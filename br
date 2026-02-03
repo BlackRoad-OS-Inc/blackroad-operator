@@ -93,6 +93,90 @@ show_help() {
     echo "║    br teach <agent>   - Teach agent a new fact                    ║"
     echo "║    br recall <agent>  - Show agent's memories                     ║"
     echo "║                                                                   ║"
+    echo "║  CONTEXT RADAR (🎯 Smart Suggestions):                            ║"
+    echo "║    br radar daemon start  - Start file watching daemon            ║"
+    echo "║    br radar daemon status - Check daemon status                   ║"
+    echo "║    br radar suggest       - Suggest related files                 ║"
+    echo "║    br radar agent         - Suggest which agent to use            ║"
+    echo "║    br radar smart         - Smart context analysis                ║"
+    echo "║    br radar context       - Show recent activity                  ║"
+    echo "║                                                                   ║"
+    echo "║  GIT INTEGRATION (🤖 Smart Git):                                  ║"
+    echo "║    br git commit          - AI-generated commit messages          ║"
+    echo "║    br git branch          - Smart branch name suggestions         ║"
+    echo "║    br git review          - Pre-commit code review                ║"
+    echo "║    br git status          - Enhanced git status                   ║"
+    echo "║                                                                   ║"
+    echo "║  SNIPPET MANAGER (💾 Code Snippets):                              ║"
+    echo "║    br snippet save <name> - Save code snippet                     ║"
+    echo "║    br snippet get <name>  - Retrieve snippet                      ║"
+    echo "║    br snippet list        - List all snippets                     ║"
+    echo "║    br snippet search      - Search snippets                       ║"
+    echo "║                                                                   ║"
+    echo "║  PAIR PROGRAMMING (🤖 AI Assistant):                              ║"
+    echo "║    br pair start [agent]  - Start pair session                    ║"
+    echo "║    br pair ask <question> - Ask your AI pair                      ║"
+    echo "║    br pair review         - Review current changes                ║"
+    echo "║    br pair suggest        - Get smart suggestions                 ║"
+    echo "║                                                                   ║"
+    echo "║  API TESTER (🌐 HTTP Requests):                                   ║"
+    echo "║    br api get <url>       - Make GET request                      ║"
+    echo "║    br api post <url>      - Make POST request                     ║"
+    echo "║    br api save <name>     - Save endpoint                         ║"
+    echo "║    br api list            - List saved endpoints                  ║"
+    echo "║                                                                   ║"
+    echo "║  PRODUCTIVITY TOOLS:                                              ║"
+    echo "║    br run                 - ⚡ Smart task detection & execution   ║"
+    echo "║    br note add            - 📝 Quick developer notes              ║"
+    echo "║    br init <template>     - 🎯 Project scaffolding                ║"
+    echo "║    br logs <file>         - 🔍 Parse and highlight logs           ║"
+    echo "║    br perf time <cmd>     - ⏱️  Performance tracking              ║"
+    echo "║    br deps check          - 📦 Dependency management              ║"
+    echo "║    br session save        - 💾 Save workspace state               ║"
+    echo "║                                                                   ║"
+    echo "║  DEPLOYMENT (☁️ Ship It!):                                        ║"
+    echo "║    br deploy detect       - Detect deployment platforms           ║"
+    echo "║    br deploy quick        - Auto-detect and deploy                ║"
+    echo "║    br deploy vercel       - Deploy to Vercel                      ║"
+    echo "║    br deploy netlify      - Deploy to Netlify                     ║"
+    echo "║    br deploy heroku       - Deploy to Heroku                      ║"
+    echo "║    br deploy status       - Show deployment history               ║"
+    echo "║                                                                   ║"
+    echo "║  DEVOPS & TOOLS (🛠️ Power Tools):                                 ║"
+    echo "║    br docker ps           - 🐳 Container management               ║"
+    echo "║    br db connect          - 💾 Database client                    ║"
+    echo "║    br env list            - 🔐 Environment variables              ║"
+    echo "║    br find search         - 🔍 Advanced file search               ║"
+    echo "║                                                                   ║"
+    echo "║  IOT & HARDWARE (🥧 Pi Management):                               ║"
+    echo "║    br pi list             - List all Raspberry Pis                ║"
+    echo "║    br pi connect <name>   - SSH to Pi                             ║"
+    echo "║    br pi status <name>    - Check Pi status                       ║"
+    echo "║    br pi task deploy      - Deploy & run tasks on Pi ⚡          ║"
+    echo "║    br pi all <cmd>        - Run on all Pis                        ║"
+    echo "║                                                                   ║"
+    echo "║  CLOUD PLATFORMS (☁️ Infrastructure):                             ║"
+    echo "║    br cloudflare zones    - Manage Cloudflare zones & DNS        ║"
+    echo "║    br ocean list          - Manage DigitalOcean droplets         ║"
+    echo "║                                                                   ║"
+    echo "║  WEB DEVELOPMENT (🌐 Full Stack):                                ║"
+    echo "║    br web serve           - Dev server with live reload          ║"
+    echo "║    br web scaffold        - Create React/Vue/Next projects       ║"
+    echo "║    br monitor check       - Website uptime monitoring            ║"
+    echo "║    br search <query>      - Smart code search 🔍                ║"
+    echo "║                                                                   ║"
+    echo "║  QUALITY & TESTING (🧪 Code Quality):                            ║"
+    echo "║    br test run            - 🧪 Run tests with coverage           ║"
+    echo "║    br security scan       - 🔒 Security & vulnerability scan     ║"
+    echo "║    br backup git          - 💾 Backup git/files/databases        ║"
+    echo "║    br quality lint        - ✨ Code quality & linting            ║"
+    echo "║                                                                   ║"
+    echo "║  AGENT ORCHESTRATION (🤖 Multi-Agent):                           ║"
+    echo "║    br agent register      - Register agents for task routing    ║"
+    echo "║    br agent task          - Submit tasks to agent pool          ║"
+    echo "║    br agent distribute    - Distribute workload across agents   ║"
+    echo "║    br agent status        - Monitor agent performance           ║"
+    echo "║                                                                   ║"
     echo "║  SHORTCUTS:                                                       ║"
     echo "║    br-octavia [msg]   - Direct invoke (add to PATH)               ║"
     echo "║    br-lucidia [msg]   - Direct invoke                             ║"
@@ -288,6 +372,98 @@ main() {
             ;;
         setup)
             cmd_setup
+            ;;
+        radar)
+            local subcmd=${1:-suggest}
+            case $subcmd in
+                daemon|db)
+                    /Users/alexa/blackroad/tools/context-radar/radar-${subcmd}.sh "${@:2}"
+                    ;;
+                *)
+                    /Users/alexa/blackroad/tools/context-radar/radar-suggest.sh "$subcmd" "${@:2}"
+                    ;;
+            esac
+            ;;
+        git)
+            /Users/alexa/blackroad/tools/git-integration/br-git.sh "$@"
+            ;;
+        snippet|snip)
+            /Users/alexa/blackroad/tools/snippet-manager/br-snippet.sh "$@"
+            ;;
+        pair)
+            /Users/alexa/blackroad/tools/pair-programming/br-pair.sh "$@"
+            ;;
+        api)
+            /Users/alexa/blackroad/tools/api-tester/br-api.sh "$@"
+            ;;
+        run)
+            /Users/alexa/blackroad/tools/task-runner/br-run.sh "$@"
+            ;;
+        note|notes)
+            /Users/alexa/blackroad/tools/quick-notes/br-note.sh "$@"
+            ;;
+        init)
+            /Users/alexa/blackroad/tools/project-init/br-init.sh "$@"
+            ;;
+        logs|log)
+            /Users/alexa/blackroad/tools/log-parser/br-logs.sh "$@"
+            ;;
+        perf|performance)
+            /Users/alexa/blackroad/tools/perf-monitor/br-perf.sh "$@"
+            ;;
+        deps|dependencies)
+            /Users/alexa/blackroad/tools/dependency-helper/br-deps.sh "$@"
+            ;;
+        session|sess)
+            /Users/alexa/blackroad/tools/session-manager/br-session.sh "$@"
+            ;;
+        deploy)
+            /Users/alexa/blackroad/tools/deploy-manager/br-deploy.sh "$@"
+            ;;
+        docker)
+            /Users/alexa/blackroad/tools/docker-manager/br-docker.sh "$@"
+            ;;
+        db|database)
+            /Users/alexa/blackroad/tools/db-client/br-db.sh "$@"
+            ;;
+        env|environment)
+            /Users/alexa/blackroad/tools/env-manager/br-env.sh "$@"
+            ;;
+        find)
+            /Users/alexa/blackroad/tools/file-finder/br-find.sh "$@"
+            ;;
+        pi|raspberry)
+            /Users/alexa/blackroad/tools/pi-manager/br-pi.sh "$@"
+            ;;
+        cloudflare|cf)
+            /Users/alexa/blackroad/tools/cloudflare/br-cloudflare.sh "$@"
+            ;;
+        ocean|do|digitalocean)
+            /Users/alexa/blackroad/tools/ocean-droplets/br-ocean.sh "$@"
+            ;;
+        web)
+            /Users/alexa/blackroad/tools/web-dev/br-web.sh "$@"
+            ;;
+        monitor|uptime)
+            /Users/alexa/blackroad/tools/web-monitor/br-monitor.sh "$@"
+            ;;
+        search|s)
+            /Users/alexa/blackroad/tools/smart-search/br-search.sh "$@"
+            ;;
+        test|t)
+            /Users/alexa/blackroad/tools/test-suite/br-test.sh "$@"
+            ;;
+        security|sec|scan)
+            /Users/alexa/blackroad/tools/security-scanner/br-security.sh "$@"
+            ;;
+        backup|bak)
+            /Users/alexa/blackroad/tools/backup-manager/br-backup.sh "$@"
+            ;;
+        quality|lint|q)
+            /Users/alexa/blackroad/tools/code-quality/br-quality.sh "$@"
+            ;;
+        agent|agents|route)
+            /Users/alexa/blackroad/tools/agent-router/br-agent.sh "$@"
             ;;
         octavia|lucidia|alice|aria|shellfish)
             if [[ -n "$*" ]]; then
