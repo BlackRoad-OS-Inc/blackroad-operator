@@ -2,6 +2,99 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+---
+
+## 📑 TABLE OF CONTENTS
+
+### Overview & Organizations
+- [Project Overview](#project-overview)
+- [GitHub Organizations (16 orgs)](#github-organizations-16-orgs-1200-repos)
+- [Key Forks by Organization](#key-forks-by-organization)
+- [Private Repositories](#private-repositories-key)
+
+### Local Repository Structure
+- [Repository Structure](#repository-structure)
+- [Local Organizations (orgs/)](#local-organizations-orgs)
+- [CLI Tools (57 scripts)](#cli-tools-57-scripts)
+- [Key Subprojects & Commands](#key-subprojects--commands)
+
+### Architecture & Development
+- [Architecture](#architecture)
+- [Conventions](#conventions)
+- [Environment Variables](#environment-variables)
+- [Adding New Features](#adding-new-features)
+
+### AI & Memory Systems
+- [Memory System ([MEMORY])](#memory-system-memory)
+- [Ollama Integration](#ollama-integration)
+- [Agent Infrastructure (30K agents)](#agent-infrastructure)
+- [Task Marketplace](#task-marketplace)
+- [Trinity System (Traffic Lights)](#trinity-system-traffic-lights)
+
+### Skills & Coordination
+- [Skills System](#skills-system)
+- [Multi-Agent Coordination](#multi-agent-coordination)
+
+### Design & Branding
+- [Brand Design System](#brand-design-system)
+
+### Infrastructure
+- [GitHub Infrastructure](#github-infrastructure)
+- [Railway Infrastructure (14 projects)](#railway-infrastructure)
+- [Vercel Infrastructure (15+ projects)](#vercel-infrastructure)
+- [Cloudflare Infrastructure (75+ workers)](#cloudflare-infrastructure)
+- [DigitalOcean Infrastructure](#digitalocean-infrastructure)
+- [Raspberry Pi Infrastructure](#raspberry-pi-infrastructure)
+- [Multi-Cloud Deployment](#multi-cloud-deployment)
+
+### Deployment & Automation
+- [Deployment Commands](#deployment-commands)
+- [GitHub Bot Workflows](#github-bot-workflows)
+- [GitHub Security Monitoring](#github-security-monitoring)
+- [GitHub Pages Sites (16+)](#github-pages-sites-16-sites)
+
+### Identity & Communication
+- [CECE Identity System](#cece-identity-system)
+- [Shared Messaging System](#shared-messaging-system)
+- [Template System](#template-system)
+- [MCP Bridge](#mcp-bridge)
+
+### Agent Features
+- [Ollama-Powered Agent Features](#ollama-powered-agent-features)
+- [Infrastructure Mesh](#infrastructure-mesh)
+- [Agent Relationships](#agent-relationships)
+- [@BLACKROAD Directory Waterfall](#blackroad-directory-waterfall-system)
+- [Agent Distribution & Coordination](#agent-distribution--coordination)
+
+### Interactive & CLI
+- [CLI Commands Reference (57 scripts)](#cli-commands-reference-30-commands)
+- [Interactive Games (RPG & Chess)](#interactive-games)
+
+### Reference
+- [Quick Reference](#quick-reference)
+- [Security](#security)
+
+---
+
+## 📊 QUICK STATS
+
+| Metric | Count |
+|--------|-------|
+| GitHub Organizations | 16 |
+| Total Repositories | 1,206 |
+| Local Orgs (orgs/) | 4 |
+| Local Repos (orgs/) | 138 |
+| Repo Mirrors (repos/) | 186 |
+| Shell Scripts | 57 |
+| AI Agents | 30,000 |
+| Railway Projects | 14 |
+| Vercel Projects | 15+ |
+| Cloudflare Workers | 75+ |
+| GitHub Pages Sites | 16+ |
+| GitHub Workflows | 50+ |
+
+---
+
 ## Project Overview
 
 BlackRoad is a comprehensive developer CLI system, AI agent orchestration platform, and enterprise infrastructure for AI-first companies. Core philosophy: "Your AI. Your Hardware. Your Rules."
@@ -189,9 +282,133 @@ blackroad/
 ### orgs/personal/ (25 repos)
 Personal and experimental projects including `lucidia`, `blackroad-metaverse`, `alexa-amundson-portfolio`.
 
-## CLI Tools (37)
+### repos/ Directory (186 Mirrors)
+Repository mirrors organized by category:
 
-All tools in `tools/` directory, invoked via `br <tool>`:
+**Core BlackRoad:**
+`blackroad`, `blackroad-os`, `blackroad-os-core`, `blackroad-os-web`, `blackroad-os-docs`, `blackroad-os-mesh`, `blackroad-os-helper`, `blackroad-cli`, `blackroad-tools`, `blackroad-agents`, `blackroad-agent-os`
+
+**Domains & Workers:**
+`blackroad.io`, `blackroad-io-app`, `blackroad-redirect`, `blackroad-cloudflare-infra`, `blackroad-os-landing-worker`, `blackroad-os-prism-console`
+
+**AI & Agents:**
+`agents`, `agents-api`, `agent-registry`, `ai`, `claude`, `claude-code`, `claude.ai`, `anthropic`, `chatgpt`, `chatgpt.com`
+
+**Infrastructure:**
+`aws`, `google`, `github`, `cloudflare`, `digitalocean`, `railway`, `vercel`
+
+**Named Entities:**
+`alexa`, `alice`, `anastasia`, `aria`, `atlas`, `cadence`, `cecilia`, `octavia`, `lucidia`, `silas`
+
+**Data & Storage:**
+`bitcoin`, `cache`, `data`, `docs`, `fs`, `keys`, `log`, `media`, `mnt`, `opt`, `proc`, `run`, `spool`, `sys`, `tmp`, `usr`, `var`
+
+**Platforms:**
+`apple`, `canva`, `facebook`, `figma`, `instagram`, `linkedin`, `medium`, `notion`, `substack`, `threads`, `tiktok`, `wikipedia`, `youtube`
+
+**Development:**
+`bin`, `boot`, `code`, `core`, `dev`, `etc`, `home`, `lib`, `libexec`, `local`, `root`, `runtime`, `sbin`, `src`, `test`
+
+## CLI Tools (57 Scripts)
+
+### Root Scripts Index (57 total)
+All scripts in `/Users/alexa/blackroad/`:
+
+#### Launchers & UI
+| Script | Purpose |
+|--------|---------|
+| `hub.sh` | Main menu launcher |
+| `intro.sh` | Animated intro sequence |
+| `boot.sh` | System boot animation |
+| `menu.sh` | Interactive menu |
+| `demo.sh` | Demo mode |
+
+#### Monitoring & Status
+| Script | Purpose |
+|--------|---------|
+| `god.sh` | All-in-one overview dashboard |
+| `mission.sh` | Mission control display |
+| `dash.sh` | Standard dashboard |
+| `monitor.sh` | Real-time resource monitor |
+| `status.sh` | Quick status display |
+| `health.sh` | System health check |
+| `spark.sh` | Sparkline metrics |
+| `logs.sh` | Live log stream |
+| `events.sh` | Event stream viewer |
+| `timeline.sh` | Event timeline |
+| `report.sh` | Daily system report |
+
+#### Network & Traffic
+| Script | Purpose |
+|--------|---------|
+| `net.sh` | Network topology diagram |
+| `wire.sh` | Live message wire |
+| `traffic.sh` | Traffic flow visualization |
+| `blackroad-mesh.sh` | Infrastructure mesh check |
+
+#### Agents & AI
+| Script | Purpose |
+|--------|---------|
+| `agent.sh` | Agent management |
+| `roster.sh` | Live agent roster |
+| `inspect.sh` | Detailed agent view |
+| `soul.sh` | Agent personality profile |
+| `office.sh` | Visual office with agents |
+| `bonds.sh` | Agent relationships |
+| `skills.sh` | Capabilities matrix |
+| `wake.sh` | Wake up an agent |
+
+#### Conversation (Ollama)
+| Script | Purpose |
+|--------|---------|
+| `chat.sh` | Interactive chat |
+| `focus.sh` | One-on-one with agent |
+| `convo.sh` | Watch agents converse |
+| `broadcast.sh` | Send to all agents |
+| `think.sh` | All agents respond |
+| `debate.sh` | LUCIDIA vs CIPHER debate |
+| `story.sh` | Collaborative storytelling |
+| `whisper.sh` | Private message |
+| `council.sh` | Agent council voting |
+| `thoughts.sh` | Agent thought stream |
+
+#### System & Memory
+| Script | Purpose |
+|--------|---------|
+| `mem.sh` | Memory operations |
+| `tasks.sh` | Task queue status |
+| `queue.sh` | Message queue view |
+| `config.sh` | Configuration viewer |
+| `alert.sh` | Show alerts |
+
+#### Extras & Visual
+| Script | Purpose |
+|--------|---------|
+| `clock.sh` | Digital clock |
+| `pulse.sh` | Pulse animation |
+| `matrix.sh` | Matrix rain |
+| `saver.sh` | Bouncing logo |
+| `mood.sh` | Mood display |
+
+#### Setup & Utilities
+| Script | Purpose |
+|--------|---------|
+| `install-cece.sh` | Install CECE identity |
+| `blackroad-monorepo-setup.sh` | Monorepo setup |
+| `find.sh` | Find utilities |
+| `all.sh` | Run all checks |
+| `help.sh` | Show all commands |
+
+#### Feature Scripts
+| Script | Purpose |
+|--------|---------|
+| `NEXT_FEATURE_32_SECRETS_VAULT.sh` | Secrets vault feature |
+| `NEXT_FEATURE_33_SECURITY_HARDENING.sh` | Security hardening |
+| `NEXT_FEATURE_34_COMPLIANCE_SCANNER.sh` | Compliance scanner |
+| `GIT_PUSH_INSTRUCTIONS.sh` | Git push helper |
+
+### br CLI Tools
+Tools in `tools/` directory, invoked via `br <tool>`:
 
 | Tool | Command | Purpose |
 |------|---------|---------|
