@@ -44,12 +44,33 @@ BlackRoad is a comprehensive developer CLI system, AI agent orchestration platfo
 ### BlackRoad-OS (64 forks)
 LocalAI, Qdrant, Wiki.js, Grafana, Focalboard, Taiga, Jitsi-Meet, Uptime-Kuma, OpenProject, Plane, Meilisearch, Innernet, InfluxDB, ClickHouse, Netdata, CockroachDB, JAX
 
-### BlackRoad-AI (38 forks)
+### BlackRoad-AI (52 repos, 38 forks)
 **LLM Inference:** vLLM, Ollama, llama.cpp, TensorRT-LLM, text-generation-inference, whisper.cpp
 **Models:** Qwen, Qwen3, DeepSeek-V2, DeepSeek-VL, DeepSeek-Coder, DeepSeek-Math, Pythia, RWKV-LM, gpt-neo, lit-llama
 **Frameworks:** PyTorch, TensorFlow, transformers, Ray, FastAPI, LlamaIndex, MLX
 **Vector DBs:** Qdrant, Milvus, Chroma, Weaviate
 **Tools:** stable-diffusion, whisper, scikit-learn, XGBoost, peft, accelerate, Jina
+
+**Original Repos:**
+| Repo | Purpose |
+|------|---------|
+| `blackroad-ai-qwen` | Qwen model integration |
+| `blackroad-ai-deepseek` | DeepSeek model integration |
+| `blackroad-ai-ollama` | Ollama wrapper with [MEMORY] |
+| `blackroad-ai-api-gateway` | Multi-model API gateway |
+| `blackroad-ai-cluster` | Distributed AI cluster |
+| `blackroad-ai-memory-bridge` | Memory system bridge |
+| `blackroad-vllm` | vLLM deployment |
+| `blackroad-weaviate` | Weaviate vector DB |
+| `blackroad-chroma` | Chroma vector DB |
+| `blackroad-qdrant` | Qdrant vector DB |
+| `blackroad-ray` | Ray distributed computing |
+| `blackroad-milvus` | Milvus vector DB |
+| `blackroad-transformers` | Transformers integration |
+| `blackroad-pytorch` | PyTorch utilities |
+| `blackroad-whisper` | Whisper speech-to-text |
+| `blackroad-stable-diffusion` | Stable Diffusion image gen |
+| `blackroad-tensorflow` | TensorFlow utilities |
 
 ### BlackRoad-Cloud (17 forks)
 **Orchestration:** Kubernetes, Nomad, Rancher, Flux, ArgoCD
@@ -69,8 +90,25 @@ LocalAI, Qdrant, Wiki.js, Grafana, Focalboard, Taiga, Jitsi-Meet, Uptime-Kuma, O
 **Visualization:** Superset, Streamlit, Gradio, Panel
 **ML Ops:** MLflow, Spark, Jupyter
 
-### Blackbox-Enterprises (8 forks)
-n8n, Airbyte, Temporal, Prefect, Huginn, Activepieces, DolphinScheduler, Kestra
+### Blackbox-Enterprises (9 repos - Enterprise Automation)
+| Repo | Purpose | Tech |
+|------|---------|------|
+| `blackbox-n8n` | Workflow automation | Node.js |
+| `blackbox-airbyte` | Data integration/ETL | Java/Python |
+| `blackbox-activepieces` | No-code automation | TypeScript |
+| `blackbox-prefect` | Data orchestration | Python |
+| `blackbox-kestra` | Event-driven workflows | Java |
+| `blackbox-huginn` | Agent automation | Ruby |
+| `blackbox-dolphinscheduler` | Big data scheduling | Java |
+| `blackbox-temporal` | Durable execution | Go |
+| `.github` | Org-wide workflows | YAML |
+
+**Use Cases:**
+- n8n: Visual workflow builder, 400+ integrations
+- Airbyte: ELT data pipelines, 300+ connectors
+- Prefect: Python-native data orchestration
+- Temporal: Fault-tolerant distributed systems
+- Kestra: YAML-based event workflows
 
 ## Private Repositories (Key)
 
