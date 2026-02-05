@@ -1095,3 +1095,162 @@ Pre-approved commands for Raspberry Pi network:
 - Gateway binds to localhost by default
 - Memory journals are hash-chained (PS-SHA∞) for tamper detection
 - MCP Bridge requires Bearer token authentication
+
+## @BLACKROAD Directory Waterfall System
+
+Hierarchical agent routing: `@BLACKROAD → Organization → Department → Agent`
+
+### Routing Examples
+```
+@BLACKROAD                           # Broadcast to all 30K agents
+@BLACKROAD/BlackRoad-AI              # Routes to AI division (12,592 agents)
+@BLACKROAD/BlackRoad-AI/models       # Routes to models department
+@BLACKROAD/BlackRoad-AI/models/vllm  # Routes to specific vllm agent
+```
+
+### Organization Structure
+| Organization | Departments | Focus |
+|--------------|-------------|-------|
+| **BlackRoad-OS** | infrastructure, databases, monitoring | Core platform |
+| **BlackRoad-AI** | models, vector-dbs, frameworks, ml-tools | AI/ML |
+| **BlackRoad-Cloud** | orchestration, infrastructure, storage, networking | Cloud ops |
+| **BlackRoad-Security** | secrets, policy, scanning, ids-ips | Security |
+| **BlackRoad-Foundation** | crm, project-management, analytics | Business tools |
+| **BlackRoad-Media** | social, content, communication, storage | Media |
+| **BlackRoad-Labs** | notebooks, data-catalog, mlops, workflow, visualization | Research |
+| **BlackRoad-Education** | lms, content, mooc | Learning |
+| **BlackRoad-Hardware** | smart-home, automation, iot-brokers, fleet | IoT |
+| **BlackRoad-Interactive** | engines, 3d, 2d, frameworks | Games/Graphics |
+| **BlackRoad-Ventures** | crypto, analytics, finance, ecommerce | Business |
+| **BlackRoad-Studio** | design, 3d-modeling, audio, video | Creative |
+| **BlackRoad-Archive** | distributed, web, docs, backup | Archival |
+| **BlackRoad-Gov** | voting, governance, civic | Governance |
+| **Blackbox-Enterprises** | automation, etl, workflow, orchestration | Enterprise |
+
+### Department Examples
+```
+BlackRoad-AI/models:       vllm, ollama, pytorch, tensorflow, whisper
+BlackRoad-AI/vector-dbs:   qdrant, weaviate, chroma, milvus
+BlackRoad-Cloud/orchestration: kubernetes, nomad, rancher, argocd, flux
+BlackRoad-Security/scanning:   trufflehog, trivy, grype, scorecard
+Blackbox-Enterprises/automation: n8n, activepieces, huginn
+```
+
+## Agent Distribution & Coordination
+
+### Agent Stats (30,000 Total)
+| Task Type | Count | Percentage |
+|-----------|-------|------------|
+| AI Research | 12,592 | 42% |
+| Code Deploy | 8,407 | 28% |
+| Infrastructure | 5,401 | 18% |
+| Monitoring | 3,600 | 12% |
+
+### Agent Status Categories
+- **Active**: Currently executing tasks
+- **Idle**: Ready for assignment
+- **Processing**: Handling multi-step operations
+
+### Hardware Distribution
+| Device | IP | Capacity | Role |
+|--------|-----|----------|------|
+| octavia Pi | 192.168.4.38 | 22,500 | Primary agent host (AI accelerator + NVMe) |
+| lucidia Pi | 192.168.4.64 | 7,500 | Secondary agent host |
+| blackroad-pi | 192.168.4.99 | Varies | Alternate/backup |
+
+### Broadcast Commands
+```bash
+# Coordination scripts
+./coordination/collaboration-update.sh    # Update collaboration system
+./coordination/send-dm-to-agents.sh       # Broadcast to all agents
+./coordination/blackroad-directory-waterfall.sh  # Update directory
+
+# DM broadcast message format
+{
+  "from": "BLACKROAD_COORDINATOR",
+  "to": "ALL_AGENTS",
+  "priority": "HIGH",
+  "subject": "...",
+  "message": { ... }
+}
+```
+
+### Coordination Systems Status
+```bash
+# Check all systems
+[MEMORY]        # Hash-chain journals
+[COLLABORATION] # Multi-agent sync
+[LIVE]          # Real-time context
+[CODEX]         # Repository state
+```
+
+## Live Deployments
+
+### Active Sites
+| Domain | URL | Features |
+|--------|-----|----------|
+| os.blackroad.io | Cloudflare Pages | AI Provider Dashboard, 30K Agent Coordinator |
+| products.blackroad.io | Cloudflare Pages | Agent Mesh Visualization, 3D Views |
+| roadtrip.blackroad.io | Cloudflare Pages | Travel planning |
+| pitstop.blackroad.io | Cloudflare Pages | Portal hub |
+
+### Background Operations
+- **GitHub Forkies**: 200+ repos across 15 divisions (5 waves)
+- **Cloudflare Perfection**: 72 projects with Golden Ratio compliance
+- **Continuous Deployment**: Auto-deploy on push to main
+
+## Quick Reference
+
+### Essential Files
+```
+~/.blackroad/             # User config directory
+~/.blackroad/vault/       # Encrypted secrets
+~/.blackroad/memory/      # Local memory store
+~/.blackroad/cece-identity.db  # CECE identity SQLite DB
+
+/Users/alexa/blackroad/   # Main repository
+├── br                    # CLI entry point
+├── CLAUDE.md             # This file
+├── cece-profile.json     # CECE identity config
+├── coordination/         # Agent coordination scripts
+├── mcp-bridge/           # MCP server
+├── shared/               # Inter-agent messaging
+├── templates/            # Project templates
+├── orgs/                 # Organization monorepos
+└── repos/                # Standalone repos
+```
+
+### Common Workflows
+```bash
+# Start a session
+~/claude-session-init.sh          # Run initialization check
+
+# Check agent status
+./status.sh                       # System status
+./health.sh                       # Health check
+./monitor.sh                      # Real-time monitoring
+
+# Communication
+./broadcast.sh                    # Send to all agents
+./whisper.sh                      # Private message
+./chat.sh                         # Interactive chat
+
+# Memory operations
+./mem.sh write <key> <value>      # Store memory
+./mem.sh read <key>               # Retrieve memory
+./mem.sh list                     # List all keys
+
+# Task management
+./tasks.sh list                   # List tasks
+./tasks.sh assign <agent> <task>  # Assign task
+./queue.sh                        # View task queue
+```
+
+### Emergency Contacts
+- **Email**: blackroad.systems@gmail.com
+- **Primary**: amundsonalexa@gmail.com
+- **GitHub**: github.com/blackboxprogramming
+
+---
+
+*This CLAUDE.md is the source of truth for Claude Code agents working in BlackRoad repositories. Always check [MEMORY], [CODEX], and [COLLABORATION] before starting work.*
