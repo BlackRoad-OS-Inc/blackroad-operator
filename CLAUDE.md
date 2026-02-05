@@ -889,6 +889,73 @@ ssh pi@192.168.4.64              # blackroad-pi
 ssh pi@192.168.4.99              # alternate
 ```
 
+## MCP Bridge
+
+Local MCP server at `mcp-bridge/` for remote AI agent access.
+
+### Start MCP Bridge
+```bash
+cd mcp-bridge
+./start.sh  # Runs on 127.0.0.1:8420
+```
+
+### Endpoints
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/` | GET | Service info |
+| `/system` | GET | System status |
+| `/exec` | POST | Execute command |
+| `/file/read` | POST | Read file |
+| `/file/write` | POST | Write file |
+| `/memory/write` | POST | Store memory |
+| `/memory/read` | POST | Retrieve memory |
+| `/memory/list` | GET | List all keys |
+
+### Authentication
+```bash
+# All requests require Bearer token
+curl -H "Authorization: Bearer $MCP_BRIDGE_TOKEN" http://127.0.0.1:8420/system
+```
+
+### Example Usage
+```bash
+# Execute command
+curl -X POST http://127.0.0.1:8420/exec \
+  -H "Authorization: Bearer $MCP_BRIDGE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"command": "ls -la", "cwd": "/Users/alexa/blackroad"}'
+
+# Write memory
+curl -X POST http://127.0.0.1:8420/memory/write \
+  -H "Authorization: Bearer $MCP_BRIDGE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"key": "session-123", "value": {"task": "deploy", "status": "complete"}}'
+```
+
+## Claude Code Settings
+
+### Local Permissions (.claude/settings.local.json)
+```json
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep:*)",
+      "Bash(ping:*)",
+      "Bash(test:*)",
+      "Bash(npm install:*)",
+      "Bash(gh repo list:*)",
+      "Bash(gh api:*)"
+    ]
+  }
+}
+```
+
+### Pi Network Access
+Pre-approved commands for Raspberry Pi network:
+- `192.168.4.38` - lucidia
+- `192.168.4.64` - blackroad-pi
+- `192.168.4.99` - alternate
+
 ## Security
 
 - Master keys: `~/.blackroad/vault/.master.key` (chmod 400)
@@ -897,3 +964,4 @@ ssh pi@192.168.4.99              # alternate
 - No tokens in agent code (gateway only)
 - Gateway binds to localhost by default
 - Memory journals are hash-chained (PS-SHA∞) for tamper detection
+- MCP Bridge requires Bearer token authentication
