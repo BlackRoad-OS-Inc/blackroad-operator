@@ -827,35 +827,456 @@ line-height: 1.618;  /* Golden Ratio */
 --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
 ```
 
+## GitHub Infrastructure
+
+### Organizations (16 Total)
+| Organization | Repos | Focus |
+|--------------|-------|-------|
+| **BlackRoad-OS** | 923 | Core platform, operating system |
+| **blackboxprogramming** | 68 | Primary development |
+| **BlackRoad-AI** | 52 | AI/ML, model forks |
+| **BlackRoad-Labs** | - | Research & experiments |
+| **BlackRoad-Cloud** | - | Cloud infrastructure |
+| **BlackRoad-Ventures** | - | Business & finance |
+| **BlackRoad-Foundation** | - | CRM, project management |
+| **BlackRoad-Media** | - | Social, content |
+| **BlackRoad-Hardware** | - | IoT, Raspberry Pi |
+| **BlackRoad-Education** | - | LMS, learning |
+| **BlackRoad-Gov** | - | Governance |
+| **BlackRoad-Security** | - | Security tools |
+| **BlackRoad-Interactive** | - | Games, graphics |
+| **BlackRoad-Archive** | - | Archival, IPFS |
+| **BlackRoad-Studio** | - | Creative tools |
+| **Blackbox-Enterprises** | - | Enterprise automation |
+
+### GitHub Actions Workflows
+Located in `.github/workflows/`:
+
+**Deployment Workflows:**
+| Workflow | Purpose |
+|----------|---------|
+| `deploy-railway.yml` | Railway multi-service deployment |
+| `deploy-cloudflare.yml` | Cloudflare Pages multi-domain |
+| `deploy-droplet.yml` | DigitalOcean droplet deployment |
+| `deploy-to-pis.yml` | Raspberry Pi deployment |
+| `deploy-multi-cloud.yml` | Universal multi-cloud deploy |
+| `deploy-cloudflare-all.yml` | All Cloudflare services |
+
+**CI/CD & Automation:**
+| Workflow | Purpose |
+|----------|---------|
+| `ci.yml` | Continuous integration |
+| `health-check.yml` | Service health monitoring |
+| `blackroad-agents.yml` | Autonomous agent automation |
+| `blackroad-auto-merge.yml` | Automated PR merging |
+| `agent-code-review.yml` | Agent-based code review |
+| `agent-test-coverage.yml` | Automated test coverage |
+| `agent-security-audit.yml` | Security auditing |
+| `blackroad-codeql-analysis.yml` | Code security analysis |
+
+**Workflow Secrets Required:**
+```yaml
+RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
+CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+DIGITALOCEAN_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+```
+
+## Railway Infrastructure
+
+### Railway Projects (14 Total)
+| # | Project ID | Name |
+|---|------------|------|
+| 01 | `9d3d2549-3778-4c86-8afd-cefceaaa74d2` | RoadWork Production |
+| 02 | `6d4ab1b5-3e97-460e-bba0-4db86691c476` | RoadWork Staging |
+| 03 | `aa968fb7-ec35-4a8b-92dc-1eba70fa8478` | BlackRoad Core Services |
+| 04 | `e8b256aa-8708-4eb2-ba24-99eba4fe7c2e` | BlackRoad Operator |
+| 05 | `85e6de55-fefd-4e8d-a9ec-d20c235c2551` | BlackRoad Master |
+| 06 | `8ac583cb-ffad-40bd-8676-6569783274d1` | BlackRoad Beacon |
+| 07 | `b61ecd98-adb2-4788-a2e0-f98e322af53a` | BlackRoad Packs |
+| 08 | `47f557cf-09b8-40df-8d77-b34f91ba90cc` | Prism Console |
+| 09 | `1a039a7e-a60c-42c5-be68-e66f9e269209` | BlackRoad Home |
+| 10-14 | Reserved | Available for expansion |
+
+### Railway Configuration (`railway.toml`)
+```toml
+[build]
+builder = "NIXPACKS"
+
+[deploy]
+startCommand = "npm start"
+healthcheckPath = "/health"
+healthcheckTimeout = 300
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10
+
+[[services]]
+name = "blackroad-service"
+
+[services.env]
+PORT = "8080"
+NODE_ENV = "production"
+```
+
+### Railway GPU Services (AI Inference)
+| Service | GPU | Model | Purpose |
+|---------|-----|-------|---------|
+| Primary | A100 80GB | blackroad-qwen-72b | General agent inference |
+| Specialist | H100 80GB | Coding models | Coding & reasoning |
+| Governance | A100 80GB | Lucidia sync | Governance decisions |
+
+**GPU Configuration:**
+```toml
+[deploy]
+startCommand = "python server.py"
+gpu = "nvidia-a100-80gb"
+replicas = 1
+
+[[deploy.environmentVariables]]
+name = "MODEL_NAME"
+value = "blackroad-qwen-72b"
+name = "GPU_MEMORY_UTILIZATION"
+value = "0.9"
+```
+
+### Railway Commands
+```bash
+# Deploy to Railway
+railway up
+
+# Deploy specific project
+./scripts/deploy-railway-project.sh 01
+
+# Deploy all services
+./scripts/deploy-railway-all.sh
+
+# View logs
+railway logs
+
+# Set environment variable
+railway variables set KEY=value
+```
+
+## Vercel Infrastructure
+
+### Vercel Projects (15+)
+| Project | Type | Description |
+|---------|------|-------------|
+| blackroad-os-prism-console | Next.js | Prism console UI |
+| blackroad-os | Next.js | Main OS interface |
+| blackroad-os-mesh | Next.js | Mesh visualization |
+| blackroad-os-helper | Next.js | Helper services |
+| blackroad-os-landing-worker | Static | Landing pages |
+| containers-template | Next.js | Container template |
+| clerk-docs | Next.js | Documentation |
+| blackbox-airbyte | React | Airbyte integration |
+
+### Vercel Configuration (`vercel.json`)
+```json
+{
+  "version": 2,
+  "builds": [
+    { "src": "package.json", "use": "@vercel/next" }
+  ],
+  "routes": [
+    { "src": "/(.*)", "dest": "/$1" }
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  },
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" }
+      ]
+    }
+  ]
+}
+```
+
+### Vercel Commands
+```bash
+# Deploy to Vercel
+vercel
+
+# Deploy to production
+vercel --prod
+
+# Set environment variable
+vercel env add VARIABLE_NAME
+
+# View logs
+vercel logs
+
+# List deployments
+vercel ls
+```
+
+### Vercel Environment Variables
+```bash
+VERCEL_TOKEN=<token>
+VERCEL_ORG_ID=<org-id>
+VERCEL_PROJECT_ID=<project-id>
+```
+
 ## Cloudflare Infrastructure
 
-### Pages Deployments
-| Domain | Project |
+### Account Details
+- **Account ID:** `848cf0b18d51e0170e0d1537aec3505a`
+- **Primary Zone:** `blackroad.ai`
+- **Workers:** 75+ wrangler.toml configurations
+
+### Wrangler Configuration (`wrangler.toml`)
+```toml
+name = "blackroad-service"
+main = "src/index.js"
+compatibility_date = "2024-12-01"
+account_id = "848cf0b18d51e0170e0d1537aec3505a"
+
+[vars]
+REPO_NAME = "blackroad-os-docs"
+ORG_NAME = "BlackRoad-OS"
+ENVIRONMENT = "production"
+
+[[kv_namespaces]]
+binding = "CACHE"
+id = "<kv-namespace-id>"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "blackroad"
+database_id = "<d1-database-id>"
+
+[[r2_buckets]]
+binding = "STORAGE"
+bucket_name = "blackroad-assets"
+```
+
+### Cloudflare Pages Projects
+| Domain | Project | Status |
+|--------|---------|--------|
+| blackroad.network | blackroad-network | Active |
+| blackroad.systems | blackroad-systems | Active |
+| blackroad.me | blackroad-me | Active |
+| lucidia.earth | lucidia-earth | Active |
+| aliceqi | aliceqi | Active |
+| blackroad.inc | blackroad-inc | Active |
+| blackroadai | blackroadai | Active |
+| lucidia.studio | lucidia-studio | Active |
+| lucidiaqi | lucidiaqi | Active |
+| blackroad.quantum | blackroad-quantum | Active |
+
+### Cloudflare Workers
+| Worker | Purpose |
 |--------|---------|
-| `os.blackroad.io` | blackroad-os-web |
-| `products.blackroad.io` | blackroad-dashboard |
-| `roadtrip.blackroad.io` | blackroad-pitstop |
-| `pitstop.blackroad.io` | blackroad-portals |
+| blackroad-os-core | Site builder |
+| blackroad-os-dashboard | Dashboard API |
+| blackroad-os-metaverse | 3D/VR services |
+| blackroad-os-pitstop | Portal hub |
+| blackroad-os-roadworld | World services |
+| blackroad-os-landing-worker | Landing pages |
+| tools-api | Tools API |
+| agents-api | Agent coordination API |
+| roadgateway | Payment gateway |
+| command-center | Central command |
 
-### Workers (40+ subdomain workers)
-Pattern: `*-blackroadio` workers handle subdomains
+### Cloudflare Tunnel
+```yaml
+Tunnel ID: 52915859-da18-4aa6-add5-7bd9fcac2e0b
+Tunnel Name: blackroad
+Status: Active
+Protocol: QUIC
+Edge Location: dfw08 (Dallas)
+Running on: blackroad-pi (Raspberry Pi 192.168.4.64)
 
+Routes:
+  - agent.blackroad.ai → localhost:8080
+  - api.blackroad.ai → localhost:3000
+```
+
+**Tunnel Service (systemd):**
+```ini
+[Service]
+Type=simple
+User=root
+ExecStart=/usr/bin/cloudflared --no-autoupdate tunnel run --token <TOKEN>
+Restart=on-failure
+RestartSec=5s
+```
+
+### Cloudflare R2 Storage
+- **Bucket:** `blackroad-models` (private)
+- **Size:** 135GB of LLMs
+- **Models:** Qwen 72B, Llama 70B, DeepSeek R1 (Q4_K_M quantized)
+
+### Cloudflare Commands
 ```bash
-# Deploy a worker
-cd orgs/core/<worker-name>
+# Deploy worker
 wrangler deploy
 
 # Deploy Pages
 wrangler pages deploy . --project-name=<project>
+
+# Tail logs
+wrangler tail
+
+# List KV namespaces
+wrangler kv:namespace list
+
+# Create D1 database
+wrangler d1 create <database-name>
+
+# Tunnel status
+cloudflared tunnel info blackroad
 ```
 
-### KV Namespaces
-- Sessions, cache, feature flags stored in KV
-- Access via `env.KV_NAMESPACE.get/put`
+## DigitalOcean Infrastructure
 
-### D1 Database
-- SQLite at the edge
-- Migrations in `migrations/` directory
+### Droplet Configuration
+| Droplet | IP | Role |
+|---------|-----|------|
+| codex-infinity | 159.65.43.12 | Primary server |
+
+### DigitalOcean CLI Tool (`br-ocean.sh`)
+```bash
+# Authenticate
+br ocean auth <api-token>
+
+# List droplets
+br ocean list
+
+# Create droplet
+br ocean create <name> <region> <size>
+
+# Create snapshot
+br ocean snapshot <droplet-id> <name>
+
+# SSH to droplet
+br ocean ssh <droplet-name>
+```
+
+### Configuration Database
+- **Location:** `~/.blackroad/digitalocean.db` (SQLite)
+- **API Token:** `~/.blackroad/digitalocean.conf`
+
+### Environment Variables
+```bash
+DIGITALOCEAN_ACCESS_TOKEN=<token>
+DIGITALOCEAN_SPACES_KEY=<spaces-key>
+DIGITALOCEAN_SPACES_SECRET=<spaces-secret>
+DO_DROPLET_IP=159.65.43.12
+DO_DROPLET_NAME=codex-infinity
+```
+
+### Droplet Sizes
+| Size | vCPUs | Memory | Disk | Use Case |
+|------|-------|--------|------|----------|
+| s-1vcpu-1gb | 1 | 1GB | 25GB | Dev/test |
+| s-2vcpu-4gb | 2 | 4GB | 80GB | Small services |
+| s-4vcpu-8gb | 4 | 8GB | 160GB | Production |
+| g-2vcpu-8gb | 2 | 8GB | 25GB | GPU workloads |
+
+## Raspberry Pi Infrastructure
+
+### Connected Devices
+| Hostname | IP | User | Role |
+|----------|-----|------|------|
+| blackroad-pi (lucidia.local) | 192.168.4.64 | pi | Primary, Cloudflared tunnel |
+| aria64 | 192.168.4.38 | pi | Secondary, 22,500 agent capacity |
+| alice (raspberrypi.local) | 192.168.4.49 | alice | Tertiary |
+| lucidia (alternate) | 192.168.4.99 | lucidia | Alternate instance |
+| iPhone Koder | 192.168.4.68:8080 | - | Mobile development |
+
+### Pi Deployment
+```bash
+# Deploy to all Pis
+./pi-deploy/deploy-to-pis.sh
+
+# Deploy to specific Pi
+./deploy-to-pi.sh aria64 192.168.4.38
+
+# SSH to Pi
+ssh pi@192.168.4.64
+ssh pi@192.168.4.38
+```
+
+### Pi Services
+- Cloudflared tunnel (QUIC to edge)
+- Ollama (local inference)
+- Agent runtime
+- Memory system
+
+## Multi-Cloud Deployment
+
+### Universal Deploy Script
+**Location:** `orgs/core/blackroad-os-deploy/deploy.sh`
+
+**Supported Targets:**
+- Railway
+- Vercel
+- Cloudflare Workers/Pages
+- DigitalOcean Droplets
+- Raspberry Pis
+
+**Auto-Detection:**
+- Node.js (package.json)
+- Python (requirements.txt, pyproject.toml)
+- Go (go.mod)
+- Rust (Cargo.toml)
+- Docker (Dockerfile)
+
+```bash
+# Auto-detect and deploy
+./deploy.sh
+
+# Deploy to specific target
+./deploy.sh --target railway
+./deploy.sh --target vercel
+./deploy.sh --target cloudflare
+./deploy.sh --target droplet
+./deploy.sh --target pi
+```
+
+### Environment Template (`.env.example`)
+```bash
+# Platform API Tokens
+RAILWAY_TOKEN=
+VERCEL_TOKEN=
+VERCEL_ORG_ID=
+VERCEL_PROJECT_ID=
+CLOUDFLARE_API_TOKEN=
+CLOUDFLARE_ACCOUNT_ID=848cf0b18d51e0170e0d1537aec3505a
+DIGITALOCEAN_ACCESS_TOKEN=
+DIGITALOCEAN_SPACES_KEY=
+DIGITALOCEAN_SPACES_SECRET=
+
+# Service Configuration
+BR_OS_ENV=local                    # local, staging, prod
+BR_OS_SERVICE_NAME=your-service
+PORT=8080
+NODE_ENV=development
+
+# Database
+DATABASE_URL=
+
+# Authentication (NEVER commit!)
+JWT_SECRET=
+NEXTAUTH_SECRET=
+NEXTAUTH_URL=http://localhost:3000
+
+# Monitoring
+LOG_LEVEL=info
+SENTRY_DSN=
+
+# Third-Party
+STRIPE_API_KEY=
+SENDGRID_API_KEY=
+```
 
 ## Deployment Commands
 
