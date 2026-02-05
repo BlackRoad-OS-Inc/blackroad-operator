@@ -986,6 +986,33 @@ Validates `.trinity/` directory structure:
 | `stale-issues.yml` | Daily | Clean up stale issues |
 | `trinity-compliance.yml` | Sunday midnight | Weekly compliance check |
 
+### GitHub Security Monitoring
+| Feature | Count | Purpose |
+|---------|-------|---------|
+| Dependabot Alerts | 30 | Dependency vulnerabilities |
+| Code Scanning Alerts | 30 | CodeQL security issues |
+| Secret Scanning Alerts | 30 | Exposed credentials |
+
+**Monitor Commands:**
+```bash
+# Check Dependabot alerts
+gh api repos/BlackRoad-OS/blackroad/dependabot/alerts -q '.[0:10] | .[] | "\(.security_advisory.severity): \(.security_advisory.summary)"'
+
+# Check code scanning alerts
+gh api repos/BlackRoad-OS/blackroad/code-scanning/alerts -q '.[0:10] | .[] | "\(.rule.severity): \(.rule.description)"'
+
+# Check secret scanning
+gh api repos/BlackRoad-OS/blackroad/secret-scanning/alerts -q '.[0:10] | .[] | "\(.secret_type): \(.state)"'
+
+# Dismiss alert
+gh api -X PATCH repos/BlackRoad-OS/blackroad/dependabot/alerts/<alert_number> -f state=dismissed -f dismissed_reason=tolerable_risk
+```
+
+**Active Security Workflows:**
+- `blackroad-codeql-analysis.yml` - CodeQL scanning on push/PR
+- `bot-security-scan.yml` - Continuous security scanning
+- `security-scan.yml` - Manual/scheduled security scan (currently running!)
+
 ### GitHub Pages Sites (16+ Sites)
 | Repository | URL |
 |------------|-----|
