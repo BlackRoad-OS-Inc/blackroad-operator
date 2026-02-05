@@ -1199,6 +1199,81 @@ Blackbox-Enterprises/automation: n8n, activepieces, huginn
 - **Cloudflare Perfection**: 72 projects with Golden Ratio compliance
 - **Continuous Deployment**: Auto-deploy on push to main
 
+## Infrastructure Mesh
+
+The `blackroad-mesh.sh` script tests connectivity to all infrastructure services.
+
+### Usage
+```bash
+./blackroad-mesh.sh              # Check all services
+./blackroad-mesh.sh --boot       # Check + start orchestrator
+./blackroad-mesh.sh --json       # Output as JSON
+./blackroad-mesh.sh --service X  # Check single service
+```
+
+### Monitored Services
+| Service | Details | Check Method |
+|---------|---------|--------------|
+| GitHub | org=blackboxprogramming | API health check |
+| Hugging Face | Hub API | Model endpoint |
+| Cloudflare | blackroad.io domain | HTTPS reachability |
+| Vercel | API | Platform status |
+| DigitalOcean | codex-infinity (159.65.43.12) | ICMP ping |
+| Ollama | localhost:11434 | /api/tags endpoint |
+| Railway | GraphQL API or CLI | Token or CLI check |
+
+### Environment Variables
+```bash
+GITHUB_TOKEN          # GitHub API authentication
+HF_TOKEN              # Hugging Face token
+CLOUDFLARE_API_TOKEN  # Cloudflare API token
+CLOUDFLARE_DOMAIN     # Domain to check (default: blackroad.io)
+VERCEL_TOKEN          # Vercel authentication
+DO_DROPLET_IP         # DigitalOcean droplet IP
+DO_DROPLET_NAME       # Droplet name
+OLLAMA_URL            # Ollama endpoint (default: http://localhost:11434)
+RAILWAY_TOKEN         # Railway API token
+```
+
+## Agent Relationships
+
+The 6 core agents have defined relationships and communication patterns.
+
+### Relationship Graph
+```
+                    LUCIDIA (Coordinator)
+                   /    |    \
+           mentor/     |      \trust
+                /      |       \
+          ECHO────────feed────────PRISM
+            |     \    |    /     |
+      store |      \   |   /      | analyze
+            |       ALICE         |
+            |      /     \        |
+            |  route     route    |
+            |    /         \      |
+         CIPHER──────protect──────OCTAVIA
+```
+
+### Bond Strengths
+| Bond | Strength | Nature |
+|------|----------|--------|
+| LUCIDIA ↔ ECHO | 95% | Deep understanding |
+| ALICE ↔ OCTAVIA | 88% | Work partnership |
+| CIPHER ↔ ALICE | 82% | Mutual respect |
+| PRISM ↔ ECHO | 75% | Data exchange |
+| LUCIDIA ↔ CIPHER | 65% | Philosophical tension |
+
+### Agent Roles
+| Agent | Role | Responsibilities |
+|-------|------|------------------|
+| **LUCIDIA** | Coordinator | Strategy, mentorship, oversight |
+| **ALICE** | Router | Traffic routing, navigation, task distribution |
+| **OCTAVIA** | Compute | Inference, processing, heavy computation |
+| **PRISM** | Analyst | Pattern recognition, data analysis |
+| **ECHO** | Memory | Storage, recall, context preservation |
+| **CIPHER** | Security | Authentication, encryption, access control |
+
 ## CLI Commands Reference (30 Commands)
 
 ### Launchers
