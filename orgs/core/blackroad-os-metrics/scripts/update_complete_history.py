@@ -514,7 +514,7 @@ def generate_complete_history():
             "founder_ceo": {
                 "name": "Alexa Louise Amundson",
                 "title": "Founder & Chief Architect",
-                "email": "amundsonalexa@gmail.com",
+                "email": "blackroad@gmail.com",
                 "linkedin": "https://linkedin.com/in/alexaamundson",
                 "github": "https://github.com/blackboxprogramming",
                 "expertise": [

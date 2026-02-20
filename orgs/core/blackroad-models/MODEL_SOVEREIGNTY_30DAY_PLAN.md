@@ -380,7 +380,7 @@ stage: research
 owner:
   type: person
   id: alexa
-  contact: amundsonalexa@gmail.com
+  contact: blackroad@gmail.com
 
 derived_from:
   - id: forkies/qwen2.5-coder-7b-instruct@v1.0.0

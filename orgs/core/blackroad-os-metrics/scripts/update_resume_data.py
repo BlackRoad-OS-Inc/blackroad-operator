@@ -35,7 +35,7 @@ except:
 resume_data = {
     'personal': {
         'name': 'Alexa Louise Amundson',
-        'email': 'amundsonalexa@gmail.com',
+        'email': 'blackroad@gmail.com',
         'phone': '(507) 828-0842',
         'location': 'Lakeville, MN',
         'linkedin': 'https://linkedin.com/in/alexaamundson',

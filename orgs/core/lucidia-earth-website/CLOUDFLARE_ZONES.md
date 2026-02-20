@@ -248,7 +248,7 @@ curl -X GET "https://api.cloudflare.com/client/v4/user/tokens/verify" \
 wrangler whoami
 
 # Expected output:
-# Email: amundsonalexa@gmail.com
+# Email: blackroad@gmail.com
 # Account ID: 848cf0b18d51e0170e0d1537aec3505a
 ```
 
@@ -525,5 +525,5 @@ curl -X GET "https://api.cloudflare.com/client/v4/user/tokens/verify" \
 
 **Last Updated:** 2025-12-23
 **Maintainer:** BlackRoad OS
-**Primary Account:** amundsonalexa@gmail.com
+**Primary Account:** blackroad@gmail.com
 **Account ID:** 848cf0b18d51e0170e0d1537aec3505a

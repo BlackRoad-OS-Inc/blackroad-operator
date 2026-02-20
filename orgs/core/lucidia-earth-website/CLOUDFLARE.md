@@ -548,7 +548,7 @@ wrangler deploy
 Based on your infrastructure:
 
 ```bash
-# Primary account (amundsonalexa@gmail.com)
+# Primary account (blackroad@gmail.com)
 ACCOUNT_ID="848cf0b18d51e0170e0d1537aec3505a"
 
 # Other account

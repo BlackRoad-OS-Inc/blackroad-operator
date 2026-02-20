@@ -216,7 +216,7 @@ Alexa Amundson
 Founder & Chief Architect
 BlackRoad OS, Inc.
 
-📧 amundsonalexa@gmail.com
+📧 blackroad@gmail.com
 🌐 blackroad.io
 💼 linkedin.com/in/alexaamundson
 ```
@@ -315,7 +315,7 @@ Contact: blackroad.systems@gmail.com
 
 All brand materials must be approved by:
 **Alexa Amundson** (Founder & CEO)
-Email: amundsonalexa@gmail.com
+Email: blackroad@gmail.com
 
 ---
 

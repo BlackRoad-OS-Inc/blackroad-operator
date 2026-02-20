@@ -23,45 +23,167 @@ init_matcher() {
 {
     "skills": {
         "backend": {
-            "keywords": ["api", "server", "backend", "fastapi", "express", "django"],
-            "weight": 1.0
+            "keywords": ["api", "server", "backend", "fastapi", "express", "django", "flask", "graphql", "grpc", "rest"],
+            "weight": 1.0,
+            "category": "development"
         },
         "frontend": {
-            "keywords": ["react", "vue", "ui", "frontend", "component", "css"],
-            "weight": 1.0
+            "keywords": ["react", "vue", "ui", "frontend", "component", "css", "tailwind", "nextjs", "svelte", "angular"],
+            "weight": 1.0,
+            "category": "development"
         },
         "database": {
-            "keywords": ["postgres", "mysql", "database", "sql", "redis", "mongodb"],
-            "weight": 1.0
+            "keywords": ["postgres", "mysql", "database", "sql", "redis", "mongodb", "sqlite", "cockroachdb", "supabase", "planetscale"],
+            "weight": 1.0,
+            "category": "data"
         },
         "devops": {
-            "keywords": ["docker", "k8s", "kubernetes", "deploy", "ci/cd", "terraform"],
-            "weight": 1.0
+            "keywords": ["docker", "k8s", "kubernetes", "deploy", "ci/cd", "terraform", "ansible", "pulumi", "helm", "argocd"],
+            "weight": 1.0,
+            "category": "infrastructure"
         },
         "ml": {
-            "keywords": ["machine learning", "neural", "tensorflow", "pytorch", "model"],
-            "weight": 1.0
+            "keywords": ["machine learning", "neural", "tensorflow", "pytorch", "model", "llm", "inference", "training", "fine-tuning"],
+            "weight": 1.0,
+            "category": "ai"
         },
         "security": {
-            "keywords": ["security", "auth", "oauth", "encryption", "vulnerability"],
-            "weight": 1.0
+            "keywords": ["security", "auth", "oauth", "encryption", "vulnerability", "pentest", "audit", "firewall", "waf", "sast"],
+            "weight": 1.0,
+            "category": "security"
         },
         "testing": {
-            "keywords": ["test", "pytest", "jest", "unit test", "integration"],
-            "weight": 0.8
+            "keywords": ["test", "pytest", "jest", "unit test", "integration", "e2e", "playwright", "cypress", "coverage"],
+            "weight": 0.8,
+            "category": "quality"
         },
         "documentation": {
-            "keywords": ["docs", "documentation", "readme", "guide", "tutorial"],
-            "weight": 0.7
+            "keywords": ["docs", "documentation", "readme", "guide", "tutorial", "docusaurus", "mkdocs", "api docs"],
+            "weight": 0.7,
+            "category": "documentation"
         },
         "integration": {
-            "keywords": ["integration", "api integration", "webhook", "connector"],
-            "weight": 0.9
+            "keywords": ["integration", "api integration", "webhook", "connector", "stripe", "salesforce", "hubspot"],
+            "weight": 0.9,
+            "category": "integration"
         },
         "performance": {
-            "keywords": ["performance", "optimization", "cache", "benchmark"],
-            "weight": 0.9
+            "keywords": ["performance", "optimization", "cache", "benchmark", "profiling", "latency", "throughput"],
+            "weight": 0.9,
+            "category": "quality"
+        },
+        "ai_inference": {
+            "keywords": ["vllm", "ollama", "inference", "embedding", "rag", "vector", "langchain", "llamaindex", "semantic"],
+            "weight": 1.0,
+            "category": "ai"
+        },
+        "nlp": {
+            "keywords": ["nlp", "text", "tokenizer", "transformer", "bert", "gpt", "sentiment", "ner", "classification"],
+            "weight": 1.0,
+            "category": "ai"
+        },
+        "computer_vision": {
+            "keywords": ["vision", "image", "opencv", "yolo", "detection", "segmentation", "ocr", "diffusion"],
+            "weight": 1.0,
+            "category": "ai"
+        },
+        "cloud": {
+            "keywords": ["aws", "gcp", "azure", "cloudflare", "vercel", "railway", "digitalocean", "lambda", "serverless"],
+            "weight": 1.0,
+            "category": "infrastructure"
+        },
+        "monitoring": {
+            "keywords": ["monitoring", "logging", "metrics", "grafana", "prometheus", "datadog", "sentry", "alerting", "observability"],
+            "weight": 0.9,
+            "category": "infrastructure"
+        },
+        "networking": {
+            "keywords": ["network", "dns", "cdn", "load balancer", "proxy", "nginx", "traefik", "tailscale", "wireguard"],
+            "weight": 0.9,
+            "category": "infrastructure"
+        },
+        "blockchain": {
+            "keywords": ["blockchain", "web3", "solidity", "ethereum", "bitcoin", "smart contract", "defi", "nft", "wallet"],
+            "weight": 1.0,
+            "category": "blockchain"
+        },
+        "crypto": {
+            "keywords": ["cryptography", "hash", "jwt", "ssl", "tls", "certificate", "pgp", "aes", "rsa", "hmac"],
+            "weight": 0.9,
+            "category": "security"
+        },
+        "data_engineering": {
+            "keywords": ["etl", "pipeline", "airflow", "dagster", "spark", "dbt", "data warehouse", "bigquery", "snowflake"],
+            "weight": 1.0,
+            "category": "data"
+        },
+        "analytics": {
+            "keywords": ["analytics", "metrics", "dashboard", "visualization", "tableau", "superset", "metabase", "bi"],
+            "weight": 0.9,
+            "category": "data"
+        },
+        "time_series": {
+            "keywords": ["time series", "timescaledb", "influxdb", "forecasting", "anomaly", "trend", "seasonality"],
+            "weight": 0.9,
+            "category": "data"
+        },
+        "iot": {
+            "keywords": ["iot", "raspberry pi", "arduino", "mqtt", "sensor", "embedded", "gpio", "edge", "home assistant"],
+            "weight": 1.0,
+            "category": "hardware"
+        },
+        "mobile": {
+            "keywords": ["mobile", "ios", "android", "react native", "flutter", "swift", "kotlin", "expo"],
+            "weight": 1.0,
+            "category": "development"
+        },
+        "cli": {
+            "keywords": ["cli", "command line", "terminal", "shell", "bash", "zsh", "scripting", "automation"],
+            "weight": 0.8,
+            "category": "development"
+        },
+        "vector_db": {
+            "keywords": ["vector", "qdrant", "weaviate", "chroma", "milvus", "pinecone", "pgvector", "faiss"],
+            "weight": 1.0,
+            "category": "ai"
+        },
+        "agent_systems": {
+            "keywords": ["agent", "multi-agent", "orchestration", "coordination", "swarm", "autonomous", "reasoning"],
+            "weight": 1.0,
+            "category": "ai"
+        },
+        "workflow": {
+            "keywords": ["workflow", "n8n", "temporal", "prefect", "dagster", "automation", "orchestration"],
+            "weight": 0.9,
+            "category": "integration"
+        },
+        "realtime": {
+            "keywords": ["realtime", "websocket", "sse", "pubsub", "streaming", "socket.io", "pusher"],
+            "weight": 0.9,
+            "category": "development"
+        },
+        "search": {
+            "keywords": ["search", "elasticsearch", "meilisearch", "algolia", "typesense", "lucene", "full-text"],
+            "weight": 0.9,
+            "category": "data"
+        },
+        "compliance": {
+            "keywords": ["compliance", "gdpr", "hipaa", "soc2", "pci", "audit", "governance", "policy"],
+            "weight": 0.8,
+            "category": "security"
         }
+    },
+    "categories": {
+        "ai": { "priority": 1.0, "description": "AI/ML capabilities" },
+        "development": { "priority": 1.0, "description": "Software development" },
+        "infrastructure": { "priority": 0.9, "description": "DevOps and cloud" },
+        "data": { "priority": 0.9, "description": "Data engineering and analytics" },
+        "security": { "priority": 1.0, "description": "Security and compliance" },
+        "integration": { "priority": 0.8, "description": "Third-party integrations" },
+        "quality": { "priority": 0.8, "description": "Testing and performance" },
+        "documentation": { "priority": 0.6, "description": "Documentation" },
+        "blockchain": { "priority": 0.9, "description": "Web3 and crypto" },
+        "hardware": { "priority": 0.8, "description": "IoT and embedded" }
     }
 }
 EOF
@@ -315,18 +437,49 @@ ${GREEN}HOW IT WORKS:${NC}
     4. Matches tasks to BlackRoad Agents using similarity scoring
     5. Returns ranked list of best matches
 
-${GREEN}SKILLS TRACKED:${NC}
+${GREEN}SKILLS TRACKED (30 categories):${NC}
 
-    • Backend (API, servers, FastAPI)
-    • Frontend (React, Vue, UI)
-    • Database (PostgreSQL, Redis, SQL)
-    • DevOps (Docker, K8s, deployment)
-    • ML (TensorFlow, models)
-    • Security (Auth, encryption)
-    • Testing (pytest, unit tests)
-    • Documentation (guides, tutorials)
-    • Integration (APIs, webhooks)
-    • Performance (optimization, caching)
+  ${BOLD}AI/ML:${NC}
+    • ml (TensorFlow, PyTorch, training)
+    • ai_inference (vLLM, Ollama, RAG, embeddings)
+    • nlp (transformers, sentiment, NER)
+    • computer_vision (YOLO, OpenCV, diffusion)
+    • vector_db (Qdrant, Weaviate, Chroma)
+    • agent_systems (multi-agent, orchestration)
+
+  ${BOLD}Development:${NC}
+    • backend (FastAPI, Express, Django)
+    • frontend (React, Vue, Next.js)
+    • mobile (iOS, Android, Flutter)
+    • cli (shell, bash, automation)
+    • realtime (WebSocket, SSE, streaming)
+
+  ${BOLD}Infrastructure:${NC}
+    • devops (Docker, K8s, Terraform)
+    • cloud (AWS, GCP, Cloudflare)
+    • monitoring (Grafana, Prometheus)
+    • networking (DNS, CDN, Tailscale)
+
+  ${BOLD}Data:${NC}
+    • database (PostgreSQL, Redis, MongoDB)
+    • data_engineering (ETL, Airflow, Spark)
+    • analytics (dashboards, BI, metrics)
+    • time_series (InfluxDB, forecasting)
+    • search (Elasticsearch, Meilisearch)
+
+  ${BOLD}Security:${NC}
+    • security (auth, OAuth, WAF)
+    • crypto (JWT, encryption, TLS)
+    • compliance (GDPR, SOC2, audit)
+
+  ${BOLD}Other:${NC}
+    • blockchain (Web3, Solidity, DeFi)
+    • iot (Raspberry Pi, MQTT, embedded)
+    • workflow (n8n, Temporal, Prefect)
+    • integration (webhooks, connectors)
+    • testing (pytest, Jest, e2e)
+    • documentation (guides, tutorials)
+    • performance (caching, optimization)
 
 ${GREEN}EXAMPLES:${NC}
 

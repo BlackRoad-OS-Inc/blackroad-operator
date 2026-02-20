@@ -316,7 +316,7 @@ This BCP is designed to:
 
 | Name | Role | Mobile | Email | Backup Email |
 |------|------|--------|-------|--------------|
-| Alexa Amundson | Principal/CCO | [Mobile] | blackroad.systems@gmail.com | amundsonalexa@gmail.com |
+| Alexa Amundson | Principal/CCO | [Mobile] | blackroad.systems@gmail.com | blackroad@gmail.com |
 | [Backup Advisor] | Backup | [Mobile] | [Email] | [Personal Email] |
 
 ### B. Critical Vendors and Service Providers

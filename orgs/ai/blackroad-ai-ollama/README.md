@@ -170,7 +170,7 @@ Need help? Mention **@blackroad** in any issue or PR to summon our intelligent a
 ### 📧 Contact
 
 - Email: blackroad.systems@gmail.com
-- Primary: amundsonalexa@gmail.com
+- Primary: blackroad@gmail.com
 
 ### ⚖️ License
 

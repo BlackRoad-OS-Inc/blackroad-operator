@@ -81,7 +81,7 @@ schedule:
 ### PR Management
 
 - **Max open PRs:** 5 per ecosystem (prevents PR flood)
-- **Auto-reviewers:** @amundsonalexa (CRD# 7794541)
+- **Auto-reviewers:** @blackroad (CRD# 7794541)
 - **Labels:** `dependencies`, `automated`
 - **Security PRs:** Created immediately (bypass weekly schedule)
 
@@ -157,7 +157,7 @@ gh pr list --repo BlackRoad-OS/blackroad-os-dashboard --label dependencies
 **Every Monday 9 AM UTC:**
 1. Dependabot creates PRs for all outdated dependencies
 2. PRs are auto-labeled: `dependencies`, `automated`
-3. PRs are assigned to @amundsonalexa for review
+3. PRs are assigned to @blackroad for review
 4. Review PRs for breaking changes and test results
 5. Merge approved PRs (auto-merge can be enabled for minor/patch updates)
 
@@ -358,7 +358,7 @@ updates:
       - "dependencies"
       - "automated"
     reviewers:
-      - "amundsonalexa"
+      - "blackroad"
 
   # Python packages
   - package-ecosystem: "pip"

@@ -375,7 +375,7 @@ window.BlackRoadAnalytics.event('sponsor_click', {
 **Email:**
 - General: hello@blackroad.io
 - Business: blackroad.systems@gmail.com
-- Personal: amundsonalexa@gmail.com
+- Personal: blackroad@gmail.com
 
 **Web:**
 - Website: https://blackroad.io

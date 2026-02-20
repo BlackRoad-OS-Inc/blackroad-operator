@@ -23,7 +23,7 @@ def ensure_git():
         run(f"git remote add origin {REMOTE}")
         run(f"git branch -M {BRANCH}")
     run("git config user.name 'Alexa Amundson'")
-    run("git config user.email 'amundsonalexa@gmail.com'")
+    run("git config user.email 'blackroad@gmail.com'")
 
 def ensure_ssh():
     print("🔐 Ensuring ssh-agent is running...")

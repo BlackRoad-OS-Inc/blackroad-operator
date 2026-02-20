@@ -339,7 +339,7 @@ curl -s https://raw.githubusercontent.com/BlackRoad-OS/blackroad-os-metrics/main
 **Email:**
 - General: hello@blackroad.io
 - Business: blackroad.systems@gmail.com
-- Personal: amundsonalexa@gmail.com
+- Personal: blackroad@gmail.com
 
 **Web:**
 - Website: https://blackroad.io
