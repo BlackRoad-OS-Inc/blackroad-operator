@@ -222,14 +222,22 @@ def run_cli():
             elif action == 'fleet':
                 statuses = fleet_status()
                 print(f"\n{'Host':<12} {'IP':<16} {'Status':<10} {'Hashrate':<15} {'Role'}")
-                print("-" * 58)
+                print("-" * 62)
                 running = 0
+                disabled = 0
                 for s in statuses:
-                    st = "MINING" if s["running"] else "OFFLINE"
-                    if s["running"]:
+                    if s['hashrate'] == 'disabled':
+                        st = "DISABLED"
+                        disabled += 1
+                    elif s["running"]:
+                        st = "MINING"
                         running += 1
+                    else:
+                        st = "OFFLINE"
                     print(f"{s['host']:<12} {s['ip']:<16} {st:<10} {s['hashrate']:<15} {s['role']}")
-                print(f"\nFleet: {running}/{len(FLEET)} active")
+                active_fleet = len(FLEET) - disabled
+                est_hashrate = sum(FLEET[h]["xmr_hashrate"] for h in FLEET if FLEET[h].get("xmr_hashrate", 0) > 0)
+                print(f"\nFleet: {running}/{active_fleet} active | Est. {est_hashrate} H/s combined")
 
             elif action == 'rates':
                 rates = fetch_rates()

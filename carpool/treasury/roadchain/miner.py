@@ -16,7 +16,8 @@ Fleet:
   cecilia   192.168.4.89  Pi 5 + Hailo-8 + 500GB NVMe (primary)
   lucidia   192.168.4.81  Pi 5 + Pironman + 1TB NVMe
   octavia   192.168.4.38  Pi 5
-  alice     192.168.4.49  Pi 4
+  alice     192.168.4.49  Pi 4 (32-bit armhf, not viable for RandomX)
+  gematria  159.65.43.12  DigitalOcean x86_64 4-core (fastest miner)
 """
 
 import json
@@ -45,7 +46,7 @@ FLEET = {
         "cores": 4,
         "role": "primary",
         "note": "Pi 5 + Hailo-8 + 500GB NVMe",
-        "xmr_hashrate": 200  # H/s measured with 2 threads
+        "xmr_hashrate": 200  # H/s measured with 2 threads on Pi 5
     },
     "lucidia": {
         "ip": "192.168.4.81",
@@ -59,14 +60,25 @@ FLEET = {
         "user": "blackroad",
         "cores": 4,
         "role": "worker",
-        "note": "Pi 5"
+        "note": "Pi 5",
+        "xmr_hashrate": 367  # H/s measured with 2 threads on Pi 5
     },
     "alice": {
         "ip": "192.168.4.49",
-        "user": "alice",
+        "user": "blackroad",
         "cores": 4,
         "role": "worker",
-        "note": "Pi 4"
+        "note": "Pi 4 (32-bit armhf, not viable for RandomX)",
+        "xmr_hashrate": 0,
+        "disabled": True
+    },
+    "gematria": {
+        "ip": "159.65.43.12",
+        "user": "root",
+        "cores": 4,
+        "role": "primary",
+        "note": "DigitalOcean x86_64 AVX2 4-core",
+        "xmr_hashrate": 955
     }
 }
 
@@ -80,10 +92,11 @@ COINS = {
         "name": "Monero",
         "symbol": "XMR",
         "algorithm": "RandomX",
-        "pool": "pool.hashvault.pro:443",
+        "pool": "pool.hashvault.pro:80",
+        "pool_tls": "pool.hashvault.pro:443",
         "pool_alt": "pool.supportxmr.com:443",
         "miner_binary": "xmrig",
-        "tls": True
+        "tls": False
     },
     "vrsc": {
         "name": "Verus",
@@ -178,10 +191,13 @@ def load_config():
 # ============================================================================
 
 def ssh_cmd(host, command, user=None, timeout=10):
-    """Execute command on a Pi via SSH."""
+    """Execute command on a fleet node via SSH."""
     node = FLEET.get(host)
     if not node:
         return {"success": False, "error": f"Unknown host: {host}"}
+
+    if node.get("disabled"):
+        return {"success": False, "error": f"{host} is disabled", "host": host}
 
     user = user or node["user"]
     ip = node["ip"]
@@ -236,11 +252,19 @@ def stop_miner(host):
 
 def check_miner_status(host):
     """Check if miner is running and get stats."""
+    node = FLEET.get(host, {})
+    if node.get("disabled"):
+        return {
+            "host": host, "running": False, "hashrate": "disabled",
+            "ip": node["ip"], "role": node["role"]
+        }
+
     # Check process
     proc = ssh_cmd(host, "pgrep -a xmrig 2>/dev/null || echo 'not running'")
 
-    # Check recent hashrate from log
-    log = ssh_cmd(host, "tail -5 ~/.xmrig/miner.log 2>/dev/null || echo 'no log'")
+    # Check recent hashrate from log (different paths per host)
+    log_cmd = "tail -5 /var/log/xmrig/xmrig.log 2>/dev/null || tail -5 ~/.xmrig/xmrig.log 2>/dev/null || echo 'no log'"
+    log = ssh_cmd(host, log_cmd)
 
     running = proc["success"] and "not running" not in proc.get("stdout", "")
 
@@ -267,10 +291,13 @@ def check_miner_status(host):
 
 
 def deploy_all(wallet_address, coin="xmr"):
-    """Deploy miner to all Pis in the fleet."""
+    """Deploy miner to all active fleet nodes."""
     results = []
-    for host in FLEET:
-        print(f"  Deploying to {host} ({FLEET[host]['ip']})...")
+    for host, node in FLEET.items():
+        if node.get("disabled"):
+            print(f"  Skipping {host} (disabled)")
+            continue
+        print(f"  Deploying to {host} ({node['ip']})...")
         result = deploy_miner(host, wallet_address, coin)
         results.append(result)
         status = "OK" if result["success"] else f"FAIL: {result.get('error', 'unknown')}"
