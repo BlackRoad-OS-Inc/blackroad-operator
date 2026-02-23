@@ -1,0 +1,36 @@
+---
+id: core-primitives
+title: Core Primitives
+slug: /platform/core/primitives
+sidebar_position: 4
+---
+
+`blackroad-os-core` holds the shared types and helpers that every other repository uses. Keep these primitives stable: they shape how agents, jobs, events, and truth states are expressed everywhere else.
+
+## Result helpers
+- `Result<T, E>` — functional success/error envelope.
+- `ok(value)` — wrap a success value.
+- `err(error)` — wrap an error while preserving type information.
+
+## Identity
+- `PsShaInfinity` — identity anchor that binds an entity to a verifiable worldline.
+- `IdentityAnchor` — concrete anchor instance containing the PS-SHA∞ hash and metadata.
+- `IdentityKind` — enum describing whether the anchor is a human, agent, asset, or service.
+
+## Truth pipeline
+- `TextSnapshot` — immutable text input captured for verification.
+- `VerificationJob` — request to assess a snapshot; typically executed by an agent like Atlas.
+- `AgentAssessment` — agent-produced judgment about the snapshot.
+- `TruthState` — aggregated result (affirmed, disputed, retracted) plus minority reports.
+
+## Events & journaling
+- `DomainEvent` — canonical event wrapper for runtime transitions and job outcomes.
+- `JournalEntry` — persisted record of an event, ready to be grouped into RoadChain blocks.
+- `RoadChainBlock` — hash-linked bundle of journal entries with block metadata for audit.
+
+## Agents & jobs
+- `Agent`, `AgentContext`, `AgentMetadata`, `AgentState` — shape how agents are registered, invoked, and tracked.
+- `Job`, `JobStatus` — lifecycle states for work items.
+- Lifecycle helpers such as `startJob`, `completeJob`, and `failJob` enforce consistent transitions and event emission.
+
+Use these primitives instead of ad-hoc types so Prism, API, Operator, and future agents (including Atlas and Lucidia) see the same worldview.

@@ -1,0 +1,23 @@
+---
+id: operator-dns-and-networking
+title: DNS & Networking
+sidebar_position: 3
+slug: /platform/operator/dns-and-networking
+---
+
+DNS is managed through Cloudflare with a consistent pattern per environment. Each service receives a predictable subdomain so operators, agents, and external users know where to reach it. Terraform modules in `blackroad-os-infra` own zone records, TLS settings, and any required tunnels.
+
+## Base strategy
+
+- Root zones exist for production and environment-specific subdomains (e.g., `blackroad.systems`, `dev.blackroad.systems`, `stg.blackroad.systems`).
+- Service records follow a consistent pattern, typically `<service>.<env>.blackroad.systems`.
+- Cloudflare handles TLS termination and security policies, with origin servers pinned to known IPs or load balancers.
+
+## Adding a new service
+
+1. Define the DNS record in the `dns` module within `blackroad-os-infra`, specifying the environment and target.
+2. Associate the record with the appropriate service module so that infrastructure and DNS changes roll out together.
+3. Apply the Terraform changes for the desired environment after peer review and required approvals.
+4. Validate propagation and health checks before advertising the new endpoint to agents or users.
+
+Networking relies on consistent CIDR allocations and security groups defined in infra modules. Coordinate with the infra team when introducing new ingress/egress paths or when agents need to reach sensitive systems. For deployment choreography, see [Deployments & Runbooks](/platform/operator/deployments-and-runbooks).

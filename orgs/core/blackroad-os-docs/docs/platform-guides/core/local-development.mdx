@@ -1,0 +1,27 @@
+---
+id: local-development
+title: Local Development
+sidebar_position: 7
+slug: /platform/core/local-development
+---
+
+Use this checklist to spin up the BlackRoad OS stack locally. It assumes you cloned the repositories into a common directory and have Node.js 20+, npm or pnpm, git, and Docker available.
+
+## Setup steps
+
+1. Clone the repos you need: `blackroad-os-core`, `blackroad-os-operator`, `blackroad-os-api`, `blackroad-os-prism-console`, `blackroad-os-web`, and this docs repo.
+2. Install dependencies in each repo (`npm install` or `pnpm install`). Keep versions aligned with the `.nvmrc` or `engines` fields if present.
+3. If `blackroad-os-core` provides a runtime, start it or ensure its libraries are built for downstream consumers.
+4. Start the operator to host agents. Finance agents can run in stub mode until you hook them to live data sources.
+5. Launch the API, typically binding to a port in the 4000–5000 range. Load any required environment variables (database URIs, secrets, base URLs).
+6. Run Prism Console with `NEXT_PUBLIC_API_BASE_URL` pointing to your API instance. Visit `/dashboard` or `/finance` to confirm connectivity.
+7. Optionally run the Web app for the marketing experience and to verify documentation links.
+8. Run this docs site via `npm run start` to keep guidance close at hand.
+
+## Stubbing dependencies
+
+Not every integration must be live during local development. Use mock data for bank feeds, sandbox queues for events, and stub implementations of PS-SHA∞ when cryptographic anchoring is not necessary. Document your choices in pull requests so other contributors understand the assumptions.
+
+## Next steps
+
+When comfortable, explore [Extending Agents](/platform/api/extending-agents) to add new capabilities. Cross-reference environment settings in [Infra Environments](/platform/operator/environments) before deploying anything beyond dev, and consult [Deployments & Runbooks](/platform/operator/deployments-and-runbooks) for rollout discipline.

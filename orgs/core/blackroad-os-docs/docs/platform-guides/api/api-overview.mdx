@@ -1,0 +1,56 @@
+---
+id: api-overview
+title: API Overview
+slug: /platform/api/overview
+sidebar_position: 1
+---
+
+`blackroad-os-api` is the HTTP surface that external consumers, Prism Console, and automation call. It wraps Operator runtime data in a consistent envelope.
+
+## Envelope
+Every response returns:
+
+```json
+{
+  "ok": true,
+  "data": {"..."}
+}
+```
+
+When `ok` is `false`, expect an `error` object with a `code` and `message` instead of `data`.
+
+## Endpoints
+- `GET /api/v1/health` — liveness and readiness.
+- `GET /api/v1/system/overview` — summary of system health, agents, and version info.
+- `GET /api/v1/agents` — list registered agents.
+- `GET /api/v1/agents/:id` — inspect a specific agent, including state and last-seen metadata.
+- `GET /api/v1/finance/snapshot` — wallet balances, ROI snapshots, and agent cost rollups (where implemented).
+- `GET /api/v1/events` — paginated DomainEvents from the Operator runtime.
+- `GET /api/v1/roadchain/blocks` — grouped RoadChain blocks for audit references.
+
+### Example shapes (pseudocode)
+- **System overview**
+  ```json
+  {
+    "ok": true,
+    "data": {
+      "uptimeSeconds": 1234,
+      "agents": {"total": 3, "healthy": 3},
+      "jobs": {"queued": 2, "running": 1}
+    }
+  }
+  ```
+- **Agent detail**
+  ```json
+  {
+    "ok": true,
+    "data": {
+      "id": "atlas",
+      "psShaInfinity": "ps-sha∞-...",
+      "state": "ready",
+      "lastJob": {"id": "job-123", "status": "succeeded"}
+    }
+  }
+  ```
+
+Keep endpoints thin and stable: Operator is where jobs run; the API is the consumable contract for Prism, web, and partners.

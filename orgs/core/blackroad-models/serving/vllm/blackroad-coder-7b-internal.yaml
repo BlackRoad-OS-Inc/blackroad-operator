@@ -1,0 +1,144 @@
+# vLLM Serving Configuration
+# Model: internal/blackroad-coder-7b/v1
+# Purpose: Internal code assistant for BlackRoad agents
+
+model:
+  id: internal/blackroad-coder-7b-v1
+  name: BlackRoad Coder 7B (Internal)
+  base_model: Qwen/Qwen2.5-Coder-7B-Instruct
+  lora_weights: s3://blackroad-models/internal/blackroad-coder-7b/v1/lora_weights/
+  stage: internal
+
+serving:
+  backend: vllm
+  version: "0.6.0"
+
+  # Model configuration
+  model_path: Qwen/Qwen2.5-Coder-7B-Instruct
+  enable_lora: true
+  lora_modules:
+    - name: blackroad-coder
+      path: s3://blackroad-models/internal/blackroad-coder-7b/v1/lora_weights/
+
+  # Hardware
+  gpu: nvidia-a10  # Railway GPU
+  tensor_parallel_size: 1
+  dtype: float16
+
+  # Context & tokens
+  max_model_len: 4096
+  max_num_seqs: 128
+
+  # Quantization (for efficiency)
+  quantization: awq  # INT4 quantization
+  # Alternative: gptq, bitsandbytes
+
+  # Performance tuning
+  gpu_memory_utilization: 0.9
+  swap_space: 4  # GB
+  enforce_eager: false
+  max_parallel_loading_workers: 4
+
+  # Batching
+  max_num_batched_tokens: 8192
+  max_paddings: 256
+
+  # KV cache
+  block_size: 16
+  enable_prefix_caching: true
+
+endpoints:
+  # OpenAI-compatible API
+  - path: /v1/completions
+    method: POST
+    description: Text completion endpoint
+
+  - path: /v1/chat/completions
+    method: POST
+    description: Chat completion endpoint
+
+  - path: /v1/models
+    method: GET
+    description: List available models
+
+  # Health & monitoring
+  - path: /health
+    method: GET
+    description: Health check
+
+  - path: /metrics
+    method: GET
+    description: Prometheus metrics
+
+  - path: /version
+    method: GET
+    description: vLLM version info
+
+# Access control
+access:
+  require_api_key: true
+  allowed_services:
+    - blackroad-os-operator
+    - pack-infra-devops
+    - blackroad-os-core
+    - agent-spawner
+
+  # Rate limiting
+  rate_limit:
+    requests_per_minute: 60
+    tokens_per_minute: 100000
+
+  # CORS
+  cors:
+    enabled: true
+    allowed_origins:
+      - https://blackroad.io
+      - https://*.blackroad.io
+      - http://localhost:3000
+
+# Performance targets
+sla:
+  latency_p50: 200  # ms
+  latency_p95: 500  # ms
+  latency_p99: 1000 # ms
+  throughput: 100   # requests/sec
+  uptime: 99.5      # percent
+
+# Monitoring
+monitoring:
+  enable_metrics: true
+  metrics_port: 9090
+  log_level: info
+
+  # Structured logging
+  log_format: json
+  log_requests: true
+  log_responses: false  # Don't log response content (privacy)
+
+  # Tracing
+  enable_tracing: true
+  tracing_backend: sentry
+  sentry_dsn: ${SENTRY_DSN}
+
+# Environment-specific overrides
+environments:
+  staging:
+    model_path: Qwen/Qwen2.5-Coder-7B-Instruct
+    max_model_len: 2048  # Smaller for staging
+    gpu_memory_utilization: 0.8
+
+  production:
+    model_path: Qwen/Qwen2.5-Coder-7B-Instruct
+    max_model_len: 4096
+    gpu_memory_utilization: 0.95
+    enable_lora: true
+
+# Cost optimization
+cost:
+  estimated_monthly: 50  # USD (1 A10 GPU on Railway)
+  autoscaling:
+    enabled: true
+    min_replicas: 1
+    max_replicas: 3
+    target_cpu: 70
+    scale_down_delay: 300  # seconds

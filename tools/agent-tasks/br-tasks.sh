@@ -157,6 +157,65 @@ cmd_clear() {
     echo "${GREEN}✓ Cleared completed tasks${NC}"
 }
 
+# Sync task DB to/from Pi nodes
+cmd_sync() {
+    local PI_KEY="$HOME/.ssh/br_mesh_ed25519"
+    local PI_USER="pi"
+    local NODES=("192.168.4.38")
+    local PI_DB="/home/pi/.blackroad/task_queue.db"
+    local MERGED_DB="/tmp/br-tasks-merge.db"
+    local synced=0
+
+    init_db
+
+    for node in $NODES; do
+        ping -c 1 -W 2 "$node" > /dev/null 2>&1 || { echo "${YELLOW}⚠ $node unreachable, skipping${NC}"; continue }
+
+        echo "${CYAN}⟳ Syncing with $node...${NC}"
+
+        # Push new pending tasks to Pi (tasks Pi doesn't have yet)
+        local new_tasks=$(sqlite3 "$TASKS_DB" "SELECT id,title,description,assigned_to,status,priority,created_at FROM tasks WHERE status='pending';" 2>/dev/null)
+        if [[ -n "$new_tasks" ]]; then
+            while IFS='|' read -r id title desc agent tstatus pri cat; do
+                ssh -i "$PI_KEY" -o ConnectTimeout=5 "$PI_USER@$node" \
+                    "sqlite3 ~/.blackroad/task_queue.db \"INSERT OR IGNORE INTO tasks(id,title,description,assigned_to,status,priority,created_at) VALUES('$id','${title//\'/\'\'}','${desc//\'/\'\'}','$agent','$tstatus',$pri,$cat);\"" 2>/dev/null
+            done <<< "$new_tasks"
+            echo "${GREEN}  ↑ pushed pending tasks to $node${NC}"
+        fi
+
+        # Pull completed tasks back from Pi
+        local pi_done=$(ssh -i "$PI_KEY" -o ConnectTimeout=5 "$PI_USER@$node" \
+            "sqlite3 ~/.blackroad/task_queue.db \"SELECT id,result,completed_at FROM tasks WHERE status='done';\"" 2>/dev/null)
+        if [[ -n "$pi_done" ]]; then
+            local count=0
+            while IFS='|' read -r id result cat; do
+                sqlite3 "$TASKS_DB" "UPDATE tasks SET status='done', result='${result//\'/\'\'}', completed_at=$cat WHERE id='$id' AND status!='done';" 2>/dev/null
+                ((count++))
+            done <<< "$pi_done"
+            [[ $count -gt 0 ]] && echo "${GREEN}  ↓ pulled $count completed tasks from $node${NC}"
+        fi
+
+        # Show Pi fleet status
+        local pi_agents=$(ssh -i "$PI_KEY" -o ConnectTimeout=5 "$PI_USER@$node" \
+            "for f in ~/.blackroad/agents/active/*.json 2>/dev/null; do python3 -c \"import json; d=json.load(open('\$f')); print(d['name'],d.get('status','?'))\"; done" 2>/dev/null)
+        [[ -n "$pi_agents" ]] && echo "${BLUE}  Pi agents: $pi_agents${NC}"
+
+        ((synced++))
+    done
+
+    echo "${GREEN}✓ Synced $synced node(s)${NC}"
+}
+
+# Watch: auto-sync every N seconds
+cmd_watch_sync() {
+    local interval=${1:-30}
+    echo "${CYAN}⟳ Auto-sync every ${interval}s (Ctrl+C to stop)${NC}"
+    while true; do
+        cmd_sync
+        sleep "$interval"
+    done
+}
+
 show_help() {
     echo "${CYAN}Usage: br task <command>${NC}"
     echo ""
@@ -167,20 +226,24 @@ show_help() {
     echo "  done <id> [result]                      — Complete a task"
     echo "  result <id>                             — Show task result"
     echo "  clear                                   — Remove completed tasks"
+    echo "  sync                                    — Sync tasks with Pi nodes"
+    echo "  watch [interval]                        — Auto-sync every N seconds"
     echo ""
     echo "Example:"
     echo "  br task post \"Scan for vulnerabilities\" \"\" CIPHER 8"
-    echo "  br task list"
+    echo "  br task sync"
 }
 
 case "${1:-list}" in
-    post|add)      cmd_post "$2" "$3" "$4" "$5" ;;
-    list|ls)       cmd_list "$2" ;;
-    assign)        cmd_assign "$2" "$3" ;;
-    claim)         cmd_claim "$2" "$3" ;;
-    done|complete) cmd_done "$2" "${@:3}" ;;
-    result|show)   cmd_result "$2" ;;
-    clear|clean)   cmd_clear ;;
-    help|-h)       show_help ;;
-    *)             show_help ;;
+    post|add)        cmd_post "$2" "$3" "$4" "$5" ;;
+    list|ls)         cmd_list "$2" ;;
+    assign)          cmd_assign "$2" "$3" ;;
+    claim)           cmd_claim "$2" "$3" ;;
+    done|complete)   cmd_done "$2" "${@:3}" ;;
+    result|show)     cmd_result "$2" ;;
+    clear|clean)     cmd_clear ;;
+    sync)            cmd_sync ;;
+    watch)           cmd_watch_sync "$2" ;;
+    help|-h)         show_help ;;
+    *)               show_help ;;
 esac

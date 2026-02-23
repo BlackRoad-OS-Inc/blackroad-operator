@@ -45,8 +45,6 @@ BR_TOOLS=(
     note        "${BR_TOOLS_DIR}/quick-notes/br-note.sh"
     notes       "${BR_TOOLS_DIR}/quick-notes/br-note.sh"
     init        "${BR_TOOLS_DIR}/project-init/br-init.sh"
-    health      "${BR_TOOLS_DIR}/health-check/br-health.sh"
-    check       "${BR_TOOLS_DIR}/health-check/br-health.sh"
     logs        "${BR_TOOLS_DIR}/log-parser/br-logs.sh"
     log         "${BR_TOOLS_DIR}/log-parser/br-logs.sh"
     perf        "${BR_TOOLS_DIR}/perf-monitor/br-perf.sh"
@@ -87,7 +85,6 @@ BR_TOOLS=(
     agent       "${BR_TOOLS_DIR}/agent-router/br-agent.sh"
     agents      "${BR_TOOLS_DIR}/agent-router/br-agent.sh"
     route       "${BR_TOOLS_DIR}/agent-router/br-agent.sh"
-    talk        "${BR_TOOLS_DIR}/agent-router/br-agent.sh"
     ci          "${BR_TOOLS_DIR}/ci-pipeline/br-ci.sh"
     pipeline    "${BR_TOOLS_DIR}/ci-pipeline/br-ci.sh"
     notify      "${BR_TOOLS_DIR}/notifications/br-notify.sh"
@@ -118,7 +115,16 @@ BR_TOOLS=(
     api-gw      "${BR_TOOLS_DIR}/agent-gateway/br-gateway.sh"
     tpl         "${BR_TOOLS_DIR}/brand/br-brand.sh"
     template    "${BR_TOOLS_DIR}/brand/br-brand.sh"
+    brand       "${BR_TOOLS_DIR}/brand/br-brand.sh"
+    health      "${BR_TOOLS_DIR}/health-check/br-health.sh"
+    check       "${BR_TOOLS_DIR}/health-check/br-health.sh"
+    diag        "${BR_TOOLS_DIR}/health-check/br-health.sh"
 )
+
+# Stream shortcut — delegates to gateway stream sub-command
+stream_events() {
+    zsh "${BR_TOOLS_DIR}/agent-gateway/br-gateway.sh" stream
+}
 
 dispatch_tool() {
     local tool=$1
@@ -229,7 +235,6 @@ show_help() {
     echo "║    br api list            - List saved endpoints                  ║"
     echo "║                                                                   ║"
     echo "║  PRODUCTIVITY TOOLS:                                              ║"
-    echo "║    br health              - 🏥 All-systems diagnostic              ║"
     echo "║    br run                 - ⚡ Smart task detection & execution   ║"
     echo "║    br note add            - 📝 Quick developer notes              ║"
     echo "║    br init <template>     - 🎯 Project scaffolding                ║"
@@ -293,6 +298,10 @@ show_help() {
     echo "║  AGENT INTERACTIONS (🤖 Talk to the Fleet):                     ║"
     echo "║    br wake [agent] [model]  - Wake an agent with morning thoughts ║"
     echo "║    br council <question>    - All agents vote on a question       ║"
+    echo "║    br carpool <topic>       - 8 agents parallel roundtable 🚗    ║"
+    echo "║    br carpool list          - List saved carpool sessions         ║"
+    echo "║    br carpool last          - Open most recent session            ║"
+    echo "║    br roundtable <topic>    - All 6 agents discuss in tmux 🎯   ║"
     echo "║    br think <query>         - All agents respond to a query       ║"
     echo "║    br debate <topic>        - LUCIDIA vs CIPHER debate            ║"
     echo "║    br broadcast <msg>       - Broadcast to all agents             ║"
@@ -344,6 +353,13 @@ show_help() {
     echo "║    br gateway status        - Show status + health                ║"
     echo "║    br gateway test          - Run API test suite                  ║"
     echo "║    br gateway logs          - Tail gateway logs                   ║"
+    echo "║    br stream                - Watch live agent event stream (SSE) ║"
+    echo "║                                                                   ║"
+    echo "║  DIAGNOSTICS (🩺 System Health):                                  ║"
+    echo "║    br health                - Full system health diagnostic       ║"
+    echo "║    br health quick          - Fast check (no latency tests)       ║"
+    echo "║    br brand list            - List brand templates                ║"
+    echo "║    br brand new <type>      - Generate brand-compliant HTML page  ║"
     echo "║                                                                   ║"
     echo "║  VERCEL (▲ Deployments):                                         ║"
     echo "║    br vercel deploy         - Deploy to preview                   ║"
@@ -352,6 +368,16 @@ show_help() {
     echo "║    br vercel logs <url>     - Tail deployment logs                ║"
     echo "║    br vercel env            - Manage environment variables        ║"
     echo "║    br vercel domains        - List domains                        ║"
+    echo "║                                                                   ║"
+    echo "║  HARDWARE FLEET (🖥️ Nodes):                                      ║"
+    echo "║    br nodes scan            - Discover all fleet nodes + devices    ║"
+    echo "║    br nodes status          - Quick health table                    ║"
+    echo "║    br nodes show <name>     - Detail view (IP, OS, Ollama, devices) ║"
+    echo "║    br nodes devices         - USB/serial/video across all nodes     ║"
+    echo "║    br nodes topology        - ASCII network topology diagram        ║"
+    echo "║    br nodes ssh <name>      - SSH into node by alias                ║"
+    echo "║    br nodes fix             - Apply fleet fixes (hostname, WAL etc) ║"
+    echo "║    br nodes ping            - Quick ping all known nodes            ║"
     echo "║                                                                   ║"
     echo "║  8-BIT WORLD (🌍 Adventure):                                     ║"
     echo "║    br world generate <name> - Create an 8-bit ASCII world        ║"
@@ -639,6 +665,40 @@ main() {
             local question="${*:-Should we deploy to production?}"
             bash /Users/alexa/blackroad/council.sh llama3.2 "$question"
             ;;
+        carpool)
+            # br carpool [topic]       — 8-agent parallel tmux roundtable
+            # br carpool list          — list saved sessions
+            # br carpool last          — open most recent session
+            # CARPOOL_MODEL=x CARPOOL_TURNS=n br carpool "topic"
+            local subcmd="$1"; shift 2>/dev/null || true
+            case "$subcmd" in
+                list|last)
+                    bash /Users/alexa/blackroad/carpool.sh "$subcmd"
+                    ;;
+                "")
+                    echo -e "\033[1;37m🚗 BlackRoad CarPool\033[0m"
+                    echo -ne "\033[0;36mTopic: \033[0m"
+                    read -r topic
+                    [[ -z "$topic" ]] && topic="What should BlackRoad build next?"
+                    bash /Users/alexa/blackroad/carpool.sh "$topic"
+                    ;;
+                *)
+                    bash /Users/alexa/blackroad/carpool.sh "$subcmd"
+                    ;;
+            esac
+            ;;
+        roundtable|rt)
+            # br roundtable [topic] [turns] — all 6 agents discuss in tmux panes
+            local topic="$1"; shift 2>/dev/null || true
+            local turns="${1:-6}"
+            if [[ -z "$topic" ]]; then
+                echo -e "\033[1;37m🎯 BlackRoad Roundtable\033[0m"
+                echo -ne "\033[0;36mTopic: \033[0m"
+                read -r topic
+                [[ -z "$topic" ]] && topic="What is the best way to optimize our agent network?"
+            fi
+            bash /Users/alexa/blackroad/roundtable.sh "$topic" "$turns"
+            ;;
         think)
             # br think <query> — all agents respond
             local query="${*:-What should we build next?}"
@@ -659,6 +719,15 @@ main() {
             local fleet_cmd="${1:-once}"
             shift 2>/dev/null || true
             zsh "${BR_TOOLS_DIR}/agent-runtime/br-fleet.sh" "$fleet_cmd" "$@"
+            ;;
+        nodes|hardware)
+            # br nodes — fleet discovery, device inventory, topology
+            shift 2>/dev/null || true
+            zsh "${BR_TOOLS_DIR}/nodes/br-nodes.sh" "$@"
+            ;;
+        stream|events)
+            # br stream — live SSE event feed from gateway
+            stream_events
             ;;
         whisper)
             # br whisper <agent> <message>

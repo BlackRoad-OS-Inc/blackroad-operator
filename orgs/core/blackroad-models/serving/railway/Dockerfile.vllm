@@ -1,0 +1,41 @@
+# BlackRoad Model Server - vLLM on Railway
+# Serves internal/blackroad-coder-7b/v1 with LoRA
+
+FROM vllm/vllm-openai:v0.6.0
+
+# Install additional dependencies
+RUN pip install --no-cache-dir \
+    boto3 \
+    pyyaml \
+    sentry-sdk \
+    prometheus-client
+
+# Set working directory
+WORKDIR /app
+
+# Copy model configuration
+COPY serving/vllm/blackroad-coder-7b-internal.yaml /app/config.yaml
+
+# Create model directory
+RUN mkdir -p /app/models/blackroad-coder-7b/v1/lora_weights
+
+# Download base model (cached in volume)
+# This will be done at runtime via vLLM
+
+# Copy startup script
+COPY serving/railway/start.sh /app/start.sh
+RUN chmod +x /app/start.sh
+
+# Expose ports
+EXPOSE 8000 9090
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=5s --start-period=300s --retries=3 \
+  CMD curl -f http://localhost:8000/health || exit 1
+
+# Set environment
+ENV PYTHONUNBUFFERED=1
+ENV CUDA_VISIBLE_DEVICES=0
+
+# Start server
+CMD ["/app/start.sh"]

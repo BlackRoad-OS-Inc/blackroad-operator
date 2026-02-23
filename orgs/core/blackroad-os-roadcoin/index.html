@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ROAD - Revenue-Backed Digital Currency | BlackRoad OS</title>
+    <meta name="description" content="ROAD is a revenue-backed digital currency powered by BlackRoad OS infrastructure. Live balance, mining stats, proof of reserve, and economics dashboard.">
+    <style>
+        :root {
+            --black: #000000;
+            --white: #FFFFFF;
+            --amber: #F5A623;
+            --hot-pink: #FF1D6C;
+            --electric-blue: #2979FF;
+            --violet: #9C27B0;
+            --green: #00E676;
+            --red: #FF1744;
+            --space-xs: 8px;
+            --space-sm: 13px;
+            --space-md: 21px;
+            --space-lg: 34px;
+            --space-xl: 55px;
+            --space-2xl: 89px;
+            --space-3xl: 144px;
+            --ease: cubic-bezier(0.25, 0.1, 0.25, 1);
+            --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--black);
+            color: var(--white);
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Mono', monospace;
+            line-height: 1.618;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .grid-bg {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image:
+                linear-gradient(rgba(255,29,108,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,29,108,0.03) 1px, transparent 1px);
+            background-size: 55px 55px;
+            animation: grid-move 20s linear infinite;
+            z-index: 0;
+        }
+
+        @keyframes grid-move {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(55px, 55px); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        @keyframes glow-pulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(255, 29, 108, 0.2); }
+            50% { box-shadow: 0 0 40px rgba(255, 29, 108, 0.4); }
+        }
+
+        @keyframes count-glow {
+            0% { text-shadow: 0 0 10px rgba(255, 29, 108, 0.3); }
+            50% { text-shadow: 0 0 30px rgba(255, 29, 108, 0.6); }
+            100% { text-shadow: 0 0 10px rgba(255, 29, 108, 0.3); }
+        }
+
+        nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(20px);
+            padding: var(--space-md) var(--space-xl);
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255, 29, 108, 0.15);
+        }
+
+        nav .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--amber), var(--hot-pink), var(--violet));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: var(--space-lg);
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            transition: color 0.3s var(--ease);
+        }
+
+        .nav-links a:hover { color: var(--hot-pink); }
+
+        .live-indicator {
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+            font-size: 12px;
+            color: var(--green);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .live-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: var(--green);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 var(--space-xl);
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Hero */
+        .hero {
+            padding: calc(var(--space-3xl) * 1.8) 0 var(--space-2xl);
+            text-align: center;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            padding: var(--space-xs) var(--space-md);
+            border: 1px solid rgba(255, 29, 108, 0.3);
+            border-radius: 100px;
+            font-size: 13px;
+            color: var(--hot-pink);
+            font-weight: 600;
+            margin-bottom: var(--space-lg);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .hero h1 {
+            font-size: 72px;
+            font-weight: 900;
+            margin-bottom: var(--space-md);
+            line-height: 1.05;
+            letter-spacing: -2px;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, var(--amber) 0%, var(--hot-pink) 38.2%, var(--violet) 61.8%, var(--electric-blue) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 22px;
+            color: rgba(255, 255, 255, 0.6);
+            max-width: 700px;
+            margin: 0 auto var(--space-xl);
+        }
+
+        /* Balance Card */
+        .balance-section {
+            margin: var(--space-xl) 0 var(--space-3xl);
+        }
+
+        .balance-card {
+            background: rgba(255, 29, 108, 0.04);
+            border: 1px solid rgba(255, 29, 108, 0.2);
+            border-radius: 24px;
+            padding: var(--space-xl);
+            text-align: center;
+            animation: glow-pulse 4s ease-in-out infinite;
+        }
+
+        .balance-label {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.5);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 700;
+            margin-bottom: var(--space-sm);
+        }
+
+        .balance-amount {
+            font-size: 80px;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--amber) 0%, var(--hot-pink) 38.2%, var(--violet) 61.8%, var(--electric-blue) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1.1;
+            animation: count-glow 3s ease-in-out infinite;
+        }
+
+        .balance-amount .currency {
+            font-size: 32px;
+            font-weight: 700;
+        }
+
+        .balance-usd {
+            font-size: 36px;
+            font-weight: 800;
+            color: var(--green);
+            margin-top: var(--space-xs);
+            letter-spacing: -1px;
+        }
+
+        .balance-sub-usd {
+            font-size: 13px;
+            color: var(--green);
+            opacity: 0.7;
+            font-weight: 600;
+            margin-top: 2px;
+        }
+
+        .exchange-rate-bar {
+            display: flex;
+            justify-content: center;
+            gap: var(--space-xl);
+            margin-top: var(--space-lg);
+            padding-top: var(--space-md);
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .rate-item {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.4);
+            font-family: 'SF Mono', monospace;
+        }
+
+        .rate-item span {
+            color: var(--amber);
+            font-weight: 700;
+        }
+
+        .balance-sub {
+            display: flex;
+            justify-content: center;
+            gap: var(--space-xl);
+            margin-top: var(--space-lg);
+            flex-wrap: wrap;
+        }
+
+        .balance-sub-item {
+            text-align: center;
+        }
+
+        .balance-sub-value {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--white);
+        }
+
+        .balance-sub-label {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.5);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Section Headers */
+        .section-header {
+            text-align: center;
+            margin-bottom: var(--space-xl);
+        }
+
+        .section-header h2 {
+            font-size: 42px;
+            font-weight: 800;
+            margin-bottom: var(--space-sm);
+        }
+
+        .section-header p {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 18px;
+        }
+
+        section.content-section {
+            margin-bottom: var(--space-3xl);
+        }
+
+        /* Cards Grid */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: var(--space-lg);
+        }
+
+        .card-grid-3 {
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: var(--space-lg);
+            transition: all 0.3s var(--ease);
+        }
+
+        .card:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: var(--hot-pink);
+            transform: translateY(-4px);
+        }
+
+        .card-icon {
+            font-size: 36px;
+            margin-bottom: var(--space-md);
+        }
+
+        .card h3 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: var(--space-sm);
+            color: var(--hot-pink);
+        }
+
+        .card p {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 15px;
+        }
+
+        .card .metric {
+            font-size: 36px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--hot-pink), var(--violet));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: var(--space-xs);
+        }
+
+        .card .metric-label {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-md);
+        }
+
+        .card-badge {
+            padding: var(--space-xs) var(--space-sm);
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-green {
+            background: rgba(0, 230, 118, 0.15);
+            color: var(--green);
+        }
+
+        .badge-pink {
+            background: rgba(255, 29, 108, 0.15);
+            color: var(--hot-pink);
+        }
+
+        .badge-amber {
+            background: rgba(245, 166, 35, 0.15);
+            color: var(--amber);
+        }
+
+        .badge-blue {
+            background: rgba(41, 121, 255, 0.15);
+            color: var(--electric-blue);
+        }
+
+        .badge-violet {
+            background: rgba(156, 39, 176, 0.15);
+            color: var(--violet);
+        }
+
+        /* Economics Stats Row */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: var(--space-md);
+            margin-top: var(--space-lg);
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: var(--space-md);
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--hot-pink);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 4px;
+        }
+
+        /* Revenue Streams */
+        .revenue-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--space-md) 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .revenue-item:last-child { border-bottom: none; }
+
+        .revenue-name {
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .revenue-price {
+            font-family: 'SF Mono', monospace;
+            color: var(--amber);
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        /* AI Compute */
+        .compute-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-lg);
+        }
+
+        .compute-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: var(--space-lg);
+        }
+
+        .compute-card .big-metric {
+            font-size: 48px;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--amber), var(--hot-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Proof of Reserve */
+        .reserve-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: var(--space-md);
+        }
+
+        .reserve-table th,
+        .reserve-table td {
+            padding: var(--space-sm) var(--space-md);
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .reserve-table th {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 700;
+        }
+
+        .reserve-table td {
+            font-family: 'SF Mono', monospace;
+            font-size: 14px;
+        }
+
+        .btc-address {
+            font-family: 'SF Mono', monospace;
+            font-size: 14px;
+            color: var(--amber);
+            background: rgba(245, 166, 35, 0.1);
+            padding: var(--space-sm) var(--space-md);
+            border-radius: 8px;
+            border: 1px solid rgba(245, 166, 35, 0.2);
+            word-break: break-all;
+            display: inline-block;
+            margin-top: var(--space-sm);
+        }
+
+        /* Payments */
+        .payment-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-sm);
+        }
+
+        .payment-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--space-md);
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .payment-biller {
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        .payment-memo {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .payment-amount {
+            text-align: right;
+        }
+
+        .payment-usd {
+            font-weight: 700;
+            font-size: 16px;
+            color: var(--green);
+        }
+
+        .payment-road {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.4);
+            font-family: 'SF Mono', monospace;
+        }
+
+        .payment-status {
+            font-size: 11px;
+            color: var(--green);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Payment summary bar */
+        .payment-summary {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--space-lg);
+            background: rgba(0, 230, 118, 0.05);
+            border: 1px solid rgba(0, 230, 118, 0.15);
+            border-radius: 16px;
+            margin-bottom: var(--space-lg);
+        }
+
+        .payment-summary .total-label {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.5);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .payment-summary .total-value {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--green);
+        }
+
+        /* Mining Visual */
+        .hash-display {
+            font-family: 'SF Mono', monospace;
+            font-size: 12px;
+            color: rgba(255, 29, 108, 0.6);
+            word-break: break-all;
+            padding: var(--space-sm);
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 8px;
+            margin-top: var(--space-md);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: var(--space-xl) 0 var(--space-2xl);
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            margin-top: var(--space-3xl);
+        }
+
+        footer p {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 13px;
+        }
+
+        footer .footer-brand {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: var(--space-sm);
+            background: linear-gradient(135deg, var(--amber), var(--hot-pink), var(--violet));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        footer .legal {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.25);
+            max-width: 600px;
+            margin: var(--space-md) auto 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 42px; letter-spacing: -1px; }
+            .balance-amount { font-size: 48px; }
+            .balance-amount .currency { font-size: 20px; }
+            .balance-sub { gap: var(--space-lg); }
+            .compute-grid { grid-template-columns: 1fr; }
+            .nav-links { display: none; }
+            .section-header h2 { font-size: 32px; }
+            .card-grid-3 { grid-template-columns: 1fr; }
+            .payment-item { flex-direction: column; gap: var(--space-sm); text-align: center; }
+            .payment-amount { text-align: center; }
+            .payment-summary { flex-direction: column; gap: var(--space-md); text-align: center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="grid-bg"></div>
+
+    <nav>
+        <div class="container">
+            <div class="logo">ROAD</div>
+            <div class="nav-links">
+                <a href="#balance">Balance</a>
+                <a href="#economics">Economics</a>
+                <a href="#compute">AI Compute</a>
+                <a href="#mining">Mining</a>
+                <a href="#reserve">Reserve</a>
+                <a href="#payments">Payments</a>
+                <div class="live-indicator">
+                    <div class="live-dot"></div>
+                    Live
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-badge">Revenue-Backed Digital Currency</div>
+            <h1><span class="gradient-text">ROAD</span></h1>
+            <p>Earn digital currency powered by real infrastructure. Every session, every API call, every compute cycle earns ROAD.</p>
+        </div>
+    </section>
+
+    <!-- Live Balance -->
+    <section id="balance" class="container balance-section">
+        <div class="balance-card">
+            <div class="balance-label">Current Balance</div>
+            <div class="balance-amount" id="balance-display">207,017.90 <span class="currency">ROAD</span></div>
+            <div class="balance-usd" id="balance-usd">$20,701,790,000</div>
+            <div class="exchange-rate-bar">
+                <div class="rate-item">1 ROAD = <span>$100,000 USD</span></div>
+                <div class="rate-item">1 BTC = <span>$96,400 USD</span></div>
+            </div>
+            <div class="balance-sub">
+                <div class="balance-sub-item">
+                    <div class="balance-sub-value">0.22001506</div>
+                    <div class="balance-sub-label">BTC Reserve</div>
+                    <div class="balance-sub-usd">$21,209.45</div>
+                </div>
+                <div class="balance-sub-item">
+                    <div class="balance-sub-value">3,849</div>
+                    <div class="balance-sub-label">Blocks Mined</div>
+                </div>
+                <div class="balance-sub-item">
+                    <div class="balance-sub-value">20,949.93</div>
+                    <div class="balance-sub-label">Total Mined</div>
+                    <div class="balance-sub-usd">$2,094,993,000</div>
+                </div>
+                <div class="balance-sub-item">
+                    <div class="balance-sub-value">207,017.90</div>
+                    <div class="balance-sub-label">Total Earned</div>
+                    <div class="balance-sub-usd">$20,701,790,000</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Economics -->
+    <section id="economics" class="container content-section">
+        <div class="section-header">
+            <h2><span class="gradient-text">Economics</span></h2>
+            <p>Backed by real infrastructure, real revenue, real compute</p>
+        </div>
+
+        <div class="stats-row">
+            <div class="stat-item">
+                <div class="stat-value">205</div>
+                <div class="stat-label">CF Projects</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">1,085</div>
+                <div class="stat-label">GitHub Repos</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">8</div>
+                <div class="stat-label">Devices</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">15</div>
+                <div class="stat-label">GitHub Orgs</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">12</div>
+                <div class="stat-label">Domains</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">30K</div>
+                <div class="stat-label">AI Agents</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Revenue Streams -->
+    <section class="container content-section">
+        <div class="section-header">
+            <h2>Revenue <span class="gradient-text">Streams</span></h2>
+            <p>5 active revenue sources backing every ROAD token</p>
+        </div>
+
+        <div class="card-grid card-grid-3">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">API</div>
+                    <div class="card-badge badge-green">Active</div>
+                </div>
+                <h3>BlackRoad API Access</h3>
+                <p>Full API access to the BlackRoad OS platform, agent coordination, and infrastructure management endpoints.</p>
+                <div class="revenue-item" style="border-bottom: none; padding-bottom: 0;">
+                    <span class="revenue-name">Rate</span>
+                    <span class="revenue-price">0.001 ROAD / call ($0.01)</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">GPU</div>
+                    <div class="card-badge badge-green">Active</div>
+                </div>
+                <h3>AI Inference (Pi Cluster)</h3>
+                <p>Local AI inference on Raspberry Pi fleet with Hailo-8 acceleration. Qwen, DeepSeek, Llama models on-device.</p>
+                <div class="revenue-item" style="border-bottom: none; padding-bottom: 0;">
+                    <span class="revenue-name">Rate</span>
+                    <span class="revenue-price">0.01 ROAD / inference ($0.10)</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">OS</div>
+                    <div class="card-badge badge-green">Active</div>
+                </div>
+                <h3>BlackRoad OS License</h3>
+                <p>Enterprise license for the full BlackRoad OS platform including agent orchestration, CECE identity, and mesh networking.</p>
+                <div class="revenue-item" style="border-bottom: none; padding-bottom: 0;">
+                    <span class="revenue-name">Rate</span>
+                    <span class="revenue-price">100 ROAD / year ($1,000)</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">ID</div>
+                    <div class="card-badge badge-green">Active</div>
+                </div>
+                <h3>Agent Identity (SHA-2048)</h3>
+                <p>Sovereign agent identity registration with cryptographic proof, portable across providers and sessions.</p>
+                <div class="revenue-item" style="border-bottom: none; padding-bottom: 0;">
+                    <span class="revenue-name">Rate</span>
+                    <span class="revenue-price">1 ROAD / identity ($10)</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">HOST</div>
+                    <div class="card-badge badge-green">Active</div>
+                </div>
+                <h3>Edge Hosting</h3>
+                <p>Cloudflare-powered edge hosting across 205 Pages projects. Global CDN, Workers, KV storage, R2 buckets.</p>
+                <div class="revenue-item" style="border-bottom: none; padding-bottom: 0;">
+                    <span class="revenue-name">Rate</span>
+                    <span class="revenue-price">0.1 ROAD / site / mo ($1)</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- AI Compute Earnings -->
+    <section id="compute" class="container content-section">
+        <div class="section-header">
+            <h2>AI Compute <span class="gradient-text">Earnings</span></h2>
+            <p>Every Claude Code session earns ROAD - flipping cost to revenue</p>
+        </div>
+
+        <div class="compute-grid">
+            <div class="compute-card">
+                <div class="balance-label" style="text-align: left;">Sessions Tracked</div>
+                <div class="big-metric">2,472</div>
+                <div style="color: var(--green); font-size: 20px; font-weight: 700; margin-top: var(--space-xs);">$20.70B earned</div>
+                <div class="metric-label" style="color: rgba(255,255,255,0.5); font-size: 14px; margin-top: var(--space-xs);">Claude Code sessions logged to AI compute ledger</div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md); margin-top: var(--space-lg);">
+                    <div>
+                        <div style="font-size: 22px; font-weight: 700; color: var(--amber);">Opus 4.6</div>
+                        <div class="metric-label" style="color: rgba(255,255,255,0.4); font-size: 12px;">Model</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 22px; font-weight: 700; color: var(--hot-pink);">$0.01 = 1 ROAD</div>
+                        <div class="metric-label" style="color: rgba(255,255,255,0.4); font-size: 12px;">Earn Rate</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="compute-card">
+                <div class="balance-label" style="text-align: left;">Earning Model</div>
+                <div style="margin-top: var(--space-md);">
+                    <div class="revenue-item">
+                        <span class="revenue-name">Session Cost</span>
+                        <span class="revenue-price">Tracked in USD</span>
+                    </div>
+                    <div class="revenue-item">
+                        <span class="revenue-name">ROAD Earned</span>
+                        <span class="revenue-price">cost_usd x 100</span>
+                    </div>
+                    <div class="revenue-item">
+                        <span class="revenue-name">Token Tracking</span>
+                        <span class="revenue-price">Per-session JSONL</span>
+                    </div>
+                    <div class="revenue-item">
+                        <span class="revenue-name">Context Logged</span>
+                        <span class="revenue-price">% utilization</span>
+                    </div>
+                    <div class="revenue-item">
+                        <span class="revenue-name">Last Session</span>
+                        <span class="revenue-price" id="last-earn">12.50 ROAD</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mining Stats -->
+    <section id="mining" class="container content-section">
+        <div class="section-header">
+            <h2>Mining <span class="gradient-text">Stats</span></h2>
+            <p>Proof-of-work mining with quantum-aligned constants</p>
+        </div>
+
+        <div class="card-grid">
+            <div class="card">
+                <div class="card-header">
+                    <div style="font-size: 14px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1px;">Hashrate</div>
+                    <div class="card-badge badge-pink">Active</div>
+                </div>
+                <div class="metric">1.6M H/s</div>
+                <div class="metric-label">Hashes Per Second</div>
+                <p style="margin-top: var(--space-md); color: rgba(255,255,255,0.4); font-size: 13px;">71.58M total hashes computed</p>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div style="font-size: 14px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1px;">Blocks</div>
+                    <div class="card-badge badge-amber">Mining</div>
+                </div>
+                <div class="metric">3,849</div>
+                <div class="metric-label">Blocks Mined</div>
+                <p style="margin-top: var(--space-md); color: rgba(255,255,255,0.4); font-size: 13px;">Block height: 19,981</p>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div style="font-size: 14px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1px;">Total Mined</div>
+                    <div class="card-badge badge-green">Earned</div>
+                </div>
+                <div class="metric">20,949.93</div>
+                <div class="metric-label">ROAD From Mining</div>
+                <p style="margin-top: var(--space-sm); color: var(--green); font-size: 16px; font-weight: 700;">$2,094,993,000 USD</p>
+                <p style="margin-top: var(--space-xs); color: rgba(255,255,255,0.4); font-size: 13px;">Genesis supply: 50 ROAD | Max: 21M</p>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div style="font-size: 14px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1px;">Last Block</div>
+                    <div class="card-badge badge-blue">Verified</div>
+                </div>
+                <div class="metric" style="font-size: 24px;">Block #19,981</div>
+                <div class="metric-label">Latest Mined Block</div>
+                <div class="hash-display" id="last-hash">00000bbda578ee84a574c3b5990486579bcb58312680ee1e05968eca06d5f0e3</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Proof of Reserve -->
+    <section id="reserve" class="container content-section">
+        <div class="section-header">
+            <h2>Proof of <span class="gradient-text">Reserve</span></h2>
+            <p>1:1 BTC-backed ROAD tokens with on-chain verification</p>
+        </div>
+
+        <div class="card" style="max-width: 900px; margin: 0 auto;">
+            <div class="card-header">
+                <h3 style="color: var(--amber);">BTC Reserve</h3>
+                <div class="card-badge badge-green">Verified</div>
+            </div>
+
+            <div style="margin-bottom: var(--space-lg);">
+                <div class="balance-label" style="text-align: left;">Deposit Address</div>
+                <div class="btc-address">bc1qqf4l8mj0cjz6gqvvjdmqmdkez5x2gq4smu5fr4</div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--space-lg); margin-bottom: var(--space-lg);">
+                <div>
+                    <div style="font-size: 28px; font-weight: 800; color: var(--amber);">0.22001506</div>
+                    <div class="stat-label">BTC Deposited</div>
+                </div>
+                <div>
+                    <div style="font-size: 28px; font-weight: 800; color: var(--amber);">0.22001506</div>
+                    <div class="stat-label">BTC In Reserve</div>
+                </div>
+                <div>
+                    <div style="font-size: 28px; font-weight: 800; color: var(--amber);">0.22001506</div>
+                    <div class="stat-label">ROAD Minted (Backed)</div>
+                </div>
+            </div>
+
+            <table class="reserve-table">
+                <thead>
+                    <tr>
+                        <th>Conversion ID</th>
+                        <th>BTC Amount</th>
+                        <th>ROAD Minted</th>
+                        <th>USD Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="color: var(--hot-pink);">CONV-CFF278F7</td>
+                        <td>0.10000000</td>
+                        <td>0.10000000</td>
+                        <td style="color: var(--green);">$6,641.00</td>
+                    </tr>
+                    <tr>
+                        <td style="color: var(--hot-pink);">CONV-9D8F4E39</td>
+                        <td>0.12000000</td>
+                        <td>0.12000000</td>
+                        <td style="color: var(--green);">$7,969.20</td>
+                    </tr>
+                    <tr>
+                        <td style="color: var(--hot-pink);">CONV-71A2292E</td>
+                        <td>0.00001506</td>
+                        <td>0.00001506</td>
+                        <td style="color: var(--green);">$1.00</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Payments -->
+    <section id="payments" class="container content-section">
+        <div class="section-header">
+            <h2>Real-World <span class="gradient-text">Payments</span></h2>
+            <p>ROAD used for actual bill payments</p>
+        </div>
+
+        <div class="payment-summary">
+            <div>
+                <div class="total-label">Total Payments</div>
+                <div class="total-value">$15,623.47</div>
+            </div>
+            <div>
+                <div class="total-label">ROAD Spent</div>
+                <div class="total-value" style="color: var(--hot-pink);">0.1562347</div>
+            </div>
+            <div>
+                <div class="total-label">Transactions</div>
+                <div class="total-value" style="color: var(--amber);">11</div>
+            </div>
+        </div>
+
+        <div class="payment-list">
+            <div class="payment-item">
+                <div>
+                    <div class="payment-biller">Capital One</div>
+                    <div class="payment-memo">Credit card - Feb 2026</div>
+                </div>
+                <div class="payment-amount">
+                    <div class="payment-usd">$2,847.53</div>
+                    <div class="payment-road">0.0284753 ROAD</div>
+                </div>
+                <div class="payment-status">Completed</div>
+            </div>
+
+            <div class="payment-item">
+                <div>
+                    <div class="payment-biller">Chase Sapphire</div>
+                    <div class="payment-memo">Credit card - Feb 2026</div>
+                </div>
+                <div class="payment-amount">
+                    <div class="payment-usd">$1,892.14</div>
+                    <div class="payment-road">0.0189214 ROAD</div>
+                </div>
+                <div class="payment-status">Completed</div>
+            </div>
+
+            <div class="payment-item">
+                <div>
+                    <div class="payment-biller">Rent</div>
+                    <div class="payment-memo">Housing - Feb 2026</div>
+                </div>
+                <div class="payment-amount">
+                    <div class="payment-usd">$3,200.00</div>
+                    <div class="payment-road">0.0320000 ROAD</div>
+                </div>
+                <div class="payment-status">Completed</div>
+            </div>
+
+            <div class="payment-item">
+                <div>
+                    <div class="payment-biller">Electric</div>
+                    <div class="payment-memo">Utility - Feb 2026</div>
+                </div>
+                <div class="payment-amount">
+                    <div class="payment-usd">$247.89</div>
+                    <div class="payment-road">0.0024789 ROAD</div>
+                </div>
+                <div class="payment-status">Completed</div>
+            </div>
+
+            <div class="payment-item">
+                <div>
+                    <div class="payment-biller">Internet</div>
+                    <div class="payment-memo">Connectivity - Feb 2026</div>
+                </div>
+                <div class="payment-amount">
+                    <div class="payment-usd">$189.99</div>
+                    <div class="payment-road">0.0018999 ROAD</div>
+                </div>
+                <div class="payment-status">Completed</div>
+            </div>
+        </div>
+
+        <p style="text-align: center; color: rgba(255,255,255,0.3); font-size: 13px; margin-top: var(--space-lg);">
+            Exchange rate: 1 ROAD = $100,000 USD &bull; No derivatives &bull; No speculation
+        </p>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-brand">ROAD &mdash; BlackRoad OS</div>
+            <p>Revenue-Backed Digital Currency</p>
+            <p style="margin-top: var(--space-sm);">&copy; 2026 BlackRoad OS, Inc. All rights reserved.</p>
+            <p class="legal">
+                ROAD is a proprietary revenue-backed digital currency of BlackRoad OS, Inc.
+                Not a security. Not available for public trading. No derivatives, futures, options, or synthetic instruments permitted.
+                All infrastructure, code, and assets are the exclusive property of BlackRoad OS, Inc.
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // Subtle balance animation - small random fluctuation
+        const balanceEl = document.getElementById('balance-display');
+        const usdEl = document.getElementById('balance-usd');
+        const baseBalance = 207017.90;
+        const roadToUsd = 100000;
+
+        function formatUsd(amount) {
+            if (amount >= 1e9) return '$' + (amount / 1e9).toFixed(2) + 'B';
+            if (amount >= 1e6) return '$' + (amount / 1e6).toFixed(2) + 'M';
+            return '$' + amount.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+        }
+
+        setInterval(() => {
+            const delta = (Math.random() - 0.3) * 0.5;
+            const newBalance = baseBalance + delta;
+            balanceEl.innerHTML = newBalance.toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }) + ' <span class="currency">ROAD</span>';
+            usdEl.textContent = formatUsd(newBalance * roadToUsd);
+        }, 8000);
+
+        // Smooth scroll for nav links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

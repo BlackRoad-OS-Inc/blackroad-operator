@@ -1,0 +1,106 @@
+---
+id: finance-layer
+title: Finance Layer
+sidebar_position: 3
+slug: /packs/finance/finance-layer
+---
+
+The finance layer is composed of eight core agents that mirror traditional controllership and treasury functions. Each agent is designed to be auditable, composable, and capable of escalating to a human approver when thresholds or policy rules demand it. Together they create a closed-loop system for ledger integrity, forecasting, and capital stewardship.
+
+## Unified Ledger & Subledgers Agent
+
+**Purpose:** Maintain the general ledger and reconcile specialized subledgers (revenue, billing, expenses). It enforces chart-of-accounts structure and ensures postings conform to policy.
+
+**Inputs:** Transaction events from upstream systems, reference data updates, and manual journal proposals initiated through the API or orchestrators.
+
+**Outputs:** Posted journal entries, reconciliation status, and variance flags that inform close orchestration.
+
+**Key reports:** Trial balance snapshots, reconciliation summaries, and exception reports when subledger drift exceeds tolerance.
+
+**Escalation:** Requires human approval (e.g., Cecilia) for policy overrides, materiality thresholds, or back-dated adjustments.
+
+## Market & Reference Data Agent
+
+**Purpose:** Aggregate market data (FX, rates, commodities) and corporate reference data to anchor valuations and risk calculations.
+
+**Inputs:** External data feeds, internal reference files, and scheduled refresh triggers.
+
+**Outputs:** Normalized data sets pushed to downstream agents, valuation marks, and alerts when sources disagree.
+
+**Key reports:** Source freshness dashboards, pricing variance summaries, and confidence ratings for each data provider.
+
+**Escalation:** Escalates when pricing deviation crosses policy bounds or when a feed is stale beyond defined SLOs.
+
+## Accounting & Close Agent
+
+**Purpose:** Coordinate period close, enforcing sequencing (reconciliations before close), validating completeness, and publishing financial statements.
+
+**Inputs:** Trial balances and reconciliation signals from the ledger agent, close checklists, and manual attestations from controllers.
+
+**Outputs:** Close status, adjusting entries, financial statement packages, and PS-SHA∞ journal trails for every approval.
+
+**Key reports:** Close calendar progress, checklist completion, and post-close variance analysis.
+
+**Escalation:** Escalates when a checklist item is overdue, when balances fail policy thresholds, or when a journal requires human attestation.
+
+## Treasury & Liquidity Agent
+
+**Purpose:** Manage cash positions, liquidity buffers, and payment scheduling to satisfy operational needs while respecting policy.
+
+**Inputs:** Bank balances, payment requests, forecasted inflows/outflows, and market data for FX hedging.
+
+**Outputs:** Daily liquidity positions, payment execution plans, and hedging recommendations.
+
+**Key reports:** Cash ladder, counterparty exposures, and payment status dashboards.
+
+**Escalation:** Requires approval for large disbursements, deviations from hedging policy, or when liquidity drops below guardrails.
+
+## FP&A / Forecasting Agent
+
+**Purpose:** Produce rolling forecasts and scenario plans that inform budgeting and capital allocation.
+
+**Inputs:** Historical actuals, pipeline data, hiring plans, and macro assumptions from the market data agent.
+
+**Outputs:** Forecast models, scenario comparisons, and sensitivity analyses.
+
+**Key reports:** Budget vs. actuals, forecast accuracy tracking, and scenario deltas.
+
+**Escalation:** Flags scenarios with outsized risk, rapid variance swings, or when assumptions fall outside policy ranges.
+
+## Capital Budgeting Agent
+
+**Purpose:** Evaluate projects and investments, ensuring capital is deployed where expected return and risk align with strategy.
+
+**Inputs:** Project proposals, forecasted cash flows, hurdle rates, and risk assessments.
+
+**Outputs:** Investment recommendations, NPV/IRR calculations, and approval packets for decision-makers.
+
+**Key reports:** Pipeline of pending investments, approved vs. declined rationale, and portfolio performance over time.
+
+**Escalation:** Escalates when proposals exceed budget caps, when risk scores breach policy, or when decision deadlines slip.
+
+## Capital Structure & Funding Agent
+
+**Purpose:** Plan and monitor debt/equity mix, covenant compliance, and funding runway.
+
+**Inputs:** Treasury positions, financing terms, covenant schedules, and market data for pricing.
+
+**Outputs:** Capital structure snapshots, covenant monitoring alerts, and recommended financing actions.
+
+**Key reports:** Runway analysis, leverage ratios, and covenant tracking dashboards.
+
+**Escalation:** Requires human sign-off for new financings, covenant waivers, or leverage increases beyond policy.
+
+## Working Capital & Trade Credit Agent
+
+**Purpose:** Optimize receivables, payables, and inventory to maintain healthy working capital.
+
+**Inputs:** AR/AP ledgers, inventory signals, payment terms, and customer credit data.
+
+**Outputs:** Collections plans, payment schedules, and term recommendations for customers and vendors.
+
+**Key reports:** DSO/DPO trends, aging reports, and discount utilization.
+
+**Escalation:** Triggers review when counterparty credit quality degrades, when aging buckets exceed limits, or when aggressive terms are requested.
+
+Together these agents form the finance backbone. They consume tasks via the event bus, emit PS-SHA∞ journal entries, and escalate to Cecilia or other human approvers at defined checkpoints to keep automation accountable.

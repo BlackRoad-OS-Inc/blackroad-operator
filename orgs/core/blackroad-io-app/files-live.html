@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>File Explorer - BlackRoad</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root { --gradient: linear-gradient(135deg, #FF9D00, #FF6B00, #FF0066, #D600AA, #7700FF, #0066FF); }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #02030a;
+      color: white;
+      min-height: 100vh;
+    }
+    .navbar {
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(20px);
+      padding: 16px 32px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .navbar h1 {
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-size: 24px;
+      font-weight: 900;
+    }
+    .user-badge {
+      background: rgba(255,255,255,0.1);
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 48px 32px;
+    }
+    .hero {
+      text-align: center;
+      padding: 48px 0;
+    }
+    .hero h2 {
+      font-size: 56px;
+      margin-bottom: 24px;
+    }
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 24px;
+      margin: 48px 0;
+    }
+    .feature-card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      padding: 24px;
+      transition: all 0.3s;
+    }
+    .feature-card:hover {
+      transform: translateY(-4px);
+      border-color: #7700FF;
+      background: rgba(255,255,255,0.08);
+    }
+    .feature-card h3 {
+      font-size: 20px;
+      margin-bottom: 12px;
+    }
+    .data-display {
+      background: rgba(0,0,0,0.3);
+      border-radius: 12px;
+      padding: 24px;
+      margin: 24px 0;
+      font-family: monospace;
+      font-size: 14px;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    button {
+      padding: 12px 24px;
+      border-radius: 8px;
+      border: none;
+      background: var(--gradient);
+      color: white;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.2s;
+      margin: 8px;
+    }
+    button:hover { transform: scale(1.05); }
+    .status {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .status.online { background: rgba(0,255,136,0.2); color: #00ff88; }
+    .status.offline { background: rgba(255,0,102,0.2); color: #ff0066; }
+    .payment-banner {
+      margin-top: 48px;
+      padding: 24px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 16px;
+      text-align: center;
+    }
+    .crypto-address {
+      font-family: monospace;
+      background: rgba(0,0,0,0.3);
+      padding: 12px;
+      border-radius: 8px;
+      margin-top: 12px;
+      font-size: 13px;
+      word-break: break-all;
+    }
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <h1>File Explorer</h1>
+    <div class="user-badge" id="userBadge">Guest</div>
+  </div>
+  
+  <div class="container">
+    <div class="hero">
+      <h2>File Explorer</h2>
+      <span class="status" id="apiStatus">Connecting...</span>
+    </div>
+
+    <div class="feature-grid">
+      <div class="feature-card"><h3>✓</h3><p>File upload</p></div>
+      <div class="feature-card"><h3>✓</h3><p>Cloud storage</p></div>
+      <div class="feature-card"><h3>✓</h3><p>File sharing</p></div>
+      <div class="feature-card"><h3>✓</h3><p>Version control</p></div>
+    </div>
+
+    <div class="data-display" id="dataDisplay">
+      <div style="opacity: 0.5;">Connecting to API...</div>
+    </div>
+
+    <button onclick="loadData()">Refresh Data</button>
+    <button onclick="window.location.href='/'">Back to Home</button>
+
+    <div class="payment-banner">
+      <h3>💸 Support BlackRoad</h3>
+      <a href="https://krak.app/AAAAAAAA" target="_blank" style="display: inline-block; padding: 12px 24px; background: var(--gradient); color: white; text-decoration: none; border-radius: 8px; font-weight: 700; margin: 8px;">Send via Krak →</a>
+      <div class="crypto-address"><strong>BTC:</strong> 3NJYuq8KA1xBea6JNg32XgDwjpvLkrR5VH</div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = 'https://core.blackroad.systems';
+    const ENDPOINT = '/api/files';
+    let authToken = localStorage.getItem('authToken');
+
+    async function checkAuth() {
+      if (!authToken) return;
+      try {
+        const response = await fetch(`${API_BASE}/api/auth/me`, {
+          headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+        if (response.ok) {
+          const user = await response.json();
+          document.getElementById('userBadge').textContent = user.username;
+        }
+      } catch (error) {
+        console.error('Auth check failed:', error);
+      }
+    }
+
+    async function loadData() {
+      const statusEl = document.getElementById('apiStatus');
+      const dataEl = document.getElementById('dataDisplay');
+      
+      statusEl.className = 'status';
+      statusEl.textContent = 'Loading...';
+      
+      try {
+        const response = await fetch(`${API_BASE}${ENDPOINT}`, {
+          headers: {
+            'Content-Type': 'application/json',
+            ...(authToken && { 'Authorization': `Bearer ${authToken}` })
+          }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          statusEl.className = 'status online';
+          statusEl.textContent = 'Online';
+          dataEl.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+        } else {
+          throw new Error(`HTTP ${response.status}`);
+        }
+      } catch (error) {
+        statusEl.className = 'status offline';
+        statusEl.textContent = 'Offline';
+        dataEl.innerHTML = `<div style="color: #ff6b6b;">Error: ${error.message}</div>
+          <div style="opacity: 0.7; margin-top: 12px;">Backend API may be starting up or unavailable.</div>`;
+      }
+    }
+
+    checkAuth();
+    loadData();
+  </script>
+</body>
+</html>

@@ -188,7 +188,7 @@ svc_traffic_lights() {
 svc_format() {
     local result="$1"
     local max_detail_len="${2:-30}"
-    local status="${result%%:*}"
+    local svc_st="${result%%:*}"
     local detail="${result#*:}"
 
     # Truncate detail if needed
@@ -196,7 +196,7 @@ svc_format() {
         detail="${detail:0:$((max_detail_len-2))}.."
     fi
 
-    case "$status" in
+    case "$svc_st" in
         up)   echo -e "${BGREEN}✓${NC} ${detail}" ;;
         warn) echo -e "${BYELLOW}○${NC} ${detail}" ;;
         down) echo -e "${DIM}✗ ${detail}${NC}" ;;

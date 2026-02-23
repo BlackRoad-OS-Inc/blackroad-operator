@@ -1,0 +1,24 @@
+---
+id: operator-environments
+title: Environments
+sidebar_position: 4
+slug: /platform/operator/environments
+---
+
+BlackRoad OS is deployed across three environments that share Terraform modules but differ in usage and change cadence. The `blackroad-os-infra` repository holds the definitions under `envs/`, keeping configuration predictable and reviewable.
+
+| Environment | Purpose | URL Example |
+|------------|---------------------|---------------------------------|
+| dev | Experiments | `*.dev.blackroad.systems` |
+| staging | Pre-production | `*.stg.blackroad.systems` |
+| prod | Live customer usage | `*.blackroad.systems` |
+
+## How the environments are structured
+
+Each environment directory defines its own variables, state backend, and service maps. Shared modules handle DNS, networking, and cluster bootstrapping to minimize drift. Promotion follows a dev → staging → prod flow, with change windows and approvals tracked through PS-SHA∞ journal entries.
+
+## Working with envs
+
+When introducing a new service, add it to the relevant environment definitions and ensure DNS entries are present (see [DNS & Networking](/platform/operator/dns-and-networking)). Use Terraform workspaces or separate state files as defined in `blackroad-os-infra` to avoid collisions. Apply changes in dev first, validate health checks, then promote to staging and prod with the appropriate human approvals.
+
+Runbooks for deploying and verifying updates live in `blackroad-os-infra/runbooks`. Coordinate with operators when changes affect shared resources like VPCs, certificates, or secrets. TODO: add direct links to specific runbooks once the directory is finalized.

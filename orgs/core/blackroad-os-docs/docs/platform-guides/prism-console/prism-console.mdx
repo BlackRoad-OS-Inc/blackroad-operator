@@ -1,0 +1,42 @@
+---
+id: prism-console
+title: Prism Console
+slug: /platform/prism-console/overview
+sidebar_position: 1
+---
+
+Prism Console is the operator-facing cockpit for BlackRoad OS. It brings system status, agent state, finance visibility, and the RoadChain event stream into one UI so an orchestrator can act quickly and with evidence.
+
+## What Prism Console covers
+- **Dashboard** — high-level health, pending jobs, recent truth state changes, and alerts from the Operator runtime.
+- **Agents** — registry view of Atlas and future agents, including PS-SHA∞ anchors, current jobs, and state transitions.
+- **Finance** — wallet/treasury snapshot, ROI views, and agent cost attribution where available.
+- **Events / RoadChain Explorer** — chronological DomainEvents, journal entries, and RoadChain blocks with search and filters.
+- **Future pages** — Inbox/RoadMail, Hardware/Nodes, and Operator Chat are planned as the runtime expands.
+
+## How it talks to the API
+Prism is a Next.js app that reads from `blackroad-os-api`. Configure the base URL via:
+
+```bash
+NEXT_PUBLIC_API_BASE_URL=http://localhost:4000
+```
+
+Typical endpoints consumed:
+- `GET /api/v1/system/overview`
+- `GET /api/v1/agents`
+- `GET /api/v1/agents/:id`
+- `GET /api/v1/finance/snapshot`
+- `GET /api/v1/events`
+- `GET /api/v1/roadchain/blocks`
+
+## Running locally
+1. Start `blackroad-os-api` (or point at a deployed instance) and ensure CORS is configured for the console host.
+2. Set `NEXT_PUBLIC_API_BASE_URL` to the API origin.
+3. Run `npm install && npm run dev` inside `blackroad-os-prism-console`.
+4. Log in or load the dashboard; confirm the agents and finance panels populate.
+
+## Reading the dashboards
+- Treat the **Dashboard** as your pulse: spikes in failed jobs or truth retractions should drive investigation.
+- Use **Agents** to verify Atlas (or others) are registered and emitting events; cross-check IDs against PS-SHA∞ anchors.
+- The **Finance** tab is the bridge between operations and ROI; if numbers look wrong, check the event stream for missing ledger entries.
+- The **Events / RoadChain Explorer** is the audit trail. When filing incidents or compliance reports, capture block references instead of screenshots alone.

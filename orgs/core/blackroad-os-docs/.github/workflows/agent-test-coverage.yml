@@ -1,0 +1,173 @@
+name: "🧪 Agent: Test Coverage"
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  test-coverage:
+    name: Test Coverage Agent
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+        continue-on-error: true
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v44
+        with:
+          files: |
+            **/*.ts
+            **/*.tsx
+            **/*.js
+            **/*.jsx
+
+      - name: Analyze test coverage
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            const changedFiles = '${{ steps.changed-files.outputs.all_changed_files }}'.split(' ').filter(f => f);
+
+            let report = '## 🧪 Test Coverage Agent Report\n\n';
+            let stats = {
+              sourceFiles: [],
+              testFiles: [],
+              missingTests: [],
+              hasTestFramework: false
+            };
+
+            // Check for test framework
+            try {
+              const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+              const deps = { ...packageJson.dependencies, ...packageJson.devDependencies };
+              stats.hasTestFramework = !!(deps.jest || deps.vitest || deps.mocha || deps['@testing-library/react']);
+            } catch (e) {}
+
+            // Analyze changed files
+            for (const file of changedFiles) {
+              const isTest = file.includes('.test.') ||
+                             file.includes('.spec.') ||
+                             file.includes('__tests__') ||
+                             file.includes('test/') ||
+                             file.includes('tests/');
+
+              if (isTest) {
+                stats.testFiles.push(file);
+              } else {
+                stats.sourceFiles.push(file);
+
+                // Check if corresponding test exists
+                const basename = path.basename(file, path.extname(file));
+                const dirname = path.dirname(file);
+                const testPatterns = [
+                  `${dirname}/${basename}.test${path.extname(file)}`,
+                  `${dirname}/${basename}.spec${path.extname(file)}`,
+                  `${dirname}/__tests__/${basename}.test${path.extname(file)}`,
+                  `__tests__/${basename}.test${path.extname(file)}`,
+                ];
+
+                let hasTest = false;
+                for (const testPath of testPatterns) {
+                  if (fs.existsSync(testPath)) {
+                    hasTest = true;
+                    break;
+                  }
+                }
+
+                if (!hasTest && !file.includes('index.') && !file.includes('.d.ts')) {
+                  stats.missingTests.push(file);
+                }
+              }
+            }
+
+            // Calculate coverage percentage
+            const coveragePercent = stats.sourceFiles.length > 0
+              ? Math.round(((stats.sourceFiles.length - stats.missingTests.length) / stats.sourceFiles.length) * 100)
+              : 100;
+
+            // Build report
+            report += '### 📊 Test Analysis\n\n';
+            report += `| Metric | Value |\n`;
+            report += `|--------|-------|\n`;
+            report += `| Source files changed | ${stats.sourceFiles.length} |\n`;
+            report += `| Test files changed | ${stats.testFiles.length} |\n`;
+            report += `| Files with tests | ${stats.sourceFiles.length - stats.missingTests.length} |\n`;
+            report += `| Files missing tests | ${stats.missingTests.length} |\n`;
+            report += `| Test framework | ${stats.hasTestFramework ? '✅ Detected' : '❌ Not found'} |\n\n`;
+
+            report += `### 📈 Test Coverage Score: ${coveragePercent}%\n\n`;
+
+            // Progress bar
+            const filled = Math.round(coveragePercent / 10);
+            const empty = 10 - filled;
+            report += `\`[${'█'.repeat(filled)}${'░'.repeat(empty)}]\`\n\n`;
+
+            if (coveragePercent >= 80) {
+              report += '✅ Excellent test coverage!\n\n';
+            } else if (coveragePercent >= 50) {
+              report += '⚠️ Consider adding more tests for better coverage.\n\n';
+            } else {
+              report += '❌ Low test coverage. Please add tests for your changes.\n\n';
+            }
+
+            // Missing tests
+            if (stats.missingTests.length > 0) {
+              report += '### 🔍 Files Missing Tests\n\n';
+              stats.missingTests.slice(0, 10).forEach(f => {
+                report += `- \`${f}\`\n`;
+              });
+              if (stats.missingTests.length > 10) {
+                report += `\n*...and ${stats.missingTests.length - 10} more files*\n`;
+              }
+              report += '\n';
+            }
+
+            // Recommendations
+            report += '### 💡 Recommendations\n\n';
+            if (!stats.hasTestFramework) {
+              report += '- Consider adding a test framework (Jest, Vitest, etc.)\n';
+            }
+            if (stats.testFiles.length === 0 && stats.sourceFiles.length > 0) {
+              report += '- No test files in this PR - consider adding tests\n';
+            }
+            if (stats.missingTests.length > 0) {
+              report += '- Add unit tests for the files listed above\n';
+            }
+            if (coveragePercent === 100) {
+              report += '- All changed files have corresponding tests! 🎉\n';
+            }
+
+            report += '\n---\n*🧪 Automated analysis by Test Coverage Agent*';
+
+            // Post comment
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body: report
+            });
+
+      - name: Run tests (if available)
+        continue-on-error: true
+        run: |
+          if [ -f "package.json" ]; then
+            npm ci --ignore-scripts 2>/dev/null || npm install --ignore-scripts 2>/dev/null || true
+            npm test 2>/dev/null || echo "No tests configured or tests failed"
+          fi

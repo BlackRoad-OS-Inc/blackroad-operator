@@ -1,0 +1,36 @@
+---
+id: repos-and-services
+title: Repos & Services
+sidebar_position: 8
+slug: /platform/core/repos-and-services
+---
+
+The BlackRoad OS ecosystem is intentionally modular. Each repository owns a specific responsibility so teams can iterate independently while sharing common primitives like events, capabilities, and journaling. Use this map to understand where to look when debugging or extending the platform.
+
+## Core (`blackroad-os-core`)
+
+Holds domain models (`Agent`, `Capability`, `Task`, `Event`, `JournalEntry`), event bus abstractions, and the PS-SHA∞ interface. Everything else depends on these contracts.
+
+## Operator (`blackroad-os-operator`)
+
+Hosts agents and orchestrators. Finance agents live here alongside scheduling logic and escalation rules. Registries describe capabilities so orchestration remains declarative.
+
+## API (`blackroad-os-api`)
+
+Exposes public HTTP endpoints for metrics, task submission, and finance controls. It mediates between external callers and the operator while enforcing authentication and policy.
+
+## Prism Console (`blackroad-os-prism-console`)
+
+Provides dashboards for agents, events, and finance workflows. It consumes the API and requires `NEXT_PUBLIC_API_BASE_URL` to be configured per environment.
+
+## Web (`blackroad-os-web`)
+
+The marketing and public storytelling site. It links visitors to documentation and captures interest without exposing internal control surfaces.
+
+## Infra (`blackroad-os-infra`)
+
+Terraform modules, environment definitions, DNS, networking, and runbooks. It keeps deployments consistent and auditable across dev, staging, and prod.
+
+## Docs (`blackroad-os-docs`)
+
+This repository. It aggregates architecture, developer, operator, and compliance guidance so contributors have a single source of truth. For local setup, see [Local Development](/platform/core/local-development).

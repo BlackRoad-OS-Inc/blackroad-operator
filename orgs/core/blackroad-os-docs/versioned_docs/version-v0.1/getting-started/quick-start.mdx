@@ -1,0 +1,41 @@
+---
+id: quick-start
+title: Quick Start
+sidebar_position: 1
+---
+
+This guide is for developers and curious operators who want to explore the BlackRoad OS ecosystem locally. It summarizes the repos you will touch, the tooling you need, and a straightforward path to spin up the most important services. Expect rapid iteration: the stack favors composability so you can replace stubs with production-grade agents as they become available.
+
+## What is in the BlackRoad OS ecosystem?
+
+BlackRoad OS spans several focused repositories, each responsible for a slice of the platform:
+
+- `blackroad-os-core` – domain models, capability definitions, event bus abstraction, and the PS-SHA∞ journaling interface.
+- `blackroad-os-operator` – hosts agents (finance, infra, and beyond) plus orchestrators that coordinate them.
+- `blackroad-os-api` – public API surface to expose OS metrics, tasks, and finance capabilities.
+- `blackroad-os-prism-console` – admin and observability UI for agents, metrics, and events.
+- `blackroad-os-web` – marketing and public-facing site.
+- `blackroad-os-infra` – Terraform, environment definitions, and runbooks.
+- `blackroad-os-docs` – this documentation hub.
+- Supporting repos such as `blackroad-os-brand` and `blackroad-os-home` hold design assets and handbook material.
+
+## Prerequisites
+
+You will need a recent Node.js LTS (we validate on Node 20+), npm or pnpm, git, and Docker for services that expect containerized dependencies. Some agents are written in TypeScript, and the infra stack uses Terraform, so install those toolchains if you plan to contribute in those areas. Keep your shell environment ready to load `.env` files for service-specific variables.
+
+## Running everything locally (simple stack)
+
+A minimal local experience focuses on the operator, core, API, Prism Console, and the docs themselves:
+
+1. Clone the repos you need: `git clone` each repository listed above into a common workspace.
+2. Start `blackroad-os-core` if it exposes a runtime (or ensure its libraries are available to other services).
+3. Boot `blackroad-os-operator` to host agents; the finance agents can run in stub mode while you wire orchestration.
+4. Run `blackroad-os-api` to expose HTTP endpoints; default ports typically sit in the 4000–5000 range.
+5. Launch `blackroad-os-prism-console` with `NEXT_PUBLIC_API_BASE_URL` pointing at your API instance.
+6. Optionally run `blackroad-os-web` for public-site parity.
+
+Environment variables differ per service, but a common pattern is `PORT=xxxx` alongside service-specific API keys or base URLs. Start with defaults, then align ports to avoid conflicts when multiple processes run side by side.
+
+## Where to go next
+
+After you have the basics running, read the [Architecture Overview](/reference/architecture/overview) to understand how components talk to each other, then jump to the [Finance Layer](/packs/finance/finance-layer) for agent-specific behavior. For deployment considerations and domain names, see [Infra Environments](/platform/operator/environments) and [DNS & Networking](/platform/operator/dns-and-networking). When you want to extend the platform, the [Extending Agents](/platform/api/extending-agents) guide walks through adding new automation safely.

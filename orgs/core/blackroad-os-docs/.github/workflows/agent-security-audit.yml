@@ -1,0 +1,127 @@
+name: "🛡️ Agent: Security Audit"
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+  security-events: write
+
+jobs:
+  security-audit:
+    name: Security Audit Agent
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Get PR diff
+        id: diff
+        run: |
+          git diff origin/${{ github.base_ref }}...HEAD > pr_diff.txt
+          echo "diff_size=$(wc -l < pr_diff.txt)" >> $GITHUB_OUTPUT
+
+      - name: Run security patterns check
+        id: security-check
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const diff = fs.readFileSync('pr_diff.txt', 'utf8');
+
+            const securityPatterns = [
+              { pattern: /eval\s*\(/gi, severity: 'high', msg: 'Dangerous eval() usage detected' },
+              { pattern: /innerHTML\s*=/gi, severity: 'medium', msg: 'innerHTML assignment - potential XSS' },
+              { pattern: /document\.write/gi, severity: 'medium', msg: 'document.write usage - potential XSS' },
+              { pattern: /dangerouslySetInnerHTML/gi, severity: 'medium', msg: 'React dangerouslySetInnerHTML - ensure sanitized' },
+              { pattern: /exec\s*\(/gi, severity: 'high', msg: 'Shell exec detected - potential command injection' },
+              { pattern: /subprocess|os\.system/gi, severity: 'high', msg: 'System command execution detected' },
+              { pattern: /localStorage\.setItem.*password/gi, severity: 'high', msg: 'Storing password in localStorage' },
+              { pattern: /Bearer\s+[A-Za-z0-9\-_]+\.[A-Za-z0-9\-_]+/gi, severity: 'critical', msg: '⚠️ Possible JWT token in code' },
+              { pattern: /sk-[A-Za-z0-9]{32,}/gi, severity: 'critical', msg: '⚠️ Possible API key detected' },
+              { pattern: /AKIA[0-9A-Z]{16}/gi, severity: 'critical', msg: '⚠️ Possible AWS key detected' },
+              { pattern: /ghp_[A-Za-z0-9]{36}/gi, severity: 'critical', msg: '⚠️ Possible GitHub token detected' },
+              { pattern: /-----BEGIN (RSA |EC |DSA |OPENSSH )?PRIVATE KEY-----/gi, severity: 'critical', msg: '⚠️ Private key detected!' },
+              { pattern: /sql.*['"]\s*\+/gi, severity: 'high', msg: 'Potential SQL injection - use parameterized queries' },
+              { pattern: /password\s*[=:]\s*['"][^'"]+['"]/gi, severity: 'high', msg: 'Hardcoded password detected' },
+            ];
+
+            let findings = { critical: [], high: [], medium: [], low: [] };
+            let totalIssues = 0;
+
+            for (const { pattern, severity, msg } of securityPatterns) {
+              const matches = diff.match(pattern);
+              if (matches) {
+                findings[severity].push({ msg, count: matches.length });
+                totalIssues += matches.length;
+              }
+            }
+
+            // Build report
+            let report = '## 🛡️ Security Audit Agent Report\n\n';
+
+            if (totalIssues === 0) {
+              report += '✅ **No security issues detected!**\n\n';
+              report += 'The changes in this PR passed all security checks.\n';
+            } else {
+              report += `⚠️ **Found ${totalIssues} potential security issue(s)**\n\n`;
+
+              if (findings.critical.length > 0) {
+                report += '### 🚨 Critical\n';
+                findings.critical.forEach(f => report += `- ${f.msg} (${f.count} occurrence(s))\n`);
+                report += '\n';
+              }
+
+              if (findings.high.length > 0) {
+                report += '### 🔴 High\n';
+                findings.high.forEach(f => report += `- ${f.msg} (${f.count} occurrence(s))\n`);
+                report += '\n';
+              }
+
+              if (findings.medium.length > 0) {
+                report += '### 🟠 Medium\n';
+                findings.medium.forEach(f => report += `- ${f.msg} (${f.count} occurrence(s))\n`);
+                report += '\n';
+              }
+            }
+
+            report += '\n### Checks Performed\n';
+            report += '- [x] Secrets & API keys scan\n';
+            report += '- [x] SQL injection patterns\n';
+            report += '- [x] XSS vulnerability patterns\n';
+            report += '- [x] Command injection patterns\n';
+            report += '- [x] Hardcoded credentials\n';
+
+            report += '\n---\n*🛡️ Automated audit by Security Agent*';
+
+            // Post comment
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body: report
+            });
+
+            // Fail on critical findings
+            if (findings.critical.length > 0) {
+              core.setFailed('Critical security issues found! Please review before merging.');
+            }
+
+            return { findings, totalIssues };
+
+      - name: Run npm audit (if package.json exists)
+        continue-on-error: true
+        run: |
+          if [ -f "package.json" ]; then
+            npm audit --audit-level=high || echo "Vulnerabilities found"
+          fi

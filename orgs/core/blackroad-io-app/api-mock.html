@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BlackRoad API - Mock Service</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #02030a;
+      color: white;
+      padding: 48px;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    h1 {
+      background: linear-gradient(135deg, #FF9D00, #FF6B00, #FF0066, #D600AA, #7700FF, #0066FF);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-size: 48px;
+      margin-bottom: 24px;
+    }
+    .endpoint {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 24px;
+      margin: 16px 0;
+    }
+    .endpoint h3 {
+      color: #FF9D00;
+      margin-bottom: 12px;
+    }
+    code {
+      background: rgba(0,0,0,0.3);
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-family: monospace;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>BlackRoad API</h1>
+    <p style="font-size: 20px; opacity: 0.8; margin-bottom: 48px;">Mock API Service - Development Mode</p>
+
+    <div class="endpoint">
+      <h3>POST /api/auth/register</h3>
+      <p>Register a new user</p>
+      <p style="margin-top: 12px;"><code>{ "username": "...", "email": "...", "password": "..." }</code></p>
+    </div>
+
+    <div class="endpoint">
+      <h3>POST /api/auth/token</h3>
+      <p>Login and get JWT token</p>
+      <p style="margin-top: 12px;"><code>FormData: username, password</code></p>
+    </div>
+
+    <div class="endpoint">
+      <h3>GET /api/auth/me</h3>
+      <p>Get current user</p>
+      <p style="margin-top: 12px;"><code>Headers: Authorization: Bearer {token}</code></p>
+    </div>
+
+    <div class="endpoint">
+      <h3>POST /api/ai-chat/chat</h3>
+      <p>Send message to AI</p>
+      <p style="margin-top: 12px;"><code>{ "message": "..." }</code></p>
+    </div>
+
+    <div style="margin-top: 48px; padding: 24px; background: rgba(255,157,0,0.1); border-radius: 12px;">
+      <h3>⚠️ Development Mode</h3>
+      <p style="margin-top: 12px;">This is a mock API for development. Deploy the full backend to Railway for production use.</p>
+      <p style="margin-top: 12px;">Backend repo: <code>BlackRoad-Operating-System/backend</code></p>
+    </div>
+  </div>
+
+  <script>
+    // Mock API implementation
+    const mockAPI = {
+      users: [
+        { id: 1, username: 'demo', email: 'demo@blackroad.io', password: 'demo123' }
+      ],
+      sessions: new Map()
+    };
+
+    // Intercept fetch requests
+    const originalFetch = window.fetch;
+    window.fetch = async function(url, options) {
+      // Check if this is an API call
+      if (url.includes('/api/')) {
+        return handleMockAPI(url, options);
+      }
+      return originalFetch(url, options);
+    };
+
+    async function handleMockAPI(url, options) {
+      const path = url.split('/api/')[1];
+      const method = options?.method || 'GET';
+      
+      console.log(`Mock API: ${method} /api/${path}`);
+      
+      // Simulate network delay
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      if (path.includes('auth/register')) {
+        const body = JSON.parse(options.body);
+        mockAPI.users.push({
+          id: mockAPI.users.length + 1,
+          ...body
+        });
+        return new Response(JSON.stringify({ id: mockAPI.users.length, ...body }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+      
+      if (path.includes('auth/token')) {
+        const formData = options.body;
+        const token = 'mock_token_' + Math.random().toString(36);
+        mockAPI.sessions.set(token, { userId: 1 });
+        return new Response(JSON.stringify({ access_token: token, token_type: 'bearer' }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+      
+      if (path.includes('auth/me')) {
+        const user = mockAPI.users[0];
+        return new Response(JSON.stringify(user), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+      
+      if (path.includes('ai-chat/chat')) {
+        const body = JSON.parse(options.body);
+        const responses = [
+          "That's an interesting question! Let me think about that...",
+          "I'm powered by 30,000 AI agents working together!",
+          "BlackRoad OS is the future of computing. How can I help you?",
+          "Great question! Here's what I think..."
+        ];
+        return new Response(JSON.stringify({
+          response: responses[Math.floor(Math.random() * responses.length)] + ` You said: "${body.message}"`
+        }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+      
+      // Default response
+      return new Response(JSON.stringify({ message: 'Mock API response', path }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    console.log('BlackRoad Mock API is ready!');
+    console.log('All API calls will be intercepted and handled locally.');
+  </script>
+</body>
+</html>

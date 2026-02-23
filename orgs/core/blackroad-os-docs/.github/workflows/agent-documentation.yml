@@ -1,0 +1,137 @@
+name: "📚 Agent: Documentation"
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  documentation:
+    name: Documentation Agent
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v44
+
+      - name: Analyze documentation coverage
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            const changedFiles = '${{ steps.changed-files.outputs.all_changed_files }}'.split(' ').filter(f => f);
+
+            let report = '## 📚 Documentation Agent Report\n\n';
+            let suggestions = [];
+            let stats = {
+              codeFiles: 0,
+              docFiles: 0,
+              hasJsdoc: 0,
+              missingJsdoc: 0,
+              readmeUpdated: false
+            };
+
+            // Categorize files
+            const codeExtensions = ['.ts', '.tsx', '.js', '.jsx', '.py', '.go'];
+            const docExtensions = ['.md', '.mdx', '.rst', '.txt'];
+
+            for (const file of changedFiles) {
+              const ext = path.extname(file);
+
+              if (codeExtensions.includes(ext)) {
+                stats.codeFiles++;
+
+                // Check for JSDoc/docstrings
+                try {
+                  const content = fs.readFileSync(file, 'utf8');
+
+                  // Check for exported functions without documentation
+                  const exportedFunctions = content.match(/export\s+(async\s+)?function\s+\w+/g) || [];
+                  const jsdocBlocks = content.match(/\/\*\*[\s\S]*?\*\//g) || [];
+
+                  if (exportedFunctions.length > jsdocBlocks.length) {
+                    stats.missingJsdoc++;
+                    suggestions.push(`📝 **${file}**: Consider adding JSDoc comments to exported functions`);
+                  } else if (jsdocBlocks.length > 0) {
+                    stats.hasJsdoc++;
+                  }
+
+                  // Check for complex functions that need docs
+                  const lines = content.split('\n').length;
+                  if (lines > 200 && jsdocBlocks.length === 0) {
+                    suggestions.push(`📖 **${file}**: Large file (${lines} lines) without documentation`);
+                  }
+                } catch (e) {
+                  // File might not exist
+                }
+              }
+
+              if (docExtensions.includes(ext)) {
+                stats.docFiles++;
+              }
+
+              if (file.toLowerCase().includes('readme')) {
+                stats.readmeUpdated = true;
+              }
+            }
+
+            // Build report
+            report += '### 📊 Documentation Stats\n\n';
+            report += `| Metric | Value |\n`;
+            report += `|--------|-------|\n`;
+            report += `| Code files changed | ${stats.codeFiles} |\n`;
+            report += `| Doc files changed | ${stats.docFiles} |\n`;
+            report += `| Files with JSDoc | ${stats.hasJsdoc} |\n`;
+            report += `| Files needing docs | ${stats.missingJsdoc} |\n`;
+            report += `| README updated | ${stats.readmeUpdated ? '✅' : '❌'} |\n\n`;
+
+            // Calculate documentation score
+            const docScore = stats.codeFiles > 0
+              ? Math.round((stats.hasJsdoc / stats.codeFiles) * 100)
+              : 100;
+
+            report += `### 📈 Documentation Score: ${docScore}%\n\n`;
+
+            if (docScore >= 80) {
+              report += '✅ Great documentation coverage!\n\n';
+            } else if (docScore >= 50) {
+              report += '⚠️ Documentation could be improved.\n\n';
+            } else {
+              report += '❌ Documentation coverage is low. Please add docs.\n\n';
+            }
+
+            // Suggestions
+            if (suggestions.length > 0) {
+              report += '### 💡 Suggestions\n\n';
+              suggestions.slice(0, 10).forEach(s => report += `- ${s}\n`);
+              if (suggestions.length > 10) {
+                report += `\n*...and ${suggestions.length - 10} more suggestions*\n`;
+              }
+            }
+
+            // Tips
+            if (stats.codeFiles > 0 && !stats.readmeUpdated) {
+              report += '\n### 💡 Tip\n';
+              report += 'Consider updating the README if this PR introduces new features or API changes.\n';
+            }
+
+            report += '\n---\n*📚 Automated review by Documentation Agent*';
+
+            // Post comment
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body: report
+            });
