@@ -287,7 +287,7 @@ _draw_hub() {
     echo -e "${B}║${R}                                                                            ${B}║${R}"
     echo -e "${B}║${R}  ${W}[c]${R}hat  ${W}[s]${R}tatus  ${W}[h]${R}ealth  ${W}[m]${R}etrics ${W}[g]${R}od  ${W}[o]${R}ffice  ${W}[r]${R}efresh  ${W}[?]${R}help   ${B}║${R}"
     echo -e "${B}║${R}  ${W}[d]${R}ash  ${W}[n]${R}et     ${W}[l]${R}ogs    ${W}[t]${R}asks    ${W}[w]${R}ire ${W}[k]${R}skills  ${W}[b]${R}onds    ${W}[q]${R}uit    ${B}║${R}"
-    echo -e "${B}║${R}  ${W}[D]${R}ocker ps  ${W}[C]${R}ompose↑  ${W}[X]${R}ompose↓  ${W}[I]${R}mages  ${W}[S]${R}tats  ${W}[e]${R}cece  ${W}[v]${R}ault  ${W}[A]${R}lert  ${W}[G]${R}it  ${B}║${R}"
+    echo -e "${B}║${R}  ${W}[D]${R}ocker ps  ${W}[C]${R}ompose↑  ${W}[X]${R}ompose↓  ${W}[I]${R}mages  ${W}[S]${R}tats  ${W}[e]${R}cece  ${W}[v]${R}ault  ${W}[A]${R}lert  ${W}[G]${R}it  ${W}[W]${R}s  ${B}║${R}"
     echo -e "${B}║${R}                                                                            ${B}║${R}"
     echo -e "${B}╚══════════════════════════════════════════════════════════════════════════════╝${R}"
 }
@@ -328,6 +328,7 @@ while true; do
             e) tput cnorm 2>/dev/null; zsh "${SCRIPT_DIR}/br" cece whoami 2>/dev/null; read -n 1 -p "  Press any key..."; tput civis 2>/dev/null ;;
             v) tput cnorm 2>/dev/null; zsh "${SCRIPT_DIR}/br" vault status 2>/dev/null; read -n 1 -p "  Press any key..."; tput civis 2>/dev/null ;;
             G) tput cnorm 2>/dev/null; zsh "${SCRIPT_DIR}/../tools/git-integration/br-git.sh" summary; read -n 1 -p "  Press any key..."; tput civis 2>/dev/null ;;
+            W) tput cnorm 2>/dev/null; zsh "${SCRIPT_DIR}/../tools/session-manager/br-session.sh" list; read -n 1 -p "  Press any key..."; tput civis 2>/dev/null ;;
             A) tput cnorm 2>/dev/null
                echo -e "\n  ${AMBER}◆${NC} Send desktop alert"
                printf "  title: "; read -r _atitle
