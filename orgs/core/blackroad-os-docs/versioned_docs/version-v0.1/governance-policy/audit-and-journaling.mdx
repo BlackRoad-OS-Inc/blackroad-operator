@@ -1,0 +1,25 @@
+---
+id: audit-and-journaling
+title: Audit & Journaling
+sidebar_position: 2
+---
+
+Auditors need to answer who did what, when, and why. BlackRoad OS provides hooks for every significant action to be journaled via PS-SHA∞, creating a tamper-evident trail. This page explains the intent; it is not a formal compliance assertion.
+
+## Journaling model
+
+Every action that matters—task creation, capability execution, approvals—can append a `JournalEntry`. Entries capture actor identity, payload metadata, hashes of prior entries, and timestamps. Because the log is append-only and hash-chained, attempts to alter history become evident during verification.
+
+## Mapping to audit expectations
+
+- **Provenance:** Each entry links to the initiator and capability invoked.
+- **Sequencing:** Hash chaining preserves order and continuity across long-running workflows.
+- **Approval evidence:** Human-in-the-loop decisions are recorded with context so reviewers can confirm policy adherence.
+
+## Usage patterns
+
+Agents and orchestrators should emit journal entries at policy-defined checkpoints: before and after material ledger changes, when treasury actions are scheduled, and when incidents are declared or resolved. Prism Console can expose these entries for review alongside operational dashboards.
+
+## Caveats
+
+The current implementation uses `DevPsShaInfinity` for interface consistency, not production-grade cryptography. Treat outputs as informative until RoadChain-backed implementations replace the stub. Coordinate with compliance teams before representing journaling as a finalized control in audits.

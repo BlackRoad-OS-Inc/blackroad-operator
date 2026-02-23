@@ -1,0 +1,99 @@
+# Railway Configuration for BlackRoad Model Server
+# Deploys internal/blackroad-coder-7b/v1 with vLLM
+
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "serving/railway/Dockerfile.vllm"
+
+[deploy]
+startCommand = "python -m vllm.entrypoints.openai.api_server --model Qwen/Qwen2.5-Coder-7B-Instruct --enable-lora --lora-modules blackroad-coder=/app/models/blackroad-coder-7b/v1/lora_weights --host 0.0.0.0 --port ${PORT:-8000} --max-model-len 4096"
+healthcheckPath = "/health"
+healthcheckTimeout = 300
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3
+
+# Service metadata
+[service]
+name = "blackroad-model-server"
+region = "us-west1"
+
+# GPU resources
+[resources]
+gpu = "nvidia-a10"
+memory = "16Gi"
+cpu = "4"
+ephemeralStorage = "20Gi"
+
+# Environment variables
+[env]
+# Model configuration
+MODEL_ID = "internal/blackroad-coder-7b-v1"
+MODEL_NAME = "BlackRoad Coder 7B"
+BASE_MODEL = "Qwen/Qwen2.5-Coder-7B-Instruct"
+
+# vLLM configuration
+VLLM_QUANTIZATION = "awq"
+VLLM_MAX_MODEL_LEN = "4096"
+VLLM_GPU_MEMORY_UTILIZATION = "0.9"
+VLLM_TENSOR_PARALLEL_SIZE = "1"
+
+# LoRA configuration
+VLLM_ENABLE_LORA = "true"
+LORA_MODEL_PATH = "/app/models/blackroad-coder-7b/v1/lora_weights"
+
+# Serving configuration
+PORT = "8000"
+HOST = "0.0.0.0"
+LOG_LEVEL = "info"
+
+# Access control
+REQUIRE_API_KEY = "true"
+# API_KEY set via Railway secrets
+
+# Monitoring
+SENTRY_DSN = "${SENTRY_DSN}"  # Set via Railway secrets
+ENABLE_METRICS = "true"
+METRICS_PORT = "9090"
+
+# Performance
+MAX_NUM_SEQS = "128"
+MAX_PADDINGS = "256"
+ENABLE_PREFIX_CACHING = "true"
+
+# Domains
+[[domains]]
+domain = "models-internal.blackroad.io"
+
+# Health checks
+[[healthchecks]]
+path = "/health"
+port = 8000
+interval = 30
+timeout = 5
+retries = 3
+
+# Autoscaling
+[[autoscaling]]
+enabled = true
+minReplicas = 1
+maxReplicas = 3
+targetCPU = 70
+scaleDownDelay = 300
+
+# Networking
+[[networking]]
+externalPort = 443
+internalPort = 8000
+protocol = "HTTPS"
+
+# Volumes (for model caching)
+[[volumes]]
+name = "model-cache"
+mountPath = "/root/.cache"
+size = "50Gi"
+
+# Secrets (set via Railway dashboard)
+# Required secrets:
+# - API_KEY (model serving API key)
+# - SENTRY_DSN (error tracking)
+# - HUGGINGFACE_TOKEN (for model downloads)

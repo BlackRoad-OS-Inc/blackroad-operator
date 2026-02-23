@@ -1,0 +1,70 @@
+name: Docs Deploy
+
+on:
+  push:
+    branches:
+      - dev
+      - staging
+      - main
+
+jobs:
+  build-and-deploy:
+    name: Build and deploy docs-site
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@f43a3398dc5d8737c2dbc7bf8ad6b50918d7a3d4
+
+      - name: Resolve environment
+        id: env
+        run: |
+          case "$GITHUB_REF_NAME" in
+            dev)
+              target_env="dev"
+              docs_url="https://dev.docs.blackroad.systems"
+              ;;
+            staging)
+              target_env="staging"
+              docs_url="https://staging.docs.blackroad.systems"
+              ;;
+            main)
+              target_env="prod"
+              docs_url="https://docs.blackroad.systems"
+              ;;
+            *)
+              echo "Branch $GITHUB_REF_NAME is not mapped to a Railway environment" >&2
+              exit 1
+              ;;
+          esac
+
+          echo "env_name=$target_env" >> "$GITHUB_OUTPUT"
+          echo "docs_url=$docs_url" >> "$GITHUB_OUTPUT"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@b829d2ab59ffb3738572edf3c6dbd9bfebc477f1
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build docs
+        env:
+          NODE_ENV: production
+          PUBLIC_DOCS_URL: ${{ steps.env.outputs.docs_url }}
+        run: npm run build
+
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Deploy to Railway
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: railway up --service docs-site --environment ${{ steps.env.outputs.env_name }} --ci
+
+      - name: Smoke check
+        run: |
+          url="${{ steps.env.outputs.docs_url }}/health"
+          echo "Pinging $url"
+          curl -fL "$url"

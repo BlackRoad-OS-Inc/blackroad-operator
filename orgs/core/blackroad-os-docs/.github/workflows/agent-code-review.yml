@@ -1,0 +1,111 @@
+name: "🤖 Agent: Code Review"
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  code-review:
+    name: Code Review Agent
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v44
+        with:
+          files: |
+            **/*.ts
+            **/*.tsx
+            **/*.js
+            **/*.jsx
+            **/*.py
+            **/*.go
+
+      - name: Analyze code quality
+        if: steps.changed-files.outputs.any_changed == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const changedFiles = '${{ steps.changed-files.outputs.all_changed_files }}'.split(' ').filter(f => f);
+
+            let reviewComments = [];
+            let summary = '## 🤖 Code Review Agent Report\n\n';
+            summary += `Analyzed **${changedFiles.length}** changed files.\n\n`;
+
+            // Analyze patterns
+            const patterns = {
+              'console.log': { severity: 'warning', msg: 'Consider removing debug logs before merging' },
+              'TODO': { severity: 'info', msg: 'Found TODO comment - ensure this is tracked' },
+              'FIXME': { severity: 'warning', msg: 'FIXME found - should be addressed' },
+              'any': { severity: 'warning', msg: 'Avoid using `any` type - prefer specific types' },
+              'eslint-disable': { severity: 'info', msg: 'ESLint rule disabled - ensure this is intentional' },
+              'password': { severity: 'error', msg: '⚠️ Possible hardcoded credential detected' },
+              'secret': { severity: 'error', msg: '⚠️ Possible secret in code' },
+            };
+
+            const { execSync } = require('child_process');
+            let issues = { error: 0, warning: 0, info: 0 };
+
+            for (const file of changedFiles) {
+              try {
+                const content = require('fs').readFileSync(file, 'utf8');
+                const lines = content.split('\n');
+
+                lines.forEach((line, idx) => {
+                  for (const [pattern, config] of Object.entries(patterns)) {
+                    if (line.toLowerCase().includes(pattern.toLowerCase())) {
+                      issues[config.severity]++;
+                      reviewComments.push(`- **${file}:${idx + 1}** [${config.severity.toUpperCase()}] ${config.msg}`);
+                    }
+                  }
+                });
+              } catch (e) {
+                // File might not exist in working directory
+              }
+            }
+
+            // Build summary
+            if (issues.error > 0) {
+              summary += `### ❌ Errors: ${issues.error}\n`;
+            }
+            if (issues.warning > 0) {
+              summary += `### ⚠️ Warnings: ${issues.warning}\n`;
+            }
+            if (issues.info > 0) {
+              summary += `### ℹ️ Info: ${issues.info}\n`;
+            }
+
+            if (reviewComments.length > 0) {
+              summary += '\n### Details\n\n';
+              summary += reviewComments.slice(0, 20).join('\n');
+              if (reviewComments.length > 20) {
+                summary += `\n\n*...and ${reviewComments.length - 20} more issues*`;
+              }
+            } else {
+              summary += '\n✅ No issues found! Code looks good.\n';
+            }
+
+            summary += '\n\n---\n*🤖 Automated review by Code Review Agent*';
+
+            // Post comment
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body: summary
+            });
+
+            // Fail if errors found
+            if (issues.error > 0) {
+              core.setFailed(`Found ${issues.error} error(s) in code review`);
+            }

@@ -1,0 +1,33 @@
+---
+id: architecture-overview
+title: Architecture Overview
+sidebar_position: 1
+slug: /reference/architecture/overview
+---
+
+BlackRoad OS is organized into a small set of collaborating services that work together to deliver AI-led operations with human oversight. Each component owns a clear domain boundary and communicates through events, APIs, and shared journaling. Understanding these responsibilities helps contributors reason about changes without losing sight of compliance and observability goals.
+
+## Logical components
+
+- **Core (`blackroad-os-core`)** – defines domain models such as `Agent`, `Capability`, `Task`, `Event`, and `JournalEntry`. It contains the event bus abstraction and the PS-SHA∞ journaling interface used by every runtime participant.
+- **Operator (`blackroad-os-operator`)** – hosts finance, infra, and future agents. It provides orchestrators that chain capabilities together and manage agent lifecycle, scheduling, and escalation.
+- **API (`blackroad-os-api`)** – the public HTTP API exposing OS metrics, task submission, and finance controls. It is the main entry point for external callers and the Prism Console.
+- **Prism Console (`blackroad-os-prism-console`)** – administrative UI that surfaces agent health, finance workflows, and event streams to operators.
+- **Web (`blackroad-os-web`)** – marketing and public-facing site that communicates the platform story.
+- **Infra (`blackroad-os-infra`)** – Terraform modules, environment definitions, DNS, and runbooks that bind the ecosystem to cloud resources.
+
+## Data flow at a glance
+
+```
+User / Orchestrator -> Web (marketing) -> (optional) Docs
+           |                               \
+           |                                \
+           v                                 v
+        Prism Console  <-->  API  <-->  Operator & Agents
+           ^                                 |
+           |                                 v
+         Observability & Journaling (PS-SHA∞)
+Infra (DNS, networking, environments) underpins every service
+```
+
+Core primitives flow through the Operator and API: tasks are emitted onto the event bus, agents claim work, and every significant action emits a journal entry. Prism Console consumes the API and stream endpoints to present live state, while Infra ensures each environment is consistent and auditable. For deeper agent mechanics, see [Agents and Orchestration](/reference/architecture/agents-and-orchestration); for finance-specific behavior, head to the [Finance Layer](/packs/finance/finance-layer).

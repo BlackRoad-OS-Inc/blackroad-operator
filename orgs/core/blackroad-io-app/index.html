@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BlackRoad OS - 30,000 AI Agents</title>
+  <script src="https://js.stripe.com/v3/"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --gradient: linear-gradient(135deg, #FF9D00, #FF6B00, #FF0066, #D600AA, #7700FF, #0066FF);
+      --bg: #02030a;
+      --text: #ffffff;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    .auth-screen {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: radial-gradient(circle at top, #1a1f3a 0%, var(--bg) 60%);
+    }
+    .auth-container {
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(20px);
+      border-radius: 24px;
+      padding: 48px;
+      width: 400px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .logo {
+      font-size: 48px;
+      font-weight: 900;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .form-group { margin-bottom: 24px; }
+    label { display: block; margin-bottom: 8px; font-size: 14px; opacity: 0.8; }
+    input {
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.05);
+      color: white;
+      font-size: 16px;
+    }
+    input:focus { outline: none; border-color: #7700FF; }
+    button {
+      width: 100%;
+      padding: 16px;
+      border-radius: 12px;
+      border: none;
+      background: var(--gradient);
+      color: white;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    button:hover { transform: scale(1.02); }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .toggle-auth { text-align: center; margin-top: 16px; font-size: 14px; opacity: 0.7; }
+    .toggle-auth a { color: #7700FF; text-decoration: none; }
+    .app-container { display: none; }
+    .navbar {
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(20px);
+      padding: 16px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .navbar-brand {
+      font-size: 24px;
+      font-weight: 900;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .navbar-menu { display: flex; gap: 24px; align-items: center; }
+    .navbar-menu a { color: white; text-decoration: none; opacity: 0.8; transition: opacity 0.2s; }
+    .navbar-menu a:hover { opacity: 1; }
+    .user-badge {
+      background: rgba(255,255,255,0.1);
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+    }
+    .content { max-width: 1200px; margin: 48px auto; padding: 0 32px; }
+    .hero { text-align: center; padding: 80px 0; }
+    .hero h1 { font-size: 64px; font-weight: 900; margin-bottom: 24px; }
+    .hero p { font-size: 24px; opacity: 0.8; margin-bottom: 48px; }
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 32px;
+      margin-top: 48px;
+    }
+    .pricing-card {
+      background: rgba(255,255,255,0.05);
+      border-radius: 24px;
+      padding: 40px;
+      border: 1px solid rgba(255,255,255,0.1);
+      transition: transform 0.3s;
+    }
+    .pricing-card:hover { transform: translateY(-8px); border-color: #7700FF; }
+    .pricing-card h3 { font-size: 32px; margin-bottom: 16px; }
+    .pricing-card .price {
+      font-size: 48px;
+      font-weight: 900;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 24px;
+    }
+    .pricing-card ul { list-style: none; margin-bottom: 32px; }
+    .pricing-card li { padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .error {
+      background: rgba(255,0,0,0.1);
+      border: 1px solid rgba(255,0,0,0.3);
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      color: #ff6b6b;
+    }
+    .success {
+      background: rgba(0,255,0,0.1);
+      border: 1px solid rgba(0,255,0,0.3);
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      color: #51cf66;
+    }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <div class="auth-screen" id="authScreen">
+    <div class="auth-container">
+      <div class="logo">BlackRoad OS</div>
+      <div id="errorMessage" class="error hidden"></div>
+      <div id="successMessage" class="success hidden"></div>
+      <form id="loginForm">
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="loginEmail" value="test@blackroad.io" required />
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="loginPassword" value="password123" required />
+        </div>
+        <button type="submit">Sign In</button>
+        <div class="toggle-auth">
+          Don't have an account? <a href="#" id="showRegister">Register</a>
+        </div>
+      </form>
+      <form id="registerForm" class="hidden">
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" id="registerUsername" required />
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="registerEmail" required />
+        </div>
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" id="registerFullName" required />
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="registerPassword" required />
+        </div>
+        <button type="submit">Create Account</button>
+        <div class="toggle-auth">
+          Already have an account? <a href="#" id="showLogin">Sign In</a>
+        </div>
+      </form>
+    </div>
+  </div>
+  <div class="app-container" id="appContainer">
+    <nav class="navbar">
+      <div class="navbar-brand">BlackRoad OS</div>
+      <div class="navbar-menu">
+        <a href="#dashboard">Dashboard</a>
+        <a href="#agents">Agents</a>
+        <a href="#docs">Docs</a>
+        <div class="user-badge" id="userBadge"></div>
+        <a href="#" id="logoutBtn">Logout</a>
+      </div>
+    </nav>
+    <div class="content">
+      <div class="hero">
+        <h1>30,000 AI Agents at Your Command</h1>
+        <p>The future of computing is here</p>
+        <div style="margin-top: 32px; padding: 24px; background: rgba(255,255,255,0.05); border-radius: 16px; border: 1px solid rgba(255,255,255,0.1);">
+          <p style="font-size: 18px; margin-bottom: 16px;">💸 Support BlackRoad</p>
+          <a href="https://krak.app/AAAAAAAA" target="_blank" style="display: inline-block; padding: 12px 24px; background: var(--gradient); color: white; text-decoration: none; border-radius: 8px; font-weight: 700; margin: 8px;">Tap here to try Krak →</a>
+          <div style="font-family: monospace; background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; margin-top: 16px; font-size: 14px; word-break: break-all;">
+            <strong>BTC:</strong> 3NJYuq8KA1xBea6JNg32XgDwjpvLkrR5VH
+          </div>
+        </div>
+      </div>
+      <div class="pricing-grid">
+        <div class="pricing-card">
+          <h3>Starter</h3>
+          <div class="price">$49<span style="font-size:20px">/mo</span></div>
+          <ul>
+            <li>✓ 100 AI Agents</li>
+            <li>✓ 10GB Storage</li>
+            <li>✓ Basic Support</li>
+            <li>✓ Community Access</li>
+          </ul>
+          <button onclick="handleCheckout('starter', 4900)">Get Started</button>
+        </div>
+        <div class="pricing-card">
+          <h3>Pro</h3>
+          <div class="price">$149<span style="font-size:20px">/mo</span></div>
+          <ul>
+            <li>✓ 1,000 AI Agents</li>
+            <li>✓ 100GB Storage</li>
+            <li>✓ Priority Support</li>
+            <li>✓ Advanced Analytics</li>
+          </ul>
+          <button onclick="handleCheckout('pro', 14900)">Get Started</button>
+        </div>
+        <div class="pricing-card">
+          <h3>Enterprise</h3>
+          <div class="price">$499<span style="font-size:20px">/mo</span></div>
+          <ul>
+            <li>✓ 30,000 AI Agents</li>
+            <li>✓ Unlimited Storage</li>
+            <li>✓ 24/7 Support</li>
+            <li>✓ Custom Integration</li>
+          </ul>
+          <button onclick="handleCheckout('enterprise', 49900)">Get Started</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- BlackRoad Unified API -->
+  <script src="/blackroad-api.js"></script>
+  <script>
+    const stripe = Stripe('pk_test_51QTdFgP9LkdZ0rQk8kLPHxZMqB8LkMbQNE09vzZYNQz2AxRpG3yVRpLhHOtJdhCvK1hkWlJlV1EFLb5yh3Dq7NU600wLO0Bupq');
+    const authScreen = document.getElementById('authScreen');
+    const appContainer = document.getElementById('appContainer');
+    const loginForm = document.getElementById('loginForm');
+    const registerForm = document.getElementById('registerForm');
+    const errorMessage = document.getElementById('errorMessage');
+    const successMessage = document.getElementById('successMessage');
+
+    document.getElementById('showRegister').addEventListener('click', (e) => {
+      e.preventDefault();
+      loginForm.classList.add('hidden');
+      registerForm.classList.remove('hidden');
+      hideMessages();
+    });
+    document.getElementById('showLogin').addEventListener('click', (e) => {
+      e.preventDefault();
+      registerForm.classList.add('hidden');
+      loginForm.classList.remove('hidden');
+      hideMessages();
+    });
+
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      hideMessages();
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPassword').value;
+      try {
+        await window.blackroad.login(email, password);
+        showApp();
+      } catch (error) {
+        showError(error.message);
+      }
+    });
+
+    registerForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      hideMessages();
+      const email = document.getElementById('registerEmail').value;
+      const password = document.getElementById('registerPassword').value;
+      const name = document.getElementById('registerFullName')?.value || document.getElementById('registerUsername')?.value;
+      try {
+        await window.blackroad.register(email, password, name);
+        showApp();
+      } catch (error) {
+        showError(error.message);
+      }
+    });
+
+    async function loadUser() {
+      const user = await window.blackroad.loadCurrentUser();
+      if (user) {
+        document.getElementById('userBadge').textContent = user.name || user.email;
+      }
+    }
+
+    document.getElementById('logoutBtn').addEventListener('click', (e) => {
+      e.preventDefault();
+      window.blackroad.logout();
+    });
+
+    async function handleCheckout(plan, amount) {
+      if (!window.blackroad.isAuthenticated()) {
+        showError('Please sign in first');
+        return;
+      }
+      try {
+        const data = await window.blackroad.createCheckoutSession(plan, amount);
+        showSuccess(`Payment created! Plan: ${plan}`);
+      } catch (error) {
+        showError(error.message);
+      }
+    }
+
+    function showApp() {
+      authScreen.classList.add('hidden');
+      appContainer.classList.remove('hidden');
+    }
+    function showError(message) {
+      errorMessage.textContent = message;
+      errorMessage.classList.remove('hidden');
+    }
+    function showSuccess(message) {
+      successMessage.textContent = message;
+      successMessage.classList.remove('hidden');
+    }
+    function hideMessages() {
+      errorMessage.classList.add('hidden');
+      successMessage.classList.add('hidden');
+    }
+    if (window.blackroad.isAuthenticated()) {
+      loadUser().then(() => showApp());
+    }
+  </script>
+</body>
+</html>

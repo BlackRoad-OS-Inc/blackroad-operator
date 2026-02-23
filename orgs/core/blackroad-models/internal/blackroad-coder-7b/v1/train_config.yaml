@@ -1,0 +1,120 @@
+# LoRA Training Configuration for blackroad-coder-lora
+# Based on Qwen 2.5 Coder 7B Instruct
+
+# Base model
+base_model:
+  name: qwen2-5-coder-7b-instruct
+  path: ../../../forkies/qwen2-5-coder-7b-instruct/v1.0.0
+  architecture: qwen2
+  vocab_size: 151936
+  hidden_size: 3584
+  num_layers: 28
+
+# Training data
+data:
+  train_file: s3://blackroad-internal/training-data/codebase-samples-2025.jsonl
+  val_file: s3://blackroad-internal/training-data/validation-samples-2025.jsonl
+  format: jsonl
+  input_field: prompt
+  output_field: completion
+
+  # Data preprocessing
+  max_length: 4096
+  truncation: true
+  padding: max_length
+
+  # Data filters
+  min_completion_length: 10
+  max_completion_length: 2048
+  languages:
+    - typescript
+    - python
+    - javascript
+    - yaml
+    - markdown
+
+# LoRA configuration
+lora:
+  # Core LoRA params
+  r: 16                    # Rank (lower = faster, less capacity)
+  lora_alpha: 32           # Scaling factor (typically 2*r)
+  lora_dropout: 0.05       # Dropout for regularization
+
+  # Target modules (Qwen 2.5 architecture)
+  target_modules:
+    - q_proj               # Query projection
+    - v_proj               # Value projection
+    - k_proj               # Key projection
+    - o_proj               # Output projection
+    - gate_proj            # MLP gate
+    - up_proj              # MLP up
+    - down_proj            # MLP down
+
+  # LoRA configuration
+  bias: none               # Don't train biases
+  task_type: CAUSAL_LM     # Causal language modeling
+
+# Training hyperparameters
+training:
+  # Optimization
+  optimizer: adamw_torch
+  learning_rate: 2.0e-4
+  weight_decay: 0.01
+  lr_scheduler: cosine
+  warmup_ratio: 0.03
+
+  # Batch sizes
+  per_device_train_batch_size: 4
+  per_device_eval_batch_size: 4
+  gradient_accumulation_steps: 4  # Effective batch = 16
+
+  # Training duration
+  num_train_epochs: 3
+  max_steps: -1            # Use epochs instead
+
+  # Evaluation
+  evaluation_strategy: steps
+  eval_steps: 100
+  save_strategy: steps
+  save_steps: 500
+  save_total_limit: 3      # Keep only 3 checkpoints
+
+  # Logging
+  logging_steps: 10
+  logging_dir: ./logs
+  report_to: tensorboard
+
+  # Performance
+  fp16: true               # Use mixed precision
+  gradient_checkpointing: true
+  optim: adamw_torch
+
+  # Reproducibility
+  seed: 42
+
+# Hardware requirements
+hardware:
+  recommended_gpu: A100    # 40GB or 80GB
+  min_gpu_memory: 24       # GB
+  estimated_time: 4-8      # Hours on A100
+
+# Output
+output:
+  output_dir: ./lora_weights
+  final_model_name: blackroad-coder-lora-v0.1
+
+# Evaluation during training
+eval_during_training:
+  - name: perplexity
+    metric: perplexity
+  - name: code_completion_accuracy
+    metric: exact_match
+
+# Post-training evaluation
+post_training_eval:
+  - name: HumanEval
+    script: ../../../evals/coding/humaneval.py
+    target_score: 0.70
+  - name: BlackRoad Internal Benchmark
+    script: ../../../evals/coding/blackroad_internal.py
+    target_score: 0.80

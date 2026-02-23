@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PitStop - Visual DevOps Dashboard | No More Terminal Hell</title>
+    <meta name="description" content="Manage your infrastructure visually. Docker, Kubernetes, databases, CI/CD pipelines - all in a beautiful dashboard. No terminal required.">
+    <style>
+        :root {
+            --black: #000000;
+            --white: #FFFFFF;
+            --amber: #F5A623;
+            --hot-pink: #FF1D6C;
+            --electric-blue: #2979FF;
+            --violet: #9C27B0;
+            --green: #00E676;
+            --red: #FF1744;
+            --space-xs: 8px;
+            --space-sm: 13px;
+            --space-md: 21px;
+            --space-lg: 34px;
+            --space-xl: 55px;
+            --space-2xl: 89px;
+            --space-3xl: 144px;
+            --ease: cubic-bezier(0.25, 0.1, 0.25, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--black);
+            color: var(--white);
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Mono', monospace;
+            line-height: 1.618;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Grid Background */
+        .grid-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 55px 55px;
+            animation: grid-move 20s linear infinite;
+            z-index: 0;
+        }
+
+        @keyframes grid-move {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(55px, 55px); }
+        }
+
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(20px);
+            padding: var(--space-md) var(--space-xl);
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        nav .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--amber), var(--hot-pink), var(--violet));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .btn {
+            padding: var(--space-sm) var(--space-lg);
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s var(--ease);
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: var(--hot-pink);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(255, 29, 108, 0.4);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 var(--space-xl);
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero {
+            padding: calc(var(--space-3xl) * 2) 0 var(--space-3xl);
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 64px;
+            font-weight: 900;
+            margin-bottom: var(--space-md);
+            line-height: 1.1;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, var(--amber) 0%, var(--hot-pink) 38.2%, var(--violet) 61.8%, var(--electric-blue) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 24px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: var(--space-xl);
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Dashboard Preview */
+        .dashboard-preview {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            padding: var(--space-lg);
+            margin: var(--space-3xl) 0;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-lg);
+        }
+
+        .status-bar {
+            display: flex;
+            gap: var(--space-md);
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+            background: rgba(255, 255, 255, 0.05);
+            padding: var(--space-sm) var(--space-md);
+            border-radius: 8px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .status-dot.green { background: var(--green); }
+        .status-dot.red { background: var(--red); }
+        .status-dot.amber { background: var(--amber); }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--space-lg);
+        }
+
+        .dashboard-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: var(--space-lg);
+            transition: all 0.3s var(--ease);
+        }
+
+        .dashboard-card:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: var(--hot-pink);
+            transform: translateY(-4px);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-md);
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .card-badge {
+            padding: var(--space-xs) var(--space-sm);
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .badge-green {
+            background: rgba(0, 230, 118, 0.2);
+            color: var(--green);
+        }
+
+        .badge-red {
+            background: rgba(255, 23, 68, 0.2);
+            color: var(--red);
+        }
+
+        .metric {
+            font-size: 36px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--hot-pink), var(--violet));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: var(--space-sm);
+        }
+
+        .metric-label {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 14px;
+        }
+
+        /* Features */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--space-lg);
+            margin: var(--space-3xl) 0;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: var(--space-lg);
+            transition: all 0.3s var(--ease);
+        }
+
+        .feature-card:hover {
+            background: rgba(255, 255, 255, 0.06);
+            transform: translateY(-4px);
+            border-color: var(--hot-pink);
+        }
+
+        .feature-icon {
+            font-size: 48px;
+            margin-bottom: var(--space-md);
+        }
+
+        .feature-card h3 {
+            font-size: 24px;
+            margin-bottom: var(--space-sm);
+            color: var(--hot-pink);
+        }
+
+        .feature-card p {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Code Example */
+        .code-comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-lg);
+            margin: var(--space-3xl) 0;
+        }
+
+        .code-block {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: var(--space-lg);
+        }
+
+        .code-block h3 {
+            margin-bottom: var(--space-md);
+            color: var(--hot-pink);
+        }
+
+        pre {
+            background: rgba(0, 0, 0, 0.5);
+            padding: var(--space-md);
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'SF Mono', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .pricing {
+            text-align: center;
+            margin: var(--space-3xl) 0;
+        }
+
+        .pricing h2 {
+            font-size: 48px;
+            margin-bottom: var(--space-xl);
+        }
+
+        .pricing-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--space-lg);
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .pricing-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: var(--space-xl);
+            transition: all 0.3s var(--ease);
+        }
+
+        .pricing-card.featured {
+            border: 2px solid var(--hot-pink);
+            background: rgba(255, 29, 108, 0.05);
+            transform: scale(1.05);
+        }
+
+        .pricing-card h3 {
+            font-size: 28px;
+            margin-bottom: var(--space-md);
+        }
+
+        .price {
+            font-size: 48px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--hot-pink), var(--violet));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: var(--space-md);
+        }
+
+        .price span {
+            font-size: 20px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .pricing-card ul {
+            list-style: none;
+            margin-bottom: var(--space-xl);
+            text-align: left;
+        }
+
+        .pricing-card li {
+            padding: var(--space-xs) 0;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .pricing-card li::before {
+            content: '✓';
+            color: var(--hot-pink);
+            margin-right: var(--space-sm);
+            font-weight: bold;
+        }
+
+        footer {
+            text-align: center;
+            padding: var(--space-xl) 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 36px; }
+            .code-comparison { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="grid-bg"></div>
+
+    <nav>
+        <div class="container">
+            <div class="logo">🏁 PitStop</div>
+            <a href="#pricing" class="btn btn-primary">Start Free Trial</a>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="container">
+            <h1>DevOps Without the<br><span class="gradient-text">Terminal Hell</span></h1>
+            <p>Manage your entire infrastructure visually. Docker, Kubernetes, databases, CI/CD pipelines - all in a beautiful dashboard.</p>
+            <div style="display: flex; gap: var(--space-md); justify-content: center; margin-top: var(--space-xl);">
+                <a href="#demo" class="btn btn-primary">See Live Demo →</a>
+                <a href="https://github.com/BlackRoad-OS/blackroad-os-pitstop" class="btn" style="background: rgba(255,255,255,0.1); color: white;">View on GitHub</a>
+            </div>
+        </div>
+    </section>
+
+    <section id="demo" class="container">
+        <div class="dashboard-preview">
+            <div class="dashboard-header">
+                <h2>Live Infrastructure Dashboard</h2>
+                <div class="status-bar">
+                    <div class="status-item">
+                        <div class="status-dot green"></div>
+                        <span>12 containers running</span>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-dot green"></div>
+                        <span>3 databases healthy</span>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-dot amber"></div>
+                        <span>1 deployment pending</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-grid">
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <div class="card-title">🐳 Docker Containers</div>
+                        <div class="card-badge badge-green">Healthy</div>
+                    </div>
+                    <div class="metric">12/12</div>
+                    <div class="metric-label">Running containers</div>
+                    <p style="margin-top: var(--space-md); color: rgba(255,255,255,0.6);">
+                        nginx, postgres, redis, api-server, frontend, worker, cache, queue, metrics, logs, backup, monitor
+                    </p>
+                </div>
+
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <div class="card-title">☸️ Kubernetes</div>
+                        <div class="card-badge badge-green">Running</div>
+                    </div>
+                    <div class="metric">24</div>
+                    <div class="metric-label">Active pods</div>
+                    <p style="margin-top: var(--space-md); color: rgba(255,255,255,0.6);">
+                        3 nodes • 8 deployments • 4 services
+                    </p>
+                </div>
+
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <div class="card-title">🗄️ Databases</div>
+                        <div class="card-badge badge-green">Optimized</div>
+                    </div>
+                    <div class="metric">3</div>
+                    <div class="metric-label">Databases online</div>
+                    <p style="margin-top: var(--space-md); color: rgba(255,255,255,0.6);">
+                        PostgreSQL • MongoDB • Redis
+                    </p>
+                </div>
+
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <div class="card-title">🚀 Deployments</div>
+                        <div class="card-badge badge-green">Success</div>
+                    </div>
+                    <div class="metric">47</div>
+                    <div class="metric-label">Successful deploys today</div>
+                    <p style="margin-top: var(--space-md); color: rgba(255,255,255,0.6);">
+                        Last: 2 minutes ago • Next: in queue
+                    </p>
+                </div>
+
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <div class="card-title">📊 Resources</div>
+                        <div class="card-badge badge-green">Healthy</div>
+                    </div>
+                    <div class="metric">42%</div>
+                    <div class="metric-label">CPU usage</div>
+                    <p style="margin-top: var(--space-md); color: rgba(255,255,255,0.6);">
+                        Memory: 8.2/16GB • Disk: 120/500GB
+                    </p>
+                </div>
+
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <div class="card-title">🔒 Security</div>
+                        <div class="card-badge badge-green">Protected</div>
+                    </div>
+                    <div class="metric">0</div>
+                    <div class="metric-label">Vulnerabilities</div>
+                    <p style="margin-top: var(--space-md); color: rgba(255,255,255,0.6);">
+                        All images scanned • Secrets encrypted
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="container">
+        <div style="text-align: center; margin-bottom: var(--space-xl);">
+            <h2 style="font-size: 48px; margin-bottom: var(--space-md);">Before vs After PitStop</h2>
+        </div>
+        <div class="code-comparison">
+            <div class="code-block">
+                <h3>❌ The Old Way (Terminal Hell)</h3>
+                <pre>$ ssh user@server
+$ docker ps | grep api
+$ kubectl get pods -n production
+$ psql -h localhost -U postgres
+$ tail -f /var/log/nginx/error.log
+$ docker logs container-id
+$ kubectl describe pod pod-name
+$ docker-compose up -d
+$ kubectl apply -f deployment.yaml
+$ systemctl restart nginx
+$ journalctl -u service-name
+...and 50 more commands</pre>
+            </div>
+
+            <div class="code-block">
+                <h3>✅ With PitStop (Visual)</h3>
+                <pre>Open PitStop dashboard →
+
+See everything at a glance:
+✓ All containers running
+✓ All pods healthy
+✓ Database metrics
+✓ Live logs streaming
+✓ One-click deployments
+✓ Drag-and-drop config
+✓ Visual resource graphs
+✓ Automated monitoring
+
+Zero terminal commands needed.</pre>
+            </div>
+        </div>
+    </section>
+
+    <section class="container">
+        <h2 style="text-align: center; font-size: 48px; margin-bottom: var(--space-xl);">Everything You Need</h2>
+        <div class="features">
+            <div class="feature-card">
+                <div class="feature-icon">🐳</div>
+                <h3>Docker Management</h3>
+                <p>Visual container management. Start, stop, restart containers with one click. Live logs, metrics, and shell access.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">☸️</div>
+                <h3>Kubernetes Dashboard</h3>
+                <p>Manage pods, deployments, services visually. No more kubectl commands. Drag-and-drop scaling.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">🗄️</div>
+                <h3>Database Tools</h3>
+                <p>PostgreSQL, MongoDB, MySQL, Redis - all in one place. Query, backup, monitor performance visually.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">🚀</div>
+                <h3>CI/CD Pipelines</h3>
+                <p>Visual pipeline builder. Git push → auto deploy. Monitor builds, tests, deployments in real-time.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <h3>Resource Monitoring</h3>
+                <p>CPU, memory, disk, network - all visualized. Set alerts, track trends, optimize costs.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">🔒</div>
+                <h3>Security Scanning</h3>
+                <p>Auto-scan images for vulnerabilities. Manage secrets, certificates, and access controls visually.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="pricing" class="container">
+        <div class="pricing">
+            <h2>Simple, Transparent Pricing</h2>
+            <div class="pricing-cards">
+                <div class="pricing-card">
+                    <h3>Starter</h3>
+                    <div class="price">$29<span>/month</span></div>
+                    <ul>
+                        <li>Up to 10 containers</li>
+                        <li>1 Kubernetes cluster</li>
+                        <li>3 databases</li>
+                        <li>Basic monitoring</li>
+                        <li>Email support</li>
+                    </ul>
+                    <a href="#" class="btn btn-primary" style="width: 100%;">Start Free Trial</a>
+                </div>
+
+                <div class="pricing-card featured">
+                    <h3>Pro</h3>
+                    <div class="price">$99<span>/month</span></div>
+                    <ul>
+                        <li>Unlimited containers</li>
+                        <li>5 Kubernetes clusters</li>
+                        <li>Unlimited databases</li>
+                        <li>Advanced monitoring</li>
+                        <li>CI/CD pipelines</li>
+                        <li>Security scanning</li>
+                        <li>Priority support</li>
+                    </ul>
+                    <a href="#" class="btn btn-primary" style="width: 100%;">Start Free Trial</a>
+                </div>
+
+                <div class="pricing-card">
+                    <h3>Enterprise</h3>
+                    <div class="price">Custom</div>
+                    <ul>
+                        <li>Everything in Pro</li>
+                        <li>Unlimited everything</li>
+                        <li>On-premise option</li>
+                        <li>Custom integrations</li>
+                        <li>White-label</li>
+                        <li>Dedicated support</li>
+                        <li>SLA guarantees</li>
+                    </ul>
+                    <a href="mailto:blackroad.systems@gmail.com" class="btn btn-primary" style="width: 100%;">Contact Sales</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 BlackRoad OS, Inc. All rights reserved.</p>
+            <p style="margin-top: var(--space-sm);">DevOps made beautiful.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Live dashboard simulation
+        setInterval(() => {
+            const metrics = document.querySelectorAll('.metric');
+            metrics.forEach(metric => {
+                if (metric.textContent.includes('%')) {
+                    const current = parseInt(metric.textContent);
+                    const change = Math.floor(Math.random() * 10) - 5;
+                    const newVal = Math.max(10, Math.min(90, current + change));
+                    metric.textContent = newVal + '%';
+                }
+            });
+        }, 5000);
+    </script>
+</body>
+</html>

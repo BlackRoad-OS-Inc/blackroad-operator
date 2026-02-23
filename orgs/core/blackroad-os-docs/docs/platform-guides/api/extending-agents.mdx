@@ -1,0 +1,37 @@
+---
+id: api-extending-agents
+title: Extending Agents
+slug: /platform/api/extending-agents
+sidebar_position: 2
+---
+
+Adding a new agent to BlackRoad OS follows a predictable path so capabilities stay discoverable and auditable. Start with a clear problem statement, then wire the agent into the operator with the right journaling and escalation points.
+
+## Design
+
+Clarify what problem the agent solves, what systems it touches, and how success is measured. Define the capabilities it will expose and the tasks it should accept. Consider whether it needs human approval gates and how those are surfaced in Prism Console.
+
+## Define capabilities
+
+Add the agent to the operator’s registry (typically YAML) with its capabilities, input schemas, and escalation thresholds. Keep naming consistent with existing finance agents so orchestrators can route tasks predictably.
+
+## Implement the agent
+
+Create the stub class following the base agent interface (or finance-specific base classes). Implement capability handlers, emit PS-SHA∞ journal entries for meaningful actions, and add guardrails for policy or limit checks. Start with stubbed integrations before wiring real data sources.
+
+## Wire into orchestrators
+
+Update orchestrators to dispatch tasks to the new capabilities. Ensure event bus routing matches the registry and that failure modes are surfaced as events Prism Console can display. Add policy hooks for when human intervention is required.
+
+## Testing and docs
+
+Add unit and integration tests that validate capability behavior, journaling, and escalation triggers. Document assumptions, inputs, and outputs in the operator repo, then cross-link from this docs site. For examples, see the finance agents described in the [Finance Layer](/packs/finance/finance-layer).
+
+## Example: Notification Agent
+
+A simple Notification Agent might watch for anomalies and send alerts:
+
+1. Define a `notify` capability in the registry with inputs for subject, body, and recipients.
+2. Implement the agent to format messages and post to email or chat systems, emitting journal entries for traceability.
+3. Add orchestration rules to throttle or escalate when alerts relate to regulated actions.
+4. Document configuration knobs and link them from [Local Development](/platform/core/local-development) so others can reproduce behavior.

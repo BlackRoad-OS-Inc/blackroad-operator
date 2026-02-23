@@ -1,0 +1,180 @@
+name: "⚡ Agent: Performance"
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  performance:
+    name: Performance Agent
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get PR stats
+        id: pr-stats
+        run: |
+          # Get diff stats
+          ADDITIONS=$(git diff --shortstat origin/${{ github.base_ref }}...HEAD | grep -oP '\d+(?= insertion)' || echo 0)
+          DELETIONS=$(git diff --shortstat origin/${{ github.base_ref }}...HEAD | grep -oP '\d+(?= deletion)' || echo 0)
+          FILES_CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | wc -l)
+
+          echo "additions=$ADDITIONS" >> $GITHUB_OUTPUT
+          echo "deletions=$DELETIONS" >> $GITHUB_OUTPUT
+          echo "files_changed=$FILES_CHANGED" >> $GITHUB_OUTPUT
+
+      - name: Analyze bundle size impact
+        id: bundle
+        run: |
+          # Check if package.json exists and get dependencies
+          if [ -f "package.json" ]; then
+            DEPS=$(cat package.json | jq '.dependencies | length // 0')
+            DEV_DEPS=$(cat package.json | jq '.devDependencies | length // 0')
+            echo "deps=$DEPS" >> $GITHUB_OUTPUT
+            echo "dev_deps=$DEV_DEPS" >> $GITHUB_OUTPUT
+          else
+            echo "deps=0" >> $GITHUB_OUTPUT
+            echo "dev_deps=0" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v44
+
+      - name: Performance analysis
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            const changedFiles = '${{ steps.changed-files.outputs.all_changed_files }}'.split(' ').filter(f => f);
+            const additions = parseInt('${{ steps.pr-stats.outputs.additions }}') || 0;
+            const deletions = parseInt('${{ steps.pr-stats.outputs.deletions }}') || 0;
+            const filesChanged = parseInt('${{ steps.pr-stats.outputs.files_changed }}') || 0;
+            const deps = parseInt('${{ steps.bundle.outputs.deps }}') || 0;
+            const devDeps = parseInt('${{ steps.bundle.outputs.dev_deps }}') || 0;
+
+            let report = '## ⚡ Performance Agent Report\n\n';
+            let warnings = [];
+            let suggestions = [];
+
+            // PR Size Analysis
+            report += '### 📦 PR Size Analysis\n\n';
+            report += `| Metric | Value |\n`;
+            report += `|--------|-------|\n`;
+            report += `| Files changed | ${filesChanged} |\n`;
+            report += `| Lines added | +${additions} |\n`;
+            report += `| Lines removed | -${deletions} |\n`;
+            report += `| Net change | ${additions - deletions > 0 ? '+' : ''}${additions - deletions} |\n`;
+            report += `| Dependencies | ${deps} |\n`;
+            report += `| Dev Dependencies | ${devDeps} |\n\n`;
+
+            // PR Size Rating
+            const totalChanges = additions + deletions;
+            let sizeRating = '';
+            if (totalChanges < 100) {
+              sizeRating = '🟢 Small PR - Easy to review';
+            } else if (totalChanges < 500) {
+              sizeRating = '🟡 Medium PR - Moderate review effort';
+            } else if (totalChanges < 1000) {
+              sizeRating = '🟠 Large PR - Consider breaking down';
+              warnings.push('Large PR detected. Consider splitting into smaller PRs for easier review.');
+            } else {
+              sizeRating = '🔴 Very Large PR - Difficult to review';
+              warnings.push('Very large PR! This will be difficult to review. Strongly consider breaking into smaller PRs.');
+            }
+            report += `**Size Rating:** ${sizeRating}\n\n`;
+
+            // Performance patterns check
+            report += '### 🔍 Performance Patterns\n\n';
+
+            const perfPatterns = [
+              { pattern: /\.forEach\s*\(/g, msg: 'forEach loop - consider for...of for better performance', severity: 'info' },
+              { pattern: /JSON\.parse\s*\(.*JSON\.stringify/g, msg: 'Deep clone via JSON - consider structuredClone()', severity: 'warning' },
+              { pattern: /new\s+RegExp\s*\(/g, msg: 'Dynamic RegExp creation - consider caching if used repeatedly', severity: 'info' },
+              { pattern: /document\.querySelector.*loop|for.*querySelector/gi, msg: 'DOM query in loop - cache selectors outside loop', severity: 'warning' },
+              { pattern: /\bawait\b.*\bawait\b.*\bawait\b/g, msg: 'Multiple sequential awaits - consider Promise.all()', severity: 'warning' },
+              { pattern: /\.filter\(.*\)\.map\(/g, msg: 'filter().map() chain - consider reduce() or single pass', severity: 'info' },
+              { pattern: /useEffect.*\[\s*\]/g, msg: 'Empty dependency array - ensure this is intentional', severity: 'info' },
+              { pattern: /new\s+Date\(\).*loop|for.*new\s+Date/gi, msg: 'Date creation in loop - cache Date object', severity: 'warning' },
+            ];
+
+            let patternFindings = [];
+
+            for (const file of changedFiles) {
+              try {
+                const content = fs.readFileSync(file, 'utf8');
+
+                for (const { pattern, msg, severity } of perfPatterns) {
+                  if (pattern.test(content)) {
+                    patternFindings.push({ file, msg, severity });
+                  }
+                }
+
+                // Check file size
+                const lines = content.split('\n').length;
+                if (lines > 500) {
+                  warnings.push(`\`${file}\` has ${lines} lines - consider splitting into smaller modules`);
+                }
+              } catch (e) {}
+            }
+
+            if (patternFindings.length > 0) {
+              patternFindings.slice(0, 10).forEach(({ file, msg, severity }) => {
+                const icon = severity === 'warning' ? '⚠️' : 'ℹ️';
+                report += `- ${icon} **${file}**: ${msg}\n`;
+              });
+              if (patternFindings.length > 10) {
+                report += `\n*...and ${patternFindings.length - 10} more findings*\n`;
+              }
+            } else {
+              report += '✅ No performance anti-patterns detected!\n';
+            }
+            report += '\n';
+
+            // Warnings
+            if (warnings.length > 0) {
+              report += '### ⚠️ Warnings\n\n';
+              warnings.forEach(w => report += `- ${w}\n`);
+              report += '\n';
+            }
+
+            // Bundle impact estimation
+            report += '### 📊 Impact Assessment\n\n';
+
+            // Check for new dependencies in package.json changes
+            const pkgChanged = changedFiles.some(f => f.includes('package.json'));
+            if (pkgChanged) {
+              report += '⚠️ `package.json` was modified - bundle size may be affected.\n';
+              report += 'Consider running bundle analysis after merging.\n\n';
+            }
+
+            // Recommendations
+            report += '### 💡 Recommendations\n\n';
+            if (totalChanges > 500) {
+              report += '- Consider breaking this PR into smaller, focused changes\n';
+            }
+            if (patternFindings.some(f => f.severity === 'warning')) {
+              report += '- Review the performance warnings above\n';
+            }
+            report += '- Run performance tests before and after merging\n';
+            report += '- Monitor production metrics after deployment\n';
+
+            report += '\n---\n*⚡ Automated analysis by Performance Agent*';
+
+            // Post comment
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body: report
+            });
