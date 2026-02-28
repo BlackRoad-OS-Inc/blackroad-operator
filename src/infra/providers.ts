@@ -332,10 +332,14 @@ export interface MeshReport {
 }
 
 export async function checkFullMesh(): Promise<MeshReport> {
+  const workerAgentsUrl =
+    process.env['BLACKROAD_AGENTS_WORKER_URL'] ??
+    'https://blackroad-agents.blackroad.workers.dev'
+
   const results = await Promise.allSettled([
     checkGateway(),
     checkCloudflare(),
-    checkCloudflareWorker('https://blackroad-agents.blackroad.workers.dev'),
+    checkCloudflareWorker(workerAgentsUrl),
     checkRailway(),
     checkHuggingFace(),
     checkSalesforce(),
