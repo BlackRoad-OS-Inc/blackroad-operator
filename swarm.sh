@@ -24,24 +24,33 @@ BOLD='\033[1m'
 DIM='\033[2m'
 NC='\033[0m'
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SWARM_DIR="${SCRIPT_DIR}/.swarm"
 REPO="${SWARM_REPO:-BlackRoad-OS-Inc/blackroad-operator}"
 DEFAULT_AGENTS="lucidia,octavia,alice,cipher"
 
 # ── Helpers ──────────────────────────────────────────────────
 
-log()   { echo -e "${GREEN}✓${NC} $1"; }
-error() { echo -e "${RED}✗${NC} $1" >&2; }
-warn()  { echo -e "${YELLOW}!${NC} $1"; }
-info()  { echo -e "${CYAN}i${NC} $1"; }
+log()    { echo -e "${GREEN}*${NC} $1"; }
+error()  { echo -e "${RED}x${NC} $1" >&2; }
+warn()   { echo -e "${YELLOW}!${NC} $1"; }
+info()   { echo -e "${CYAN}i${NC} $1"; }
 header() { echo -e "\n${BOLD}${MAGENTA}$1${NC}\n"; }
 
-check_gh() {
+# Check if gh is available AND authenticated
+has_gh() {
+  command -v gh &>/dev/null && gh auth status &>/dev/null 2>&1
+}
+
+# Require gh or fail with helpful message
+require_gh() {
   if ! command -v gh &>/dev/null; then
-    error "GitHub CLI (gh) is required. Install: https://cli.github.com"
+    error "This command requires GitHub CLI (gh). Install: https://cli.github.com"
     exit 1
   fi
   if ! gh auth status &>/dev/null 2>&1; then
-    error "Not authenticated. Run: gh auth login"
+    error "This command requires GitHub auth. Run: gh auth login"
+    info "Local commands (launch, status, list) work without auth."
     exit 1
   fi
 }
@@ -61,17 +70,17 @@ agent_color() {
   esac
 }
 
-agent_icon() {
+agent_role() {
   case "$1" in
-    lucidia)  echo "~" ;;
-    octavia)  echo ">" ;;
-    alice)    echo "@" ;;
-    cipher)   echo "#" ;;
-    aria)     echo "*" ;;
-    prism)    echo "%" ;;
-    echo)     echo "&" ;;
-    cecilia)  echo "+" ;;
-    *)        echo "-" ;;
+    lucidia)  echo "Philosopher" ;;
+    octavia)  echo "Architect" ;;
+    alice)    echo "Operator" ;;
+    cipher)   echo "Guardian" ;;
+    aria)     echo "Dreamer" ;;
+    prism)    echo "Analyst" ;;
+    echo)     echo "Memory" ;;
+    cecilia)  echo "CECE" ;;
+    *)        echo "Agent" ;;
   esac
 }
 
@@ -88,8 +97,8 @@ cmd_launch() {
   info "Strategy: ${strategy}"
   echo ""
 
-  # Check if we can trigger the workflow
-  if gh workflow list --repo "$REPO" 2>/dev/null | grep -q "Agent PR Swarm"; then
+  # Try remote workflow first, fall back to local
+  if has_gh && gh workflow list --repo "$REPO" 2>/dev/null | grep -q "Agent PR Swarm"; then
     log "Triggering workflow via GitHub Actions..."
     gh workflow run "Agent PR Swarm" \
       --repo "$REPO" \
@@ -99,8 +108,6 @@ cmd_launch() {
     log "Swarm workflow dispatched!"
     info "Monitor with: ./swarm.sh status"
   else
-    # Local mode — create branches and PRs directly
-    warn "Workflow not available remotely, launching locally..."
     cmd_launch_local "$task" "$agents" "$strategy"
   fi
 }
@@ -116,60 +123,98 @@ cmd_launch_local() {
   header "LOCAL SWARM: ${swarm_id}"
 
   # Create swarm directory
-  mkdir -p ".swarm/${swarm_id}"
-  cat > ".swarm/${swarm_id}/manifest.json" << EOF
+  mkdir -p "${SWARM_DIR}/${swarm_id}"
+
+  # Build agents JSON array (handle jq absence)
+  local agents_json="["
+  local first=true
+  IFS=',' read -ra AGENT_LIST <<< "$agents"
+  for agent in "${AGENT_LIST[@]}"; do
+    agent=$(echo "$agent" | tr -d ' ')
+    if [ "$first" = true ]; then
+      agents_json="${agents_json}\"${agent}\""
+      first=false
+    else
+      agents_json="${agents_json},\"${agent}\""
+    fi
+  done
+  agents_json="${agents_json}]"
+
+  cat > "${SWARM_DIR}/${swarm_id}/manifest.json" << EOF
 {
   "swarm_id": "${swarm_id}",
   "task": "${task}",
   "strategy": "${strategy}",
   "created_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
   "base_branch": "${base_branch}",
-  "agents": $(echo "$agents" | tr ',' '\n' | jq -R . | jq -s .),
+  "agents": ${agents_json},
   "status": "active"
 }
 EOF
   log "Swarm manifest created"
 
   # Spawn agent branches
-  IFS=',' read -ra AGENT_LIST <<< "$agents"
   for agent in "${AGENT_LIST[@]}"; do
     agent=$(echo "$agent" | tr -d ' ')
     local color
     color=$(agent_color "$agent")
-    local icon
-    icon=$(agent_icon "$agent")
+    local role
+    role=$(agent_role "$agent")
     local branch="swarm/${swarm_id}/agent/${agent}"
 
-    echo -e "  ${color}${icon} ${agent^^}${NC} -> ${DIM}${branch}${NC}"
+    echo -e "  ${color}[${agent^^}]${NC} ${role} -> ${DIM}${branch}${NC}"
 
     # Create branch from current HEAD
-    git branch "$branch" HEAD 2>/dev/null || true
+    git branch "$branch" HEAD 2>/dev/null || warn "  Branch ${branch} already exists"
 
     # Create agent workspace marker
-    cat > ".swarm/${swarm_id}/${agent}.json" << AGENT_EOF
+    cat > "${SWARM_DIR}/${swarm_id}/${agent}.json" << AGENT_EOF
 {
   "agent": "${agent}",
   "swarm_id": "${swarm_id}",
   "task": "${task}",
   "branch": "${branch}",
+  "role": "${role}",
   "status": "ready",
   "spawned_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 }
 AGENT_EOF
   done
 
+  # Broadcast to coordination mesh
+  if [ -x "${SCRIPT_DIR}/coordination/swarm-broadcast.sh" ]; then
+    bash "${SCRIPT_DIR}/coordination/swarm-broadcast.sh" launch "$swarm_id" "$task" "$agents" 2>/dev/null || true
+  fi
+
+  echo ""
   log "Created ${#AGENT_LIST[@]} agent branches"
   echo ""
-  info "Swarm ID: ${swarm_id}"
-  info "Next: Agents push work to their branches, then create PRs"
+
+  # Show swarm summary
+  echo -e "${BOLD}  Swarm ID:${NC}  ${swarm_id}"
+  echo -e "${BOLD}  Task:${NC}     ${task}"
+  echo -e "${BOLD}  Strategy:${NC} ${strategy}"
+  echo -e "${BOLD}  Branches:${NC} ${#AGENT_LIST[@]}"
   echo ""
-  echo -e "${DIM}  To create PRs for all agents:${NC}"
-  echo -e "${DIM}  ./swarm.sh open-prs ${swarm_id}${NC}"
+
+  # Show next steps
+  echo -e "${BOLD}Next steps:${NC}"
+  echo -e "  1. Agents checkout their branches and push work:"
+  for agent in "${AGENT_LIST[@]}"; do
+    agent=$(echo "$agent" | tr -d ' ')
+    echo -e "     ${DIM}git checkout swarm/${swarm_id}/agent/${agent}${NC}"
+  done
+  echo -e "  2. When ready, create PRs:"
+  echo -e "     ${DIM}./swarm.sh open-prs ${swarm_id}${NC}"
+  echo -e "  3. Monitor progress:"
+  echo -e "     ${DIM}./swarm.sh status ${swarm_id}${NC}"
 }
 
 cmd_open_prs() {
   local swarm_id="${1:?Usage: swarm.sh open-prs <swarm-id>}"
-  local manifest=".swarm/${swarm_id}/manifest.json"
+  local manifest="${SWARM_DIR}/${swarm_id}/manifest.json"
+
+  require_gh
 
   if [ ! -f "$manifest" ]; then
     error "Swarm not found: ${swarm_id}"
@@ -178,23 +223,21 @@ cmd_open_prs() {
 
   header "OPENING AGENT PRs: ${swarm_id}"
 
-  local task
+  local task strategy base
   task=$(jq -r '.task' "$manifest")
-  local strategy
   strategy=$(jq -r '.strategy' "$manifest")
-  local agents
-  agents=$(jq -r '.agents[]' "$manifest")
-  local base
   base=$(jq -r '.base_branch // "main"' "$manifest")
 
   local pr_numbers=()
 
-  while IFS= read -r agent; do
+  jq -r '.agents[]' "$manifest" | while IFS= read -r agent; do
     local branch="swarm/${swarm_id}/agent/${agent}"
     local color
     color=$(agent_color "$agent")
+    local role
+    role=$(agent_role "$agent")
 
-    echo -e "  ${color}Creating PR for ${agent^^}...${NC}"
+    echo -e "  ${color}Creating PR for ${agent^^} (${role})...${NC}"
 
     # Push branch
     git push -u origin "$branch" 2>/dev/null || true
@@ -207,7 +250,7 @@ cmd_open_prs() {
       --head "$branch" \
       --title "[${swarm_id}] ${agent^^}: ${task}" \
       --label "swarm,agent:${agent}" \
-      --body "## Agent: ${agent^^}
+      --body "## Agent: ${agent^^} (${role})
 **Swarm:** \`${swarm_id}\` | **Strategy:** \`${strategy}\`
 
 ### Task
@@ -222,48 +265,14 @@ ${task}
 _Part of swarm \`${swarm_id}\`_" 2>/dev/null || echo "")
 
     if [ -n "$pr_url" ]; then
-      local pr_num
-      pr_num=$(echo "$pr_url" | grep -oP '\d+$' || echo "?")
-      pr_numbers+=("$pr_num")
-      echo -e "    ${GREEN}#${pr_num}${NC} ${pr_url}"
+      echo -e "    ${GREEN}${pr_url}${NC}"
     else
       warn "  Could not create PR for ${agent} (branch may already have a PR)"
     fi
-  done <<< "$agents"
+  done
 
   echo ""
-  log "Created ${#pr_numbers[@]} PRs"
-
-  # Create coordinator PR if multiple agents
-  if [ ${#pr_numbers[@]} -gt 1 ]; then
-    local coord_branch="swarm/${swarm_id}/coordinator"
-    git branch "$coord_branch" HEAD 2>/dev/null || true
-    git push -u origin "$coord_branch" 2>/dev/null || true
-
-    local pr_list=""
-    for num in "${pr_numbers[@]}"; do
-      pr_list="${pr_list}- #${num}
-"
-    done
-
-    gh pr create \
-      --repo "$REPO" \
-      --base "$base" \
-      --head "$coord_branch" \
-      --title "[${swarm_id}] COORDINATOR: ${task}" \
-      --label "swarm,swarm-coordinator" \
-      --body "## Swarm Coordinator
-**Swarm:** \`${swarm_id}\` | **Strategy:** \`${strategy}\`
-
-### Agent PRs
-${pr_list}
-### Status
-- [ ] All agent PRs complete
-- [ ] All checks passing
-- [ ] Ready for merge" 2>/dev/null || warn "Could not create coordinator PR"
-
-    log "Coordinator PR created"
-  fi
+  log "PRs created for swarm ${swarm_id}"
 }
 
 cmd_status() {
@@ -271,55 +280,91 @@ cmd_status() {
 
   header "SWARM STATUS"
 
-  if [ -n "$swarm_id" ]; then
-    # Show specific swarm
-    local prs
-    prs=$(gh pr list --repo "$REPO" --label "swarm" --json number,title,state,headRefName,mergeable,statusCheckRollup \
-      --jq ".[] | select(.headRefName | startswith(\"swarm/${swarm_id}/\"))" 2>/dev/null || echo "")
+  # Always show local swarms first
+  local found_local=false
+  if [ -d "$SWARM_DIR" ]; then
+    if [ -n "$swarm_id" ]; then
+      # Show specific swarm
+      if [ -f "${SWARM_DIR}/${swarm_id}/manifest.json" ]; then
+        found_local=true
+        local manifest="${SWARM_DIR}/${swarm_id}/manifest.json"
+        local task strategy status agent_count
+        task=$(jq -r '.task' "$manifest" 2>/dev/null || echo "unknown")
+        strategy=$(jq -r '.strategy' "$manifest" 2>/dev/null || echo "unknown")
+        status=$(jq -r '.status // "active"' "$manifest" 2>/dev/null || echo "unknown")
+        agent_count=$(jq -r '.agents | length' "$manifest" 2>/dev/null || echo "?")
 
-    if [ -z "$prs" ]; then
-      # Check local swarm
-      if [ -f ".swarm/${swarm_id}/manifest.json" ]; then
-        info "Local swarm (no PRs yet)"
-        jq '.' ".swarm/${swarm_id}/manifest.json"
+        echo -e "${BOLD}  Swarm:${NC}    ${swarm_id}"
+        echo -e "${BOLD}  Task:${NC}     ${task}"
+        echo -e "${BOLD}  Strategy:${NC} ${strategy}"
+        echo -e "${BOLD}  Status:${NC}   ${status}"
+        echo -e "${BOLD}  Agents:${NC}   ${agent_count}"
         echo ""
-        info "Create PRs with: ./swarm.sh open-prs ${swarm_id}"
-      else
-        error "No swarm found: ${swarm_id}"
+
+        # Show each agent's status
+        echo -e "${BOLD}  Agent Branches:${NC}"
+        for agent_file in "${SWARM_DIR}/${swarm_id}"/*.json; do
+          [ -f "$agent_file" ] || continue
+          local basename
+          basename=$(basename "$agent_file" .json)
+          [ "$basename" = "manifest" ] && continue
+
+          local agent_status branch
+          agent_status=$(jq -r '.status // "unknown"' "$agent_file" 2>/dev/null || echo "?")
+          branch=$(jq -r '.branch // "?"' "$agent_file" 2>/dev/null || echo "?")
+          local color
+          color=$(agent_color "$basename")
+
+          # Check if branch has commits ahead
+          local ahead=""
+          local branch_commits
+          branch_commits=$(git log --oneline "HEAD..${branch}" 2>/dev/null | wc -l | tr -d ' ')
+          if [ "$branch_commits" -gt 0 ] 2>/dev/null; then
+            ahead=" (+${branch_commits} commits)"
+          fi
+
+          echo -e "    ${color}[${basename^^}]${NC} ${agent_status}${ahead}"
+          echo -e "      ${DIM}${branch}${NC}"
+        done
       fi
-      return
-    fi
+    else
+      # Show all local swarms
+      for manifest in "${SWARM_DIR}"/*/manifest.json; do
+        [ -f "$manifest" ] || continue
+        found_local=true
+        local sid task status agents strategy
+        sid=$(jq -r '.swarm_id' "$manifest" 2>/dev/null)
+        task=$(jq -r '.task' "$manifest" 2>/dev/null)
+        status=$(jq -r '.status // "active"' "$manifest" 2>/dev/null)
+        agents=$(jq -r '.agents | join(", ")' "$manifest" 2>/dev/null)
+        strategy=$(jq -r '.strategy' "$manifest" 2>/dev/null)
 
-    gh pr list --repo "$REPO" --label "swarm" --json number,title,state,headRefName \
-      --jq ".[] | select(.headRefName | startswith(\"swarm/${swarm_id}/\"))" \
-      --template '{{range .}}#{{.number}} {{.state}} {{.title}}
-{{end}}' 2>/dev/null
-  else
-    # Show all active swarms
-    echo -e "${BOLD}Active Swarm PRs:${NC}"
-    echo ""
-    gh pr list --repo "$REPO" --label "swarm" \
-      --json number,title,state,headRefName,createdAt \
-      --template '{{range .}}  {{.state}} #{{.number}} {{.title}}
-    {{.headRefName}} ({{timeago .createdAt}})
-{{end}}' 2>/dev/null || warn "No active swarm PRs"
-
-    # Show local swarms
-    if [ -d ".swarm" ]; then
-      echo ""
-      echo -e "${BOLD}Local Swarms:${NC}"
-      for manifest in .swarm/*/manifest.json; do
-        if [ -f "$manifest" ]; then
-          local sid
-          sid=$(jq -r '.swarm_id' "$manifest")
-          local task
-          task=$(jq -r '.task' "$manifest")
-          local agents
-          agents=$(jq -r '.agents | join(", ")' "$manifest")
-          echo -e "  ${CYAN}${sid}${NC} — ${task}"
-          echo -e "  ${DIM}agents: ${agents}${NC}"
-        fi
+        echo -e "  ${CYAN}${sid}${NC}  [${status}]  ${strategy}"
+        echo -e "    ${BOLD}Task:${NC}   ${task}"
+        echo -e "    ${BOLD}Agents:${NC} ${agents}"
+        echo ""
       done
+    fi
+  fi
+
+  if [ "$found_local" = false ]; then
+    echo -e "  ${DIM}No local swarms found.${NC}"
+    echo -e "  ${DIM}Launch one: ./swarm.sh launch \"your task\" lucidia,octavia,cipher${NC}"
+  fi
+
+  # Show GitHub PRs if gh is available
+  if has_gh; then
+    echo ""
+    echo -e "${BOLD}GitHub PRs:${NC}"
+    local pr_output
+    pr_output=$(gh pr list --repo "$REPO" --label "swarm" \
+      --json number,title,state,headRefName \
+      --template '{{range .}}  {{.state}} #{{.number}} {{.title}}
+{{end}}' 2>/dev/null || echo "")
+    if [ -n "$pr_output" ]; then
+      echo "$pr_output"
+    else
+      echo -e "  ${DIM}(none)${NC}"
     fi
   fi
 }
@@ -327,37 +372,56 @@ cmd_status() {
 cmd_list() {
   header "ALL SWARMS"
 
-  # Remote PRs
-  echo -e "${BOLD}GitHub PRs:${NC}"
-  gh pr list --repo "$REPO" --label "swarm" \
-    --json number,title,state,headRefName,createdAt,labels \
-    --template '{{range .}}  {{if eq .state "OPEN"}}OPEN{{else}}{{.state}}{{end}}  #{{.number}}  {{.title}}
-{{end}}' 2>/dev/null || echo "  (none)"
-
   # Local swarms
-  echo ""
   echo -e "${BOLD}Local Swarms:${NC}"
-  if [ -d ".swarm" ]; then
-    for manifest in .swarm/*/manifest.json; do
+  local count=0
+  if [ -d "$SWARM_DIR" ]; then
+    for manifest in "${SWARM_DIR}"/*/manifest.json; do
       [ -f "$manifest" ] || continue
+      count=$((count + 1))
       local sid task status agents
-      sid=$(jq -r '.swarm_id' "$manifest")
-      task=$(jq -r '.task' "$manifest")
-      status=$(jq -r '.status // "unknown"' "$manifest")
-      agents=$(jq -r '.agents | length' "$manifest")
-      echo -e "  ${status}  ${sid}  ${task} (${agents} agents)"
+      sid=$(jq -r '.swarm_id' "$manifest" 2>/dev/null)
+      task=$(jq -r '.task' "$manifest" 2>/dev/null)
+      status=$(jq -r '.status // "unknown"' "$manifest" 2>/dev/null)
+      agents=$(jq -r '.agents | length' "$manifest" 2>/dev/null)
+      echo -e "  [${status}]  ${CYAN}${sid}${NC}  ${task} (${agents} agents)"
+    done
+  fi
+  if [ "$count" -eq 0 ]; then
+    echo -e "  ${DIM}(none)${NC}"
+  fi
+
+  # Git branches
+  echo ""
+  echo -e "${BOLD}Swarm Branches:${NC}"
+  local branches
+  branches=$(git branch --list 'swarm/*' 2>/dev/null || echo "")
+  if [ -n "$branches" ]; then
+    echo "$branches" | while IFS= read -r branch; do
+      branch=$(echo "$branch" | tr -d ' *')
+      echo -e "  ${DIM}${branch}${NC}"
     done
   else
-    echo "  (none)"
+    echo -e "  ${DIM}(none)${NC}"
+  fi
+
+  # GitHub PRs if available
+  if has_gh; then
+    echo ""
+    echo -e "${BOLD}GitHub PRs:${NC}"
+    gh pr list --repo "$REPO" --label "swarm" \
+      --json number,title,state \
+      --template '{{range .}}  {{.state}} #{{.number}} {{.title}}
+{{end}}' 2>/dev/null || echo "  (none)"
   fi
 }
 
 cmd_merge() {
   local swarm_id="${1:?Usage: swarm.sh merge <swarm-id>}"
+  require_gh
 
   header "MERGING SWARM: ${swarm_id}"
 
-  # Get all agent PRs for this swarm (not the coordinator)
   local prs
   prs=$(gh pr list --repo "$REPO" --label "swarm" --state open \
     --json number,headRefName \
@@ -380,15 +444,15 @@ cmd_merge() {
       warn "  #${pr_num} could not be merged (check status)"
   done
 
-  # Close coordinator PR
-  local coord_pr
-  coord_pr=$(gh pr list --repo "$REPO" --label "swarm-coordinator" --state open \
-    --json number,headRefName \
-    --jq ".[] | select(.headRefName | startswith(\"swarm/${swarm_id}/coordinator\")) | .number" 2>/dev/null || echo "")
+  # Update local manifest
+  if [ -f "${SWARM_DIR}/${swarm_id}/manifest.json" ]; then
+    jq '.status = "merged"' "${SWARM_DIR}/${swarm_id}/manifest.json" > "${SWARM_DIR}/${swarm_id}/manifest.tmp" && \
+      mv "${SWARM_DIR}/${swarm_id}/manifest.tmp" "${SWARM_DIR}/${swarm_id}/manifest.json"
+  fi
 
-  if [ -n "$coord_pr" ]; then
-    gh pr close "$coord_pr" --repo "$REPO" --comment "Swarm ${swarm_id} merge complete. All agent PRs processed." 2>/dev/null
-    log "Coordinator PR #${coord_pr} closed"
+  # Broadcast completion
+  if [ -x "${SCRIPT_DIR}/coordination/swarm-broadcast.sh" ]; then
+    bash "${SCRIPT_DIR}/coordination/swarm-broadcast.sh" complete "$swarm_id" 2>/dev/null || true
   fi
 
   log "Swarm ${swarm_id} merge initiated"
@@ -399,25 +463,37 @@ cmd_close() {
 
   header "CLOSING SWARM: ${swarm_id}"
 
-  gh pr list --repo "$REPO" --label "swarm" --state open \
-    --json number,headRefName \
-    --jq ".[] | select(.headRefName | startswith(\"swarm/${swarm_id}/\")) | .number" 2>/dev/null | \
-  while read -r pr_num; do
-    gh pr close "$pr_num" --repo "$REPO" --comment "Swarm ${swarm_id} closed." 2>/dev/null
-    log "Closed #${pr_num}"
+  # Close GitHub PRs if gh available
+  if has_gh; then
+    gh pr list --repo "$REPO" --label "swarm" --state open \
+      --json number,headRefName \
+      --jq ".[] | select(.headRefName | startswith(\"swarm/${swarm_id}/\")) | .number" 2>/dev/null | \
+    while read -r pr_num; do
+      gh pr close "$pr_num" --repo "$REPO" --comment "Swarm ${swarm_id} closed." 2>/dev/null
+      log "Closed PR #${pr_num}"
+    done
+  fi
+
+  # Clean up local branches
+  git branch --list "swarm/${swarm_id}/*" 2>/dev/null | while IFS= read -r branch; do
+    branch=$(echo "$branch" | tr -d ' *')
+    git branch -D "$branch" 2>/dev/null && log "Deleted branch: ${branch}" || true
   done
 
   # Update local manifest
-  if [ -f ".swarm/${swarm_id}/manifest.json" ]; then
-    jq '.status = "closed"' ".swarm/${swarm_id}/manifest.json" > ".swarm/${swarm_id}/manifest.tmp" && \
-      mv ".swarm/${swarm_id}/manifest.tmp" ".swarm/${swarm_id}/manifest.json"
+  if [ -f "${SWARM_DIR}/${swarm_id}/manifest.json" ]; then
+    jq '.status = "closed"' "${SWARM_DIR}/${swarm_id}/manifest.json" > "${SWARM_DIR}/${swarm_id}/manifest.tmp" && \
+      mv "${SWARM_DIR}/${swarm_id}/manifest.tmp" "${SWARM_DIR}/${swarm_id}/manifest.json"
     log "Local manifest updated"
   fi
+
+  log "Swarm ${swarm_id} closed"
 }
 
 cmd_comment() {
   local pr="${1:?Usage: swarm.sh comment <pr-number> \"message\"}"
   local message="${2:?Message required}"
+  require_gh
 
   gh pr comment "$pr" --repo "$REPO" --body "$message"
   log "Comment posted to #${pr}"
@@ -428,33 +504,74 @@ cmd_review() {
 
   header "SWARM REVIEW: ${swarm_id}"
 
-  gh pr list --repo "$REPO" --label "swarm" --state open \
-    --json number,title,headRefName,additions,deletions,changedFiles \
-    --jq ".[] | select(.headRefName | startswith(\"swarm/${swarm_id}/agent/\"))" \
-    --template '{{range .}}
-PR #{{.number}}: {{.title}}
-  Branch: {{.headRefName}}
-  Changes: +{{.additions}} -{{.deletions}} ({{.changedFiles}} files)
-{{end}}' 2>/dev/null || warn "No PRs found"
+  # Local review: show diff for each agent branch
+  local manifest="${SWARM_DIR}/${swarm_id}/manifest.json"
+  if [ -f "$manifest" ]; then
+    local base
+    base=$(jq -r '.base_branch // "main"' "$manifest" 2>/dev/null || echo "main")
+
+    jq -r '.agents[]' "$manifest" 2>/dev/null | while IFS= read -r agent; do
+      local branch="swarm/${swarm_id}/agent/${agent}"
+      local color
+      color=$(agent_color "$agent")
+
+      echo -e "  ${color}[${agent^^}]${NC} ${branch}"
+
+      # Show diff stat if branch exists
+      local stat
+      stat=$(git diff --stat "${base}...${branch}" 2>/dev/null || echo "  (no changes yet)")
+      echo "$stat" | head -10 | sed 's/^/    /'
+      echo ""
+    done
+  fi
+
+  # Also show GitHub PR info if available
+  if has_gh; then
+    echo -e "${BOLD}GitHub PR Details:${NC}"
+    gh pr list --repo "$REPO" --label "swarm" --state open \
+      --json number,title,headRefName,additions,deletions,changedFiles \
+      --jq ".[] | select(.headRefName | startswith(\"swarm/${swarm_id}/agent/\"))" \
+      --template '{{range .}}  #{{.number}} {{.title}}
+    +{{.additions}} -{{.deletions}} ({{.changedFiles}} files)
+{{end}}' 2>/dev/null || echo "  (no GitHub PRs)"
+  fi
+}
+
+cmd_checkout() {
+  local swarm_id="${1:?Usage: swarm.sh checkout <swarm-id> <agent>}"
+  local agent="${2:?Agent name required}"
+  local branch="swarm/${swarm_id}/agent/${agent}"
+
+  if git rev-parse --verify "$branch" &>/dev/null; then
+    git checkout "$branch"
+    log "Switched to ${agent}'s branch: ${branch}"
+  else
+    error "Branch not found: ${branch}"
+    info "Available branches:"
+    git branch --list "swarm/${swarm_id}/*" 2>/dev/null | sed 's/^/  /'
+  fi
 }
 
 # ── Help ─────────────────────────────────────────────────────
 
 show_help() {
-  header "SWARM — Parallel Agent PR System"
+  header "SWARM - Parallel Agent PR System"
 
   echo -e "${BOLD}Usage:${NC}"
   echo "  ./swarm.sh <command> [args]"
   echo ""
-  echo -e "${BOLD}Commands:${NC}"
+  echo -e "${BOLD}Local Commands (no GitHub auth needed):${NC}"
   echo -e "  ${CYAN}launch${NC} <task> [agents] [strategy]  Launch a new swarm"
-  echo -e "  ${CYAN}open-prs${NC} <swarm-id>                Create PRs for local swarm"
   echo -e "  ${CYAN}status${NC} [swarm-id]                  Show swarm status"
   echo -e "  ${CYAN}list${NC}                               List all swarms"
+  echo -e "  ${CYAN}review${NC} <swarm-id>                  Review agent changes"
+  echo -e "  ${CYAN}checkout${NC} <swarm-id> <agent>        Switch to agent branch"
+  echo -e "  ${CYAN}close${NC} <swarm-id>                   Close swarm + delete branches"
+  echo ""
+  echo -e "${BOLD}GitHub Commands (requires gh auth):${NC}"
+  echo -e "  ${CYAN}open-prs${NC} <swarm-id>                Create PRs for all agents"
   echo -e "  ${CYAN}merge${NC} <swarm-id>                   Merge all agent PRs"
-  echo -e "  ${CYAN}close${NC} <swarm-id>                   Close all swarm PRs"
   echo -e "  ${CYAN}comment${NC} <pr> <message>             Post comment to agent PR"
-  echo -e "  ${CYAN}review${NC} <swarm-id>                  Review all agent changes"
   echo ""
   echo -e "${BOLD}Strategies:${NC}"
   echo -e "  ${GREEN}parallel${NC}      All agents work simultaneously"
@@ -466,22 +583,21 @@ show_help() {
   echo "  ./swarm.sh launch \"Build auth module\" lucidia,octavia,cipher"
   echo "  ./swarm.sh launch \"Refactor API\" all consensus"
   echo "  ./swarm.sh status swarm-1234567890"
+  echo "  ./swarm.sh checkout swarm-1234567890 lucidia"
   echo "  ./swarm.sh merge swarm-1234567890"
   echo ""
   echo -e "${BOLD}Agents:${NC}"
-  echo -e "  lucidia   — Philosopher (reasoning, architecture)"
-  echo -e "  octavia   — Architect (systems, infrastructure)"
-  echo -e "  alice     — Operator (execution, automation)"
-  echo -e "  cipher    — Guardian (security, access control)"
-  echo -e "  aria      — Dreamer (creative, UX, vision)"
-  echo -e "  prism     — Analyst (data, patterns)"
-  echo -e "  echo      — Memory (context, knowledge)"
-  echo -e "  cecilia   — CECE (meta-cognition, coordination)"
+  echo -e "  lucidia   - Philosopher (reasoning, architecture)"
+  echo -e "  octavia   - Architect (systems, infrastructure)"
+  echo -e "  alice     - Operator (execution, automation)"
+  echo -e "  cipher    - Guardian (security, access control)"
+  echo -e "  aria      - Dreamer (creative, UX, vision)"
+  echo -e "  prism     - Analyst (data, patterns)"
+  echo -e "  echo      - Memory (context, knowledge)"
+  echo -e "  cecilia   - CECE (meta-cognition, coordination)"
 }
 
 # ── Router ───────────────────────────────────────────────────
-
-check_gh
 
 case "${1:-help}" in
   launch)    cmd_launch "${@:2}" ;;
@@ -492,5 +608,6 @@ case "${1:-help}" in
   close)     cmd_close "${@:2}" ;;
   comment)   cmd_comment "${@:2}" ;;
   review)    cmd_review "${@:2}" ;;
+  checkout)  cmd_checkout "${@:2}" ;;
   help|*)    show_help ;;
 esac
