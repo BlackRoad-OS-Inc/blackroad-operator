@@ -255,9 +255,26 @@ function sanitizeFilename(name) {
  * @returns {boolean}
  */
 function matchGlob(path, pattern) {
-  const regex = pattern
+  // Replace glob wildcards with placeholders so we can safely escape regex metacharacters.
+  const withPlaceholders = pattern
     .replace(/\*\*/g, '<<<GLOBSTAR>>>')
-    .replace(/\*/g, '[^/]*')
-    .replace(/<<<GLOBSTAR>>>/g, '.*');
+    .replace(/\*/g, '<<<GLOB>>>');
+
+  // Escape all regex metacharacters, then restore our glob placeholders.
+  const escaped = escapeRegex(withPlaceholders);
+  const regex = escaped
+    .replace(/<<<GLOBSTAR>>>/g, '.*')
+    .replace(/<<<GLOB>>>/g, '[^/]*');
+
   return new RegExp(`^${regex}$`).test(path);
+}
+
+/**
+ * Escape regex metacharacters in a string so it can be used to build a RegExp.
+ * This is used by matchGlob to ensure that only * and ** act as wildcards.
+ * @param {string} str
+ * @returns {string}
+ */
+function escapeRegex(str) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
