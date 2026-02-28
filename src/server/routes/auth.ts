@@ -89,19 +89,35 @@ authRoutes.post('/token', async (c) => {
   }>()
   if (!body.sub) return c.json({ error: 'sub required' }, 400)
 
-  // Elevated roles require caller authentication
-  if (body.role === 'owner' || body.role === 'coordinator') {
-    const auth = c.req.header('Authorization') ?? ''
-    const callerToken = auth.startsWith('Bearer ') ? auth.slice(7).trim() : ''
-    if (!callerToken) return c.json({ error: 'elevated roles require caller auth' }, 401)
+  const auth = c.req.header('Authorization') ?? ''
+  const callerToken = auth.startsWith('Bearer ') ? auth.slice(7).trim() : ''
+  let callerPayload: TokenPayload | null = null
+  let callerCanIssue = false
 
+  if (callerToken) {
     const callerResult = await verifyToken(callerToken, masterKey)
-    if (!callerResult.ok) return c.json({ error: `caller auth failed: ${callerResult.error}` }, 401)
-    if (!hasScope(callerResult.payload, 'auth:issue') && !callerResult.payload.scope?.includes('*')) {
+    if (!callerResult.ok) {
+      return c.json({ error: `caller auth failed: ${callerResult.error}` }, 401)
+    }
+    callerPayload = callerResult.payload
+    callerCanIssue =
+      hasScope(callerPayload, 'auth:issue') || callerPayload.scope?.includes('*') === true
+  }
+
+  // Elevated roles require authenticated caller with auth:issue (or wildcard)
+  if (body.role === 'owner' || body.role === 'coordinator') {
+    if (!callerPayload) {
+      return c.json({ error: 'elevated roles require caller auth' }, 401)
+    }
+    if (!callerCanIssue) {
       return c.json({ error: 'caller lacks auth:issue scope' }, 403)
     }
   }
 
+  // Custom TTL/scope overrides require auth:issue (or wildcard)
+  if ((body.ttl !== undefined || body.scope !== undefined) && !callerCanIssue) {
+    return c.json({ error: 'custom ttl/scope requires auth:issue' }, 403)
+  }
   const { token, payload } = await mintToken(masterKey, { ...body, sub: body.sub! })
   return c.json({ ok: true, token, payload })
 })
