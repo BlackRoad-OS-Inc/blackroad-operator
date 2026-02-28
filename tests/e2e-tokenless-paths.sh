@@ -85,12 +85,20 @@ else
   PR_REFS=$(git ls-remote origin 'refs/pull/*/head' 2>/dev/null | awk '{print $2}' | sed 's|refs/pull/||;s|/head||' | sort -n)
 
   for pr_num in $PR_REFS; do
-    # Fetch if not already available
-    git fetch origin "refs/pull/$pr_num/head:refs/remotes/origin/pr/$pr_num" 2>/dev/null || true
+    # Fetch if not already available; warn and skip PR on fetch failure
+    if ! fetch_output=$(git fetch origin "refs/pull/$pr_num/head:refs/remotes/origin/pr/$pr_num" 2>&1); then
+      warn "PR #$pr_num — Failed to fetch PR ref: $fetch_output"
+      continue
+    fi
 
-    # Scan diff for forbidden patterns
-    diff_output=$(git diff "$MAIN_SHA"..origin/pr/$pr_num 2>/dev/null | grep "^+" | grep -v "^+++" || true)
+    # Generate diff; warn and skip PR on diff failure
+    if ! raw_diff=$(git diff "$MAIN_SHA"..origin/pr/$pr_num 2>&1); then
+      warn "PR #$pr_num — Unable to generate diff: $raw_diff"
+      continue
+    fi
 
+    # Scan diff for forbidden patterns (only added lines)
+    diff_output=$(printf '%s\n' "$raw_diff" | grep "^+" | grep -v "^+++" || true)
     # Check for hardcoded API keys (real values, not empty placeholders)
     hardcoded_keys=$(echo "$diff_output" | grep -E 'sk-[a-zA-Z0-9]{20,}|sk-ant-[a-zA-Z0-9]{20,}' || true)
 
