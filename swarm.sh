@@ -440,7 +440,7 @@ cmd_merge() {
   echo "$prs" | jq -r '.[]' | while read -r pr_num; do
     echo -e "  Merging #${pr_num}..."
     gh pr merge "$pr_num" --repo "$REPO" --squash --auto 2>/dev/null && \
-      log "  #${pr_num} merged" || \
+      log "  #${pr_num} auto-merge enabled (will merge after required checks pass)" || \
       warn "  #${pr_num} could not be merged (check status)"
   done
 
