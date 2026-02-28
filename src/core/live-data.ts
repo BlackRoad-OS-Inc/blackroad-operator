@@ -67,18 +67,51 @@ export interface ServiceProbe {
   error?: string
 }
 
+// Keep a previous CPU sample so we can compute utilization from deltas
+let previousCpuSample:
+  | {
+      idle: number
+      total: number
+    }
+  | null = null
+
+function sampleCpuTimes(): { idle: number; total: number } {
+  const cpus = os.cpus()
+  let totalIdle = 0
+  let totalTick = 0
+
+  for (const cpu of cpus) {
+    for (const type of Object.keys(cpu.times) as (keyof typeof cpu.times)[]) {
+      totalTick += cpu.times[type]
+    }
+    totalIdle += cpu.times.idle
+  }
+
+  return { idle: totalIdle, total: totalTick }
+}
+
 function getCpuUsage(): number {
   try {
-    const cpus = os.cpus()
-    let totalIdle = 0
-    let totalTick = 0
-    for (const cpu of cpus) {
-      for (const type of Object.keys(cpu.times) as (keyof typeof cpu.times)[]) {
-        totalTick += cpu.times[type]
-      }
-      totalIdle += cpu.times.idle
+    const current = sampleCpuTimes()
+
+    // On first call, we don't have a previous sample to compare against.
+    if (!previousCpuSample) {
+      previousCpuSample = current
+      return 0
     }
-    return Math.round(((totalTick - totalIdle) / totalTick) * 100)
+
+    const totalDelta = current.total - previousCpuSample.total
+    const idleDelta = current.idle - previousCpuSample.idle
+
+    // Update previous sample for the next call before any early returns.
+    previousCpuSample = current
+
+    if (totalDelta <= 0) {
+      return 0
+    }
+
+    const usage = 1 - idleDelta / totalDelta
+    return Math.round(usage * 100)
   } catch {
     return 0
   }
