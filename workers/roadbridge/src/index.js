@@ -22,7 +22,7 @@
 import { verifyGitHubSignature, verifyDriveChannelToken } from './hmac.js';
 import { classifyGitHubEvent, classifyDriveEvent, shouldExecuteRoute } from './classifier.js';
 import { executeRoute } from './executor.js';
-import { witness, hashPayload, getEntry, getEntriesByDate, getEntryCount, verifyEntry } from './witness.js';
+import { getEntry, getEntriesByDate, getEntryCount, verifyEntry } from './witness.js';
 
 // ─── CORS ────────────────────────────────────────────────────────────────────
 const CORS = {
