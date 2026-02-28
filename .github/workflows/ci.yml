@@ -24,25 +24,24 @@ jobs:
           find . -name "*.sh" -not -path "./.git/*" -not -path "./node_modules/*" | \
             xargs shellcheck --severity=warning 2>&1 | head -50 || echo "⚠️ shellcheck warnings above"
         continue-on-error: true
-      - name: ✅ ShellCheck complete
-        run: echo "ShellCheck finished"
 
   test:
-    name: CLI Tests
+    name: Tests
     runs-on: [self-hosted, linux, arm64, blackroad]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
-      - name: Install deps
-        run: npm install --if-present --quiet 2>/dev/null || true
-      - name: Run tests
-        run: npm test --if-present 2>/dev/null || echo "✓ no tests yet"
-        continue-on-error: true
-      - name: Check br script
-        run: |
-          [ -f br ] && bash -n br && echo "✓ br script syntax OK" || echo "⚠️ br not found"
-        continue-on-error: true
-      - name: ✅ CLI Tests complete
-        run: echo "CLI tests finished"
+          node-version: '22'
+      - name: Install dependencies
+        run: npm ci
+      - name: Typecheck
+        run: npx tsc --noEmit
+      - name: Lint
+        run: npx prettier --check .
+      - name: Unit tests
+        run: npm test
+      - name: Gateway tests
+        run: node blackroad-core/tests/gateway.test.js
+      - name: Check br script syntax
+        run: zsh -n br
