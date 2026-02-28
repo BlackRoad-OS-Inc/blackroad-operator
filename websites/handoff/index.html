@@ -373,10 +373,19 @@
 
     // ── REPORT to parent if in iframe ──
     if (window.parent !== window) {
+      let parentOrigin = window.location.origin;
+      if (document.referrer) {
+        try {
+          parentOrigin = new URL(document.referrer).origin;
+        } catch (e) {
+          // Fallback to same-origin if referrer is not a valid URL
+          parentOrigin = window.location.origin;
+        }
+      }
       window.parent.postMessage({
         br_state: body.dataset.state,
         ts: Date.now()
-      }, '*');
+      }, parentOrigin);
     }
   </script>
 
