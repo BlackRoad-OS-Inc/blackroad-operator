@@ -56,7 +56,7 @@ jobs:
           else
             # Extract swarm ID from branch name
             BRANCH="${{ github.event.pull_request.head.ref || '' }}"
-            SWARM_ID=$(echo "$BRANCH" | grep -oP 'swarm/\K[^/]+' || echo "")
+            SWARM_ID=$(printf '%s\n' "$BRANCH" | sed -n 's@.*swarm/\([^/]*\).*@\1@p')
           fi
 
           if [ -z "$SWARM_ID" ]; then
