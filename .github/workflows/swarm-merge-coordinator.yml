@@ -83,12 +83,12 @@ jobs:
 
           TOTAL=$(echo "$AGENT_PRS" | jq length)
           MERGEABLE=$(echo "$AGENT_PRS" | jq '[.[] | select(.mergeable == "MERGEABLE")] | length')
-          CHECKS_PASS=$(echo "$AGENT_PRS" | jq '[.[] | select(.statusCheckRollup | all(.conclusion == "SUCCESS"))] | length')
+          CHECKS_PASS=$(echo "$AGENT_PRS" | jq '[.[] | select(.statusCheckRollup != null and (.statusCheckRollup | length > 0) and (.statusCheckRollup | all(.conclusion == "SUCCESS")))] | length')
 
           echo "total=${TOTAL}" >> "$GITHUB_OUTPUT"
           echo "mergeable=${MERGEABLE}" >> "$GITHUB_OUTPUT"
           echo "checks_pass=${CHECKS_PASS}" >> "$GITHUB_OUTPUT"
-          echo "all_ready=$([ "$TOTAL" -gt 0 ] && [ "$TOTAL" -eq "$CHECKS_PASS" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          echo "all_ready=$([ "$TOTAL" -gt 0 ] && [ "$TOTAL" -eq "$CHECKS_PASS" ] && [ "$TOTAL" -eq "$MERGEABLE" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
 
           echo "## Swarm ${SWARM_ID} Status" >> "$GITHUB_STEP_SUMMARY"
           echo "| Metric | Count |" >> "$GITHUB_STEP_SUMMARY"
