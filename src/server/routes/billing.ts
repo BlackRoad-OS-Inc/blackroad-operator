@@ -125,7 +125,12 @@ billingRoutes.get('/usage', authMiddleware('billing:read'), (c) => {
 
 // POST /v1/billing/record — record usage (internal, called by gateway)
 billingRoutes.post('/record', authMiddleware('billing:write'), async (c) => {
-  const body = await c.req.json<{ sub: string; requests?: number; tokens?: number }>()
+  let body: { sub: string; requests?: number; tokens?: number }
+  try {
+    body = await c.req.json<{ sub: string; requests?: number; tokens?: number }>()
+  } catch {
+    return c.json({ error: 'Invalid JSON body' }, 400)
+  }
   if (!body.sub) return c.json({ error: 'sub required' }, 400)
 
   const usage = getOrCreateUsage(body.sub)
