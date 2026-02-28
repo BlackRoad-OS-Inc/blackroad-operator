@@ -116,7 +116,7 @@ async function executeDriveToGitHub(env, route, payload) {
 
   const repo = env.ROADBRIDGE_DEFAULT_REPO || 'blackroad-operator';
   const owner = env.ROADBRIDGE_DEFAULT_OWNER || 'BlackRoad-OS-Inc';
-  const baseBranch = route.githubPath ? 'main' : 'main';
+  const baseBranch = 'main';
   const branchName = `roadbridge/drive-sync-${Date.now()}`;
 
   // Create a branch for the PR
