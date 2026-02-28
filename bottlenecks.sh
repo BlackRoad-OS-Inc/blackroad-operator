@@ -252,7 +252,7 @@ analyze() {
   local load_int load_frac load_x100 core_load_x100
   load_int=${load_1m%.*}
   load_frac=${load_1m#*.}
-  load_x100=$(( load_int * 100 + ${load_frac:-0} ))
+  load_x100=$(( 10#$load_int * 100 + 10#${load_frac:-0} ))
   core_load_x100=$(( load_x100 / cores ))
   if [ $core_load_x100 -ge 150 ]; then
     add_bottleneck "CRITICAL" "load" "System load critically high" \
