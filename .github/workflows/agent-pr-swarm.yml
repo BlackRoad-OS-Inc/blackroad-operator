@@ -119,8 +119,28 @@ jobs:
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             AGENTS="${{ inputs.agents }}"
           else
-            # Extract agents from issue body (format: agents: a,b,c)
-            AGENTS=$(echo "${{ github.event.issue.body }}" | grep -i "^agents:" | sed 's/agents://i' | tr -d ' ' || echo "lucidia,octavia,alice")
+            BODY="${{ github.event.issue.body }}"
+
+            # 1) Try legacy format: agents: a,b,c
+            AGENTS=$(printf '%s\n' "$BODY" | grep -i "^agents:" | sed 's/^[Aa][Gg][Ee][Nn][Tt][Ss]:[[:space:]]*//' | tr -d ' ')
+
+            # 2) If not found, try issue-form format:
+            #    ### Agents   (next non-empty line contains the list)
+            if [ -z "$AGENTS" ]; then
+              AGENTS=$(printf '%s\n' "$BODY" | awk 'BEGIN{IGNORECASE=1}
+                /^###[[:space:]]*agents[[:space:]]*$/ { 
+                  # Read the next non-empty line
+                  while (getline line) {
+                    gsub(/^[[:space:]]+|[[:space:]]+$/, "", line);
+                    if (length(line) > 0) { print line; exit }
+                  }
+                }')
+            fi
+
+            # 3) Fallback to default agents if still empty
+            if [ -z "$AGENTS" ]; then
+              AGENTS="lucidia,octavia,alice"
+            fi
           fi
 
           if [ "$AGENTS" = "all" ]; then
