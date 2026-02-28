@@ -301,24 +301,44 @@ ORDER BY category, subdomain;
           <div class="template-name">📊 Queryable Views</div>
         </div>
         <div class="template-desc">
-          Three pre-built views for common queries across the template system:
+          Four pre-built views for common queries across the template system:
         </div>
         <div class="preview-block">-- Templates grouped by category with counts
 CREATE VIEW templates_by_category AS
-SELECT category, COUNT(*) as template_count
-FROM template_catalog GROUP BY category;
+SELECT category, COUNT(*) AS template_count
+FROM template_catalog
+GROUP BY category;
 
 -- Top 10 most-used templates
 CREATE VIEW most_used_templates AS
-SELECT name, emoji, usage_count FROM template_catalog
-WHERE usage_count > 0 ORDER BY usage_count DESC LIMIT 10;
+SELECT name, emoji, usage_count
+FROM template_catalog
+WHERE usage_count > 0
+ORDER BY usage_count DESC
+LIMIT 10;
+
+-- Template dependency graph
+CREATE VIEW template_dependency_graph AS
+SELECT
+  t.template_id,
+  t.name           AS template_name,
+  d.depends_on_id  AS depends_on_template_id,
+  dp.name          AS depends_on_template_name
+FROM template_dependencies d
+JOIN template_catalog t  ON t.template_id  = d.template_id
+JOIN template_catalog dp ON dp.template_id = d.depends_on_id;
 
 -- Domain statistics with live/pending counts
 CREATE VIEW domain_stats AS
-SELECT domain, emoji, purpose, subdomain_count,
-  (SELECT COUNT(*) WHERE status = 'live') as live,
-  (SELECT COUNT(*) WHERE status = 'pending') as pending
-FROM template_003_domain_nodes;</div>
+SELECT
+  domain,
+  emoji,
+  purpose,
+  COUNT(*) AS subdomain_count,
+  SUM(CASE WHEN status = 'live' THEN 1 ELSE 0 END)    AS live,
+  SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) AS pending
+FROM template_003_domain_nodes
+GROUP BY domain, emoji, purpose;</div>
       </div>
 
     </div>
