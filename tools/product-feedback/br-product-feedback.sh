@@ -367,12 +367,20 @@ cmd_submit() {
     read -r -p "  > " url
   fi
 
-  # Escape single quotes for SQL
+  # Ensure defaults and escape single quotes for SQL
+  category="${category:-product}"
+  submitted_by="${submitted_by:-anonymous}"
+
   name=$(echo "$name" | sed "s/'/''/g")
   description=$(echo "$description" | sed "s/'/''/g")
+  org=$(echo "$org" | sed "s/'/''/g")
+  tags=$(echo "$tags" | sed "s/'/''/g")
+  submitted_by=$(echo "$submitted_by" | sed "s/'/''/g")
+  url=$(echo "$url" | sed "s/'/''/g")
+  category=$(echo "$category" | sed "s/'/''/g")
 
   sqlite3 "$DB" "INSERT INTO submissions(name, org, category, description, url, submitted_by, tags, source)
-    VALUES('$name', '$org', '${category:-product}', '$description', '$url', '${submitted_by:-anonymous}', '$tags', 'manual');"
+    VALUES('$name', '$org', '$category', '$description', '$url', '$submitted_by', '$tags', 'manual');"
 
   local new_id
   new_id=$(sqlite3 "$DB" "SELECT MAX(id) FROM submissions;")
