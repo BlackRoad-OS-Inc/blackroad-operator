@@ -7,5 +7,7 @@ export const logsCommand = new Command('logs')
   .option('-n <lines>', 'Number of lines', '50')
   .action((opts: { n: string }) => {
     logger.info(`Tailing last ${opts.n} log lines...`)
-    logger.warn('Log tailing not yet implemented. Use wrangler tail or railway logs.')
+    logger.warn(
+      'Log tailing not yet implemented. Use wrangler tail or railway logs.',
+    )
   })
