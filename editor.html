@@ -730,7 +730,18 @@ function toggleFind() {
   }
 }
 
-document.getElementById('find-input').addEventListener('input', () => doFind());
+const findInputEl = document.getElementById('find-input');
+findInputEl.addEventListener('input', () => doFind());
+findInputEl.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' || event.key === 'Esc') {
+    event.preventDefault();
+    const bar = document.getElementById('find-bar');
+    if (bar.classList.contains('open')) {
+      bar.classList.remove('open');
+    }
+    editor.focus();
+  }
+});
 
 function doFind() {
   const q = document.getElementById('find-input').value;
