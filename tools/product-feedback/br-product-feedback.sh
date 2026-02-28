@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/zsh
 # BR Product Feedback — Dig through orgs, submit favorites, surface what works
 # Usage: br feedback <command>
 #
