@@ -1280,15 +1280,27 @@
             updateScrollProgress();
         })();
         // Scroll reveal
-        const observer = new IntersectionObserver((entries) => {
+        const revealElements = document.querySelectorAll('.reveal');
+        let remainingRevealTargets = revealElements.length;
+
+        const observer = new IntersectionObserver((entries, obs) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     entry.target.classList.add('visible');
+                    // Stop observing this element once it has been revealed
+                    obs.unobserve(entry.target);
+                    if (remainingRevealTargets > 0) {
+                        remainingRevealTargets -= 1;
+                        if (remainingRevealTargets === 0) {
+                            // All reveal elements have been handled; disconnect observer
+                            obs.disconnect();
+                        }
+                    }
                 }
             });
         }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
 
-        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+        revealElements.forEach(el => observer.observe(el));
     </script>
 
 </body>
