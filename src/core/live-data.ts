@@ -212,7 +212,7 @@ export async function probeService(name: string, url: string, timeoutMs: number 
 
 export async function probeAllServices(): Promise<ServiceProbe[]> {
   const services = [
-    { name: 'Gateway', url: process.env['BLACKROAD_GATEWAY_URL'] ?? 'http://127.0.0.1:8787' },
+    { name: 'Gateway', url: (process.env['BLACKROAD_GATEWAY_URL'] ?? 'http://127.0.0.1:8787') + '/v1/health' },
     { name: 'Ollama', url: (process.env['OLLAMA_URL'] ?? 'http://localhost:11434') + '/api/tags' },
     { name: 'GitHub API', url: 'https://api.github.com' },
   ]
