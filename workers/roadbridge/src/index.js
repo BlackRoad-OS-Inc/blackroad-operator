@@ -135,6 +135,17 @@ async function handleDriveWebhook(request, env) {
     return json({ ok: true, event: 'sync', channelId });
   }
 
+  // removal/trash notifications — acknowledge but do not process as modifications
+  if (resourceState === 'remove' || resourceState === 'trash') {
+    return json({
+      ok: true,
+      event: `drive.${resourceState}`,
+      action: 'ignored',
+      reason: 'resource removed or trashed',
+      channelId,
+      resourceId,
+    });
+  }
   // Map Drive resource state to our change type
   const changeType = resourceState === 'add' ? 'created' : 'modified';
 
