@@ -154,6 +154,10 @@ meshCommand
       console.log(`  Score: ${score}% | Press Ctrl+C to stop`)
     }
 
-    await run()
-    setInterval(run, intervalMs)
+    const loop = async (): Promise<void> => {
+      await run()
+      setTimeout(loop, intervalMs)
+    }
+
+    await loop()
   })
