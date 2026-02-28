@@ -41,7 +41,9 @@ jobs:
     if: |
       github.event_name == 'workflow_dispatch' ||
       (github.event_name == 'pull_request_review' && contains(github.event.pull_request.labels.*.name, 'swarm')) ||
-      (github.event_name == 'check_suite' && github.event.check_suite.conclusion == 'success')
+      (github.event_name == 'check_suite' &&
+        github.event.check_suite.conclusion == 'success' &&
+        startsWith(join(github.event.check_suite.pull_requests.*.head.ref, ','), 'swarm/'))
 
     steps:
       - uses: actions/checkout@v4
