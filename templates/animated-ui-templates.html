@@ -90,14 +90,30 @@ function drawLn(x1,y1,w,p,a=1,lw=.8) {
 // 4 templates × ~4s each = 16s loop at 60fps = 960 frames
 // Each template: 240 frames
 // build:0-120, hold:120-180, exit:180-240
-const LOOP   = 960;
-const SEG    = 240;
+const LOOP   = 960;   // legacy "frame" based loop length (at 60fps)
+const SEG    = 240;   // legacy "frame" based segment length (at 60fps)
+
+// Time-based durations derived from the original 60fps assumptions
+const FPS_TARGET = 60;
+const LOOP_MS    = (LOOP / FPS_TARGET) * 1000; // ~16000ms
+const SEG_MS     = (SEG  / FPS_TARGET) * 1000; // ~4000ms
+
+// Start time for the looping scene animation
+let SCENE_START_MS = null;
 
 // scene index and local progress 0..1
+// NOTE: `f` is kept for backwards compatibility but is no longer used
 function scene(f) {
-  const ff = ((f % LOOP) + LOOP) % LOOP;
-  const si  = Math.floor(ff / SEG);
-  const sp  = (ff % SEG) / SEG;
+  if (SCENE_START_MS === null) {
+    SCENE_START_MS = performance.now();
+  }
+  const now = performance.now();
+  // Elapsed time within the loop, wrapped to [0, LOOP_MS)
+  let elapsed = now - SCENE_START_MS;
+  if (elapsed < 0) elapsed = 0;
+  const ee = ((elapsed % LOOP_MS) + LOOP_MS) % LOOP_MS;
+  const si  = Math.floor(ee / SEG_MS);
+  const sp  = (ee % SEG_MS) / SEG_MS;
   return [si, sp];
 }
 
