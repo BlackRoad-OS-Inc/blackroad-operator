@@ -29,8 +29,13 @@ const PI2 = Math.PI * 2;
 let W, H, frame = 0;
 
 function resize() {
-  W = C.width  = window.innerWidth;
-  H = C.height = window.innerHeight;
+  const dpr = window.devicePixelRatio || 1;
+  const rect = C.getBoundingClientRect();
+  W = rect.width;
+  H = rect.height;
+  C.width  = W * dpr;
+  C.height = H * dpr;
+  X.setTransform(dpr, 0, 0, dpr, 0, 0);
 }
 resize();
 window.addEventListener('resize', resize);
