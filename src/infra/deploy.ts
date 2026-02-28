@@ -129,9 +129,21 @@ export function deployToPi(host: string, opts: DeployOptions): DeployResult {
     return { provider: `pi:${host}`, success: true }
   }
 
+  const service = opts.service
+  const servicePattern = /^[a-zA-Z0-9_-]+$/
+  if (!servicePattern.test(service)) {
+    const message = `Invalid service name: "${service}". Allowed pattern: [a-zA-Z0-9_-]+`
+    logger.error(message)
+    return {
+      provider: `pi:${host}`,
+      success: false,
+      error: message,
+    }
+  }
+
   const result = exec(
-    `rsync -az --exclude node_modules --exclude .git . pi@${host}:~/blackroad/${opts.service}/ && ` +
-      `ssh pi@${host} "cd ~/blackroad/${opts.service} && npm install --production 2>/dev/null; sudo systemctl restart ${opts.service} 2>/dev/null || true"`,
+    `rsync -az --exclude node_modules --exclude .git . pi@${host}:~/blackroad/${service}/ && ` +
+      `ssh pi@${host} "cd ~/blackroad/${service} && npm install --production 2>/dev/null; sudo systemctl restart ${service} 2>/dev/null || true"`,
   )
 
   return {
