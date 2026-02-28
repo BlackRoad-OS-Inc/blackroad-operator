@@ -105,13 +105,16 @@ else
     # Check for direct provider calls in non-doc/config code
     direct_calls=$(echo "$diff_output" | grep -E '(fetch|axios|http\.request|curl).*api\.(openai|anthropic|claude)\.com' || true)
 
+    # Check for direct provider base URLs (e.g., in configs/manifests)
+    provider_urls=$(echo "$diff_output" | grep -E 'https?://(api\.)?(openai|anthropic|claude)\.com' || true)
+
     # Check for merge conflicts
     conflicts=$(echo "$diff_output" | grep -E '^\+(<<<<<<<|=======|>>>>>>>)' || true)
 
     if [ -n "$hardcoded_keys" ]; then
       fail "PR #$pr_num — Hardcoded API keys detected"
-    elif [ -n "$direct_calls" ]; then
-      fail "PR #$pr_num — Direct provider API calls bypassing gateway"
+    elif [ -n "$direct_calls" ] || [ -n "$provider_urls" ]; then
+      fail "PR #$pr_num — Direct provider API usage bypassing gateway"
     elif [ -n "$conflicts" ]; then
       warn "PR #$pr_num — Unresolved merge conflicts"
     else
