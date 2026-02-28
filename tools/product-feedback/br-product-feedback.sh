@@ -173,8 +173,15 @@ for r in repos:
     print(f'{name}\t{desc}\t{lang}\t{stars}\t{url}\t{score}\t{topics}\t{\"fork\" if fork else \"original\"}')
 " 2>/dev/null | while IFS=$'\t' read -r name desc lang stars url score topics source_type; do
         # Store in dig_results
+        # Escape single quotes in all string fields before inserting into SQLite
+        org_esc=$(printf "%s" "$target_org" | sed "s/'/''/g")
+        name_esc=$(printf "%s" "$name" | sed "s/'/''/g")
+        type_esc=$(printf "%s" "$source_type" | sed "s/'/''/g")
+        url_esc=$(printf "%s" "$url" | sed "s/'/''/g")
+        lang_esc=$(printf "%s" "$lang" | sed "s/'/''/g")
+        desc_esc=$(printf "%s" "$desc" | sed "s/'/''/g")
         sqlite3 "$DB" "INSERT INTO dig_results(org, repo, item_type, name, path, description, stars, language, useful_score)
-          VALUES('$target_org', '$name', '$source_type', '$name', '$url', '$(echo "$desc" | sed "s/'/''/g")', $stars, '$lang', $score);" 2>/dev/null
+          VALUES('$org_esc', '$name_esc', '$type_esc', '$name_esc', '$url_esc', '$desc_esc', $stars, '$lang_esc', $score);" 2>/dev/null
         ((items_found++))
 
         # Display interesting ones (score > 3)
