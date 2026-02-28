@@ -1234,12 +1234,51 @@
 
     <script>
         // Scroll progress bar
-        window.addEventListener('scroll', () => {
-            const bar = document.getElementById('scrollProgress');
-            const pct = (document.documentElement.scrollTop / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
-            bar.style.width = pct + '%';
-        });
+        (function () {
+            let scrollProgressBar = document.getElementById('scrollProgress');
+            let scrollTicking = false;
 
+            function updateScrollProgress() {
+                if (!scrollProgressBar) {
+                    scrollProgressBar = document.getElementById('scrollProgress');
+                    if (!scrollProgressBar) {
+                        scrollTicking = false;
+                        return;
+                    }
+                }
+
+                const docEl = document.documentElement;
+                const scrollTop = docEl.scrollTop || window.pageYOffset || 0;
+                const scrollHeight = docEl.scrollHeight || 0;
+                const viewportHeight = window.innerHeight || 0;
+                const denominator = scrollHeight - viewportHeight;
+
+                let pct = 0;
+                if (denominator > 0) {
+                    pct = (scrollTop / denominator) * 100;
+                }
+
+                // Clamp percentage to [0, 100]
+                pct = Math.max(0, Math.min(100, pct));
+
+                scrollProgressBar.style.width = pct + '%';
+                scrollTicking = false;
+            }
+
+            window.addEventListener(
+                'scroll',
+                function () {
+                    if (!scrollTicking) {
+                        scrollTicking = true;
+                        window.requestAnimationFrame(updateScrollProgress);
+                    }
+                },
+                { passive: true }
+            );
+
+            // Initialize on load in case the page starts scrolled
+            updateScrollProgress();
+        })();
         // Scroll reveal
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
