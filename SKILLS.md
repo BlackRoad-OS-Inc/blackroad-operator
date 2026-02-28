@@ -15,6 +15,7 @@
 - [Skill Communication](#skill-communication)
 - [Testing Skills](#testing-skills)
 - [Publishing Skills](#publishing-skills)
+- [Mobile Installation](MOBILE_SKILL_INSTALL.md)
 - [Skill Registry](#skill-registry)
 - [Best Practices](#best-practices)
 
@@ -809,6 +810,17 @@ blackroad-skills install my-skill@1.0.0
 # Install from git
 blackroad-skills install git+https://github.com/user/my-skill
 ```
+
+### Install on Mobile
+
+Skills can be installed directly from the Claude mobile app. See the full walkthrough in [MOBILE_SKILL_INSTALL.md](MOBILE_SKILL_INSTALL.md).
+
+**Quick steps:**
+1. Download the `.skill` file to your phone
+2. Open Claude app → **Settings** → **Skills**
+3. Tap **+** / **Install** and select the file
+
+Skills install to your account — once installed, they work on all devices.
 
 ---
 
