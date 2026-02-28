@@ -122,12 +122,63 @@ async function fetchRepoContent(org, repo, path, env) {
 
 // ─── Service proxying ───────────────────────────────────────────────────────
 
+/**
+ * Sanitize incoming request headers before proxying to an upstream service.
+ * Drops hop-by-hop, connection-specific, platform, and credential-bearing headers.
+ */
+function sanitizeRequestHeaders(originalHeaders) {
+  const sanitized = new Headers();
+
+  // Headers that must not be forwarded to upstream (case-insensitive)
+  const blockedNames = new Set([
+    "connection",
+    "keep-alive",
+    "proxy-authenticate",
+    "proxy-authorization",
+    "te",
+    "trailer",
+    "trailers",
+    "transfer-encoding",
+    "upgrade",
+    "host",
+    "content-length",
+    // Credentials / sensitive
+    "authorization",
+    "proxy-authorization",
+    "cookie",
+    "set-cookie",
+  ]);
+
+  for (const [name, value] of originalHeaders) {
+    const lowerName = name.toLowerCase();
+
+    // Drop any explicitly blocked headers
+    if (blockedNames.has(lowerName)) {
+      continue;
+    }
+
+    // Drop Cloudflare-specific and similar platform headers
+    if (lowerName.startsWith("cf-")) {
+      continue;
+    }
+
+    // Optionally avoid forwarding X-Forwarded-*; let the platform manage these.
+    if (lowerName.startsWith("x-forwarded-")) {
+      continue;
+    }
+
+    sanitized.append(name, value);
+  }
+
+  return sanitized;
+}
+
 async function proxyToService(serviceUrl, subpath, request) {
   const target = `${serviceUrl}${subpath}`;
   try {
     const proxyRes = await fetch(target, {
       method: request.method,
-      headers: request.headers,
+      headers: sanitizeRequestHeaders(request.headers),
       body: request.method !== "GET" && request.method !== "HEAD" ? request.body : undefined,
     });
 
