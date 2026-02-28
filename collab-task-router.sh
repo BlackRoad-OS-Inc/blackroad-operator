@@ -39,7 +39,11 @@ TARGET=""
 REASON=""
 METHOD=""
 
-if echo "$TASK_LOWER" | grep -qE "bash|script|shell|deploy|infra|devops|ssh|git|ci|cd|docker|k8s|pipeline|server|daemon|cron"; then
+if echo "$TASK_LOWER" | grep -qE "swarm|parallel agents|multi-agent|group call|pr swarm|agent prs"; then
+  TARGET="swarm"
+  REASON="multi-agent parallel work → PR Swarm"
+  METHOD="swarm"
+elif echo "$TASK_LOWER" | grep -qE "bash|script|shell|deploy|infra|devops|ssh|git|ci|cd|docker|k8s|pipeline|server|daemon|cron"; then
   TARGET="lucidia-copilot-cli"
   REASON="bash/infra task → Primary CLI operator"
   METHOD="execute"
@@ -133,6 +137,18 @@ print(d.get('response','[no response]'))
   fi
 fi
 
+# If swarm, dispatch to swarm system
+if [[ "$METHOD" == "swarm" ]]; then
+  echo "${PURPLE}  Dispatching to PR Swarm...${NC}"
+  echo ""
+  if [[ "$AUTO_EXEC" == "--exec" ]]; then
+    bash "$(dirname "$0")/swarm.sh" launch "$TASK" "lucidia,octavia,alice,cipher" "parallel"
+  else
+    echo "  ${DIM}(Pass --exec to auto-launch swarm)${NC}"
+    echo "  Manual: ./swarm.sh launch \"$TASK\" lucidia,octavia,cipher"
+  fi
+fi
+
 echo ""
-echo "${GREEN}✅ Task routed.${NC}  Check: ./collab-status.sh"
+echo "${GREEN}Task routed.${NC}  Check: ./collab-status.sh"
 echo ""
