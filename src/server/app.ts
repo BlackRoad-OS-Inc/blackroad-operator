@@ -43,6 +43,7 @@ export function createApp() {
   app.route('/v1/agents', agentRoutes)
   app.route('/v1/billing', billingRoutes)
   app.route('/v1/gateway', gatewayRoutes)
+  app.use('/v1/metrics/*', authMiddleware('metrics:read'))
   app.route('/v1/metrics', metricsRoutes)
 
   // Root info
