@@ -137,7 +137,8 @@ export const bottlenecksCommand = new Command('bottlenecks')
     }
 
     if (opts.watch) {
-      const intervalSec = parseInt(opts.interval ?? '5', 10)
+      const rawInterval = parseInt(opts.interval ?? '5', 10)
+      const intervalSec = Number.isFinite(rawInterval) && rawInterval > 0 ? rawInterval : 5
       logger.info(`Watching bottlenecks every ${intervalSec}s. Press Ctrl+C to stop.`)
       console.log()
 
