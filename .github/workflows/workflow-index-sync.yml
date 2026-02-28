@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   sync-index:
-    runs-on: [self-hosted, blackroad-fleet]
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -48,22 +48,22 @@ jobs:
             }
 
             // Parse workflow ID components
-            const [prefix, date, scope, seq] = workflowId.split('-');
+            const [prefix, date, idScope, seq] = workflowId.split('-');
 
             // Extract dependencies from body
             const depsMatch = issue.body?.match(/Dependencies?:\s*([^\n]+)/i);
-            const deps = depsMatch 
+            const deps = depsMatch
               ? depsMatch[1].split(',').map(d => d.trim()).filter(d => d)
               : [];
 
             // Extract other metadata from labels
-            const trafficLight = issue.labels.find(l => 
+            const trafficLight = issue.labels.find(l =>
               l.name.match(/[🟢🟡🔴]/)
             )?.name || '🟢';
 
             const state = issue.state === 'closed' ? 'Done' : 'Active';
-            
-            const scope = issue.labels.find(l => 
+
+            const scope = issue.labels.find(l =>
               ['Local', 'Service', 'System', 'Public', 'Experimental'].includes(l.name)
             )?.name || 'Service';
 

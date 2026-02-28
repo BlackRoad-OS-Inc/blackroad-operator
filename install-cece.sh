@@ -20,7 +20,7 @@ cat << 'EOF'
 EOF
 echo -e "${NC}\n"
 
-cd /Users/alexa/blackroad
+cd "$(cd "$(dirname "$0")" && pwd)"
 
 # Step 1: Create directories
 echo -e "${CYAN}Step 1: Creating directories...${NC}"
