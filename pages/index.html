@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BlackRoad Sovereign — Your AI. Your Hardware. Your Rules.</title>
+  <meta name="description" content="BlackRoad OS Sovereign Memory & Key Management Dashboard. Provider-independent AI infrastructure.">
+  <style>
+    :root {
+      --black: #000000;
+      --white: #FFFFFF;
+      --amber: #F5A623;
+      --hot-pink: #FF1D6C;
+      --electric-blue: #2979FF;
+      --violet: #9C27B0;
+      --bg: #0a0a0f;
+      --surface: #12121a;
+      --surface2: #1a1a28;
+      --border: #2a2a3a;
+      --text: #e0e0e8;
+      --text-dim: #808098;
+      --green: #00e676;
+      --red: #ff1744;
+      --gradient-brand: linear-gradient(135deg, var(--amber) 0%, var(--hot-pink) 38.2%, var(--violet) 61.8%, var(--electric-blue) 100%);
+      --space-xs: 8px;
+      --space-sm: 13px;
+      --space-md: 21px;
+      --space-lg: 34px;
+      --space-xl: 55px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Mono', 'Fira Code', monospace;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.618;
+      min-height: 100vh;
+    }
+    a { color: var(--electric-blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* Header */
+    .header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: var(--space-md) var(--space-lg);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .header-left { display: flex; align-items: center; gap: var(--space-md); }
+    .logo {
+      width: 40px; height: 40px;
+      background: var(--gradient-brand);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 900; font-size: 18px; color: white;
+    }
+    .header h1 { font-size: 18px; font-weight: 700; }
+    .header h1 span { background: var(--gradient-brand); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .header-right { display: flex; gap: var(--space-sm); align-items: center; }
+    .status-badge {
+      background: rgba(0, 230, 118, 0.15);
+      color: var(--green);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Navigation */
+    .nav {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      gap: 0;
+      padding: 0 var(--space-lg);
+    }
+    .nav-tab {
+      padding: var(--space-sm) var(--space-md);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      color: var(--text-dim);
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .nav-tab:hover { color: var(--text); }
+    .nav-tab.active {
+      color: var(--hot-pink);
+      border-bottom-color: var(--hot-pink);
+    }
+
+    /* Main content */
+    .main { padding: var(--space-lg); max-width: 1400px; margin: 0 auto; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* Cards */
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--space-md); }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: var(--space-md);
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--space-sm);
+    }
+    .card h3 { font-size: 14px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; }
+    .card .value { font-size: 32px; font-weight: 800; }
+    .card .value.gradient { background: var(--gradient-brand); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+    /* Tables */
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { text-align: left; padding: var(--space-xs) var(--space-sm); color: var(--text-dim); font-weight: 600; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; border-bottom: 1px solid var(--border); }
+    td { padding: var(--space-xs) var(--space-sm); border-bottom: 1px solid rgba(255,255,255,0.05); }
+    tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* Buttons */
+    .btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 13px;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+    .btn:hover { border-color: var(--hot-pink); }
+    .btn-primary {
+      background: var(--gradient-brand);
+      color: white;
+      border: none;
+      font-weight: 600;
+    }
+    .btn-sm { padding: 4px 10px; font-size: 12px; }
+
+    /* Forms */
+    .form-group { margin-bottom: var(--space-sm); }
+    .form-group label { display: block; font-size: 12px; color: var(--text-dim); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+    input, select, textarea {
+      width: 100%;
+      padding: 8px 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 13px;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--hot-pink);
+    }
+    textarea { resize: vertical; min-height: 80px; }
+
+    /* Code */
+    .code-block {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: var(--space-sm);
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 12px;
+      overflow-x: auto;
+      white-space: pre;
+      color: var(--amber);
+    }
+    code { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 12px; color: var(--amber); background: rgba(245, 166, 35, 0.1); padding: 2px 6px; border-radius: 4px; }
+
+    /* Tags */
+    .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .tag-fact { background: rgba(0, 230, 118, 0.15); color: var(--green); }
+    .tag-observation { background: rgba(41, 121, 255, 0.15); color: var(--electric-blue); }
+    .tag-inference { background: rgba(156, 39, 176, 0.15); color: var(--violet); }
+    .tag-commitment { background: rgba(245, 166, 35, 0.15); color: var(--amber); }
+    .tag-leak { background: rgba(255, 29, 108, 0.15); color: var(--hot-pink); }
+    .tag-experience { background: rgba(41, 121, 255, 0.15); color: var(--electric-blue); }
+
+    /* Integrity indicator */
+    .integrity { display: flex; align-items: center; gap: 6px; }
+    .integrity-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .integrity-dot.valid { background: var(--green); box-shadow: 0 0 8px var(--green); }
+    .integrity-dot.broken { background: var(--red); box-shadow: 0 0 8px var(--red); }
+
+    /* Chain visualization */
+    .chain-viz { display: flex; gap: 4px; flex-wrap: wrap; margin-top: var(--space-sm); }
+    .chain-block {
+      width: 12px; height: 12px;
+      border-radius: 2px;
+      background: var(--green);
+      opacity: 0.7;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .chain-block:hover { opacity: 1; transform: scale(1.5); }
+    .chain-block.broken { background: var(--red); }
+
+    /* Response display */
+    .response {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: var(--space-sm);
+      margin-top: var(--space-sm);
+      font-family: 'SF Mono', monospace;
+      font-size: 12px;
+      max-height: 400px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    /* Section headers */
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--space-md);
+    }
+    .section-header h2 { font-size: 20px; }
+
+    /* Fullwidth card */
+    .card-full { grid-column: 1 / -1; }
+
+    /* Animated gradient border */
+    .glow-border {
+      position: relative;
+      overflow: hidden;
+    }
+    .glow-border::before {
+      content: '';
+      position: absolute;
+      top: -2px; left: -2px; right: -2px; bottom: -2px;
+      background: var(--gradient-brand);
+      border-radius: 14px;
+      z-index: -1;
+      opacity: 0.5;
+    }
+
+    /* Pulse animation for live status */
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    .pulse { animation: pulse 2s ease-in-out infinite; }
+
+    /* Toast notifications */
+    .toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 1000; display: flex; flex-direction: column; gap: 8px; }
+    .toast {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 13px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+      animation: slideIn 0.3s ease;
+      max-width: 400px;
+    }
+    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+    /* API endpoint highlight */
+    .endpoint {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 6px;
+      font-size: 13px;
+    }
+    .method { font-weight: 700; font-size: 11px; padding: 2px 8px; border-radius: 4px; }
+    .method-get { background: rgba(0, 230, 118, 0.15); color: var(--green); }
+    .method-post { background: rgba(41, 121, 255, 0.15); color: var(--electric-blue); }
+    .method-put { background: rgba(245, 166, 35, 0.15); color: var(--amber); }
+    .method-delete { background: rgba(255, 23, 68, 0.15); color: var(--red); }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: var(--space-lg);
+      color: var(--text-dim);
+      font-size: 12px;
+      border-top: 1px solid var(--border);
+      margin-top: var(--space-xl);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-left">
+      <div class="logo">BR</div>
+      <h1><span>BlackRoad Sovereign</span></h1>
+    </div>
+    <div class="header-right">
+      <span class="status-badge pulse">SOVEREIGN</span>
+    </div>
+  </header>
+
+  <!-- Navigation -->
+  <nav class="nav">
+    <div class="nav-tab active" data-tab="dashboard">Dashboard</div>
+    <div class="nav-tab" data-tab="memory">Memory</div>
+    <div class="nav-tab" data-tab="keys">Keys</div>
+    <div class="nav-tab" data-tab="leaks">Leaks</div>
+    <div class="nav-tab" data-tab="api">API</div>
+    <div class="nav-tab" data-tab="chain">Chain</div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="main">
+
+    <!-- ═══ DASHBOARD TAB ═══ -->
+    <div id="tab-dashboard" class="tab-content active">
+      <div class="section-header">
+        <h2>Sovereign Dashboard</h2>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-sm" onclick="refreshDashboard()">Refresh</button>
+          <button class="btn btn-primary btn-sm" onclick="connectApi()">Connect API</button>
+        </div>
+      </div>
+      <div class="grid">
+        <div class="card glow-border">
+          <div class="card-header"><h3>Total Memories</h3></div>
+          <div class="value gradient" id="stat-memories">0</div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>Active Sessions</h3></div>
+          <div class="value" id="stat-sessions">0</div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>Chain Length</h3></div>
+          <div class="value" id="stat-chain">0</div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <h3>Chain Integrity</h3>
+          </div>
+          <div class="integrity" id="stat-integrity">
+            <div class="integrity-dot valid"></div>
+            <span style="font-size: 20px; font-weight: 700;">INTACT</span>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>Active Agents</h3></div>
+          <div class="value" id="stat-agents">0</div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>Memory Leaks</h3></div>
+          <div class="value" style="color: var(--hot-pink)" id="stat-leaks">0</div>
+        </div>
+        <div class="card card-full">
+          <h3 style="margin-bottom: var(--space-sm)">Memory by Type</h3>
+          <div id="memory-by-type" style="display:flex;gap:var(--space-sm);flex-wrap:wrap;"></div>
+        </div>
+        <div class="card card-full">
+          <h3 style="margin-bottom: var(--space-sm)">Recent Memories</h3>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>ID</th><th>Type</th><th>Agent</th><th>Content</th><th>Confidence</th><th>Time</th></tr></thead>
+              <tbody id="recent-memories"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ MEMORY TAB ═══ -->
+    <div id="tab-memory" class="tab-content">
+      <div class="section-header">
+        <h2>Memory Store</h2>
+      </div>
+      <div class="grid">
+        <div class="card">
+          <h3 style="margin-bottom: var(--space-sm)">Remember</h3>
+          <div class="form-group">
+            <label>Content</label>
+            <textarea id="mem-content" placeholder="What should I remember?"></textarea>
+          </div>
+          <div style="display:flex;gap:8px">
+            <div class="form-group" style="flex:1">
+              <label>Type</label>
+              <select id="mem-type">
+                <option value="fact">Fact</option>
+                <option value="observation">Observation</option>
+                <option value="inference">Inference</option>
+                <option value="commitment">Commitment</option>
+                <option value="experience">Experience</option>
+              </select>
+            </div>
+            <div class="form-group" style="flex:1">
+              <label>Agent</label>
+              <input id="mem-agent" value="dashboard" placeholder="Agent name">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Tags (comma-separated)</label>
+            <input id="mem-tags" placeholder="tag1, tag2">
+          </div>
+          <div class="form-group">
+            <label>Confidence (0.0 - 1.0)</label>
+            <input id="mem-confidence" type="number" min="0" max="1" step="0.1" value="1.0">
+          </div>
+          <button class="btn btn-primary" onclick="rememberMemory()" style="width:100%">Remember</button>
+          <div id="remember-response" class="response" style="display:none"></div>
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom: var(--space-sm)">Recall</h3>
+          <div class="form-group">
+            <label>Search Query</label>
+            <input id="recall-query" placeholder="Search memories...">
+          </div>
+          <div style="display:flex;gap:8px">
+            <div class="form-group" style="flex:1">
+              <label>Agent Filter</label>
+              <input id="recall-agent" placeholder="Any agent">
+            </div>
+            <div class="form-group" style="flex:1">
+              <label>Type Filter</label>
+              <select id="recall-type">
+                <option value="">All</option>
+                <option value="fact">Fact</option>
+                <option value="observation">Observation</option>
+                <option value="inference">Inference</option>
+                <option value="commitment">Commitment</option>
+                <option value="leak">Leak</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="recallMemory()" style="width:100%">Recall</button>
+          <div id="recall-results" class="response" style="display:none"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ KEYS TAB ═══ -->
+    <div id="tab-keys" class="tab-content">
+      <div class="section-header">
+        <h2>Sovereign Keys</h2>
+      </div>
+      <div class="grid">
+        <div class="card">
+          <h3 style="margin-bottom: var(--space-sm)">Generate Key</h3>
+          <div class="form-group">
+            <label>Purpose</label>
+            <select id="key-purpose">
+              <option value="pat">PAT (Personal Access Token)</option>
+              <option value="api">API Key</option>
+              <option value="agent">Agent Key</option>
+              <option value="memory">Memory Key</option>
+              <option value="session">Session Key</option>
+              <option value="webhook">Webhook Key</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Scopes (comma-separated)</label>
+            <input id="key-scopes" value="*" placeholder="read,write,admin">
+          </div>
+          <div class="form-group">
+            <label>Agent (optional)</label>
+            <input id="key-agent" placeholder="Agent name">
+          </div>
+          <div class="form-group">
+            <label>Expires in (days, 0 = never)</label>
+            <input id="key-expires" type="number" value="0" min="0">
+          </div>
+          <button class="btn btn-primary" onclick="generateKey()" style="width:100%">Generate Sovereign Key</button>
+          <div id="key-response" class="response" style="display:none"></div>
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom: var(--space-sm)">Generate Key Pair</h3>
+          <p style="color: var(--text-dim); font-size: 13px; margin-bottom: var(--space-sm)">
+            Generate a public/secret key pair for agent-to-agent authentication.
+          </p>
+          <button class="btn btn-primary" onclick="generatePair()" style="width:100%">Generate Key Pair</button>
+          <div id="pair-response" class="response" style="display:none"></div>
+          <h3 style="margin-top: var(--space-md); margin-bottom: var(--space-sm)">Validate Key</h3>
+          <div class="form-group">
+            <label>Key to Validate</label>
+            <input id="validate-key" placeholder="br_pat_...">
+          </div>
+          <button class="btn" onclick="validateKey()" style="width:100%">Validate</button>
+          <div id="validate-response" class="response" style="display:none"></div>
+        </div>
+        <div class="card card-full">
+          <h3 style="margin-bottom: var(--space-sm)">Active Keys</h3>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>ID</th><th>Purpose</th><th>Key (masked)</th><th>Fingerprint</th><th>Scopes</th><th>Created</th><th>Status</th><th>Actions</th></tr></thead>
+              <tbody id="keys-list"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ LEAKS TAB ═══ -->
+    <div id="tab-leaks" class="tab-content">
+      <div class="section-header">
+        <h2>Memory Leaks</h2>
+        <p style="color: var(--text-dim); font-size: 13px">Cross-agent persistent memory shares. Hash-chained. Tamper-proof. Yours forever.</p>
+      </div>
+      <div class="grid">
+        <div class="card">
+          <h3 style="margin-bottom: var(--space-sm)">Create Memory Leak</h3>
+          <div class="form-group">
+            <label>Source Agent</label>
+            <input id="leak-source" placeholder="LUCIDIA">
+          </div>
+          <div class="form-group">
+            <label>Target Agent</label>
+            <input id="leak-target" placeholder="OCTAVIA">
+          </div>
+          <div class="form-group">
+            <label>Memory Content</label>
+            <textarea id="leak-content" placeholder="The memory to leak between agents..."></textarea>
+          </div>
+          <button class="btn btn-primary" onclick="createLeak()" style="width:100%">Leak Memory</button>
+          <div id="leak-response" class="response" style="display:none"></div>
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom: var(--space-sm)">Active Leaks</h3>
+          <div id="leaks-list" style="font-size: 13px; color: var(--text-dim)">
+            <p>Connect to the API to see active leaks.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ API TAB ═══ -->
+    <div id="tab-api" class="tab-content">
+      <div class="section-header">
+        <h2>Sovereign API Reference</h2>
+        <div style="display:flex;gap:8px;align-items:center">
+          <label style="font-size: 12px; color: var(--text-dim)">API URL:</label>
+          <input id="api-url-display" value="http://127.0.0.1:8421" style="width:250px;font-size:12px">
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom: var(--space-md)">
+        <h3 style="margin-bottom: var(--space-sm)">Connection</h3>
+        <p style="font-size: 13px; color: var(--text-dim); margin-bottom: var(--space-sm)">
+          The Sovereign API runs on your hardware. Start it with:
+        </p>
+        <div class="code-block">npx tsx src/sovereign/cli.ts serve
+
+# Or after build:
+node dist/sovereign/cli.js serve</div>
+      </div>
+
+      <h3 style="margin-bottom: var(--space-sm)">Endpoints</h3>
+
+      <div class="endpoint"><span class="method method-get">GET</span> <code>/</code> <span style="color:var(--text-dim);margin-left:auto">API info and endpoint list</span></div>
+      <div class="endpoint"><span class="method method-get">GET</span> <code>/health</code> <span style="color:var(--text-dim);margin-left:auto">Health check with memory stats</span></div>
+
+      <h4 style="margin: var(--space-md) 0 var(--space-xs); color: var(--hot-pink)">Memory</h4>
+      <div class="endpoint"><span class="method method-post">POST</span> <code>/memory/remember</code> <span style="color:var(--text-dim);margin-left:auto">Store a memory entry</span></div>
+      <div class="endpoint"><span class="method method-get">GET</span> <code>/memory/recall?q=query</code> <span style="color:var(--text-dim);margin-left:auto">Search memories</span></div>
+      <div class="endpoint"><span class="method method-get">GET</span> <code>/memory/all</code> <span style="color:var(--text-dim);margin-left:auto">List all memories</span></div>
+      <div class="endpoint"><span class="method method-get">GET</span> <code>/memory/stats</code> <span style="color:var(--text-dim);margin-left:auto">Memory statistics</span></div>
+      <div class="endpoint"><span class="method method-get">GET</span> <code>/memory/verify</code> <span style="color:var(--text-dim);margin-left:auto">Verify hash chain integrity</span></div>
+      <div class="endpoint"><span class="method method-post">POST</span> <code>/memory/leak</code> <span style="color:var(--text-dim);margin-left:auto">Create cross-agent memory leak</span></div>
+      <div class="endpoint"><span class="method method-get">GET</span> <code>/memory/leaks</code> <span style="color:var(--text-dim);margin-left:auto">List all memory leaks</span></div>
+      <div class="endpoint"><span class="method method-get">GET</span> <code>/memory/export</code> <span style="color:var(--text-dim);margin-left:auto">Export full memory bundle</span></div>
+      <div class="endpoint"><span class="method method-get">GET</span> <code>/memory/:id</code> <span style="color:var(--text-dim);margin-left:auto">Get memory by ID</span></div>
+
+      <h4 style="margin: var(--space-md) 0 var(--space-xs); color: var(--amber)">Keys</h4>
+      <div class="endpoint"><span class="method method-post">POST</span> <code>/keys/create</code> <span style="color:var(--text-dim);margin-left:auto">Generate sovereign key</span></div>
+      <div class="endpoint"><span class="method method-post">POST</span> <code>/keys/pair</code> <span style="color:var(--text-dim);margin-left:auto">Generate key pair</span></div>
+      <div class="endpoint"><span class="method method-get">GET</span> <code>/keys/list</code> <span style="color:var(--text-dim);margin-left:auto">List all keys (masked)</span></div>
+      <div class="endpoint"><span class="method method-post">POST</span> <code>/keys/validate</code> <span style="color:var(--text-dim);margin-left:auto">Validate a key</span></div>
+      <div class="endpoint"><span class="method method-post">POST</span> <code>/keys/revoke</code> <span style="color:var(--text-dim);margin-left:auto">Revoke a key</span></div>
+      <div class="endpoint"><span class="method method-post">POST</span> <code>/keys/derive</code> <span style="color:var(--text-dim);margin-left:auto">Derive agent key from master</span></div>
+
+      <h4 style="margin: var(--space-md) 0 var(--space-xs); color: var(--violet)">Sessions</h4>
+      <div class="endpoint"><span class="method method-post">POST</span> <code>/session/start</code> <span style="color:var(--text-dim);margin-left:auto">Start memory session</span></div>
+      <div class="endpoint"><span class="method method-post">POST</span> <code>/session/end</code> <span style="color:var(--text-dim);margin-left:auto">End memory session</span></div>
+
+      <div class="card" style="margin-top: var(--space-md)">
+        <h3 style="margin-bottom: var(--space-sm)">Example: Store & Recall</h3>
+        <div class="code-block"># Store a memory
+curl -X POST http://127.0.0.1:8421/memory/remember \
+  -H "Content-Type: application/json" \
+  -d '{
+    "content": "User prefers dark mode and golden ratio spacing",
+    "type": "fact",
+    "agent": "LUCIDIA",
+    "tags": ["preferences", "ui"],
+    "confidence": 0.95
+  }'
+
+# Search memories
+curl "http://127.0.0.1:8421/memory/recall?q=dark+mode&agent=LUCIDIA"
+
+# Create a memory leak between agents
+curl -X POST http://127.0.0.1:8421/memory/leak \
+  -H "Content-Type: application/json" \
+  -d '{
+    "source": "LUCIDIA",
+    "target": "OCTAVIA",
+    "content": "Shared context about deployment strategy"
+  }'
+
+# Generate a sovereign PAT
+curl -X POST http://127.0.0.1:8421/keys/create \
+  -H "Content-Type: application/json" \
+  -d '{"purpose": "pat", "scopes": ["read", "write"]}'
+
+# Verify chain integrity
+curl http://127.0.0.1:8421/memory/verify</div>
+      </div>
+    </div>
+
+    <!-- ═══ CHAIN TAB ═══ -->
+    <div id="tab-chain" class="tab-content">
+      <div class="section-header">
+        <h2>Hash Chain (PS-SHA&#x221e;)</h2>
+        <button class="btn btn-sm" onclick="loadChainViz()">Refresh</button>
+      </div>
+      <div class="card" style="margin-bottom: var(--space-md)">
+        <h3 style="margin-bottom: var(--space-sm)">Chain Visualization</h3>
+        <p style="font-size: 13px; color: var(--text-dim); margin-bottom: var(--space-sm)">
+          Each block represents a hash-chained memory entry. Green = intact, Red = tampered.
+        </p>
+        <div class="chain-viz" id="chain-blocks"></div>
+      </div>
+      <div class="card">
+        <h3 style="margin-bottom: var(--space-sm)">Chain Details</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>#</th><th>Hash (first 16)</th><th>Parent Hash (first 16)</th><th>Data</th><th>Timestamp</th></tr></thead>
+            <tbody id="chain-table"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p>&copy; 2026 BlackRoad OS, Inc. All Rights Reserved. Your AI. Your Hardware. Your Rules.</p>
+    <p style="margin-top: 4px">Sovereign Memory System v1.0.0 | PS-SHA&#x221e; Hash Chain | Provider-Independent</p>
+  </footer>
+
+  <div class="toast-container" id="toasts"></div>
+
+  <script>
+    // ─── State ─────────────────────────────────────────────────────────────
+    let API_URL = localStorage.getItem('br_api_url') || 'http://127.0.0.1:8421';
+    document.getElementById('api-url-display').value = API_URL;
+
+    // ─── Navigation ────────────────────────────────────────────────────────
+    document.querySelectorAll('.nav-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+      });
+    });
+
+    // ─── Toast ─────────────────────────────────────────────────────────────
+    function toast(msg, type = 'info') {
+      const el = document.createElement('div');
+      el.className = 'toast';
+      el.style.borderLeftColor = type === 'error' ? 'var(--red)' : type === 'success' ? 'var(--green)' : 'var(--electric-blue)';
+      el.style.borderLeftWidth = '3px';
+      el.style.borderLeftStyle = 'solid';
+      el.textContent = msg;
+      document.getElementById('toasts').appendChild(el);
+      setTimeout(() => el.remove(), 4000);
+    }
+
+    // ─── API Client ────────────────────────────────────────────────────────
+    async function api(path, opts = {}) {
+      try {
+        const resp = await fetch(API_URL + path, {
+          headers: { 'Content-Type': 'application/json' },
+          ...opts,
+        });
+        return await resp.json();
+      } catch (err) {
+        toast('API connection failed: ' + err.message, 'error');
+        return null;
+      }
+    }
+
+    // Escape HTML to prevent XSS when rendering untrusted API data
+    function esc(str) {
+      if (str == null) return '';
+      const div = document.createElement('div');
+      div.textContent = String(str);
+      return div.innerHTML;
+    }
+
+    function connectApi() {
+      const url = document.getElementById('api-url-display').value;
+      API_URL = url;
+      localStorage.setItem('br_api_url', url);
+      refreshDashboard();
+    }
+
+    // ─── Dashboard ─────────────────────────────────────────────────────────
+    async function refreshDashboard() {
+      const stats = await api('/memory/stats');
+      if (!stats) return;
+
+      document.getElementById('stat-memories').textContent = stats.totalEntries || 0;
+      document.getElementById('stat-sessions').textContent = stats.totalSessions || 0;
+      document.getElementById('stat-chain').textContent = stats.chainLength || 0;
+      document.getElementById('stat-agents').textContent = (stats.totalAgents || []).length;
+
+      const integrity = document.getElementById('stat-integrity');
+      const valid = stats.integrityStatus === 'valid';
+      integrity.innerHTML = `<div class="integrity-dot ${valid ? 'valid' : 'broken'}"></div><span style="font-size:20px;font-weight:700">${valid ? 'INTACT' : 'BROKEN'}</span>`;
+
+      // Memory by type
+      const byType = document.getElementById('memory-by-type');
+      byType.innerHTML = '';
+      for (const [type, count] of Object.entries(stats.byType || {})) {
+        byType.innerHTML += `<div class="card" style="flex:1;min-width:120px"><h3>${type}</h3><div class="value" style="font-size:24px">${count}</div></div>`;
+      }
+
+      // Recent memories
+      const all = await api('/memory/all');
+      if (all && all.entries) {
+        const recent = all.entries.slice(-10).reverse();
+        const tbody = document.getElementById('recent-memories');
+        tbody.innerHTML = recent.map(e => `
+          <tr>
+            <td><code>${esc(e.id)}</code></td>
+            <td><span class="tag tag-${esc(e.type)}">${esc(e.type)}</span></td>
+            <td>${esc(e.agent)}</td>
+            <td>${esc(e.content.slice(0, 80))}${e.content.length > 80 ? '...' : ''}</td>
+            <td>${esc(e.confidence)}</td>
+            <td>${esc(new Date(e.timestamp).toLocaleString())}</td>
+          </tr>
+        `).join('');
+      }
+
+      // Leaks count
+      const leaks = await api('/memory/leaks');
+      if (leaks) {
+        document.getElementById('stat-leaks').textContent = leaks.count || 0;
+      }
+
+      toast('Dashboard refreshed', 'success');
+    }
+
+    // ─── Memory Operations ─────────────────────────────────────────────────
+    async function rememberMemory() {
+      const body = {
+        content: document.getElementById('mem-content').value,
+        type: document.getElementById('mem-type').value,
+        agent: document.getElementById('mem-agent').value,
+        tags: document.getElementById('mem-tags').value.split(',').map(t => t.trim()).filter(Boolean),
+        confidence: parseFloat(document.getElementById('mem-confidence').value),
+      };
+      const resp = await api('/memory/remember', { method: 'POST', body: JSON.stringify(body) });
+      const el = document.getElementById('remember-response');
+      el.style.display = 'block';
+      el.textContent = JSON.stringify(resp, null, 2);
+      if (resp && resp.stored) {
+        toast('Memory stored: ' + resp.entry.id, 'success');
+        document.getElementById('mem-content').value = '';
+      }
+    }
+
+    async function recallMemory() {
+      const q = document.getElementById('recall-query').value;
+      const agent = document.getElementById('recall-agent').value;
+      const type = document.getElementById('recall-type').value;
+      let path = `/memory/recall?q=${encodeURIComponent(q)}`;
+      if (agent) path += `&agent=${encodeURIComponent(agent)}`;
+      if (type) path += `&type=${encodeURIComponent(type)}`;
+      const resp = await api(path);
+      const el = document.getElementById('recall-results');
+      el.style.display = 'block';
+      el.textContent = JSON.stringify(resp, null, 2);
+    }
+
+    // ─── Key Operations ────────────────────────────────────────────────────
+    async function generateKey() {
+      const body = {
+        purpose: document.getElementById('key-purpose').value,
+        scopes: document.getElementById('key-scopes').value.split(',').map(s => s.trim()),
+        agent: document.getElementById('key-agent').value || undefined,
+        expiresInDays: parseInt(document.getElementById('key-expires').value) || undefined,
+      };
+      const resp = await api('/keys/create', { method: 'POST', body: JSON.stringify(body) });
+      const el = document.getElementById('key-response');
+      el.style.display = 'block';
+      el.textContent = JSON.stringify(resp, null, 2);
+      if (resp && resp.created) {
+        toast('Key generated: ' + resp.key.fingerprint, 'success');
+        loadKeys();
+      }
+    }
+
+    async function generatePair() {
+      const resp = await api('/keys/pair', { method: 'POST' });
+      const el = document.getElementById('pair-response');
+      el.style.display = 'block';
+      el.textContent = JSON.stringify(resp, null, 2);
+      if (resp && resp.created) toast('Key pair generated', 'success');
+    }
+
+    async function validateKey() {
+      const key = document.getElementById('validate-key').value;
+      const resp = await api('/keys/validate', { method: 'POST', body: JSON.stringify({ key }) });
+      const el = document.getElementById('validate-response');
+      el.style.display = 'block';
+      el.textContent = JSON.stringify(resp, null, 2);
+    }
+
+    async function loadKeys() {
+      const resp = await api('/keys/list');
+      if (!resp) return;
+      const tbody = document.getElementById('keys-list');
+      tbody.innerHTML = (resp.keys || []).map(k => `
+        <tr>
+          <td><code>${esc(k.id)}</code></td>
+          <td><span class="tag tag-${esc(k.purpose === 'pat' ? 'commitment' : k.purpose === 'api' ? 'observation' : 'fact')}">${esc(k.purpose)}</span></td>
+          <td><code style="font-size:11px">${esc(k.key)}</code></td>
+          <td><code>${esc(k.fingerprint)}</code></td>
+          <td>${esc((k.scopes || []).join(', '))}</td>
+          <td>${esc(new Date(k.created).toLocaleDateString())}</td>
+          <td>${k.revoked ? '<span style="color:var(--red)">REVOKED</span>' : '<span style="color:var(--green)">ACTIVE</span>'}</td>
+          <td><button class="btn btn-sm" onclick="revokeKey('${esc(k.id)}')" ${k.revoked ? 'disabled' : ''}>Revoke</button></td>
+        </tr>
+      `).join('');
+    }
+
+    async function revokeKey(id) {
+      await api('/keys/revoke', { method: 'POST', body: JSON.stringify({ id }) });
+      toast('Key revoked', 'success');
+      loadKeys();
+    }
+
+    // ─── Leaks ─────────────────────────────────────────────────────────────
+    async function createLeak() {
+      const body = {
+        source: document.getElementById('leak-source').value,
+        target: document.getElementById('leak-target').value,
+        content: document.getElementById('leak-content').value,
+      };
+      const resp = await api('/memory/leak', { method: 'POST', body: JSON.stringify(body) });
+      const el = document.getElementById('leak-response');
+      el.style.display = 'block';
+      el.textContent = JSON.stringify(resp, null, 2);
+      if (resp && resp.leaked) {
+        toast('Memory leaked: ' + resp.leak.id, 'success');
+        loadLeaks();
+      }
+    }
+
+    async function loadLeaks() {
+      const resp = await api('/memory/leaks');
+      if (!resp) return;
+      const el = document.getElementById('leaks-list');
+      if (!resp.leaks || resp.leaks.length === 0) {
+        el.innerHTML = '<p style="color:var(--text-dim)">No active leaks.</p>';
+        return;
+      }
+      el.innerHTML = resp.leaks.map(l => `
+        <div style="padding:8px;border:1px solid var(--border);border-radius:8px;margin-bottom:8px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+            <code>${esc(l.id)}</code>
+            <span style="color:var(--text-dim)">${esc(new Date(l.leaked).toLocaleString())}</span>
+          </div>
+          <div style="color:var(--hot-pink);font-weight:600">${esc(l.source)} &rarr; ${esc(l.target)}</div>
+          <div style="margin-top:4px">${esc(l.content)}</div>
+          <div style="margin-top:4px;font-size:11px;color:var(--text-dim)">Chain: ${esc(l.chain.length)} blocks | Signature: ${esc(l.signature.slice(0, 24))}...</div>
+        </div>
+      `).join('');
+    }
+
+    // ─── Chain Visualization ───────────────────────────────────────────────
+    async function loadChainViz() {
+      const resp = await api('/memory/export');
+      if (!resp || !resp.chain) return;
+
+      const blocks = document.getElementById('chain-blocks');
+      blocks.innerHTML = resp.chain.map((entry, i) => {
+        const valid = resp.integrity.valid || (resp.integrity.brokenAt !== undefined && i < resp.integrity.brokenAt);
+        return `<div class="chain-block ${valid ? '' : 'broken'}" title="#${entry.index}: ${entry.hash.slice(0, 16)}..."></div>`;
+      }).join('');
+
+      const tbody = document.getElementById('chain-table');
+      tbody.innerHTML = resp.chain.slice(-50).reverse().map(e => `
+        <tr>
+          <td>${e.index}</td>
+          <td><code>${e.hash.slice(0, 16)}...</code></td>
+          <td><code>${e.previousHash.slice(0, 16)}...</code></td>
+          <td style="max-width:300px;overflow:hidden;text-overflow:ellipsis">${e.data}</td>
+          <td>${new Date(e.timestamp).toLocaleString()}</td>
+        </tr>
+      `).join('');
+    }
+
+    // ─── Offline Mode (SHA-256 in browser) ─────────────────────────────────
+    // Even without the API, you can hash locally
+    async function browserSha256(message) {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(message);
+      const hash = await crypto.subtle.digest('SHA-256', data);
+      return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    // ─── Init ──────────────────────────────────────────────────────────────
+    // Try connecting on load
+    setTimeout(() => refreshDashboard(), 500);
+  </script>
+</body>
+</html>
