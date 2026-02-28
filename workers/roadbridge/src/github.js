@@ -242,7 +242,7 @@ export async function createBranch(token, owner, repo, branchName, baseSha) {
  */
 export async function getBranchSha(token, owner, repo, branch) {
   const res = await fetch(
-    `${GITHUB_API}/repos/${owner}/${repo}/git/ref/heads/${branch}`,
+    `${GITHUB_API}/repos/${owner}/${repo}/git/refs/heads/${branch}`,
     {
       headers: {
         Authorization: `token ${token}`,
