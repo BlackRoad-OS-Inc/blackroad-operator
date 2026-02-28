@@ -527,13 +527,19 @@ cmd_search() {
   echo ""
 
   local found=0
+  # Escape query for safe use in SQL LIKE
+  local like_query="$query"
+  like_query="${like_query//\'/\'\'}"   # escape single quotes for SQL string literal
+  like_query="${like_query//%/\\%}"     # escape % so it's treated literally
+  like_query="${like_query//_/\\_}"     # escape _ so it's treated literally
+
   sqlite3 -separator '|' "$DB" "
     SELECT id, name, category, votes, org, description, tags
     FROM submissions
-    WHERE name LIKE '%$query%'
-       OR description LIKE '%$query%'
-       OR tags LIKE '%$query%'
-       OR org LIKE '%$query%'
+    WHERE name LIKE '%' || '$like_query' || '%' ESCAPE '\\'
+       OR description LIKE '%' || '$like_query' || '%' ESCAPE '\\'
+       OR tags LIKE '%' || '$like_query' || '%' ESCAPE '\\'
+       OR org LIKE '%' || '$like_query' || '%' ESCAPE '\\'
     ORDER BY votes DESC;" | while IFS='|' read -r id name cat votes org desc tags; do
     ((found++))
     echo -e "  ${YELLOW}#$id${NC} ${BOLD}$name${NC} ${MAGENTA}[$cat]${NC} — ${GREEN}${votes} votes${NC}"
