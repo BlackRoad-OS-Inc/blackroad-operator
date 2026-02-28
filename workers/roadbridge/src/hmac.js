@@ -55,10 +55,18 @@ export function verifyDriveChannelToken(expected, received) {
  * @returns {boolean}
  */
 function timingSafeEqual(a, b) {
-  if (a.length !== b.length) return false;
-  let result = 0;
-  for (let i = 0; i < a.length; i++) {
-    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  const lenA = a.length;
+  const lenB = b.length;
+  const len = Math.max(lenA, lenB);
+
+  // Incorporate length difference into the result so that differing lengths
+  // are always treated as unequal, without returning early.
+  let result = lenA ^ lenB;
+
+  for (let i = 0; i < len; i++) {
+    const charCodeA = i < lenA ? a.charCodeAt(i) : 0;
+    const charCodeB = i < lenB ? b.charCodeAt(i) : 0;
+    result |= charCodeA ^ charCodeB;
   }
   return result === 0;
 }
