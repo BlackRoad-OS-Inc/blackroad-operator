@@ -21,11 +21,14 @@ export const agentsCommand = new Command('agents')
         console.log(JSON.stringify(data.agents, null, 2))
         return
       }
-      console.log(formatTable(
-        ['Name', 'Title', 'Role'],
-        data.agents.map((a) => [a.name, a.title, a.role]),
-      ))
-    } catch {
+      console.log(
+        formatTable(
+          ['Name', 'Title', 'Role'],
+          data.agents.map((a) => [a.name, a.title, a.role]),
+        ),
+      )
+    } catch (err) {
       logger.error('Failed to fetch agents from gateway.')
+      logger.debug(err instanceof Error ? err.message : String(err))
     }
   })
