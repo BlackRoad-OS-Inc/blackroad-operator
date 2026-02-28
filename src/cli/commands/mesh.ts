@@ -122,14 +122,23 @@ meshCommand
   .description('Continuously monitor infrastructure (every 30s)')
   .option('--interval <seconds>', 'Polling interval', '30')
   .action(async (opts: { interval: string }) => {
-    const intervalMs = parseInt(opts.interval, 10) * 1000
+    const DEFAULT_INTERVAL_SECONDS = 30
+    const MIN_INTERVAL_SECONDS = 1
+
+    const parsedSeconds = Number.parseInt(opts.interval, 10)
+    const requestedSeconds =
+      Number.isFinite(parsedSeconds) && parsedSeconds > 0
+        ? parsedSeconds
+        : DEFAULT_INTERVAL_SECONDS
+    const effectiveSeconds = Math.max(requestedSeconds, MIN_INTERVAL_SECONDS)
+    const intervalMs = effectiveSeconds * 1000
 
     const run = async () => {
       console.clear()
       console.log(brand.header('Infrastructure Mesh — Live'))
       console.log(
         chalk.gray(
-          `  Refreshing every ${opts.interval}s | ${new Date().toLocaleTimeString()}`,
+          `  Refreshing every ${effectiveSeconds}s | ${new Date().toLocaleTimeString()}`,
         ),
       )
       console.log()
