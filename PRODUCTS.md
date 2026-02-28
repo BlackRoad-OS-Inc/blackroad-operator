@@ -88,17 +88,16 @@ Deploy branded landing page with: product overview, screenshots, feature list, q
 **Stack:** Python, FastAPI, Redis
 
 ### What It Is
-6 core agents (Lucidia, Alice, Octavia, Prism, Echo, Cipher) with 30,000 distributed workers across Raspberry Pi and cloud infrastructure.
+5 specialized agents (Octavia, Lucidia, Alice, Aria, Shellfish) with 30,000 distributed workers across Raspberry Pi and cloud infrastructure.
 
 ### Agents
-| Agent | Role | Strength |
-|-------|------|----------|
-| Lucidia | Coordinator | Strategy, oversight |
-| Alice | Router | Traffic, task distribution |
-| Octavia | Compute | Inference, processing |
-| Prism | Analyst | Pattern recognition |
-| Echo | Memory | Storage, recall |
-| Cipher | Security | Auth, encryption |
+| Agent    | Role       | Strength                          |
+|----------|------------|-----------------------------------|
+| Octavia  | Architect  | Systems design, strategy          |
+| Lucidia  | Dreamer    | Creative direction, vision        |
+| Alice    | Operator   | DevOps, automation, reliability   |
+| Aria     | Interface  | Frontend, UX, interaction         |
+| Shellfish | Hacker   | Security, exploits, red-teaming   |
 
 ### Plan
 - [ ] Build agent registry API with capabilities matrix
