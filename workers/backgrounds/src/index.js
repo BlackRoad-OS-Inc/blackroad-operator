@@ -38,15 +38,30 @@ function json(data, status = 200) {
 /** Fetch file list from a public Google Drive folder */
 async function listDriveFolder(folderId, apiKey) {
   const query = encodeURIComponent(`'${folderId}' in parents and mimeType contains 'image/' and trashed = false`)
-  const fields = encodeURIComponent('files(id,name,mimeType,thumbnailLink,imageMediaMetadata,size,createdTime)')
-  const url = `${DRIVE_API}/files?q=${query}&fields=${fields}&orderBy=name&pageSize=100&key=${apiKey}`
+  const fields = encodeURIComponent('nextPageToken,files(id,name,mimeType,thumbnailLink,imageMediaMetadata,size,createdTime)')
 
-  const res = await fetch(url)
-  if (!res.ok) {
-    const body = await res.text()
-    throw new Error(`Drive API ${res.status}: ${body}`)
-  }
-  return res.json()
+  let pageToken = null
+  const allFiles = []
+
+  do {
+    const pageTokenParam = pageToken ? `&pageToken=${encodeURIComponent(pageToken)}` : ''
+    const url = `${DRIVE_API}/files?q=${query}&fields=${fields}&orderBy=name&pageSize=100${pageTokenParam}&key=${apiKey}`
+
+    const res = await fetch(url)
+    if (!res.ok) {
+      const body = await res.text()
+      throw new Error(`Drive API ${res.status}: ${body}`)
+    }
+
+    const data = await res.json()
+    if (Array.isArray(data.files)) {
+      allFiles.push(...data.files)
+    }
+
+    pageToken = data.nextPageToken || null
+  } while (pageToken)
+
+  return { files: allFiles }
 }
 
 /** Proxy a single image from Google Drive by file ID */
