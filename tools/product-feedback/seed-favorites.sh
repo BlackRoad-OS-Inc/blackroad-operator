@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/zsh
 # Seed the product feedback database with known favorites across orgs
 # Run once to bootstrap: ./seed-favorites.sh
 
