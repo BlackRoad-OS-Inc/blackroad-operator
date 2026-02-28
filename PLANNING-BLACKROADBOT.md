@@ -16,11 +16,17 @@
 - [Routing Matrix](#routing-matrix)
 - [Rate Limit Mitigation Strategy](#rate-limit-mitigation-strategy)
 - [roadchain: Witnessing Every Action](#roadchain-witnessing-every-action)
+- [Technical Architecture](#technical-architecture)
+- [Implementation Phases](#implementation-phases)
+- [Security Model](#security-model)
+- [Related Documents](#related-documents)
 - [Milestones & Timeline](#milestones--timeline)
 - [Success Metrics](#success-metrics)
 - [Risks & Mitigations](#risks--mitigations)
 - [Open Questions](#open-questions)
 - [Appendix: Organization Quick Reference](#appendix-organization-quick-reference)
+- [Appendix: Command Examples](#appendix-command-examples)
+- [Change Log](#change-log)
 
 ---
 
