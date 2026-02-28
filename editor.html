@@ -809,9 +809,18 @@ function renderPalette() {
   filteredCmds.forEach((cmd, i) => {
     const item = document.createElement('div');
     item.className = 'palette-item' + (i===palSel?' selected':'');
-    item.innerHTML = `<span class="palette-item-icon">${cmd.icon}</span>
-      <span class="palette-item-label">${cmd.label}</span>
-      <span class="palette-item-shortcut">${cmd.shortcut}</span>`;
+    const iconSpan = document.createElement('span');
+    iconSpan.className = 'palette-item-icon';
+    iconSpan.textContent = cmd.icon;
+    const labelSpan = document.createElement('span');
+    labelSpan.className = 'palette-item-label';
+    labelSpan.textContent = cmd.label;
+    const shortcutSpan = document.createElement('span');
+    shortcutSpan.className = 'palette-item-shortcut';
+    shortcutSpan.textContent = cmd.shortcut || '';
+    item.appendChild(iconSpan);
+    item.appendChild(labelSpan);
+    item.appendChild(shortcutSpan);
     item.onclick = () => { cmd.fn(); closePalette(); };
     list.appendChild(item);
   });
