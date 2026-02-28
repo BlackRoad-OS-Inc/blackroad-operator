@@ -18,7 +18,14 @@ function detectTarget(cwd: string): DeployTarget {
   if (existsSync(`${cwd}/wrangler.toml`)) return 'cloudflare'
   if (existsSync(`${cwd}/railway.toml`)) return 'railway'
   if (existsSync(`${cwd}/vercel.json`)) return 'vercel'
-  return 'cloudflare'
+
+  logger.error(
+    `Unable to auto-detect deploy target: no wrangler.toml, railway.toml, or vercel.json found in ${cwd}. ` +
+      'Please specify --target explicitly.',
+  )
+  throw new Error(
+    'Deploy target detection failed. No provider config files found. Please specify --target explicitly.',
+  )
 }
 
 function exec(cmd: string): { stdout: string; stderr: string; code: number } {
