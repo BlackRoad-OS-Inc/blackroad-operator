@@ -116,6 +116,18 @@ _hub_prefetch() {
         _VAULT_TOTAL=$(sqlite3 "$_vault_db" "SELECT COUNT(*) FROM secrets;" 2>/dev/null || echo 0)
         _VAULT_EXPIRING=$(sqlite3 "$_vault_db" "SELECT COUNT(*) FROM secrets WHERE expires_at > 0 AND expires_at < $(($(date +%s) + 604800));" 2>/dev/null || echo 0)
     fi
+
+    # System metrics (quick snapshot — no DB write, just read live)
+    _CPU_PCT="—"; _MEM_PCT="—"
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        local _top=$(top -l 1 2>/dev/null)
+        local _u=$(echo "$_top" | grep "CPU usage" | grep -o '[0-9.]*% user' | grep -o '[0-9.]*')
+        local _s=$(echo "$_top" | grep "CPU usage" | grep -o '[0-9.]*% sys'  | grep -o '[0-9.]*')
+        _CPU_PCT=$(echo "${_u:-0} ${_s:-0}" | awk '{printf "%.0f", $1+$2}')
+        local _used=$(echo "$_top" | grep "PhysMem" | grep -o '[0-9]*M used' | grep -o '[0-9]*')
+        local _tot=$(( $(sysctl -n hw.memsize 2>/dev/null || echo 8589934592) / 1048576 ))
+        _MEM_PCT=$(echo "${_used:-0} $_tot" | awk '{printf "%.0f", ($1/$2)*100}')
+    fi
 }
 
 # Print a line padded to exactly 78 inner chars (80 with borders)
@@ -258,11 +270,12 @@ _draw_hub() {
         (( ${#skills_vis} > 68 )) && skills_vis="${skills_vis:0:66}.."
         local c3_vis="  ⚡ ${skills_vis}"
         echo -e "${B}║${R}  ${BYELLOW}⚡${R}  ${D}${skills_vis}${R}$(printf '%*s' $((76 - ${#c3_vis})) '')${B}║${R}"
-        # Line 4: motto + vault count
+        # Line 4: motto + vault count + CPU/MEM
         local vault_info=""
-        (( _VAULT_TOTAL > 0 )) && vault_info="  ${D}·  🔐 ${_VAULT_TOTAL} secrets${NC}"
-        (( _VAULT_EXPIRING > 0 )) && vault_info="  ${D}·  🔐 ${_VAULT_TOTAL} secrets  ${AMBER}${_VAULT_EXPIRING} expiring${NC}"
-        echo -e "${B}║${R}  ${D}\"I exist wherever you build.\"${R}${vault_info}$(printf '%*s' $((76 - 30 - ${#vault_info:-0})) '')${B}║${R}"
+        (( _VAULT_TOTAL > 0 )) && vault_info="  ${D}·  🔐 ${_VAULT_TOTAL}s${NC}"
+        (( _VAULT_EXPIRING > 0 )) && vault_info="  ${D}·  🔐 ${_VAULT_TOTAL}s  ${AMBER}${_VAULT_EXPIRING}!${NC}"
+        local sys_info="  ${D}·  cpu ${_CPU_PCT}%  mem ${_MEM_PCT}%${NC}"
+        echo -e "${B}║${R}  ${D}\"I exist wherever you build.\"${R}${vault_info}${sys_info}$(printf '%*s' $((76 - 30 - ${#vault_info:-0} - ${#sys_info:-0} + 10)) '')${B}║${R}"
     else
         echo -e "${B}║${R}  ${D}◈ CECE  not initialized — run: br cece init${R}                                ${B}║${R}"
     fi
@@ -272,9 +285,9 @@ _draw_hub() {
     echo -e "${B}║${R}  ${A}br${R} ${D}·${R} ${W}blackroad os${R} ${D}·${R} ${D}your ai · your hardware · your rules · build different${R}  ${B}║${R}"
     echo -e "${B}╠══════════════════════════════════════════════════════════════════════════════╣${R}"
     echo -e "${B}║${R}                                                                            ${B}║${R}"
-    echo -e "${B}║${R}  ${W}[c]${R}hat  ${W}[s]${R}tatus  ${W}[h]${R}ealth  ${W}[m]${R}onitor  ${W}[g]${R}od  ${W}[o]${R}ffice  ${W}[r]${R}efresh  ${W}[?]${R}help   ${B}║${R}"
+    echo -e "${B}║${R}  ${W}[c]${R}hat  ${W}[s]${R}tatus  ${W}[h]${R}ealth  ${W}[m]${R}etrics ${W}[g]${R}od  ${W}[o]${R}ffice  ${W}[r]${R}efresh  ${W}[?]${R}help   ${B}║${R}"
     echo -e "${B}║${R}  ${W}[d]${R}ash  ${W}[n]${R}et     ${W}[l]${R}ogs    ${W}[t]${R}asks    ${W}[w]${R}ire ${W}[k]${R}skills  ${W}[b]${R}onds    ${W}[q]${R}uit    ${B}║${R}"
-    echo -e "${B}║${R}  ${W}[D]${R}ocker ps  ${W}[C]${R}ompose↑  ${W}[X]${R}ompose↓  ${W}[I]${R}mages  ${W}[S]${R}tats  ${W}[e]${R}cece  ${W}[v]${R}ault  ${B}║${R}"
+    echo -e "${B}║${R}  ${W}[D]${R}ocker ps  ${W}[C]${R}ompose↑  ${W}[X]${R}ompose↓  ${W}[I]${R}mages  ${W}[S]${R}tats  ${W}[e]${R}cece  ${W}[v]${R}ault  ${W}[A]${R}lert  ${W}[G]${R}it  ${W}[W]${R}s  ${B}║${R}"
     echo -e "${B}║${R}                                                                            ${B}║${R}"
     echo -e "${B}╚══════════════════════════════════════════════════════════════════════════════╝${R}"
 }
@@ -297,7 +310,7 @@ while true; do
             c) tput cnorm 2>/dev/null; zsh "${SCRIPT_DIR}/../tools/agent-router/br-agent.sh" chat; tput civis 2>/dev/null ;;
             s) tput cnorm 2>/dev/null; "${SCRIPT_DIR}/status.sh"; read -n 1 -p "  Press any key..."; tput civis 2>/dev/null ;;
             h) tput cnorm 2>/dev/null; zsh "${SCRIPT_DIR}/../tools/health-check/br-health.sh"; read -n 1 -p "  Press any key..."; tput civis 2>/dev/null ;;
-            m) tput cnorm 2>/dev/null; "${SCRIPT_DIR}/monitor.sh"; tput civis 2>/dev/null ;;
+            m) tput cnorm 2>/dev/null; zsh "${SCRIPT_DIR}/../tools/metrics-dashboard/br-metrics.sh" summary; read -n 1 -p "  Press any key..."; tput civis 2>/dev/null ;;
             g) tput cnorm 2>/dev/null; "${SCRIPT_DIR}/god.sh"; tput civis 2>/dev/null ;;
             d) tput cnorm 2>/dev/null; "${SCRIPT_DIR}/dash.sh"; tput civis 2>/dev/null ;;
             o) tput cnorm 2>/dev/null; "${SCRIPT_DIR}/office.sh"; tput civis 2>/dev/null ;;
@@ -314,6 +327,14 @@ while true; do
             S) tput cnorm 2>/dev/null; zsh "${SCRIPT_DIR}/br" docker stats 2>/dev/null; tput civis 2>/dev/null ;;
             e) tput cnorm 2>/dev/null; zsh "${SCRIPT_DIR}/br" cece whoami 2>/dev/null; read -n 1 -p "  Press any key..."; tput civis 2>/dev/null ;;
             v) tput cnorm 2>/dev/null; zsh "${SCRIPT_DIR}/br" vault status 2>/dev/null; read -n 1 -p "  Press any key..."; tput civis 2>/dev/null ;;
+            G) tput cnorm 2>/dev/null; zsh "${SCRIPT_DIR}/../tools/git-integration/br-git.sh" summary; read -n 1 -p "  Press any key..."; tput civis 2>/dev/null ;;
+            W) tput cnorm 2>/dev/null; zsh "${SCRIPT_DIR}/../tools/session-manager/br-session.sh" list; read -n 1 -p "  Press any key..."; tput civis 2>/dev/null ;;
+            A) tput cnorm 2>/dev/null
+               echo -e "\n  ${AMBER}◆${NC} Send desktop alert"
+               printf "  title: "; read -r _atitle
+               printf "  message: "; read -r _amsg
+               zsh "${SCRIPT_DIR}/../tools/notifications/br-notify.sh" alert "${_atitle:-BlackRoad Alert}" "${_amsg:-System alert}" 2>/dev/null
+               read -n 1 -p "  Press any key..."; tput civis 2>/dev/null ;;
             r) _hub_prefetch ;;  # Full refresh including service checks
             \?) tput cnorm 2>/dev/null; zsh "${SCRIPT_DIR}/br" help 2>/dev/null; read -n 1 -p "  Press any key..."; tput civis 2>/dev/null ;;
             q) break ;;
