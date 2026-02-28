@@ -82,6 +82,11 @@ export function hasScope(payload: TokenPayload, required: string): boolean {
 function extractToken(c: Context): string | null {
   const auth = c.req.header('Authorization') ?? ''
   if (auth.startsWith('Bearer ')) return auth.slice(7).trim()
+
+  // In production, do not accept tokens via query parameters to avoid leakage via logs, referrers, etc.
+  if (process.env['NODE_ENV'] === 'production') {
+    return null
+  }
   const token = new URL(c.req.url).searchParams.get('token')
   return token || null
 }
