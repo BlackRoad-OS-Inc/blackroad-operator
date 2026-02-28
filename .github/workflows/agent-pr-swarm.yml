@@ -322,6 +322,10 @@ jobs:
           gh label create "swarm" --color "7B61FF" --description "Part of an agent swarm" 2>/dev/null || true
           gh label create "agent:${AGENT}" --color "$(printf '%06X' $((RANDOM % 16777215)))" --description "Agent: ${AGENT}" 2>/dev/null || true
 
+          # Apply labels to the PR
+          if [ -n "$PR" ]; then
+            gh pr edit "$PR" --add-label "swarm" --add-label "agent:${AGENT}"
+          fi
   # ============================================
   # Stage 2: Create Coordinator PR
   # ============================================
