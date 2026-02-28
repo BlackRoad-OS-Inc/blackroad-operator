@@ -553,12 +553,13 @@ GitHub Webhook --> HMAC-SHA256 signature validation
 | Read-only queries (status, list, info) | None | No |
 | Branch creation / PR opening | Bot auto-approve | No |
 | Device deployment (non-prod) | Bot auto-approve | No |
-| DNS changes | Bot auto-approve | No |
+| DNS changes | Alexa approval + allowlisted actor | Yes |
 | Production deployment | Alexa approval | Yes |
 | Security-scoped operations | Alexa approval | Yes |
 | Destructive operations (delete, rebuild) | Alexa approval | Yes |
 | Cross-org data movement | Alexa approval | Yes |
 
+> DNS-modifying intents are always treated as high-risk. Only explicitly allowlisted actors may approve DNS changes, and this rule MUST be enforced consistently across Layers 1–3 and within the Cloudflare executor (no direct or indirect bypass paths).
 ### HITL Flow
 
 ```
