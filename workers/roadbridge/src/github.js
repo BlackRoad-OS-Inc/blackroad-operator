@@ -294,11 +294,18 @@ async function createAppJwt(appId, privateKeyPem) {
 }
 
 function b64url(input) {
-  const str =
+  const base64 =
     typeof input === 'string'
       ? btoa(input)
-      : btoa(String.fromCharCode(...new Uint8Array(input)));
-  return str.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+      : (() => {
+          const bytes = new Uint8Array(input);
+          const chars = new Array(bytes.length);
+          for (let i = 0; i < bytes.length; i += 1) {
+            chars[i] = String.fromCharCode(bytes[i]);
+          }
+          return btoa(chars.join(''));
+        })();
+  return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
 async function importPkcs8(pem) {
