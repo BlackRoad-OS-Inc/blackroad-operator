@@ -1,26 +1,28 @@
-# E2E Test Report: Open PRs — Tokenless Paths & Cross-Org Connections
+# E2E Test Report Template: Open PRs — Tokenless Paths & Cross-Org Connections
 
-**Date:** 2026-02-28
-**Branch:** `claude/test-prs-tokenless-paths-7onZi`
-**Repository:** `BlackRoad-OS-Inc/blackroad-operator`
+> NOTE: This file is a template/example used for tests. Concrete values are populated by CI or test fixtures and should not be treated as a live status report.
+
+**Date:** `<REPORT_DATE>`
+**Branch:** `<REPORT_BRANCH>`
+**Repository:** `<REPORT_REPOSITORY>`
 
 ---
 
 ## Executive Summary
 
-Tested all **15 open pull requests** against the BlackRoad tokenless gateway architecture.
-Found **1 critical tokenless violation**, **8 merge conflicts**, and **0 credential leaks**.
+Tested all **<TOTAL_PRS_TESTED> open pull requests** against the BlackRoad tokenless gateway architecture.
+Found **<CRITICAL_TOKENLESS_VIOLATIONS> critical tokenless violations**, **<PRS_WITH_MERGE_CONFLICTS> merge conflicts**, and **<CREDENTIAL_LEAKS> credential leaks**.
 
-| Metric                     | Result             |
-|----------------------------|--------------------|
-| Total PRs Tested           | 15                 |
-| Gateway Unit Tests         | 125/125 PASSED     |
-| Vitest Unit Tests          | 11/11 PASSED       |
-| Tokenless Agent Scan       | PASSED (main)      |
-| PRs with Merge Conflicts   | 8 (CODEOWNERS)     |
-| PRs with Tokenless Issues  | 1 (PR #28)         |
-| Hardcoded Credentials      | 0                  |
-| Direct Provider Bypasses   | 1 (PR #28)         |
+| Metric                     | Result                       |
+|----------------------------|------------------------------|
+| Total PRs Tested           | `<TOTAL_PRS_TESTED>`         |
+| Gateway Unit Tests         | `125/125 PASSED`             |
+| Vitest Unit Tests          | `11/11 PASSED`               |
+| Tokenless Agent Scan       | `PASSED (main)`              |
+| PRs with Merge Conflicts   | `<PRS_WITH_MERGE_CONFLICTS>` |
+| PRs with Tokenless Issues  | `<PRS_WITH_TOKENLESS_ISSUES>`|
+| Hardcoded Credentials      | `<HARDCODED_CREDENTIALS>`    |
+| Direct Provider Bypasses   | `<DIRECT_PROVIDER_BYPASSES>` |
 
 ---
 
