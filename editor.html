@@ -646,13 +646,33 @@ editor.addEventListener('input', () => {
 });
 
 editor.addEventListener('keydown', (e) => {
-  // tab -> 2 spaces
+  // Tab / Shift+Tab -> indent / unindent
   if (e.key === 'Tab') {
     e.preventDefault();
-    const s = editor.selectionStart;
-    editor.value = editor.value.slice(0,s) + '  ' + editor.value.slice(editor.selectionEnd);
-    editor.selectionStart = editor.selectionEnd = s + 2;
-    editor.dispatchEvent(new Event('input'));
+    // Shift+Tab: unindent current line by up to 2 spaces
+    if (e.shiftKey) {
+      const s = editor.selectionStart;
+      const ePos = editor.selectionEnd;
+      // Only handle simple caret case; with selection we currently do nothing
+      if (s === ePos) {
+        const value = editor.value;
+        const lineStart = value.lastIndexOf('\n', s - 1) + 1;
+        let remove = 0;
+        while (remove < 2 && value[lineStart + remove] === ' ') remove++;
+        if (remove > 0) {
+          editor.value = value.slice(0, lineStart) + value.slice(lineStart + remove);
+          const newPos = s - Math.min(remove, s - lineStart);
+          editor.selectionStart = editor.selectionEnd = newPos;
+          editor.dispatchEvent(new Event('input'));
+        }
+      }
+    } else {
+      // Tab: insert 2 spaces at cursor
+      const s = editor.selectionStart;
+      editor.value = editor.value.slice(0, s) + '  ' + editor.value.slice(editor.selectionEnd);
+      editor.selectionStart = editor.selectionEnd = s + 2;
+      editor.dispatchEvent(new Event('input'));
+    }
   }
   // Ctrl/Cmd+S -> save
   if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); saveFile(); }
