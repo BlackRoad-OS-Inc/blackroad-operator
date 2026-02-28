@@ -8,11 +8,12 @@ import { configCommand } from './config.js'
 import { gatewayCommand } from './gateway.js'
 import { invokeCommand } from './invoke.js'
 import { initCommand } from './init.js'
+import { meshCommand } from './mesh.js'
 
 export const program = new Command()
   .name('br')
   .description('BlackRoad OS operator CLI')
-  .version('0.1.0')
+  .version('0.2.0')
 
 program.addCommand(statusCommand)
 program.addCommand(agentsCommand)
@@ -22,3 +23,4 @@ program.addCommand(configCommand)
 program.addCommand(gatewayCommand)
 program.addCommand(invokeCommand)
 program.addCommand(initCommand)
+program.addCommand(meshCommand)
