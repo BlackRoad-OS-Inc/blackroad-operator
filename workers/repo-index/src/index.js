@@ -241,27 +241,41 @@ async function searchRepos(query, env, opts = {}) {
   const org = opts.org || null;
 
   const prefix = org ? `repo:${org}:` : "repo:";
-  const list = await env.INDEX.list({ prefix, limit: 1000 });
 
   const matches = [];
-  for (const key of list.keys) {
-    const meta = key.metadata || {};
-    const name = meta.name || key.name.split(":").pop();
-    if (
-      name.toLowerCase().includes(q) ||
-      (meta.language || "").toLowerCase().includes(q) ||
-      (meta.org || "").toLowerCase().includes(q)
-    ) {
-      matches.push({
-        key: key.name,
-        org: meta.org,
-        name: meta.name || name,
-        language: meta.language,
-        stars: meta.stars,
-        updated_at: meta.updated_at,
-      });
+  let cursor;
+  let done = false;
+
+  while (!done && matches.length < limit) {
+    const page = await env.INDEX.list({ prefix, limit: 1000, cursor });
+
+    for (const key of page.keys) {
+      const meta = key.metadata || {};
+      const name = meta.name || key.name.split(":").pop();
+      if (
+        name.toLowerCase().includes(q) ||
+        (meta.language || "").toLowerCase().includes(q) ||
+        (meta.org || "").toLowerCase().includes(q)
+      ) {
+        matches.push({
+          key: key.name,
+          org: meta.org,
+          name: meta.name || name,
+          language: meta.language,
+          stars: meta.stars,
+          updated_at: meta.updated_at,
+        });
+      }
+      if (matches.length >= limit) {
+        break;
+      }
     }
-    if (matches.length >= limit) break;
+
+    if (page.list_complete || matches.length >= limit) {
+      done = true;
+    } else {
+      cursor = page.cursor;
+    }
   }
 
   // Sort by stars descending
