@@ -54,7 +54,7 @@ const DEFAULT_CONFIG = {
  */
 export function parseConfig(yamlContent) {
   if (!yamlContent || !yamlContent.trim()) {
-    return { ...DEFAULT_CONFIG };
+    return structuredClone(DEFAULT_CONFIG);
   }
 
   const parsed = parseSimpleYaml(yamlContent);
