@@ -13,7 +13,26 @@ export function createApp() {
   const app = new Hono()
 
   // Global middleware
-  app.use('*', cors())
+  const allowedOriginsEnv = process.env['BLACKROAD_ALLOWED_ORIGINS']
+  const allowedOrigins =
+    allowedOriginsEnv && allowedOriginsEnv.trim().length > 0
+      ? allowedOriginsEnv
+          .split(',')
+          .map((origin) => origin.trim())
+          .filter((origin) => origin.length > 0)
+      : []
+
+  const corsOptions =
+    allowedOriginsEnv === '*'
+      ? {}
+      : {
+          origin: (origin: string | null) => {
+            if (!origin) return false
+            return allowedOrigins.includes(origin)
+          },
+        }
+
+  app.use('*', cors(corsOptions))
   app.use('/v1/*', metricsMiddleware())
 
   // Public routes (no auth required)
