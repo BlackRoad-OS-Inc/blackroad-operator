@@ -15,7 +15,11 @@ describe('preflight e2e', () => {
   })
 
   it('should succeed even when gateway is unreachable', async () => {
-    // Default gateway URL points to nothing, preflight should still pass
+    // Simulate gateway being unreachable: fetch rejects with a connection error
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockRejectedValue(new Error('connect ECONNREFUSED')),
+    )
     const result = await runPreflight()
     expect(result).toBe(true)
   })
