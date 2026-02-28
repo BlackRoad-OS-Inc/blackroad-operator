@@ -1202,7 +1202,7 @@ describe('GatewayClient — src/core/client.ts', () => {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 describe('Wrangler Configurations', () => {
-  const CLOUDFLARE_ACCOUNT_ID = '848cf0b18d51e0170e0d1537aec3505a'
+  const CLOUDFLARE_ACCOUNT_ID = 'test-account-id'
 
   describe('workers/auth', () => {
     it('should have correct worker name and account', () => {
