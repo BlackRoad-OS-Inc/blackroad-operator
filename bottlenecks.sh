@@ -38,16 +38,28 @@ done
 # ============================================================================
 
 get_cpu_usage() {
-  # Read /proc/stat for actual CPU usage
+  # Read /proc/stat twice and compute CPU usage over the interval
   if [ -f /proc/stat ]; then
-    local line
-    line=$(head -1 /proc/stat)
-    local user nice system idle iowait irq softirq
-    read -r _ user nice system idle iowait irq softirq _ <<< "$line"
-    local total=$((user + nice + system + idle + iowait + irq + softirq))
-    local active=$((total - idle - iowait))
-    if [ $total -gt 0 ]; then
-      echo $((active * 100 / total))
+    local line1 line2
+    local user1 nice1 system1 idle1 iowait1 irq1 softirq1 steal1
+    local user2 nice2 system2 idle2 iowait2 irq2 softirq2 steal2
+
+    line1=$(head -n 1 /proc/stat)
+    read -r _ user1 nice1 system1 idle1 iowait1 irq1 softirq1 steal1 _ <<< "$line1"
+    local total1=$((user1 + nice1 + system1 + idle1 + iowait1 + irq1 + softirq1 + steal1))
+
+    # Short sampling interval for "live" CPU usage
+    sleep 0.2
+
+    line2=$(head -n 1 /proc/stat)
+    read -r _ user2 nice2 system2 idle2 iowait2 irq2 softirq2 steal2 _ <<< "$line2"
+    local total2=$((user2 + nice2 + system2 + idle2 + iowait2 + irq2 + softirq2 + steal2))
+
+    local total_delta=$((total2 - total1))
+    local idle_delta=$(((idle2 + iowait2) - (idle1 + iowait1)))
+
+    if [ "$total_delta" -gt 0 ]; then
+      echo $(((total_delta - idle_delta) * 100 / total_delta))
     else
       echo 0
     fi
