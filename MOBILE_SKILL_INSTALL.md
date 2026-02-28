@@ -104,7 +104,7 @@ After installation, verify the skill is active:
 
 ```bash
 # List installed skills
-blackroad-skills list --installed
+blackroad-skills list
 
 # Check a specific skill
 blackroad-skills info my-skill
