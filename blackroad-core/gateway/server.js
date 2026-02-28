@@ -309,6 +309,19 @@ async function start() {
       }
 
       // ---------------------------------------------------------------
+      // V1 health (aliased from /healthz for CLI compatibility)
+      // ---------------------------------------------------------------
+      if (req.method === 'GET' && req.url === '/v1/health') {
+        return send(200, {
+          status: 'ok',
+          version: '2.0.0',
+          uptime: Math.floor((Date.now() - metrics.startTime) / 1000),
+          gateway: 'blackroad-core',
+          ts: new Date().toISOString()
+        })
+      }
+
+      // ---------------------------------------------------------------
       // Metrics endpoint
       // ---------------------------------------------------------------
       if (req.method === 'GET' && req.url === '/metrics') {
@@ -348,6 +361,58 @@ async function start() {
           return send(200, { status: 'ok', worlds: data })
         } catch (e) {
           return send(502, { status: 'error', error: 'worlds feed unavailable' })
+        }
+      }
+
+      // ---------------------------------------------------------------
+      // V1 invoke — simplified agent invocation (CLI compatibility)
+      // ---------------------------------------------------------------
+      if (req.method === 'POST' && req.url === '/v1/invoke') {
+        const invokeBody = await readBody(req, config.maxBodyBytes)
+        let invokePayload
+        try {
+          invokePayload = JSON.parse(invokeBody)
+        } catch (error) {
+          return send(400, { status: 'error', error: 'Invalid JSON', request_id: requestId })
+        }
+
+        // Transform CLI format { agent, task } to gateway format
+        const gatewayPayload = {
+          agent: invokePayload.agent || 'octavia',
+          intent: invokePayload.intent || 'general',
+          input: invokePayload.task || invokePayload.input || '',
+          context: invokePayload.context || {}
+        }
+
+        // Rewrite req.url to /v1/agent and fall through
+        requestPayload = gatewayPayload
+        agentName = gatewayPayload.agent
+        intent = gatewayPayload.intent
+
+        // Load policy and invoke (same logic as /v1/agent)
+        const invokePolicy = await loadPolicy(config.policyPath)
+        const invokeAgentPolicy = invokePolicy.agents[agentName]
+        if (!invokeAgentPolicy) {
+          return send(200, { content: `Agent "${agentName}" not registered. Available agents: ${Object.keys(invokePolicy.agents).join(', ')}` })
+        }
+
+        const invokeProviderName = pickProvider(null, invokeAgentPolicy, intent)
+        if (!invokeProviderName) {
+          return send(200, { content: `No provider configured for agent "${agentName}"` })
+        }
+
+        try {
+          const invokePrompts = await loadJson(config.promptPath)
+          const invokeSystemPrompt = buildSystemPrompt(invokePrompts, agentName, intent, gatewayPayload.context)
+          const invokeResult = await invokeWithFallback(
+            invokeProviderName,
+            invokeAgentPolicy.fallback_chain || [],
+            { input: gatewayPayload.input, system: invokeSystemPrompt, context: gatewayPayload.context, requestId, agent: agentName, intent }
+          )
+          rateLimiter.record(agentName)
+          return send(200, { content: invokeResult.output, provider: invokeResult.provider })
+        } catch (err) {
+          return send(200, { content: `Task received for ${agentName}. Provider unavailable: ${err.message}` })
         }
       }
 
