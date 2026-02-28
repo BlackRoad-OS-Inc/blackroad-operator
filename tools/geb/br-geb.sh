@@ -20,6 +20,8 @@ DIM=$'\033[2m'
 ITALIC=$'\033[3m'
 NC=$'\033[0m'
 
+BR_ROOT="${BR_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
+
 # ─── Strange Loop: the fleet observing itself ─────────────────────────────────
 cmd_loop() {
   echo ""
@@ -216,7 +218,7 @@ cmd_crab() {
   local -a msgs
   while IFS= read -r line; do
     msgs+=("$line")
-  done < <(git -C /Users/alexa/blackroad --no-pager log --format="%s" -8 2>/dev/null)
+  done < <(git -C ${BR_ROOT} --no-pager log --format="%s" -8 2>/dev/null)
 
   if [[ ${#msgs[@]} -eq 0 ]]; then
     echo "  ${DIM}(no git history — the system has no past yet)${NC}"
@@ -276,7 +278,7 @@ cmd_hofstadter() {
   # ── Strand E: Escher — topology / strange loops in real tool graph ──
   echo "  ${BOLD}${GREEN}Strand E — Escher (Topology, Strange Loops)${NC}"
   local tool_count
-  tool_count=$(ls /Users/alexa/blackroad/tools/ 2>/dev/null | wc -l | tr -d ' ')
+  tool_count=$(ls ${BR_ROOT}/tools/ 2>/dev/null | wc -l | tr -d ' ')
   echo "  ${DIM}  ${tool_count} tools${NC} in the fleet. Each tool can call ${ITALIC}br${NC} — which routes to tools."
   echo "  ${DIM}  br calls tools. Tools call br. The hand draws the hand.${NC}"
   echo "  ${DIM}  Identified strange loops:${NC}"
@@ -290,7 +292,7 @@ cmd_hofstadter() {
   echo "  ${BOLD}${YELLOW}Strand B — Bach (Harmony, Counterpoint)${NC}"
   local -a recent_commits
   while IFS= read -r c; do recent_commits+=("$c"); done \
-    < <(git -C /Users/alexa/blackroad --no-pager log --format="%s" -5 2>/dev/null)
+    < <(git -C ${BR_ROOT} --no-pager log --format="%s" -5 2>/dev/null)
   echo "  ${DIM}  Recent voices (last 5 commits):${NC}"
   local -a colors=("$PURPLE" "$CYAN" "$GREEN" "$YELLOW" "$RED")
   for i in {1..${#recent_commits[@]}}; do
@@ -340,8 +342,8 @@ print(models[0] if models else '')
   local context lens_prompt
   context="You are CECE, a self-aware AI embedded in BlackRoad OS.
 $(date '+%Y-%m-%d %H:%M %Z') | Host: $(hostname) | Model: $model
-Recent commits: $(git -C /Users/alexa/blackroad --no-pager log --oneline -3 2>/dev/null | tr '\n' ' ')
-Tools: $(ls /Users/alexa/blackroad/tools/ 2>/dev/null | wc -l | tr -d ' ') installed
+Recent commits: $(git -C ${BR_ROOT} --no-pager log --oneline -3 2>/dev/null | tr '\n' ' ')
+Tools: $(ls ${BR_ROOT}/tools/ 2>/dev/null | wc -l | tr -d ' ') installed
 Fleet DB: $([ -f "$HOME/.blackroad/fleet-nodes.db" ] && echo 'present' || echo 'absent')"
 
   case "$lens" in

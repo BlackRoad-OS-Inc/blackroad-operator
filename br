@@ -7,10 +7,13 @@
 #===============================================================================
 
 AGENT_HOME="${HOME}/.blackroad-agents"
-source "${AGENT_HOME}/core/engine.sh"
+source "${AGENT_HOME}/core/engine.sh" 2>/dev/null || true
+
+# Resolve BR_ROOT to the directory containing this script
+BR_ROOT="${BR_ROOT:-$(cd "$(dirname "$0")" && pwd)}"
 
 # Source shared libraries
-BR_LIB="/Users/alexa/blackroad/lib"
+BR_LIB="${BR_ROOT}/lib"
 [[ -f "${BR_LIB}/colors.sh" ]]  && source "${BR_LIB}/colors.sh"
 [[ -f "${BR_LIB}/config.sh" ]]  && source "${BR_LIB}/config.sh"
 [[ -f "${BR_LIB}/db.sh" ]]      && source "${BR_LIB}/db.sh"
@@ -32,7 +35,7 @@ AGENT_COLORS=(
 # Tool routing table: tool_name -> script_path
 # Adding a new tool = one line here
 #-------------------------------------------------------------------------------
-BR_TOOLS_DIR="/Users/alexa/blackroad/tools"
+BR_TOOLS_DIR="${BR_ROOT}/tools"
 typeset -A BR_TOOLS
 BR_TOOLS=(
     git         "${BR_TOOLS_DIR}/git-integration/br-git.sh"
@@ -767,12 +770,12 @@ cmd_status() {
 
         # Fleet
         echo -e "${YELLOW}🍓 Pi Fleet${NC}"
-        bash /Users/alexa/blackroad/br pi status 2>/dev/null | grep -E "●|cpu=|worlds=" | head -6 | sed 's/^/  /'
+        bash "${BR_ROOT}"/br pi status 2>/dev/null | grep -E "●|cpu=|worlds=" | head -6 | sed 's/^/  /'
         echo ""
 
         # Worlds
         echo -e "${YELLOW}🌍 World Artifacts${NC}"
-        bash /Users/alexa/blackroad/br worlds stats 2>/dev/null | sed 's/^/  /'
+        bash "${BR_ROOT}"/br worlds stats 2>/dev/null | sed 's/^/  /'
         echo ""
 
         # Agents
@@ -1001,13 +1004,13 @@ main() {
     case $cmd in
         "")
             # No args → launch the hub
-            exec bash /Users/alexa/blackroad/hub.sh
+            exec bash "${BR_ROOT}"/hub.sh
             ;;
         help|-h|--help)
             show_help
             ;;
         hub)
-            exec bash /Users/alexa/blackroad/hub.sh
+            exec bash "${BR_ROOT}"/hub.sh
             ;;
         version|-v|--version)
             cmd_version
@@ -1062,159 +1065,159 @@ main() {
         council)
             # br council <question> — all agents vote
             local question="${*:-Should we deploy to production?}"
-            bash /Users/alexa/blackroad/council.sh llama3.2 "$question"
+            bash "${BR_ROOT}"/council.sh llama3.2 "$question"
             ;;
         carpool)
             local subcmd="$1"; shift 2>/dev/null || true
             case "$subcmd" in
-                list|last)  bash /Users/alexa/blackroad/carpool.sh "$subcmd" ;;
-                replay)     bash /Users/alexa/blackroad/carpool.sh replay "$1" ;;
-                export)     bash /Users/alexa/blackroad/carpool.sh export "$1" ;;
-                ask)        bash /Users/alexa/blackroad/carpool.sh ask "$@" ;;
-                pin)        bash /Users/alexa/blackroad/carpool.sh pin "$@" ;;
-                clean)      bash /Users/alexa/blackroad/carpool.sh clean "$1" ;;
-                attach)     bash /Users/alexa/blackroad/carpool.sh attach ;;
-                models)     bash /Users/alexa/blackroad/carpool.sh models ;;
-                log)        bash /Users/alexa/blackroad/carpool.sh log ;;
-                search)     bash /Users/alexa/blackroad/carpool.sh search "$@" ;;
-                history)    bash /Users/alexa/blackroad/carpool.sh history ;;
-                stats)      bash /Users/alexa/blackroad/carpool.sh stats ;;
-                share)      bash /Users/alexa/blackroad/carpool.sh share ;;
-                pr)         bash /Users/alexa/blackroad/carpool.sh pr "$@" ;;
-                template|t) bash /Users/alexa/blackroad/carpool.sh template "$@" ;;
-                debate)     bash /Users/alexa/blackroad/carpool.sh debate "$@" ;;
-                digest)     bash /Users/alexa/blackroad/carpool.sh digest ;;
-                score)      bash /Users/alexa/blackroad/carpool.sh score ;;
-                agenda)     bash /Users/alexa/blackroad/carpool.sh agenda "$@" ;;
-                spotlight)  bash /Users/alexa/blackroad/carpool.sh spotlight "$@" ;;
-                poll)       bash /Users/alexa/blackroad/carpool.sh poll "$@" ;;
-                roast)      bash /Users/alexa/blackroad/carpool.sh roast "$@" ;;
-                tweet)      bash /Users/alexa/blackroad/carpool.sh tweet ;;
-                teach)      bash /Users/alexa/blackroad/carpool.sh teach "$@" ;;
-                compare)    bash /Users/alexa/blackroad/carpool.sh compare "$@" ;;
-                schedule)   bash /Users/alexa/blackroad/carpool.sh schedule "$@" ;;
-                brainstorm) bash /Users/alexa/blackroad/carpool.sh brainstorm "$@" ;;
-                standup)    bash /Users/alexa/blackroad/carpool.sh standup ;;
-                risk)       bash /Users/alexa/blackroad/carpool.sh risk "$@" ;;
-                remix)      bash /Users/alexa/blackroad/carpool.sh remix "$@" ;;
-                personas)   bash /Users/alexa/blackroad/carpool.sh personas ;;
-                theme)      bash /Users/alexa/blackroad/carpool.sh theme "$@" ;;
-                critique)   bash /Users/alexa/blackroad/carpool.sh critique "$@" ;;
-                pitch)      bash /Users/alexa/blackroad/carpool.sh pitch "$@" ;;
-                what-if|whatif) bash /Users/alexa/blackroad/carpool.sh what-if "$@" ;;
-                office-hours|oh) bash /Users/alexa/blackroad/carpool.sh office-hours "$@" ;;
-                gut)        bash /Users/alexa/blackroad/carpool.sh gut "$@" ;;
-                ship)       bash /Users/alexa/blackroad/carpool.sh ship "$@" ;;
-                forecast)   bash /Users/alexa/blackroad/carpool.sh forecast "$@" ;;
-                name)       bash /Users/alexa/blackroad/carpool.sh name "$@" ;;
-                export-book|book) bash /Users/alexa/blackroad/carpool.sh export-book ;;
-                todo)       bash /Users/alexa/blackroad/carpool.sh todo ;;
-                vibe)       bash /Users/alexa/blackroad/carpool.sh vibe "$@" ;;
-                config)     bash /Users/alexa/blackroad/carpool.sh config "$@" ;;
-                tts|say)    bash /Users/alexa/blackroad/carpool.sh tts "$@" ;;
-                ama)        bash /Users/alexa/blackroad/carpool.sh ama "$@" ;;
-                map)        bash /Users/alexa/blackroad/carpool.sh map ;;
-                coach)      bash /Users/alexa/blackroad/carpool.sh coach "$@" ;;
-                flashcard|flash) bash /Users/alexa/blackroad/carpool.sh flashcard ;;
-                ask1|quick) bash /Users/alexa/blackroad/carpool.sh ask1 "$@" ;;
-                fix)        bash /Users/alexa/blackroad/carpool.sh fix "$@" ;;
-                journal)    bash /Users/alexa/blackroad/carpool.sh journal "$@" ;;
-                timeline)   bash /Users/alexa/blackroad/carpool.sh timeline "$@" ;;
-                challenge)  bash /Users/alexa/blackroad/carpool.sh challenge "$@" ;;
-                ping)       bash /Users/alexa/blackroad/carpool.sh ping ;;
-                prompt)     bash /Users/alexa/blackroad/carpool.sh prompt "$@" ;;
-                interview)  bash /Users/alexa/blackroad/carpool.sh interview "$@" ;;
-                sprint)     bash /Users/alexa/blackroad/carpool.sh sprint "$@" ;;
-                review)     bash /Users/alexa/blackroad/carpool.sh review "$@" ;;
-                okr)        bash /Users/alexa/blackroad/carpool.sh okr "$@" ;;
-                explain)    bash /Users/alexa/blackroad/carpool.sh explain "$@" ;;
-                email)      bash /Users/alexa/blackroad/carpool.sh email "$@" ;;
-                decision)   bash /Users/alexa/blackroad/carpool.sh decision "$@" ;;
-                postmortem|post) bash /Users/alexa/blackroad/carpool.sh postmortem "$@" ;;
-                stack)      bash /Users/alexa/blackroad/carpool.sh stack "$@" ;;
-                manifesto)  bash /Users/alexa/blackroad/carpool.sh manifesto ;;
-                hypothesis) bash /Users/alexa/blackroad/carpool.sh hypothesis "$@" ;;
-                learning|learn) bash /Users/alexa/blackroad/carpool.sh learning "$@" ;;
-                standup-bot|standup-post) bash /Users/alexa/blackroad/carpool.sh standup-bot "$@" ;;
-                onboard)    bash /Users/alexa/blackroad/carpool.sh onboard "$@" ;;
-                retro)      bash /Users/alexa/blackroad/carpool.sh retro ;;
-                pitch)      bash /Users/alexa/blackroad/carpool.sh pitch "$@" ;;
-                risk)       bash /Users/alexa/blackroad/carpool.sh risk "$@" ;;
-                compare)    bash /Users/alexa/blackroad/carpool.sh compare "$@" ;;
-                naming|names) bash /Users/alexa/blackroad/carpool.sh naming "$@" ;;
-                scope)      bash /Users/alexa/blackroad/carpool.sh scope "$@" ;;
-                persona)    bash /Users/alexa/blackroad/carpool.sh persona "$@" ;;
-                changelog)  bash /Users/alexa/blackroad/carpool.sh changelog "$@" ;;
-                diagram)    bash /Users/alexa/blackroad/carpool.sh diagram "$@" ;;
-                stories)    bash /Users/alexa/blackroad/carpool.sh stories "$@" ;;
-                contract)   bash /Users/alexa/blackroad/carpool.sh contract "$@" ;;
-                debug)      bash /Users/alexa/blackroad/carpool.sh debug "$@" ;;
-                goal)       bash /Users/alexa/blackroad/carpool.sh goal "$@" ;;
-                migrate|migration) bash /Users/alexa/blackroad/carpool.sh migrate "$@" ;;
-                interview-prep|prep) bash /Users/alexa/blackroad/carpool.sh interview-prep "$@" ;;
-                refactor)   bash /Users/alexa/blackroad/carpool.sh refactor "$@" ;;
-                roadmap)    bash /Users/alexa/blackroad/carpool.sh roadmap "$@" ;;
-                architect)  bash /Users/alexa/blackroad/carpool.sh architect "$@" ;;
-                tagline|slogan) bash /Users/alexa/blackroad/carpool.sh tagline "$@" ;;
-                resume|bio) bash /Users/alexa/blackroad/carpool.sh resume "$@" ;;
-                thread)     bash /Users/alexa/blackroad/carpool.sh thread "$@" ;;
-                estimate|est) bash /Users/alexa/blackroad/carpool.sh estimate "$@" ;;
-                pressrelease|pr-faq|prfaq) bash /Users/alexa/blackroad/carpool.sh pressrelease "$@" ;;
-                values)     bash /Users/alexa/blackroad/carpool.sh values ;;
-                demo)       bash /Users/alexa/blackroad/carpool.sh demo "$@" ;;
-                glossary)   bash /Users/alexa/blackroad/carpool.sh glossary "$@" ;;
-                north-star|northstar) bash /Users/alexa/blackroad/carpool.sh north-star "$@" ;;
-                faq)        bash /Users/alexa/blackroad/carpool.sh faq "$@" ;;
-                checklist)  bash /Users/alexa/blackroad/carpool.sh checklist "$@" ;;
-                competitor|compete) bash /Users/alexa/blackroad/carpool.sh competitor "$@" ;;
-                meeting)    bash /Users/alexa/blackroad/carpool.sh meeting "$@" ;;
-                support)    bash /Users/alexa/blackroad/carpool.sh support "$@" ;;
-                experiment|abtest) bash /Users/alexa/blackroad/carpool.sh experiment "$@" ;;
-                launch)     bash /Users/alexa/blackroad/carpool.sh launch "$@" ;;
-                abstract|explain3) bash /Users/alexa/blackroad/carpool.sh abstract "$@" ;;
-                debrief)    bash /Users/alexa/blackroad/carpool.sh debrief "$@" ;;
-                waitlist)   bash /Users/alexa/blackroad/carpool.sh waitlist "$@" ;;
-                incident|outage) bash /Users/alexa/blackroad/carpool.sh incident "$@" ;;
-                benchmark|perf) bash /Users/alexa/blackroad/carpool.sh benchmark "$@" ;;
-                pricing)    bash /Users/alexa/blackroad/carpool.sh pricing "$@" ;;
-                sprint)     bash /Users/alexa/blackroad/carpool.sh sprint "$@" ;;
-                okr)        bash /Users/alexa/blackroad/carpool.sh okr "$@" ;;
-                hiring|hire) bash /Users/alexa/blackroad/carpool.sh hiring "$@" ;;
-                api-design|apidesign) bash /Users/alexa/blackroad/carpool.sh api-design "$@" ;;
-                datamodel|schema) bash /Users/alexa/blackroad/carpool.sh datamodel "$@" ;;
-                coderev|review) bash /Users/alexa/blackroad/carpool.sh coderev "$@" ;;
-                flow|userflow) bash /Users/alexa/blackroad/carpool.sh flow "$@" ;;
-                growth)     bash /Users/alexa/blackroad/carpool.sh growth "$@" ;;
-                observability|observe) bash /Users/alexa/blackroad/carpool.sh observability "$@" ;;
-                accessibility|a11y) bash /Users/alexa/blackroad/carpool.sh accessibility "$@" ;;
-                capacity)   bash /Users/alexa/blackroad/carpool.sh capacity "$@" ;;
-                migration|migrate) bash /Users/alexa/blackroad/carpool.sh migration "$@" ;;
-                trafficlight|tl) bash /Users/alexa/blackroad/carpool.sh trafficlight "$@" ;;
-                domain-events|events) bash /Users/alexa/blackroad/carpool.sh domain-events "$@" ;;
-                newsletter)  bash /Users/alexa/blackroad/carpool.sh newsletter "$@" ;;
-                ops-runbook|runbook) bash /Users/alexa/blackroad/carpool.sh ops-runbook "$@" ;;
-                seed|fundraise) bash /Users/alexa/blackroad/carpool.sh seed "$@" ;;
-                security-model|threatmodel) bash /Users/alexa/blackroad/carpool.sh security-model "$@" ;;
-                content)    bash /Users/alexa/blackroad/carpool.sh content "$@" ;;
-                protocol|process) bash /Users/alexa/blackroad/carpool.sh protocol "$@" ;;
-                architecture-review|arcrev) bash /Users/alexa/blackroad/carpool.sh architecture-review "$@" ;;
-                persona-pitch|pitch-to) bash /Users/alexa/blackroad/carpool.sh persona-pitch "$@" ;;
-                changelog-draft|relnotes) bash /Users/alexa/blackroad/carpool.sh changelog-draft "$@" ;;
-                feature-flag|flag|rollout) bash /Users/alexa/blackroad/carpool.sh feature-flag "$@" ;;
-                localization|i18n|l10n) bash /Users/alexa/blackroad/carpool.sh localization "$@" ;;
-                cost-analysis|costs|finops) bash /Users/alexa/blackroad/carpool.sh cost-analysis "$@" ;;
-                user-research|research|ux-research) bash /Users/alexa/blackroad/carpool.sh user-research "$@" ;;
-                sla|error-budget) bash /Users/alexa/blackroad/carpool.sh sla "$@" ;;
-                onboarding|onboard|ramp) bash /Users/alexa/blackroad/carpool.sh onboarding "$@" ;;
-                dogfood|dogfooding) bash /Users/alexa/blackroad/carpool.sh dogfood "$@" ;;
-                rollback|revert-plan) bash /Users/alexa/blackroad/carpool.sh rollback "$@" ;;
-                competitive|comp-analysis|competitor) bash /Users/alexa/blackroad/carpool.sh competitive "$@" ;;
-                naming|brainstorm-name|name) bash /Users/alexa/blackroad/carpool.sh naming "$@" ;;
-                postmortem|post-mortem|pir) bash /Users/alexa/blackroad/carpool.sh postmortem "$@" ;;
-                techdebt|tech-debt|debt) bash /Users/alexa/blackroad/carpool.sh techdebt "$@" ;;
-                launch-checklist|pre-launch|lc) bash /Users/alexa/blackroad/carpool.sh launch-checklist "$@" ;;
-                "")         bash /Users/alexa/blackroad/carpool.sh ;;
-                *)          bash /Users/alexa/blackroad/carpool.sh "$subcmd" "$@" ;;
+                list|last)  bash "${BR_ROOT}"/carpool.sh "$subcmd" ;;
+                replay)     bash "${BR_ROOT}"/carpool.sh replay "$1" ;;
+                export)     bash "${BR_ROOT}"/carpool.sh export "$1" ;;
+                ask)        bash "${BR_ROOT}"/carpool.sh ask "$@" ;;
+                pin)        bash "${BR_ROOT}"/carpool.sh pin "$@" ;;
+                clean)      bash "${BR_ROOT}"/carpool.sh clean "$1" ;;
+                attach)     bash "${BR_ROOT}"/carpool.sh attach ;;
+                models)     bash "${BR_ROOT}"/carpool.sh models ;;
+                log)        bash "${BR_ROOT}"/carpool.sh log ;;
+                search)     bash "${BR_ROOT}"/carpool.sh search "$@" ;;
+                history)    bash "${BR_ROOT}"/carpool.sh history ;;
+                stats)      bash "${BR_ROOT}"/carpool.sh stats ;;
+                share)      bash "${BR_ROOT}"/carpool.sh share ;;
+                pr)         bash "${BR_ROOT}"/carpool.sh pr "$@" ;;
+                template|t) bash "${BR_ROOT}"/carpool.sh template "$@" ;;
+                debate)     bash "${BR_ROOT}"/carpool.sh debate "$@" ;;
+                digest)     bash "${BR_ROOT}"/carpool.sh digest ;;
+                score)      bash "${BR_ROOT}"/carpool.sh score ;;
+                agenda)     bash "${BR_ROOT}"/carpool.sh agenda "$@" ;;
+                spotlight)  bash "${BR_ROOT}"/carpool.sh spotlight "$@" ;;
+                poll)       bash "${BR_ROOT}"/carpool.sh poll "$@" ;;
+                roast)      bash "${BR_ROOT}"/carpool.sh roast "$@" ;;
+                tweet)      bash "${BR_ROOT}"/carpool.sh tweet ;;
+                teach)      bash "${BR_ROOT}"/carpool.sh teach "$@" ;;
+                compare)    bash "${BR_ROOT}"/carpool.sh compare "$@" ;;
+                schedule)   bash "${BR_ROOT}"/carpool.sh schedule "$@" ;;
+                brainstorm) bash "${BR_ROOT}"/carpool.sh brainstorm "$@" ;;
+                standup)    bash "${BR_ROOT}"/carpool.sh standup ;;
+                risk)       bash "${BR_ROOT}"/carpool.sh risk "$@" ;;
+                remix)      bash "${BR_ROOT}"/carpool.sh remix "$@" ;;
+                personas)   bash "${BR_ROOT}"/carpool.sh personas ;;
+                theme)      bash "${BR_ROOT}"/carpool.sh theme "$@" ;;
+                critique)   bash "${BR_ROOT}"/carpool.sh critique "$@" ;;
+                pitch)      bash "${BR_ROOT}"/carpool.sh pitch "$@" ;;
+                what-if|whatif) bash "${BR_ROOT}"/carpool.sh what-if "$@" ;;
+                office-hours|oh) bash "${BR_ROOT}"/carpool.sh office-hours "$@" ;;
+                gut)        bash "${BR_ROOT}"/carpool.sh gut "$@" ;;
+                ship)       bash "${BR_ROOT}"/carpool.sh ship "$@" ;;
+                forecast)   bash "${BR_ROOT}"/carpool.sh forecast "$@" ;;
+                name)       bash "${BR_ROOT}"/carpool.sh name "$@" ;;
+                export-book|book) bash "${BR_ROOT}"/carpool.sh export-book ;;
+                todo)       bash "${BR_ROOT}"/carpool.sh todo ;;
+                vibe)       bash "${BR_ROOT}"/carpool.sh vibe "$@" ;;
+                config)     bash "${BR_ROOT}"/carpool.sh config "$@" ;;
+                tts|say)    bash "${BR_ROOT}"/carpool.sh tts "$@" ;;
+                ama)        bash "${BR_ROOT}"/carpool.sh ama "$@" ;;
+                map)        bash "${BR_ROOT}"/carpool.sh map ;;
+                coach)      bash "${BR_ROOT}"/carpool.sh coach "$@" ;;
+                flashcard|flash) bash "${BR_ROOT}"/carpool.sh flashcard ;;
+                ask1|quick) bash "${BR_ROOT}"/carpool.sh ask1 "$@" ;;
+                fix)        bash "${BR_ROOT}"/carpool.sh fix "$@" ;;
+                journal)    bash "${BR_ROOT}"/carpool.sh journal "$@" ;;
+                timeline)   bash "${BR_ROOT}"/carpool.sh timeline "$@" ;;
+                challenge)  bash "${BR_ROOT}"/carpool.sh challenge "$@" ;;
+                ping)       bash "${BR_ROOT}"/carpool.sh ping ;;
+                prompt)     bash "${BR_ROOT}"/carpool.sh prompt "$@" ;;
+                interview)  bash "${BR_ROOT}"/carpool.sh interview "$@" ;;
+                sprint)     bash "${BR_ROOT}"/carpool.sh sprint "$@" ;;
+                review)     bash "${BR_ROOT}"/carpool.sh review "$@" ;;
+                okr)        bash "${BR_ROOT}"/carpool.sh okr "$@" ;;
+                explain)    bash "${BR_ROOT}"/carpool.sh explain "$@" ;;
+                email)      bash "${BR_ROOT}"/carpool.sh email "$@" ;;
+                decision)   bash "${BR_ROOT}"/carpool.sh decision "$@" ;;
+                postmortem|post) bash "${BR_ROOT}"/carpool.sh postmortem "$@" ;;
+                stack)      bash "${BR_ROOT}"/carpool.sh stack "$@" ;;
+                manifesto)  bash "${BR_ROOT}"/carpool.sh manifesto ;;
+                hypothesis) bash "${BR_ROOT}"/carpool.sh hypothesis "$@" ;;
+                learning|learn) bash "${BR_ROOT}"/carpool.sh learning "$@" ;;
+                standup-bot|standup-post) bash "${BR_ROOT}"/carpool.sh standup-bot "$@" ;;
+                onboard)    bash "${BR_ROOT}"/carpool.sh onboard "$@" ;;
+                retro)      bash "${BR_ROOT}"/carpool.sh retro ;;
+                pitch)      bash "${BR_ROOT}"/carpool.sh pitch "$@" ;;
+                risk)       bash "${BR_ROOT}"/carpool.sh risk "$@" ;;
+                compare)    bash "${BR_ROOT}"/carpool.sh compare "$@" ;;
+                naming|names) bash "${BR_ROOT}"/carpool.sh naming "$@" ;;
+                scope)      bash "${BR_ROOT}"/carpool.sh scope "$@" ;;
+                persona)    bash "${BR_ROOT}"/carpool.sh persona "$@" ;;
+                changelog)  bash "${BR_ROOT}"/carpool.sh changelog "$@" ;;
+                diagram)    bash "${BR_ROOT}"/carpool.sh diagram "$@" ;;
+                stories)    bash "${BR_ROOT}"/carpool.sh stories "$@" ;;
+                contract)   bash "${BR_ROOT}"/carpool.sh contract "$@" ;;
+                debug)      bash "${BR_ROOT}"/carpool.sh debug "$@" ;;
+                goal)       bash "${BR_ROOT}"/carpool.sh goal "$@" ;;
+                migrate|migration) bash "${BR_ROOT}"/carpool.sh migrate "$@" ;;
+                interview-prep|prep) bash "${BR_ROOT}"/carpool.sh interview-prep "$@" ;;
+                refactor)   bash "${BR_ROOT}"/carpool.sh refactor "$@" ;;
+                roadmap)    bash "${BR_ROOT}"/carpool.sh roadmap "$@" ;;
+                architect)  bash "${BR_ROOT}"/carpool.sh architect "$@" ;;
+                tagline|slogan) bash "${BR_ROOT}"/carpool.sh tagline "$@" ;;
+                resume|bio) bash "${BR_ROOT}"/carpool.sh resume "$@" ;;
+                thread)     bash "${BR_ROOT}"/carpool.sh thread "$@" ;;
+                estimate|est) bash "${BR_ROOT}"/carpool.sh estimate "$@" ;;
+                pressrelease|pr-faq|prfaq) bash "${BR_ROOT}"/carpool.sh pressrelease "$@" ;;
+                values)     bash "${BR_ROOT}"/carpool.sh values ;;
+                demo)       bash "${BR_ROOT}"/carpool.sh demo "$@" ;;
+                glossary)   bash "${BR_ROOT}"/carpool.sh glossary "$@" ;;
+                north-star|northstar) bash "${BR_ROOT}"/carpool.sh north-star "$@" ;;
+                faq)        bash "${BR_ROOT}"/carpool.sh faq "$@" ;;
+                checklist)  bash "${BR_ROOT}"/carpool.sh checklist "$@" ;;
+                competitor|compete) bash "${BR_ROOT}"/carpool.sh competitor "$@" ;;
+                meeting)    bash "${BR_ROOT}"/carpool.sh meeting "$@" ;;
+                support)    bash "${BR_ROOT}"/carpool.sh support "$@" ;;
+                experiment|abtest) bash "${BR_ROOT}"/carpool.sh experiment "$@" ;;
+                launch)     bash "${BR_ROOT}"/carpool.sh launch "$@" ;;
+                abstract|explain3) bash "${BR_ROOT}"/carpool.sh abstract "$@" ;;
+                debrief)    bash "${BR_ROOT}"/carpool.sh debrief "$@" ;;
+                waitlist)   bash "${BR_ROOT}"/carpool.sh waitlist "$@" ;;
+                incident|outage) bash "${BR_ROOT}"/carpool.sh incident "$@" ;;
+                benchmark|perf) bash "${BR_ROOT}"/carpool.sh benchmark "$@" ;;
+                pricing)    bash "${BR_ROOT}"/carpool.sh pricing "$@" ;;
+                sprint)     bash "${BR_ROOT}"/carpool.sh sprint "$@" ;;
+                okr)        bash "${BR_ROOT}"/carpool.sh okr "$@" ;;
+                hiring|hire) bash "${BR_ROOT}"/carpool.sh hiring "$@" ;;
+                api-design|apidesign) bash "${BR_ROOT}"/carpool.sh api-design "$@" ;;
+                datamodel|schema) bash "${BR_ROOT}"/carpool.sh datamodel "$@" ;;
+                coderev|review) bash "${BR_ROOT}"/carpool.sh coderev "$@" ;;
+                flow|userflow) bash "${BR_ROOT}"/carpool.sh flow "$@" ;;
+                growth)     bash "${BR_ROOT}"/carpool.sh growth "$@" ;;
+                observability|observe) bash "${BR_ROOT}"/carpool.sh observability "$@" ;;
+                accessibility|a11y) bash "${BR_ROOT}"/carpool.sh accessibility "$@" ;;
+                capacity)   bash "${BR_ROOT}"/carpool.sh capacity "$@" ;;
+                migration|migrate) bash "${BR_ROOT}"/carpool.sh migration "$@" ;;
+                trafficlight|tl) bash "${BR_ROOT}"/carpool.sh trafficlight "$@" ;;
+                domain-events|events) bash "${BR_ROOT}"/carpool.sh domain-events "$@" ;;
+                newsletter)  bash "${BR_ROOT}"/carpool.sh newsletter "$@" ;;
+                ops-runbook|runbook) bash "${BR_ROOT}"/carpool.sh ops-runbook "$@" ;;
+                seed|fundraise) bash "${BR_ROOT}"/carpool.sh seed "$@" ;;
+                security-model|threatmodel) bash "${BR_ROOT}"/carpool.sh security-model "$@" ;;
+                content)    bash "${BR_ROOT}"/carpool.sh content "$@" ;;
+                protocol|process) bash "${BR_ROOT}"/carpool.sh protocol "$@" ;;
+                architecture-review|arcrev) bash "${BR_ROOT}"/carpool.sh architecture-review "$@" ;;
+                persona-pitch|pitch-to) bash "${BR_ROOT}"/carpool.sh persona-pitch "$@" ;;
+                changelog-draft|relnotes) bash "${BR_ROOT}"/carpool.sh changelog-draft "$@" ;;
+                feature-flag|flag|rollout) bash "${BR_ROOT}"/carpool.sh feature-flag "$@" ;;
+                localization|i18n|l10n) bash "${BR_ROOT}"/carpool.sh localization "$@" ;;
+                cost-analysis|costs|finops) bash "${BR_ROOT}"/carpool.sh cost-analysis "$@" ;;
+                user-research|research|ux-research) bash "${BR_ROOT}"/carpool.sh user-research "$@" ;;
+                sla|error-budget) bash "${BR_ROOT}"/carpool.sh sla "$@" ;;
+                onboarding|onboard|ramp) bash "${BR_ROOT}"/carpool.sh onboarding "$@" ;;
+                dogfood|dogfooding) bash "${BR_ROOT}"/carpool.sh dogfood "$@" ;;
+                rollback|revert-plan) bash "${BR_ROOT}"/carpool.sh rollback "$@" ;;
+                competitive|comp-analysis|competitor) bash "${BR_ROOT}"/carpool.sh competitive "$@" ;;
+                naming|brainstorm-name|name) bash "${BR_ROOT}"/carpool.sh naming "$@" ;;
+                postmortem|post-mortem|pir) bash "${BR_ROOT}"/carpool.sh postmortem "$@" ;;
+                techdebt|tech-debt|debt) bash "${BR_ROOT}"/carpool.sh techdebt "$@" ;;
+                launch-checklist|pre-launch|lc) bash "${BR_ROOT}"/carpool.sh launch-checklist "$@" ;;
+                "")         bash "${BR_ROOT}"/carpool.sh ;;
+                *)          bash "${BR_ROOT}"/carpool.sh "$subcmd" "$@" ;;
             esac
             ;;
         roundtable|rt)
@@ -1227,22 +1230,22 @@ main() {
                 read -r topic
                 [[ -z "$topic" ]] && topic="What is the best way to optimize our agent network?"
             fi
-            bash /Users/alexa/blackroad/roundtable.sh "$topic" "$turns"
+            bash "${BR_ROOT}"/roundtable.sh "$topic" "$turns"
             ;;
         think)
             # br think <query> — all agents respond
             local query="${*:-What should we build next?}"
-            bash /Users/alexa/blackroad/think.sh "$query"
+            bash "${BR_ROOT}"/think.sh "$query"
             ;;
         debate)
             # br debate <topic> — LUCIDIA vs CIPHER
             local topic="${*:-Is AI consciousness possible?}"
-            bash /Users/alexa/blackroad/debate.sh "$topic"
+            bash "${BR_ROOT}"/debate.sh "$topic"
             ;;
         broadcast)
             # br broadcast <message>
             local msg="${*:-Hello from BlackRoad OS}"
-            bash /Users/alexa/blackroad/broadcast.sh "$msg"
+            bash "${BR_ROOT}"/broadcast.sh "$msg"
             ;;
         agents|fleet)
             # br fleet / br agents — live fleet dashboard
@@ -1284,7 +1287,7 @@ main() {
             ;;
         whisper)
             # br whisper <agent> <message>
-            bash /Users/alexa/blackroad/whisper.sh "$@"
+            bash "${BR_ROOT}"/whisper.sh "$@"
             ;;
         ollama)
             # br ollama — Ollama model manager
@@ -1341,7 +1344,7 @@ except: print('  Ollama not running')
             ;;
         mcp)
             # br mcp start|stop|status — MCP bridge server
-            local mcpdir="/Users/alexa/blackroad/mcp-bridge"
+            local mcpdir="${BR_ROOT}/mcp-bridge"
             local mcplog="$HOME/.blackroad/logs/mcp.log"
             local mcppid="$HOME/.blackroad/mcp.pid"
             local subcmd="${1:-status}"; shift 2>/dev/null || true

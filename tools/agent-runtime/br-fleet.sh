@@ -5,8 +5,9 @@ GREEN=$'\033[0;32m'; RED=$'\033[0;31m'; YELLOW=$'\033[1;33m'
 CYAN=$'\033[0;36m'; BLUE=$'\033[0;34m'; MAGENTA=$'\033[0;35m'
 BOLD=$'\033[1m'; DIM=$'\033[2m'; NC=$'\033[0m'
 
+BR_ROOT="${BR_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 TASKS_DB="$HOME/.blackroad/agent-tasks.db"
-AGENTS_DIR="/Users/alexa/blackroad/agents/active"
+AGENTS_DIR="${BR_ROOT}/agents/active"
 PI_KEY="$HOME/.ssh/br_mesh_ed25519"
 PI_NODES=("pi@192.168.4.38")
 
