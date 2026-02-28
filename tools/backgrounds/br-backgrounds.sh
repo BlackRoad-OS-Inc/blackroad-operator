@@ -133,10 +133,36 @@ cmd_set() {
   blur="$(get_config 'blur')"
   fit="$(get_config 'fit')"
 
+  # Build JSON payload safely using Python's json encoder
+  local payload
+  payload=$(python3 - "$file_id" "$opacity" "$blur" "$fit" << 'PY'
+import json
+import sys
+
+file_id, opacity_str, blur_str, fit = sys.argv[1:5]
+
+def parse_float(value, default):
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return default
+
+payload = {
+    "mode": "image",
+    "fileId": file_id,
+    "opacity": parse_float(opacity_str, 0.15),
+    "blur": parse_float(blur_str, 0.0),
+    "fit": fit,
+}
+
+print(json.dumps(payload))
+PY
+)
+
   local response
   response=$(curl -sS -X POST "$url/backgrounds/config" \
     -H "Content-Type: application/json" \
-    -d "{\"mode\":\"image\",\"fileId\":\"$file_id\",\"opacity\":$opacity,\"blur\":$blur,\"fit\":\"$fit\"}" 2>&1)
+    -d "$payload" 2>&1)
 
   set_config "mode" "image"
   set_config "active_file_id" "$file_id"
