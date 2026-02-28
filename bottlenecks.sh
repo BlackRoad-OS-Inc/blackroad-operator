@@ -160,9 +160,13 @@ get_uptime_human() {
 probe_service() {
   local name="$1"
   local url="$2"
-  local start end http_code latency status
+  local start end http_code latency status curl_exit
   start=$(date +%s%N 2>/dev/null || python3 -c "import time; print(int(time.time()*1e9))")
-  http_code=$(curl -sf -o /dev/null -w "%{http_code}" --max-time 5 "$url" 2>/dev/null || echo "000")
+  curl_exit=0
+  http_code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 "$url" 2>/dev/null) || curl_exit=$?
+  if [ "$curl_exit" -ne 0 ] || [ -z "${http_code:-}" ]; then
+    http_code="000"
+  fi
   end=$(date +%s%N 2>/dev/null || python3 -c "import time; print(int(time.time()*1e9))")
   latency=$(( (end - start) / 1000000 ))
 
