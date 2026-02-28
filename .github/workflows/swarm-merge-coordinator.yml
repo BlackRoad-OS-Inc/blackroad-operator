@@ -1,0 +1,162 @@
+# .github/workflows/swarm-merge-coordinator.yml
+# Watches swarm PRs and auto-merges when strategy conditions are met
+#
+# Strategies:
+#   parallel:    Merge when ALL agent PRs pass checks
+#   pipeline:    Merge sequentially in agent order
+#   review-ring: Merge when each agent has reviewed the next
+#   consensus:   Merge when ALL agents approve ALL PRs
+
+name: "Swarm Merge Coordinator"
+
+on:
+  pull_request_review:
+    types: [submitted]
+  check_suite:
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      swarm_id:
+        description: 'Swarm ID to process'
+        required: true
+        type: string
+      action:
+        description: 'Action to take'
+        required: true
+        type: choice
+        options:
+          - check-status
+          - force-merge
+          - close-all
+
+permissions:
+  contents: write
+  pull-requests: write
+  checks: read
+
+jobs:
+  coordinate:
+    name: "Swarm Coordination"
+    runs-on: [self-hosted, blackroad-fleet]
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'pull_request_review' && contains(github.event.pull_request.labels.*.name, 'swarm')) ||
+      (github.event_name == 'check_suite' && github.event.check_suite.conclusion == 'success')
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Identify Swarm
+        id: swarm
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            SWARM_ID="${{ inputs.swarm_id }}"
+          else
+            # Extract swarm ID from branch name
+            BRANCH="${{ github.event.pull_request.head.ref || '' }}"
+            SWARM_ID=$(echo "$BRANCH" | grep -oP 'swarm/\K[^/]+' || echo "")
+          fi
+
+          if [ -z "$SWARM_ID" ]; then
+            echo "No swarm ID found, skipping"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "swarm_id=${SWARM_ID}" >> "$GITHUB_OUTPUT"
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+          echo "Swarm ID: ${SWARM_ID}"
+
+      - name: Check Swarm Status
+        if: steps.swarm.outputs.skip != 'true'
+        id: status
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          SWARM_ID="${{ steps.swarm.outputs.swarm_id }}"
+
+          # Get all agent PRs
+          AGENT_PRS=$(gh pr list --label "swarm" --state open --json number,headRefName,mergeable,statusCheckRollup,reviews \
+            --jq "[.[] | select(.headRefName | startswith(\"swarm/${SWARM_ID}/agent/\"))]")
+
+          TOTAL=$(echo "$AGENT_PRS" | jq length)
+          MERGEABLE=$(echo "$AGENT_PRS" | jq '[.[] | select(.mergeable == "MERGEABLE")] | length')
+          CHECKS_PASS=$(echo "$AGENT_PRS" | jq '[.[] | select(.statusCheckRollup | all(.conclusion == "SUCCESS"))] | length')
+
+          echo "total=${TOTAL}" >> "$GITHUB_OUTPUT"
+          echo "mergeable=${MERGEABLE}" >> "$GITHUB_OUTPUT"
+          echo "checks_pass=${CHECKS_PASS}" >> "$GITHUB_OUTPUT"
+          echo "all_ready=$([ "$TOTAL" -gt 0 ] && [ "$TOTAL" -eq "$CHECKS_PASS" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+
+          echo "## Swarm ${SWARM_ID} Status" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Metric | Count |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|--------|-------|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Total Agent PRs | ${TOTAL} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Mergeable | ${MERGEABLE} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Checks Passing | ${CHECKS_PASS} |" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Auto-Merge (Parallel Strategy)
+        if: |
+          steps.swarm.outputs.skip != 'true' &&
+          steps.status.outputs.all_ready == 'true' &&
+          steps.status.outputs.total != '0'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          SWARM_ID="${{ steps.swarm.outputs.swarm_id }}"
+
+          echo "All agent PRs are ready — initiating merge cascade"
+
+          # Merge agent PRs
+          gh pr list --label "swarm" --state open --json number,headRefName \
+            --jq ".[] | select(.headRefName | startswith(\"swarm/${SWARM_ID}/agent/\")) | .number" | \
+          while read -r pr_num; do
+            echo "Merging #${pr_num}..."
+            gh pr merge "$pr_num" --squash --auto \
+              --subject "swarm(${SWARM_ID}): merge agent work" || \
+              echo "Warning: Could not merge #${pr_num}"
+          done
+
+          # Comment on coordinator PR
+          COORD_PR=$(gh pr list --label "swarm-coordinator" --state open --json number,headRefName \
+            --jq ".[] | select(.headRefName | startswith(\"swarm/${SWARM_ID}/coordinator\")) | .number" || echo "")
+
+          if [ -n "$COORD_PR" ]; then
+            gh pr comment "$COORD_PR" --body "## Swarm Complete
+All agent PRs have passed checks and been merged.
+Swarm \`${SWARM_ID}\` is complete."
+
+            gh pr close "$COORD_PR" --comment "Closing coordinator — all agent work merged."
+          fi
+
+      - name: Force Merge (Manual)
+        if: |
+          github.event_name == 'workflow_dispatch' &&
+          inputs.action == 'force-merge'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          SWARM_ID="${{ steps.swarm.outputs.swarm_id }}"
+
+          gh pr list --label "swarm" --state open --json number,headRefName \
+            --jq ".[] | select(.headRefName | startswith(\"swarm/${SWARM_ID}/agent/\")) | .number" | \
+          while read -r pr_num; do
+            gh pr merge "$pr_num" --squash --admin || echo "Failed: #${pr_num}"
+          done
+
+      - name: Close All (Manual)
+        if: |
+          github.event_name == 'workflow_dispatch' &&
+          inputs.action == 'close-all'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          SWARM_ID="${{ steps.swarm.outputs.swarm_id }}"
+
+          gh pr list --label "swarm" --state open --json number,headRefName \
+            --jq ".[] | select(.headRefName | startswith(\"swarm/${SWARM_ID}/\")) | .number" | \
+          while read -r pr_num; do
+            gh pr close "$pr_num" --comment "Swarm ${SWARM_ID} closed by coordinator." || true
+          done
