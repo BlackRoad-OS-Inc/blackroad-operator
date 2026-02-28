@@ -56,16 +56,6 @@ const BUILTIN_SERVICES = {
   "products":     { url: "https://products.blackroad.io",     type: "pages" },
   "docs":         { url: "https://docs.blackroad.io",         type: "pages" },
 
-  // Infrastructure
-  "gateway":      { url: "http://127.0.0.1:8787",             type: "local" },
-  "ollama":       { url: "http://127.0.0.1:11434",            type: "local" },
-  "mcp-bridge":   { url: "http://127.0.0.1:8420",             type: "local" },
-
-  // Raspberry Pi
-  "pi-primary":   { url: "http://192.168.4.64:8080",          type: "pi" },
-  "pi-secondary": { url: "http://192.168.4.38:8080",          type: "pi" },
-  "pi-alternate": { url: "http://192.168.4.99:8080",          type: "pi" },
-
   // DigitalOcean
   "droplet":      { url: "http://159.65.43.12:8080",          type: "droplet" },
 };
