@@ -735,12 +735,17 @@ document.getElementById('find-input').addEventListener('input', () => doFind());
 function doFind() {
   const q = document.getElementById('find-input').value;
   const countEl = document.getElementById('find-count');
-  if (!q) { countEl.textContent=''; findMatches=[]; return; }
+  if (!q) { countEl.textContent=''; findMatches=[]; findIndex=0; return; }
   const text = editor.value;
   const re = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gi');
   findMatches = [];
   let m;
   while((m = re.exec(text)) !== null) findMatches.push(m.index);
+  if (findMatches.length) {
+    findIndex = Math.max(0, Math.min(findIndex, findMatches.length - 1));
+  } else {
+    findIndex = 0;
+  }
   countEl.textContent = findMatches.length ? `${Math.min(findIndex+1,findMatches.length)} / ${findMatches.length}` : '0 results';
   if (findMatches.length) highlightFind();
 }
