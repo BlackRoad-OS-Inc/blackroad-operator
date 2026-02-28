@@ -8,14 +8,31 @@ export const gatewayRoutes = new Hono()
 gatewayRoutes.post('/invoke', authMiddleware('gateway:invoke'), async (c) => {
   const gatewayUrl = process.env['BLACKROAD_GATEWAY_URL'] ?? 'http://127.0.0.1:8787'
 
-  const body = await c.req.json<{
+  let body: {
     agent: string
     intent: string
     input: string
     provider?: string
     context?: Record<string, unknown>
-  }>()
+  }
 
+  try {
+    body = await c.req.json<{
+      agent: string
+      intent: string
+      input: string
+      provider?: string
+      context?: Record<string, unknown>
+    }>()
+  } catch {
+    return c.json(
+      {
+        error: 'invalid_json',
+        message: 'Request body must be valid JSON',
+      },
+      400,
+    )
+  }
   if (!body.agent) return c.json({ error: 'agent required' }, 400)
   if (!body.intent) return c.json({ error: 'intent required' }, 400)
   if (!body.input) return c.json({ error: 'input required' }, 400)
