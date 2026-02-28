@@ -88,8 +88,25 @@ jobs:
             TASK="${{ inputs.task }}"
             STRATEGY="${{ inputs.strategy }}"
           else
-            TASK="${{ github.event.issue.title }}"
-            STRATEGY="parallel"
+            # Parse task and strategy from issue form body, with safe fallbacks
+            ISSUE_BODY="${{ github.event.issue.body }}"
+
+            # Extract Task Description section (between "### Task Description" and next "### ")
+            TASK=$(printf '%s\n' "$ISSUE_BODY" | awk '/^### Task Description/{flag=1;next}/^### /{flag=0}flag' | sed '/^[[:space:]]*$/d' | head -n 20 | tr '\n' ' ' | sed 's/[[:space:]]\{1,\}/ /g' | sed 's/[[:space:]]*$//')
+
+            # Fallback to issue title if no task description found in body
+            if [ -z "$TASK" ]; then
+              TASK="${{ github.event.issue.title }}"
+            fi
+
+            # Extract selected strategy from "### Strategy" section, e.g. "- [x] Parallel"
+            RAW_STRATEGY=$(printf '%s\n' "$ISSUE_BODY" | awk '/^### Strategy/{flag=1;next}/^### /{flag=0}flag' | grep -i '\[x\]' | head -n 1 | sed -E 's/.*\[(x|X)\][[:space:]]*//')
+            STRATEGY=$(printf '%s' "$RAW_STRATEGY" | tr '[:upper:]' '[:lower:]' | sed 's/[[:space:]]\{1,\}/ /g' | sed 's/[[:space:]]*$//')
+
+            # Fallback to "parallel" if no strategy could be parsed
+            if [ -z "$STRATEGY" ]; then
+              STRATEGY="parallel"
+            fi
           fi
           echo "description=${TASK}" >> "$GITHUB_OUTPUT"
           echo "strategy=${STRATEGY}" >> "$GITHUB_OUTPUT"
