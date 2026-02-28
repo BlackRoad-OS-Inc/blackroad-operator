@@ -1,0 +1,63 @@
+name: "Swarm Task"
+description: "Launch a parallel agent PR swarm to work on a task"
+title: "[SWARM] "
+labels: ["swarm"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Launch an Agent PR Swarm
+        Describe your task and select which agents should work on it.
+        Each agent gets its own branch and PR — like a group call.
+
+  - type: textarea
+    id: task
+    attributes:
+      label: Task Description
+      description: What should the swarm work on?
+      placeholder: "Build a new authentication module with OAuth2 support"
+    validations:
+      required: true
+
+  - type: input
+    id: agents
+    attributes:
+      label: Agents
+      description: "Comma-separated agent names, or 'all'"
+      placeholder: "lucidia,octavia,alice,cipher"
+      value: "lucidia,octavia,alice,cipher"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: strategy
+    attributes:
+      label: Swarm Strategy
+      description: How should agents coordinate?
+      options:
+        - "parallel — All agents work simultaneously"
+        - "pipeline — Sequential handoff between agents"
+        - "review-ring — Each agent reviews the previous"
+        - "consensus — All must approve before merge"
+      default: 0
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - low
+        - medium
+        - high
+        - critical
+      default: 1
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Any extra context, file paths, or references for the agents
+      placeholder: "Focus on src/auth/ directory. Reference PR #42 for prior work."
