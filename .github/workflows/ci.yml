@@ -81,7 +81,7 @@ jobs:
         run: |
           FOUND=0
           if grep -rn --include="*.ts" --include="*.js" \
-            -E "(password|secret|api_key|private_key)\s*[:=]\s*['\"][A-Za-z0-9+/=]{8,}['\"]" \
+            -E "(password|secret|api_key|private_key)[[:space:]]*[:=][[:space:]]*['\"][A-Za-z0-9+/=]{8,}['\"]" \
             src/ 2>/dev/null | grep -v node_modules | grep -v '\.test\.'; then
             echo "::warning::Potential hardcoded secrets detected in source files"
             FOUND=1
