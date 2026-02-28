@@ -48,11 +48,22 @@ gatewayRoutes.post('/invoke', authMiddleware('gateway:invoke'), async (c) => {
         provider: body.provider,
         context: body.context ?? {},
       }),
+      signal: AbortSignal.timeout(5000),
     })
 
     const data = (await res.json()) as Record<string, unknown>
     return c.json(data, res.status as 200)
   } catch (err) {
+    if (err instanceof Error && (err.name === 'TimeoutError' || err.name === 'AbortError')) {
+      return c.json(
+        {
+          error: 'gateway_timeout',
+          message: 'Gateway request timed out',
+          gateway_url: gatewayUrl,
+        },
+        504,
+      )
+    }
     return c.json(
       {
         error: 'gateway_unreachable',
