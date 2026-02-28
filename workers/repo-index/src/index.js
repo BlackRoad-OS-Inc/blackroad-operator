@@ -389,19 +389,32 @@ export default {
 
       // Fetch individual repo metadata
       const repos = [];
-      for (const name of data.repos.slice(0, 200)) {
-        const repoRaw = await env.INDEX.get(`repo:${org}:${name}`);
-        if (repoRaw) {
-          const r = JSON.parse(repoRaw);
-          repos.push({
-            name: r.name,
-            description: r.description,
-            language: r.language,
-            stars: r.stars,
-            visibility: r.visibility,
-            is_fork: r.is_fork,
-            updated_at: r.updated_at,
-          });
+      const repoNames = data.repos.slice(0, 200);
+      const CONCURRENCY = 20;
+
+      for (let i = 0; i < repoNames.length; i += CONCURRENCY) {
+        const chunk = repoNames.slice(i, i + CONCURRENCY);
+        const results = await Promise.all(
+          chunk.map(async (name) => {
+            const repoRaw = await env.INDEX.get(`repo:${org}:${name}`);
+            if (!repoRaw) return null;
+            const r = JSON.parse(repoRaw);
+            return {
+              name: r.name,
+              description: r.description,
+              language: r.language,
+              stars: r.stars,
+              visibility: r.visibility,
+              is_fork: r.is_fork,
+              updated_at: r.updated_at,
+            };
+          }),
+        );
+
+        for (const repo of results) {
+          if (repo) {
+            repos.push(repo);
+          }
         }
       }
 
