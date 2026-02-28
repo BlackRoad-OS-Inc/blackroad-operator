@@ -310,7 +310,7 @@ function summarizeEntry(entry) {
     artifactType: entry.artifactType,
     direction: entry.direction,
     status: entry.status,
-    hash: entry.hash?.slice(0, 12) + '...',
+    hash: entry.hash ? entry.hash.slice(0, 12) + '...' : null,
   };
 }
 
