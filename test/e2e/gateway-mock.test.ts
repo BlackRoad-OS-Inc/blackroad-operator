@@ -79,7 +79,7 @@ describe('Gateway integration e2e', () => {
       expect(stdout).toContain('healthy')
       expect(stdout).toContain('1.2.3')
       expect(stdout).toContain('9876')
-      expect(stdout).toContain('3')
+      expect(stdout).toContain('3 registered')
     })
   })
 
