@@ -142,10 +142,15 @@ else
 fi
 
 # Verify gateway binding is localhost-only
-if grep -q 'BLACKROAD_GATEWAY_BIND.*0\.0\.0\.0' "$ROOT_DIR/blackroad-core/gateway/server.js" 2>/dev/null; then
+GATEWAY_SERVER="$ROOT_DIR/blackroad-core/gateway/server.js"
+if [ ! -f "$GATEWAY_SERVER" ]; then
+  warn "Gateway server.js not found; cannot verify bind address"
+elif grep -q "bind:[[:space:]]*'0\.0\.0\.0'" "$GATEWAY_SERVER"; then
   fail "Gateway binds to 0.0.0.0 (should be 127.0.0.1)"
-else
+elif grep -q "bind:[[:space:]]*'127\.0\.0\.1'" "$GATEWAY_SERVER"; then
   pass "Gateway binds to localhost only (secure)"
+else
+  warn "Gateway bind address could not be verified as localhost-only"
 fi
 
 # ── Summary ─────────────────────────────────────────────────
