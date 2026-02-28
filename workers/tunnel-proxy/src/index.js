@@ -313,14 +313,61 @@ export default {
     // GET /tunnel/:target/* — generic tunnel by URL
     const tunnelMatch = path.match(/^\/tunnel\/(.+)$/);
     if (tunnelMatch && method === "GET") {
+      // Require auth for tunnel endpoints: either standard auth or a shared secret
+      const isAuthed = requireAuth(request, env);
+      const tunnelSecretHeader = request.headers.get("X-Tunnel-Secret");
+      const hasValidTunnelSecret =
+        env.TUNNEL_SECRET && tunnelSecretHeader && tunnelSecretHeader === env.TUNNEL_SECRET;
+      if (!isAuthed && !hasValidTunnelSecret) {
+        return json({ error: "Unauthorized" }, 401);
+      }
+
       const targetEncoded = tunnelMatch[1];
       let target;
+      let urlObj;
       try {
         target = decodeURIComponent(targetEncoded);
         if (!target.startsWith("http")) target = `https://${target}`;
-        new URL(target); // validate
+        urlObj = new URL(target); // basic URL validation
       } catch {
         return json({ error: "Invalid tunnel target URL" }, 400);
+      }
+
+      const hostname = urlObj.hostname.toLowerCase();
+
+      // Optional allowlist: comma-separated hostnames in env.TUNNEL_ALLOWLIST
+      if (env.TUNNEL_ALLOWLIST) {
+        const allowedHosts = env.TUNNEL_ALLOWLIST.split(",").map((h) => h.trim().toLowerCase()).filter(Boolean);
+        const isAllowed = allowedHosts.some((allowed) => {
+          if (hostname === allowed) return true;
+          // Allow subdomains of allowed hosts
+          return hostname.endsWith("." + allowed);
+        });
+        if (!isAllowed) {
+          return json({ error: "Tunnel target not allowed" }, 403);
+        }
+      }
+
+      // Block obvious SSRF targets: localhost and common private/loopback IP ranges
+      const isLocalHostname = hostname === "localhost";
+      const ipv4Match = hostname.match(/^(\d{1,3}\.){3}\d{1,3}$/);
+      let isPrivateIp = false;
+      if (ipv4Match) {
+        const parts = hostname.split(".").map((p) => parseInt(p, 10));
+        const [a, b] = parts;
+        if (a === 10) {
+          isPrivateIp = true; // 10.0.0.0/8
+        } else if (a === 172 && b >= 16 && b <= 31) {
+          isPrivateIp = true; // 172.16.0.0 – 172.31.255.255
+        } else if (a === 192 && b === 168) {
+          isPrivateIp = true; // 192.168.0.0/16
+        } else if (a === 127) {
+          isPrivateIp = true; // 127.0.0.0/8 loopback
+        }
+      }
+
+      if (isLocalHostname || isPrivateIp) {
+        return json({ error: "Tunnel target host is not allowed" }, 403);
       }
       return proxyToService(target, "", request);
     }
