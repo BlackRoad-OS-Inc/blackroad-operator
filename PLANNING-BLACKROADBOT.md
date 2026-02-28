@@ -46,7 +46,7 @@ Today this capability exists in documentation and architectural intent. This pla
 
 ### The Core Friction
 
-BlackRoad's infrastructure spans 15 GitHub organizations, 19 domains, 85+ Cloudflare Workers, a Pi cluster, two DigitalOcean droplets, and integrations with Salesforce, Hugging Face, Railway, and Google Drive. Coordinating work across this surface today requires manually context-switching between platforms, writing custom scripts per task, and holding routing logic in the architect's head.
+BlackRoad's infrastructure spans 15 GitHub organizations, 19 domains, 75 Cloudflare Workers, a Pi cluster, two DigitalOcean droplets, and integrations with Salesforce, Hugging Face, Railway, and Google Drive. Coordinating work across this surface today requires manually context-switching between platforms, writing custom scripts per task, and holding routing logic in the architect's head.
 
 This does not scale to 1,000 agents -- let alone 30,000.
 
