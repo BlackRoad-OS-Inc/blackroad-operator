@@ -276,10 +276,37 @@
 
     // ── COUNT: track renders in localStorage
     const key = 'br_handoff_count';
-    let counts = JSON.parse(localStorage.getItem(key) || '{"handoff":0,"color":0}');
+    const defaultCounts = { handoff: 0, color: 0 };
+    let counts = defaultCounts;
 
-    function saveCount() { localStorage.setItem(key, JSON.stringify(counts)); }
+    // Safely read counts from localStorage, falling back if anything goes wrong
+    (function initCounts() {
+      try {
+        if (typeof window !== 'undefined' && window.localStorage) {
+          const raw = window.localStorage.getItem(key);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            if (parsed && typeof parsed === 'object') {
+              counts = parsed;
+              return;
+            }
+          }
+        }
+      } catch (e) {
+        // ignore and fall back to defaultCounts
+      }
+      counts = { ...defaultCounts };
+    })();
 
+    function saveCount() {
+      try {
+        if (typeof window !== 'undefined' && window.localStorage) {
+          window.localStorage.setItem(key, JSON.stringify(counts));
+        }
+      } catch (e) {
+        // ignore write errors
+      }
+    }
     function updateCounter() {
       const mode = body.dataset.state;
       counter.textContent = counts[mode] || 0;
