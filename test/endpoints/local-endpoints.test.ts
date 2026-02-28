@@ -13,7 +13,7 @@
 //   9. Dashboard API (dashboard/app/api)      — Next.js routes
 //  10. GatewayClient (src/core/client.ts)
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect } from 'vitest'
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // 1. GATEWAY (blackroad-core/gateway/server.js) — Port 8787
