@@ -1,5 +1,5 @@
 // Copyright (c) 2025-2026 BlackRoad OS, Inc. All Rights Reserved.
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import {
   checkCloudflare,
   checkCloudflareWorker,
