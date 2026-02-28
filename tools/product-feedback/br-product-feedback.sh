@@ -426,6 +426,14 @@ cmd_vote() {
   local voter="${2:-anonymous}"
 
   [[ -z "$sub_id" ]] && { echo -e "${RED}✗${NC} Usage: br feedback vote <id> [voter-name]"; return 1; }
+  # Ensure sub_id is digits-only to prevent SQL injection
+  if ! [[ "$sub_id" =~ ^[0-9]+$ ]]; then
+    echo -e "${RED}✗${NC} Invalid submission id: $sub_id (must be a positive integer)"
+    return 1
+  fi
+
+  # Escape single quotes in voter to keep SQL safe
+  local safe_voter="${voter//\'/\'\'}"
 
   # Check exists
   local exists
@@ -433,7 +441,7 @@ cmd_vote() {
   [[ "$exists" -eq 0 ]] && { echo -e "${RED}✗${NC} Submission #$sub_id not found"; return 1; }
 
   sqlite3 "$DB" "UPDATE submissions SET votes = votes + 1, updated_at = datetime('now') WHERE id = $sub_id;"
-  sqlite3 "$DB" "INSERT INTO votes(submission_id, voter) VALUES($sub_id, '$voter');"
+  sqlite3 "$DB" "INSERT INTO votes(submission_id, voter) VALUES($sub_id, '$safe_voter');"
 
   local name votes
   name=$(sqlite3 "$DB" "SELECT name FROM submissions WHERE id=$sub_id;")
