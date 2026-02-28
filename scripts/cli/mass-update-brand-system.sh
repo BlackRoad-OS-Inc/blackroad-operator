@@ -13,9 +13,10 @@
 
 set -euo pipefail
 
-BRAND_STARTER="/Users/alexa/blackroad-template-starter.html"
-UPDATE_LOG="/Users/alexa/.brand-update-$(date +%Y%m%d-%H%M%S).log"
-BACKUP_DIR="/Users/alexa/.brand-backup-$(date +%Y%m%d-%H%M%S)"
+BR_ROOT="${BR_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)}"
+BRAND_STARTER="${BR_ROOT}/blackroad-template-starter.html"
+UPDATE_LOG="$HOME/.brand-update-$(date +%Y%m%d-%H%M%S).log"
+BACKUP_DIR="$HOME/.brand-backup-$(date +%Y%m%d-%H%M%S)"
 
 # Colors
 RED='\033[0;31m'

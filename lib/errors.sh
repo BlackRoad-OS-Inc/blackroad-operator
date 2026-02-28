@@ -4,7 +4,7 @@
 #===============================================================================
 
 # Resolve lib directory (works in both bash and zsh)
-_ERRORS_LIB="${BR_LIB:-/Users/alexa/blackroad/lib}"
+_ERRORS_LIB="${BR_LIB:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}"
 [[ -z "$_BR_COLORS_LOADED" ]] && source "${_ERRORS_LIB}/colors.sh" && _BR_COLORS_LOADED=1
 
 # Error handler: prints file, line number, and command that failed

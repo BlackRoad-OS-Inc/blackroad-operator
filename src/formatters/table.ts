@@ -9,9 +9,5 @@ export function formatTable(headers: string[], rows: string[][]): string {
   const formatRow = (row: string[]) =>
     row.map((cell, i) => ` ${(cell ?? '').padEnd(widths[i])} `).join('│')
 
-  return [
-    formatRow(headers),
-    sep,
-    ...rows.map(formatRow),
-  ].join('\n')
+  return [formatRow(headers), sep, ...rows.map(formatRow)].join('\n')
 }

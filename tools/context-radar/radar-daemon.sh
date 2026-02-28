@@ -4,9 +4,10 @@
 # Monitors file access and builds contextual relationships
 #===============================================================================
 
-RADAR_HOME="/Users/alexa/blackroad/tools/context-radar"
+BR_ROOT="${BR_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
+RADAR_HOME="${BR_ROOT}/tools/context-radar"
 RADAR_DB="${RADAR_HOME}/data/radar.db"
-WATCH_DIR="/Users/alexa/blackroad"
+WATCH_DIR="${BR_ROOT}"
 PID_FILE="${RADAR_HOME}/data/radar.pid"
 LOG_FILE="${RADAR_HOME}/data/radar.log"
 

@@ -13,11 +13,12 @@ TASK="${3:-Continue the work}"
 TS=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 EPOCH=$(date +%s)
 
-COLLAB_DIR="/Users/alexa/blackroad/coordination/collaboration"
-LIVE_FILE="/Users/alexa/blackroad/coordination/live/real-time-context.json"
-INBOX_ROOT="/Users/alexa/blackroad/shared/inbox"
+_SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+COLLAB_DIR="${_SCRIPT_DIR}/coordination/collaboration"
+LIVE_FILE="${_SCRIPT_DIR}/coordination/live/real-time-context.json"
+INBOX_ROOT="${_SCRIPT_DIR}/shared/inbox"
 JOURNAL="$HOME/.blackroad/memory/journals/master-journal.jsonl"
-OUTBOX="/Users/alexa/blackroad/shared/outbox"
+OUTBOX="${_SCRIPT_DIR}/shared/outbox"
 
 if [[ -z "$TO" ]]; then
   echo "Usage: ./handoff.sh [from] [to] [task]"
@@ -49,13 +50,13 @@ import json, subprocess, os
 try:
     git_log = subprocess.check_output(
         ["git", "--no-pager", "log", "--oneline", "-5"],
-        cwd="/Users/alexa/blackroad", text=True
+        cwd=os.environ.get("_SCRIPT_DIR", os.path.dirname(os.path.abspath(__file__))), text=True
     ).strip()
 except: git_log = "unavailable"
 
 # Current focus
 try:
-    live = json.load(open("/Users/alexa/blackroad/coordination/live/real-time-context.json"))
+    live = json.load(open(os.path.join(os.environ.get("_SCRIPT_DIR", "."), "coordination/live/real-time-context.json")))
     focus = live.get("current_focus", "—")
     session = live.get("session", "—")
 except: focus, session = "—", "—"

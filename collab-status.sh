@@ -6,10 +6,11 @@ GREEN='\033[0;32m'; RED='\033[0;31m'; YELLOW='\033[1;33m'
 CYAN='\033[0;36m'; PURPLE='\033[0;35m'; BLUE='\033[0;34m'
 BOLD='\033[1m'; DIM='\033[2m'; NC='\033[0m'
 
-COLLAB_FILE="/Users/alexa/blackroad/coordination/collaboration/active-instances.json"
-LIVE_FILE="/Users/alexa/blackroad/coordination/live/real-time-context.json"
-INBOX_ROOT="/Users/alexa/blackroad/shared/inbox"
-QUEUE_DIR="/Users/alexa/blackroad/shared/mesh/queue"
+_SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+COLLAB_FILE="${_SCRIPT_DIR}/coordination/collaboration/active-instances.json"
+LIVE_FILE="${_SCRIPT_DIR}/coordination/live/real-time-context.json"
+INBOX_ROOT="${_SCRIPT_DIR}/shared/inbox"
+QUEUE_DIR="${_SCRIPT_DIR}/shared/mesh/queue"
 JOURNAL="$HOME/.blackroad/memory/journals/master-journal.jsonl"
 
 clear
