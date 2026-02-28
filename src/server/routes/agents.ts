@@ -89,7 +89,15 @@ agentRoutes.post('/:name/invoke', authMiddleware('agents:invoke'), async (c) => 
     return c.json({ error: 'agent_not_found', message: `Agent "${name}" not found` }, 404)
   }
 
-  const body = await c.req.json<{ task: string; context?: Record<string, unknown> }>()
+  let body: { task: string; context?: Record<string, unknown> }
+  try {
+    body = await c.req.json<{ task: string; context?: Record<string, unknown> }>()
+  } catch {
+    return c.json(
+      { error: 'invalid_json', message: 'Request body must be valid JSON' },
+      400,
+    )
+  }
   if (!body.task) {
     return c.json({ error: 'validation_error', message: 'task is required' }, 400)
   }
