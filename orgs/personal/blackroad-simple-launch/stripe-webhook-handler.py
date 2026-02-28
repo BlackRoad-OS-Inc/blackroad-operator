@@ -31,13 +31,19 @@ if not STRIPE_SECRET_KEY:
 stripe.api_key = STRIPE_SECRET_KEY
 
 # Webhook secret (get this from Stripe dashboard)
-WEBHOOK_SECRET = os.environ.get('STRIPE_WEBHOOK_SECRET', 'whsec_...')  # Set this in production
+WEBHOOK_SECRET = os.environ.get('STRIPE_WEBHOOK_SECRET', '')
 
 @app.route('/webhook/stripe', methods=['POST'])
 def stripe_webhook():
     """Handle incoming Stripe webhook events"""
+    if not WEBHOOK_SECRET:
+        return jsonify({'error': 'Webhook secret not configured'}), 500
+
     payload = request.data
     sig_header = request.headers.get('Stripe-Signature')
+
+    if not sig_header:
+        return jsonify({'error': 'Missing Stripe-Signature header'}), 400
 
     try:
         # Verify webhook signature
@@ -46,7 +52,7 @@ def stripe_webhook():
         )
     except ValueError:
         return jsonify({'error': 'Invalid payload'}), 400
-    except stripe.error.SignatureVerificationError:
+    except stripe.SignatureVerificationError:
         return jsonify({'error': 'Invalid signature'}), 400
 
     # Handle the event
@@ -263,10 +269,10 @@ def disable_user_access(customer_id):
 
 def log_event(event_type, data):
     """Log event to file"""
-    log_dir = '/Users/alexa/projects/blackroad-simple-launch/logs'
+    log_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'logs')
     os.makedirs(log_dir, exist_ok=True)
 
-    log_file = f"{log_dir}/webhook-events.jsonl"
+    log_file = os.path.join(log_dir, 'webhook-events.jsonl')
 
     event = {
         'event_type': event_type,
@@ -290,7 +296,8 @@ def health_check():
 
 if __name__ == '__main__':
     print("🚀 Starting BlackRoad OS Webhook Handler...")
-    print(f"📝 Logs will be saved to: /Users/alexa/projects/blackroad-simple-launch/logs/")
+    log_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'logs')
+    print(f"📝 Logs will be saved to: {log_dir}")
 
     # Run in development mode
     # In production, use gunicorn or similar: gunicorn -w 4 -b 0.0.0.0:5000 stripe-webhook-handler:app

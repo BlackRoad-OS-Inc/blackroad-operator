@@ -79,7 +79,6 @@ async def create_checkout_session(request: CreateCheckoutRequest):
         # Create checkout session
         session = stripe.checkout.Session.create(
             customer=customer_id,
-            payment_method_types=["card"],
             line_items=[
                 {
                     "price": price_id,
@@ -108,7 +107,7 @@ async def create_checkout_session(request: CreateCheckoutRequest):
             "session_id": session.id,
         }
 
-    except stripe.error.StripeError as e:
+    except stripe.StripeError as e:
         raise HTTPException(400, str(e))
 
 
@@ -130,7 +129,7 @@ async def create_portal_session(request: CreatePortalRequest):
 
         return {"portal_url": session.url}
 
-    except stripe.error.StripeError as e:
+    except stripe.StripeError as e:
         raise HTTPException(400, str(e))
 
 
@@ -168,7 +167,7 @@ async def get_subscription_status(user_id: str):
                     current_period_end=datetime.fromtimestamp(sub.current_period_end),
                     cancel_at_period_end=sub.cancel_at_period_end,
                 )
-        except stripe.error.StripeError:
+        except stripe.StripeError:
             pass
 
     return SubscriptionStatus(
@@ -194,6 +193,9 @@ async def stripe_webhook(
     if not STRIPE_WEBHOOK_SECRET:
         raise HTTPException(500, "Webhook secret not configured")
 
+    if not stripe_signature:
+        raise HTTPException(400, "Missing Stripe-Signature header")
+
     payload = await request.body()
 
     try:
@@ -202,7 +204,7 @@ async def stripe_webhook(
         )
     except ValueError:
         raise HTTPException(400, "Invalid payload")
-    except stripe.error.SignatureVerificationError:
+    except stripe.SignatureVerificationError:
         raise HTTPException(400, "Invalid signature")
 
     # Handle events
@@ -249,7 +251,7 @@ async def stripe_webhook(
 
         # Find user by customer ID
         for uid, cid in user_customers.items():
-            if cid == customer_id:
+            if cid == customer_id and uid in user_subscriptions:
                 user_subscriptions[uid]["status"] = "past_due"
                 print(f"Payment failed for user {uid}")
                 break

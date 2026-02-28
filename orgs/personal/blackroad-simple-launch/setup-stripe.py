@@ -216,7 +216,7 @@ def main():
         print()
         print("🚀 Next: Update landing page with founding member link!")
 
-    except stripe.error.StripeError as e:
+    except stripe.StripeError as e:
         print(f"❌ Stripe Error: {e}")
         sys.exit(1)
     except Exception as e:

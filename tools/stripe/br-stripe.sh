@@ -195,8 +195,9 @@ cmd_products_list() {
         echo -e "  ID: $prod_id"
         [[ -n "$desc" ]] && echo -e "  $desc"
 
-        # Cache
-        sqlite3 "$DB_FILE" "INSERT OR REPLACE INTO products (stripe_product_id, name, created_at) VALUES ('$prod_id', '$(echo $name | sed "s/'/''/g")', $(date +%s));"
+        # Cache (use parameterized-style escaping)
+        local safe_name=$(echo "$name" | sed "s/'/''/g")
+        sqlite3 "$DB_FILE" "INSERT OR REPLACE INTO products (stripe_product_id, name, created_at) VALUES ('${prod_id//\'/\'\'}', '${safe_name}', $(date +%s));"
         echo ""
     done
 }
@@ -295,7 +296,9 @@ cmd_customers_list() {
         echo -e "  Email: $email"
         echo -e "  ID: $cust_id"
 
-        sqlite3 "$DB_FILE" "INSERT OR REPLACE INTO customers (stripe_customer_id, email, name, created_at) VALUES ('$cust_id', '$email', '$(echo ${name:-} | sed "s/'/''/g")', $(date +%s));"
+        local safe_cust_name=$(echo "${name:-}" | sed "s/'/''/g")
+        local safe_email=$(echo "$email" | sed "s/'/''/g")
+        sqlite3 "$DB_FILE" "INSERT OR REPLACE INTO customers (stripe_customer_id, email, name, created_at) VALUES ('${cust_id//\'/\'\'}', '${safe_email}', '${safe_cust_name}', $(date +%s));"
         echo ""
     done
 }
@@ -402,16 +405,24 @@ cmd_revenue() {
     local subs=$(stripe_api GET "/subscriptions?status=active&limit=100")
     local mrr=0
 
-    # Count subscriptions and sum amounts
+    # Count subscriptions and sum amounts, normalizing yearly to monthly
     local sub_count=0
-    while read -r amount_line; do
-        local amt=$(echo "$amount_line" | grep -o '[0-9]*')
+    # Parse each subscription's amount and interval
+    local sub_ids=$(echo "$subs" | grep -o '"id":"sub_[^"]*"' | grep -o 'sub_[^"]*')
+    while read -r sid; do
+        [[ -z "$sid" ]] && continue
+        local sub_detail=$(stripe_api GET "/subscriptions/$sid")
+        local amt=$(echo "$sub_detail" | grep -o '"amount":[0-9]*' | head -1 | grep -o '[0-9]*')
+        local interval=$(echo "$sub_detail" | grep -o '"interval":"[^"]*"' | head -1 | cut -d'"' -f4)
         if [[ -n "$amt" && "$amt" -gt 0 ]]; then
-            # Check if yearly and normalize to monthly
-            mrr=$((mrr + amt))
+            if [[ "$interval" == "year" ]]; then
+                mrr=$((mrr + amt / 12))
+            else
+                mrr=$((mrr + amt))
+            fi
             sub_count=$((sub_count + 1))
         fi
-    done <<< "$(echo "$subs" | grep -o '"amount":[0-9]*' | grep -o '[0-9]*')"
+    done <<< "$sub_ids"
 
     echo -e "${PINK}Monthly Recurring Revenue (MRR):${NC} $(fmt_cents $mrr)"
     echo -e "${PINK}Annual Run Rate (ARR):${NC}          $(fmt_cents $((mrr * 12)))"
@@ -463,7 +474,8 @@ cmd_sync() {
         local pid=$(echo "$line" | cut -d'"' -f4)
         local p=$(stripe_api GET "/products/$pid")
         local name=$(json_val "$p" "name")
-        sqlite3 "$DB_FILE" "INSERT OR REPLACE INTO products (stripe_product_id, name, created_at) VALUES ('$pid', '$(echo $name | sed "s/'/''/g")', $(date +%s));"
+        local safe_sync_name=$(echo "$name" | sed "s/'/''/g")
+        sqlite3 "$DB_FILE" "INSERT OR REPLACE INTO products (stripe_product_id, name, created_at) VALUES ('${pid//\'/\'\'}', '${safe_sync_name}', $(date +%s));"
         prod_count=$((prod_count + 1))
     done
     echo -e "  ${GREEN}Synced products${NC}"
@@ -476,7 +488,9 @@ cmd_sync() {
         local c=$(stripe_api GET "/customers/$cid")
         local email=$(json_val "$c" "email")
         local name=$(json_val "$c" "name")
-        sqlite3 "$DB_FILE" "INSERT OR REPLACE INTO customers (stripe_customer_id, email, name, created_at) VALUES ('$cid', '$email', '$(echo ${name:-} | sed "s/'/''/g")', $(date +%s));"
+        local safe_sync_email=$(echo "$email" | sed "s/'/''/g")
+        local safe_sync_cname=$(echo "${name:-}" | sed "s/'/''/g")
+        sqlite3 "$DB_FILE" "INSERT OR REPLACE INTO customers (stripe_customer_id, email, name, created_at) VALUES ('${cid//\'/\'\'}', '${safe_sync_email}', '${safe_sync_cname}', $(date +%s));"
     done
     echo -e "  ${GREEN}Synced customers${NC}"
 
@@ -534,6 +548,7 @@ cmd_help() {
   echo -e "  ${AMBER}  subscriptions cancel <id>       ${NC} Cancel subscription"
   echo -e "  ${AMBER}  products list                   ${NC} List products & prices"
   echo -e "  ${AMBER}  products create                 ${NC} Create canonical BlackRoad pricing"
+  echo -e "  ${AMBER}  portal <customer-id>            ${NC} Generate billing portal URL"
   echo -e "  ${AMBER}  sync                            ${NC} Pull Stripe data to local SQLite cache"
   echo -e "  ${AMBER}  webhook-test [event]            ${NC} Fire test webhook via Stripe CLI"
   echo -e ""

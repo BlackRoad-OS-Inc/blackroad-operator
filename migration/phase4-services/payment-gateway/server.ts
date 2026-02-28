@@ -31,14 +31,6 @@ app.use('*', cors({
   allowHeaders: ['Content-Type', 'Authorization'],
 }));
 
-// ─── HTML Helpers ───
-function json(data: unknown, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { 'Content-Type': 'application/json' },
-  });
-}
-
 // ─── Health ───
 app.get('/health', (c) => c.json({
   status: 'healthy',
@@ -80,7 +72,6 @@ app.post('/create-checkout-session', async (c) => {
 
   const params = new URLSearchParams({
     'mode': 'subscription',
-    'payment_method_types[]': 'card',
     'line_items[0][price]': priceId,
     'line_items[0][quantity]': '1',
     'success_url': 'https://pay.blackroad.io/success?session_id={CHECKOUT_SESSION_ID}',
@@ -282,9 +273,11 @@ async function handlePaymentSucceeded(invoice: any): Promise<void> {
   const userId = invoice.subscription_details?.metadata?.user_id || invoice.metadata?.user_id;
   if (!userId) return;
 
+  const tierId = invoice.subscription_details?.metadata?.tier_id || invoice.metadata?.tier_id || null;
+
   await REVENUE_D1.prepare(
-    'INSERT INTO revenue (user_id, amount, currency, created_at) VALUES (?, ?, ?, ?)'
-  ).bind(userId, (invoice.amount_paid || 0) / 100, invoice.currency || 'usd', new Date().toISOString()).run();
+    'INSERT INTO revenue (user_id, tier_id, amount, currency, created_at) VALUES (?, ?, ?, ?, ?)'
+  ).bind(userId, tierId, (invoice.amount_paid || 0) / 100, invoice.currency || 'usd', new Date().toISOString()).run();
 }
 
 // ─── Stripe API Helper ───

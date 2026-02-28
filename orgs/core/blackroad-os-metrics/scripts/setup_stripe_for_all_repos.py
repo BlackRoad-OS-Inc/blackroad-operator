@@ -80,7 +80,7 @@ def generate_stripe_payment_page_html():
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #F5A623 0%, #FF1D6C 38.2%, #9C27B0 61.8%, #2979FF 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -102,7 +102,7 @@ def generate_stripe_payment_page_html():
 
         h1 {
             font-size: 2.5em;
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            background: linear-gradient(135deg, #F5A623 0%, #FF1D6C 38.2%, #9C27B0 61.8%, #2979FF 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             margin-bottom: 10px;
@@ -136,13 +136,13 @@ def generate_stripe_payment_page_html():
         }
 
         .pricing-card:hover {
-            border-color: #667eea;
+            border-color: #FF1D6C;
             transform: translateY(-5px);
             box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
         }
 
         .pricing-card.featured {
-            border-color: #667eea;
+            border-color: #FF1D6C;
             background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
         }
 
@@ -156,7 +156,7 @@ def generate_stripe_payment_page_html():
         .pricing-amount {
             font-size: 2.5em;
             font-weight: bold;
-            color: #667eea;
+            color: #FF1D6C;
             margin: 20px 0;
         }
 
@@ -184,13 +184,13 @@ def generate_stripe_payment_page_html():
 
         .pricing-features li:before {
             content: "✓ ";
-            color: #667eea;
+            color: #FF1D6C;
             font-weight: bold;
             margin-right: 8px;
         }
 
         button {
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            background: linear-gradient(135deg, #F5A623 0%, #FF1D6C 38.2%, #9C27B0 61.8%, #2979FF 100%);
             color: white;
             border: none;
             padding: 15px 40px;
@@ -210,7 +210,7 @@ def generate_stripe_payment_page_html():
 
         .badge {
             display: inline-block;
-            background: #667eea;
+            background: #FF1D6C;
             color: white;
             padding: 5px 15px;
             border-radius: 20px;
@@ -335,7 +335,7 @@ def generate_stripe_payment_page_html():
         </div>
 
         <div class="footer">
-            <p>© 2023-2025 BlackRoad OS, Inc. All Rights Reserved.</p>
+            <p>© 2023-2026 BlackRoad OS, Inc. All Rights Reserved.</p>
             <p style="margin-top: 10px; opacity: 0.8;">
                 Payments processed securely by <strong>Stripe</strong>
             </p>
@@ -466,9 +466,9 @@ def webhook():
         event = stripe.Webhook.construct_event(
             payload, sig_header, webhook_secret
         )
-    except ValueError as e:
+    except ValueError:
         return jsonify({'error': 'Invalid payload'}), 400
-    except stripe.error.SignatureVerificationError as e:
+    except stripe.SignatureVerificationError:
         return jsonify({'error': 'Invalid signature'}), 400
 
     # Handle the event
