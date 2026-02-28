@@ -89,6 +89,8 @@ describe('brand e2e', () => {
   it('should produce a logo containing BlackRoad and OS', () => {
     const logo = brand.logo()
     // The logo includes styled text with BlackRoad and OS
+    expect(logo).toContain('BlackRoad')
+    expect(logo).toContain('OS')
     expect(logo.length).toBeGreaterThan(0)
   })
 
