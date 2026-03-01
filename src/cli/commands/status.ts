@@ -18,7 +18,8 @@ export const statusCommand = new Command('status')
       )
       const agents = await client.get<{ agents: unknown[] }>('/v1/agents')
       logger.info(`Agents: ${agents.agents.length} registered`)
-    } catch {
+    } catch (err) {
       logger.error('Gateway unreachable. Is the gateway running?')
+      logger.debug(err instanceof Error ? err.message : String(err))
     }
   })

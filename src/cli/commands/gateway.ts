@@ -17,8 +17,9 @@ gatewayCommand
         '/v1/health',
       )
       logger.success(`Gateway is ${health.status} (v${health.version})`)
-    } catch {
+    } catch (err) {
       logger.error('Gateway is unreachable.')
+      logger.debug(err instanceof Error ? err.message : String(err))
     }
   })
 
