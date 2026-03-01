@@ -11,6 +11,8 @@ import { initCommand } from './init.js'
 import { roadbridgeCommand } from './roadbridge.js'
 import { serveCommand } from './serve.js'
 import { meshCommand } from './mesh.js'
+import { indexCommand } from './index-cmd.js'
+import { workersCommand } from './workers.js'
 
 export const program = new Command()
   .name('br')
@@ -28,3 +30,5 @@ program.addCommand(initCommand)
 program.addCommand(roadbridgeCommand)
 program.addCommand(serveCommand)
 program.addCommand(meshCommand)
+program.addCommand(indexCommand)
+program.addCommand(workersCommand)
