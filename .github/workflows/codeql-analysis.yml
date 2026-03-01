@@ -1,50 +1,35 @@
-name: CodeQL Security Analysis
+# Copyright (c) 2025-2026 BlackRoad OS, Inc. All Rights Reserved.
+name: CodeQL Analysis
 
 on:
   push:
-    branches: [main, master]
+    branches: [main, master, develop]
   pull_request:
-    branches: [main, master]
+    branches: [main, master, develop]
   schedule:
-    - cron: '0 6 * * 1' # Monday 6 AM UTC
+    - cron: '0 6 * * 1'
 
 permissions:
   actions: read
   contents: read
   security-events: write
 
-concurrency:
-  group: codeql-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
-  analyze-javascript:
-    name: CodeQL - JavaScript/TypeScript
-    runs-on: [self-hosted, linux, arm64, blackroad]
-    timeout-minutes: 30
+  analyze:
+    name: Analyze
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [javascript-typescript]
+
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
         with:
-          languages: javascript-typescript
-          queries: security-and-quality
-          config: |
-            paths:
-              - src/
-              - tools/
-              - scripts/
-              - blackroad-core/
-              - mcp-bridge/
-            paths-ignore:
-              - node_modules/
-              - dist/
-              - orgs/
-              - repos/
-              - '**/*.test.ts'
-              - '**/*.spec.ts'
+          languages: ${{ matrix.language }}
 
       - name: Autobuild
         uses: github/codeql-action/autobuild@v3
@@ -52,35 +37,4 @@ jobs:
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
         with:
-          category: "/language:javascript-typescript"
-
-  analyze-python:
-    name: CodeQL - Python
-    runs-on: [self-hosted, linux, arm64, blackroad]
-    timeout-minutes: 30
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
-        with:
-          languages: python
-          queries: security-and-quality
-          config: |
-            paths:
-              - mcp-bridge/
-              - blackroad-core/
-              - scripts/
-            paths-ignore:
-              - orgs/
-              - repos/
-              - '**/*test*.py'
-
-      - name: Autobuild
-        uses: github/codeql-action/autobuild@v3
-
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
-        with:
-          category: "/language:python"
+          category: '/language:${{ matrix.language }}'
