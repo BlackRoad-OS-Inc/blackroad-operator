@@ -1,0 +1,133 @@
+name: Known Issue / Advisory
+description: Document a known issue with workarounds for the team
+title: "[Known Issue]: "
+labels: ["type:known-issue", "status:open"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Document a known issue that doesn't yet have a permanent fix. This helps the team avoid spending time re-investigating the same problems.
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      description: What area does this known issue affect?
+      options:
+        - Agent System
+        - Memory System
+        - CLI Tools
+        - Infrastructure
+        - Deployment / CI
+        - Networking
+        - Performance
+        - Security
+        - Development / Build
+        - Ollama / LLM
+        - Raspberry Pi
+        - Web / Frontend
+        - Database
+    validations:
+      required: true
+
+  - type: dropdown
+    id: impact
+    attributes:
+      label: Impact Level
+      description: How much does this affect daily operations?
+      options:
+        - Critical - Blocks core functionality
+        - High - Major workflow disruption
+        - Medium - Workaround available but inconvenient
+        - Low - Minor nuisance, easy to bypass
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Issue Description
+      description: Clear description of the known issue and when it manifests.
+      placeholder: |
+        The `br deploy` command fails silently when the Railway token has expired.
+        No error message is shown—the command exits with code 0 but nothing deploys.
+    validations:
+      required: true
+
+  - type: textarea
+    id: trigger_conditions
+    attributes:
+      label: Trigger Conditions
+      description: Under what specific conditions does this issue occur?
+      placeholder: |
+        - Railway token older than 30 days
+        - Running `br deploy` with `--target railway`
+        - Only affects production deploys, staging works fine
+    validations:
+      required: true
+
+  - type: textarea
+    id: workaround
+    attributes:
+      label: Workaround
+      description: How to work around this issue until it's permanently fixed.
+      placeholder: |
+        ```bash
+        # Regenerate Railway token before deploying:
+        railway login
+        # Then retry:
+        br deploy --target railway
+        ```
+    validations:
+      required: true
+
+  - type: textarea
+    id: permanent_fix
+    attributes:
+      label: Permanent Fix (if known)
+      description: What would a real fix look like? Describe the approach even if not yet implemented.
+      placeholder: |
+        Add token validation to `br deploy` that checks expiry before attempting
+        deployment. Show a clear error message with instructions to refresh the token.
+
+  - type: dropdown
+    id: fix_planned
+    attributes:
+      label: Fix Status
+      description: Is a permanent fix being worked on?
+      options:
+        - No fix planned - workaround is sufficient
+        - Fix planned - not yet started
+        - Fix in progress - actively being worked on
+        - Fix blocked - depends on upstream changes
+    validations:
+      required: true
+
+  - type: dropdown
+    id: affected_environments
+    attributes:
+      label: Affected Environments
+      multiple: true
+      options:
+        - macOS (local dev)
+        - Raspberry Pi fleet
+        - DigitalOcean droplet
+        - Cloudflare Workers
+        - Railway
+        - GitHub Actions CI
+        - All environments
+    validations:
+      required: true
+
+  - type: input
+    id: discovered_date
+    attributes:
+      label: Date Discovered
+      placeholder: "2026-03-01"
+
+  - type: input
+    id: related
+    attributes:
+      label: Related Issues / Docs
+      description: Links to related issues, PRs, or troubleshooting entries
+      placeholder: "#42, TROUBLESHOOTING.md"

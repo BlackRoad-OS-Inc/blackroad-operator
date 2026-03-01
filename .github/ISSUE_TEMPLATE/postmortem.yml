@@ -1,0 +1,181 @@
+name: Postmortem / Root Cause Analysis
+description: Document an incident with root cause analysis and corrective actions
+title: "[Postmortem]: "
+labels: ["type:postmortem", "status:backlog"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Document an incident or outage with full root cause analysis. This helps prevent recurrence and builds institutional knowledge.
+
+  - type: input
+    id: incident_date
+    attributes:
+      label: Incident Date
+      description: When did this incident occur?
+      placeholder: "2026-03-01"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity_level
+    attributes:
+      label: Incident Severity
+      description: How severe was the impact?
+      options:
+        - SEV-0 (Total outage / data loss)
+        - SEV-1 (Major feature broken / significant degradation)
+        - SEV-2 (Minor feature broken / partial degradation)
+        - SEV-3 (Cosmetic issue / no user impact)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: affected_system
+    attributes:
+      label: Affected System
+      description: Which system(s) were impacted?
+      multiple: true
+      options:
+        - Agent System (30K agents)
+        - Memory System (PS-SHA∞)
+        - API Gateway
+        - Web Frontend
+        - CLI Tools
+        - Cloudflare Workers
+        - Railway Services
+        - Raspberry Pi Fleet
+        - GitHub Actions / CI
+        - Ollama / LLM Inference
+        - Database (SQLite/D1/KV)
+        - Networking / DNS / Tunnels
+        - Authentication / Secrets
+    validations:
+      required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Incident Summary
+      description: One paragraph explaining what happened and the business impact.
+      placeholder: |
+        On 2026-03-01 at 14:30 UTC, the agent mesh became unresponsive after a
+        Cloudflare tunnel restart. 22,500 agents on the primary Pi lost connectivity
+        for 45 minutes. No data was lost but task processing was delayed.
+    validations:
+      required: true
+
+  - type: textarea
+    id: timeline
+    attributes:
+      label: Timeline
+      description: Chronological sequence of events from detection to resolution.
+      placeholder: |
+        - 14:30 UTC - Cloudflare tunnel restart triggered by Pi reboot
+        - 14:32 UTC - Agent health checks start failing
+        - 14:35 UTC - Monitoring alert fires (PagerDuty)
+        - 14:40 UTC - Engineer begins investigation
+        - 14:50 UTC - Root cause identified: tunnel token expired
+        - 14:55 UTC - New tunnel token deployed
+        - 15:00 UTC - Tunnel reconnected, agents recovering
+        - 15:15 UTC - All agents back online, backlog draining
+    validations:
+      required: true
+
+  - type: textarea
+    id: root_cause
+    attributes:
+      label: Root Cause
+      description: What specifically caused the incident? Go deep—don't just describe symptoms.
+      placeholder: |
+        The Cloudflare tunnel authentication token had a 90-day expiry that was not
+        being monitored. When the Pi rebooted (scheduled kernel update), cloudflared
+        attempted to reconnect with the expired token and silently failed. The systemd
+        restart policy retried 10 times then gave up.
+    validations:
+      required: true
+
+  - type: textarea
+    id: contributing_factors
+    attributes:
+      label: Contributing Factors
+      description: What other conditions made this worse or allowed it to happen?
+      placeholder: |
+        1. No monitoring on tunnel token expiry dates
+        2. Pi reboot was scheduled during peak agent activity hours
+        3. cloudflared logs were not forwarded to central logging
+        4. No fallback tunnel configuration
+
+  - type: textarea
+    id: resolution
+    attributes:
+      label: Resolution
+      description: What was done to fix the immediate incident?
+      placeholder: |
+        1. Generated new tunnel token via `cloudflared tunnel token`
+        2. Updated token in `/etc/cloudflared/config.yml`
+        3. Restarted cloudflared service: `sudo systemctl restart cloudflared`
+        4. Verified tunnel connectivity: `cloudflared tunnel info blackroad`
+        5. Confirmed all agents reconnected via `./roster.sh`
+    validations:
+      required: true
+
+  - type: textarea
+    id: corrective_actions
+    attributes:
+      label: Corrective Actions
+      description: What changes will prevent this from happening again? Include owners and deadlines.
+      placeholder: |
+        - [ ] Add tunnel token expiry monitoring to health.sh (@alice, 2026-03-05)
+        - [ ] Create token rotation script in scripts/ (@cipher, 2026-03-07)
+        - [ ] Schedule Pi reboots during low-activity window (@octavia, 2026-03-03)
+        - [ ] Forward cloudflared logs to central logging (@prism, 2026-03-10)
+        - [ ] Add fallback tunnel configuration (@lucidia, 2026-03-14)
+    validations:
+      required: true
+
+  - type: textarea
+    id: lessons_learned
+    attributes:
+      label: Lessons Learned
+      description: What did we learn? What would we do differently?
+      placeholder: |
+        1. All credentials with expiry dates need automated monitoring
+        2. Infrastructure reboots should be tested in staging first
+        3. Silent failures are the most dangerous—always fail loudly
+
+  - type: dropdown
+    id: detection_method
+    attributes:
+      label: How Was This Detected?
+      description: How did we first learn about the incident?
+      options:
+        - Automated monitoring / alerting
+        - Agent self-reporting
+        - Manual observation
+        - User report
+        - Scheduled health check
+        - Accident / discovered during other work
+    validations:
+      required: true
+
+  - type: input
+    id: time_to_detect
+    attributes:
+      label: Time to Detect (TTD)
+      description: How long from incident start to detection?
+      placeholder: "5 minutes"
+
+  - type: input
+    id: time_to_resolve
+    attributes:
+      label: Time to Resolve (TTR)
+      description: How long from detection to full resolution?
+      placeholder: "40 minutes"
+
+  - type: input
+    id: related_issues
+    attributes:
+      label: Related Issues / PRs
+      description: Links to related issues, PRs, or previous postmortems
+      placeholder: "#42, #55"

@@ -4,7 +4,47 @@
 
 ---
 
-## 📋 Quick Diagnostics
+## Solution Index
+
+Quick-jump to solutions by symptom. Each entry links to the full solution below.
+
+| ID | Symptom | Category | Severity |
+|----|---------|----------|----------|
+| S-001 | [System won't start / boot fails](#system-wont-start) | Critical | Blocker |
+| S-002 | [Agent offline / tasks stuck](#agent-not-responding) | Critical | Blocker |
+| S-003 | [Memory writes fail / search empty](#memory-system-failure) | Critical | Blocker |
+| S-004 | [Ollama model not found](#model-not-found) | Ollama | Major |
+| S-005 | [Ollama connection refused (11434)](#ollama-not-running) | Ollama | Major |
+| S-006 | [CUDA / GPU out of memory](#out-of-memory) | Ollama | Major |
+| S-007 | [Git push rejected](#push-rejected) | Git | Moderate |
+| S-008 | [Git large file error (>100MB)](#large-file-error) | Git | Moderate |
+| S-009 | [API 401 Unauthorized](#401-unauthorized) | API | Major |
+| S-010 | [API 429 Rate Limited](#429-rate-limited) | API | Moderate |
+| S-011 | [API 500 Internal Error](#500-internal-error) | API | Major |
+| S-012 | [Docker container won't start](#container-wont-start) | Docker | Major |
+| S-013 | [Port already in use / EADDRINUSE](#port-already-in-use) | Docker | Moderate |
+| S-014 | [DNS resolution failed](#dns-resolution-failed) | Network | Major |
+| S-015 | [SSL/TLS certificate error](#ssl-certificate-error) | Network | Moderate |
+| S-016 | [Connection timeout](#timeout-errors) | Network | Moderate |
+| S-017 | [Slow response times / high latency](#slow-response-times) | Performance | Moderate |
+| S-018 | [High memory usage / RAM full](#high-memory-usage) | Performance | Major |
+| S-019 | [High CPU usage](#high-cpu-usage) | Performance | Moderate |
+| S-020 | [Cloudflare worker deploy failed](#worker-deployment-failed) | Infrastructure | Major |
+| S-021 | [Cloudflare KV not working](#kv-not-working) | Infrastructure | Moderate |
+| S-022 | [Railway deployment failed](#deployment-failed) | Infrastructure | Major |
+| S-023 | [Railway service unavailable](#service-unavailable) | Infrastructure | Major |
+| S-024 | [Raspberry Pi SSH refused](#ssh-connection-refused) | Infrastructure | Major |
+| S-025 | [Out of disk space](#out-of-disk-space) | Infrastructure | Major |
+
+**Can't find your issue?**
+- [File a bug report](../../issues/new?template=bug_report.yml) — automated triage will suggest matching solutions
+- [Browse known issues](../../issues?q=is%3Aissue+is%3Aopen+label%3Atype%3Aknown-issue) — documented workarounds
+- [Search solution knowledge base](../../issues?q=is%3Aissue+label%3Atype%3Asolution) — community-verified fixes
+- [Document a new solution](../../issues/new?template=pain_point_solution.yml) — help others who hit the same problem
+
+---
+
+## Quick Diagnostics
 
 Run these commands first to diagnose issues:
 
@@ -24,7 +64,7 @@ Run these commands first to diagnose issues:
 
 ---
 
-## 🔴 Critical Issues
+## Critical Issues
 
 ### System Won't Start
 
@@ -588,35 +628,32 @@ netstat -tlnp
 
 ### Filing a Bug Report
 
-```markdown
-## Bug Report
+Use our structured issue templates for the best experience:
 
-**Environment:**
-- OS: macOS 14.0
-- Node: 22.0.0
-- Python: 3.12.0
-- Ollama: 0.1.27
+- **[Bug Report](../../issues/new?template=bug_report.yml)** — Report a broken feature with automated solution matching
+- **[Pain Point & Solution](../../issues/new?template=pain_point_solution.yml)** — Document a problem and its verified fix
+- **[Known Issue](../../issues/new?template=known_issue.yml)** — Flag a recurring issue with workarounds
+- **[Postmortem](../../issues/new?template=postmortem.yml)** — Root cause analysis for incidents
 
-**Steps to Reproduce:**
-1. Run `./boot.sh`
-2. Execute `./wake.sh ALICE`
-3. Observe error
-
-**Expected Behavior:**
-ALICE should wake up
-
-**Actual Behavior:**
-Error: "model not found"
-
-**Logs:**
-```
-[paste relevant logs]
-```
-
-**Additional Context:**
-First time setup, fresh install
-```
+When filing a bug report, include:
+- Environment (OS, Node, Python, Ollama versions)
+- Steps to reproduce
+- Expected vs actual behavior
+- Error logs
+- Workarounds already tried
 
 ---
 
-*Last updated: 2026-02-05*
+## Contributing Solutions
+
+Found a fix for a recurring problem? Help the team by documenting it:
+
+1. **[Create a Solution entry](../../issues/new?template=pain_point_solution.yml)** with the pain point, root cause, and verified fix
+2. The automated triage system will index your solution and suggest it to future reporters
+3. Confirmed solutions get the `solution:confirmed` label and appear in reports
+
+This builds our collective knowledge base so agents and developers resolve issues faster.
+
+---
+
+*Last updated: 2026-03-01*

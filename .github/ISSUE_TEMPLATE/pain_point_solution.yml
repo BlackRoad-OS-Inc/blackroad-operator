@@ -1,0 +1,158 @@
+name: Pain Point & Solution
+description: Document a recurring pain point and its verified solution for the knowledge base
+title: "[Solution]: "
+labels: ["type:solution", "knowledge-base", "status:backlog"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Document a pain point you've encountered and the solution that worked. This builds our internal knowledge base so agents and developers can resolve issues faster.
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      description: What area does this pain point affect?
+      options:
+        - Agent System (wake, chat, council, routing)
+        - Memory System (PS-SHA∞, Redis, Pinecone)
+        - CLI Tools (br commands, shell scripts)
+        - Infrastructure (Cloudflare, Railway, Vercel, DigitalOcean)
+        - Deployment (CI/CD, GitHub Actions, wrangler)
+        - Networking (DNS, tunnels, mesh, SSL)
+        - Performance (latency, memory, CPU, GPU)
+        - Security (auth, secrets, scanning, CVEs)
+        - Development (build, test, lint, dependencies)
+        - Ollama / LLM Inference
+        - Raspberry Pi Fleet
+        - Web / Frontend (Next.js, React)
+        - Database (SQLite, PostgreSQL, D1, KV)
+        - Documentation
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Pain Severity
+      description: How disruptive is this issue when it occurs?
+      options:
+        - Blocker - Stops all work until resolved
+        - Major - Significant workflow disruption
+        - Moderate - Slows work but has manual workaround
+        - Minor - Annoying but easily bypassed
+    validations:
+      required: true
+
+  - type: dropdown
+    id: frequency
+    attributes:
+      label: Frequency
+      description: How often does this pain point occur?
+      options:
+        - Every time (100% reproducible)
+        - Frequently (weekly or more)
+        - Occasionally (monthly)
+        - Rarely (happened a few times)
+    validations:
+      required: true
+
+  - type: textarea
+    id: pain_point
+    attributes:
+      label: Pain Point Description
+      description: Describe the problem clearly. What goes wrong? What symptoms appear?
+      placeholder: |
+        When running `./wake.sh llama3.2 ALICE` after a fresh Ollama restart, the agent
+        fails with "model not found" even though `ollama list` shows the model is available.
+        This blocks all agent interactions until manually resolved.
+    validations:
+      required: true
+
+  - type: textarea
+    id: root_cause
+    attributes:
+      label: Root Cause
+      description: What causes this issue? Why does it happen?
+      placeholder: |
+        Ollama needs time to fully load model weights into memory after restart.
+        The wake script doesn't wait for model readiness before sending the first prompt.
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Verified Solution
+      description: The fix that works. Include exact commands, code changes, or config updates.
+      placeholder: |
+        ```bash
+        # Add a readiness check before wake:
+        until curl -s http://localhost:11434/api/tags | jq -e '.models[] | select(.name=="llama3.2")' > /dev/null 2>&1; do
+          echo "Waiting for model to load..."
+          sleep 2
+        done
+        ./wake.sh llama3.2 ALICE
+        ```
+    validations:
+      required: true
+
+  - type: textarea
+    id: workarounds
+    attributes:
+      label: Alternative Workarounds
+      description: Other approaches that partially solve or mitigate the issue.
+      placeholder: |
+        1. Wait 30 seconds after `ollama serve` before running any agent commands
+        2. Use `ollama run llama3.2 "test"` first to warm up the model
+        3. Add `sleep 30` to boot.sh after starting Ollama
+
+  - type: textarea
+    id: prevention
+    attributes:
+      label: Prevention Strategy
+      description: How can we prevent this pain point from recurring?
+      placeholder: |
+        - Add health check loop to boot.sh
+        - Add retry logic with exponential backoff to wake.sh
+        - Create a systemd readiness probe for Ollama
+
+  - type: dropdown
+    id: solution_status
+    attributes:
+      label: Solution Status
+      description: How confident are you in this solution?
+      options:
+        - Verified - Works consistently in production
+        - Tested - Works in dev/staging
+        - Proposed - Untested but high confidence
+        - Partial - Reduces impact but doesn't fully resolve
+    validations:
+      required: true
+
+  - type: input
+    id: affected_files
+    attributes:
+      label: Affected Files / Scripts
+      description: Which files are involved? (comma-separated paths)
+      placeholder: "wake.sh, boot.sh, health.sh"
+
+  - type: input
+    id: related_issues
+    attributes:
+      label: Related Issues
+      description: Link to related issues, PRs, or docs
+      placeholder: "#42, #55, TROUBLESHOOTING.md"
+
+  - type: dropdown
+    id: environments
+    attributes:
+      label: Affected Environments
+      description: Where does this pain point occur?
+      multiple: true
+      options:
+        - macOS (local dev)
+        - Raspberry Pi fleet
+        - DigitalOcean droplet
+        - Cloudflare Workers
+        - Railway
+        - GitHub Actions CI
+        - All environments

@@ -155,16 +155,192 @@ jobs:
               });
             }
 
-      - name: Welcome Response
+      - name: Match Known Solutions
+        id: solutions
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = context.payload.issue.title || '';
+            const body = context.payload.issue.body || '';
+            const text = (title + ' ' + body).toLowerCase();
+
+            // Solution knowledge base — maps keyword patterns to documented solutions
+            const solutionDB = [
+              {
+                keywords: ['ollama', 'not running', 'connection refused', '11434'],
+                title: 'Ollama Not Running',
+                solution: '```bash\nollama serve &\ncurl http://localhost:11434/api/tags\n```',
+                doc: 'TROUBLESHOOTING.md#ollama-not-running'
+              },
+              {
+                keywords: ['model not found', 'model', 'not found', 'ollama'],
+                title: 'Ollama Model Not Found',
+                solution: '```bash\nollama pull llama3.2\nollama list\n```',
+                doc: 'TROUBLESHOOTING.md#model-not-found'
+              },
+              {
+                keywords: ['cuda', 'out of memory', 'gpu', 'oom'],
+                title: 'GPU Out of Memory',
+                solution: '```bash\nollama pull llama3.2:1b\nexport OLLAMA_NUM_CTX=2048\n```',
+                doc: 'TROUBLESHOOTING.md#out-of-memory'
+              },
+              {
+                keywords: ['agent', 'not responding', 'offline', 'stuck', 'wake'],
+                title: 'Agent Not Responding',
+                solution: '```bash\n./status.sh | grep -i agent\n./wake.sh llama3.2 ALICE\nollama list\n```',
+                doc: 'TROUBLESHOOTING.md#agent-not-responding'
+              },
+              {
+                keywords: ['push rejected', 'failed to push', 'git push'],
+                title: 'Git Push Rejected',
+                solution: '```bash\ngit pull --rebase origin main\n```',
+                doc: 'TROUBLESHOOTING.md#push-rejected'
+              },
+              {
+                keywords: ['401', 'unauthorized', 'api key', 'auth fail'],
+                title: 'API 401 Unauthorized',
+                solution: '```bash\necho $BLACKROAD_API_KEY\n./scripts/regenerate-api-key.sh\n```',
+                doc: 'TROUBLESHOOTING.md#401-unauthorized'
+              },
+              {
+                keywords: ['429', 'rate limit', 'too many requests'],
+                title: 'API Rate Limited (429)',
+                solution: 'Wait 60s and retry. Check headers:\n```bash\ncurl -I https://api.blackroad.io/v1/agents\n```',
+                doc: 'TROUBLESHOOTING.md#429-rate-limited'
+              },
+              {
+                keywords: ['500', 'internal error', 'server error'],
+                title: 'API Internal Error (500)',
+                solution: '```bash\n./blackroad-mesh.sh\nrailway logs\n```',
+                doc: 'TROUBLESHOOTING.md#500-internal-error'
+              },
+              {
+                keywords: ['container', 'docker', 'exited', 'wont start'],
+                title: 'Docker Container Failure',
+                solution: '```bash\ndocker logs container_name\ndocker compose down && docker compose build --no-cache && docker compose up -d\n```',
+                doc: 'TROUBLESHOOTING.md#container-wont-start'
+              },
+              {
+                keywords: ['port', 'already in use', 'address already', 'eaddrinuse'],
+                title: 'Port Already in Use',
+                solution: '```bash\nlsof -i :8000\nkill -9 $(lsof -t -i :8000)\n```',
+                doc: 'TROUBLESHOOTING.md#port-already-in-use'
+              },
+              {
+                keywords: ['dns', 'could not resolve', 'nxdomain'],
+                title: 'DNS Resolution Failed',
+                solution: '```bash\nnslookup api.blackroad.io\n```',
+                doc: 'TROUBLESHOOTING.md#dns-resolution-failed'
+              },
+              {
+                keywords: ['ssl', 'certificate', 'tls', 'cert verify'],
+                title: 'SSL Certificate Error',
+                solution: '```bash\nsudo apt update && sudo apt install ca-certificates\n```',
+                doc: 'TROUBLESHOOTING.md#ssl-certificate-error'
+              },
+              {
+                keywords: ['timeout', 'timed out', 'connection timeout'],
+                title: 'Connection Timeout',
+                solution: '```bash\nping -c 3 google.com\nsudo ufw status\n```',
+                doc: 'TROUBLESHOOTING.md#timeout-errors'
+              },
+              {
+                keywords: ['memory system', 'redis', 'pinecone', 'memory write', 'memory fail'],
+                title: 'Memory System Failure',
+                solution: '```bash\nredis-cli ping\ncurl http://localhost:8001/health\n```',
+                doc: 'TROUBLESHOOTING.md#memory-system-failure'
+              },
+              {
+                keywords: ['slow', 'latency', 'performance', 'response time'],
+                title: 'Slow Response Times',
+                solution: '```bash\ntime curl http://localhost:8000/health\ndocker compose restart\nredis-cli FLUSHALL\n```',
+                doc: 'TROUBLESHOOTING.md#slow-response-times'
+              },
+              {
+                keywords: ['wrangler', 'worker deploy', 'cloudflare deploy'],
+                title: 'Cloudflare Worker Deploy Failed',
+                solution: '```bash\nwrangler whoami\nwrangler login\nwrangler publish --dry-run\n```',
+                doc: 'TROUBLESHOOTING.md#worker-deployment-failed'
+              },
+              {
+                keywords: ['railway', 'build failed', 'nixpacks'],
+                title: 'Railway Deployment Failed',
+                solution: '```bash\nrailway logs --build\ndocker build -t test .\n```',
+                doc: 'TROUBLESHOOTING.md#deployment-failed'
+              },
+              {
+                keywords: ['ssh', 'raspberry pi', 'pi connection'],
+                title: 'Pi SSH Connection Refused',
+                solution: '```bash\nping 192.168.4.38\n# On Pi: sudo systemctl enable ssh\n```',
+                doc: 'TROUBLESHOOTING.md#ssh-connection-refused'
+              },
+              {
+                keywords: ['disk', 'no space', 'disk full', 'storage full'],
+                title: 'Out of Disk Space',
+                solution: '```bash\ndf -h\nsudo apt autoremove\ndocker system prune -a\n```',
+                doc: 'TROUBLESHOOTING.md#out-of-disk-space'
+              },
+              {
+                keywords: ['high memory', 'ram', 'swap', 'memory usage'],
+                title: 'High Memory Usage',
+                solution: '```bash\nfree -h\ndocker stats\ndocker compose restart\n```',
+                doc: 'TROUBLESHOOTING.md#high-memory-usage'
+              }
+            ];
+
+            // Score each solution by keyword match count
+            const matches = solutionDB
+              .map(entry => {
+                const score = entry.keywords.filter(kw => text.includes(kw)).length;
+                return { ...entry, score };
+              })
+              .filter(entry => entry.score >= 2)
+              .sort((a, b) => b.score - a.score)
+              .slice(0, 3);
+
+            core.setOutput('found', matches.length > 0);
+            core.setOutput('matches', JSON.stringify(matches));
+
+      - name: Search Related Known Issues
+        id: known_issues
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Search for related open known issues and solutions
+            const queries = [
+              `repo:${context.repo.owner}/${context.repo.repo} is:issue is:open label:type:known-issue`,
+              `repo:${context.repo.owner}/${context.repo.repo} is:issue is:open label:type:solution`
+            ];
+
+            let related = [];
+            for (const q of queries) {
+              try {
+                const results = await github.rest.search.issuesAndPullRequests({ q, per_page: 5 });
+                for (const item of results.data.items) {
+                  if (item.number !== context.payload.issue.number) {
+                    related.push({ number: item.number, title: item.title, labels: item.labels.map(l => l.name) });
+                  }
+                }
+              } catch (e) { /* search may fail silently */ }
+            }
+
+            core.setOutput('related', JSON.stringify(related.slice(0, 5)));
+            core.setOutput('has_related', related.length > 0);
+
+      - name: Welcome Response with Solutions
         uses: actions/github-script@v7
         with:
           script: |
             const labels = '${{ steps.keywords.outputs.labels }}'.split(',').filter(l => l);
             const priority = '${{ steps.ai.outputs.priority }}';
+            const solutionMatches = JSON.parse('${{ steps.solutions.outputs.matches }}' || '[]');
+            const hasSolutions = '${{ steps.solutions.outputs.found }}' === 'true';
+            const relatedIssues = JSON.parse('${{ steps.known_issues.outputs.related }}' || '[]');
+            const hasRelated = '${{ steps.known_issues.outputs.has_related }}' === 'true';
 
-            let response = `Thanks for opening this issue! 👋\n\n`;
+            let response = `Thanks for opening this issue!\n\n`;
 
-            // Add context based on type
+            // Context based on type
             if (labels.includes('bug')) {
               response += `This has been identified as a **bug report**. `;
               response += `To help us investigate:\n`;
@@ -180,10 +356,38 @@ jobs:
             }
 
             if (priority === 'high') {
-              response += `⚠️ **High priority** - This will be reviewed soon.\n\n`;
+              response += `**High priority** - This will be reviewed soon.\n\n`;
             }
 
-            response += `**Automated Labels Applied:** ${labels.length > 0 ? labels.map(l => '`' + l + '`').join(', ') : 'None'}\n\n`;
+            // Suggest matching solutions from the knowledge base
+            if (hasSolutions && solutionMatches.length > 0) {
+              response += `---\n\n`;
+              response += `### Possible Solutions\n\n`;
+              response += `Based on the issue description, these documented solutions may help:\n\n`;
+
+              for (const match of solutionMatches) {
+                const confidence = Math.round(match.score / match.keywords.length * 100);
+                response += `<details>\n<summary><strong>${match.title}</strong> (${confidence}% match)</summary>\n\n`;
+                response += `${match.solution}\n\n`;
+                response += `See: \`${match.doc}\`\n`;
+                response += `</details>\n\n`;
+              }
+
+              response += `> If a solution above works, comment to let us know and we'll close this issue.\n\n`;
+            }
+
+            // Link related known issues and solutions
+            if (hasRelated && relatedIssues.length > 0) {
+              response += `### Related Issues\n\n`;
+              for (const issue of relatedIssues) {
+                const badges = issue.labels.map(l => '`' + l + '`').join(' ');
+                response += `- #${issue.number} — ${issue.title} ${badges}\n`;
+              }
+              response += `\n`;
+            }
+
+            response += `**Labels:** ${labels.length > 0 ? labels.map(l => '`' + l + '`').join(', ') : 'None'}\n\n`;
+            response += `**Resources:** [Troubleshooting](../blob/main/TROUBLESHOOTING.md) · [FAQ](../blob/main/FAQ.md) · [Known Issues](../../issues?q=is%3Aissue+is%3Aopen+label%3Atype%3Aknown-issue)\n\n`;
             response += `---\n*Triaged by BlackRoad Autonomous Agent*`;
 
             await github.rest.issues.createComment({
@@ -192,6 +396,62 @@ jobs:
               issue_number: context.payload.issue.number,
               body: response
             });
+
+  # ============================================
+  # Solution Confirmation Handler
+  # ============================================
+  solution-confirm:
+    name: "Solution Confirmation"
+    if: github.event_name == 'issue_comment' && github.event.action == 'created'
+    runs-on: [self-hosted, blackroad-fleet]
+
+    steps:
+      - name: Check for Solution Confirmation
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const comment = context.payload.comment.body.toLowerCase();
+            const issue = context.payload.issue;
+
+            // Detect solution confirmation phrases
+            const confirmPhrases = [
+              'solution worked', 'this fixed it', 'resolved', 'that solved it',
+              'works now', 'fixed my issue', 'this helped', 'problem solved',
+              'confirmed fix', 'working now'
+            ];
+
+            const isConfirmation = confirmPhrases.some(phrase => comment.includes(phrase));
+
+            if (isConfirmation) {
+              // Add solved label
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                labels: ['solution:confirmed']
+              }).catch(() => {});
+
+              // Thank the reporter and suggest documenting it
+              const hasKnownIssueLabel = issue.labels.some(l => l.name === 'type:known-issue');
+              const hasSolutionLabel = issue.labels.some(l => l.name === 'type:solution');
+
+              let thankYou = `The solution has been confirmed! Thanks for reporting back.\n\n`;
+
+              if (!hasSolutionLabel && !hasKnownIssueLabel) {
+                thankYou += `Consider documenting this for the team:\n`;
+                thankYou += `- [Document as a Solution](../../issues/new?template=pain_point_solution.yml) — helps others find this fix faster\n`;
+                thankYou += `- [Report as Known Issue](../../issues/new?template=known_issue.yml) — if this is a recurring problem\n\n`;
+              }
+
+              thankYou += `---\n*Tracked by BlackRoad Autonomous Agent*`;
+
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: thankYou
+              });
+            }
 
   # ============================================
   # Stale Issue Cleanup
@@ -366,14 +626,24 @@ jobs:
               per_page: 100
             });
 
+            const allIssues = issues.data.filter(i => !i.pull_request);
+
             const stats = {
-              total: issues.data.length,
-              open: issues.data.filter(i => i.state === 'open' && !i.pull_request).length,
-              closed: issues.data.filter(i => i.state === 'closed' && !i.pull_request).length,
-              bugs: issues.data.filter(i => i.labels.some(l => l.name === 'bug')).length,
-              enhancements: issues.data.filter(i => i.labels.some(l => l.name === 'enhancement')).length,
-              stale: issues.data.filter(i => i.labels.some(l => l.name === 'stale')).length
+              total: allIssues.length,
+              open: allIssues.filter(i => i.state === 'open').length,
+              closed: allIssues.filter(i => i.state === 'closed').length,
+              bugs: allIssues.filter(i => i.labels.some(l => l.name === 'bug')).length,
+              enhancements: allIssues.filter(i => i.labels.some(l => l.name === 'enhancement')).length,
+              stale: allIssues.filter(i => i.labels.some(l => l.name === 'stale')).length,
+              solutions: allIssues.filter(i => i.labels.some(l => l.name === 'type:solution')).length,
+              knownIssues: allIssues.filter(i => i.labels.some(l => l.name === 'type:known-issue')).length,
+              postmortems: allIssues.filter(i => i.labels.some(l => l.name === 'type:postmortem')).length,
+              confirmedSolutions: allIssues.filter(i => i.labels.some(l => l.name === 'solution:confirmed')).length
             };
+
+            // Calculate solution effectiveness rate
+            const totalBugs = stats.bugs || 1;
+            const solutionRate = Math.round((stats.confirmedSolutions / totalBugs) * 100);
 
             console.log('Issue Statistics:', stats);
 
@@ -381,8 +651,10 @@ jobs:
             await github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              title: `[Report] Issue Statistics - ${new Date().toISOString().split('T')[0]}`,
-              body: `## Issue Statistics Report
+              title: `[Report] Issue & Solution Statistics - ${new Date().toISOString().split('T')[0]}`,
+              body: `## Issue & Solution Statistics Report
+
+            ### Issue Counts
 
             | Metric | Count |
             |--------|-------|
@@ -392,6 +664,21 @@ jobs:
             | Bugs | ${stats.bugs} |
             | Enhancements | ${stats.enhancements} |
             | Stale | ${stats.stale} |
+
+            ### Solution Knowledge Base
+
+            | Metric | Count |
+            |--------|-------|
+            | Documented Solutions | ${stats.solutions} |
+            | Known Issues (with workarounds) | ${stats.knownIssues} |
+            | Postmortems | ${stats.postmortems} |
+            | Confirmed Solutions | ${stats.confirmedSolutions} |
+            | Solution Effectiveness | ${solutionRate}% |
+
+            ### Health Indicators
+            - Open/Closed Ratio: ${stats.open}/${stats.closed}
+            - Knowledge Base Coverage: ${stats.solutions + stats.knownIssues} documented entries
+            - Stale Issues: ${stats.stale} (need attention)
 
             ---
             *Generated by BlackRoad Autonomous Agent*`,
