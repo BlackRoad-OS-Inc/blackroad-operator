@@ -27,7 +27,8 @@ export const agentsCommand = new Command('agents')
           data.agents.map((a) => [a.name, a.title, a.role]),
         ),
       )
-    } catch {
+    } catch (err) {
       logger.error('Failed to fetch agents from gateway.')
+      logger.debug(err instanceof Error ? err.message : String(err))
     }
   })
