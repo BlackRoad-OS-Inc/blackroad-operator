@@ -57,7 +57,7 @@ jobs:
   # ============================================
   analyze:
     name: "Analyze Repository"
-    runs-on: [self-hosted, blackroad-fleet]
+    runs-on: ubuntu-latest
     outputs:
       project_type: ${{ steps.detect.outputs.type }}
       has_tests: ${{ steps.detect.outputs.has_tests }}
@@ -68,7 +68,7 @@ jobs:
       memory_context: ${{ steps.memory.outputs.context }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -194,14 +194,14 @@ jobs:
   test-and-build:
     name: "Test & Build"
     needs: analyze
-    runs-on: [self-hosted, blackroad-fleet]
+    runs-on: ubuntu-latest
     if: needs.analyze.outputs.project_type != 'unknown'
     outputs:
       test_result: ${{ steps.test.outputs.result }}
       build_result: ${{ steps.build.outputs.result }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Setup Environment
         run: |
@@ -295,13 +295,13 @@ jobs:
   security-scan:
     name: "Security Scan"
     needs: analyze
-    runs-on: [self-hosted, blackroad-fleet]
+    runs-on: ubuntu-latest
     outputs:
       vulnerabilities: ${{ steps.scan.outputs.vulns }}
       severity: ${{ steps.scan.outputs.max_severity }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Run Security Scanners
         id: scan
@@ -357,10 +357,10 @@ jobs:
     name: "AI Code Review"
     needs: [analyze, test-and-build]
     if: github.event_name == 'pull_request'
-    runs-on: [self-hosted, blackroad-fleet]
+    runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -389,7 +389,7 @@ jobs:
           echo "AI Review: $REVIEW"
 
       - name: Post Review Comment
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const testResult = '${{ needs.test-and-build.outputs.test_result }}';
@@ -436,7 +436,7 @@ jobs:
       needs.test-and-build.outputs.test_result != 'failed' &&
       needs.test-and-build.outputs.build_result != 'failed' &&
       needs.security-scan.outputs.severity != 'critical'
-    runs-on: [self-hosted, blackroad-fleet]
+    runs-on: ubuntu-latest
 
     steps:
       - name: Enable Auto-Merge
@@ -467,10 +467,10 @@ jobs:
       github.ref == 'refs/heads/main' &&
       needs.test-and-build.outputs.test_result != 'failed' &&
       needs.security-scan.outputs.severity != 'critical'
-    runs-on: [self-hosted, blackroad-fleet]
+    runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Determine Deploy Target
         id: target
@@ -510,7 +510,7 @@ jobs:
     name: "Persist Memory"
     needs: [test-and-build, security-scan]
     if: always()
-    runs-on: [self-hosted, blackroad-fleet]
+    runs-on: ubuntu-latest
 
     steps:
       - name: Save Run Memory
@@ -536,7 +536,7 @@ jobs:
     name: "Issue Triage"
     needs: analyze
     if: github.event_name == 'issues' && github.event.action == 'opened'
-    runs-on: [self-hosted, blackroad-fleet]
+    runs-on: ubuntu-latest
 
     steps:
       - name: AI Issue Analysis
@@ -567,7 +567,7 @@ jobs:
           done
 
       - name: Auto-Respond
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const labels = '${{ steps.analyze.outputs.labels }}'.split(',').filter(l => l);
@@ -596,10 +596,10 @@ jobs:
     name: "Scheduled Maintenance"
     needs: analyze
     if: github.event_name == 'schedule'
-    runs-on: [self-hosted, blackroad-fleet]
+    runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Update Dependencies
         run: |
@@ -642,7 +642,7 @@ jobs:
           done
 
       - name: Health Report
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const healthScore = '${{ needs.analyze.outputs.health_score }}';
