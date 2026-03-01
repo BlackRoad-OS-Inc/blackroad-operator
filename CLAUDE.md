@@ -35,6 +35,7 @@ This file provides guidance to Cecilia Code (BlackRoad OS AI development) when w
 ### Skills & Coordination
 - [Skills System](#skills-system)
 - [Multi-Agent Coordination](#multi-agent-coordination)
+- [PR Swarm System](#pr-swarm-system)
 
 ### Design & Branding
 - [Brand Design System](#brand-design-system)
@@ -1183,6 +1184,82 @@ interface Task {
 3. **Memory Logging**: All actions logged to [MEMORY]
 4. **Completion**: Agent marks task complete with summary
 5. **Broadcasting**: TILs and updates shared across agents
+
+## PR Swarm System
+
+Parallel Agent PR Swarm — uses GitHub pull requests as a coordination layer for multi-agent work. Each agent gets its own branch and PR, turning PRs into a "group call."
+
+### How It Works
+```
+     [Issue or Manual Trigger]
+              |
+     [agent-pr-swarm.yml]
+              |
+    +---------+---------+---------+
+    |         |         |         |
+ LUCIDIA   OCTAVIA    ALICE    CIPHER
+ (branch)  (branch)  (branch) (branch)
+    |         |         |         |
+  [PR #1]  [PR #2]  [PR #3]  [PR #4]
+    |         |         |         |
+    +---------+---------+---------+
+              |
+     [Coordinator PR #5]
+              |
+     [Auto-merge when ready]
+```
+
+### Swarm Strategies
+| Strategy | Description |
+|----------|-------------|
+| `parallel` | All agents work simultaneously, merge when all pass |
+| `pipeline` | Sequential handoff — agent N+1 starts after N completes |
+| `review-ring` | Each agent reviews the previous agent's PR |
+| `consensus` | All agents must approve all PRs before any merge |
+
+### CLI Commands
+```bash
+# Launch a swarm
+br swarm launch "Build auth module" lucidia,octavia,cipher
+br swarm launch "Refactor API" all consensus
+
+# Monitor
+br swarm status [swarm-id]
+br swarm list
+br swarm monitor                    # Live dashboard (auto-refresh)
+
+# Manage
+br swarm merge <swarm-id>           # Merge all agent PRs
+br swarm close <swarm-id>           # Close all swarm PRs
+br swarm review <swarm-id>          # Review agent changes
+br swarm comment <pr-num> "message" # Post to agent PR
+
+# Direct scripts
+./swarm.sh launch "task" agents strategy
+./swarm-monitor.sh --live           # Live terminal dashboard
+./swarm-monitor.sh --json           # JSON output
+```
+
+### Swarm Workflows
+| Workflow | Trigger | Purpose |
+|----------|---------|---------|
+| `agent-pr-swarm.yml` | Issues labeled "swarm", manual dispatch | Spawns agent branches + PRs |
+| `swarm-merge-coordinator.yml` | PR reviews, check completions | Auto-merges when strategy met |
+| `swarm-agent-crosstalk.yml` | Push to `swarm/*/agent/*` | Auto-comments on sibling PRs |
+
+### Coordination Integration
+```bash
+# Broadcast swarm events to 30K agents
+./coordination/swarm-broadcast.sh launch <swarm-id> "task" "agents"
+./coordination/swarm-broadcast.sh update <swarm-id> "status"
+./coordination/swarm-broadcast.sh complete <swarm-id>
+```
+
+### Task Router Integration
+The `collab-task-router.sh` auto-routes tasks with keywords like "swarm", "parallel agents", "multi-agent", or "group call" to the PR Swarm system.
+
+### Issue Template
+Create a swarm from GitHub UI: Issues -> New Issue -> "Swarm Task" template. Select agents, strategy, and describe the task.
 
 ## Brand Design System
 

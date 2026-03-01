@@ -1,0 +1,519 @@
+# .github/workflows/agent-pr-swarm.yml
+# Parallel Agent PR Swarm — Each agent gets its own branch + PR
+# PRs become the "group call" for coordinated multi-agent work
+#
+# How it works:
+#   1. Create an issue with label "swarm" and task descriptions
+#   2. This workflow spawns N agent branches + PRs in parallel
+#   3. Each agent PR gets its own label, assignee, and checklist
+#   4. Agents coordinate via PR comments (cross-references)
+#   5. A "swarm-coordinator" PR links all agent PRs together
+#   6. When all agent PRs pass checks → auto-merge cascade
+#
+# Trigger with: gh workflow run "Agent PR Swarm" -f task="..." -f agents="lucidia,octavia,alice"
+
+name: "Agent PR Swarm"
+
+on:
+  issues:
+    types: [labeled]
+  workflow_dispatch:
+    inputs:
+      task:
+        description: 'Task description for the swarm'
+        required: true
+        type: string
+      agents:
+        description: 'Comma-separated agent names (or "all")'
+        required: false
+        default: 'lucidia,octavia,alice,cipher'
+        type: string
+      strategy:
+        description: 'Swarm strategy'
+        required: false
+        default: 'parallel'
+        type: choice
+        options:
+          - parallel      # All agents work simultaneously
+          - pipeline      # Sequential handoff between agents
+          - review-ring   # Each agent reviews the previous
+          - consensus     # All must approve before merge
+      base_branch:
+        description: 'Base branch to fork from'
+        required: false
+        default: 'main'
+        type: string
+      auto_merge:
+        description: 'Auto-merge when all checks pass'
+        required: false
+        default: true
+        type: boolean
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  checks: write
+
+concurrency:
+  group: swarm-${{ github.run_id }}
+  cancel-in-progress: false
+
+env:
+  SWARM_ID: "swarm-${{ github.run_number }}-${{ github.run_attempt }}"
+  BLACKROAD_AGENT_API: https://blackroad-agents.blackroad.workers.dev
+
+jobs:
+  # ============================================
+  # Stage 0: Initialize Swarm
+  # ============================================
+  init-swarm:
+    name: "Initialize Swarm"
+    runs-on: [self-hosted, blackroad-fleet]
+    outputs:
+      swarm_id: ${{ steps.init.outputs.swarm_id }}
+      agents: ${{ steps.agents.outputs.list }}
+      agent_count: ${{ steps.agents.outputs.count }}
+      task: ${{ steps.task.outputs.description }}
+      strategy: ${{ steps.task.outputs.strategy }}
+      coordinator_branch: ${{ steps.init.outputs.coordinator_branch }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Parse Task
+        id: task
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TASK="${{ inputs.task }}"
+            STRATEGY="${{ inputs.strategy }}"
+          else
+            # Parse task and strategy from issue form body, with safe fallbacks
+            ISSUE_BODY="${{ github.event.issue.body }}"
+
+            # Extract Task Description section (between "### Task Description" and next "### ")
+            TASK=$(printf '%s\n' "$ISSUE_BODY" | awk '/^### Task Description/{flag=1;next}/^### /{flag=0}flag' | sed '/^[[:space:]]*$/d' | head -n 20 | tr '\n' ' ' | sed 's/[[:space:]]\{1,\}/ /g' | sed 's/[[:space:]]*$//')
+
+            # Fallback to issue title if no task description found in body
+            if [ -z "$TASK" ]; then
+              TASK="${{ github.event.issue.title }}"
+            fi
+
+            # Extract selected strategy from "### Strategy" section, e.g. "- [x] Parallel"
+            RAW_STRATEGY=$(printf '%s\n' "$ISSUE_BODY" | awk '/^### Strategy/{flag=1;next}/^### /{flag=0}flag' | grep -i '\[x\]' | head -n 1 | sed -E 's/.*\[(x|X)\][[:space:]]*//')
+            STRATEGY=$(printf '%s' "$RAW_STRATEGY" | tr '[:upper:]' '[:lower:]' | sed 's/[[:space:]]\{1,\}/ /g' | sed 's/[[:space:]]*$//')
+
+            # Fallback to "parallel" if no strategy could be parsed
+            if [ -z "$STRATEGY" ]; then
+              STRATEGY="parallel"
+            fi
+          fi
+          echo "description=${TASK}" >> "$GITHUB_OUTPUT"
+          echo "strategy=${STRATEGY}" >> "$GITHUB_OUTPUT"
+          echo "Task: ${TASK}"
+          echo "Strategy: ${STRATEGY}"
+
+      - name: Resolve Agents
+        id: agents
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            AGENTS="${{ inputs.agents }}"
+          else
+            BODY="${{ github.event.issue.body }}"
+
+            # 1) Try legacy format: agents: a,b,c
+            AGENTS=$(printf '%s\n' "$BODY" | grep -i "^agents:" | sed 's/^[Aa][Gg][Ee][Nn][Tt][Ss]:[[:space:]]*//' | tr -d ' ')
+
+            # 2) If not found, try issue-form format:
+            #    ### Agents   (next non-empty line contains the list)
+            if [ -z "$AGENTS" ]; then
+              AGENTS=$(printf '%s\n' "$BODY" | awk 'BEGIN{IGNORECASE=1}
+                /^###[[:space:]]*agents[[:space:]]*$/ { 
+                  # Read the next non-empty line
+                  while (getline line) {
+                    gsub(/^[[:space:]]+|[[:space:]]+$/, "", line);
+                    if (length(line) > 0) { print line; exit }
+                  }
+                }')
+            fi
+
+            # 3) Fallback to default agents if still empty
+            if [ -z "$AGENTS" ]; then
+              AGENTS="lucidia,octavia,alice"
+            fi
+          fi
+
+          if [ "$AGENTS" = "all" ]; then
+            AGENTS="lucidia,octavia,alice,cipher,aria,prism,echo,cecilia"
+          fi
+
+          # Convert to JSON array
+          JSON_LIST=$(echo "$AGENTS" | tr ',' '\n' | jq -R . | jq -s .)
+          COUNT=$(echo "$JSON_LIST" | jq length)
+
+          echo "list=${JSON_LIST}" >> "$GITHUB_OUTPUT"
+          echo "count=${COUNT}" >> "$GITHUB_OUTPUT"
+          echo "Agents (${COUNT}): ${AGENTS}"
+
+      - name: Initialize Swarm
+        id: init
+        run: |
+          SWARM_ID="swarm-${{ github.run_number }}"
+          COORD_BRANCH="swarm/${SWARM_ID}/coordinator"
+
+          echo "swarm_id=${SWARM_ID}" >> "$GITHUB_OUTPUT"
+          echo "coordinator_branch=${COORD_BRANCH}" >> "$GITHUB_OUTPUT"
+
+          echo "## Swarm Initialized" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Field | Value |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|-------|-------|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Swarm ID | \`${SWARM_ID}\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Agents | ${{ steps.agents.outputs.count }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Strategy | ${{ steps.task.outputs.strategy }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Task | ${{ steps.task.outputs.description }} |" >> "$GITHUB_STEP_SUMMARY"
+
+  # ============================================
+  # Stage 1: Spawn Agent Branches + PRs
+  # ============================================
+  spawn-agents:
+    name: "Spawn: ${{ matrix.agent }}"
+    needs: init-swarm
+    runs-on: [self-hosted, blackroad-fleet]
+    strategy:
+      matrix:
+        agent: ${{ fromJson(needs.init-swarm.outputs.agents) }}
+      max-parallel: 8
+      fail-fast: false
+
+    outputs:
+      pr_number: ${{ steps.create-pr.outputs.pr_number }}
+      branch: ${{ steps.branch.outputs.name }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.base_branch || 'main' }}
+          fetch-depth: 0
+
+      - name: Create Agent Branch
+        id: branch
+        run: |
+          SWARM_ID="${{ needs.init-swarm.outputs.swarm_id }}"
+          AGENT="${{ matrix.agent }}"
+          BRANCH="swarm/${SWARM_ID}/agent/${AGENT}"
+
+          git checkout -b "${BRANCH}"
+          echo "name=${BRANCH}" >> "$GITHUB_OUTPUT"
+          echo "Branch: ${BRANCH}"
+
+      - name: Agent Workspace Setup
+        run: |
+          AGENT="${{ matrix.agent }}"
+          SWARM_ID="${{ needs.init-swarm.outputs.swarm_id }}"
+
+          # Create agent workspace marker
+          mkdir -p ".swarm/${SWARM_ID}"
+          cat > ".swarm/${SWARM_ID}/${AGENT}.json" << AGENT_EOF
+          {
+            "agent": "${AGENT}",
+            "swarm_id": "${SWARM_ID}",
+            "task": "${{ needs.init-swarm.outputs.task }}",
+            "strategy": "${{ needs.init-swarm.outputs.strategy }}",
+            "branch": "${{ steps.branch.outputs.name }}",
+            "spawned_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "status": "active",
+            "run_id": "${{ github.run_id }}"
+          }
+          AGENT_EOF
+
+          git config user.name "${AGENT}-agent[bot]"
+          git config user.email "${AGENT}@blackroad.io"
+          git add ".swarm/"
+          git commit -m "swarm(${AGENT}): initialize workspace for ${SWARM_ID}
+
+          Agent: ${AGENT}
+          Task: ${{ needs.init-swarm.outputs.task }}
+          Strategy: ${{ needs.init-swarm.outputs.strategy }}"
+
+      - name: Push Agent Branch
+        run: |
+          git push -u origin "${{ steps.branch.outputs.name }}"
+
+      - name: Create Agent PR
+        id: create-pr
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          AGENT="${{ matrix.agent }}"
+          SWARM_ID="${{ needs.init-swarm.outputs.swarm_id }}"
+          TASK="${{ needs.init-swarm.outputs.task }}"
+          STRATEGY="${{ needs.init-swarm.outputs.strategy }}"
+          AGENT_COUNT="${{ needs.init-swarm.outputs.agent_count }}"
+
+          # Agent-specific role descriptions
+          case "${AGENT}" in
+            lucidia)  ROLE="Philosopher — deep reasoning, architecture decisions" ;;
+            octavia)  ROLE="Architect — systems design, infrastructure" ;;
+            alice)    ROLE="Operator — task execution, automation, routing" ;;
+            cipher)   ROLE="Guardian — security review, access control" ;;
+            aria)     ROLE="Dreamer — creative direction, UX, vision" ;;
+            prism)    ROLE="Analyst — data analysis, pattern recognition" ;;
+            echo)     ROLE="Memory — context preservation, knowledge retrieval" ;;
+            cecilia)  ROLE="CECE — meta-cognition, self-awareness, coordination" ;;
+            *)        ROLE="Agent — general purpose" ;;
+          esac
+
+          PR_URL=$(gh pr create \
+            --base "${{ inputs.base_branch || 'main' }}" \
+            --head "${{ steps.branch.outputs.name }}" \
+            --title "[${SWARM_ID}] ${AGENT^^}: ${TASK}" \
+            --body "$(cat <<PR_EOF
+          ## Agent: ${AGENT^^}
+          **Role:** ${ROLE}
+          **Swarm:** \`${SWARM_ID}\` | **Strategy:** \`${STRATEGY}\` | **Agents in swarm:** ${AGENT_COUNT}
+
+          ---
+
+          ### Task
+          ${TASK}
+
+          ### Agent Checklist
+          - [ ] Analyze task requirements
+          - [ ] Implement changes
+          - [ ] Self-review code
+          - [ ] Cross-reference other agent PRs
+          - [ ] Mark ready for merge
+
+          ### Swarm Communication
+          > Other agents in this swarm can comment here to coordinate.
+          > Use \`@${AGENT}\` mentions to direct messages to this agent.
+
+          ---
+          <details>
+          <summary>Swarm Metadata</summary>
+
+          \`\`\`json
+          {
+            "swarm_id": "${SWARM_ID}",
+            "agent": "${AGENT}",
+            "role": "${ROLE}",
+            "strategy": "${STRATEGY}",
+            "spawned_by": "agent-pr-swarm.yml",
+            "run_id": "${{ github.run_id }}"
+          }
+          \`\`\`
+          </details>
+          PR_EOF
+          )")
+
+          PR_NUMBER="${PR_URL##*/}"
+          echo "pr_number=${PR_NUMBER}" >> "$GITHUB_OUTPUT"
+          echo "pr_url=${PR_URL}" >> "$GITHUB_OUTPUT"
+          echo "Created PR #${PR_NUMBER} for agent ${AGENT}"
+
+      - name: Label PR by Agent Type
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          AGENT="${{ matrix.agent }}"
+          PR="${{ steps.create-pr.outputs.pr_number }}"
+
+          # Create labels if they don't exist (ignore errors)
+          gh label create "swarm" --color "7B61FF" --description "Part of an agent swarm" 2>/dev/null || true
+          gh label create "agent:${AGENT}" --color "$(printf '%06X' $((RANDOM % 16777215)))" --description "Agent: ${AGENT}" 2>/dev/null || true
+
+          # Apply labels to the PR
+          if [ -n "$PR" ]; then
+            gh pr edit "$PR" --add-label "swarm" --add-label "agent:${AGENT}"
+          fi
+  # ============================================
+  # Stage 2: Create Coordinator PR
+  # ============================================
+  coordinator:
+    name: "Swarm Coordinator"
+    needs: [init-swarm, spawn-agents]
+    runs-on: [self-hosted, blackroad-fleet]
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.base_branch || 'main' }}
+          fetch-depth: 0
+
+      - name: Create Coordinator Branch
+        run: |
+          COORD_BRANCH="${{ needs.init-swarm.outputs.coordinator_branch }}"
+          git checkout -b "${COORD_BRANCH}"
+
+      - name: Build Swarm Manifest
+        run: |
+          SWARM_ID="${{ needs.init-swarm.outputs.swarm_id }}"
+          AGENTS='${{ needs.init-swarm.outputs.agents }}'
+          TASK="${{ needs.init-swarm.outputs.task }}"
+          STRATEGY="${{ needs.init-swarm.outputs.strategy }}"
+
+          mkdir -p ".swarm/${SWARM_ID}"
+
+          cat > ".swarm/${SWARM_ID}/manifest.json" << MANIFEST_EOF
+          {
+            "swarm_id": "${SWARM_ID}",
+            "task": "${TASK}",
+            "strategy": "${STRATEGY}",
+            "created_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "run_id": "${{ github.run_id }}",
+            "agents": ${AGENTS},
+            "status": "active",
+            "coordination": {
+              "type": "github-prs",
+              "pattern": "swarm/${SWARM_ID}/agent/*",
+              "coordinator_branch": "${{ needs.init-swarm.outputs.coordinator_branch }}"
+            },
+            "rules": {
+              "parallel": "All agents work simultaneously, coordinator merges when all pass",
+              "pipeline": "Agent N+1 starts after Agent N completes",
+              "review-ring": "Each agent reviews the previous agent's PR",
+              "consensus": "All agents must approve all PRs before any merge"
+            }
+          }
+          MANIFEST_EOF
+
+          git config user.name "blackroad-coordinator[bot]"
+          git config user.email "coordinator@blackroad.io"
+          git add ".swarm/"
+          git commit -m "swarm(coordinator): initialize ${SWARM_ID}
+
+          Task: ${TASK}
+          Strategy: ${STRATEGY}
+          Agents: $(echo ${AGENTS} | jq -r 'join(", ")')"
+
+      - name: Push Coordinator Branch
+        run: |
+          git push -u origin "${{ needs.init-swarm.outputs.coordinator_branch }}"
+
+      - name: Create Coordinator PR
+        id: coord-pr
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          SWARM_ID="${{ needs.init-swarm.outputs.swarm_id }}"
+          TASK="${{ needs.init-swarm.outputs.task }}"
+          STRATEGY="${{ needs.init-swarm.outputs.strategy }}"
+          AGENTS='${{ needs.init-swarm.outputs.agents }}'
+          AGENT_COUNT="${{ needs.init-swarm.outputs.agent_count }}"
+
+          # List all agent PRs
+          AGENT_PRS=$(gh pr list --label "swarm" --json number,title,headRefName --jq \
+            ".[] | select(.headRefName | startswith(\"swarm/${SWARM_ID}/agent/\")) | \"- #\\(.number) — \\(.title)\"" || echo "- (loading...)")
+
+          gh label create "swarm-coordinator" --color "FF1D6C" --description "Swarm coordinator PR" 2>/dev/null || true
+
+          PR_URL=$(gh pr create \
+            --base "${{ inputs.base_branch || 'main' }}" \
+            --head "${{ needs.init-swarm.outputs.coordinator_branch }}" \
+            --title "[${SWARM_ID}] COORDINATOR: ${TASK}" \
+            --label "swarm,swarm-coordinator" \
+            --body "$(cat <<COORD_EOF
+          ## Swarm Coordinator
+          **Swarm ID:** \`${SWARM_ID}\`
+          **Task:** ${TASK}
+          **Strategy:** \`${STRATEGY}\`
+          **Agent Count:** ${AGENT_COUNT}
+
+          ---
+
+          ### Agent PRs (Group Call)
+          ${AGENT_PRS}
+
+          ### Merge Strategy: \`${STRATEGY}\`
+          $(case "${STRATEGY}" in
+            parallel)  echo "All agent PRs work simultaneously. This coordinator merges once all agent PRs are approved and pass checks." ;;
+            pipeline)  echo "Sequential pipeline: each agent starts after the previous completes. Order is defined by the agent list." ;;
+            review-ring) echo "Review ring: each agent reviews the next agent's PR in a circular pattern." ;;
+            consensus) echo "Consensus required: ALL agents must approve ALL other agent PRs before any merge proceeds." ;;
+          esac)
+
+          ### Swarm Status
+          - [ ] All agent PRs created
+          - [ ] All agents have pushed work
+          - [ ] All CI checks passing
+          - [ ] Cross-agent review complete
+          - [ ] Ready for final merge
+
+          ### How This Works
+          1. Each agent has its own branch: \`swarm/${SWARM_ID}/agent/<name>\`
+          2. Each agent has its own PR (listed above)
+          3. Agents communicate via PR comments
+          4. This coordinator PR tracks overall progress
+          5. When strategy conditions are met → merge cascade
+
+          ---
+          <details>
+          <summary>Swarm Architecture</summary>
+
+          \`\`\`
+                         [Coordinator PR]
+                              |
+                    +---------+---------+
+                    |         |         |
+               [Agent PR] [Agent PR] [Agent PR]
+                    |         |         |
+                [branch]  [branch]  [branch]
+          \`\`\`
+          </details>
+          COORD_EOF
+          )")
+
+          echo "Coordinator PR: ${PR_URL}"
+
+      - name: Post Swarm Links to Issue
+        if: github.event_name == 'issues'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          SWARM_ID="${{ needs.init-swarm.outputs.swarm_id }}"
+
+          AGENT_PRS=$(gh pr list --label "swarm" --json number,title,headRefName --jq \
+            ".[] | select(.headRefName | startswith(\"swarm/${SWARM_ID}/\")) | \"- #\\(.number) — \\(.title)\"")
+
+          gh issue comment "${{ github.event.issue.number }}" --body "$(cat <<ISSUE_EOF
+          ## Swarm Deployed: \`${SWARM_ID}\`
+
+          Agent PRs have been created for this task:
+
+          ${AGENT_PRS}
+
+          Each agent will work on their assigned branch. Track progress in the PRs above.
+          ISSUE_EOF
+          )"
+
+  # ============================================
+  # Stage 3: Swarm Health Monitor
+  # ============================================
+  monitor:
+    name: "Swarm Monitor"
+    needs: [init-swarm, coordinator]
+    runs-on: [self-hosted, blackroad-fleet]
+    if: always()
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Swarm Status Report
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          SWARM_ID="${{ needs.init-swarm.outputs.swarm_id }}"
+
+          echo "## Swarm Status Report: ${SWARM_ID}" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+
+          # List all swarm PRs
+          echo "### Active PRs" >> "$GITHUB_STEP_SUMMARY"
+          gh pr list --label "swarm" --json number,title,state,headRefName,mergeable \
+            --jq ".[] | select(.headRefName | startswith(\"swarm/${SWARM_ID}/\")) | \"| #\\(.number) | \\(.title) | \\(.state) | \\(.mergeable) |\"" \
+            >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || echo "| No PRs found yet |" >> "$GITHUB_STEP_SUMMARY"
+
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "### Swarm Complete" >> "$GITHUB_STEP_SUMMARY"
+          echo "All agent branches and PRs have been created." >> "$GITHUB_STEP_SUMMARY"
+          echo "Agents can now push work to their branches." >> "$GITHUB_STEP_SUMMARY"

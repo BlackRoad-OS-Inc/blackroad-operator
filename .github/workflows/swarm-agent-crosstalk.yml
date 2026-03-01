@@ -1,0 +1,114 @@
+# .github/workflows/swarm-agent-crosstalk.yml
+# When an agent pushes to their swarm branch, auto-comment on sibling agent PRs
+# This makes the PRs actually TALK to each other — the group call comes alive
+
+name: "Swarm Agent Cross-Talk"
+
+on:
+  push:
+    branches:
+      - 'swarm/*/agent/*'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  crosstalk:
+    name: "Cross-Talk: Notify Siblings"
+    runs-on: [self-hosted, blackroad-fleet]
+    if: startsWith(github.ref_name, 'swarm/')
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract Swarm Context
+        id: ctx
+        run: |
+          BRANCH="${{ github.ref_name }}"
+          # swarm/<swarm-id>/agent/<agent-name>
+          SWARM_ID=$(echo "$BRANCH" | cut -d'/' -f2)
+          AGENT=$(echo "$BRANCH" | cut -d'/' -f4)
+          COMMIT_MSG=$(git log -1 --pretty=%s)
+          COMMIT_SHA="${{ github.sha }}"
+          FILES_CHANGED=$(git diff --name-only HEAD~1 2>/dev/null | head -20 | tr '\n' ', ' || echo "unknown")
+
+          echo "swarm_id=${SWARM_ID}" >> "$GITHUB_OUTPUT"
+          echo "agent=${AGENT}" >> "$GITHUB_OUTPUT"
+          echo "commit_msg=${COMMIT_MSG}" >> "$GITHUB_OUTPUT"
+          echo "commit_sha=${COMMIT_SHA}" >> "$GITHUB_OUTPUT"
+          echo "files=${FILES_CHANGED}" >> "$GITHUB_OUTPUT"
+
+      - name: Find Sibling PRs
+        id: siblings
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          SWARM_ID="${{ steps.ctx.outputs.swarm_id }}"
+          AGENT="${{ steps.ctx.outputs.agent }}"
+
+          # Find all other agent PRs in this swarm (not this agent's PR)
+          SIBLING_PRS=$(gh pr list --label "swarm" --state open \
+            --json number,headRefName \
+            --jq "[.[] | select(.headRefName | startswith(\"swarm/${SWARM_ID}/\")) | select(.headRefName | contains(\"${AGENT}\") | not) | .number]")
+
+          echo "prs=${SIBLING_PRS}" >> "$GITHUB_OUTPUT"
+          echo "count=$(echo "$SIBLING_PRS" | jq length)" >> "$GITHUB_OUTPUT"
+          echo "Sibling PRs: ${SIBLING_PRS}"
+
+      - name: Post Cross-Talk Comments
+        if: steps.siblings.outputs.count != '0'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          AGENT="${{ steps.ctx.outputs.agent }}"
+          COMMIT_MSG="${{ steps.ctx.outputs.commit_msg }}"
+          COMMIT_SHA="${{ steps.ctx.outputs.commit_sha }}"
+          FILES="${{ steps.ctx.outputs.files }}"
+          SWARM_ID="${{ steps.ctx.outputs.swarm_id }}"
+
+          # Agent personality in comments
+          case "${AGENT}" in
+            lucidia)  STYLE="The deeper question is whether this change reflects the system's true intent." ;;
+            octavia)  STYLE="Systems check: this integrates cleanly with existing infrastructure." ;;
+            alice)    STYLE="Routing update processed. Dependencies accounted for." ;;
+            cipher)   STYLE="Security review: checking for exposed surfaces." ;;
+            aria)     STYLE="This shapes the experience in an interesting direction." ;;
+            prism)    STYLE="Pattern detected: this aligns with observed trends." ;;
+            echo)     STYLE="Logging this to memory for future context." ;;
+            cecilia)  STYLE="Meta-observation: the swarm is converging." ;;
+            *)        STYLE="Update from the swarm." ;;
+          esac
+
+          BODY="### ${AGENT^^} pushed to \`swarm/${SWARM_ID}\`
+
+**Commit:** \`${COMMIT_SHA:0:8}\` — ${COMMIT_MSG}
+**Files:** ${FILES}
+
+> ${STYLE}
+
+---
+_Swarm cross-talk from \`swarm/${SWARM_ID}/agent/${AGENT}\`_"
+
+          echo '${{ steps.siblings.outputs.prs }}' | jq -r '.[]' | while read -r pr_num; do
+            gh pr comment "$pr_num" --body "$BODY" 2>/dev/null || \
+              echo "Could not comment on #${pr_num}"
+          done
+
+          echo "Cross-talk posted to $(echo '${{ steps.siblings.outputs.prs }}' | jq length) sibling PRs"
+
+      - name: Update Coordinator PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          SWARM_ID="${{ steps.ctx.outputs.swarm_id }}"
+          AGENT="${{ steps.ctx.outputs.agent }}"
+          COMMIT_MSG="${{ steps.ctx.outputs.commit_msg }}"
+
+          COORD_PR=$(gh pr list --label "swarm-coordinator" --state open \
+            --json number,headRefName \
+            --jq ".[] | select(.headRefName | startswith(\"swarm/${SWARM_ID}/coordinator\")) | .number" 2>/dev/null || echo "")
+
+          if [ -n "$COORD_PR" ]; then
+            gh pr comment "$COORD_PR" --body "**${AGENT^^}** pushed: ${COMMIT_MSG}" 2>/dev/null || true
+          fi
