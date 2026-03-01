@@ -13,6 +13,7 @@ import { serveCommand } from './serve.js'
 import { meshCommand } from './mesh.js'
 import { indexCommand } from './index-cmd.js'
 import { workersCommand } from './workers.js'
+import { bottlenecksCommand } from './bottlenecks.js'
 
 export const program = new Command()
   .name('br')
@@ -32,3 +33,4 @@ program.addCommand(serveCommand)
 program.addCommand(meshCommand)
 program.addCommand(indexCommand)
 program.addCommand(workersCommand)
+program.addCommand(bottlenecksCommand)
