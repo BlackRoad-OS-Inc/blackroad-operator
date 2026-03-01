@@ -5,7 +5,7 @@ name: "Autonomous Self-Healer"
 
 on:
   workflow_run:
-    workflows: ["Autonomous Orchestrator", "CI", "Test"]
+    workflows: ["Autonomous Orchestrator", "CI"]
     types: [completed]
     conclusions: [failure]
   schedule:
@@ -41,7 +41,7 @@ jobs:
   # ============================================
   diagnose:
     name: "Diagnose Failure"
-    runs-on: [self-hosted, blackroad-fleet]
+    runs-on: ubuntu-latest
     outputs:
       failure_type: ${{ steps.analyze.outputs.type }}
       failure_details: ${{ steps.analyze.outputs.details }}
@@ -49,7 +49,7 @@ jobs:
       fix_strategy: ${{ steps.strategy.outputs.approach }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Get Failed Run Logs
         id: logs
@@ -135,15 +135,15 @@ jobs:
     name: "Fix Lint Issues"
     needs: diagnose
     if: needs.diagnose.outputs.fix_strategy == 'auto_lint_fix'
-    runs-on: [self-hosted, blackroad-fleet]
+    runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           ref: ${{ github.event.workflow_run.head_branch || github.ref }}
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '20'
 
@@ -182,10 +182,10 @@ jobs:
     name: "Fix Dependencies"
     needs: diagnose
     if: needs.diagnose.outputs.fix_strategy == 'reinstall_deps'
-    runs-on: [self-hosted, blackroad-fleet]
+    runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           ref: ${{ github.event.workflow_run.head_branch || github.ref }}
 
@@ -228,10 +228,10 @@ jobs:
     name: "Fix Security Issues"
     needs: diagnose
     if: needs.diagnose.outputs.fix_strategy == 'security_patch'
-    runs-on: [self-hosted, blackroad-fleet]
+    runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           ref: ${{ github.event.workflow_run.head_branch || github.ref }}
 
@@ -290,10 +290,10 @@ jobs:
     name: "AI-Assisted Fix"
     needs: diagnose
     if: needs.diagnose.outputs.fix_strategy == 'ai_assisted_fix'
-    runs-on: [self-hosted, blackroad-fleet]
+    runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           ref: ${{ github.event.workflow_run.head_branch || github.ref }}
 
@@ -315,7 +315,7 @@ jobs:
 
       - name: Create Issue for Manual Review
         if: needs.diagnose.outputs.fixable == 'maybe'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const failureType = '${{ needs.diagnose.outputs.failure_type }}';
@@ -355,7 +355,7 @@ jobs:
     name: "Report Results"
     needs: [diagnose, fix-lint, fix-deps, fix-security, ai-fix]
     if: always()
-    runs-on: [self-hosted, blackroad-fleet]
+    runs-on: ubuntu-latest
 
     steps:
       - name: Summarize Healing Attempt

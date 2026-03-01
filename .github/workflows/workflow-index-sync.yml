@@ -14,7 +14,7 @@ jobs:
     runs-on: [self-hosted, blackroad-fleet]
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -24,7 +24,7 @@ jobs:
 
       - name: Extract workflow metadata
         id: metadata
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const issue = context.payload.issue;
@@ -62,8 +62,8 @@ jobs:
             )?.name || '🟢';
 
             const state = issue.state === 'closed' ? 'Done' : 'Active';
-            
-            const scope = issue.labels.find(l => 
+
+            const scopeLabel = issue.labels.find(l =>
               ['Local', 'Service', 'System', 'Public', 'Experimental'].includes(l.name)
             )?.name || 'Service';
 
@@ -81,7 +81,7 @@ jobs:
               repo: context.repo.owner + '/' + context.repo.repo,
               title: issue.title,
               state: state,
-              scope: scope,
+              scope: scopeLabel,
               risk: risk,
               intent: intent,
               traffic_light: trafficLight,

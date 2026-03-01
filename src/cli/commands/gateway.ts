@@ -3,8 +3,9 @@ import { Command } from 'commander'
 import { GatewayClient } from '../../core/client.js'
 import { logger } from '../../core/logger.js'
 
-export const gatewayCommand = new Command('gateway')
-  .description('Gateway management')
+export const gatewayCommand = new Command('gateway').description(
+  'Gateway management',
+)
 
 gatewayCommand
   .command('health')
@@ -12,10 +13,13 @@ gatewayCommand
   .action(async () => {
     const client = new GatewayClient()
     try {
-      const health = await client.get<{ status: string; version: string }>('/v1/health')
+      const health = await client.get<{ status: string; version: string }>(
+        '/v1/health',
+      )
       logger.success(`Gateway is ${health.status} (v${health.version})`)
-    } catch {
+    } catch (err) {
       logger.error('Gateway is unreachable.')
+      logger.debug(err instanceof Error ? err.message : String(err))
     }
   })
 
