@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { BackgroundProvider } from '../components/BackgroundProvider'
 
 export const metadata: Metadata = {
   title: 'BlackRoad Operator',
@@ -18,7 +19,7 @@ export default function RootLayout({
         backgroundColor: '#0a0a0a',
         color: '#e0e0e0'
       }}>
-        {children}
+        <BackgroundProvider>{children}</BackgroundProvider>
       </body>
     </html>
   )
