@@ -122,6 +122,9 @@ BR_TOOLS=(
     api-gw      "${BR_TOOLS_DIR}/agent-gateway/br-gateway.sh"
     tpl         "${BR_TOOLS_DIR}/brand/br-brand.sh"
     brand       "${BR_TOOLS_DIR}/brand/br-brand.sh"
+    backgrounds "${BR_TOOLS_DIR}/backgrounds/br-backgrounds.sh"
+    bg          "${BR_TOOLS_DIR}/backgrounds/br-backgrounds.sh"
+    wallpaper   "${BR_TOOLS_DIR}/backgrounds/br-backgrounds.sh"
     health      "${BR_TOOLS_DIR}/health-check/br-health.sh"
     check       "${BR_TOOLS_DIR}/health-check/br-health.sh"
     diag        "${BR_TOOLS_DIR}/health-check/br-health.sh"
@@ -184,6 +187,9 @@ BR_TOOLS=(
     org-audit   "${BR_TOOLS_DIR}/org-audit/br-org-audit.sh"
     swarm       "${BR_TOOLS_DIR}/swarm/br-swarm.sh"
     swarm-launch "${BR_TOOLS_DIR}/swarm/br-swarm.sh"
+    feedback    "${BR_TOOLS_DIR}/product-feedback/br-product-feedback.sh"
+    faves       "${BR_TOOLS_DIR}/product-feedback/br-product-feedback.sh"
+    dig         "${BR_TOOLS_DIR}/product-feedback/br-product-feedback.sh"
 )
 
 # Stream shortcut — delegates to gateway stream sub-command
@@ -352,6 +358,15 @@ show_help() {
     echo "║    br agent task          - Submit tasks to agent pool          ║"
     echo "║    br agent distribute    - Distribute workload across agents   ║"
     echo "║    br agent status        - Monitor agent performance           ║"
+    echo "║                                                                   ║"
+    echo "║  PRODUCT FEEDBACK (⛏️ Dig & Discover):                           ║"
+    echo "║    br feedback dig <org>  - Dig an org for useful stuff         ║"
+    echo "║    br feedback dig-all    - Dig ALL 17 organizations            ║"
+    echo "║    br feedback submit     - Submit your favorite product/tool   ║"
+    echo "║    br feedback vote <id>  - Upvote a submission                 ║"
+    echo "║    br feedback top        - See top-voted favorites             ║"
+    echo "║    br feedback report     - Full cross-org feedback report      ║"
+    echo "║    br feedback broadcast  - Call for feedback from all agents   ║"
     echo "║                                                                   ║"
     echo "║  CI/CD & MONITORING (🔧 Pipelines & Metrics):                    ║"
     echo "║    br ci create/run       - CI/CD pipeline orchestration        ║"
@@ -570,6 +585,9 @@ show_help() {
     echo "║    br health quick          - Fast check (no latency tests)       ║"
     echo "║    br brand list            - List brand templates                ║"
     echo "║    br brand new <type>      - Generate brand-compliant HTML page  ║"
+    echo "║    br backgrounds list      - List Google Drive backgrounds       ║"
+    echo "║    br backgrounds set <id>  - Set active background              ║"
+    echo "║    br bg random             - Pick a random background           ║"
     echo "║                                                                   ║"
     echo "║  AI (✦ Ollama Powered):                                          ║"
     echo "║    br ai ask <question>     - Quick question to Lucidia           ║"
@@ -1489,6 +1507,22 @@ worlds.sort(reverse=True)
             ;;
         auth)
             zsh "${BR_TOOLS_DIR}/auth/br-auth.sh" "$@"
+            ;;
+        swarm)
+            local subcmd="${1:-help}"; shift 2>/dev/null || true
+            local SWARM_SCRIPT="${BR_ROOT}/swarm.sh"
+            case "$subcmd" in
+                launch|deploy)  bash "$SWARM_SCRIPT" launch "$@" ;;
+                status|st)      bash "$SWARM_SCRIPT" status "$@" ;;
+                list|ls)        bash "$SWARM_SCRIPT" list ;;
+                merge)          bash "$SWARM_SCRIPT" merge "$@" ;;
+                close|kill)     bash "$SWARM_SCRIPT" close "$@" ;;
+                comment|msg)    bash "$SWARM_SCRIPT" comment "$@" ;;
+                review)         bash "$SWARM_SCRIPT" review "$@" ;;
+                open-prs)       bash "$SWARM_SCRIPT" open-prs "$@" ;;
+                monitor|watch)  bash "${BR_ROOT}/swarm-monitor.sh" --live ;;
+                *)              bash "$SWARM_SCRIPT" help ;;
+            esac
             ;;
         *)
             # Data-driven tool dispatch

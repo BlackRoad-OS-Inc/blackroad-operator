@@ -42,7 +42,7 @@ function randHex(bytes = 8): string {
 async function hmacSign(keyHex: string, msg: string): Promise<string> {
   const key = await crypto.subtle.importKey(
     'raw',
-    hexToBytes(keyHex),
+    hexToBytes(keyHex) as unknown as ArrayBuffer,
     { name: 'HMAC', hash: 'SHA-256' },
     false,
     ['sign'],

@@ -2,21 +2,13 @@
  * BlackRoad OS — Unified Integration Client
  *
  * Single entry point for all 30 integrations.
- * AI provider requests route through the tokenless gateway at :8787.
- * Non-AI integrations connect directly with env-based credentials.
+ * Routes requests through the tokenless gateway or directly to providers.
  *
  * © BlackRoad OS, Inc. All rights reserved.
  */
 
 import { readFileSync } from "fs";
 import { join } from "path";
-
-// ─── Gateway Config ─────────────────────────────────────────────────
-const GATEWAY_URL =
-  process.env.BLACKROAD_GATEWAY_URL || "http://127.0.0.1:8787";
-
-/** Categories whose requests must route through the tokenless gateway */
-const GATEWAY_ROUTED_CATEGORIES = new Set(["ai-providers"]);
 
 // ─── Types ──────────────────────────────────────────────────────────
 interface IntegrationConfig {
@@ -159,46 +151,9 @@ export class BlackRoadIntegrations {
     }
 
     const start = Date.now();
+    const authHeaders = resolveAuth(config);
 
-    // AI providers route through the tokenless gateway — never call
-    // provider APIs directly from agent/operator code.
-    const useGateway =
-      GATEWAY_ROUTED_CATEGORIES.has(config.category) &&
-      (config as unknown as Record<string, string>).gateway_route;
-
-    let url: string;
-    let headers: Record<string, string>;
-
-    if (useGateway) {
-      const gatewayRoute = (
-        config as unknown as Record<string, string>
-      ).gateway_route;
-      url = `${GATEWAY_URL}${gatewayRoute}${options.path}`;
-      // Gateway handles auth — no API keys leave this process
-      headers = {
-        "Content-Type": "application/json",
-        "X-BlackRoad-Agent": integrationId,
-        ...options.headers,
-      };
-    } else {
-      // Non-AI integrations use direct auth
-      const authHeaders = resolveAuth(config);
-      url = `${config.api_base}${options.path}`;
-      headers = {
-        "Content-Type": "application/json",
-        ...authHeaders,
-        ...options.headers,
-      };
-
-      // Gemini API key as query param (only when gateway is unavailable)
-      if (config.id === "gemini") {
-        const key = process.env["GOOGLE_AI_API_KEY"];
-        if (key) {
-          const sep = url.includes("?") ? "&" : "?";
-          url += `${sep}key=${key}`;
-        }
-      }
-    }
+    let url = `${config.api_base}${options.path}`;
 
     // Replace path params
     if (options.params) {
@@ -207,9 +162,22 @@ export class BlackRoadIntegrations {
       }
     }
 
+    // Gemini API key as query param
+    if (config.id === "gemini") {
+      const key = process.env["GOOGLE_AI_API_KEY"];
+      if (key) {
+        const sep = url.includes("?") ? "&" : "?";
+        url += `${sep}key=${key}`;
+      }
+    }
+
     const response = await fetch(url, {
       method: options.method || "GET",
-      headers,
+      headers: {
+        "Content-Type": "application/json",
+        ...authHeaders,
+        ...options.headers,
+      },
       body: options.body ? JSON.stringify(options.body) : undefined,
     });
 
@@ -256,35 +224,14 @@ export class BlackRoadIntegrations {
 
       try {
         const start = Date.now();
+        const authHeaders = resolveAuth(config);
 
-        const useGateway =
-          GATEWAY_ROUTED_CATEGORIES.has(config.category) &&
-          (config as unknown as Record<string, string>).gateway_route;
-
-        let healthUrl: string;
-        let healthHeaders: Record<string, string>;
-
-        if (useGateway) {
-          const gatewayRoute = (
-            config as unknown as Record<string, string>
-          ).gateway_route;
-          healthUrl = `${GATEWAY_URL}${gatewayRoute}`;
-          healthHeaders = {
-            "Content-Type": "application/json",
-            "X-BlackRoad-Agent": config.id,
-          };
-        } else {
-          const authHeaders = resolveAuth(config);
-          healthUrl = config.api_base;
-          healthHeaders = {
+        const response = await fetch(config.api_base, {
+          method: "GET",
+          headers: {
             "Content-Type": "application/json",
             ...authHeaders,
-          };
-        }
-
-        const response = await fetch(healthUrl, {
-          method: "GET",
-          headers: healthHeaders,
+          },
           signal: AbortSignal.timeout(10000),
         });
 

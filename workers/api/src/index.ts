@@ -18,9 +18,7 @@
 
 interface Env {
   BRAT_MASTER_KEY?: string
-  METRICS?: KVNamespace
-  INSTANCE?: string
-  VERSION?: string
+  METRICS: KVNamespace
 }
 
 const CORS = {
@@ -96,13 +94,7 @@ async function verifyToken(token: string, masterKey: string) {
   const [hdr, payloadB64, sigB64] = parts
   if (hdr !== HEADER) return { ok: false as const, error: 'invalid header' }
   const expected = await hmacSign(masterKey, `${hdr}.${payloadB64}`)
-  // Constant-time comparison to prevent timing side-channel attacks
-  if (expected.length !== sigB64.length) return { ok: false as const, error: 'invalid signature' }
-  const encA = new TextEncoder().encode(expected)
-  const encB = new TextEncoder().encode(sigB64)
-  let diff = 0
-  for (let i = 0; i < encA.length; i++) diff |= encA[i] ^ encB[i]
-  if (diff !== 0) return { ok: false as const, error: 'invalid signature' }
+  if (expected !== sigB64) return { ok: false as const, error: 'invalid signature' }
   let payload: Record<string, unknown>
   try { payload = JSON.parse(new TextDecoder().decode(b64dec(payloadB64))) } catch { return { ok: false as const, error: 'decode error' } }
   if (typeof payload.exp === 'number' && payload.exp < Math.floor(Date.now() / 1000)) return { ok: false as const, error: 'expired' }
@@ -128,8 +120,8 @@ export default {
     // GET / — service info
     if (path === '/' && method === 'GET') {
       return json({
-        service: env.INSTANCE ?? 'blackroad-operator-api',
-        version: env.VERSION ?? '0.1.0',
+        service: 'blackroad-operator-api',
+        version: '0.1.0',
         status: 'operational',
         runtime: 'cloudflare-workers',
         ts: new Date().toISOString(),

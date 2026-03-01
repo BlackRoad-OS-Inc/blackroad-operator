@@ -118,31 +118,11 @@ class KeyStore {
 
 // ─── Request Helpers ─────────────────────────────────────────────────────────
 
-const MAX_BODY_BYTES = 5 * 1024 * 1024 // 5MB limit to prevent DoS via large payloads
-
 async function readBody(req: IncomingMessage): Promise<string> {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     const chunks: Buffer[] = []
-    let totalBytes = 0
-
-    const onData = (chunk: Buffer): void => {
-      totalBytes += chunk.length
-      if (totalBytes > MAX_BODY_BYTES) {
-        req.removeListener('data', onData)
-        req.removeListener('end', onEnd)
-        reject(new Error('Request body too large'))
-        req.destroy()
-        return
-      }
-      chunks.push(chunk)
-    }
-    const onEnd = (): void => resolve(Buffer.concat(chunks).toString('utf-8'))
-    const onError = (err: Error): void => reject(err)
-
-    req.on('data', onData)
-    req.on('end', onEnd)
-    req.on('error', onError)
-    req.on('aborted', () => reject(new Error('Request aborted')))
+    req.on('data', (chunk: Buffer) => chunks.push(chunk))
+    req.on('end', () => resolve(Buffer.concat(chunks).toString('utf-8')))
   })
 }
 
@@ -242,18 +222,8 @@ export function createSovereignApi(): { start: () => void; port: number } {
       // ─── Memory Endpoints ─────────────────────────────────────────────
 
       if (path === '/memory/remember' && req.method === 'POST') {
-        let body: Record<string, unknown>
-        try {
-          body = JSON.parse(await readBody(req))
-        } catch {
-          error(res, 'Invalid JSON body', 400)
-          return
-        }
-        if (!body.content || typeof body.content !== 'string') {
-          error(res, 'Missing or invalid required field: content (must be a string)', 400)
-          return
-        }
-        const entry = memory.remember(body.content as string, {
+        const body = JSON.parse(await readBody(req))
+        const entry = memory.remember(body.content, {
           type: body.type,
           agent: body.agent,
           tags: body.tags,
@@ -320,20 +290,9 @@ export function createSovereignApi(): { start: () => void; port: number } {
       // ─── Key Endpoints ────────────────────────────────────────────────
 
       if (path === '/keys/create' && req.method === 'POST') {
-        let body: Record<string, unknown>
-        try {
-          body = JSON.parse(await readBody(req))
-        } catch {
-          error(res, 'Invalid JSON body', 400)
-          return
-        }
-        const VALID_PURPOSES: KeyPurpose[] = ['pat', 'api', 'agent', 'memory', 'session', 'webhook']
-        const purpose = (body.purpose as string) ?? 'api'
-        if (!VALID_PURPOSES.includes(purpose as KeyPurpose)) {
-          error(res, `Invalid purpose "${purpose}". Allowed: ${VALID_PURPOSES.join(', ')}`, 400)
-          return
-        }
-        const key = keyStore.create(purpose as KeyPurpose, {
+        const body = JSON.parse(await readBody(req))
+        const purpose: KeyPurpose = body.purpose ?? 'api'
+        const key = keyStore.create(purpose, {
           scopes: body.scopes,
           agent: body.agent,
           expiresInDays: body.expiresInDays,
@@ -375,24 +334,9 @@ export function createSovereignApi(): { start: () => void; port: number } {
       }
 
       if (path === '/keys/derive' && req.method === 'POST') {
-        let body: Record<string, unknown>
-        try {
-          body = JSON.parse(await readBody(req))
-        } catch {
-          error(res, 'Invalid JSON body', 400)
-          return
-        }
-        if (!body.agent || typeof body.agent !== 'string') {
-          error(res, 'Missing or invalid required field: agent', 400)
-          return
-        }
-        const VALID_PURPOSES: KeyPurpose[] = ['pat', 'api', 'agent', 'memory', 'session', 'webhook']
-        const purpose = (body.purpose as string) ?? 'agent'
-        if (!VALID_PURPOSES.includes(purpose as KeyPurpose)) {
-          error(res, `Invalid purpose "${purpose}". Allowed: ${VALID_PURPOSES.join(', ')}`, 400)
-          return
-        }
-        const derivedKey = deriveAgentKey(config.masterKey, body.agent as string, purpose as KeyPurpose)
+        const body = JSON.parse(await readBody(req))
+        const purpose: KeyPurpose = body.purpose ?? 'agent'
+        const derivedKey = deriveAgentKey(config.masterKey, body.agent, purpose)
         json(res, {
           derived: true,
           agent: body.agent,
