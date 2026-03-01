@@ -9,6 +9,7 @@ import { gatewayCommand } from './gateway.js'
 import { invokeCommand } from './invoke.js'
 import { initCommand } from './init.js'
 import { roadbridgeCommand } from './roadbridge.js'
+import { serveCommand } from './serve.js'
 
 export const program = new Command()
   .name('br')
@@ -24,3 +25,4 @@ program.addCommand(gatewayCommand)
 program.addCommand(invokeCommand)
 program.addCommand(initCommand)
 program.addCommand(roadbridgeCommand)
+program.addCommand(serveCommand)

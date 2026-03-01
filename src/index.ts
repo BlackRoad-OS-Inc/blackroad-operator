@@ -7,6 +7,7 @@ export { formatTable } from './formatters/table.js'
 export { formatJson } from './formatters/json.js'
 export { brand } from './formatters/brand.js'
 
+
 // Sovereign System — Provider-independent keys, memory, and API
 export {
   sha256,
@@ -26,3 +27,4 @@ export {
   SovereignMemory,
   createSovereignApi,
 } from './sovereign/index.js'
+export { createApp } from './server/app.js'
