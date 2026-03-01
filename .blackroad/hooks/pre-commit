@@ -18,30 +18,82 @@ echo -e "${GREEN}[BlackRoad Security Gate]${NC} Scanning staged files..."
 
 for file in $STAGED; do
   case "$file" in
-    .env|.env.local|.env.production|.env.staging)
-      echo -e "${RED}BLOCKED${NC}: $file - environment file with potential secrets"
-      BLOCKED=true
+    .env|.env.*|!.env.example)
+      if [ "$file" != ".env.example" ]; then
+        echo -e "${RED}BLOCKED${NC}: $file - environment file with potential secrets"
+        BLOCKED=true
+      fi
       ;;
-    *.pem|*.key|*.p12|*.pfx)
+    *.pem|*.key|*.p12|*.pfx|*.keystore|*.jks|*.p8)
       echo -e "${RED}BLOCKED${NC}: $file - private key or certificate"
       BLOCKED=true
       ;;
-    *credentials*|*secret*token*)
+    *credentials*|*secret*token*|*service-account*.json)
       echo -e "${RED}BLOCKED${NC}: $file - potential credentials file"
+      BLOCKED=true
+      ;;
+    *.sqlite|*.sqlite3)
+      echo -e "${YELLOW}WARNING${NC}: $file - database file (verify no sensitive data)"
+      ;;
+    *id_rsa*|*id_ed25519*|*id_ecdsa*|*id_dsa*)
+      echo -e "${RED}BLOCKED${NC}: $file - SSH private key"
+      BLOCKED=true
+      ;;
+    *.wallet.dat|*/seeds/*|*/wallets/*)
+      echo -e "${RED}BLOCKED${NC}: $file - wallet/seed file"
+      BLOCKED=true
+      ;;
+    vault/.master.key|*master.key)
+      echo -e "${RED}BLOCKED${NC}: $file - master key file"
       BLOCKED=true
       ;;
   esac
 done
 
 PATTERNS=(
+  # AI Provider Keys
   'ANTHROPIC_API_KEY\s*='
   'OPENAI_API_KEY\s*='
+  'GOOGLE_API_KEY\s*='
+  'HUGGINGFACE_TOKEN\s*='
+  'HF_TOKEN\s*='
+  'COHERE_API_KEY\s*='
+  'REPLICATE_API_TOKEN\s*='
+  # Generic API key patterns
   'sk-[a-zA-Z0-9]{20,}'
+  'sk-ant-[a-zA-Z0-9-]{20,}'
+  'sk-proj-[a-zA-Z0-9-]{20,}'
+  # GitHub tokens
   'ghp_[a-zA-Z0-9]{36}'
   'gho_[a-zA-Z0-9]{36}'
+  'ghs_[a-zA-Z0-9]{36}'
+  'github_pat_[a-zA-Z0-9_]{22,}'
+  # AWS credentials
   'AKIA[0-9A-Z]{16}'
+  'aws_secret_access_key\s*='
+  # Slack tokens
   'xox[bpoas]-[a-zA-Z0-9-]+'
+  # Cloud provider tokens
+  'CLOUDFLARE_API_TOKEN\s*=\s*[a-zA-Z0-9_-]{40}'
+  'RAILWAY_TOKEN\s*='
+  'VERCEL_TOKEN\s*='
+  'DIGITALOCEAN_ACCESS_TOKEN\s*='
+  'dop_v1_[a-f0-9]{64}'
+  # Payment / SaaS
+  'STRIPE_API_KEY\s*=\s*sk_'
+  'SENDGRID_API_KEY\s*=\s*SG\.'
+  # Database URLs with credentials
+  'postgres(ql)?://[^:]+:[^@]+@'
+  'mysql://[^:]+:[^@]+@'
+  'mongodb(\+srv)?://[^:]+:[^@]+@'
+  # Private keys
   'PRIVATE.KEY'
+  '-----BEGIN (RSA |EC |DSA )?PRIVATE KEY-----'
+  '-----BEGIN OPENSSH PRIVATE KEY-----'
+  # JWT and session secrets
+  'JWT_SECRET\s*=\s*[a-zA-Z0-9+/=]{32,}'
+  'NEXTAUTH_SECRET\s*=\s*[a-zA-Z0-9+/=]{32,}'
+  'SESSION_SECRET\s*=\s*[a-zA-Z0-9+/=]{32,}'
 )
 
 for pattern in "${PATTERNS[@]}"; do
