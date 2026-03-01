@@ -10,11 +10,12 @@ import { invokeCommand } from './invoke.js'
 import { initCommand } from './init.js'
 import { roadbridgeCommand } from './roadbridge.js'
 import { serveCommand } from './serve.js'
+import { meshCommand } from './mesh.js'
 
 export const program = new Command()
   .name('br')
   .description('BlackRoad OS operator CLI')
-  .version('0.1.0')
+  .version('0.2.0')
 
 program.addCommand(statusCommand)
 program.addCommand(agentsCommand)
@@ -26,3 +27,4 @@ program.addCommand(invokeCommand)
 program.addCommand(initCommand)
 program.addCommand(roadbridgeCommand)
 program.addCommand(serveCommand)
+program.addCommand(meshCommand)

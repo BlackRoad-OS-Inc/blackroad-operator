@@ -28,3 +28,20 @@ export {
   createSovereignApi,
 } from './sovereign/index.js'
 export { createApp } from './server/app.js'
+export type {
+  HealthResult,
+  MeshReport,
+  DeployResult,
+} from './infra/providers.js'
+export {
+  checkFullMesh,
+  checkCloudflare,
+  checkRailway,
+  checkHuggingFace,
+  checkSalesforce,
+  checkOllama,
+  checkPi,
+  checkGateway,
+} from './infra/providers.js'
+export type { DeployTarget } from './infra/deploy.js'
+export { deployService } from './infra/deploy.js'
