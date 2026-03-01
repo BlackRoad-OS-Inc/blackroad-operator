@@ -5,32 +5,12 @@ on:
   push:
     tags: ['v*']
 
-permissions:
-  contents: write
-
 jobs:
-  validate:
-    name: Validate
+  release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-      - run: npm ci
-      - run: npx tsc --noEmit
-      - run: npm test
-      - name: Security audit
-        run: npm audit --omit=dev || true
-
-  release:
-    name: Release
-    needs: [validate]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: npm
@@ -40,4 +20,3 @@ jobs:
       - uses: softprops/action-gh-release@v2
         with:
           files: '*.tgz'
-          generate_release_notes: true

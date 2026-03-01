@@ -13,10 +13,11 @@
 
 set -euo pipefail
 
+BR_ROOT="${BR_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)}"
 WEBHOOK_URL="${SLACK_WEBHOOK_URL:-}"
 EMAIL="${ALERT_EMAIL:-blackroad.systems@gmail.com}"
 MIN_SCORE=90
-VIOLATION_LOG="/Users/alexa/.brand-violations.log"
+VIOLATION_LOG="$HOME/.brand-violations.log"
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -29,7 +30,7 @@ echo ""
 
 # Check for violations in audit results
 check_violations() {
-    local results_dir="/Users/alexa/brand-audit-results"
+    local results_dir="$HOME/brand-audit-results"
 
     if [ ! -d "$results_dir" ]; then
         echo "⚠️  No audit results found. Run visual audit first."
@@ -107,7 +108,7 @@ Action required:
 2. Update project with official brand system
 3. Re-deploy after fixes
 
-Dashboard: file:///Users/alexa/blackroad-brand-dashboard.html
+Dashboard: file://${BR_ROOT}/blackroad-brand-dashboard.html
 Audit results: ~/brand-audit-results/$project.json"
 
     # Slack webhook (if configured)

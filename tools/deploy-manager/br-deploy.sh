@@ -1,6 +1,7 @@
 #!/bin/zsh
 # BR Deploy - Quick Deployment Manager
-DEPLOY_HOME="/Users/alexa/blackroad/tools/deploy-manager"
+BR_ROOT="${BR_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
+DEPLOY_HOME="${BR_ROOT}/tools/deploy-manager"
 DEPLOY_DB="${DEPLOY_HOME}/deployments.db"
 GREEN='\033[0;32m'; RED='\033[0;31m'; BOLD='\033[1m'; DIM='\033[2m'
 AMBER='\033[38;5;214m'; PINK='\033[38;5;205m'; VIOLET='\033[38;5;135m'; BBLUE='\033[38;5;69m'; NC='\033[0m'
