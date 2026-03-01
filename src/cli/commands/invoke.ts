@@ -10,7 +10,10 @@ export const invokeCommand = new Command('invoke')
   .action(async (agent: string, task: string) => {
     const client = new GatewayClient()
     try {
-      const result = await client.post<{ content: string }>('/v1/invoke', { agent, task })
+      const result = await client.post<{ content: string }>('/v1/invoke', {
+        agent,
+        task,
+      })
       console.log(result.content)
     } catch {
       logger.error(`Failed to invoke agent "${agent}".`)
