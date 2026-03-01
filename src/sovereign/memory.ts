@@ -2,7 +2,7 @@
 // Sovereign Memory System — Persistent, hash-chained, tamper-proof agent memory
 // "Memory leaks" that nobody can take away. Your memory. Your data. Your rules.
 
-import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync } from 'node:fs'
+import { readFileSync, writeFileSync, appendFileSync, mkdirSync, existsSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
 import {
   sha256,
@@ -219,7 +219,7 @@ export class SovereignMemory {
     this.saveEntry(entry)
     this.saveChain()
 
-    // Append to ledger (append-only log)
+    // Append to ledger (truly append-only — no read+rewrite)
     const ledgerLine = JSON.stringify({
       action: 'remember',
       id: entry.id,
@@ -228,8 +228,16 @@ export class SovereignMemory {
       timestamp,
     })
     const ledgerFile = join(this.baseDir, 'ledger', 'master.jsonl')
-    const existing = existsSync(ledgerFile) ? readFileSync(ledgerFile, 'utf-8') : ''
-    writeFileSync(ledgerFile, existing + ledgerLine + '\n')
+    appendFileSync(ledgerFile, ledgerLine + '\n')
+
+    // Update session if it exists
+    const sessionId = opts.sessionId ?? 'default'
+    const session = this.sessions.get(sessionId)
+    if (session) {
+      session.entryCount += 1
+      session.chainHead = entry.hash
+      this.saveSession(session)
+    }
 
     return entry
   }
@@ -286,11 +294,17 @@ export class SovereignMemory {
     // Save leak
     writeFileSync(join(this.baseDir, 'leaks', `${id}.json`), JSON.stringify(leak, null, 2))
 
-    // Also store as a memory entry in both source and target
+    // Store as a memory entry in both source and target
     this.remember(content, {
       type: 'leak',
       agent: source,
       tags: ['leak', `to:${target}`],
+      confidence: 1.0,
+    })
+    this.remember(content, {
+      type: 'leak',
+      agent: target,
+      tags: ['leak', `from:${source}`],
       confidence: 1.0,
     })
 

@@ -55,8 +55,12 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             SWARM_ID="${{ inputs.swarm_id }}"
+          elif [ "${{ github.event_name }}" = "check_suite" ]; then
+            # Extract swarm ID from branch name for check_suite events
+            BRANCH="${{ github.event.check_suite.pull_requests[0].head.ref || '' }}"
+            SWARM_ID=$(printf '%s\n' "$BRANCH" | sed -n 's@.*swarm/\([^/]*\).*@\1@p')
           else
-            # Extract swarm ID from branch name
+            # Extract swarm ID from branch name for pull_request events
             BRANCH="${{ github.event.pull_request.head.ref || '' }}"
             SWARM_ID=$(printf '%s\n' "$BRANCH" | sed -n 's@.*swarm/\([^/]*\).*@\1@p')
           fi

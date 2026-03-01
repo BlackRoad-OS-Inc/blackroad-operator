@@ -22,11 +22,11 @@ jobs:
       - name: ShellCheck all scripts
         run: |
           find . -name "*.sh" -not -path "./.git/*" -not -path "./node_modules/*" | \
-            xargs shellcheck --severity=warning 2>&1 | head -50 || echo "ShellCheck warnings above"
+            xargs shellcheck --severity=warning 2>&1 | head -50 || echo "⚠️ shellcheck warnings above"
         continue-on-error: true
 
-  build-and-test:
-    name: Build & Test
+  test:
+    name: Tests
     runs-on: [self-hosted, linux, arm64, blackroad]
     steps:
       - uses: actions/checkout@v4
@@ -36,14 +36,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Typecheck
-        run: npm run typecheck
-      - name: Build
-        run: npm run build
+        run: npx tsc --noEmit
       - name: Lint
-        run: npm run lint
-      - name: Test
+        run: npx prettier --check .
+      - name: Unit tests
         run: npm test
+      - name: Gateway tests
+        run: node blackroad-core/tests/gateway.test.js
       - name: Check br script syntax
-        run: |
-          [ -f br ] && bash -n br && echo "br script syntax OK" || echo "br not found"
-        continue-on-error: true
+        run: zsh -n br

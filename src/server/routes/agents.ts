@@ -115,6 +115,7 @@ agentRoutes.post('/:name/invoke', authMiddleware('agents:invoke'), async (c) => 
           input: body.task,
           context: body.context ?? {},
         }),
+        signal: AbortSignal.timeout(30_000),
       })
       const data = (await res.json()) as Record<string, unknown>
       return c.json({
@@ -125,6 +126,9 @@ agentRoutes.post('/:name/invoke', authMiddleware('agents:invoke'), async (c) => 
         metadata: data['metadata'] ?? {},
       })
     } catch (err) {
+      if (err instanceof Error && (err.name === 'TimeoutError' || err.name === 'AbortError')) {
+        return c.json({ error: 'gateway_timeout', message: 'Gateway request timed out' }, 504)
+      }
       return c.json(
         {
           error: 'gateway_error',

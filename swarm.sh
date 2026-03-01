@@ -37,6 +37,14 @@ warn()   { echo -e "${YELLOW}!${NC} $1"; }
 info()   { echo -e "${CYAN}i${NC} $1"; }
 header() { echo -e "\n${BOLD}${MAGENTA}$1${NC}\n"; }
 
+# Require jq for JSON processing
+require_jq() {
+  if ! command -v jq &>/dev/null; then
+    error "jq (JSON CLI) required. Install: https://jqlang.github.io/jq/download/"
+    exit 1
+  fi
+}
+
 # Check if gh is available AND authenticated
 has_gh() {
   command -v gh &>/dev/null && gh auth status &>/dev/null 2>&1
@@ -69,6 +77,9 @@ agent_color() {
     *)        echo "${NC}" ;;
   esac
 }
+
+# Portable uppercase (macOS bash 3.2 lacks ${var^^})
+to_upper() { printf '%s' "$1" | tr '[:lower:]' '[:upper:]'; }
 
 agent_role() {
   case "$1" in
@@ -162,7 +173,7 @@ EOF
     role=$(agent_role "$agent")
     local branch="swarm/${swarm_id}/agent/${agent}"
 
-    echo -e "  ${color}[${agent^^}]${NC} ${role} -> ${DIM}${branch}${NC}"
+    echo -e "  ${color}[$(to_upper "$agent")]${NC} ${role} -> ${DIM}${branch}${NC}"
 
     # Create branch from current HEAD
     git branch "$branch" HEAD 2>/dev/null || warn "  Branch ${branch} already exists"
@@ -237,7 +248,7 @@ cmd_open_prs() {
     local role
     role=$(agent_role "$agent")
 
-    echo -e "  ${color}Creating PR for ${agent^^} (${role})...${NC}"
+    echo -e "  ${color}Creating PR for $(to_upper "$agent") (${role})...${NC}"
 
     # Push branch
     git push -u origin "$branch" 2>/dev/null || true
@@ -248,9 +259,9 @@ cmd_open_prs() {
       --repo "$REPO" \
       --base "$base" \
       --head "$branch" \
-      --title "[${swarm_id}] ${agent^^}: ${task}" \
+      --title "[${swarm_id}] $(to_upper "$agent"): ${task}" \
       --label "swarm,agent:${agent}" \
-      --body "## Agent: ${agent^^} (${role})
+      --body "## Agent: $(to_upper "$agent") (${role})
 **Swarm:** \`${swarm_id}\` | **Strategy:** \`${strategy}\`
 
 ### Task
@@ -323,7 +334,7 @@ cmd_status() {
             ahead=" (+${branch_commits} commits)"
           fi
 
-          echo -e "    ${color}[${basename^^}]${NC} ${agent_status}${ahead}"
+          echo -e "    ${color}[$(to_upper "$basename")]${NC} ${agent_status}${ahead}"
           echo -e "      ${DIM}${branch}${NC}"
         done
       fi
@@ -515,7 +526,7 @@ cmd_review() {
       local color
       color=$(agent_color "$agent")
 
-      echo -e "  ${color}[${agent^^}]${NC} ${branch}"
+      echo -e "  ${color}[$(to_upper "$agent")]${NC} ${branch}"
 
       # Show diff stat if branch exists
       local stat
@@ -600,14 +611,14 @@ show_help() {
 # ── Router ───────────────────────────────────────────────────
 
 case "${1:-help}" in
-  launch)    cmd_launch "${@:2}" ;;
-  open-prs)  cmd_open_prs "${@:2}" ;;
-  status)    cmd_status "${@:2}" ;;
-  list)      cmd_list ;;
-  merge)     cmd_merge "${@:2}" ;;
-  close)     cmd_close "${@:2}" ;;
+  launch)    require_jq; cmd_launch "${@:2}" ;;
+  open-prs)  require_jq; cmd_open_prs "${@:2}" ;;
+  status)    require_jq; cmd_status "${@:2}" ;;
+  list)      require_jq; cmd_list ;;
+  merge)     require_jq; cmd_merge "${@:2}" ;;
+  close)     require_jq; cmd_close "${@:2}" ;;
   comment)   cmd_comment "${@:2}" ;;
-  review)    cmd_review "${@:2}" ;;
+  review)    require_jq; cmd_review "${@:2}" ;;
   checkout)  cmd_checkout "${@:2}" ;;
   help|*)    show_help ;;
 esac

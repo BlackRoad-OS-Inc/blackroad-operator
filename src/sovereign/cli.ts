@@ -78,8 +78,13 @@ async function main(): Promise<void> {
     case 'key': {
       switch (subcommand) {
         case 'gen': {
-          const purpose = (args[2] ?? 'api') as KeyPurpose
-          const key = createSovereignKey(purpose, {
+          const VALID_PURPOSES: KeyPurpose[] = ['pat', 'api', 'agent', 'memory', 'session', 'webhook']
+          const purpose = args[2] ?? 'api'
+          if (!VALID_PURPOSES.includes(purpose as KeyPurpose)) {
+            console.error(`Invalid purpose "${purpose}". Allowed: ${VALID_PURPOSES.join(', ')}`)
+            process.exit(1)
+          }
+          const key = createSovereignKey(purpose as KeyPurpose, {
             scopes: args[3] ? args[3].split(',') : ['*'],
             agent: args[4],
           })

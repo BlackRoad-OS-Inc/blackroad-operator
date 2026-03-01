@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env zsh
 # ============================================================================
 # BLACKROAD OS, INC. - PROPRIETARY AND CONFIDENTIAL
 # Copyright (c) 2024-2026 BlackRoad OS, Inc. All Rights Reserved.
@@ -247,52 +247,57 @@ generate_plan() {
     local agents
     agents=$(agent_names "$agent_count")
 
-    # Build plan JSON via python for safe escaping
-    python3 -c "
-import json, sys
+    # Build plan JSON via python — pass dynamic values via env to prevent injection
+    SWARM_TASK="$task" SWARM_ID="$swarm_id" SWARM_AGENTS="$agents" SWARM_PLAN_FILE="$plan_file" \
+    python3 -c '
+import json, os, sys
+
+task_text = os.environ["SWARM_TASK"]
+swarm_id = os.environ["SWARM_ID"]
+agents_raw = os.environ["SWARM_AGENTS"]
+plan_file = os.environ["SWARM_PLAN_FILE"]
 
 agents_list = []
-for line in '''${agents}'''.strip().split('\n'):
+for line in agents_raw.strip().split("\n"):
     name = line.strip()
     if not name:
         continue
     specialty_map = {
-        'LUCIDIA': 'architecture and reasoning',
-        'ALICE': 'routing and API design',
-        'OCTAVIA': 'compute and infrastructure',
-        'PRISM': 'analysis and testing',
-        'ECHO': 'documentation and memory',
-        'CIPHER': 'security and hardening',
-        'ARIA': 'frontend and UX',
-        'SILAS': 'engineering and implementation',
+        "LUCIDIA": "architecture and reasoning",
+        "ALICE": "routing and API design",
+        "OCTAVIA": "compute and infrastructure",
+        "PRISM": "analysis and testing",
+        "ECHO": "documentation and memory",
+        "CIPHER": "security and hardening",
+        "ARIA": "frontend and UX",
+        "SILAS": "engineering and implementation",
     }
     subtask_map = {
-        'LUCIDIA': 'Design the architecture and define interfaces for: ',
-        'ALICE': 'Implement routing, API endpoints, and integration for: ',
-        'OCTAVIA': 'Build core logic, services, and infrastructure for: ',
-        'PRISM': 'Write tests, validation, and monitoring for: ',
-        'ECHO': 'Write documentation, update CLAUDE.md, and add examples for: ',
-        'CIPHER': 'Add security checks, input validation, and hardening for: ',
-        'ARIA': 'Build UI components and user-facing interfaces for: ',
-        'SILAS': 'Implement CLI commands and developer tooling for: ',
+        "LUCIDIA": "Design the architecture and define interfaces for: ",
+        "ALICE": "Implement routing, API endpoints, and integration for: ",
+        "OCTAVIA": "Build core logic, services, and infrastructure for: ",
+        "PRISM": "Write tests, validation, and monitoring for: ",
+        "ECHO": "Write documentation, update CLAUDE.md, and add examples for: ",
+        "CIPHER": "Add security checks, input validation, and hardening for: ",
+        "ARIA": "Build UI components and user-facing interfaces for: ",
+        "SILAS": "Implement CLI commands and developer tooling for: ",
     }
-    task_text = '''${task}'''
     agents_list.append({
-        'name': name,
-        'branch': f'swarm/${swarm_id}/{name.lower()}',
-        'specialty': specialty_map.get(name, 'general development'),
-        'subtask': subtask_map.get(name, 'Work on: ') + task_text
+        "name": name,
+        "branch": f"swarm/{swarm_id}/{name.lower()}",
+        "specialty": specialty_map.get(name, "general development"),
+        "subtask": subtask_map.get(name, "Work on: ") + task_text,
     })
 
 plan = {
-    'swarm_id': '${swarm_id}',
-    'task': task_text,
-    'agents': agents_list
+    "swarm_id": swarm_id,
+    "task": task_text,
+    "agents": agents_list,
 }
 
-with open('${plan_file}', 'w') as f:
+with open(plan_file, "w") as f:
     json.dump(plan, f, indent=2)
-" 2>/dev/null
+' 2>/dev/null
 
     # Display the plan (to stderr so it doesn't pollute the return value)
     echo -e "  ${BOLD}Swarm ID:${NC}  ${AMBER}${swarm_id}${NC}" >&2
@@ -307,7 +312,7 @@ with open('${plan_file}', 'w') as f:
         color=$(agent_color "$agent")
         local specialty
         specialty=$(agent_specialty "$agent")
-        local branch="swarm/${swarm_id}/${agent,,}"
+        local branch="swarm/${swarm_id}/$(echo "$agent" | tr '[:upper:]' '[:lower:]')"
         local short_task
         short_task=$(agent_task_short "$agent")
 
@@ -415,7 +420,7 @@ cmd_launch() {
     local agents
     agents=$(agent_names "$agent_count")
     while IFS= read -r agent; do
-        agent_checklist+="- [ ] **${agent}** -> \`swarm/${swarm_id}/${agent,,}\`
+        agent_checklist+="- [ ] **${agent}** -> \`swarm/${swarm_id}/$(echo "$agent" | tr '[:upper:]' '[:lower:]')\`
 "
     done <<< "$agents"
 
@@ -459,7 +464,7 @@ ${agent_checklist}
     while IFS= read -r agent; do
         local color
         color=$(agent_color "$agent")
-        local branch="swarm/${swarm_id}/${agent,,}"
+        local branch="swarm/${swarm_id}/$(echo "$agent" | tr '[:upper:]' '[:lower:]')"
         local specialty
         specialty=$(agent_specialty "$agent")
 
@@ -469,9 +474,14 @@ ${agent_checklist}
         # Create branch
         echo -e "    ${DIM}Creating branch ${branch}...${NC}"
         if git branch "$branch" "$base_branch" 2>/dev/null; then
-            git push -u origin "$branch" 2>/dev/null || true
-            echo -e "    ${GREEN}+${NC} Branch created"
-            log_swarm "$swarm_id" "${agent}: Branch ${branch} created"
+            if git push -u origin "$branch" 2>/dev/null; then
+                echo -e "    ${GREEN}+${NC} Branch created and pushed"
+                log_swarm "$swarm_id" "${agent}: Branch ${branch} created"
+            else
+                echo -e "    ${AMBER}!${NC} Failed to push branch to remote; skipping PR creation"
+                log_swarm "$swarm_id" "${agent}: Branch push failed"
+                continue
+            fi
         else
             echo -e "    ${AMBER}!${NC} Branch may already exist"
         fi
@@ -506,7 +516,7 @@ ${subtask}
             --repo "$repo_slug" \
             --base "$base_branch" \
             --head "$branch" \
-            --title "swarm(${swarm_id}/${agent,,}): ${task}" \
+            --title "swarm(${swarm_id}/$(echo "$agent" | tr '[:upper:]' '[:lower:]')): ${task}" \
             --body "$pr_body" \
             --draft 2>/dev/null || echo "")
 
