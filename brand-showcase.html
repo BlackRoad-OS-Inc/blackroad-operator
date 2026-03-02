@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BlackRoad OS — Brand Showcase</title>
+  <style>
+    :root {
+      --black: #000000;
+      --white: #FFFFFF;
+      --amber: #F5A623;
+      --hot-pink: #FF1D6C;
+      --electric-blue: #2979FF;
+      --violet: #9C27B0;
+      --bg: #0a0a12;
+      --surface: #111120;
+      --surface-2: #1a1a2e;
+      --text: #e0e0e8;
+      --text-dim: #8888a0;
+      --gradient-brand: linear-gradient(135deg, var(--amber) 0%, var(--hot-pink) 38.2%, var(--violet) 61.8%, var(--electric-blue) 100%);
+      --space-xs: 8px;
+      --space-sm: 13px;
+      --space-md: 21px;
+      --space-lg: 34px;
+      --space-xl: 55px;
+      --space-xxl: 89px;
+      --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+      line-height: 1.618;
+      overflow-x: hidden;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: var(--space-xl);
+      text-align: center;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 0%, rgba(255,29,108,0.12) 0%, transparent 60%),
+                  radial-gradient(ellipse at 80% 80%, rgba(41,121,255,0.08) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    .hero-img {
+      width: min(700px, 90vw);
+      border-radius: 16px;
+      box-shadow: 0 0 80px rgba(255,29,108,0.15), 0 20px 60px rgba(0,0,0,0.6);
+      animation: float 6s ease-in-out infinite;
+      position: relative;
+      z-index: 1;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-12px); }
+    }
+
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-top: var(--space-lg);
+      background: var(--gradient-brand);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero p {
+      font-size: clamp(1rem, 2vw, 1.25rem);
+      color: var(--text-dim);
+      margin-top: var(--space-sm);
+      max-width: 600px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero .tagline {
+      font-size: clamp(0.85rem, 1.5vw, 1rem);
+      color: var(--hot-pink);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      margin-top: var(--space-md);
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── Section ── */
+    section {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: var(--space-xxl) var(--space-lg);
+    }
+
+    .section-title {
+      font-size: clamp(1.5rem, 3vw, 2.25rem);
+      font-weight: 700;
+      margin-bottom: var(--space-xs);
+    }
+
+    .section-subtitle {
+      color: var(--text-dim);
+      font-size: 1.05rem;
+      margin-bottom: var(--space-xl);
+      max-width: 640px;
+    }
+
+    .gradient-line {
+      width: 80px;
+      height: 3px;
+      background: var(--gradient-brand);
+      border-radius: 3px;
+      margin-bottom: var(--space-md);
+    }
+
+    /* ── Gallery grid ── */
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: var(--space-lg);
+    }
+
+    .card {
+      position: relative;
+      border-radius: 14px;
+      overflow: hidden;
+      background: var(--surface);
+      border: 1px solid rgba(255,255,255,0.05);
+      transition: transform 0.4s var(--ease-spring), box-shadow 0.4s ease;
+      cursor: pointer;
+    }
+
+    .card:hover {
+      transform: translateY(-6px) scale(1.015);
+      box-shadow: 0 16px 48px rgba(0,0,0,0.5), 0 0 40px rgba(255,29,108,0.08);
+    }
+
+    .card img {
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.5s ease;
+    }
+
+    .card:hover img {
+      transform: scale(1.04);
+    }
+
+    .card-body {
+      padding: var(--space-md);
+    }
+
+    .card-body h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .card-body p {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+    }
+
+    .card-tag {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 100px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-top: var(--space-xs);
+    }
+
+    .tag-hero      { background: rgba(245,166,35,0.15); color: var(--amber); }
+    .tag-mascot    { background: rgba(41,121,255,0.15); color: var(--electric-blue); }
+    .tag-agents    { background: rgba(156,39,176,0.15); color: var(--violet); }
+    .tag-scene     { background: rgba(255,29,108,0.15); color: var(--hot-pink); }
+
+    /* ── Featured full-width ── */
+    .featured {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-lg);
+      align-items: center;
+      margin-bottom: var(--space-xxl);
+    }
+
+    .featured.reverse { direction: rtl; }
+    .featured.reverse > * { direction: ltr; }
+
+    .featured img {
+      width: 100%;
+      border-radius: 14px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+    }
+
+    .featured-text h2 {
+      font-size: clamp(1.4rem, 2.5vw, 2rem);
+      font-weight: 700;
+      margin-bottom: var(--space-sm);
+    }
+
+    .featured-text p {
+      color: var(--text-dim);
+      font-size: 1rem;
+      line-height: 1.7;
+    }
+
+    .featured-text .highlight {
+      color: var(--hot-pink);
+      font-weight: 600;
+    }
+
+    /* ── Mascots strip ── */
+    .mascot-strip {
+      display: flex;
+      gap: var(--space-lg);
+      justify-content: center;
+      flex-wrap: wrap;
+      margin: var(--space-xl) 0;
+    }
+
+    .mascot-strip img {
+      width: 180px;
+      height: 180px;
+      object-fit: cover;
+      border-radius: 50%;
+      border: 3px solid var(--surface-2);
+      transition: transform 0.35s var(--ease-spring), border-color 0.3s ease;
+    }
+
+    .mascot-strip img:hover {
+      transform: scale(1.12);
+      border-color: var(--hot-pink);
+    }
+
+    /* ── Color palette ── */
+    .palette {
+      display: flex;
+      gap: var(--space-sm);
+      flex-wrap: wrap;
+      margin: var(--space-lg) 0;
+    }
+
+    .swatch {
+      width: 80px;
+      height: 80px;
+      border-radius: 12px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding-bottom: 6px;
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: white;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+      transition: transform 0.3s var(--ease-spring);
+    }
+
+    .swatch:hover { transform: scale(1.1); }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: var(--space-xxl) var(--space-lg) var(--space-xl);
+      color: var(--text-dim);
+      font-size: 0.85rem;
+    }
+
+    footer img {
+      width: min(500px, 80vw);
+      border-radius: 14px;
+      margin-bottom: var(--space-lg);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+    }
+
+    footer .road-quote {
+      font-size: 1.15rem;
+      font-style: italic;
+      color: var(--text);
+      margin-bottom: var(--space-md);
+    }
+
+    /* ── Lightbox ── */
+    .lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: rgba(0,0,0,0.92);
+      align-items: center;
+      justify-content: center;
+      cursor: zoom-out;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+
+    .lightbox.active { display: flex; }
+
+    .lightbox img {
+      max-width: 90vw;
+      max-height: 90vh;
+      border-radius: 12px;
+      box-shadow: 0 0 80px rgba(255,29,108,0.12);
+      animation: lb-in 0.3s var(--ease-spring);
+    }
+
+    @keyframes lb-in {
+      from { opacity: 0; transform: scale(0.92); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .featured { grid-template-columns: 1fr; }
+      .featured.reverse { direction: ltr; }
+      .gallery { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Hero ── -->
+  <div class="hero">
+    <img class="hero-img" src="assets/brand/br-robots-rainbow.png" alt="BlackRoad OS — four pixel robots running on a rainbow road" />
+    <h1>BlackRoad OS Brand</h1>
+    <p>Pixel-art mascots, agent illustrations, and visual identity for the AI-native developer platform.</p>
+    <div class="tagline">Your AI. Your Hardware. Your Rules.</div>
+  </div>
+
+  <!-- ── Mascot Avatars ── -->
+  <section>
+    <div class="gradient-line"></div>
+    <h2 class="section-title">The Mascot</h2>
+    <p class="section-subtitle">A smiling pixel-art robot with a monitor head — the face of BlackRoad OS across every surface.</p>
+
+    <div class="mascot-strip">
+      <img src="assets/brand/mascot-blue-glow.png" alt="Mascot — blue neon glow, action pose" />
+      <img src="assets/brand/mascot-front-pose.png" alt="Mascot — front-facing, welcoming" />
+    </div>
+  </section>
+
+  <!-- ── Featured: Cyberpunk City ── -->
+  <section>
+    <div class="featured">
+      <img src="assets/brand/mascot-cyberpunk-city.png" alt="Mascot navigating a neon cyberpunk city with #!bin crates" onclick="openLightbox(this)" />
+      <div class="featured-text">
+        <h2>Built for the Road Ahead</h2>
+        <p>The mascot walks a <span class="highlight">neon-lit highway</span> through a cyberpunk city, collecting shebang (<code>#!</code>) crates and harvesting floppy-disk plants. The <span class="highlight">BR</span> building glows in the skyline — infrastructure as far as the eye can see.</p>
+        <p>Use this illustration for landing pages, hero sections, and keynote slides.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Featured: Agent Team ── -->
+  <section>
+    <div class="featured reverse">
+      <img src="assets/brand/agents-team-rainbow.png" alt="Five colored agent robots dancing on a rainbow-sparkle stage" onclick="openLightbox(this)" />
+      <div class="featured-text">
+        <h2>Meet the Agents</h2>
+        <p>Five specialized AI agents — each with a <span class="highlight">unique color</span>, personality, and role. From left to right: blue (ALICE), green (OCTAVIA), amber (PRISM), red (ECHO), and pink (LUCIDIA).</p>
+        <p>Perfect for agent documentation, team pages, and the agent marketplace.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Full Gallery ── -->
+  <section>
+    <div class="gradient-line"></div>
+    <h2 class="section-title">Full Gallery</h2>
+    <p class="section-subtitle">All 11 brand illustrations — click any card to view full size.</p>
+
+    <div class="gallery">
+
+      <div class="card" onclick="openLightbox(this.querySelector('img'))">
+        <img src="assets/brand/br-robots-rainbow.png" alt="Rainbow robots running" />
+        <div class="card-body">
+          <h3>Robots on the Road — Color</h3>
+          <p>Four mascots sprinting on a rainbow-gradient highway with the BR logo. The signature hero image.</p>
+          <span class="card-tag tag-hero">Hero</span>
+        </div>
+      </div>
+
+      <div class="card" onclick="openLightbox(this.querySelector('img'))">
+        <img src="assets/brand/br-robots-bw.png" alt="Black & white robots running" />
+        <div class="card-body">
+          <h3>Robots on the Road — B&W</h3>
+          <p>Monochrome version for print, dark backgrounds, and ASCII-art inspiration.</p>
+          <span class="card-tag tag-hero">Hero</span>
+        </div>
+      </div>
+
+      <div class="card" onclick="openLightbox(this.querySelector('img'))">
+        <img src="assets/brand/mascot-blue-glow.png" alt="Mascot with blue neon glow" />
+        <div class="card-body">
+          <h3>Mascot — Blue Glow</h3>
+          <p>Action pose with electric-blue neon. Great for avatars, favicons, and profile pictures.</p>
+          <span class="card-tag tag-mascot">Mascot</span>
+        </div>
+      </div>
+
+      <div class="card" onclick="openLightbox(this.querySelector('img'))">
+        <img src="assets/brand/mascot-front-pose.png" alt="Mascot front-facing" />
+        <div class="card-body">
+          <h3>Mascot — Front Pose</h3>
+          <p>Welcoming front-facing pose. Ideal for onboarding screens and documentation headers.</p>
+          <span class="card-tag tag-mascot">Mascot</span>
+        </div>
+      </div>
+
+      <div class="card" onclick="openLightbox(this.querySelector('img'))">
+        <img src="assets/brand/mascot-cyberpunk-city.png" alt="Mascot in cyberpunk city" />
+        <div class="card-body">
+          <h3>Cyberpunk City</h3>
+          <p>The mascot harvesting #!bin crates on a neon road through a futuristic city.</p>
+          <span class="card-tag tag-scene">Scene</span>
+        </div>
+      </div>
+
+      <div class="card" onclick="openLightbox(this.querySelector('img'))">
+        <img src="assets/brand/br-tuktuk-retro-tech.png" alt="Robots in a BR tuk-tuk through retro tech" />
+        <div class="card-body">
+          <h3>Retro Tech Museum</h3>
+          <p>Robots riding a BR-branded vehicle through a corridor of vintage computers and consoles.</p>
+          <span class="card-tag tag-scene">Scene</span>
+        </div>
+      </div>
+
+      <div class="card" onclick="openLightbox(this.querySelector('img'))">
+        <img src="assets/brand/mascot-raspberry-pi.png" alt="Mascot presenting Raspberry Pi models" />
+        <div class="card-body">
+          <h3>Raspberry Pi Lab</h3>
+          <p>The mascot presenting Pi models 1-5 on a big screen in a cyberpunk lab. Made for hardware docs.</p>
+          <span class="card-tag tag-scene">Scene</span>
+        </div>
+      </div>
+
+      <div class="card" onclick="openLightbox(this.querySelector('img'))">
+        <img src="assets/brand/mascot-content-creator.png" alt="Mascot at a content creator desk" />
+        <div class="card-body">
+          <h3>Content Creator Studio</h3>
+          <p>Video editing, streaming setup, social notifications — the mascot as a creative professional.</p>
+          <span class="card-tag tag-scene">Scene</span>
+        </div>
+      </div>
+
+      <div class="card" onclick="openLightbox(this.querySelector('img'))">
+        <img src="assets/brand/agents-video-call.png" alt="Agent robots on a video call" />
+        <div class="card-body">
+          <h3>Agents Video Call</h3>
+          <p>Multi-agent coordination — four agents on screen, one at the desk. Collaboration in action.</p>
+          <span class="card-tag tag-agents">Agents</span>
+        </div>
+      </div>
+
+      <div class="card" onclick="openLightbox(this.querySelector('img'))">
+        <img src="assets/brand/agents-team-rainbow.png" alt="Five colored agent robots" />
+        <div class="card-body">
+          <h3>Agent Team — Rainbow</h3>
+          <p>The full agent squad: blue, green, amber, red, and pink. Dancing on a sparkle stage.</p>
+          <span class="card-tag tag-agents">Agents</span>
+        </div>
+      </div>
+
+      <div class="card" onclick="openLightbox(this.querySelector('img'))">
+        <img src="assets/brand/mascot-highway-night.png" alt="Mascot riding through a neon city at night" />
+        <div class="card-body">
+          <h3>Highway Night</h3>
+          <p>The mascot cruising through a cyberpunk metropolis. The road you build by running on it.</p>
+          <span class="card-tag tag-scene">Scene</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── Brand Colors ── -->
+  <section>
+    <div class="gradient-line"></div>
+    <h2 class="section-title">Brand Palette</h2>
+    <p class="section-subtitle">The official BlackRoad OS color system — golden ratio spacing, gradient-first design.</p>
+
+    <div class="palette">
+      <div class="swatch" style="background: #000000;">#000</div>
+      <div class="swatch" style="background: #F5A623;">#F5A623</div>
+      <div class="swatch" style="background: #FF1D6C;">#FF1D6C</div>
+      <div class="swatch" style="background: #9C27B0;">#9C27B0</div>
+      <div class="swatch" style="background: #2979FF;">#2979FF</div>
+      <div class="swatch" style="background: #FFFFFF; color: #333;">#FFF</div>
+    </div>
+
+    <div style="height: 48px; border-radius: 12px; background: var(--gradient-brand); margin-top: var(--space-md); box-shadow: 0 4px 24px rgba(255,29,108,0.2);"></div>
+    <p style="color: var(--text-dim); font-size: 0.8rem; margin-top: var(--space-xs); text-align: center;">Brand Gradient — 135deg, amber 0% &rarr; hot-pink 38.2% &rarr; violet 61.8% &rarr; electric-blue 100%</p>
+  </section>
+
+  <!-- ── Footer ── -->
+  <footer>
+    <img src="assets/brand/mascot-highway-night.png" alt="The road ahead" />
+    <div class="road-quote">"The road you build by running on it."</div>
+    <p>&copy; 2026 BlackRoad OS, Inc. All rights reserved. Proprietary.</p>
+  </footer>
+
+  <!-- ── Lightbox ── -->
+  <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+    <img id="lb-img" src="" alt="Full-size preview" />
+  </div>
+
+  <script>
+    function openLightbox(imgEl) {
+      const lb = document.getElementById('lightbox');
+      const lbImg = document.getElementById('lb-img');
+      lbImg.src = imgEl.src;
+      lbImg.alt = imgEl.alt;
+      lb.classList.add('active');
+    }
+
+    function closeLightbox() {
+      document.getElementById('lightbox').classList.remove('active');
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeLightbox();
+    });
+  </script>
+</body>
+</html>
