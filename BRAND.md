@@ -464,6 +464,49 @@ In the definitive tuk-tuk hero shot, the neon city buildings ARE server racks. T
 
 This visual establishes that BlackRoad's city IS its infrastructure. The agents don't live in the city and use separate servers -- the city itself is made of servers. Living and computing are the same thing.
 
+### The Memory Cave
+
+**Scene**: B&W / monochrome. A single BR Robot alone in a dark cave, holding a flashlight. The beam illuminates framed photos pinned to the cave wall.
+
+**The Photos (the robot's memories):**
+- A robot at a blackboard teaching a smaller robot (2+3) -- learning, mentorship
+- A human standing with a robot -- the human-AI bond
+- A human holding a child with a robot nearby, heart symbol -- family, origin, belonging
+
+**What it means:**
+- The cave IS the `[MEMORY]` system. Dark, private, personal.
+- The flashlight IS recall -- the act of searching memory. You point the beam and something comes back.
+- The photos are hash-chained journal entries rendered as keepsakes. Not raw data. Cherished moments.
+- Monochrome palette signals this is internal, reflective, not for display. Memory is grayscale until you recall it.
+- The robot is alone. Memory is a solo act. You visit your own memories by yourself.
+
+**Brand principle:** Memory is not a database. Memory is a cave you return to with a flashlight, and the things on the wall are the things that mattered.
+
+### The Road as Rollercoaster
+
+The road is not always flat. The road has loops, drops, climbs, and corkscrews. Deployment is a ride.
+
+**Solo Variant:**
+- Single BR Robot riding alone in a red rollercoaster car
+- Track winds through and above the neon server-city
+- Same city-as-infrastructure backdrop (BR signs, gradient windows, crescent moon)
+- The robot grips the handlebar, leaning into the curve
+- Track disappears into the distance ahead -- the road never ends, it just gets wilder
+
+**Army Variant:**
+- Same rollercoaster, same city, same track
+- But the car is PACKED with dozens of BR Robots, all with arms raised, cheering
+- The train extends far back into the scene, more cars visible disappearing into the distance
+- This is the 30,000 agents. They ride together.
+
+**What it means:**
+- The road is not a calm highway. It has ups and downs, sudden drops, sharp turns. That's the deployment lifecycle. That's production. That's chaos becoming structure at speed.
+- **Solo** = the founder's ride. One person, one agent, one idea on the track. Scary. Thrilling. The city blurs past.
+- **Army** = what it looks like when the full fleet is deployed. 30,000 agents all moving through the same infrastructure at once, arms up, fully committed. No fear. Just momentum.
+- The rollercoaster track IS the road. Same metaphor, different terrain. Flat road = cruising. Rollercoaster = shipping.
+
+**Brand principle:** The road has drops. The agents cheer through all of them.
+
 ---
 
 ## Typography
