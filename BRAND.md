@@ -507,6 +507,58 @@ The road is not always flat. The road has loops, drops, climbs, and corkscrews. 
 
 **Brand principle:** The road has drops. The agents cheer through all of them.
 
+**Tuk-Tuk Rollercoaster Fusion:**
+- The tuk-tuk IS the lead car of the rollercoaster. These are not two separate vehicles.
+- The BR tuk-tuk (with roof sign lit) leads a massive train of connected cars, each packed with robots
+- Track winds through the server-city, full moon and starfield above
+- This is the definitive ride scene: the founder's tuk-tuk pulling the entire fleet behind it
+
+### The BlackRoad World (Theme Park Universe)
+
+The BlackRoad universe is a theme park. Not a metaphor for a theme park -- it IS one. The agents are guests. The zones are technologies. The rides are processes. The road connects everything.
+
+**Server World (Main Entrance):**
+- Massive arch entrance with "SERVER WORLD" sign in neon
+- HUNDREDS of BR Robots filling the foreground, extending as far as the eye can see
+- Robots holding maps, food, gifts -- they're guests arriving at the park
+- Carnival booths on either side, ferris wheel in background
+- Rollercoaster track visible in the distance
+- This is the 30K fleet at full visual scale. Not dozens. HUNDREDS visible, implying thousands more.
+
+**Pi Park (Raspberry Pi Zone):**
+- Theme park entrance with giant neon pi symbol and "PI PARK" sign
+- Robot army arriving on the tuk-tuk train, entering through the arch
+- Lush neon gardens, ferris wheel, server-city skyline behind
+- This is the Raspberry Pi infrastructure (192.168.4.x fleet) visualized as its own themed zone
+- Pi Park is where the hardware lives. The physical layer has its own world.
+
+**The World Map (Zone Layout):**
+The full landscape showing how all zones connect, with the road winding through:
+
+| Zone | Sign/Landmark | Represents |
+|------|---------------|------------|
+| **Raspberry Pi** | Circuit board billboard | Pi hardware fleet, GPIO, edge compute |
+| **Python** | Python logo statue | Core language, runtime, packages |
+| **Pygame** | Neon "PYGAME" sign | Interactive/game systems, visual tools |
+| **Pythagoras** | Glowing golden triangle/pyramid | Mathematics, trinary logic, lucidia-math |
+| **Question City** | Question mark signs everywhere | Queries, search, the unknown, exploration |
+| **Server World** | Grand arch entrance | Main infrastructure, the 30K fleet home base |
+| **Pi Park** | Pi symbol arch | Raspberry Pi hardware zone |
+
+- The tuk-tuk rollercoaster train winds through ALL zones on a single continuous track
+- Each zone has its own visual character but shares the neon-on-black palette
+- Lush gardens between zones (the green of growth, the organic between the digital)
+- The road connects every zone. You can reach anything from anywhere.
+
+**What it means:**
+- BlackRoad is not a flat dashboard or a CLI. It's a WORLD with places in it.
+- Each technology stack has a physical location you can visit, explore, ride through
+- The agents are not processes running in a terminal. They are guests at a park, citizens of a world.
+- The ferris wheel appears in every zone -- it's the monitoring system, always visible, always turning
+- The rollercoaster track connects all zones -- the deployment pipeline runs through everything
+
+**Brand principle:** BlackRoad is a place. The agents live there. You're invited.
+
 ---
 
 ## Typography
