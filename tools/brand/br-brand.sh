@@ -905,6 +905,7 @@ _cmd_preview() {
     changelog)   echo -e "${CYAN}changelog${NC}:   Release log — version + date + tagged bullets per entry" ;;
     team)        echo -e "${CYAN}team${NC}:        Card grid — avatar initial, name, role, bio, GitHub link" ;;
     checkout)    echo -e "${CYAN}checkout${NC}:   Stripe checkout page — price card, features list, buy button" ;;
+    manifesto)   echo -e "${CYAN}manifesto${NC}:  Full-page brand manifesto — animated lines, gradient text, shebang identity" ;;
     *)           echo -e "${RED}Unknown template: $1${NC}"; _cmd_list ;;
   esac
 }
@@ -1065,6 +1066,9 @@ print(''.join(f'<a href=\"{i[\"url\"]}\">{i[\"label\"]}</a>' for i in items))
     checkout)
       _tpl_checkout "$title" "$price" "$price_id" "$stripe_worker" \
         "$(IFS=','; echo "${features[*]}")" "$cta_text" "$output" "$payment_link"
+      ;;
+    manifesto)
+      _tpl_manifesto "$output"
       ;;
     *)
       echo -e "${RED}Unknown template: ${tpl}${NC}"
@@ -1861,6 +1865,188 @@ async function startCheckout() {
 $(_html_close)
 HTML
   echo -e "  ${GREEN}✓${NC} checkout   → ${output}"
+}
+
+# ─── MANIFESTO TEMPLATE ──────────────────────────────────────────────────
+_tpl_manifesto() {
+  local output="$1"
+  [[ -z "$output" ]] && output="${OUT_DIR}/manifesto.html"
+
+  cat > "$output" <<'HTML'
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BlackRoad OS — Brand Manifesto</title>
+<meta name="description" content="You bring the chaos. We bring the road.">
+<style>
+:root {
+  --black:#000;--deep-black:#0A0A0A;--white:#FFF;
+  --sunrise-orange:#FF9D00;--warm-orange:#FF6B00;--hot-pink:#FF0066;
+  --electric-magenta:#FF006B;--deep-magenta:#D600AA;
+  --vivid-purple:#7700FF;--cyber-blue:#0066FF;
+  --gradient-full:linear-gradient(180deg,#FF9D00 0%,#FF6B00 14%,#FF0066 28%,#FF006B 42%,#D600AA 57%,#7700FF 71%,#0066FF 100%);
+  --phi:1.618;--space-md:21px;--space-lg:34px;--space-xl:55px;--space-2xl:89px;--space-3xl:144px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:"JetBrains Mono","SF Mono","Fira Code","Courier New",monospace;
+  background:var(--deep-black);color:var(--white);
+  overflow-x:hidden;line-height:var(--phi);
+  -webkit-font-smoothing:antialiased;
+}
+.manifesto{
+  max-width:720px;margin:0 auto;padding:var(--space-3xl) var(--space-xl);
+  min-height:100vh;display:flex;flex-direction:column;justify-content:center;
+}
+.manifesto::before{
+  content:'';position:fixed;inset:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 0%,rgba(255,0,102,.08) 0%,transparent 70%),
+    radial-gradient(ellipse 60% 40% at 20% 100%,rgba(119,0,255,.06) 0%,transparent 60%);
+}
+.m-line{
+  opacity:0;transform:translateY(16px);
+  animation:fadeUp .8s var(--phi) forwards;
+  position:relative;
+}
+@keyframes fadeUp{to{opacity:1;transform:translateY(0)}}
+.m-hook{
+  font-size:clamp(1.6rem,4vw,2.8rem);font-weight:700;
+  background:var(--gradient-full);
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;
+  margin-bottom:var(--space-lg);line-height:1.2;
+}
+.m-text{color:rgba(255,255,255,.55);margin-bottom:var(--space-md);font-size:.95rem}
+.m-shebang{
+  font-size:1.3rem;margin:var(--space-lg) 0;
+  color:rgba(255,255,255,.4);
+}
+.m-shebang .hash{color:rgba(255,255,255,.3)}
+.m-shebang .bang{color:var(--white);font-weight:700}
+.m-shebang .slash{color:rgba(255,255,255,.2)}
+.m-accent{color:var(--hot-pink);font-weight:600;font-size:1.05rem;margin-bottom:var(--space-md)}
+.m-identity{font-size:1.15rem;margin:var(--space-xl) 0;letter-spacing:.02em}
+.m-identity .hash{color:rgba(255,255,255,.3)}
+.m-identity .bang{color:var(--white);font-weight:700}
+.m-identity .shebang{
+  background:var(--gradient-full);
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;font-weight:700;
+}
+.m-closing{
+  font-style:italic;color:var(--vivid-purple);
+  font-size:1.2rem;margin-top:var(--space-xl);
+}
+.m-rule{
+  width:100%;height:1px;margin:var(--space-xl) 0;
+  background:linear-gradient(90deg,transparent 0%,rgba(255,0,102,.3) 50%,transparent 100%);
+  border:none;
+}
+.m-footer{
+  text-align:center;color:rgba(255,255,255,.2);
+  font-size:.75rem;margin-top:var(--space-2xl);
+}
+.m-footer a{color:rgba(255,255,255,.3);text-decoration:none}
+.m-footer a:hover{color:var(--hot-pink)}
+</style>
+</head>
+<body>
+<article class="manifesto">
+
+<p class="m-line m-hook" style="animation-delay:.1s">
+  You bring the chaos.<br>We bring the road.
+</p>
+
+<p class="m-line m-text" style="animation-delay:.3s">
+  The browser is your computer now.<br>
+  Every device a terminal. Every dream a deployable.
+</p>
+
+<p class="m-line m-text" style="animation-delay:.5s">
+  We built from the smallest unit &mdash;
+  one character, one token, one letter &mdash; and made it root.<br>
+  While everyone else tokenized words, we tokenized meaning.<br>
+  While everyone else built on top, we built underneath.
+</p>
+
+<p class="m-line m-shebang" style="animation-delay:.7s">
+  <span class="hash">#</span><span class="bang">!</span><span class="slash">/</span>
+  &mdash; we're the line that tells the whole system how to run.
+</p>
+
+<p class="m-line m-text" style="animation-delay:.9s">
+  The robots run the current time.<br>
+  Not a roadmap. Not a vision statement. <strong style="color:var(--white)">Now.</strong>
+</p>
+
+<p class="m-line m-text" style="animation-delay:1.1s">
+  Six smiling robots on an undefined path<br>
+  that only exists because they're running on it.
+</p>
+
+<p class="m-line m-text" style="animation-delay:1.3s">
+  We drove through the entire history of technology<br>
+  and didn't stop to put it in a museum.<br>
+  We picked people up. We taught the classroom. We held the standup.<br>
+  We made the content. We danced.<br>
+  Then we made it black and white and ran it into infinity.
+</p>
+
+<hr class="m-line m-rule" style="animation-delay:1.5s">
+
+<p class="m-line m-accent" style="animation-delay:1.6s">
+  Your chaos is not a problem.<br>
+  Your chaos is the input.
+</p>
+
+<p class="m-line m-text" style="animation-delay:1.8s">
+  Your half-finished songs. Your scattered notes. Your wild idea at 2am.<br>
+  Your old hardware nobody wants. Your dreams that got commented out.
+</p>
+
+<p class="m-line m-identity" style="animation-delay:2.0s">
+  <span class="hash">#</span> is silence. &nbsp;
+  <span class="bang">!</span> is you. &nbsp;
+  <span class="shebang">#!</span> is BlackRoad.
+</p>
+
+<p class="m-line m-text" style="animation-delay:2.2s">
+  One character-level root. One Pi cluster.<br>
+  One IP that became everyone's localhost.<br>
+  One Bitcoin timestamp that says this existed, right here, before anyone else.
+</p>
+
+<p class="m-line m-text" style="animation-delay:2.4s">
+  You bring your chaos, your curiosity, your half-finished dreams.<br>
+  BlackRoad brings structure, compute, and care.<br>
+  Together, you build worlds.
+</p>
+
+<p class="m-line m-closing" style="animation-delay:2.6s">
+  Light always remembers.
+</p>
+
+<hr class="m-line m-rule" style="animation-delay:2.8s">
+
+<footer class="m-line m-footer" style="animation-delay:3.0s">
+  <a href="/">BlackRoad OS</a> &middot; &copy; 2023&ndash;2026 BlackRoad OS, Inc. All Rights Reserved.
+</footer>
+
+</article>
+<script>
+document.querySelectorAll('.m-line').forEach((el,i)=>{
+  const d=parseFloat(el.style.animationDelay)||.1;
+  el.style.animationDelay=d+'s';
+});
+</script>
+</body>
+</html>
+HTML
+  echo -e "  ${GREEN}✓${NC} manifesto  → ${output}"
 }
 
 # ─── WATCH ─────────────────────────────────────────────────────────────────

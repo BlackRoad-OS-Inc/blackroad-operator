@@ -183,6 +183,14 @@ The BlackRoad OS visual identity uses a **pixel-art / retro-futurism** aesthetic
 
 6. **Gradient Glow**: All elements radiate with the brand gradient (amber to hot pink to violet to electric blue). Edges glow. Light bleeds. Nothing has hard borders -- everything is alive and in motion.
 
+7. **The BR Vehicle**: A branded tuk-tuk / auto-rickshaw with smiling pixel robots visible through the windshield, driving down a glowing materializing road. The vehicle carries the `BR` mark. It is small, scrappy, fast, and joyful -- not a luxury car but a vehicle that gets anywhere. It represents BlackRoad's ethos: accessible infrastructure, not gatekept enterprise.
+
+8. **The Technology Museum**: Walls of tech history lining both sides of the road -- rotary phones, CRT monitors, CD-ROMs, floppy disks, keyboards, game controllers, early PCs -- displayed like art in a gallery. Silhouettes of people watching from the sidelines as the BR vehicle drives through. This captures: *"We drove through the entire history of technology and didn't stop to put it in a museum. We picked people up."* The technology is honored but never worshipped. It's the road's scenery, not its destination.
+
+9. **The Crescent Moon**: A crescent moon hangs above the neon cityscape. BlackRoad runs at night -- the time when builders, dreamers, and 2am-idea people are awake. The moon is the natural light source for the road. It watches. Light always remembers.
+
+10. **The Spectators**: Silhouetted figures stand at the edges of the road, watching the robots pass. Some are reaching toward the vehicle. They represent the people BlackRoad picks up -- the curious, the dreamers, the ones ready to jump on. The road is inclusive by motion: you don't apply, you join by running.
+
 **Style Rules:**
 - Always dark backgrounds (`#000000` or `#0A0A0A`)
 - Pixel-art characters at low resolution, rendered crisply (nearest-neighbor scaling, no smoothing)
