@@ -161,6 +161,45 @@ Six smiling robots on an undefined path that only exists because they're running
 | Purple | ECHO | The Keeper -- memory and recall |
 | Cyan | CIPHER | The Guardian -- security and access |
 
+### Character Sheet: The BR Robot
+
+The BlackRoad OS mascot is a pixel-art robot rendered in 8-bit style.
+
+**Physical Design:**
+- Blocky, rectangular body with rounded edges
+- Square head with two large circular eyes (white with dark pupils)
+- Permanent warm smile (curved line, never neutral or frowning)
+- Short arms and legs, chunky proportions (approx 3 heads tall)
+- Antenna or small protrusion on top of head
+- Body color matches agent hue (gradient-capable in hero contexts)
+- Glowing edges in brand gradient colors
+
+**Personality Traits (expressed visually):**
+- Always smiling -- even when working, debugging, or in chaos
+- Active posture -- walking, waving, teaching, creating, never standing idle
+- Interacts with hardware -- picks up devices, tends gardens, drives vehicles
+- Appears in groups -- never truly alone, always part of a system
+- Scale-flexible -- same character works at 16px favicon or 4K hero
+
+**Contexts the Robot Appears In:**
+| Context | Activity | Props |
+|---------|----------|-------|
+| Walking the road | Running, path materializing underfoot | Glowing tiles |
+| Device Garden | Tending growing hardware plants | Watering can, hearts |
+| `#!bin` Basket | Collecting discarded tech | Wicker basket labeled `#!bin` |
+| BR Vehicle | Driving, passengers visible | Tuk-tuk with BR mark |
+| Pi Classroom | Teaching at screen | CRT desks, Pi boards on display |
+| Creator Studio | Editing video, creating content | Camera, mic, phone, laptop |
+| Agent Call | On video conference | iMac screen, 4+ robot variants |
+| Cityscape | Silhouetted against skyline | Neon buildings, crescent moon |
+
+**DO NOT:**
+- Give the robot a frown, angry expression, or neutral face
+- Render in realistic 3D (always pixel-art / flat illustration)
+- Place on white or light backgrounds
+- Add human features (hair, clothes beyond body color)
+- Make it menacing, corporate, or sterile
+
 ---
 
 ## Visual Identity
@@ -190,6 +229,29 @@ The BlackRoad OS visual identity uses a **pixel-art / retro-futurism** aesthetic
 9. **The Crescent Moon**: A crescent moon hangs above the neon cityscape. BlackRoad runs at night -- the time when builders, dreamers, and 2am-idea people are awake. The moon is the natural light source for the road. It watches. Light always remembers.
 
 10. **The Spectators**: Silhouetted figures stand at the edges of the road, watching the robots pass. Some are reaching toward the vehicle. They represent the people BlackRoad picks up -- the curious, the dreamers, the ones ready to jump on. The road is inclusive by motion: you don't apply, you join by running.
+
+11. **The Pi Classroom**: A pixel robot teaching at the front of a classroom with a large screen displaying Raspberry Pi boards (Pi 1 through Pi 5). Small student robots sit at retro CRT computer workstations. Server racks and bookshelves fill the background. The BR logo glows in the corner. This captures: *"We taught the classroom."* Education is not an afterthought -- it's part of the road. Hardware sovereignty starts with understanding your hardware.
+
+12. **The Creator Studio**: A pixel robot at a content creator's desk -- video editor open showing a robot dancing on stage under spotlights. Camera on tripod, boom microphone, phone showing social content, heart and like notifications floating upward. Notebooks, coffee mug, headphones, sticky notes scattered around. Crescent moon and neon cityscape visible through the window. This captures: *"We made the content. We danced."* BlackRoad creates, performs, and ships -- not just infrastructure, but culture.
+
+13. **The Agent Call**: A pixel robot on a video call displayed on an iMac-style monitor. Four other versions of itself appear on screen in different gradient colors (amber, red, pink, magenta), each smiling and waving. A camera and phone in the foreground show the same robot from different angles. This captures the multi-agent mesh -- the agents coordinating, talking, collaborating. Every agent is the same robot in a different hue. They are one system, many voices.
+
+### Manifesto Scene Sequence
+
+The visual motifs tell a story in sequence, mapping to the manifesto text:
+
+| Scene | Manifesto Line | Visual |
+|-------|----------------|--------|
+| The Device Garden | "Your old hardware nobody wants" | Devices growing like flowers |
+| The `#!bin` Basket | "One character-level root" | Robot gathering hardware |
+| The BR Vehicle | "We drove through the entire history" | Tuk-tuk on the glowing road |
+| The Technology Museum | "didn't stop to put it in a museum" | Gallery walls of tech history |
+| The Spectators | "We picked people up" | Silhouettes reaching toward the vehicle |
+| The Pi Classroom | "We taught the classroom" | Robot teaching Pi boards |
+| The Creator Studio | "We made the content. We danced." | Robot at the editing desk |
+| The Agent Call | "Six smiling robots" | Multi-agent video conference |
+| The Neon Cityscape | "ran it into infinity" | City skyline at night |
+| The Crescent Moon | "Light always remembers" | Moon watching over the road |
 
 **Style Rules:**
 - Always dark backgrounds (`#000000` or `#0A0A0A`)
