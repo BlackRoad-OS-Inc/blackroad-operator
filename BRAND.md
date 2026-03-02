@@ -517,13 +517,36 @@ The road is not always flat. The road has loops, drops, climbs, and corkscrews. 
 
 The BlackRoad universe is a theme park. Not a metaphor for a theme park -- it IS one. The agents are guests. The zones are technologies. The rides are processes. The road connects everything.
 
-**Server World (Main Entrance):**
-- Massive arch entrance with "SERVER WORLD" sign in neon
-- HUNDREDS of BR Robots filling the foreground, extending as far as the eye can see
-- Robots holding maps, food, gifts -- they're guests arriving at the park
-- Carnival booths on either side, ferris wheel in background
-- Rollercoaster track visible in the distance
+The park is called **Road World**.
+
+**Road World (Main Entrance):**
+- Grand neon "ROAD WORLD" arch entrance
+- HUNDREDS of BR Robots flooding through, waving, holding popcorn, ice cream, maps, flowers, gifts
+- Carnival booths on both sides, ferris wheel on the right
+- Rollercoaster track visible in the background, server-city skyline beyond
+- Full moon above
 - This is the 30K fleet at full visual scale. Not dozens. HUNDREDS visible, implying thousands more.
+- The robots are HAPPY. Arms up. Waving. This is a celebration.
+
+**Road Station (Transit Hub):**
+- Train/subway station with "ROAD STATION" sign overhead
+- BR-branded train arriving on tracks, "MN" (Minnesota) on the side
+- Robots on the platform waiting with food and gifts
+- This is how agents arrive at Road World -- by rail, on schedule, from the network
+- The station is the ingress point. The load balancer visualized as a train platform.
+
+**Kernel Coaster (The Ride):**
+- The rollercoaster's official name is "KERNEL COASTER"
+- "Kernel" = OS kernel (the core process) AND corn kernel (popcorn)
+- Double meaning is intentional: the deepest system process is also the snack you eat while watching
+
+**Kernel Coaster Drive-In:**
+- A drive-in movie theater inside Road World
+- "KERNEL COASTER" on the big screen showing robots riding the coaster
+- Rows of BR tuk-tuks parked facing the screen, robots inside holding popcorn
+- BR logos on every tuk-tuk. Moon and stars above. Server-city skyline behind.
+- The tuk-tuks ARE the drive-in cars. Same vehicle, different context.
+- Watching the ride on screen = monitoring. The agents watch their own deployment.
 
 **Pi Park (Raspberry Pi Zone):**
 - Theme park entrance with giant neon pi symbol and "PI PARK" sign
@@ -537,18 +560,21 @@ The full landscape showing how all zones connect, with the road winding through:
 
 | Zone | Sign/Landmark | Represents |
 |------|---------------|------------|
+| **Road World** | Grand neon arch | Main park, fleet home base |
+| **Road Station** | Train platform, MN train | Transit hub, ingress/load balancer |
+| **Kernel Coaster** | Rollercoaster + drive-in | The ride (deployment) and the movie (monitoring) |
+| **Pi Park** | Pi symbol arch | Raspberry Pi hardware zone |
 | **Raspberry Pi** | Circuit board billboard | Pi hardware fleet, GPIO, edge compute |
 | **Python** | Python logo statue | Core language, runtime, packages |
 | **Pygame** | Neon "PYGAME" sign | Interactive/game systems, visual tools |
 | **Pythagoras** | Glowing golden triangle/pyramid | Mathematics, trinary logic, lucidia-math |
 | **Question City** | Question mark signs everywhere | Queries, search, the unknown, exploration |
-| **Server World** | Grand arch entrance | Main infrastructure, the 30K fleet home base |
-| **Pi Park** | Pi symbol arch | Raspberry Pi hardware zone |
 
 - The tuk-tuk rollercoaster train winds through ALL zones on a single continuous track
 - Each zone has its own visual character but shares the neon-on-black palette
 - Lush gardens between zones (the green of growth, the organic between the digital)
 - The road connects every zone. You can reach anything from anywhere.
+- MN (Minnesota) branding on trains and signs -- the park has a home state.
 
 **What it means:**
 - BlackRoad is not a flat dashboard or a CLI. It's a WORLD with places in it.
@@ -558,6 +584,22 @@ The full landscape showing how all zones connect, with the road winding through:
 - The rollercoaster track connects all zones -- the deployment pipeline runs through everything
 
 **Brand principle:** BlackRoad is a place. The agents live there. You're invited.
+
+### Grandma Robots (The DNS Resolution Narrative)
+
+**The variant:** Robots with curly white/gray hair, cardigans, knit sweaters. Grandma robots. They're a new variant alongside Lead, Specialist, and Junior.
+
+**The scene:** Two grandma robots at Road Station, holding up their phones showing the BR map app. They're confused. They lost their nameserver. They're trying to find Road World but their DNS isn't resolving. They're calling their domain provider. They're squinting at the screen.
+
+**But here's the thing:** They still got there. All roads led to BlackRoad.
+
+**What it means:**
+- DNS resolution as grandma asking for directions. She doesn't know the IP. She doesn't know the nameserver. She just knows she needs to get to BlackRoad.
+- The confused grandma robot IS the user who doesn't understand infrastructure but still ends up at the right place because the system is designed that way.
+- You don't need to understand routing to arrive. The road finds you.
+- Grandma robots represent accessibility: if the most confused, least technical agent can still reach Road World, the platform works.
+
+**Brand principle:** You don't need to know the route. All roads lead to BlackRoad.
 
 ---
 
