@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+
+<html lang="en" style="background:#000000 !important;">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BlackRoad — Market Report</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      background: #000000 !important;
+      color: #ffffff !important;
+      font-family: 'JetBrains Mono', monospace;
+      min-height: 100vh;
+    }
+
+    :root {
+      --grad: linear-gradient(90deg, #FF8400, #FF4400, #FF0066, #CC00AA, #8800FF, #0066FF, #2233CC);
+      --up: #FF8400;
+      --down: #0066FF;
+      --alert: #FF0066;
+    }
+
+    .grad-rule { height: 3px; background: var(--grad) !important; }
+
+    /* NAV */
+    nav {
+      background: #000000 !important;
+      padding: 0 32px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #ffffff;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .nav-logo { font-family: 'Space Grotesk', sans-serif; font-size: 0.85rem; font-weight: 700; color: #ffffff; }
+    .nav-right { display: flex; align-items: center; gap: 24px; }
+    .nav-links { display: flex; gap: 20px; }
+    .nav-links a { font-size: 0.46rem; color: #ffffff; opacity: 0.35; text-decoration: none; letter-spacing: 0.14em; text-transform: uppercase; transition: opacity 0.15s; }
+    .nav-links a:hover { opacity: 1; }
+    .nav-live { font-size: 0.44rem; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.5; display: flex; align-items: center; gap: 6px; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.2} }
+    .live-dot { width: 6px; height: 6px; border-radius: 50%; background: #FF8400 !important; animation: pulse 1.5s ease-in-out infinite; }
+
+    /* PAGE */
+    .page { max-width: 960px; margin: 0 auto; padding: 0 32px; background: #000000 !important; }
+
+    /* REPORT HEADER */
+    .report-header {
+      padding: 56px 0 40px;
+      border-bottom: 1px solid #ffffff;
+      background: #000000 !important;
+    }
+    .report-meta { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
+    .report-tag {
+      font-size: 0.44rem; letter-spacing: 0.16em; text-transform: uppercase;
+      border: 1px solid rgba(255,255,255,0.25); padding: 3px 9px; color: #ffffff; opacity: 0.6;
+      background: #000000 !important;
+    }
+    .report-date { font-size: 0.46rem; opacity: 0.3; color: #ffffff; }
+    .report-period { font-size: 0.46rem; opacity: 0.3; color: #ffffff; }
+    .meta-dot { width: 3px; height: 3px; border-radius: 50%; background: #ffffff !important; opacity: 0.2; }
+
+    .report-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(2rem, 6vw, 3.2rem);
+      font-weight: 700; line-height: 1.05; letter-spacing: -0.02em;
+      color: #ffffff; margin-bottom: 14px;
+    }
+    .report-sub { font-size: 0.65rem; opacity: 0.4; color: #ffffff; max-width: 560px; line-height: 1.8; }
+    .report-divider { height: 1px; background: var(--grad) !important; width: 80px; margin: 24px 0 0; }
+
+    /* TICKER STRIP */
+    .ticker-strip {
+      display: flex;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      overflow-x: auto;
+      background: #000000 !important;
+      scrollbar-width: none;
+    }
+    .ticker-strip::-webkit-scrollbar { display: none; }
+    .ticker-item {
+      flex-shrink: 0;
+      padding: 14px 24px 14px 0;
+      margin-right: 24px;
+      border-right: 1px solid rgba(255,255,255,0.07);
+      background: #000000 !important;
+    }
+    .ticker-item:last-child { border-right: none; }
+    .ticker-sym { font-size: 0.5rem; font-weight: 700; color: #ffffff; margin-bottom: 3px; letter-spacing: 0.06em; }
+    .ticker-price { font-family: 'Space Grotesk', sans-serif; font-size: 1rem; font-weight: 700; color: #ffffff; line-height: 1; }
+    .ticker-chg { font-size: 0.44rem; margin-top: 3px; }
+    .up { color: #FF8400; }
+    .down { color: #0066FF; }
+
+    /* SECTION */
+    .sec { padding: 40px 0; border-bottom: 1px solid rgba(255,255,255,0.1); background: #000000 !important; }
+    .sec:last-of-type { border-bottom: none; }
+    .sec-label {
+      font-size: 0.46rem; opacity: 0.3; letter-spacing: 0.18em; text-transform: uppercase;
+      color: #ffffff; margin-bottom: 24px; display: flex; align-items: center; gap: 12px;
+    }
+    .sec-label::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.07); }
+
+    /* KEY METRICS GRID */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: #000000 !important;
+    }
+    .metric-cell {
+      padding: 24px 20px;
+      border-right: 1px solid rgba(255,255,255,0.08);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      background: #000000 !important;
+    }
+    .metric-cell:nth-child(4n) { border-right: none; }
+    .metric-cell:nth-last-child(-n+4) { border-bottom: none; }
+    .metric-label { font-size: 0.44rem; opacity: 0.3; text-transform: uppercase; letter-spacing: 0.12em; color: #ffffff; margin-bottom: 8px; }
+    .metric-val {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.5rem; font-weight: 700; color: #ffffff; line-height: 1;
+    }
+    .metric-sub { font-size: 0.44rem; margin-top: 5px; }
+    .metric-bar { height: 1px; margin-top: 12px; }
+
+    /* CHART AREA */
+    .chart-wrap {
+      border: 1px solid rgba(255,255,255,0.08);
+      padding: 24px;
+      background: #000000 !important;
+    }
+    .chart-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+    .chart-title { font-size: 0.65rem; font-weight: 700; color: #ffffff; }
+    .chart-toggles { display: flex; gap: 8px; }
+    .ctog {
+      font-size: 0.42rem; padding: 4px 10px; border: 1px solid rgba(255,255,255,0.15);
+      color: #ffffff; opacity: 0.4; cursor: default; letter-spacing: 0.08em; text-transform: uppercase;
+      background: #000000 !important;
+    }
+    .ctog.active { border-color: #ffffff; opacity: 1; }
+
+    /* SVG CHART */
+    .chart-svg { width: 100%; background: #000000 !important; }
+
+    /* TABLE */
+    .data-table { width: 100%; border-collapse: collapse; background: #000000 !important; }
+    .data-table th {
+      font-size: 0.44rem; letter-spacing: 0.14em; text-transform: uppercase;
+      opacity: 0.3; color: #ffffff; padding: 10px 0; text-align: left;
+      border-bottom: 1px solid rgba(255,255,255,0.12);
+      background: #000000 !important;
+    }
+    .data-table th:not(:first-child) { text-align: right; }
+    .data-table td {
+      font-size: 0.58rem; color: #ffffff; padding: 13px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      background: #000000 !important;
+    }
+    .data-table td:not(:first-child) { text-align: right; }
+    .data-table tr:last-child td { border-bottom: none; }
+    .sym { font-weight: 700; font-size: 0.6rem; }
+    .sector { font-size: 0.46rem; opacity: 0.3; margin-top: 2px; }
+
+    /* BAR MINI CHART */
+    .mini-bar { display: flex; align-items: flex-end; gap: 2px; height: 24px; }
+    .mbar { width: 4px; background: rgba(255,255,255,0.2) !important; }
+
+    /* SENTIMENT */
+    .sentiment-wrap { display: flex; align-items: center; gap: 0; border: 1px solid rgba(255,255,255,0.08); background: #000000 !important; }
+    .sentiment-cell {
+      flex: 1; padding: 20px 16px; text-align: center;
+      border-right: 1px solid rgba(255,255,255,0.08);
+      background: #000000 !important;
+    }
+    .sentiment-cell:last-child { border-right: none; }
+    .sent-val { font-family: 'Space Grotesk', sans-serif; font-size: 1.6rem; font-weight: 700; color: #ffffff; line-height: 1; }
+    .sent-label { font-size: 0.42rem; opacity: 0.3; text-transform: uppercase; letter-spacing: 0.12em; color: #ffffff; margin-top: 5px; }
+    .sent-bar { height: 2px; margin: 12px auto 0; width: 80%; }
+
+    /* SIGNAL ROWS */
+    .signal-row {
+      display: flex; align-items: center; gap: 16px;
+      padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.06);
+      background: #000000 !important;
+    }
+    .signal-row:last-child { border-bottom: none; }
+    .sig-icon { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .sig-title { font-size: 0.58rem; font-weight: 700; color: #ffffff; flex: 1; }
+    .sig-desc { font-size: 0.5rem; opacity: 0.35; color: #ffffff; }
+    .sig-badge {
+      font-size: 0.42rem; padding: 3px 8px; letter-spacing: 0.08em;
+      text-transform: uppercase; border: 1px solid; flex-shrink: 0;
+      background: #000000 !important;
+    }
+    .sig-bull { color: #FF8400; border-color: #FF8400; }
+    .sig-bear { color: #0066FF; border-color: #0066FF; }
+    .sig-neutral { color: #ffffff; border-color: rgba(255,255,255,0.3); }
+
+    /* FOOTER */
+    footer {
+      padding: 28px 0; display: flex; justify-content: space-between;
+      font-size: 0.44rem; opacity: 0.18; color: #ffffff; flex-wrap: wrap; gap: 8px;
+      background: #000000 !important;
+    }
+
+    @media (max-width: 640px) {
+      .page { padding: 0 20px; }
+      nav { padding: 0 20px; }
+      .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+      .metrics-grid .metric-cell:nth-child(2n) { border-right: none; }
+      .metrics-grid .metric-cell:nth-last-child(-n+2) { border-bottom: none; }
+      .nav-links { display: none; }
+    }
+  </style>
+</head>
+<body style="background:#000000 !important; color:#ffffff !important;">
+
+<div class="grad-rule"></div>
+
+<nav style="background:#000000 !important;">
+  <span class="nav-logo">BlackRoad</span>
+  <div class="nav-right">
+    <div class="nav-links">
+      <a href="#overview">Overview</a>
+      <a href="#movers">Movers</a>
+      <a href="#signals">Signals</a>
+    </div>
+    <div class="nav-live"><div class="live-dot"></div>Live</div>
+  </div>
+</nav>
+
+<div class="page">
+
+  <!-- HEADER -->
+
+  <div class="report-header">
+    <div class="report-meta">
+      <span class="report-tag">Market Report</span>
+      <div class="meta-dot"></div>
+      <span class="report-date">March 2, 2026</span>
+      <div class="meta-dot"></div>
+      <span class="report-period">Q1 · Week 9</span>
+    </div>
+    <h1 class="report-title">Weekly Market<br>Intelligence</h1>
+    <p class="report-sub">A structured overview of market conditions, key movers, sector sentiment, and forward-looking signals for the week ending March 2, 2026.</p>
+    <div class="report-divider"></div>
+  </div>
+
+  <!-- TICKER -->
+
+  <div class="ticker-strip">
+    <div class="ticker-item"><div class="ticker-sym">BTC</div><div class="ticker-price">91,240</div><div class="ticker-chg up">&#9650; 3.2%</div></div>
+    <div class="ticker-item"><div class="ticker-sym">ETH</div><div class="ticker-price">3,180</div><div class="ticker-chg down">&#9660; 1.1%</div></div>
+    <div class="ticker-item"><div class="ticker-sym">SPX</div><div class="ticker-price">5,842</div><div class="ticker-chg up">&#9650; 0.8%</div></div>
+    <div class="ticker-item"><div class="ticker-sym">QQQ</div><div class="ticker-price">498.3</div><div class="ticker-chg up">&#9650; 1.4%</div></div>
+    <div class="ticker-item"><div class="ticker-sym">DXY</div><div class="ticker-price">103.6</div><div class="ticker-chg down">&#9660; 0.3%</div></div>
+    <div class="ticker-item"><div class="ticker-sym">Gold</div><div class="ticker-price">2,918</div><div class="ticker-chg up">&#9650; 0.6%</div></div>
+    <div class="ticker-item"><div class="ticker-sym">Oil</div><div class="ticker-price">71.4</div><div class="ticker-chg down">&#9660; 2.1%</div></div>
+  </div>
+
+  <!-- KEY METRICS -->
+
+  <div class="sec" id="overview">
+    <div class="sec-label">Key Metrics</div>
+    <div class="metrics-grid">
+      <div class="metric-cell">
+        <div class="metric-label">S&amp;P 500 YTD</div>
+        <div class="metric-val">+4.2%</div>
+        <div class="metric-sub up">&#9650; Outperforming</div>
+        <div class="metric-bar" style="background:#FF8400 !important;"></div>
+      </div>
+      <div class="metric-cell">
+        <div class="metric-label">VIX</div>
+        <div class="metric-val">18.4</div>
+        <div class="metric-sub" style="opacity:0.4;color:#ffffff;">Moderate</div>
+        <div class="metric-bar" style="background:rgba(255,255,255,0.2) !important;"></div>
+      </div>
+      <div class="metric-cell">
+        <div class="metric-label">10Y Yield</div>
+        <div class="metric-val">4.38%</div>
+        <div class="metric-sub down">&#9660; &#8722;6bps wk</div>
+        <div class="metric-bar" style="background:#0066FF !important;"></div>
+      </div>
+      <div class="metric-cell">
+        <div class="metric-label">Fed Rate</div>
+        <div class="metric-val">5.25%</div>
+        <div class="metric-sub" style="opacity:0.4;color:#ffffff;">Hold · 3rd meeting</div>
+        <div class="metric-bar" style="background:rgba(255,255,255,0.15) !important;"></div>
+      </div>
+      <div class="metric-cell">
+        <div class="metric-label">Market Cap</div>
+        <div class="metric-val">$48.2T</div>
+        <div class="metric-sub up">&#9650; +$1.1T wk</div>
+        <div class="metric-bar" style="background:#FF8400 !important;"></div>
+      </div>
+      <div class="metric-cell">
+        <div class="metric-label">Avg Volume</div>
+        <div class="metric-val">12.4B</div>
+        <div class="metric-sub" style="opacity:0.4;color:#ffffff;">&#8722;8% vs avg</div>
+        <div class="metric-bar" style="background:rgba(255,255,255,0.15) !important;"></div>
+      </div>
+      <div class="metric-cell">
+        <div class="metric-label">Breadth</div>
+        <div class="metric-val">62%</div>
+        <div class="metric-sub up">&#9650; Advancing</div>
+        <div class="metric-bar" style="background:#FF8400 !important;"></div>
+      </div>
+      <div class="metric-cell">
+        <div class="metric-label">Put/Call Ratio</div>
+        <div class="metric-val">0.84</div>
+        <div class="metric-sub" style="opacity:0.4;color:#ffffff;">Slightly bullish</div>
+        <div class="metric-bar" style="background:rgba(255,255,255,0.2) !important;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHART -->
+
+  <div class="sec">
+    <div class="sec-label">S&amp;P 500 · 30 Day</div>
+    <div class="chart-wrap">
+      <div class="chart-header">
+        <span class="chart-title">SPX · 5,842.10 <span class="up" style="font-size:0.55rem;">&#9650; 0.8%</span></span>
+        <div class="chart-toggles">
+          <span class="ctog">1W</span>
+          <span class="ctog active">1M</span>
+          <span class="ctog">3M</span>
+          <span class="ctog">1Y</span>
+        </div>
+      </div>
+      <svg class="chart-svg" viewBox="0 0 860 160" xmlns="http://www.w3.org/2000/svg" style="background:#000000 !important;">
+        <!-- Grid lines -->
+        <line x1="0" y1="40" x2="860" y2="40" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+        <line x1="0" y1="80" x2="860" y2="80" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+        <line x1="0" y1="120" x2="860" y2="120" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+        <!-- Y labels -->
+        <text x="0" y="37" font-family="JetBrains Mono" font-size="9" fill="rgba(255,255,255,0.2)">5,900</text>
+        <text x="0" y="77" font-family="JetBrains Mono" font-size="9" fill="rgba(255,255,255,0.2)">5,800</text>
+        <text x="0" y="117" font-family="JetBrains Mono" font-size="9" fill="rgba(255,255,255,0.2)">5,700</text>
+        <!-- Area fill -->
+        <defs>
+          <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#FF8400" stop-opacity="0.15"/>
+            <stop offset="100%" stop-color="#FF8400" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <path d="M50,110 C80,105 100,95 130,100 C160,105 180,115 210,108 C240,101 260,85 290,80 C320,75 340,90 370,85 C400,80 420,70 450,65 C480,60 500,75 530,68 C560,61 580,50 610,45 C640,40 660,55 690,52 C720,49 740,42 770,38 C800,34 830,40 860,36 L860,160 L50,160 Z" fill="url(#areaGrad)"/>
+        <!-- Line -->
+        <path d="M50,110 C80,105 100,95 130,100 C160,105 180,115 210,108 C240,101 260,85 290,80 C320,75 340,90 370,85 C400,80 420,70 450,65 C480,60 500,75 530,68 C560,61 580,50 610,45 C640,40 660,55 690,52 C720,49 740,42 770,38 C800,34 830,40 860,36" fill="none" stroke="#FF8400" stroke-width="1.5"/>
+        <!-- Current point -->
+        <circle cx="860" cy="36" r="3" fill="#FF8400"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- TOP MOVERS -->
+
+  <div class="sec" id="movers">
+    <div class="sec-label">Top Movers</div>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Symbol</th>
+          <th>Price</th>
+          <th>Week</th>
+          <th>Volume</th>
+          <th>7d Trend</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><div class="sym">NVDA</div><div class="sector">Semiconductors</div></td>
+          <td>$924.60</td>
+          <td class="up">&#9650; 11.2%</td>
+          <td>$48.3B</td>
+          <td>
+            <div class="mini-bar">
+              <div class="mbar" style="height:8px;background:#FF8400 !important;"></div>
+              <div class="mbar" style="height:12px;background:#FF8400 !important;"></div>
+              <div class="mbar" style="height:7px;background:#FF8400 !important;"></div>
+              <div class="mbar" style="height:16px;background:#FF8400 !important;"></div>
+              <div class="mbar" style="height:20px;background:#FF8400 !important;"></div>
+              <div class="mbar" style="height:18px;background:#FF8400 !important;"></div>
+              <div class="mbar" style="height:24px;background:#FF8400 !important;"></div>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><div class="sym">META</div><div class="sector">Social · AI</div></td>
+          <td>$612.40</td>
+          <td class="up">&#9650; 6.8%</td>
+          <td>$22.1B</td>
+          <td>
+            <div class="mini-bar">
+              <div class="mbar" style="height:10px;"></div>
+              <div class="mbar" style="height:14px;background:#FF8400 !important;"></div>
+              <div class="mbar" style="height:10px;background:#FF8400 !important;"></div>
+              <div class="mbar" style="height:16px;background:#FF8400 !important;"></div>
+              <div class="mbar" style="height:12px;background:#FF8400 !important;"></div>
+              <div class="mbar" style="height:18px;background:#FF8400 !important;"></div>
+              <div class="mbar" style="height:20px;background:#FF8400 !important;"></div>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><div class="sym">TSLA</div><div class="sector">EV · Energy</div></td>
+          <td>$238.80</td>
+          <td class="down">&#9660; 4.3%</td>
+          <td>$31.6B</td>
+          <td>
+            <div class="mini-bar">
+              <div class="mbar" style="height:20px;"></div>
+              <div class="mbar" style="height:16px;"></div>
+              <div class="mbar" style="height:18px;background:#0066FF !important;"></div>
+              <div class="mbar" style="height:12px;background:#0066FF !important;"></div>
+              <div class="mbar" style="height:14px;background:#0066FF !important;"></div>
+              <div class="mbar" style="height:10px;background:#0066FF !important;"></div>
+              <div class="mbar" style="height:8px;background:#0066FF !important;"></div>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><div class="sym">MSFT</div><div class="sector">Cloud · AI</div></td>
+          <td>$418.20</td>
+          <td class="up">&#9650; 2.1%</td>
+          <td>$18.4B</td>
+          <td>
+            <div class="mini-bar">
+              <div class="mbar" style="height:12px;"></div>
+              <div class="mbar" style="height:10px;background:#FF8400 !important;"></div>
+              <div class="mbar" style="height:14px;background:#FF8400 !important;"></div>
+              <div class="mbar" style="height:12px;background:#FF8400 !important;"></div>
+              <div class="mbar" style="height:16px;background:#FF8400 !important;"></div>
+              <div class="mbar" style="height:14px;background:#FF8400 !important;"></div>
+              <div class="mbar" style="height:16px;background:#FF8400 !important;"></div>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><div class="sym">INTC</div><div class="sector">Semiconductors</div></td>
+          <td>$21.40</td>
+          <td class="down">&#9660; 8.7%</td>
+          <td>$9.2B</td>
+          <td>
+            <div class="mini-bar">
+              <div class="mbar" style="height:22px;"></div>
+              <div class="mbar" style="height:18px;background:#0066FF !important;"></div>
+              <div class="mbar" style="height:20px;background:#0066FF !important;"></div>
+              <div class="mbar" style="height:14px;background:#0066FF !important;"></div>
+              <div class="mbar" style="height:12px;background:#0066FF !important;"></div>
+              <div class="mbar" style="height:10px;background:#0066FF !important;"></div>
+              <div class="mbar" style="height:6px;background:#0066FF !important;"></div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- SENTIMENT -->
+
+  <div class="sec">
+    <div class="sec-label">Sector Sentiment</div>
+    <div class="sentiment-wrap">
+      <div class="sentiment-cell">
+        <div class="sent-val">72</div>
+        <div class="sent-label">Technology</div>
+        <div class="sent-bar" style="background:#FF8400 !important;"></div>
+      </div>
+      <div class="sentiment-cell">
+        <div class="sent-val">58</div>
+        <div class="sent-label">Energy</div>
+        <div class="sent-bar" style="background:rgba(255,255,255,0.3) !important;"></div>
+      </div>
+      <div class="sentiment-cell">
+        <div class="sent-val">44</div>
+        <div class="sent-label">Financials</div>
+        <div class="sent-bar" style="background:rgba(255,255,255,0.2) !important;"></div>
+      </div>
+      <div class="sentiment-cell">
+        <div class="sent-val">31</div>
+        <div class="sent-label">Real Estate</div>
+        <div class="sent-bar" style="background:#0066FF !important;"></div>
+      </div>
+      <div class="sentiment-cell">
+        <div class="sent-val">65</div>
+        <div class="sent-label">Healthcare</div>
+        <div class="sent-bar" style="background:rgba(255,255,255,0.35) !important;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SIGNALS -->
+
+  <div class="sec" id="signals">
+    <div class="sec-label">Market Signals</div>
+
+    <div class="signal-row">
+      <div class="sig-icon" style="background:#FF8400 !important;"></div>
+      <div>
+        <div class="sig-title">AI Infrastructure spend accelerating</div>
+        <div class="sig-desc">Hyperscaler capex guidance up 22% YoY — NVDA, AMD supply chains tightening.</div>
+      </div>
+      <span class="sig-badge sig-bull">Bullish</span>
+    </div>
+
+    <div class="signal-row">
+      <div class="sig-icon" style="background:#FF8400 !important;"></div>
+      <div>
+        <div class="sig-title">Labor market remains resilient</div>
+        <div class="sig-desc">Jobless claims 4-week average at 212k — below recessionary thresholds.</div>
+      </div>
+      <span class="sig-badge sig-bull">Bullish</span>
+    </div>
+
+    <div class="signal-row">
+      <div class="sig-icon" style="background:#ffffff !important; opacity:0.4;"></div>
+      <div>
+        <div class="sig-title">Fed rhetoric mixed on rate path</div>
+        <div class="sig-desc">Two governors diverged on March cut probability. Markets pricing 48% odds.</div>
+      </div>
+      <span class="sig-badge sig-neutral">Neutral</span>
+    </div>
+
+    <div class="signal-row">
+      <div class="sig-icon" style="background:#0066FF !important;"></div>
+      <div>
+        <div class="sig-title">Consumer discretionary softening</div>
+        <div class="sig-desc">Retail sales missed est. by 0.4%. Credit card delinquencies rising at lower tiers.</div>
+      </div>
+      <span class="sig-badge sig-bear">Bearish</span>
+    </div>
+
+    <div class="signal-row">
+      <div class="sig-icon" style="background:#0066FF !important;"></div>
+      <div>
+        <div class="sig-title">China PMI contraction widening</div>
+        <div class="sig-desc">Manufacturing PMI fell to 48.2 — third consecutive month below 50.</div>
+      </div>
+      <span class="sig-badge sig-bear">Bearish</span>
+    </div>
+
+  </div>
+
+  <footer>
+    <span>BlackRoad OS, Inc. · Market Report · March 2, 2026</span>
+    <span>For informational purposes only · Not financial advice</span>
+  </footer>
+
+</div>
+
+<div class="grad-rule"></div>
+
+</body>
+</html>
