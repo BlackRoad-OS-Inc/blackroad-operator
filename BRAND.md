@@ -397,11 +397,6 @@ The visual motifs tell a story in sequence, mapping to the manifesto text:
 BlackRoad OS
 ```
 
-**Stylized:**
-```
-BlackRoad OS
-```
-
 **Abbreviation:**
 ```
 BR OS
@@ -409,9 +404,65 @@ BR OS
 
 **CLI Logo (brand.ts):**
 ```
- BlackRoad OS
+▙▟ BlackRoad OS
 ```
-Where  is rendered in Hot Pink + Amber gradient.
+Where `▙▟` is rendered in Hot Pink + Amber gradient.
+
+### Logo Lockups (Official App Icon System)
+
+The official BlackRoad OS app icon is the **B-Road Lockup**: a stylized gradient "B" lettermark with a road curving out of it and the BR Robot running in mid-stride.
+
+**Composition:**
+```
+┌─────────────────────────┐
+│                         │
+│     ╔══╗                │
+│     ║  ╠═══╗            │
+│     ║  B   ║   🏃 ← Robot running
+│     ║  ╠═══╝  ═══      │
+│     ╚══╝   Road →  - - │
+│                         │
+└─────────────────────────┘
+```
+
+**Key Elements:**
+- **The B**: Large gradient lettermark using the full brand spectrum (orange top to blue bottom). This IS the starting point. The road emerges FROM the letter.
+- **The Road**: A winding path with white dashed center line curves out of the B's openings and extends toward the right/forward. The road has no end -- it runs off-frame.
+- **The Robot**: BR Robot in running pose (mid-stride, one leg forward) positioned on the road ahead of the B. Running AWAY from the letter, toward the undefined path.
+- **Background**: Pure black (`#000000`). No background texture, no stars. Just the mark and the darkness.
+
+**Lockup Formats:**
+
+| Format | Shape | Use Case | Container |
+|--------|-------|----------|-----------|
+| **App Icon (Square)** | Rounded square | iOS, Android, desktop app, favicon | White 2px border, rounded corners |
+| **App Icon (Circle)** | Circle | Social avatars, profile images | White 2px border, circular crop |
+| **Banner (Wide)** | 16:9 or 3:1 landscape | Twitter/X header, GitHub social preview, OG image | No border, gradient B on left, road extends right |
+| **Favicon** | 16x16 / 32x32 square | Browser tab | B lettermark only (no robot at this scale) |
+| **Monochrome** | Any | Print, watermarks, dark UI | White on black, no gradient |
+
+**Lockup Rules:**
+- The B is ALWAYS on the left. The road ALWAYS goes right.
+- The robot is ALWAYS running -- never standing still in the lockup.
+- The gradient on the B runs top-to-bottom: orange/amber at top, hot pink in middle, violet/blue at bottom.
+- The road's dashed center line is white.
+- White border on icon formats only (not banners).
+- At favicon scale (16px), drop the robot and road -- use the B lettermark alone.
+- Never rotate, skew, or distort the lockup.
+- Never place on light backgrounds -- the lockup exists on black.
+
+### The City-as-Infrastructure
+
+In the definitive tuk-tuk hero shot, the neon city buildings ARE server racks. The cityscape is not decorative -- it IS the infrastructure:
+
+- Buildings have glowing neon windows in brand gradient colors (amber, pink, violet, blue)
+- BR signs appear on building facades like business signs
+- Server rack patterns (horizontal LED rows) visible in building structures
+- The road runs through the center of the server-city with white lane markings
+- The BR tuk-tuk has a lit "BR" sign on its roof (like a taxi sign)
+- Crescent moon above confirms the always-night setting
+
+This visual establishes that BlackRoad's city IS its infrastructure. The agents don't live in the city and use separate servers -- the city itself is made of servers. Living and computing are the same thing.
 
 ---
 
