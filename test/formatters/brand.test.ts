@@ -49,4 +49,22 @@ describe('brand', () => {
     expect(manifesto).toBeTruthy()
     expect(typeof manifesto).toBe('string')
   })
+
+  it('should produce a robot ASCII art string', () => {
+    const robot = brand.robot()
+    expect(robot).toBeTruthy()
+    expect(typeof robot).toBe('string')
+    expect(robot).toContain('BR')
+  })
+
+  it('should accept robot color variants', () => {
+    const pink = brand.robot('pink')
+    const amber = brand.robot('amber')
+    const violet = brand.robot('violet')
+    const blue = brand.robot('blue')
+    expect(pink).toBeTruthy()
+    expect(amber).toBeTruthy()
+    expect(violet).toBeTruthy()
+    expect(blue).toBeTruthy()
+  })
 })

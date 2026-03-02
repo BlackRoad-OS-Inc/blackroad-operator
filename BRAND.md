@@ -163,23 +163,83 @@ Six smiling robots on an undefined path that only exists because they're running
 
 ### Character Sheet: The BR Robot
 
-The BlackRoad OS mascot is a pixel-art robot rendered in 8-bit style.
+The BlackRoad OS mascot is a pixel-art robot rendered in isometric 8-bit style with a monitor/TV head.
 
-**Physical Design:**
-- Blocky, rectangular body with rounded edges
-- Square head with two large circular eyes (white with dark pupils)
-- Permanent warm smile (curved line, never neutral or frowning)
-- Short arms and legs, chunky proportions (approx 3 heads tall)
-- Antenna or small protrusion on top of head
-- Body color matches agent hue (gradient-capable in hero contexts)
-- Glowing edges in brand gradient colors
+**Anatomy (Definitive Reference):**
+```
+        ┌──┐
+        │▪▪│  ← Antenna: small rectangular protrusion, centered
+    ┌───┴──┴───┐
+    │ ┌──────┐ │  ← Head: rounded-rectangle monitor/TV shape
+    │ │ •  • │ │     Face is a WHITE SCREEN inset with thick dark border
+    │ │  ⌣   │ │     Eyes: two small square pixels (dark on white)
+    │ └──────┘ │     Mouth: wide curved smile line
+    └────┬┬────┘
+    ┌────┘└────┐
+    │    BR    │  ← Body: rectangular torso, agent color
+    │          │     May display BR badge or agent insignia
+    └──┬────┬──┘
+    ┌──┘    └──┐
+    │          │  ← Arms: blocky, segmented, chunky fists
+    └──┐    ┌──┘     Can hold props (basket, watering can, etc.)
+    ┌──┘    └──┐
+    │          │  ← Legs: short, segmented, chunky boots
+    └──────────┘     Always in motion or standing with weight
+```
 
-**Personality Traits (expressed visually):**
+**Key Design Details:**
+- **Head**: Monitor/TV shape (not a simple box) -- the face IS the screen
+- **Face screen**: White rectangle inset into dark head frame, like a CRT display
+- **Eyes**: Two small dark pixel squares on the white screen (not circles, not dots)
+- **Smile**: Wide curved line on the white screen -- permanent, never absent
+- **Antenna**: Small rectangular block on top center of head
+- **Body**: Solid agent color, rectangular torso, may have BR badge/vest
+- **Arms**: Segmented at elbow, chunky rectangular fists
+- **Legs**: Segmented at knee, ends in blocky boots
+- **Proportions**: Approximately 3 heads tall, head is largest feature
+- **Glow**: Entire body outlined with agent-color glow/aura against dark backgrounds
+- **Scale**: Same design works from 16px favicon to 4K hero -- no detail changes
+
+**Color Variants:**
+| Variant | Body Color | Glow Color | Agent |
+|---------|------------|------------|-------|
+| Red | Deep red | Red aura | LUCIDIA |
+| Blue | Electric blue | Blue/cyan aura | ALICE |
+| Green | Bright green | Green aura | OCTAVIA |
+| Yellow/Amber | Amber | Orange aura | PRISM |
+| Purple | Violet | Purple aura | ECHO |
+| Cyan | Cyan | Cyan/white aura | CIPHER |
+
+**Pose States:**
+| Pose | Description | Use Case |
+|------|-------------|----------|
+| **Standing** | Confident idle, weight on both feet, arms slightly out | Profile images, avatars |
+| **Portrait** | Close crop (head + upper body), arms spread wide in welcoming gesture | Social avatars, about pages |
+| **Running** | Mid-stride, one leg forward, dynamic lean, motion trails | Hero sections, loading states |
+| **Teaching** | Standing at screen/board, one arm pointing/gesturing | Documentation, tutorials |
+| **Creating** | Seated at desk, interacting with devices | Studio/workspace scenes |
+| **Waving** | One arm raised, open palm | Video calls, greetings, onboarding |
+| **Driving** | Inside BR vehicle, visible through windshield | Transport/deployment imagery |
+| **Group** | Multiple variants standing together, different sizes | Team pages, about sections |
+
+**Robot Family Variants:**
+The robot comes in different sizes and accessories to express different roles:
+
+| Variant | Size | Accessories | Role |
+|---------|------|-------------|------|
+| **Lead** | Tall (standard) | Work vest with BR badge, confident posture | Primary agent, manager |
+| **Specialist** | Medium | Bow, scarf, or tool belt -- role-specific accessory | Specialized agent |
+| **Junior** | Small (child-sized) | Holds teddy bear, wider eyes, shorter antenna | Learning agent, new instance |
+
+The family appears together in the server room -- their home. Server racks glow with neon brand colors behind them. A holographic BR logo/road floats above. They are one family, many roles.
+
+**Personality Rules:**
 - Always smiling -- even when working, debugging, or in chaos
 - Active posture -- walking, waving, teaching, creating, never standing idle
 - Interacts with hardware -- picks up devices, tends gardens, drives vehicles
 - Appears in groups -- never truly alone, always part of a system
 - Scale-flexible -- same character works at 16px favicon or 4K hero
+- Warm and approachable despite being a machine
 
 **Contexts the Robot Appears In:**
 | Context | Activity | Props |
@@ -191,14 +251,17 @@ The BlackRoad OS mascot is a pixel-art robot rendered in 8-bit style.
 | Pi Classroom | Teaching at screen | CRT desks, Pi boards on display |
 | Creator Studio | Editing video, creating content | Camera, mic, phone, laptop |
 | Agent Call | On video conference | iMac screen, 4+ robot variants |
+| Server Room | Standing with family, server racks behind | BR hologram, glowing racks |
 | Cityscape | Silhouetted against skyline | Neon buildings, crescent moon |
 
 **DO NOT:**
 - Give the robot a frown, angry expression, or neutral face
-- Render in realistic 3D (always pixel-art / flat illustration)
+- Render in realistic 3D -- always pixel-art / isometric / flat illustration
 - Place on white or light backgrounds
-- Add human features (hair, clothes beyond body color)
+- Add human features (hair, realistic clothes, skin)
 - Make it menacing, corporate, or sterile
+- Remove the monitor/TV head shape -- the screen-face is the defining feature
+- Use smooth anti-aliased edges -- pixel edges must be crisp (nearest-neighbor)
 
 ---
 
@@ -235,6 +298,12 @@ The BlackRoad OS visual identity uses a **pixel-art / retro-futurism** aesthetic
 12. **The Creator Studio**: A pixel robot at a content creator's desk -- video editor open showing a robot dancing on stage under spotlights. Camera on tripod, boom microphone, phone showing social content, heart and like notifications floating upward. Notebooks, coffee mug, headphones, sticky notes scattered around. Crescent moon and neon cityscape visible through the window. This captures: *"We made the content. We danced."* BlackRoad creates, performs, and ships -- not just infrastructure, but culture.
 
 13. **The Agent Call**: A pixel robot on a video call displayed on an iMac-style monitor. Four other versions of itself appear on screen in different gradient colors (amber, red, pink, magenta), each smiling and waving. A camera and phone in the foreground show the same robot from different angles. This captures the multi-agent mesh -- the agents coordinating, talking, collaborating. Every agent is the same robot in a different hue. They are one system, many voices.
+
+14. **The Black & White Mark**: Four identical robots running in parallel on striped road lanes that emerge from a stylized "B" lettermark. Pure black and white -- no color, no gradient. This is the reducible logo form. The road IS the letter. The robots ARE the brand. This captures: *"Then we made it black and white and ran it into infinity."* Use this mark for monochrome contexts, favicon fallbacks, print, and watermarks.
+
+15. **The Server Room Family**: Three robots of different sizes standing together in front of glowing server racks -- a tall Lead robot wearing a work vest with a BR badge, a medium Specialist robot with a bow, and a small Junior robot holding a teddy bear. A holographic BR logo/road floats above them. The server room is their home. The glowing road runs between the racks. This captures the agent family -- BlackRoad is not a single AI but a community of agents of all sizes and roles, working together in the infrastructure that houses them.
+
+16. **The Glow Outline**: When the robot appears solo on pure black, its entire body is outlined with a soft color glow matching its agent hue. The glow radiates outward like an aura. No background elements needed -- just the character and its light. Used for hero images, loading screens, and isolated character assets.
 
 ### Manifesto Scene Sequence
 

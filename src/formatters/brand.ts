@@ -41,6 +41,29 @@ export const brand = {
       chalk.dim('© 2023-2026 BlackRoad OS, Inc. All Rights Reserved.')
   },
 
+  robot(color?: 'pink' | 'amber' | 'violet' | 'blue') {
+    const c = color === 'amber' ? this.amber
+      : color === 'violet' ? this.violet
+      : color === 'blue' ? this.electricBlue
+      : this.hotPink
+    return [
+      c('      ┌──┐'),
+      c('  ┌───┴──┴───┐'),
+      c('  │') + ' ┌──────┐ ' + c('│'),
+      c('  │') + ' │ ' + chalk.white('•  •') + ' │ ' + c('│'),
+      c('  │') + ' │  ' + chalk.white('⌣') + '   │ ' + c('│'),
+      c('  │') + ' └──────┘ ' + c('│'),
+      c('  └────┬┬────┘'),
+      c('  ┌────┘└────┐'),
+      c('  │') + chalk.bold('    BR    ') + c('│'),
+      c('  └──┬────┬──┘'),
+      c('  ┌──┘    └──┐'),
+      c('  └──┐    ┌──┘'),
+      c('  ┌──┘    └──┐'),
+      c('  └──────────┘'),
+    ].join('\n')
+  },
+
   manifesto() {
     return [
       this.header('BRAND MANIFESTO'),
