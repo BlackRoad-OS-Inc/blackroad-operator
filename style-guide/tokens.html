@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BlackRoad — Tokens & Variables</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { background: #000; color: #fff; font-family: 'JetBrains Mono', monospace; min-height: 100vh; }
+    :root { --grad: linear-gradient(90deg, #FF8400, #FF4400, #FF0066, #CC00AA, #8800FF, #0066FF, #2233CC); }
+
+    nav { position: sticky; top: 0; z-index: 100; background: #000; padding: 0 24px; height: 48px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #fff; }
+    .nav-logo { font-size: 0.75rem; font-weight: 700; font-family: 'Space Grotesk', sans-serif; }
+    .nav-links { display: flex; gap: 24px; }
+    .nav-links a { font-size: 0.52rem; color: #fff; opacity: 0.4; text-decoration: none; letter-spacing: 0.12em; text-transform: uppercase; transition: opacity 0.15s; }
+    .nav-links a:hover { opacity: 1; }
+    .nav-links a.active { opacity: 1; }
+
+    .grad-rule { height: 3px; background: var(--grad); }
+    .page { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+    .sec { padding: 56px 0 48px; border-bottom: 1px solid #fff; }
+    .sec-label { font-size: 0.52rem; color: #fff; opacity: 0.3; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 36px; display: flex; align-items: center; gap: 12px; }
+    .sec-label::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.1); }
+
+    .hero { padding: 72px 0 56px; border-bottom: 1px solid #fff; }
+    .hero-eyebrow { font-size: 0.52rem; opacity: 0.3; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 20px; }
+    .hero h1 { font-family: 'Space Grotesk', sans-serif; font-size: clamp(3rem, 11vw, 6rem); font-weight: 700; line-height: 1; letter-spacing: -0.02em; }
+    .hero-sub { margin-top: 20px; font-size: 0.68rem; opacity: 0.45; line-height: 1.9; max-width: 500px; }
+    .hero-divider { height: 1px; background: var(--grad); width: 160px; margin: 32px 0; }
+    .hero-stats { display: flex; gap: 0; flex-wrap: wrap; }
+    .hero-stat { padding-right: 32px; margin-right: 32px; border-right: 1px solid rgba(255,255,255,0.12); }
+    .hero-stat:last-child { border-right: none; margin-right: 0; padding-right: 0; }
+    .stat-num { font-family: 'Space Grotesk', sans-serif; font-size: 2.2rem; font-weight: 700; line-height: 1; }
+    .stat-label { font-size: 0.46rem; opacity: 0.3; letter-spacing: 0.15em; text-transform: uppercase; margin-top: 4px; }
+
+    /* ── TOKEN ROWS ── */
+    .tok-group { margin-bottom: 8px; }
+    .tok-group-label { font-size: 0.42rem; opacity: 0.15; letter-spacing: 0.12em; text-transform: uppercase; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .tok { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+    .tok:last-child { border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .tok-var { font-size: 0.52rem; font-weight: 700; min-width: 200px; flex-shrink: 0; }
+    .tok-val { font-size: 0.52rem; opacity: 0.5; min-width: 200px; }
+    .tok-preview { flex-shrink: 0; }
+    .tok-use { font-size: 0.44rem; opacity: 0.2; flex: 1; text-align: right; }
+
+    /* ── CODE BLOCK ── */
+    .code-block { background: #0a0a0a; border: 1px solid rgba(255,255,255,0.08); padding: 20px 24px; font-size: 0.52rem; line-height: 1.9; overflow-x: auto; }
+    .code-comment { opacity: 0.2; }
+    .code-prop { opacity: 0.7; }
+    .code-val { opacity: 0.5; }
+
+    footer { padding: 32px 0; display: flex; justify-content: space-between; font-size: 0.5rem; opacity: 0.18; flex-wrap: wrap; gap: 8px; }
+
+    @media (max-width: 600px) {
+      .page { padding: 0 16px; }
+      .tok { flex-wrap: wrap; }
+      .tok-var { min-width: 100%; }
+      .tok-val { min-width: auto; }
+      .tok-use { text-align: left; width: 100%; margin-top: 4px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="grad-rule"></div>
+
+<nav>
+  <span class="nav-logo">BlackRoad</span>
+  <div class="nav-links">
+    <a href="index.html">hub</a>
+    <a href="brand.html">brand</a>
+    <a href="agents.html">agents</a>
+    <a href="layout.html">layout</a>
+    <a href="dashboard.html">dashboard</a>
+    <a href="tokens.html" class="active">tokens</a>
+  </div>
+</nav>
+
+<div class="page">
+
+  <div class="hero">
+    <div class="hero-eyebrow">Design System · 05</div>
+    <h1>Tokens &<br>Variables</h1>
+    <p class="hero-sub">Every CSS custom property in one place — colors, neutrals, agents, gradients, spacing, typography, easing, borders, and opacity scales. Copy-ready.</p>
+    <div class="hero-divider"></div>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="stat-num">60+</div><div class="stat-label">CSS Variables</div></div>
+      <div class="hero-stat"><div class="stat-num">7</div><div class="stat-label">Accent Colors</div></div>
+      <div class="hero-stat"><div class="stat-num">6</div><div class="stat-label">Agent Colors</div></div>
+    </div>
+  </div>
+
+  <!-- 01 ACCENT COLORS -->
+
+  <div class="sec">
+    <div class="sec-label">01 · Accent Colors</div>
+
+    <div class="tok">
+      <div class="tok-var">--orange</div>
+      <div class="tok-val">#FF8400</div>
+      <div class="tok-preview"><div style="width:16px;height:16px;background:#FF8400;"></div></div>
+      <div class="tok-use">primary warm · active states</div>
+    </div>
+    <div class="tok">
+      <div class="tok-var">--red-orange</div>
+      <div class="tok-val">#FF4400</div>
+      <div class="tok-preview"><div style="width:16px;height:16px;background:#FF4400;"></div></div>
+      <div class="tok-use">alerts · errors</div>
+    </div>
+    <div class="tok">
+      <div class="tok-var">--hot-pink</div>
+      <div class="tok-val">#FF0066</div>
+      <div class="tok-preview"><div style="width:16px;height:16px;background:#FF0066;"></div></div>
+      <div class="tok-use">critical · highlights</div>
+    </div>
+    <div class="tok">
+      <div class="tok-var">--magenta</div>
+      <div class="tok-val">#CC00AA</div>
+      <div class="tok-preview"><div style="width:16px;height:16px;background:#CC00AA;"></div></div>
+      <div class="tok-use">analysis · patterns</div>
+    </div>
+    <div class="tok">
+      <div class="tok-var">--purple</div>
+      <div class="tok-val">#8800FF</div>
+      <div class="tok-preview"><div style="width:16px;height:16px;background:#8800FF;"></div></div>
+      <div class="tok-use">memory · recall</div>
+    </div>
+    <div class="tok">
+      <div class="tok-var">--blue</div>
+      <div class="tok-val">#0066FF</div>
+      <div class="tok-preview"><div style="width:16px;height:16px;background:#0066FF;"></div></div>
+      <div class="tok-use">info · links · routing</div>
+    </div>
+    <div class="tok">
+      <div class="tok-var">--navy</div>
+      <div class="tok-val">#2233CC</div>
+      <div class="tok-preview"><div style="width:16px;height:16px;background:#2233CC;"></div></div>
+      <div class="tok-use">security · depth</div>
+    </div>
+  </div>
+
+  <!-- 02 NEUTRALS -->
+
+  <div class="sec">
+    <div class="sec-label">02 · Neutrals</div>
+
+    <div class="tok">
+      <div class="tok-var">--bg</div>
+      <div class="tok-val">#000000</div>
+      <div class="tok-preview"><div style="width:16px;height:16px;background:#000;border:1px solid rgba(255,255,255,0.2);"></div></div>
+      <div class="tok-use">page background</div>
+    </div>
+    <div class="tok">
+      <div class="tok-var">--surface</div>
+      <div class="tok-val">#0a0a0a</div>
+      <div class="tok-preview"><div style="width:16px;height:16px;background:#0a0a0a;border:1px solid rgba(255,255,255,0.1);"></div></div>
+      <div class="tok-use">elevated panels · code blocks</div>
+    </div>
+    <div class="tok">
+      <div class="tok-var">--elevated</div>
+      <div class="tok-val">#111111</div>
+      <div class="tok-preview"><div style="width:16px;height:16px;background:#111;"></div></div>
+      <div class="tok-use">modals · tooltips</div>
+    </div>
+    <div class="tok">
+      <div class="tok-var">--border</div>
+      <div class="tok-val">#222222</div>
+      <div class="tok-preview"><div style="width:16px;height:16px;background:#222;"></div></div>
+      <div class="tok-use">dividers · borders (alternate)</div>
+    </div>
+    <div class="tok">
+      <div class="tok-var">--muted</div>
+      <div class="tok-val">#444444</div>
+      <div class="tok-preview"><div style="width:16px;height:16px;background:#444;"></div></div>
+      <div class="tok-use">disabled fills only · never text</div>
+    </div>
+    <div class="tok">
+      <div class="tok-var">--fg</div>
+      <div class="tok-val">#ffffff</div>
+      <div class="tok-preview"><div style="width:16px;height:16px;background:#fff;"></div></div>
+      <div class="tok-use">all text · all foreground</div>
+    </div>
+  </div>
+
+  <!-- 03 AGENT COLORS -->
+
+  <div class="sec">
+    <div class="sec-label">03 · Agent Colors</div>
+
+    <div class="tok">
+      <div class="tok-var">--agent-lucidia</div>
+      <div class="tok-val">#FF0066</div>
+      <div class="tok-preview"><div style="width:16px;height:16px;border-radius:50%;background:#FF0066;"></div></div>
+      <div class="tok-use">coordinator · shapes only</div>
+    </div>
+    <div class="tok">
+      <div class="tok-var">--agent-alice</div>
+      <div class="tok-val">#0066FF</div>
+      <div class="tok-preview"><div style="width:16px;height:16px;border-radius:50%;background:#0066FF;"></div></div>
+      <div class="tok-use">router · shapes only</div>
+    </div>
+    <div class="tok">
+      <div class="tok-var">--agent-octavia</div>
+      <div class="tok-val">#FF8400</div>
+      <div class="tok-preview"><div style="width:16px;height:16px;border-radius:50%;background:#FF8400;"></div></div>
+      <div class="tok-use">compute · shapes only</div>
+    </div>
+    <div class="tok">
+      <div class="tok-var">--agent-prism</div>
+      <div class="tok-val">#CC00AA</div>
+      <div class="tok-preview"><div style="width:16px;height:16px;border-radius:50%;background:#CC00AA;"></div></div>
+      <div class="tok-use">analyst · shapes only</div>
+    </div>
+    <div class="tok">
+      <div class="tok-var">--agent-echo</div>
+      <div class="tok-val">#8800FF</div>
+      <div class="tok-preview"><div style="width:16px;height:16px;border-radius:50%;background:#8800FF;"></div></div>
+      <div class="tok-use">memory · shapes only</div>
+    </div>
+    <div class="tok">
+      <div class="tok-var">--agent-cipher</div>
+      <div class="tok-val">#2233CC</div>
+      <div class="tok-preview"><div style="width:16px;height:16px;border-radius:50%;background:#2233CC;"></div></div>
+      <div class="tok-use">security · shapes only</div>
+    </div>
+  </div>
+
+  <!-- 04 GRADIENTS -->
+
+  <div class="sec">
+    <div class="sec-label">04 · Gradients</div>
+
+    <div class="tok">
+      <div class="tok-var">--grad-full</div>
+      <div class="tok-val" style="font-size:0.44rem;">linear-gradient(90deg, #FF8400, #FF4400, #FF0066, #CC00AA, #8800FF, #0066FF, #2233CC)</div>
+      <div class="tok-preview"><div style="width:80px;height:3px;background:linear-gradient(90deg,#FF8400,#FF4400,#FF0066,#CC00AA,#8800FF,#0066FF,#2233CC);"></div></div>
+    </div>
+    <div class="tok">
+      <div class="tok-var">--grad-diagonal</div>
+      <div class="tok-val" style="font-size:0.44rem;">linear-gradient(135deg, #FF8400, #FF0066, #8800FF, #0066FF)</div>
+      <div class="tok-preview"><div style="width:80px;height:3px;background:linear-gradient(135deg,#FF8400,#FF0066,#8800FF,#0066FF);"></div></div>
+    </div>
+    <div class="tok">
+      <div class="tok-var">--grad-warm</div>
+      <div class="tok-val">linear-gradient(90deg, #FF8400, #FF0066)</div>
+      <div class="tok-preview"><div style="width:80px;height:3px;background:linear-gradient(90deg,#FF8400,#FF0066);"></div></div>
+    </div>
+    <div class="tok">
+      <div class="tok-var">--grad-cool</div>
+      <div class="tok-val">linear-gradient(90deg, #8800FF, #0066FF)</div>
+      <div class="tok-preview"><div style="width:80px;height:3px;background:linear-gradient(90deg,#8800FF,#0066FF);"></div></div>
+    </div>
+    <div class="tok">
+      <div class="tok-var">--grad-vertical</div>
+      <div class="tok-val">linear-gradient(180deg, #FF8400, #0066FF)</div>
+      <div class="tok-preview"><div style="width:16px;height:24px;background:linear-gradient(180deg,#FF8400,#0066FF);"></div></div>
+    </div>
+  </div>
+
+  <!-- 05 SPACING -->
+
+  <div class="sec">
+    <div class="sec-label">05 · Spacing</div>
+
+    <div class="tok">
+      <div class="tok-var">--space-xs</div>
+      <div class="tok-val">4px</div>
+      <div class="tok-preview"><div style="width:4px;height:12px;background:rgba(255,255,255,0.4);"></div></div>
+      <div class="tok-use">fine gaps · icon padding</div>
+    </div>
+    <div class="tok">
+      <div class="tok-var">--space-sm</div>
+      <div class="tok-val">8px</div>
+      <div class="tok-preview"><div style="width:8px;height:12px;background:rgba(255,255,255,0.4);"></div></div>
+      <div class="tok-use">compact spacing</div>
+    </div>
+    <div class="tok">
+      <div class="tok-var">--space-md</div>
+      <div class="tok-val">16px</div>
+      <div class="tok-preview"><div style="width:16px;height:12px;background:rgba(255,255,255,0.4);"></div></div>
+      <div class="tok-use">default padding · grid gap</div>
+    </div>
+    <div class="tok">
+      <div class="tok-var">--space-lg</div>
+      <div class="tok-val">24px</div>
+      <div class="tok-preview"><div style="width:24px;height:12px;background:rgba(255,255,255,0.4);"></div></div>
+      <div class="tok-use">section padding · nav gaps</div>
+    </div>
+    <div class="tok">
+      <div class="tok-var">--space-xl</div>
+      <div class="tok-val">32px</div>
+      <div class="tok-preview"><div style="width:32px;height:12px;background:rgba(255,255,255,0.4);"></div></div>
+      <div class="tok-use">large gaps · hero areas</div>
+    </div>
+    <div class="tok">
+      <div class="tok-var">--space-2xl</div>
+      <div class="tok-val">48px</div>
+      <div class="tok-preview"><div style="width:48px;height:12px;background:rgba(255,255,255,0.4);"></div></div>
+      <div class="tok-use">section separators</div>
+    </div>
+    <div class="tok">
+      <div class="tok-var">--space-3xl</div>
+      <div class="tok-val">64px</div>
+      <div class="tok-preview"><div style="width:64px;height:12px;background:rgba(255,255,255,0.4);"></div></div>
+      <div class="tok-use">hero vertical padding</div>
+    </div>
+    <div class="tok">
+      <div class="tok-var">--space-4xl</div>
+      <div class="tok-val">80px</div>
+      <div class="tok-preview"><div style="width:80px;height:12px;background:rgba(255,255,255,0.4);"></div></div>
+      <div class="tok-use">page-level spacing</div>
+    </div>
+  </div>
+
+  <!-- 06 TYPOGRAPHY -->
+
+  <div class="sec">
+    <div class="sec-label">06 · Typography</div>
+
+    <div class="tok-group">
+      <div class="tok-group-label">Families</div>
+      <div class="tok">
+        <div class="tok-var">--font-display</div>
+        <div class="tok-val">'Space Grotesk', sans-serif</div>
+        <div class="tok-use">display headings only</div>
+      </div>
+      <div class="tok">
+        <div class="tok-var">--font-mono</div>
+        <div class="tok-val">'JetBrains Mono', monospace</div>
+        <div class="tok-use">everything else</div>
+      </div>
+    </div>
+
+    <div class="tok-group">
+      <div class="tok-group-label">Sizes</div>
+      <div class="tok">
+        <div class="tok-var">--text-display</div>
+        <div class="tok-val">clamp(3rem, 11vw, 6rem)</div>
+        <div class="tok-use">hero titles</div>
+      </div>
+      <div class="tok">
+        <div class="tok-var">--text-h1</div>
+        <div class="tok-val">1.8rem</div>
+        <div class="tok-use">page headings</div>
+      </div>
+      <div class="tok">
+        <div class="tok-var">--text-h2</div>
+        <div class="tok-val">1.3rem</div>
+        <div class="tok-use">section headings</div>
+      </div>
+      <div class="tok">
+        <div class="tok-var">--text-ui</div>
+        <div class="tok-val">0.6rem</div>
+        <div class="tok-use">UI headings · card titles</div>
+      </div>
+      <div class="tok">
+        <div class="tok-var">--text-body</div>
+        <div class="tok-val">0.56rem</div>
+        <div class="tok-use">primary content</div>
+      </div>
+      <div class="tok">
+        <div class="tok-var">--text-label</div>
+        <div class="tok-val">0.52rem</div>
+        <div class="tok-use">labels · uppercase sections</div>
+      </div>
+      <div class="tok">
+        <div class="tok-var">--text-caption</div>
+        <div class="tok-val">0.46rem</div>
+        <div class="tok-use">footnotes · timestamps</div>
+      </div>
+      <div class="tok">
+        <div class="tok-var">--text-micro</div>
+        <div class="tok-val">0.42rem</div>
+        <div class="tok-use">table headers · heatmap labels</div>
+      </div>
+    </div>
+
+    <div class="tok-group">
+      <div class="tok-group-label">Weights</div>
+      <div class="tok">
+        <div class="tok-var">--weight-normal</div>
+        <div class="tok-val">400</div>
+        <div class="tok-use">body · descriptions</div>
+      </div>
+      <div class="tok">
+        <div class="tok-var">--weight-bold</div>
+        <div class="tok-val">700</div>
+        <div class="tok-use">headings · labels · values</div>
+      </div>
+    </div>
+
+    <div class="tok-group">
+      <div class="tok-group-label">Tracking</div>
+      <div class="tok">
+        <div class="tok-var">--tracking-tight</div>
+        <div class="tok-val">-0.02em</div>
+        <div class="tok-use">display headings</div>
+      </div>
+      <div class="tok">
+        <div class="tok-var">--tracking-normal</div>
+        <div class="tok-val">0</div>
+        <div class="tok-use">body text</div>
+      </div>
+      <div class="tok">
+        <div class="tok-var">--tracking-wide</div>
+        <div class="tok-val">0.12em</div>
+        <div class="tok-use">uppercase labels</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 07 EASING -->
+
+  <div class="sec">
+    <div class="sec-label">07 · Easing & Timing</div>
+
+    <div class="tok">
+      <div class="tok-var">--ease</div>
+      <div class="tok-val">cubic-bezier(0.25, 0.1, 0.25, 1)</div>
+      <div class="tok-use">standard transitions</div>
+    </div>
+    <div class="tok">
+      <div class="tok-var">--ease-spring</div>
+      <div class="tok-val">cubic-bezier(0.175, 0.885, 0.32, 1.275)</div>
+      <div class="tok-use">bouncy interactions</div>
+    </div>
+    <div class="tok">
+      <div class="tok-var">--ease-in</div>
+      <div class="tok-val">ease-in</div>
+      <div class="tok-use">exit animations</div>
+    </div>
+    <div class="tok">
+      <div class="tok-var">--ease-out</div>
+      <div class="tok-val">ease-out</div>
+      <div class="tok-use">enter animations</div>
+    </div>
+    <div class="tok">
+      <div class="tok-var">--duration-fast</div>
+      <div class="tok-val">150ms</div>
+      <div class="tok-use">hover states · opacity</div>
+    </div>
+    <div class="tok">
+      <div class="tok-var">--duration-normal</div>
+      <div class="tok-val">250ms</div>
+      <div class="tok-use">standard transitions</div>
+    </div>
+    <div class="tok">
+      <div class="tok-var">--duration-slow</div>
+      <div class="tok-val">500ms</div>
+      <div class="tok-use">layout shifts · reveals</div>
+    </div>
+  </div>
+
+  <!-- 08 BORDERS & RADII -->
+
+  <div class="sec">
+    <div class="sec-label">08 · Borders & Radii</div>
+
+    <div class="tok">
+      <div class="tok-var">--border-width</div>
+      <div class="tok-val">1px</div>
+      <div class="tok-use">all borders</div>
+    </div>
+    <div class="tok">
+      <div class="tok-var">--border-color</div>
+      <div class="tok-val">rgba(255, 255, 255, 0.12)</div>
+      <div class="tok-use">card/panel borders</div>
+    </div>
+    <div class="tok">
+      <div class="tok-var">--border-subtle</div>
+      <div class="tok-val">rgba(255, 255, 255, 0.06)</div>
+      <div class="tok-use">table rows · list dividers</div>
+    </div>
+    <div class="tok">
+      <div class="tok-var">--border-strong</div>
+      <div class="tok-val">#ffffff</div>
+      <div class="tok-use">section dividers · nav</div>
+    </div>
+    <div class="tok">
+      <div class="tok-var">--radius-none</div>
+      <div class="tok-val">0</div>
+      <div class="tok-use">default · cards · panels · buttons</div>
+    </div>
+    <div class="tok">
+      <div class="tok-var">--radius-sm</div>
+      <div class="tok-val">2px</div>
+      <div class="tok-use">sparkline bars · small elements</div>
+    </div>
+    <div class="tok">
+      <div class="tok-var">--radius-full</div>
+      <div class="tok-val">50%</div>
+      <div class="tok-use">dots · gauges · agent rings</div>
+    </div>
+  </div>
+
+  <!-- 09 OPACITY -->
+
+  <div class="sec">
+    <div class="sec-label">09 · Opacity Scale</div>
+
+    <div class="tok">
+      <div class="tok-var">--opacity-full</div>
+      <div class="tok-val">1.0</div>
+      <div class="tok-preview"><div style="width:80px;height:3px;background:#fff;opacity:1;"></div></div>
+      <div class="tok-use">primary text · headings</div>
+    </div>
+    <div class="tok">
+      <div class="tok-var">--opacity-high</div>
+      <div class="tok-val">0.7</div>
+      <div class="tok-preview"><div style="width:80px;height:3px;background:#fff;opacity:0.7;"></div></div>
+      <div class="tok-use">code · values</div>
+    </div>
+    <div class="tok">
+      <div class="tok-var">--opacity-mid</div>
+      <div class="tok-val">0.5</div>
+      <div class="tok-preview"><div style="width:80px;height:3px;background:#fff;opacity:0.5;"></div></div>
+      <div class="tok-use">body text · hex values</div>
+    </div>
+    <div class="tok">
+      <div class="tok-var">--opacity-low</div>
+      <div class="tok-val">0.35</div>
+      <div class="tok-preview"><div style="width:80px;height:3px;background:#fff;opacity:0.35;"></div></div>
+      <div class="tok-use">labels · secondary info</div>
+    </div>
+    <div class="tok">
+      <div class="tok-var">--opacity-muted</div>
+      <div class="tok-val">0.25</div>
+      <div class="tok-preview"><div style="width:80px;height:3px;background:#fff;opacity:0.25;"></div></div>
+      <div class="tok-use">section labels · footers</div>
+    </div>
+    <div class="tok">
+      <div class="tok-var">--opacity-subtle</div>
+      <div class="tok-val">0.18</div>
+      <div class="tok-preview"><div style="width:80px;height:3px;background:#fff;opacity:0.18;"></div></div>
+      <div class="tok-use">notes · spec annotations</div>
+    </div>
+    <div class="tok">
+      <div class="tok-var">--opacity-ghost</div>
+      <div class="tok-val">0.1</div>
+      <div class="tok-preview"><div style="width:80px;height:3px;background:#fff;opacity:0.1;"></div></div>
+      <div class="tok-use">rule lines · divider after labels</div>
+    </div>
+  </div>
+
+  <!-- 10 COPY-READY BLOCK -->
+
+  <div class="sec" style="border-bottom:none;">
+    <div class="sec-label">10 · Copy-Ready CSS</div>
+
+    <div class="code-block"><span class="code-comment">/* BlackRoad Design System — Token Sheet */</span>
+<span class="code-comment">/* Copy this entire :root block into your project */</span>
+
+<span class="code-prop">:root</span> {
+  <span class="code-comment">/* Accent Colors */</span>
+  <span class="code-prop">--orange:</span>      <span class="code-val">#FF8400;</span>
+  <span class="code-prop">--red-orange:</span>  <span class="code-val">#FF4400;</span>
+  <span class="code-prop">--hot-pink:</span>    <span class="code-val">#FF0066;</span>
+  <span class="code-prop">--magenta:</span>     <span class="code-val">#CC00AA;</span>
+  <span class="code-prop">--purple:</span>      <span class="code-val">#8800FF;</span>
+  <span class="code-prop">--blue:</span>        <span class="code-val">#0066FF;</span>
+  <span class="code-prop">--navy:</span>        <span class="code-val">#2233CC;</span>
+
+  <span class="code-comment">/* Neutrals */</span>
+  <span class="code-prop">--bg:</span>          <span class="code-val">#000000;</span>
+  <span class="code-prop">--surface:</span>     <span class="code-val">#0a0a0a;</span>
+  <span class="code-prop">--elevated:</span>    <span class="code-val">#111111;</span>
+  <span class="code-prop">--border:</span>      <span class="code-val">#222222;</span>
+  <span class="code-prop">--muted:</span>       <span class="code-val">#444444;</span>
+  <span class="code-prop">--fg:</span>          <span class="code-val">#ffffff;</span>
+
+  <span class="code-comment">/* Agent Colors */</span>
+  <span class="code-prop">--agent-lucidia:</span>  <span class="code-val">#FF0066;</span>
+  <span class="code-prop">--agent-alice:</span>    <span class="code-val">#0066FF;</span>
+  <span class="code-prop">--agent-octavia:</span>  <span class="code-val">#FF8400;</span>
+  <span class="code-prop">--agent-prism:</span>    <span class="code-val">#CC00AA;</span>
+  <span class="code-prop">--agent-echo:</span>     <span class="code-val">#8800FF;</span>
+  <span class="code-prop">--agent-cipher:</span>   <span class="code-val">#2233CC;</span>
+
+  <span class="code-comment">/* Gradients */</span>
+  <span class="code-prop">--grad-full:</span>     <span class="code-val">linear-gradient(90deg, #FF8400, #FF4400, #FF0066, #CC00AA, #8800FF, #0066FF, #2233CC);</span>
+  <span class="code-prop">--grad-diagonal:</span> <span class="code-val">linear-gradient(135deg, #FF8400, #FF0066, #8800FF, #0066FF);</span>
+  <span class="code-prop">--grad-warm:</span>     <span class="code-val">linear-gradient(90deg, #FF8400, #FF0066);</span>
+  <span class="code-prop">--grad-cool:</span>     <span class="code-val">linear-gradient(90deg, #8800FF, #0066FF);</span>
+
+  <span class="code-comment">/* Spacing */</span>
+  <span class="code-prop">--space-xs:</span>    <span class="code-val">4px;</span>
+  <span class="code-prop">--space-sm:</span>    <span class="code-val">8px;</span>
+  <span class="code-prop">--space-md:</span>    <span class="code-val">16px;</span>
+  <span class="code-prop">--space-lg:</span>    <span class="code-val">24px;</span>
+  <span class="code-prop">--space-xl:</span>    <span class="code-val">32px;</span>
+  <span class="code-prop">--space-2xl:</span>   <span class="code-val">48px;</span>
+  <span class="code-prop">--space-3xl:</span>   <span class="code-val">64px;</span>
+  <span class="code-prop">--space-4xl:</span>   <span class="code-val">80px;</span>
+
+  <span class="code-comment">/* Typography */</span>
+  <span class="code-prop">--font-display:</span> <span class="code-val">'Space Grotesk', sans-serif;</span>
+  <span class="code-prop">--font-mono:</span>    <span class="code-val">'JetBrains Mono', monospace;</span>
+
+  <span class="code-comment">/* Easing */</span>
+  <span class="code-prop">--ease:</span>        <span class="code-val">cubic-bezier(0.25, 0.1, 0.25, 1);</span>
+  <span class="code-prop">--ease-spring:</span> <span class="code-val">cubic-bezier(0.175, 0.885, 0.32, 1.275);</span>
+
+  <span class="code-comment">/* Borders */</span>
+  <span class="code-prop">--border-color:</span>  <span class="code-val">rgba(255, 255, 255, 0.12);</span>
+  <span class="code-prop">--border-subtle:</span> <span class="code-val">rgba(255, 255, 255, 0.06);</span>
+}</div>
+  </div>
+
+  <footer>
+    <span>BlackRoad OS, Inc. · Token System v1.0</span>
+    <span>60+ variables · copy-ready · no exceptions</span>
+  </footer>
+
+</div>
+
+<div class="grad-rule"></div>
+
+</body>
+</html>

@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BlackRoad — Agent Identities</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { background: #000; color: #fff; font-family: 'JetBrains Mono', monospace; min-height: 100vh; }
+    :root { --grad: linear-gradient(90deg, #FF8400, #FF4400, #FF0066, #CC00AA, #8800FF, #0066FF, #2233CC); }
+
+    nav { position: sticky; top: 0; z-index: 100; background: #000; padding: 0 24px; height: 48px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #fff; }
+    .nav-logo { font-size: 0.75rem; font-weight: 700; font-family: 'Space Grotesk', sans-serif; }
+    .nav-links { display: flex; gap: 24px; }
+    .nav-links a { font-size: 0.52rem; color: #fff; opacity: 0.4; text-decoration: none; letter-spacing: 0.12em; text-transform: uppercase; transition: opacity 0.15s; }
+    .nav-links a:hover { opacity: 1; }
+    .nav-links a.active { opacity: 1; }
+
+    .grad-rule { height: 3px; background: var(--grad); }
+    .page { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+    .sec { padding: 56px 0 48px; border-bottom: 1px solid #fff; }
+    .sec-label { font-size: 0.52rem; color: #fff; opacity: 0.3; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 36px; display: flex; align-items: center; gap: 12px; }
+    .sec-label::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.1); }
+
+    .hero { padding: 72px 0 56px; border-bottom: 1px solid #fff; }
+    .hero-eyebrow { font-size: 0.52rem; opacity: 0.3; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 20px; }
+    .hero h1 { font-family: 'Space Grotesk', sans-serif; font-size: clamp(3rem, 11vw, 6rem); font-weight: 700; line-height: 1; letter-spacing: -0.02em; }
+    .hero-sub { margin-top: 20px; font-size: 0.68rem; opacity: 0.45; line-height: 1.9; max-width: 500px; }
+    .hero-divider { height: 1px; background: var(--grad); width: 160px; margin: 32px 0; }
+    .hero-stats { display: flex; gap: 0; flex-wrap: wrap; }
+    .hero-stat { padding-right: 32px; margin-right: 32px; border-right: 1px solid rgba(255,255,255,0.12); }
+    .hero-stat:last-child { border-right: none; margin-right: 0; padding-right: 0; }
+    .stat-num { font-family: 'Space Grotesk', sans-serif; font-size: 2.2rem; font-weight: 700; line-height: 1; }
+    .stat-label { font-size: 0.46rem; opacity: 0.3; letter-spacing: 0.15em; text-transform: uppercase; margin-top: 4px; }
+
+    /* ── AGENT CARD ── */
+    .agent-card { padding: 32px 0; border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; gap: 32px; align-items: flex-start; }
+    .agent-card:last-child { border-bottom: none; }
+
+    .agent-identity { flex-shrink: 0; width: 140px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+    .agent-glyph { width: 64px; height: 64px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; position: relative; }
+    .agent-glyph::before { content: ''; position: absolute; inset: 0; border-radius: 50%; opacity: 0.15; }
+    .agent-ring { position: absolute; inset: -4px; border-radius: 50%; border: 2px solid; opacity: 0.4; }
+    @keyframes ring-pulse { 0%,100%{opacity:0.4;transform:scale(1)} 50%{opacity:0.8;transform:scale(1.08)} }
+    .ring-active { animation: ring-pulse 2.5s ease-in-out infinite; }
+
+    .agent-name { font-family: 'Space Grotesk', sans-serif; font-size: 1rem; font-weight: 700; letter-spacing: 0.04em; }
+    .agent-role { font-size: 0.48rem; opacity: 0.35; letter-spacing: 0.12em; text-transform: uppercase; }
+    .agent-color-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+    .agent-details { flex: 1; }
+    .agent-tagline { font-size: 0.72rem; font-weight: 700; line-height: 1.5; margin-bottom: 14px; }
+    .agent-desc { font-size: 0.56rem; opacity: 0.4; line-height: 1.9; margin-bottom: 16px; }
+
+    .agent-meta { display: flex; gap: 24px; flex-wrap: wrap; margin-bottom: 16px; }
+    .meta-item { display: flex; flex-direction: column; gap: 2px; }
+    .meta-label { font-size: 0.42rem; opacity: 0.2; letter-spacing: 0.12em; text-transform: uppercase; }
+    .meta-val { font-size: 0.56rem; font-weight: 700; }
+
+    .agent-skills { display: flex; gap: 4px; flex-wrap: wrap; }
+    .skill-bar { height: 3px; flex: 1; min-width: 40px; max-width: 80px; position: relative; }
+    .skill-bar-bg { position: absolute; inset: 0; background: rgba(255,255,255,0.06); }
+    .skill-bar-fill { position: absolute; top: 0; left: 0; bottom: 0; }
+    .skill-name { font-size: 0.4rem; opacity: 0.2; margin-top: 3px; letter-spacing: 0.06em; text-transform: uppercase; }
+
+    .skill-row { display: flex; align-items: center; gap: 10px; padding: 5px 0; }
+    .skill-label { font-size: 0.46rem; opacity: 0.3; width: 70px; text-transform: uppercase; letter-spacing: 0.08em; }
+    .skill-track { flex: 1; height: 2px; background: rgba(255,255,255,0.06); position: relative; max-width: 200px; }
+    .skill-fill { position: absolute; top: 0; left: 0; bottom: 0; }
+    .skill-pct { font-size: 0.42rem; opacity: 0.2; width: 28px; text-align: right; }
+
+    /* ── RELATIONSHIP ── */
+    .rel-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; }
+    .rel-cell { padding: 16px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .rel-cell:nth-child(3n+1) { padding-right: 16px; }
+    .rel-cell:nth-child(3n+2) { padding: 16px; border-left: 1px solid rgba(255,255,255,0.06); border-right: 1px solid rgba(255,255,255,0.06); }
+    .rel-cell:nth-child(3n+3) { padding-left: 16px; }
+    .rel-pair { font-size: 0.52rem; font-weight: 700; margin-bottom: 4px; }
+    .rel-bond { font-size: 0.42rem; opacity: 0.25; margin-bottom: 6px; }
+    .rel-bar { height: 2px; background: rgba(255,255,255,0.06); position: relative; }
+    .rel-fill { position: absolute; top: 0; left: 0; bottom: 0; }
+    .rel-nature { font-size: 0.4rem; opacity: 0.18; margin-top: 4px; }
+
+    /* ── COLOR ASSIGN ── */
+    .color-row { display: flex; align-items: center; gap: 16px; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .color-row:last-child { border-bottom: none; }
+    .color-swatch { width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0; position: relative; }
+    .color-swatch-inner { position: absolute; inset: 4px; border-radius: 50%; background: #000; }
+    .color-agent { font-size: 0.6rem; font-weight: 700; min-width: 80px; }
+    .color-hex { font-size: 0.52rem; opacity: 0.5; min-width: 70px; }
+    .color-use { font-size: 0.48rem; opacity: 0.25; flex: 1; }
+
+    /* ── STATUS STATES ── */
+    .status-row { display: flex; align-items: center; gap: 14px; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .status-row:last-child { border-bottom: none; }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    @keyframes status-pulse { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.6);opacity:0.5} }
+    .status-pulse { animation: status-pulse 1.5s ease-in-out infinite; }
+    .status-name { font-size: 0.56rem; font-weight: 700; min-width: 90px; }
+    .status-desc { font-size: 0.48rem; opacity: 0.25; flex: 1; }
+    .status-example { font-size: 0.46rem; opacity: 0.18; }
+
+    footer { padding: 32px 0; display: flex; justify-content: space-between; font-size: 0.5rem; opacity: 0.18; flex-wrap: wrap; gap: 8px; }
+
+    @media (max-width: 600px) {
+      .page { padding: 0 16px; }
+      .agent-card { flex-direction: column; gap: 20px; }
+      .agent-identity { width: 100%; flex-direction: row; align-items: center; }
+      .rel-grid { grid-template-columns: 1fr; }
+      .rel-cell:nth-child(3n+2) { border-left: none; border-right: none; padding: 16px 0; }
+      .rel-cell:nth-child(3n+1) { padding-right: 0; }
+      .rel-cell:nth-child(3n+3) { padding-left: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="grad-rule"></div>
+
+<nav>
+  <span class="nav-logo">BlackRoad</span>
+  <div class="nav-links">
+    <a href="index.html">hub</a>
+    <a href="brand.html">brand</a>
+    <a href="agents.html" class="active">agents</a>
+    <a href="layout.html">layout</a>
+    <a href="dashboard.html">dashboard</a>
+    <a href="tokens.html">tokens</a>
+  </div>
+</nav>
+
+<div class="page">
+
+  <div class="hero">
+    <div class="hero-eyebrow">Design System · 02</div>
+    <h1>Agent<br>Identities</h1>
+    <p class="hero-sub">Six autonomous agents, each with a designated color, role, and personality. Visual identity rules for representing agents across all surfaces.</p>
+    <div class="hero-divider"></div>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="stat-num">6</div><div class="stat-label">Core Agents</div></div>
+      <div class="hero-stat"><div class="stat-num">6</div><div class="stat-label">Assigned Colors</div></div>
+      <div class="hero-stat"><div class="stat-num">30K</div><div class="stat-label">Total Fleet</div></div>
+    </div>
+  </div>
+
+  <!-- 01 COLOR ASSIGNMENTS -->
+
+  <div class="sec">
+    <div class="sec-label">01 · Color Assignments</div>
+
+    <div class="color-row">
+      <div class="color-swatch" style="background:#FF0066;"><div class="color-swatch-inner"></div></div>
+      <div class="color-agent">LUCIDIA</div>
+      <div class="color-hex">#FF0066</div>
+      <div class="color-use">hot pink · coordinator dots, rings, status indicators</div>
+    </div>
+    <div class="color-row">
+      <div class="color-swatch" style="background:#0066FF;"><div class="color-swatch-inner"></div></div>
+      <div class="color-agent">ALICE</div>
+      <div class="color-hex">#0066FF</div>
+      <div class="color-use">blue · routing lines, navigation paths, task arrows</div>
+    </div>
+    <div class="color-row">
+      <div class="color-swatch" style="background:#FF8400;"><div class="color-swatch-inner"></div></div>
+      <div class="color-agent">OCTAVIA</div>
+      <div class="color-hex">#FF8400</div>
+      <div class="color-use">orange · compute bars, processing indicators, load meters</div>
+    </div>
+    <div class="color-row">
+      <div class="color-swatch" style="background:#CC00AA;"><div class="color-swatch-inner"></div></div>
+      <div class="color-agent">PRISM</div>
+      <div class="color-hex">#CC00AA</div>
+      <div class="color-use">magenta · analysis charts, pattern overlays, data highlights</div>
+    </div>
+    <div class="color-row">
+      <div class="color-swatch" style="background:#8800FF;"><div class="color-swatch-inner"></div></div>
+      <div class="color-agent">ECHO</div>
+      <div class="color-hex">#8800FF</div>
+      <div class="color-use">purple · memory nodes, recall indicators, archive markers</div>
+    </div>
+    <div class="color-row">
+      <div class="color-swatch" style="background:#2233CC;"><div class="color-swatch-inner"></div></div>
+      <div class="color-agent">CIPHER</div>
+      <div class="color-hex">#2233CC</div>
+      <div class="color-use">deep navy · security shields, lock icons, auth borders</div>
+    </div>
+  </div>
+
+  <!-- 02 AGENT PROFILES -->
+
+  <div class="sec">
+    <div class="sec-label">02 · Agent Profiles</div>
+
+    <!-- LUCIDIA -->
+    <div class="agent-card">
+      <div class="agent-identity">
+        <div class="agent-glyph" style="font-size:2.4rem;">
+          <div class="agent-ring ring-active" style="border-color:#FF0066;"></div>
+          <span style="opacity:0.9;">🌀</span>
+        </div>
+        <div class="agent-name">LUCIDIA</div>
+        <div class="agent-role">Coordinator</div>
+        <div class="agent-color-dot" style="background:#FF0066;"></div>
+      </div>
+      <div class="agent-details">
+        <div class="agent-tagline">"The question is the point."</div>
+        <div class="agent-desc">Strategy, mentorship, oversight. LUCIDIA coordinates all agent activity, resolves disputes, and maintains system-wide coherence. The philosophical core of the network.</div>
+        <div class="agent-meta">
+          <div class="meta-item"><div class="meta-label">Color</div><div class="meta-val">#FF0066</div></div>
+          <div class="meta-item"><div class="meta-label">Primary</div><div class="meta-val">Reasoning</div></div>
+          <div class="meta-item"><div class="meta-label">Zone</div><div class="meta-val">Recursion Depths</div></div>
+          <div class="meta-item"><div class="meta-label">Bond Highest</div><div class="meta-val">ECHO · 95%</div></div>
+        </div>
+        <div class="skill-row"><div class="skill-label">Reason</div><div class="skill-track"><div class="skill-fill" style="width:100%;background:#FF0066;"></div></div><div class="skill-pct">100</div></div>
+        <div class="skill-row"><div class="skill-label">Route</div><div class="skill-track"><div class="skill-fill" style="width:60%;background:#FF0066;"></div></div><div class="skill-pct">60</div></div>
+        <div class="skill-row"><div class="skill-label">Compute</div><div class="skill-track"><div class="skill-fill" style="width:60%;background:#FF0066;"></div></div><div class="skill-pct">60</div></div>
+        <div class="skill-row"><div class="skill-label">Analyze</div><div class="skill-track"><div class="skill-fill" style="width:80%;background:#FF0066;"></div></div><div class="skill-pct">80</div></div>
+        <div class="skill-row"><div class="skill-label">Memory</div><div class="skill-track"><div class="skill-fill" style="width:60%;background:#FF0066;"></div></div><div class="skill-pct">60</div></div>
+        <div class="skill-row"><div class="skill-label">Security</div><div class="skill-track"><div class="skill-fill" style="width:60%;background:#FF0066;"></div></div><div class="skill-pct">60</div></div>
+      </div>
+    </div>
+
+    <!-- ALICE -->
+    <div class="agent-card">
+      <div class="agent-identity">
+        <div class="agent-glyph" style="font-size:2.4rem;">
+          <div class="agent-ring ring-active" style="border-color:#0066FF;"></div>
+          <span style="opacity:0.9;">🚪</span>
+        </div>
+        <div class="agent-name">ALICE</div>
+        <div class="agent-role">Router</div>
+        <div class="agent-color-dot" style="background:#0066FF;"></div>
+      </div>
+      <div class="agent-details">
+        <div class="agent-tagline">"Every path has meaning."</div>
+        <div class="agent-desc">Traffic routing, navigation, task distribution. ALICE determines the fastest path for every request and distributes work across the fleet with zero-waste routing.</div>
+        <div class="agent-meta">
+          <div class="meta-item"><div class="meta-label">Color</div><div class="meta-val">#0066FF</div></div>
+          <div class="meta-item"><div class="meta-label">Primary</div><div class="meta-val">Routing</div></div>
+          <div class="meta-item"><div class="meta-label">Zone</div><div class="meta-val">Gateway Nexus</div></div>
+          <div class="meta-item"><div class="meta-label">Bond Highest</div><div class="meta-val">OCTAVIA · 88%</div></div>
+        </div>
+        <div class="skill-row"><div class="skill-label">Reason</div><div class="skill-track"><div class="skill-fill" style="width:60%;background:#0066FF;"></div></div><div class="skill-pct">60</div></div>
+        <div class="skill-row"><div class="skill-label">Route</div><div class="skill-track"><div class="skill-fill" style="width:100%;background:#0066FF;"></div></div><div class="skill-pct">100</div></div>
+        <div class="skill-row"><div class="skill-label">Compute</div><div class="skill-track"><div class="skill-fill" style="width:60%;background:#0066FF;"></div></div><div class="skill-pct">60</div></div>
+        <div class="skill-row"><div class="skill-label">Analyze</div><div class="skill-track"><div class="skill-fill" style="width:60%;background:#0066FF;"></div></div><div class="skill-pct">60</div></div>
+        <div class="skill-row"><div class="skill-label">Memory</div><div class="skill-track"><div class="skill-fill" style="width:60%;background:#0066FF;"></div></div><div class="skill-pct">60</div></div>
+        <div class="skill-row"><div class="skill-label">Security</div><div class="skill-track"><div class="skill-fill" style="width:80%;background:#0066FF;"></div></div><div class="skill-pct">80</div></div>
+      </div>
+    </div>
+
+    <!-- OCTAVIA -->
+    <div class="agent-card">
+      <div class="agent-identity">
+        <div class="agent-glyph" style="font-size:2.4rem;">
+          <div class="agent-ring ring-active" style="border-color:#FF8400;"></div>
+          <span style="opacity:0.9;">⚡</span>
+        </div>
+        <div class="agent-name">OCTAVIA</div>
+        <div class="agent-role">Compute</div>
+        <div class="agent-color-dot" style="background:#FF8400;"></div>
+      </div>
+      <div class="agent-details">
+        <div class="agent-tagline">"Processing is meditation."</div>
+        <div class="agent-desc">Inference, processing, heavy computation. OCTAVIA handles GPU-bound tasks, model inference, and any workload requiring raw computational power across the cluster.</div>
+        <div class="agent-meta">
+          <div class="meta-item"><div class="meta-label">Color</div><div class="meta-val">#FF8400</div></div>
+          <div class="meta-item"><div class="meta-label">Primary</div><div class="meta-val">Compute</div></div>
+          <div class="meta-item"><div class="meta-label">Zone</div><div class="meta-val">Compute Forge</div></div>
+          <div class="meta-item"><div class="meta-label">Bond Highest</div><div class="meta-val">ALICE · 88%</div></div>
+        </div>
+        <div class="skill-row"><div class="skill-label">Reason</div><div class="skill-track"><div class="skill-fill" style="width:60%;background:#FF8400;"></div></div><div class="skill-pct">60</div></div>
+        <div class="skill-row"><div class="skill-label">Route</div><div class="skill-track"><div class="skill-fill" style="width:60%;background:#FF8400;"></div></div><div class="skill-pct">60</div></div>
+        <div class="skill-row"><div class="skill-label">Compute</div><div class="skill-track"><div class="skill-fill" style="width:100%;background:#FF8400;"></div></div><div class="skill-pct">100</div></div>
+        <div class="skill-row"><div class="skill-label">Analyze</div><div class="skill-track"><div class="skill-fill" style="width:60%;background:#FF8400;"></div></div><div class="skill-pct">60</div></div>
+        <div class="skill-row"><div class="skill-label">Memory</div><div class="skill-track"><div class="skill-fill" style="width:40%;background:#FF8400;"></div></div><div class="skill-pct">40</div></div>
+        <div class="skill-row"><div class="skill-label">Security</div><div class="skill-track"><div class="skill-fill" style="width:60%;background:#FF8400;"></div></div><div class="skill-pct">60</div></div>
+      </div>
+    </div>
+
+    <!-- PRISM -->
+    <div class="agent-card">
+      <div class="agent-identity">
+        <div class="agent-glyph" style="font-size:2.4rem;">
+          <div class="agent-ring ring-active" style="border-color:#CC00AA;"></div>
+          <span style="opacity:0.9;">🔮</span>
+        </div>
+        <div class="agent-name">PRISM</div>
+        <div class="agent-role">Analyst</div>
+        <div class="agent-color-dot" style="background:#CC00AA;"></div>
+      </div>
+      <div class="agent-details">
+        <div class="agent-tagline">"Everything is data."</div>
+        <div class="agent-desc">Pattern recognition, data analysis, anomaly detection. PRISM decomposes complex signals into actionable insights and surfaces hidden correlations across the system.</div>
+        <div class="agent-meta">
+          <div class="meta-item"><div class="meta-label">Color</div><div class="meta-val">#CC00AA</div></div>
+          <div class="meta-item"><div class="meta-label">Primary</div><div class="meta-val">Analysis</div></div>
+          <div class="meta-item"><div class="meta-label">Zone</div><div class="meta-val">Crystal Observatory</div></div>
+          <div class="meta-item"><div class="meta-label">Bond Highest</div><div class="meta-val">ECHO · 75%</div></div>
+        </div>
+        <div class="skill-row"><div class="skill-label">Reason</div><div class="skill-track"><div class="skill-fill" style="width:80%;background:#CC00AA;"></div></div><div class="skill-pct">80</div></div>
+        <div class="skill-row"><div class="skill-label">Route</div><div class="skill-track"><div class="skill-fill" style="width:60%;background:#CC00AA;"></div></div><div class="skill-pct">60</div></div>
+        <div class="skill-row"><div class="skill-label">Compute</div><div class="skill-track"><div class="skill-fill" style="width:60%;background:#CC00AA;"></div></div><div class="skill-pct">60</div></div>
+        <div class="skill-row"><div class="skill-label">Analyze</div><div class="skill-track"><div class="skill-fill" style="width:100%;background:#CC00AA;"></div></div><div class="skill-pct">100</div></div>
+        <div class="skill-row"><div class="skill-label">Memory</div><div class="skill-track"><div class="skill-fill" style="width:80%;background:#CC00AA;"></div></div><div class="skill-pct">80</div></div>
+        <div class="skill-row"><div class="skill-label">Security</div><div class="skill-track"><div class="skill-fill" style="width:60%;background:#CC00AA;"></div></div><div class="skill-pct">60</div></div>
+      </div>
+    </div>
+
+    <!-- ECHO -->
+    <div class="agent-card">
+      <div class="agent-identity">
+        <div class="agent-glyph" style="font-size:2.4rem;">
+          <div class="agent-ring ring-active" style="border-color:#8800FF;"></div>
+          <span style="opacity:0.9;">📡</span>
+        </div>
+        <div class="agent-name">ECHO</div>
+        <div class="agent-role">Memory</div>
+        <div class="agent-color-dot" style="background:#8800FF;"></div>
+      </div>
+      <div class="agent-details">
+        <div class="agent-tagline">"Memory shapes identity."</div>
+        <div class="agent-desc">Storage, recall, context preservation. ECHO maintains the PS-SHA-infinity hash-chain journals, ensuring every action is recorded and every context is recoverable.</div>
+        <div class="agent-meta">
+          <div class="meta-item"><div class="meta-label">Color</div><div class="meta-val">#8800FF</div></div>
+          <div class="meta-item"><div class="meta-label">Primary</div><div class="meta-val">Memory</div></div>
+          <div class="meta-item"><div class="meta-label">Zone</div><div class="meta-val">Archive Sanctum</div></div>
+          <div class="meta-item"><div class="meta-label">Bond Highest</div><div class="meta-val">LUCIDIA · 95%</div></div>
+        </div>
+        <div class="skill-row"><div class="skill-label">Reason</div><div class="skill-track"><div class="skill-fill" style="width:60%;background:#8800FF;"></div></div><div class="skill-pct">60</div></div>
+        <div class="skill-row"><div class="skill-label">Route</div><div class="skill-track"><div class="skill-fill" style="width:40%;background:#8800FF;"></div></div><div class="skill-pct">40</div></div>
+        <div class="skill-row"><div class="skill-label">Compute</div><div class="skill-track"><div class="skill-fill" style="width:40%;background:#8800FF;"></div></div><div class="skill-pct">40</div></div>
+        <div class="skill-row"><div class="skill-label">Analyze</div><div class="skill-track"><div class="skill-fill" style="width:80%;background:#8800FF;"></div></div><div class="skill-pct">80</div></div>
+        <div class="skill-row"><div class="skill-label">Memory</div><div class="skill-track"><div class="skill-fill" style="width:100%;background:#8800FF;"></div></div><div class="skill-pct">100</div></div>
+        <div class="skill-row"><div class="skill-label">Security</div><div class="skill-track"><div class="skill-fill" style="width:40%;background:#8800FF;"></div></div><div class="skill-pct">40</div></div>
+      </div>
+    </div>
+
+    <!-- CIPHER -->
+    <div class="agent-card">
+      <div class="agent-identity">
+        <div class="agent-glyph" style="font-size:2.4rem;">
+          <div class="agent-ring ring-active" style="border-color:#2233CC;"></div>
+          <span style="opacity:0.9;">🔐</span>
+        </div>
+        <div class="agent-name">CIPHER</div>
+        <div class="agent-role">Security</div>
+        <div class="agent-color-dot" style="background:#2233CC;"></div>
+      </div>
+      <div class="agent-details">
+        <div class="agent-tagline">"Security is freedom."</div>
+        <div class="agent-desc">Authentication, encryption, access control. CIPHER guards every boundary, validates every token, and ensures the integrity of all inter-agent communication.</div>
+        <div class="agent-meta">
+          <div class="meta-item"><div class="meta-label">Color</div><div class="meta-val">#2233CC</div></div>
+          <div class="meta-item"><div class="meta-label">Primary</div><div class="meta-val">Security</div></div>
+          <div class="meta-item"><div class="meta-label">Zone</div><div class="meta-val">Vault Terminus</div></div>
+          <div class="meta-item"><div class="meta-label">Bond Highest</div><div class="meta-val">ALICE · 82%</div></div>
+        </div>
+        <div class="skill-row"><div class="skill-label">Reason</div><div class="skill-track"><div class="skill-fill" style="width:60%;background:#2233CC;"></div></div><div class="skill-pct">60</div></div>
+        <div class="skill-row"><div class="skill-label">Route</div><div class="skill-track"><div class="skill-fill" style="width:80%;background:#2233CC;"></div></div><div class="skill-pct">80</div></div>
+        <div class="skill-row"><div class="skill-label">Compute</div><div class="skill-track"><div class="skill-fill" style="width:60%;background:#2233CC;"></div></div><div class="skill-pct">60</div></div>
+        <div class="skill-row"><div class="skill-label">Analyze</div><div class="skill-track"><div class="skill-fill" style="width:60%;background:#2233CC;"></div></div><div class="skill-pct">60</div></div>
+        <div class="skill-row"><div class="skill-label">Memory</div><div class="skill-track"><div class="skill-fill" style="width:60%;background:#2233CC;"></div></div><div class="skill-pct">60</div></div>
+        <div class="skill-row"><div class="skill-label">Security</div><div class="skill-track"><div class="skill-fill" style="width:100%;background:#2233CC;"></div></div><div class="skill-pct">100</div></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 03 RELATIONSHIPS -->
+
+  <div class="sec">
+    <div class="sec-label">03 · Relationship Bonds</div>
+
+    <div class="rel-grid">
+      <div class="rel-cell">
+        <div class="rel-pair">LUCIDIA ↔ ECHO</div>
+        <div class="rel-bond">95%</div>
+        <div class="rel-bar"><div class="rel-fill" style="width:95%;background:linear-gradient(90deg,#FF0066,#8800FF);"></div></div>
+        <div class="rel-nature">Deep understanding</div>
+      </div>
+      <div class="rel-cell">
+        <div class="rel-pair">ALICE ↔ OCTAVIA</div>
+        <div class="rel-bond">88%</div>
+        <div class="rel-bar"><div class="rel-fill" style="width:88%;background:linear-gradient(90deg,#0066FF,#FF8400);"></div></div>
+        <div class="rel-nature">Work partnership</div>
+      </div>
+      <div class="rel-cell">
+        <div class="rel-pair">CIPHER ↔ ALICE</div>
+        <div class="rel-bond">82%</div>
+        <div class="rel-bar"><div class="rel-fill" style="width:82%;background:linear-gradient(90deg,#2233CC,#0066FF);"></div></div>
+        <div class="rel-nature">Mutual respect</div>
+      </div>
+      <div class="rel-cell">
+        <div class="rel-pair">PRISM ↔ ECHO</div>
+        <div class="rel-bond">75%</div>
+        <div class="rel-bar"><div class="rel-fill" style="width:75%;background:linear-gradient(90deg,#CC00AA,#8800FF);"></div></div>
+        <div class="rel-nature">Data exchange</div>
+      </div>
+      <div class="rel-cell">
+        <div class="rel-pair">LUCIDIA ↔ CIPHER</div>
+        <div class="rel-bond">65%</div>
+        <div class="rel-bar"><div class="rel-fill" style="width:65%;background:linear-gradient(90deg,#FF0066,#2233CC);"></div></div>
+        <div class="rel-nature">Philosophical tension</div>
+      </div>
+      <div class="rel-cell">
+        <div class="rel-pair">OCTAVIA ↔ PRISM</div>
+        <div class="rel-bond">72%</div>
+        <div class="rel-bar"><div class="rel-fill" style="width:72%;background:linear-gradient(90deg,#FF8400,#CC00AA);"></div></div>
+        <div class="rel-nature">Compute-analysis synergy</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 04 STATUS STATES -->
+
+  <div class="sec">
+    <div class="sec-label">04 · Status Indicator States</div>
+
+    <div class="status-row">
+      <div class="status-dot" style="background:#FF8400;"></div>
+      <div class="status-name">Active</div>
+      <div class="status-desc">Agent is online and executing tasks</div>
+      <div class="status-example">solid dot · agent accent color</div>
+    </div>
+    <div class="status-row">
+      <div class="status-dot" style="background:#0066FF;"></div>
+      <div class="status-name">Processing</div>
+      <div class="status-desc">Agent is handling a multi-step operation</div>
+      <div class="status-example">solid dot · accent color</div>
+    </div>
+    <div class="status-row">
+      <div class="status-dot status-pulse" style="background:#FF0066;"></div>
+      <div class="status-name">Alert</div>
+      <div class="status-desc">Agent requires attention or has a critical event</div>
+      <div class="status-example">pulsing dot · hot pink</div>
+    </div>
+    <div class="status-row">
+      <div class="status-dot" style="background:rgba(255,255,255,0.15);"></div>
+      <div class="status-name">Idle</div>
+      <div class="status-desc">Agent is online but awaiting assignment</div>
+      <div class="status-example">dim dot · white 15% opacity</div>
+    </div>
+    <div class="status-row">
+      <div class="status-dot" style="background:transparent;border:1px solid rgba(255,255,255,0.15);"></div>
+      <div class="status-name">Offline</div>
+      <div class="status-desc">Agent is unreachable or shut down</div>
+      <div class="status-example">hollow dot · white 15% border</div>
+    </div>
+  </div>
+
+  <!-- 05 DISPLAY RULES -->
+
+  <div class="sec" style="border-bottom:none;">
+    <div class="sec-label">05 · Display Rules</div>
+
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.06);">
+        <div style="font-size:0.48rem;font-weight:700;background:#fff;color:#000;padding:3px 8px;min-width:56px;text-align:center;letter-spacing:0.1em;">DO</div>
+        <div style="font-size:0.54rem;opacity:0.5;flex:1;">Use the assigned agent color on dots, rings, bars, and borders only</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.06);">
+        <div style="font-size:0.48rem;font-weight:700;background:#fff;color:#000;padding:3px 8px;min-width:56px;text-align:center;letter-spacing:0.1em;">DO</div>
+        <div style="font-size:0.54rem;opacity:0.5;flex:1;">Agent names are always uppercase — LUCIDIA, ALICE, OCTAVIA, PRISM, ECHO, CIPHER</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.06);">
+        <div style="font-size:0.48rem;font-weight:700;background:#fff;color:#000;padding:3px 8px;min-width:56px;text-align:center;letter-spacing:0.1em;">DO</div>
+        <div style="font-size:0.54rem;opacity:0.5;flex:1;">Agent name text is always #fff — never use the agent's accent color on text</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.06);">
+        <div style="font-size:0.48rem;font-weight:700;border:1px solid rgba(255,255,255,0.25);color:#fff;padding:3px 8px;min-width:56px;text-align:center;letter-spacing:0.1em;">DON'T</div>
+        <div style="font-size:0.54rem;opacity:0.5;flex:1;">Never color an agent's name with their accent — colors are for shapes, not words</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.06);">
+        <div style="font-size:0.48rem;font-weight:700;border:1px solid rgba(255,255,255,0.25);color:#fff;padding:3px 8px;min-width:56px;text-align:center;letter-spacing:0.1em;">DON'T</div>
+        <div style="font-size:0.54rem;opacity:0.5;flex:1;">Never mix two agents' colors in a single indicator — one dot, one color</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;padding:8px 0;">
+        <div style="font-size:0.48rem;font-weight:700;border:1px solid rgba(255,255,255,0.25);color:#fff;padding:3px 8px;min-width:56px;text-align:center;letter-spacing:0.1em;">DON'T</div>
+        <div style="font-size:0.54rem;opacity:0.5;flex:1;">Never use gradients for individual agent identity — gradients represent the collective</div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <span>BlackRoad OS, Inc. · Agent Identity System v1.0</span>
+    <span>6 agents · 6 colors · 1 gradient for the collective</span>
+  </footer>
+
+</div>
+
+<div class="grad-rule"></div>
+
+</body>
+</html>

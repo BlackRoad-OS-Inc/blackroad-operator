@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BlackRoad — Layout & Patterns</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { background: #000; color: #fff; font-family: 'JetBrains Mono', monospace; min-height: 100vh; }
+    :root { --grad: linear-gradient(90deg, #FF8400, #FF4400, #FF0066, #CC00AA, #8800FF, #0066FF, #2233CC); }
+
+    nav { position: sticky; top: 0; z-index: 100; background: #000; padding: 0 24px; height: 48px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #fff; }
+    .nav-logo { font-size: 0.75rem; font-weight: 700; font-family: 'Space Grotesk', sans-serif; }
+    .nav-links { display: flex; gap: 24px; }
+    .nav-links a { font-size: 0.52rem; color: #fff; opacity: 0.4; text-decoration: none; letter-spacing: 0.12em; text-transform: uppercase; transition: opacity 0.15s; }
+    .nav-links a:hover { opacity: 1; }
+    .nav-links a.active { opacity: 1; }
+
+    .grad-rule { height: 3px; background: var(--grad); }
+    .page { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+    .sec { padding: 56px 0 48px; border-bottom: 1px solid #fff; }
+    .sec-label { font-size: 0.52rem; color: #fff; opacity: 0.3; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 36px; display: flex; align-items: center; gap: 12px; }
+    .sec-label::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.1); }
+
+    .hero { padding: 72px 0 56px; border-bottom: 1px solid #fff; }
+    .hero-eyebrow { font-size: 0.52rem; opacity: 0.3; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 20px; }
+    .hero h1 { font-family: 'Space Grotesk', sans-serif; font-size: clamp(3rem, 11vw, 6rem); font-weight: 700; line-height: 1; letter-spacing: -0.02em; }
+    .hero-sub { margin-top: 20px; font-size: 0.68rem; opacity: 0.45; line-height: 1.9; max-width: 500px; }
+    .hero-divider { height: 1px; background: var(--grad); width: 160px; margin: 32px 0; }
+    .hero-stats { display: flex; gap: 0; flex-wrap: wrap; }
+    .hero-stat { padding-right: 32px; margin-right: 32px; border-right: 1px solid rgba(255,255,255,0.12); }
+    .hero-stat:last-child { border-right: none; margin-right: 0; padding-right: 0; }
+    .stat-num { font-family: 'Space Grotesk', sans-serif; font-size: 2.2rem; font-weight: 700; line-height: 1; }
+    .stat-label { font-size: 0.46rem; opacity: 0.3; letter-spacing: 0.15em; text-transform: uppercase; margin-top: 4px; }
+
+    /* ── DEMO CONTAINERS ── */
+    .demo { background: #0a0a0a; border: 1px solid rgba(255,255,255,0.08); padding: 24px; margin-bottom: 24px; }
+    .demo-label { font-size: 0.42rem; opacity: 0.2; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 16px; }
+    .demo-note { font-size: 0.46rem; opacity: 0.2; margin-top: 12px; line-height: 1.7; }
+
+    /* ── GRID DEMOS ── */
+    .grid-demo { display: grid; gap: 1px; }
+    .grid-cell { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); padding: 16px; display: flex; align-items: center; justify-content: center; font-size: 0.48rem; opacity: 0.3; }
+
+    /* ── CARD ANATOMY ── */
+    .card-demo { background: #000; border: 1px solid rgba(255,255,255,0.12); padding: 0; max-width: 320px; }
+    .card-header { padding: 16px; border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; gap: 10px; }
+    .card-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .card-title { font-size: 0.6rem; font-weight: 700; }
+    .card-subtitle { font-size: 0.46rem; opacity: 0.3; }
+    .card-body { padding: 16px; }
+    .card-metric { font-family: 'Space Grotesk', sans-serif; font-size: 1.8rem; font-weight: 700; }
+    .card-meta { font-size: 0.46rem; opacity: 0.3; margin-top: 4px; }
+    .card-bar { height: 2px; margin-top: 12px; }
+    .card-footer { padding: 12px 16px; border-top: 1px solid rgba(255,255,255,0.08); font-size: 0.46rem; opacity: 0.25; }
+
+    /* ── TABLE ── */
+    .tbl { width: 100%; border-collapse: collapse; }
+    .tbl th { font-size: 0.42rem; opacity: 0.25; letter-spacing: 0.12em; text-transform: uppercase; text-align: left; padding: 8px 12px; border-bottom: 1px solid rgba(255,255,255,0.12); font-weight: 400; }
+    .tbl td { font-size: 0.54rem; padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .tbl tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* ── LIST VIEW ── */
+    .list-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .list-item:last-child { border-bottom: none; }
+    .list-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .list-primary { font-size: 0.56rem; font-weight: 700; flex: 1; }
+    .list-secondary { font-size: 0.48rem; opacity: 0.3; }
+    .list-action { font-size: 0.44rem; opacity: 0.2; letter-spacing: 0.08em; text-transform: uppercase; }
+
+    /* ── PANEL ── */
+    .panel { border: 1px solid rgba(255,255,255,0.12); }
+    .panel-head { padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: space-between; }
+    .panel-title { font-size: 0.52rem; font-weight: 700; letter-spacing: 0.06em; }
+    .panel-badge { font-size: 0.4rem; opacity: 0.3; padding: 2px 6px; border: 1px solid rgba(255,255,255,0.15); }
+    .panel-body { padding: 16px; }
+
+    /* ── SIDEBAR LAYOUT ── */
+    .sidebar-demo { display: grid; grid-template-columns: 200px 1fr; min-height: 240px; border: 1px solid rgba(255,255,255,0.12); }
+    .sidebar { border-right: 1px solid rgba(255,255,255,0.08); padding: 16px; }
+    .sidebar-item { font-size: 0.5rem; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.04); opacity: 0.4; }
+    .sidebar-item.active { opacity: 1; }
+    .main-area { padding: 16px; }
+
+    /* ── BREAKPOINTS ── */
+    .bp-row { display: flex; align-items: center; gap: 16px; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .bp-row:last-child { border-bottom: none; }
+    .bp-name { font-size: 0.56rem; font-weight: 700; min-width: 60px; }
+    .bp-val { font-size: 0.52rem; opacity: 0.5; min-width: 70px; }
+    .bp-cols { font-size: 0.48rem; opacity: 0.3; min-width: 90px; }
+    .bp-bar { flex: 1; height: 2px; background: rgba(255,255,255,0.06); position: relative; }
+    .bp-fill { position: absolute; top: 0; left: 0; bottom: 0; background: #fff; }
+
+    /* ── SPEC ROWS ── */
+    .spec-row { display: flex; align-items: center; gap: 16px; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .spec-row:last-child { border-bottom: none; }
+    .spec-label { font-size: 0.46rem; opacity: 0.25; letter-spacing: 0.1em; text-transform: uppercase; min-width: 100px; }
+    .spec-val { font-size: 0.56rem; font-weight: 700; }
+    .spec-note { font-size: 0.46rem; opacity: 0.18; margin-left: auto; }
+
+    footer { padding: 32px 0; display: flex; justify-content: space-between; font-size: 0.5rem; opacity: 0.18; flex-wrap: wrap; gap: 8px; }
+
+    @media (max-width: 600px) {
+      .page { padding: 0 16px; }
+      .sidebar-demo { grid-template-columns: 1fr; }
+      .sidebar { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    }
+  </style>
+</head>
+<body>
+
+<div class="grad-rule"></div>
+
+<nav>
+  <span class="nav-logo">BlackRoad</span>
+  <div class="nav-links">
+    <a href="index.html">hub</a>
+    <a href="brand.html">brand</a>
+    <a href="agents.html">agents</a>
+    <a href="layout.html" class="active">layout</a>
+    <a href="dashboard.html">dashboard</a>
+    <a href="tokens.html">tokens</a>
+  </div>
+</nav>
+
+<div class="page">
+
+  <div class="hero">
+    <div class="hero-eyebrow">Design System · 03</div>
+    <h1>Layout &<br>Patterns</h1>
+    <p class="hero-sub">Grid systems, card anatomy, panel structures, data tables, list views, sidebar layouts, and responsive breakpoints.</p>
+    <div class="hero-divider"></div>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="stat-num">4</div><div class="stat-label">Breakpoints</div></div>
+      <div class="hero-stat"><div class="stat-num">0</div><div class="stat-label">Border Radius</div></div>
+      <div class="hero-stat"><div class="stat-num">1px</div><div class="stat-label">Border Width</div></div>
+    </div>
+  </div>
+
+  <!-- 01 GRID SYSTEM -->
+
+  <div class="sec">
+    <div class="sec-label">01 · Grid System</div>
+
+    <div class="demo">
+      <div class="demo-label">2-Column</div>
+      <div class="grid-demo" style="grid-template-columns:1fr 1fr;">
+        <div class="grid-cell">1</div>
+        <div class="grid-cell">2</div>
+      </div>
+      <div class="demo-note">Equal split · settings panels, comparison views</div>
+    </div>
+
+    <div class="demo">
+      <div class="demo-label">3-Column</div>
+      <div class="grid-demo" style="grid-template-columns:1fr 1fr 1fr;">
+        <div class="grid-cell">1</div>
+        <div class="grid-cell">2</div>
+        <div class="grid-cell">3</div>
+      </div>
+      <div class="demo-note">Metric tiles, card grids, feature lists</div>
+    </div>
+
+    <div class="demo">
+      <div class="demo-label">4-Column</div>
+      <div class="grid-demo" style="grid-template-columns:1fr 1fr 1fr 1fr;">
+        <div class="grid-cell">1</div>
+        <div class="grid-cell">2</div>
+        <div class="grid-cell">3</div>
+        <div class="grid-cell">4</div>
+      </div>
+      <div class="demo-note">Dense data, stat rows, icon grids</div>
+    </div>
+
+    <div class="demo">
+      <div class="demo-label">Sidebar + Main (240px / 1fr)</div>
+      <div class="grid-demo" style="grid-template-columns:240px 1fr;">
+        <div class="grid-cell" style="min-height:80px;">sidebar</div>
+        <div class="grid-cell">main content</div>
+      </div>
+      <div class="demo-note">Dashboard layouts, navigation panels, settings pages</div>
+    </div>
+
+    <div class="demo" style="margin-bottom:0;">
+      <div class="demo-label">Header + Body + Footer (auto / 1fr / auto)</div>
+      <div class="grid-demo" style="grid-template-columns:1fr;grid-template-rows:auto 1fr auto;">
+        <div class="grid-cell" style="padding:10px 16px;">header</div>
+        <div class="grid-cell" style="min-height:80px;">body</div>
+        <div class="grid-cell" style="padding:10px 16px;">footer</div>
+      </div>
+      <div class="demo-note">Page-level structure, modal dialogs, panel stacks</div>
+    </div>
+  </div>
+
+  <!-- 02 CARD ANATOMY -->
+
+  <div class="sec">
+    <div class="sec-label">02 · Card Anatomy</div>
+
+    <div style="display:flex;gap:24px;flex-wrap:wrap;">
+
+      <!-- Metric Card -->
+      <div class="card-demo">
+        <div class="card-header">
+          <div class="card-dot" style="background:#FF8400;"></div>
+          <div>
+            <div class="card-title">Active Agents</div>
+            <div class="card-subtitle">Last 24 hours</div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="card-metric">28,412</div>
+          <div class="card-meta">+3.2% from yesterday</div>
+          <div class="card-bar" style="background:linear-gradient(90deg,#FF8400 94%,rgba(255,255,255,0.06) 94%);"></div>
+        </div>
+        <div class="card-footer">Updated 2 min ago</div>
+      </div>
+
+      <!-- Status Card -->
+      <div class="card-demo">
+        <div class="card-header">
+          <div class="card-dot" style="background:#0066FF;"></div>
+          <div>
+            <div class="card-title">Gateway Status</div>
+            <div class="card-subtitle">blackroad.ai</div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div style="font-size:0.56rem;font-weight:700;margin-bottom:12px;">ALL SYSTEMS OPERATIONAL</div>
+          <div style="display:flex;gap:3px;">
+            <div style="flex:1;height:12px;background:#FF8400;opacity:0.8;"></div>
+            <div style="flex:1;height:12px;background:#FF8400;opacity:0.8;"></div>
+            <div style="flex:1;height:12px;background:#FF8400;opacity:0.8;"></div>
+            <div style="flex:1;height:12px;background:#FF8400;opacity:0.8;"></div>
+            <div style="flex:1;height:12px;background:#FF0066;opacity:0.8;"></div>
+            <div style="flex:1;height:12px;background:#FF8400;opacity:0.8;"></div>
+            <div style="flex:1;height:12px;background:#FF8400;opacity:0.8;"></div>
+          </div>
+          <div style="font-size:0.4rem;opacity:0.2;margin-top:4px;display:flex;justify-content:space-between;">
+            <span>7d ago</span><span>now</span>
+          </div>
+        </div>
+        <div class="card-footer">99.8% uptime · 30d</div>
+      </div>
+
+    </div>
+
+    <div style="margin-top:24px;">
+      <div class="spec-row">
+        <div class="spec-label">Border</div>
+        <div class="spec-val">1px solid rgba(255,255,255,0.12)</div>
+        <div class="spec-note">no radius</div>
+      </div>
+      <div class="spec-row">
+        <div class="spec-label">Background</div>
+        <div class="spec-val">#000000</div>
+        <div class="spec-note">pure black</div>
+      </div>
+      <div class="spec-row">
+        <div class="spec-label">Header</div>
+        <div class="spec-val">16px padding · 1px bottom border</div>
+        <div class="spec-note">dot + title + subtitle</div>
+      </div>
+      <div class="spec-row">
+        <div class="spec-label">Body</div>
+        <div class="spec-val">16px padding</div>
+        <div class="spec-note">metric or content</div>
+      </div>
+      <div class="spec-row">
+        <div class="spec-label">Footer</div>
+        <div class="spec-val">12px vertical · 16px horizontal</div>
+        <div class="spec-note">meta text · opacity 0.25</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 03 DATA TABLE -->
+
+  <div class="sec">
+    <div class="sec-label">03 · Data Table</div>
+
+    <div class="demo" style="padding:0;">
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th style="width:24px;"></th>
+            <th>Agent</th>
+            <th>Status</th>
+            <th>Tasks</th>
+            <th>Uptime</th>
+            <th style="text-align:right;">Last Seen</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><div style="width:6px;height:6px;border-radius:50%;background:#FF0066;"></div></td>
+            <td style="font-weight:700;">LUCIDIA</td>
+            <td>active</td>
+            <td>342</td>
+            <td>99.9%</td>
+            <td style="text-align:right;opacity:0.3;">now</td>
+          </tr>
+          <tr>
+            <td><div style="width:6px;height:6px;border-radius:50%;background:#0066FF;"></div></td>
+            <td style="font-weight:700;">ALICE</td>
+            <td>active</td>
+            <td>1,208</td>
+            <td>99.7%</td>
+            <td style="text-align:right;opacity:0.3;">now</td>
+          </tr>
+          <tr>
+            <td><div style="width:6px;height:6px;border-radius:50%;background:#FF8400;"></div></td>
+            <td style="font-weight:700;">OCTAVIA</td>
+            <td>processing</td>
+            <td>89</td>
+            <td>98.2%</td>
+            <td style="text-align:right;opacity:0.3;">12s ago</td>
+          </tr>
+          <tr>
+            <td><div style="width:6px;height:6px;border-radius:50%;background:#CC00AA;"></div></td>
+            <td style="font-weight:700;">PRISM</td>
+            <td>active</td>
+            <td>567</td>
+            <td>99.5%</td>
+            <td style="text-align:right;opacity:0.3;">now</td>
+          </tr>
+          <tr>
+            <td><div style="width:6px;height:6px;border-radius:50%;background:#8800FF;"></div></td>
+            <td style="font-weight:700;">ECHO</td>
+            <td>active</td>
+            <td>2,041</td>
+            <td>99.9%</td>
+            <td style="text-align:right;opacity:0.3;">now</td>
+          </tr>
+          <tr>
+            <td><div style="width:6px;height:6px;border-radius:50%;background:#2233CC;"></div></td>
+            <td style="font-weight:700;">CIPHER</td>
+            <td>active</td>
+            <td>183</td>
+            <td>100%</td>
+            <td style="text-align:right;opacity:0.3;">now</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="spec-row">
+      <div class="spec-label">Header</div>
+      <div class="spec-val">0.42rem · uppercase · tracking 0.12em · opacity 0.25</div>
+    </div>
+    <div class="spec-row">
+      <div class="spec-label">Cell</div>
+      <div class="spec-val">0.54rem · 10px 12px padding · 1px bottom border</div>
+    </div>
+    <div class="spec-row">
+      <div class="spec-label">Hover</div>
+      <div class="spec-val">background rgba(255,255,255,0.02)</div>
+      <div class="spec-note">subtle highlight</div>
+    </div>
+    <div class="spec-row">
+      <div class="spec-label">Status Dot</div>
+      <div class="spec-val">6px · border-radius 50% · agent accent color</div>
+    </div>
+  </div>
+
+  <!-- 04 LIST VIEW -->
+
+  <div class="sec">
+    <div class="sec-label">04 · List View</div>
+
+    <div class="demo" style="padding:16px;">
+      <div class="list-item">
+        <div class="list-dot" style="background:#FF8400;"></div>
+        <div class="list-primary">Deploy blackroad-os-web to production</div>
+        <div class="list-secondary">OCTAVIA · 4m ago</div>
+        <div class="list-action">view</div>
+      </div>
+      <div class="list-item">
+        <div class="list-dot" style="background:#0066FF;"></div>
+        <div class="list-primary">Route reconfiguration for api.blackroad.ai</div>
+        <div class="list-secondary">ALICE · 12m ago</div>
+        <div class="list-action">view</div>
+      </div>
+      <div class="list-item">
+        <div class="list-dot" style="background:#8800FF;"></div>
+        <div class="list-primary">Memory journal checkpoint completed</div>
+        <div class="list-secondary">ECHO · 18m ago</div>
+        <div class="list-action">view</div>
+      </div>
+      <div class="list-item">
+        <div class="list-dot" style="background:#2233CC;"></div>
+        <div class="list-primary">Security scan: 0 vulnerabilities found</div>
+        <div class="list-secondary">CIPHER · 31m ago</div>
+        <div class="list-action">view</div>
+      </div>
+    </div>
+
+    <div class="spec-row">
+      <div class="spec-label">Row Height</div>
+      <div class="spec-val">12px vertical padding</div>
+      <div class="spec-note">compact density</div>
+    </div>
+    <div class="spec-row">
+      <div class="spec-label">Dot</div>
+      <div class="spec-val">6px · agent color · left-aligned</div>
+    </div>
+    <div class="spec-row">
+      <div class="spec-label">Primary</div>
+      <div class="spec-val">0.56rem · 700 weight</div>
+    </div>
+    <div class="spec-row">
+      <div class="spec-label">Secondary</div>
+      <div class="spec-val">0.48rem · opacity 0.3</div>
+    </div>
+  </div>
+
+  <!-- 05 PANEL -->
+
+  <div class="sec">
+    <div class="sec-label">05 · Panel Component</div>
+
+    <div class="panel" style="max-width:400px;">
+      <div class="panel-head">
+        <div class="panel-title">Task Queue</div>
+        <div class="panel-badge">12 PENDING</div>
+      </div>
+      <div class="panel-body">
+        <div class="list-item">
+          <div class="list-dot" style="background:#FF0066;"></div>
+          <div class="list-primary">Coordinate model sync</div>
+          <div class="list-secondary">high</div>
+        </div>
+        <div class="list-item">
+          <div class="list-dot" style="background:#FF8400;"></div>
+          <div class="list-primary">Process inference batch #847</div>
+          <div class="list-secondary">med</div>
+        </div>
+        <div class="list-item">
+          <div class="list-dot" style="background:#0066FF;"></div>
+          <div class="list-primary">Rebalance gateway traffic</div>
+          <div class="list-secondary">low</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:24px;">
+      <div class="spec-row">
+        <div class="spec-label">Border</div>
+        <div class="spec-val">1px solid rgba(255,255,255,0.12)</div>
+        <div class="spec-note">sharp corners</div>
+      </div>
+      <div class="spec-row">
+        <div class="spec-label">Header</div>
+        <div class="spec-val">12px 16px · bottom border · title + badge</div>
+      </div>
+      <div class="spec-row">
+        <div class="spec-label">Badge</div>
+        <div class="spec-val">0.4rem · 1px border · opacity 0.3</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 06 SIDEBAR LAYOUT -->
+
+  <div class="sec">
+    <div class="sec-label">06 · Sidebar Layout</div>
+
+    <div class="sidebar-demo">
+      <div class="sidebar">
+        <div style="font-size:0.46rem;opacity:0.2;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:12px;">Navigation</div>
+        <div class="sidebar-item active" style="display:flex;align-items:center;gap:8px;">
+          <div style="width:4px;height:4px;border-radius:50%;background:#FF8400;"></div>
+          Dashboard
+        </div>
+        <div class="sidebar-item">Agents</div>
+        <div class="sidebar-item">Memory</div>
+        <div class="sidebar-item">Tasks</div>
+        <div class="sidebar-item">Settings</div>
+      </div>
+      <div class="main-area">
+        <div style="font-size:0.46rem;opacity:0.2;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:12px;">Main Content Area</div>
+        <div style="font-size:0.56rem;opacity:0.3;line-height:1.8;">Content renders here. Sidebar is fixed width (200–240px), main area fills remaining space. Sidebar collapses to full-width on mobile.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 07 BREAKPOINTS -->
+
+  <div class="sec" style="border-bottom:none;">
+    <div class="sec-label">07 · Breakpoints</div>
+
+    <div class="bp-row">
+      <div class="bp-name">xs</div>
+      <div class="bp-val">0–479px</div>
+      <div class="bp-cols">1 column</div>
+      <div class="bp-bar"><div class="bp-fill" style="width:25%;"></div></div>
+    </div>
+    <div class="bp-row">
+      <div class="bp-name">sm</div>
+      <div class="bp-val">480–767px</div>
+      <div class="bp-cols">1–2 columns</div>
+      <div class="bp-bar"><div class="bp-fill" style="width:45%;"></div></div>
+    </div>
+    <div class="bp-row">
+      <div class="bp-name">md</div>
+      <div class="bp-val">768–1023px</div>
+      <div class="bp-cols">2–3 columns</div>
+      <div class="bp-bar"><div class="bp-fill" style="width:70%;"></div></div>
+    </div>
+    <div class="bp-row">
+      <div class="bp-name">lg</div>
+      <div class="bp-val">1024+</div>
+      <div class="bp-cols">up to 4 columns</div>
+      <div class="bp-bar"><div class="bp-fill" style="width:100%;"></div></div>
+    </div>
+
+    <div style="margin-top:24px;">
+      <div class="spec-row">
+        <div class="spec-label">Max Width</div>
+        <div class="spec-val">960px</div>
+        <div class="spec-note">content container</div>
+      </div>
+      <div class="spec-row">
+        <div class="spec-label">Page Padding</div>
+        <div class="spec-val">24px (desktop) · 16px (mobile)</div>
+      </div>
+      <div class="spec-row">
+        <div class="spec-label">Grid Gap</div>
+        <div class="spec-val">1px (dense) · 16px (cards) · 24px (sections)</div>
+      </div>
+      <div class="spec-row">
+        <div class="spec-label">Collapse</div>
+        <div class="spec-val">All grids → 1 column at xs breakpoint</div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <span>BlackRoad OS, Inc. · Layout System v1.0</span>
+    <span>Sharp corners · 1px borders · lines over boxes</span>
+  </footer>
+
+</div>
+
+<div class="grad-rule"></div>
+
+</body>
+</html>
