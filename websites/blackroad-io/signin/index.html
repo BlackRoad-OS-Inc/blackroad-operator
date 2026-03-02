@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#000000 !important;">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BlackRoad — Sign In</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      background: #000000 !important;
+      color: #ffffff !important;
+      font-family: 'JetBrains Mono', monospace;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    :root {
+      --grad: linear-gradient(90deg, #FF8400, #FF4400, #FF0066, #CC00AA, #8800FF, #0066FF, #2233CC);
+    }
+
+    .grad-rule { height: 3px; background: var(--grad) !important; flex-shrink: 0; }
+
+    /* ── LAYOUT ── */
+    .wrapper {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      min-height: calc(100vh - 6px);
+      background: #000000 !important;
+    }
+
+    /* ── LEFT PANEL ── */
+    .left {
+      background: #000000 !important;
+      border-right: 1px solid rgba(255,255,255,0.1);
+      display: flex;
+      flex-direction: column;
+      padding: 48px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Animated background grid */
+    .left::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      z-index: 0;
+    }
+
+    .left-content { position: relative; z-index: 1; flex: 1; display: flex; flex-direction: column; }
+
+    .brand { margin-bottom: auto; }
+    .brand-logo {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 64px;
+    }
+    .logo-mark {
+      width: 36px; height: 36px;
+      background: var(--grad) !important;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.75rem; font-weight: 700; color: #000000;
+    }
+    .logo-text {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1rem; font-weight: 700; color: #ffffff;
+    }
+
+    .left-headline {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(2.2rem, 4vw, 3.2rem);
+      font-weight: 700;
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      color: #ffffff;
+      margin-bottom: 20px;
+    }
+    .left-sub {
+      font-size: 0.62rem;
+      line-height: 1.9;
+      opacity: 0.4;
+      color: #ffffff;
+      max-width: 360px;
+      margin-bottom: 40px;
+    }
+
+    /* Animated spectrum bar */
+    .spectrum {
+      display: flex; gap: 3px; align-items: flex-end;
+      height: 48px; margin-bottom: 40px;
+    }
+    .sbar { width: 5px; border-radius: 0; }
+    @keyframes sp { 0%,100%{transform:scaleY(0.1)} 50%{transform:scaleY(1)} }
+    .sbar:nth-child(1)  { background:#FF8400 !important; height:100%; animation:sp 2s ease-in-out infinite 0s; }
+    .sbar:nth-child(2)  { background:#FF6200 !important; height:100%; animation:sp 2s ease-in-out infinite 0.1s; }
+    .sbar:nth-child(3)  { background:#FF4400 !important; height:100%; animation:sp 2s ease-in-out infinite 0.2s; }
+    .sbar:nth-child(4)  { background:#FF2200 !important; height:100%; animation:sp 2s ease-in-out infinite 0.3s; }
+    .sbar:nth-child(5)  { background:#FF0066 !important; height:100%; animation:sp 2s ease-in-out infinite 0.4s; }
+    .sbar:nth-child(6)  { background:#EE0088 !important; height:100%; animation:sp 2s ease-in-out infinite 0.5s; }
+    .sbar:nth-child(7)  { background:#CC00AA !important; height:100%; animation:sp 2s ease-in-out infinite 0.6s; }
+    .sbar:nth-child(8)  { background:#AA00CC !important; height:100%; animation:sp 2s ease-in-out infinite 0.7s; }
+    .sbar:nth-child(9)  { background:#8800FF !important; height:100%; animation:sp 2s ease-in-out infinite 0.8s; }
+    .sbar:nth-child(10) { background:#4400FF !important; height:100%; animation:sp 2s ease-in-out infinite 0.9s; }
+    .sbar:nth-child(11) { background:#0044FF !important; height:100%; animation:sp 2s ease-in-out infinite 1.0s; }
+    .sbar:nth-child(12) { background:#0066FF !important; height:100%; animation:sp 2s ease-in-out infinite 1.1s; }
+    .sbar:nth-child(13) { background:#1144EE !important; height:100%; animation:sp 2s ease-in-out infinite 1.2s; }
+    .sbar:nth-child(14) { background:#2233CC !important; height:100%; animation:sp 2s ease-in-out infinite 1.3s; }
+
+    /* Agent status pills */
+    .agents { display: flex; flex-direction: column; gap: 10px; }
+    .agent-pill {
+      display: flex; align-items: center; gap: 10px;
+      background: #000000 !important;
+      border: 1px solid rgba(255,255,255,0.08);
+      padding: 10px 14px;
+    }
+    .agent-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.7)} }
+    .pulse { animation: pulse 2s ease-in-out infinite; }
+    .agent-name { font-size: 0.55rem; font-weight: 700; color: #ffffff; }
+    .agent-status { font-size: 0.44rem; opacity: 0.3; color: #ffffff; margin-left: auto; }
+    .agent-bar { width: 40px; height: 1px; margin-left: 8px; flex-shrink: 0; }
+
+    /* ── RIGHT PANEL — FORM ── */
+    .right {
+      background: #000000 !important;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 48px;
+    }
+
+    .form-wrap {
+      width: 100%;
+      max-width: 380px;
+      background: #000000 !important;
+    }
+
+    .form-eyebrow {
+      font-size: 0.44rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      opacity: 0.3;
+      color: #ffffff;
+      margin-bottom: 20px;
+    }
+    .form-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 8px;
+      letter-spacing: -0.02em;
+    }
+    .form-sub {
+      font-size: 0.55rem;
+      opacity: 0.35;
+      color: #ffffff;
+      margin-bottom: 40px;
+      line-height: 1.7;
+    }
+
+    /* Input fields */
+    .field { margin-bottom: 24px; }
+    .field-label {
+      font-size: 0.46rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      opacity: 0.4;
+      color: #ffffff;
+      display: block;
+      margin-bottom: 8px;
+    }
+    .field-input {
+      width: 100%;
+      background: #000000 !important;
+      border: none;
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+      color: #ffffff;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      padding: 10px 0;
+      outline: none;
+      transition: border-color 0.2s;
+      caret-color: #FF8400;
+    }
+    .field-input:focus { border-bottom-color: #ffffff; }
+    .field-input::placeholder { color: rgba(255,255,255,0.15); }
+
+    .field-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .field-hint {
+      font-size: 0.44rem;
+      opacity: 0.3;
+      color: #ffffff;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .field-hint:hover { opacity: 0.7; }
+
+    /* Progress underline on focus - decorative */
+    .field-underline {
+      height: 1px;
+      background: var(--grad) !important;
+      width: 0;
+      transition: width 0.3s ease;
+      margin-top: -1px;
+    }
+    .field-input:focus + .field-underline { width: 100%; }
+
+    /* Options row */
+    .options-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 32px;
+    }
+    .remember-wrap {
+      display: flex; align-items: center; gap: 8px; cursor: pointer;
+    }
+    .checkbox {
+      width: 12px; height: 12px;
+      border: 1px solid rgba(255,255,255,0.25);
+      background: #000000 !important;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .checkbox.checked { background: #ffffff !important; border-color: #ffffff; }
+    .checkbox.checked::after { content: '\2713'; font-size: 0.45rem; color: #000000; font-weight: 700; }
+    .remember-label { font-size: 0.48rem; opacity: 0.35; color: #ffffff; }
+    .forgot { font-size: 0.48rem; opacity: 0.35; color: #ffffff; cursor: pointer; transition: opacity 0.15s; }
+    .forgot:hover { opacity: 0.8; }
+
+    /* Submit button */
+    .submit-btn {
+      width: 100%;
+      background: #ffffff !important;
+      color: #000000;
+      border: none;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.6rem;
+      font-weight: 700;
+      padding: 14px;
+      cursor: pointer;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      transition: opacity 0.15s;
+      margin-bottom: 16px;
+    }
+    .submit-btn:hover { opacity: 0.88; }
+    .submit-btn:active { opacity: 0.75; }
+
+    .divider-row {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 16px;
+    }
+    .divider-line { flex: 1; height: 1px; background: rgba(255,255,255,0.08) !important; }
+    .divider-text { font-size: 0.42rem; opacity: 0.25; color: #ffffff; }
+
+    .sso-btn {
+      width: 100%;
+      background: #000000 !important;
+      color: #ffffff;
+      border: 1px solid rgba(255,255,255,0.15);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.55rem;
+      padding: 12px;
+      cursor: pointer;
+      letter-spacing: 0.04em;
+      transition: border-color 0.15s;
+      margin-bottom: 32px;
+    }
+    .sso-btn:hover { border-color: rgba(255,255,255,0.4); }
+
+    .signup-row {
+      font-size: 0.5rem;
+      opacity: 0.3;
+      color: #ffffff;
+      text-align: center;
+    }
+    .signup-link {
+      color: #ffffff;
+      opacity: 1;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      border-bottom: 1px solid rgba(255,255,255,0.3);
+      padding-bottom: 1px;
+      transition: border-color 0.15s;
+    }
+    .signup-link:hover { border-color: #ffffff; }
+
+    /* Grad strip at bottom of form */
+    .form-strip { height: 1px; background: var(--grad) !important; margin-top: 32px; }
+
+    /* Footer */
+    footer {
+      padding: 16px 48px;
+      display: flex; justify-content: space-between;
+      font-size: 0.42rem; opacity: 0.15; color: #ffffff;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      flex-wrap: wrap; gap: 8px;
+      background: #000000 !important;
+    }
+
+    /* Interactive checkbox JS */
+    .checkbox { cursor: pointer; }
+
+    @media (max-width: 768px) {
+      .wrapper { grid-template-columns: 1fr; }
+      .left { display: none; }
+      .right { padding: 32px 24px; align-items: flex-start; padding-top: 64px; }
+      footer { padding: 16px 24px; }
+    }
+  </style>
+</head>
+<body style="background:#000000 !important; color:#ffffff !important;">
+
+<div class="grad-rule"></div>
+
+<div class="wrapper">
+
+  <!-- LEFT — BRAND PANEL -->
+  <div class="left">
+    <div class="left-content">
+
+      <div class="brand">
+        <div class="brand-logo">
+          <div class="logo-mark">BR</div>
+          <div class="logo-text">BlackRoad</div>
+        </div>
+
+        <h1 class="left-headline">The road<br>starts here.</h1>
+        <p class="left-sub">Sign in to access the BlackRoad OS — your distributed agent network, market intelligence, and infrastructure dashboard.</p>
+
+        <div class="spectrum">
+          <div class="sbar"></div><div class="sbar"></div><div class="sbar"></div>
+          <div class="sbar"></div><div class="sbar"></div><div class="sbar"></div>
+          <div class="sbar"></div><div class="sbar"></div><div class="sbar"></div>
+          <div class="sbar"></div><div class="sbar"></div><div class="sbar"></div>
+          <div class="sbar"></div><div class="sbar"></div>
+        </div>
+      </div>
+
+      <div class="agents">
+        <div class="agent-pill">
+          <div class="agent-dot pulse" style="background:#FF8400 !important;"></div>
+          <span class="agent-name">Cecilia</span>
+          <span class="agent-status">Processing · 4 tasks</span>
+          <div class="agent-bar" style="background:#FF8400 !important;"></div>
+        </div>
+        <div class="agent-pill">
+          <div class="agent-dot pulse" style="background:#0066FF !important;"></div>
+          <span class="agent-name">Olympia</span>
+          <span class="agent-status">Monitoring · Live</span>
+          <div class="agent-bar" style="background:linear-gradient(90deg,#0066FF,#2233CC) !important;"></div>
+        </div>
+        <div class="agent-pill">
+          <div class="agent-dot" style="background:#8800FF !important;"></div>
+          <span class="agent-name">Lucidia</span>
+          <span class="agent-status">Indexing memory</span>
+          <div class="agent-bar" style="background:#8800FF !important;"></div>
+        </div>
+        <div class="agent-pill">
+          <div class="agent-dot" style="background:rgba(255,255,255,0.2) !important;"></div>
+          <span class="agent-name">Atlas</span>
+          <span class="agent-status">Idle</span>
+          <div class="agent-bar" style="background:rgba(255,255,255,0.15) !important;"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- RIGHT — FORM PANEL -->
+  <div class="right">
+    <div class="form-wrap">
+
+      <div class="form-eyebrow">BlackRoad OS · Authentication</div>
+      <div class="form-title">Sign in</div>
+      <p class="form-sub">Enter your credentials to access your workspace and agent network.</p>
+
+      <div class="field">
+        <label class="field-label" for="email">Email</label>
+        <input class="field-input" id="email" type="email" placeholder="you@blackroad.io" autocomplete="email">
+        <div class="field-underline"></div>
+      </div>
+
+      <div class="field">
+        <div class="field-row">
+          <label class="field-label" for="password" style="margin-bottom:0;">Password</label>
+          <span class="field-hint">Forgot password?</span>
+        </div>
+        <input class="field-input" id="password" type="password" placeholder="••••••••••••" autocomplete="current-password">
+        <div class="field-underline"></div>
+      </div>
+
+      <div class="options-row">
+        <div class="remember-wrap" onclick="toggleCheckbox(this)">
+          <div class="checkbox"></div>
+          <span class="remember-label">Keep me signed in</span>
+        </div>
+        <span class="forgot">Use passkey →</span>
+      </div>
+
+      <button class="submit-btn" onclick="handleLogin(this)">Sign In →</button>
+
+      <div class="divider-row">
+        <div class="divider-line"></div>
+        <span class="divider-text">or continue with</span>
+        <div class="divider-line"></div>
+      </div>
+
+      <button class="sso-btn">⬡ &nbsp; Single Sign-On (SSO)</button>
+
+      <div class="signup-row">
+        Don't have an account? &nbsp;<a class="signup-link" href="#">Request access</a>
+      </div>
+
+      <div class="form-strip"></div>
+
+    </div>
+  </div>
+
+</div>
+
+<footer style="background:#000000 !important;">
+  <span>BlackRoad OS, Inc. · Secure Authentication · v1.0</span>
+  <span>Privacy Policy · Terms · Support</span>
+</footer>
+
+<div class="grad-rule"></div>
+
+<script>
+  function toggleCheckbox(wrap) {
+    const box = wrap.querySelector('.checkbox');
+    box.classList.toggle('checked');
+  }
+
+  function handleLogin(btn) {
+    const email = document.getElementById('email').value;
+    const pass = document.getElementById('password').value;
+    if (!email || !pass) {
+      btn.textContent = 'Enter credentials →';
+      btn.style.opacity = '0.5';
+      setTimeout(() => {
+        btn.textContent = 'Sign In →';
+        btn.style.opacity = '1';
+      }, 1500);
+      return;
+    }
+    btn.textContent = 'Authenticating…';
+    btn.style.opacity = '0.6';
+    setTimeout(() => {
+      btn.textContent = '\u2713 Authenticated';
+      btn.style.background = '#000000';
+      btn.style.color = '#ffffff';
+      btn.style.border = '1px solid rgba(255,255,255,0.3)';
+      btn.style.opacity = '1';
+    }, 1200);
+  }
+</script>
+
+</body>
+</html>
