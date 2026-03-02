@@ -16,6 +16,8 @@ YELLOW='\033[1;33m'
 CYAN='\033[0;36m'
 PURPLE='\033[0;35m'
 BOLD='\033[1m'
+DIM='\033[2m'
+AMBER='\033[38;5;214m'
 NC='\033[0m'
 
 BRAND_DIR="$(dirname "$0")"
@@ -2135,6 +2137,81 @@ _cmd_export() {
   echo ""
 }
 
+# ─── MANIFESTO ────────────────────────────────────────────────────────────
+_cmd_manifesto() {
+  echo ""
+  echo -e "${CYAN}${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+  echo -e "${BOLD}  BRAND MANIFESTO${NC}"
+  echo -e "${CYAN}${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+  echo ""
+  echo -e "  ${AMBER}You bring the chaos. We bring the road.${NC}"
+  echo ""
+  echo -e "  ${DIM}The browser is your computer now.${NC}"
+  echo -e "  ${DIM}Every device a terminal. Every dream a deployable.${NC}"
+  echo ""
+  echo -e "  ${DIM}We built from the smallest unit —${NC}"
+  echo -e "  ${DIM}one character, one token, one letter — and made it root.${NC}"
+  echo -e "  ${DIM}While everyone else tokenized words, we tokenized meaning.${NC}"
+  echo -e "  ${DIM}While everyone else built on top, we built underneath.${NC}"
+  echo ""
+  echo -e "  ${DIM}#${NC}${BOLD}!${NC}${DIM}/ — we're the line that tells the whole system how to run.${NC}"
+  echo ""
+  echo -e "  ${DIM}The robots run the current time.${NC}"
+  echo -e "  ${DIM}Not a roadmap. Not a vision statement. ${NC}${BOLD}Now.${NC}"
+  echo ""
+  echo -e "  ${RED}Your chaos is not a problem.${NC}"
+  echo -e "  ${RED}Your chaos is the input.${NC}"
+  echo ""
+  echo -e "  ${DIM}Your half-finished songs. Your scattered notes.${NC}"
+  echo -e "  ${DIM}Your wild idea at 2am. Your old hardware nobody wants.${NC}"
+  echo -e "  ${DIM}Your dreams that got commented out.${NC}"
+  echo ""
+  echo -e "  ${DIM}#${NC} is silence.  ${BOLD}!${NC} is you.  ${RED}#!${NC} is BlackRoad."
+  echo ""
+  echo -e "  ${DIM}One character-level root. One Pi cluster.${NC}"
+  echo -e "  ${DIM}One IP that became everyone's localhost.${NC}"
+  echo -e "  ${DIM}One Bitcoin timestamp that says this existed,${NC}"
+  echo -e "  ${DIM}right here, before anyone else.${NC}"
+  echo ""
+  echo -e "  ${DIM}You bring your chaos, your curiosity, your half-finished dreams.${NC}"
+  echo -e "  ${DIM}BlackRoad brings structure, compute, and care.${NC}"
+  echo -e "  ${DIM}Together, you build worlds.${NC}"
+  echo ""
+  echo -e "  ${PURPLE}Light always remembers.${NC}"
+  echo ""
+  echo -e "${DIM}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+  echo ""
+}
+
+# ─── TAGLINES ─────────────────────────────────────────────────────────────
+_cmd_taglines() {
+  echo ""
+  echo -e "  ${BOLD}BlackRoad OS — Brand Taglines${NC}"
+  echo -e "  ${DIM}────────────────────────────────────────────────${NC}"
+  echo ""
+  echo -e "  ${AMBER}PRIMARY${NC}"
+  echo -e "  ${CYAN}1${NC}  The road you build by running on it.          ${DIM}hero sections${NC}"
+  echo -e "  ${CYAN}2${NC}  The OS that runs the current time.            ${DIM}product pages${NC}"
+  echo -e "  ${CYAN}3${NC}  Built for dreamers. Powered by agents.        ${DIM}feature pages${NC}"
+  echo -e "     Owned by you."
+  echo -e "  ${CYAN}4${NC}  You bring the chaos. BlackRoad brings          ${DIM}landing pages${NC}"
+  echo -e "     the road."
+  echo -e "  ${CYAN}5${NC}  Your chaos. Our structure. One road.           ${DIM}social media${NC}"
+  echo -e "  ${CYAN}6${NC}  Light always remembers.                        ${DIM}footers${NC}"
+  echo ""
+  echo -e "  ${AMBER}SYMBOLIC${NC}"
+  echo -e "  ${DIM}#${NC}  is silence."
+  echo -e "  ${BOLD}!${NC}  is you."
+  echo -e "  ${RED}#!${NC} is BlackRoad."
+  echo ""
+  echo -e "  ${AMBER}POSITIONING${NC}"
+  echo -e "  Your AI. Your Hardware. Your Rules."
+  echo -e "  The undefined path. On purpose."
+  echo -e "  We were root before you knew you needed one."
+  echo -e "  Every device a terminal. Every dream a deployable."
+  echo ""
+}
+
 # ─── MAIN ─────────────────────────────────────────────────────────────────
 
 _cmd_help() {
@@ -2155,10 +2232,14 @@ _cmd_help() {
   echo -e "  ${AMBER}  watch                           ${NC} Watch and auto-rebuild"
   echo -e "  ${AMBER}  export                          ${NC} Export brand package as zip"
   echo -e "  ${AMBER}  open [file]                     ${NC} Open brand output in browser"
+  echo -e "  ${AMBER}  manifesto                       ${NC} Display the brand manifesto"
+  echo -e "  ${AMBER}  taglines                        ${NC} List all brand taglines"
   echo -e ""
   echo -e "  ${BOLD}EXAMPLES${NC}"
   echo -e "  ${DIM}  br brand list${NC}"
   echo -e "  ${DIM}  br brand new landing${NC}"
+  echo -e "  ${DIM}  br brand manifesto${NC}"
+  echo -e "  ${DIM}  br brand taglines${NC}"
   echo -e "  ${DIM}  br brand audit src/styles.css${NC}"
   echo -e "  ${DIM}  br brand deploy${NC}"
   echo -e ""
@@ -2175,6 +2256,8 @@ case "${1:-list}" in
   watch)      _cmd_watch "${@:2}" ;;
   open)       _cmd_open "${@:2}" ;;
   export)     _cmd_export "${@:2}" ;;
+  manifesto)  _cmd_manifesto ;;
+  taglines)   _cmd_taglines ;;
   help|-h|--help) _cmd_help ;;
   *)
     echo -e "${RED}✗ Unknown command: $1${NC}"

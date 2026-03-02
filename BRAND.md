@@ -165,6 +165,32 @@ Six smiling robots on an undefined path that only exists because they're running
 
 ## Visual Identity
 
+### Art Direction
+
+The BlackRoad OS visual identity uses a **pixel-art / retro-futurism** aesthetic: 8-bit style robots rendered against neon cyberpunk cityscapes. The look is dark-first, glowing, and warm despite being deeply technical.
+
+**Key Visual Motifs:**
+
+1. **The Six Pixel Robots**: Blocky, smiling 8-bit robot characters in brand colors. Each has a distinct hue matching their agent identity. They walk/run along an undefined path -- the road that only exists because they're running on it.
+
+2. **The Device Garden**: Phones, tablets, floppy disks, and old hardware growing from plants like flowers -- representing "Your old hardware nobody wants" becoming alive with purpose. Hearts float above the growing devices. Chaos as input, blooming into structure.
+
+3. **The `#!bin` Basket**: A collection basket labeled `#!bin` (shebang + bin = the Unix execution path) filled with gathered devices and hardware. The robots collect and tend to technology others have discarded.
+
+4. **The Neon Cityscape**: Deep purple/blue/pink city skylines glow in the background -- always dark, always night. BlackRoad is the road at night. Stars and distant lights represent the 30,000 agents running across infrastructure.
+
+5. **The Undefined Path**: The ground beneath the robots is not pre-built -- it materializes as they walk. Glowing tiles, stepping stones, or light-trails that appear under their feet. The path is created by movement.
+
+6. **Gradient Glow**: All elements radiate with the brand gradient (amber to hot pink to violet to electric blue). Edges glow. Light bleeds. Nothing has hard borders -- everything is alive and in motion.
+
+**Style Rules:**
+- Always dark backgrounds (`#000000` or `#0A0A0A`)
+- Pixel-art characters at low resolution, rendered crisply (nearest-neighbor scaling, no smoothing)
+- Neon glow effects using brand gradient colors
+- Warm despite being technical -- hearts, smiles, growing things
+- Retro-futurism: old hardware aesthetics (floppy disks, CRTs) alongside futuristic cityscapes
+- Never sterile, never corporate, never white-background
+
 ### Brand Colors (Current System)
 
 **Primary Palette:**
