@@ -1123,6 +1123,27 @@ interface Task {
 
 ## Brand Design System
 
+> **Full brand documentation: See [BRAND.md](./BRAND.md) for the complete brand manifesto, taglines, philosophy, and messaging framework.**
+
+### Brand Manifesto (Core Message)
+- **"You bring the chaos. We bring the road."**
+- **"The road you build by running on it."** — primary brand statement
+- **"# is silence. ! is you. #! is BlackRoad."** — the shebang identity
+- **"Light always remembers."** — closing signature
+- The brand operates at character-level root: `#!/` tells the system how to run
+- Chaos is input, not a problem — half-finished dreams are welcome
+- Always present tense: "The robots run the current time. Not a roadmap. Now."
+
+### Brand Taglines
+| Tagline | Use |
+|---------|-----|
+| The road you build by running on it. | Hero sections |
+| The OS that runs the current time. | Product descriptions |
+| Built for dreamers. Powered by agents. Owned by you. | Feature pages |
+| You bring the chaos. BlackRoad brings the road. | Landing pages |
+| Your chaos. Our structure. One road. | Social media |
+| Light always remembers. | Footers |
+
 **CRITICAL: Use these exact colors for all UI work.**
 
 ### Brand Colors
@@ -1142,9 +1163,15 @@ interface Task {
   var(--electric-blue) 100%);
 ```
 
-### Forbidden Colors (Old System - DO NOT USE)
-```
-❌ #FF9D00  ❌ #FF6B00  ❌ #FF0066  ❌ #FF006B  ❌ #D600AA  ❌ #7700FF  ❌ #0066FF
+### Extended Spectrum (Templates & Pages Only)
+```css
+--sunrise-orange: #FF9D00;
+--warm-orange: #FF6B00;
+--hot-pink: #FF0066;
+--electric-magenta: #FF006B;
+--deep-magenta: #D600AA;
+--vivid-purple: #7700FF;
+--cyber-blue: #0066FF;
 ```
 
 ### Spacing (Golden Ratio φ = 1.618)
@@ -1158,6 +1185,9 @@ interface Task {
 
 ### Typography
 ```css
+/* Primary (code-first brand) */
+font-family: "JetBrains Mono", "SF Mono", "Fira Code", "Courier New", monospace;
+/* System fallback */
 font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
 line-height: 1.618;  /* Golden Ratio */
 ```
@@ -2560,10 +2590,11 @@ Each repo in `orgs/` now has its own CLAUDE.md with specific guidance.
 
 **45 docs | 38,000+ lines** across the root directory.
 
-### Core Documentation (10 files)
+### Core Documentation (11 files)
 | File | Description | Lines |
 |------|-------------|-------|
 | **CLAUDE.md** | AI assistant guidance (this file) | 2,635 |
+| **BRAND.md** | Brand manifesto, taglines, visual identity, philosophy | 380 |
 | **PLANNING.md** | Strategic planning, Q1-Q4 2026 | 429 |
 | **ARCHITECTURE.md** | System architecture diagrams | 519 |
 | **ROADMAP.md** | Feature roadmap & releases | 217 |
