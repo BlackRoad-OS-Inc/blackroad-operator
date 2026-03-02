@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/brand/mascot-raspberry-pi.png" alt="BlackRoad OS on Raspberry Pi" width="500" />
+</p>
+
 # BlackRoad OS Raspberry Pi Guide
 
 > Edge computing with Raspberry Pi devices

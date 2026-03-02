@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/brand/br-robots-rainbow.png" alt="Welcome to BlackRoad OS" width="500" />
+</p>
+
 # BlackRoad OS Onboarding Guide
 
 > Welcome to BlackRoad OS! This guide will get you up and running in 30 minutes.
@@ -184,6 +188,10 @@ blackroad/
 ---
 
 ## 🎮 Interactive Tutorial
+
+<p align="center">
+  <img src="assets/brand/mascot-content-creator.png" alt="Get creative with BlackRoad OS" width="400" />
+</p>
 
 ### Exercise 1: Explore Agents
 
@@ -407,6 +415,10 @@ ls cece-logs/
 ```
 
 ---
+
+<p align="center">
+  <img src="assets/brand/mascot-highway-night.png" alt="Hit the road with BlackRoad OS" width="400" />
+</p>
 
 ## 🎉 You're Ready!
 

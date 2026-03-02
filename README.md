@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/brand/br-robots-rainbow.png" alt="BlackRoad OS — Your AI. Your Hardware. Your Rules." width="600" />
+</p>
+
 # blackroad-operator
 
 > CLI tooling, node bootstrap scripts, and operational control for BlackRoad OS.
@@ -7,6 +11,10 @@
 ## Overview
 
 The `br` CLI dispatcher and all operational tooling. Routes `br <command>` to the right tool script. Also includes the MCP bridge server for remote AI agent access.
+
+<p align="center">
+  <img src="assets/brand/mascot-cyberpunk-city.png" alt="BlackRoad OS mascot navigating the cyberpunk city" width="500" />
+</p>
 
 ## Structure
 
@@ -55,10 +63,24 @@ Local MCP server for remote AI agent access:
 cd mcp-bridge && ./start.sh   # Starts on 127.0.0.1:8420
 ```
 
+## Meet the Agents
+
+<p align="center">
+  <img src="assets/brand/agents-team-rainbow.png" alt="The BlackRoad OS agent team" width="500" />
+</p>
+
+Five specialized AI agents power the platform — each with unique capabilities, personalities, and roles. Learn more in [AGENTS.md](AGENTS.md).
+
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ---
+
+<p align="center">
+  <img src="assets/brand/mascot-highway-night.png" alt="BlackRoad OS — the road ahead" width="400" />
+  <br />
+  <em>The road you build by running on it.</em>
+</p>
 
 © BlackRoad OS, Inc. — All rights reserved. Proprietary.

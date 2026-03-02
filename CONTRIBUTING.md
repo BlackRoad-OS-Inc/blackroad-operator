@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/brand/mascot-cyberpunk-city.png" alt="Join the BlackRoad OS journey" width="500" />
+</p>
+
 # Contributing to BlackRoad OS
 
 > Thank you for your interest in contributing to BlackRoad OS!
@@ -396,5 +400,9 @@ Contributors are recognized in:
 By contributing, you agree that your contributions will be licensed under the project's license.
 
 ---
+
+<p align="center">
+  <img src="assets/brand/agents-team-rainbow.png" alt="Join the agent team" width="400" />
+</p>
 
 *Thank you for contributing to BlackRoad OS! 🖤🛣️*

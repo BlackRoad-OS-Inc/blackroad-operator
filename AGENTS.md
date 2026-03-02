@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/brand/agents-team-rainbow.png" alt="The BlackRoad OS agent team" width="600" />
+</p>
+
 # BlackRoad OS Agents
 
 > Complete guide to the AI agents in BlackRoad OS
@@ -32,6 +36,10 @@ BlackRoad OS agents are **autonomous AI entities** that perform tasks, communica
 ---
 
 ## Core Agents
+
+<p align="center">
+  <img src="assets/brand/agents-video-call.png" alt="Agents coordinating on a video call" width="500" />
+</p>
 
 ### 🔴 LUCIDIA
 
@@ -206,6 +214,10 @@ BlackRoad OS agents are **autonomous AI entities** that perform tasks, communica
 ```
 
 ---
+
+<p align="center">
+  <img src="assets/brand/mascot-front-pose.png" alt="BlackRoad OS mascot" width="200" />
+</p>
 
 ## Agent Architecture
 
