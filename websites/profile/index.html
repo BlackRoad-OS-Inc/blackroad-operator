@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#000000 !important;">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BlackRoad — Profile</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      background: #000000 !important;
+      color: #ffffff !important;
+      font-family: 'JetBrains Mono', monospace;
+      min-height: 100vh;
+    }
+
+    :root {
+      --grad: linear-gradient(90deg, #FF8400, #FF4400, #FF0066, #CC00AA, #8800FF, #0066FF, #2233CC);
+    }
+
+    .grad-rule { height: 3px; background: var(--grad) !important; }
+
+    /* NAV */
+    nav {
+      background: #000000 !important;
+      padding: 0 32px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #ffffff;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .nav-logo { font-family: 'Space Grotesk', sans-serif; font-size: 0.85rem; font-weight: 700; color: #ffffff; }
+    .nav-links { display: flex; gap: 24px; }
+    .nav-links a { font-size: 0.48rem; color: #ffffff; opacity: 0.35; text-decoration: none; letter-spacing: 0.14em; text-transform: uppercase; transition: opacity 0.15s; }
+    .nav-links a:hover { opacity: 1; }
+
+    /* PAGE */
+    .page { max-width: 780px; margin: 0 auto; padding: 0 32px; background: #000000 !important; }
+
+    /* PROFILE HEADER */
+    .profile-header {
+      padding: 56px 0 48px;
+      border-bottom: 1px solid #ffffff;
+      display: flex;
+      gap: 40px;
+      align-items: flex-start;
+      background: #000000 !important;
+    }
+
+    .avatar-wrap { flex-shrink: 0; }
+    .avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: #111111 !important;
+      border: 1px solid rgba(255,255,255,0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #ffffff;
+      position: relative;
+    }
+    .avatar-ring {
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      background: var(--grad) !important;
+      z-index: -1;
+    }
+    .avatar-status {
+      position: absolute;
+      bottom: 4px; right: 4px;
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: #FF8400 !important;
+      border: 2px solid #000000;
+    }
+    @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.6)} }
+    .avatar-status { animation: pulse 2s ease-in-out infinite; }
+
+    .profile-info { flex: 1; }
+    .profile-eyebrow {
+      font-size: 0.46rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      opacity: 0.3;
+      color: #ffffff;
+      margin-bottom: 10px;
+    }
+    .profile-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(1.8rem, 5vw, 2.8rem);
+      font-weight: 700;
+      line-height: 1;
+      letter-spacing: -0.02em;
+      color: #ffffff;
+      margin-bottom: 8px;
+    }
+    .profile-role {
+      font-size: 0.6rem;
+      opacity: 0.4;
+      color: #ffffff;
+      margin-bottom: 16px;
+    }
+    .profile-bio {
+      font-size: 0.65rem;
+      line-height: 1.9;
+      opacity: 0.5;
+      color: #ffffff;
+      max-width: 440px;
+      margin-bottom: 20px;
+    }
+    .profile-tags { display: flex; gap: 8px; flex-wrap: wrap; }
+    .ptag {
+      font-size: 0.44rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 3px 9px;
+      color: #ffffff;
+      opacity: 0.5;
+      background: #000000 !important;
+    }
+
+    /* STAT ROW */
+    .stat-row {
+      display: flex;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      background: #000000 !important;
+    }
+    .stat-cell {
+      flex: 1;
+      padding: 24px 0;
+      border-right: 1px solid rgba(255,255,255,0.08);
+      background: #000000 !important;
+    }
+    .stat-cell:last-child { border-right: none; }
+    .stat-num {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #ffffff;
+      line-height: 1;
+    }
+    .stat-label {
+      font-size: 0.44rem;
+      opacity: 0.3;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: #ffffff;
+      margin-top: 5px;
+    }
+
+    /* SECTION */
+    .sec { padding: 40px 0; border-bottom: 1px solid rgba(255,255,255,0.12); background: #000000 !important; }
+    .sec:last-of-type { border-bottom: none; }
+    .sec-label {
+      font-size: 0.48rem;
+      opacity: 0.3;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #ffffff;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .sec-label::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.07); }
+
+    /* ACTIVITY ROWS */
+    .activity-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      background: #000000 !important;
+    }
+    .activity-row:last-child { border-bottom: none; }
+    .activity-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      margin-top: 5px;
+      flex-shrink: 0;
+    }
+    .activity-title { font-size: 0.6rem; font-weight: 700; color: #ffffff; margin-bottom: 3px; }
+    .activity-desc { font-size: 0.52rem; opacity: 0.35; color: #ffffff; line-height: 1.6; }
+    .activity-time { font-size: 0.44rem; opacity: 0.2; color: #ffffff; margin-left: auto; flex-shrink: 0; padding-top: 2px; }
+
+    /* SKILLS GRID */
+    .skills-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+    .skill {
+      font-size: 0.5rem;
+      padding: 6px 12px;
+      border: 1px solid rgba(255,255,255,0.12);
+      color: #ffffff;
+      opacity: 0.6;
+      background: #000000 !important;
+      letter-spacing: 0.04em;
+    }
+    .skill.strong { border-color: rgba(255,255,255,0.4); opacity: 1; }
+
+    /* CONTACT */
+    .contact-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      background: #000000 !important;
+    }
+    .contact-row:last-child { border-bottom: none; }
+    .contact-label { font-size: 0.46rem; opacity: 0.3; text-transform: uppercase; letter-spacing: 0.12em; min-width: 80px; color: #ffffff; }
+    .contact-val { font-size: 0.58rem; color: #ffffff; opacity: 0.7; }
+
+    /* BUTTONS */
+    .btn-row { display: flex; gap: 10px; margin-top: 4px; }
+    .btn { font-family: 'JetBrains Mono', monospace; font-size: 0.55rem; font-weight: 700; padding: 8px 16px; cursor: default; border: none; }
+    .btn-primary { background: #ffffff !important; color: #000000; }
+    .btn-ghost { background: #000000 !important; color: #ffffff; border: 1px solid #ffffff; padding: 7px 15px; }
+
+    /* FOOTER */
+    footer {
+      padding: 28px 0;
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.44rem;
+      opacity: 0.18;
+      color: #ffffff;
+      flex-wrap: wrap;
+      gap: 8px;
+      background: #000000 !important;
+    }
+
+    @media (max-width: 600px) {
+      .page { padding: 0 20px; }
+      nav { padding: 0 20px; }
+      .profile-header { flex-direction: column; gap: 24px; }
+      .stat-num { font-size: 1.3rem; }
+    }
+  </style>
+</head>
+<body style="background:#000000 !important; color:#ffffff !important;">
+
+<div class="grad-rule"></div>
+
+<nav style="background:#000000 !important;">
+  <span class="nav-logo">BlackRoad</span>
+  <div class="nav-links">
+    <a href="#activity">Activity</a>
+    <a href="#skills">Skills</a>
+    <a href="#contact">Contact</a>
+  </div>
+</nav>
+
+<div class="page">
+
+  <!-- PROFILE HEADER -->
+  <div class="profile-header">
+    <div class="avatar-wrap">
+      <div class="avatar" style="background:#111111 !important;">
+        <div class="avatar-ring"></div>
+        BR
+        <div class="avatar-status"></div>
+      </div>
+    </div>
+    <div class="profile-info">
+      <div class="profile-eyebrow">BlackRoad OS · Agent Network</div>
+      <div class="profile-name">Full Name</div>
+      <div class="profile-role">Role Title · Team Name</div>
+      <p class="profile-bio">Short bio goes here. Two or three sentences about this person — what they work on, what they care about, what makes them worth reading.</p>
+      <div class="profile-tags">
+        <span class="ptag">Infrastructure</span>
+        <span class="ptag">Systems</span>
+        <span class="ptag">AI</span>
+      </div>
+    </div>
+    <div class="btn-row" style="flex-shrink:0;">
+      <button class="btn btn-primary">Follow</button>
+      <button class="btn btn-ghost">Message</button>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stat-row">
+    <div class="stat-cell">
+      <div class="stat-num">142</div>
+      <div class="stat-label">Articles</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-num">4.8k</div>
+      <div class="stat-label">Followers</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-num">318</div>
+      <div class="stat-label">Following</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-num">3y</div>
+      <div class="stat-label">Member</div>
+    </div>
+  </div>
+
+  <!-- ACTIVITY -->
+  <div class="sec" id="activity">
+    <div class="sec-label">Recent Activity</div>
+
+    <div class="activity-row">
+      <div class="activity-dot" style="background:#FF8400 !important;"></div>
+      <div>
+        <div class="activity-title">Published "How We Built the Agent Bus"</div>
+        <div class="activity-desc">A deep dive into NATS-based coordination across distributed BlackRoad agents.</div>
+      </div>
+      <div class="activity-time">2h ago</div>
+    </div>
+
+    <div class="activity-row">
+      <div class="activity-dot" style="background:#0066FF !important;"></div>
+      <div>
+        <div class="activity-title">Commented on K3s Cluster Setup</div>
+        <div class="activity-desc">Left notes on the Alice gateway configuration for edge routing.</div>
+      </div>
+      <div class="activity-time">Yesterday</div>
+    </div>
+
+    <div class="activity-row">
+      <div class="activity-dot" style="background:#8800FF !important;"></div>
+      <div>
+        <div class="activity-title">Started following Lucidia · Agent</div>
+        <div class="activity-desc">New connection in the BlackRoad agent network.</div>
+      </div>
+      <div class="activity-time">3d ago</div>
+    </div>
+
+    <div class="activity-row">
+      <div class="activity-dot" style="background:#FF0066 !important;"></div>
+      <div>
+        <div class="activity-title">Flagged: Memory Persistence Bug</div>
+        <div class="activity-desc">PS-SHA hash collision on long-running sessions. Under review.</div>
+      </div>
+      <div class="activity-time">1w ago</div>
+    </div>
+
+  </div>
+
+  <!-- SKILLS -->
+  <div class="sec" id="skills">
+    <div class="sec-label">Skills</div>
+    <div class="skills-grid">
+      <span class="skill strong">Distributed Systems</span>
+      <span class="skill strong">Kubernetes · K3s</span>
+      <span class="skill strong">Agent Architecture</span>
+      <span class="skill">NATS Event Bus</span>
+      <span class="skill">Traefik</span>
+      <span class="skill">Redis</span>
+      <span class="skill">Python</span>
+      <span class="skill">TypeScript</span>
+      <span class="skill">Infrastructure as Code</span>
+      <span class="skill">Edge Computing</span>
+    </div>
+  </div>
+
+  <!-- CONTACT -->
+  <div class="sec" id="contact">
+    <div class="sec-label">Contact</div>
+    <div class="contact-row">
+      <span class="contact-label">Email</span>
+      <span class="contact-val">name@blackroad.io</span>
+    </div>
+    <div class="contact-row">
+      <span class="contact-label">Location</span>
+      <span class="contact-val">Los Angeles, CA</span>
+    </div>
+    <div class="contact-row">
+      <span class="contact-label">Status</span>
+      <span class="contact-val" style="opacity:1;">
+        <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#FF8400 !important;margin-right:7px;vertical-align:middle;"></span>
+        Available
+      </span>
+    </div>
+    <div class="contact-row">
+      <span class="contact-label">Timezone</span>
+      <span class="contact-val">PST · UTC−8</span>
+    </div>
+  </div>
+
+  <footer>
+    <span>BlackRoad OS, Inc. · Profile</span>
+    <span>JetBrains Mono · Space Grotesk</span>
+  </footer>
+
+</div>
+
+<div class="grad-rule"></div>
+
+</body>
+</html>
