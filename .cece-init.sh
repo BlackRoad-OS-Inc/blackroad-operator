@@ -9,7 +9,7 @@ CECE_PROMPT="$HOME/.blackroad/cece-prompt.txt"
 # Check if CECE is initialized
 if [[ ! -f "$CECE_DB" ]]; then
     # Initialize CECE for first time
-    /Users/alexa/blackroad/tools/cece-identity/br-cece.sh init
+    "$(cd "$(dirname "$0")" && pwd)/tools/cece-identity/br-cece.sh" init
 fi
 
 # Update last active timestamp

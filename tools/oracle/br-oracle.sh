@@ -21,6 +21,7 @@ DIM=$'\033[2m'
 ITALIC=$'\033[3m'
 NC=$'\033[0m'
 
+BR_ROOT="${BR_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 OLLAMA_URL="${BLACKROAD_OLLAMA_URL:-http://localhost:11434}"
 DB="$HOME/.blackroad/fleet-nodes.db"
 
@@ -76,7 +77,7 @@ gather_context() {
 
   # Recent git history
   ctx+="\n## Recent Commits (last 5)\n"
-  ctx+=$(git -C /Users/alexa/blackroad --no-pager log --oneline -5 2>/dev/null)
+  ctx+=$(git -C ${BR_ROOT} --no-pager log --oneline -5 2>/dev/null)
   ctx+="\n"
 
   # Available Ollama models
