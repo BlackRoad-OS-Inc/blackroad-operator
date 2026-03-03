@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#000!important;">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RoadView — Truth-First Search · BlackRoad</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+    :root {
+      --grad: linear-gradient(90deg,#FF8400,#FF4400,#FF0066,#CC00AA,#8800FF,#0066FF,#2233CC);
+      --b:   rgba(255,255,255,0.07);
+      --b2:  rgba(255,255,255,0.04);
+      --surf: rgba(255,255,255,0.025);
+      --hov:  rgba(255,255,255,0.04);
+      --orange:#FF8400; --pink:#FF0066; --purple:#8800FF; --blue:#0066FF; --red:#FF4400;
+    }
+
+    html,body { background:#000!important; color:#fff!important; font-family:'JetBrains Mono',monospace; height:100%; overflow:hidden; }
+
+    .shell { display:grid; grid-template-rows:3px 46px 1fr; height:100vh; }
+    .grad-rule { background:var(--grad); }
+
+    /* ── TOPBAR ── */
+    .topbar { display:flex; align-items:center; border-bottom:1px solid var(--b); background:#000; }
+    .tb-logo { padding:0 20px; height:100%; display:flex; align-items:center; gap:12px; border-right:1px solid var(--b); }
+    .tb-logo-name { font-family:'Space Grotesk',sans-serif; font-size:0.95rem; font-weight:700; }
+    .tb-logo-tag  { font-size:0.4rem; opacity:0.25; letter-spacing:0.14em; text-transform:uppercase; }
+
+    .tb-search-wrap { flex:1; padding:0 20px; display:flex; align-items:center; gap:12px; }
+    .tb-search {
+      flex:1; max-width:620px;
+      display:flex; align-items:center;
+      border:1px solid rgba(255,255,255,0.15);
+      background:var(--surf);
+      transition:border-color 0.15s;
+    }
+    .tb-search:focus-within { border-color:rgba(255,255,255,0.35); }
+    .tb-search-icon { padding:0 12px; opacity:0.2; font-size:0.7rem; }
+    .tb-search-inp {
+      flex:1; font-family:'JetBrains Mono',monospace;
+      font-size:0.58rem; color:#fff; background:transparent;
+      border:none; outline:none; padding:9px 0;
+    }
+    .tb-search-inp::placeholder { color:rgba(255,255,255,0.15); }
+    .tb-search-verify {
+      padding:0 12px; font-size:0.4rem; opacity:0.25;
+      letter-spacing:0.1em; border-left:1px solid var(--b);
+      display:flex; align-items:center; gap:6px; height:100%;
+    }
+    .tv-dot { width:5px; height:5px; border-radius:50%; background:var(--blue); }
+    @keyframes tv-pulse { 0%,100%{opacity:0.4} 50%{opacity:1} }
+    .tv-dot { animation:tv-pulse 1.5s ease-in-out infinite; }
+
+    .tb-search-btn {
+      padding:0 16px; height:100%;
+      font-family:'JetBrains Mono',monospace;
+      font-size:0.52rem; font-weight:700;
+      background:#fff; color:#000; border:none; cursor:pointer;
+      letter-spacing:0.04em; transition:opacity 0.15s;
+    }
+    .tb-search-btn:hover { opacity:0.88; }
+
+    .tb-filters { display:flex; height:100%; }
+    .tb-filter {
+      padding:0 14px; height:100%; display:flex; align-items:center;
+      font-size:0.46rem; opacity:0.28; letter-spacing:0.08em;
+      cursor:pointer; border-right:1px solid var(--b);
+      transition:opacity 0.15s,background 0.15s;
+    }
+    .tb-filter:hover { opacity:0.7; background:var(--hov); }
+    .tb-filter.active { opacity:1; border-bottom:2px solid var(--orange); background:var(--surf); }
+
+    .tb-right { margin-left:auto; display:flex; align-items:center; height:100%; }
+    .tb-right-item { padding:0 14px; height:100%; display:flex; align-items:center; gap:7px; border-left:1px solid var(--b); font-size:0.44rem; opacity:0.3; }
+
+    /* ── BODY ── */
+    .body { display:grid; grid-template-columns:1fr 380px; overflow:hidden; }
+
+    /* ── RESULTS PANEL ── */
+    .results-panel { display:flex; flex-direction:column; overflow:hidden; border-right:1px solid var(--b); }
+
+    /* query info bar */
+    .query-bar { padding:10px 24px; border-bottom:1px solid var(--b); display:flex; align-items:center; gap:16px; flex-shrink:0; }
+    .qb-count { font-size:0.46rem; opacity:0.3; }
+    .qb-count span { color:#fff; opacity:1; font-weight:700; }
+    .qb-time  { font-size:0.42rem; opacity:0.2; }
+    .qb-conf  { margin-left:auto; display:flex; align-items:center; gap:8px; font-size:0.44rem; opacity:0.4; }
+    .qb-conf-bar { width:80px; height:3px; background:rgba(255,255,255,0.07); }
+    .qb-conf-fill { height:100%; background:var(--blue); }
+
+    .results-scroll { flex:1; overflow-y:auto; }
+    .results-scroll::-webkit-scrollbar { width:2px; }
+    .results-scroll::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.06); }
+
+    /* ── RESULT CARD ── */
+    .result-card {
+      padding:20px 24px;
+      border-bottom:1px solid var(--b);
+      cursor:pointer;
+      transition:background 0.12s;
+      display:grid;
+      grid-template-columns:1fr auto;
+      gap:16px;
+    }
+    .result-card:hover { background:var(--hov); }
+    .result-card.selected { background:var(--surf); border-left:3px solid var(--orange); }
+    .result-card.video { grid-template-columns:1fr 120px; }
+
+    .rc-left {}
+    .rc-source-row { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+    .rc-source-icon { width:14px; height:14px; border:1px solid var(--b); display:flex; align-items:center; justify-content:center; font-size:0.5rem; flex-shrink:0; }
+    .rc-source-name { font-size:0.44rem; opacity:0.4; }
+    .rc-source-type { font-size:0.38rem; padding:1px 5px; border:1px solid var(--b); opacity:0.3; letter-spacing:0.06em; }
+    .rc-verified { display:flex; align-items:center; gap:5px; font-size:0.4rem; margin-left:auto; }
+    .rc-ver-dot  { width:5px; height:5px; border-radius:50%; }
+
+    .rc-title { font-family:'Space Grotesk',sans-serif; font-size:0.95rem; font-weight:700; line-height:1.25; margin-bottom:8px; letter-spacing:-0.01em; }
+    .rc-snippet { font-size:0.52rem; opacity:0.45; line-height:1.75; margin-bottom:10px; }
+    .rc-snippet mark { background:transparent; color:#fff; opacity:1; font-weight:700; }
+
+    .rc-meta { display:flex; align-items:center; gap:12px; }
+    .rc-date { font-size:0.42rem; opacity:0.2; }
+    .rc-tag  { font-size:0.38rem; padding:1px 6px; border:1px solid var(--b); opacity:0.3; letter-spacing:0.05em; }
+
+    /* confidence score */
+    .rc-right { display:flex; flex-direction:column; align-items:flex-end; gap:8px; }
+    .conf-score { text-align:center; }
+    .cs-num { font-family:'Space Grotesk',sans-serif; font-size:1.4rem; font-weight:700; line-height:1; }
+    .cs-label { font-size:0.38rem; opacity:0.2; letter-spacing:0.1em; text-transform:uppercase; margin-top:3px; }
+    .cs-bar { width:40px; height:2px; background:rgba(255,255,255,0.07); margin-top:6px; }
+    .cs-fill { height:100%; }
+    .rc-sources-count { font-size:0.4rem; opacity:0.2; text-align:right; }
+
+    /* video thumbnail */
+    .rc-thumb {
+      width:120px; height:68px;
+      background:#0a0a0a;
+      border:1px solid var(--b);
+      display:flex; align-items:center; justify-content:center;
+      position:relative; overflow:hidden; flex-shrink:0;
+    }
+    .rc-thumb-grid {
+      position:absolute; inset:0;
+      background-image:linear-gradient(rgba(255,255,255,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.02) 1px,transparent 1px);
+      background-size:10px 10px;
+    }
+    .rc-play { width:24px; height:24px; border:1.5px solid rgba(255,255,255,0.3); border-radius:50%; display:flex; align-items:center; justify-content:center; z-index:1; }
+    .rc-play::after { content:'\25B6'; font-size:0.45rem; margin-left:2px; opacity:0.6; }
+    .rc-duration { position:absolute; bottom:4px; right:6px; font-size:0.38rem; opacity:0.4; z-index:1; }
+
+    /* ── AI ANSWER PANEL ── */
+    .ai-answer {
+      margin:16px 24px;
+      border:1px solid rgba(255,132,0,0.2);
+      background:rgba(255,132,0,0.03);
+    }
+    .aa-head { padding:10px 16px; border-bottom:1px solid rgba(255,132,0,0.1); display:flex; align-items:center; gap:10px; }
+    .aa-icon { width:18px; height:18px; border:1px solid rgba(255,132,0,0.4); display:flex; align-items:center; justify-content:center; font-size:0.55rem; }
+    .aa-label { font-size:0.42rem; letter-spacing:0.12em; text-transform:uppercase; color:var(--orange); opacity:0.7; flex:1; }
+    .aa-conf  { font-size:0.4rem; color:var(--blue); opacity:0.7; }
+    .aa-body  { padding:14px 16px; }
+    .aa-text  { font-size:0.58rem; opacity:0.65; line-height:1.85; }
+    .aa-text strong { color:#fff; opacity:1; }
+    .aa-sources { padding:8px 16px 10px; border-top:1px solid rgba(255,132,0,0.1); display:flex; gap:8px; flex-wrap:wrap; }
+    .aa-source { font-size:0.4rem; padding:2px 8px; border:1px solid var(--b); opacity:0.35; }
+
+    /* divider label */
+    .result-section-label { padding:8px 24px; font-size:0.4rem; opacity:0.18; letter-spacing:0.16em; text-transform:uppercase; border-bottom:1px solid var(--b2); background:var(--surf); }
+
+    /* ── RIGHT PANEL: Verification + Video ── */
+    .right-panel { display:flex; flex-direction:column; overflow:hidden; }
+
+    /* verification detail */
+    .vp-section { border-bottom:1px solid var(--b); flex-shrink:0; }
+    .vp-head { padding:10px 16px; display:flex; align-items:center; gap:8px; }
+    .vp-accent { width:3px; height:10px; }
+    .vp-title { font-size:0.42rem; opacity:0.25; letter-spacing:0.14em; text-transform:uppercase; }
+    .vp-badge { margin-left:auto; font-size:0.38rem; padding:2px 7px; border:1px solid; letter-spacing:0.06em; }
+    .vp-badge.verified { border-color:rgba(0,102,255,0.4); color:var(--blue); }
+    .vp-badge.warn     { border-color:rgba(255,0,102,0.4); color:var(--pink); }
+    .vp-badge.primary  { border-color:rgba(255,132,0,0.4); color:var(--orange); }
+
+    .vp-body { padding:12px 16px; }
+
+    .vc-row { display:flex; align-items:center; gap:8px; padding:6px 0; border-bottom:1px solid var(--b2); font-size:0.48rem; }
+    .vc-row:last-child { border-bottom:none; }
+    .vc-icon { font-size:0.55rem; width:18px; text-align:center; flex-shrink:0; }
+    .vc-label { flex:1; opacity:0.4; }
+    .vc-val   { opacity:0.7; font-size:0.46rem; }
+    .vc-val.good { color:var(--blue); }
+    .vc-val.warn { color:var(--pink); }
+
+    .source-list { padding:0 16px 12px; display:flex; flex-direction:column; gap:6px; }
+    .src-item { padding:8px 10px; border:1px solid var(--b); display:flex; gap:10px; align-items:flex-start; cursor:pointer; transition:background 0.12s; }
+    .src-item:hover { background:var(--hov); }
+    .src-rank { font-size:0.42rem; opacity:0.2; min-width:14px; }
+    .src-info { flex:1; }
+    .src-name { font-size:0.5rem; font-weight:700; margin-bottom:3px; }
+    .src-type { font-size:0.4rem; opacity:0.3; }
+    .src-conf { font-family:'Space Grotesk',sans-serif; font-size:0.9rem; font-weight:700; }
+
+    /* video creator panel */
+    .vp-creator { flex:1; overflow-y:auto; }
+    .vp-creator::-webkit-scrollbar { width:2px; }
+    .vp-creator::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.06); }
+
+    .creator-card { padding:14px 16px; border-bottom:1px solid var(--b); }
+    .creator-head { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+    .creator-avatar { width:28px; height:28px; display:flex; align-items:center; justify-content:center; font-size:0.55rem; font-weight:700; border:1px solid; flex-shrink:0; }
+    .creator-name { font-size:0.58rem; font-weight:700; }
+    .creator-sub  { font-size:0.42rem; opacity:0.3; }
+    .creator-revenue { margin-left:auto; text-align:right; }
+    .cr-num { font-family:'Space Grotesk',sans-serif; font-size:1rem; font-weight:700; color:var(--orange); }
+    .cr-lbl { font-size:0.38rem; opacity:0.2; }
+
+    .revenue-breakdown { display:flex; flex-direction:column; gap:4px; }
+    .rb-row { display:flex; align-items:center; gap:8px; font-size:0.46rem; }
+    .rb-label { opacity:0.3; flex:1; }
+    .rb-bar-wrap { width:60px; height:2px; background:rgba(255,255,255,0.06); }
+    .rb-bar { height:100%; }
+    .rb-val { opacity:0.5; min-width:28px; text-align:right; font-size:0.44rem; }
+
+    .creator-tags { display:flex; gap:5px; flex-wrap:wrap; margin-top:10px; }
+    .ct-tag { font-size:0.38rem; padding:2px 6px; border:1px solid var(--b); opacity:0.35; }
+
+    /* ── NO SEO BANNER ── */
+    .noseo-banner { padding:8px 24px; display:flex; align-items:center; gap:10px; border-bottom:1px solid var(--b); background:rgba(255,255,255,0.01); flex-shrink:0; }
+    .nb-dot { width:5px; height:5px; border-radius:50%; background:var(--blue); flex-shrink:0; }
+    .nb-text { font-size:0.44rem; opacity:0.28; }
+    .nb-text strong { color:#fff; opacity:1; }
+
+    * { scrollbar-width:thin; scrollbar-color:rgba(255,255,255,0.06) transparent; }
+
+    @keyframes fadeUp { from{opacity:0;transform:translateY(5px)} to{opacity:1;transform:none} }
+    .result-card { animation:fadeUp 0.3s ease forwards; }
+    .result-card:nth-child(2) { animation-delay:0.05s; }
+    .result-card:nth-child(3) { animation-delay:0.10s; }
+    .result-card:nth-child(4) { animation-delay:0.15s; }
+    .result-card:nth-child(5) { animation-delay:0.20s; }
+  </style>
+</head>
+<body style="background:#000!important;color:#fff!important;">
+<div style="position:fixed;inset:0;background:#000;z-index:-9999;pointer-events:none;"></div>
+
+<div class="shell">
+  <div class="grad-rule"></div>
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="tb-logo">
+      <div>
+        <div class="tb-logo-name">RoadView</div>
+        <div class="tb-logo-tag">roadview.blackroad.io</div>
+      </div>
+    </div>
+
+    <div class="tb-search-wrap">
+      <div class="tb-search">
+        <div class="tb-search-icon">&#x2315;</div>
+        <input class="tb-search-inp" id="main-search" value="how does CRISPR gene editing work" autocomplete="off" spellcheck="false">
+        <div class="tb-search-verify">
+          <div class="tv-dot"></div>
+          verifying sources
+        </div>
+        <button class="tb-search-btn" onclick="runSearch()">Search</button>
+      </div>
+    </div>
+
+    <div class="tb-filters">
+      <div class="tb-filter active" onclick="setFilter(this)">All</div>
+      <div class="tb-filter" onclick="setFilter(this)">Primary Sources</div>
+      <div class="tb-filter" onclick="setFilter(this)">Video</div>
+      <div class="tb-filter" onclick="setFilter(this)">Research</div>
+      <div class="tb-filter" onclick="setFilter(this)">News</div>
+    </div>
+
+    <div class="tb-right">
+      <div class="tb-right-item">
+        <div style="width:5px;height:5px;border-radius:50%;background:var(--blue);"></div>
+        <span>0 ads</span>
+      </div>
+      <div class="tb-right-item">No SEO gaming</div>
+    </div>
+  </div>
+
+  <!-- BODY -->
+  <div class="body">
+
+    <!-- LEFT: Results -->
+    <div class="results-panel">
+
+      <div class="noseo-banner">
+        <div class="nb-dot"></div>
+        <div class="nb-text">
+          Results ranked by <strong>source quality and verification</strong> &mdash; not SEO score, ad spend, or engagement metrics. Primary sources always surface first.
+        </div>
+      </div>
+
+      <div class="query-bar">
+        <div class="qb-count"><span id="result-count">7</span> verified results</div>
+        <div class="qb-time" id="query-time">0.31s &middot; 14 sources cross-referenced</div>
+        <div class="qb-conf">
+          System confidence
+          <div class="qb-conf-bar"><div class="qb-conf-fill" id="sys-conf" style="width:91%;"></div></div>
+          <span id="conf-pct">91%</span>
+        </div>
+      </div>
+
+      <div class="results-scroll" id="results-scroll">
+
+        <!-- AI Synthesized Answer -->
+        <div class="ai-answer">
+          <div class="aa-head">
+            <div class="aa-icon">&#x2726;</div>
+            <div class="aa-label">Synthesized Answer &middot; Lucidia</div>
+            <div class="aa-conf">91% confidence &middot; 5 primary sources</div>
+          </div>
+          <div class="aa-body">
+            <div class="aa-text" id="ai-answer-text">
+              <strong>CRISPR-Cas9</strong> is a gene-editing tool derived from a bacterial immune system. It uses a guide RNA to direct the Cas9 protein to a precise location in the genome, where it cuts the DNA double strand. The cell's own repair mechanisms then fix the break &mdash; either disabling a gene (<strong>knockout</strong>) or inserting new genetic material (<strong>knock-in</strong>).<br><br>
+              The key components: a <strong>guide RNA (gRNA)</strong> that matches your target sequence, and the <strong>Cas9 endonuclease</strong> that does the cutting. The guide RNA is the programmable part &mdash; change it, and you change the target.
+            </div>
+          </div>
+          <div class="aa-sources" id="aa-sources">
+            <div class="aa-source">Nature &middot; peer-reviewed</div>
+            <div class="aa-source">NIH National Library</div>
+            <div class="aa-source">Broad Institute</div>
+            <div class="aa-source">Science Direct</div>
+            <div class="aa-source">Cell Journal</div>
+          </div>
+        </div>
+
+        <div class="result-section-label">Primary Sources &middot; Highest Verification</div>
+
+        <!-- Result 1 -->
+        <div class="result-card selected" onclick="selectResult(this,0)">
+          <div class="rc-left">
+            <div class="rc-source-row">
+              <div class="rc-source-icon">&#x1F4C4;</div>
+              <div class="rc-source-name">nature.com</div>
+              <div class="rc-source-type">PEER REVIEWED</div>
+              <div class="rc-verified" style="color:var(--blue);">
+                <div class="rc-ver-dot" style="background:var(--blue);"></div>
+                Verified &middot; 3 cross-refs
+              </div>
+            </div>
+            <div class="rc-title">CRISPR-Cas9 for medical genetic disorders: A review of current progress</div>
+            <div class="rc-snippet">The CRISPR-Cas9 system enables precise, targeted editing of genomic DNA in living cells. <mark>Guide RNA sequences</mark> direct the nuclease to specific loci, where double-strand breaks initiate either non-homologous end joining or homology-directed repair.</div>
+            <div class="rc-meta">
+              <div class="rc-date">Jan 2024</div>
+              <div class="rc-tag">Molecular Biology</div>
+              <div class="rc-tag">Primary Research</div>
+            </div>
+          </div>
+          <div class="rc-right">
+            <div class="conf-score">
+              <div class="cs-num" style="color:var(--blue);">97%</div>
+              <div class="cs-label">confidence</div>
+              <div class="cs-bar"><div class="cs-fill" style="width:97%;background:var(--blue);"></div></div>
+            </div>
+            <div class="rc-sources-count">Cross-ref: 3</div>
+          </div>
+        </div>
+
+        <!-- Result 2 -->
+        <div class="result-card" onclick="selectResult(this,1)">
+          <div class="rc-left">
+            <div class="rc-source-row">
+              <div class="rc-source-icon">&#x1F3DB;</div>
+              <div class="rc-source-name">nih.gov</div>
+              <div class="rc-source-type">GOVERNMENT</div>
+              <div class="rc-verified" style="color:var(--blue);">
+                <div class="rc-ver-dot" style="background:var(--blue);"></div>
+                Verified &middot; 5 cross-refs
+              </div>
+            </div>
+            <div class="rc-title">Genome Editing &mdash; National Human Genome Research Institute</div>
+            <div class="rc-snippet">Genome editing (also called gene editing) refers to a group of technologies that give scientists the ability to change an organism's DNA. <mark>CRISPR-Cas9</mark> &mdash; short for Clustered Regularly Interspaced Short Palindromic Repeats &mdash; is the most widely used and precise tool available.</div>
+            <div class="rc-meta">
+              <div class="rc-date">Updated Mar 2024</div>
+              <div class="rc-tag">Government Source</div>
+              <div class="rc-tag">Educational</div>
+            </div>
+          </div>
+          <div class="rc-right">
+            <div class="conf-score">
+              <div class="cs-num" style="color:var(--blue);">95%</div>
+              <div class="cs-label">confidence</div>
+              <div class="cs-bar"><div class="cs-fill" style="width:95%;background:var(--blue);"></div></div>
+            </div>
+            <div class="rc-sources-count">Cross-ref: 5</div>
+          </div>
+        </div>
+
+        <!-- Result 3 -->
+        <div class="result-card" onclick="selectResult(this,2)">
+          <div class="rc-left">
+            <div class="rc-source-row">
+              <div class="rc-source-icon">&#x1F52C;</div>
+              <div class="rc-source-name">broadinstitute.org</div>
+              <div class="rc-source-type">RESEARCH ORG</div>
+              <div class="rc-verified" style="color:var(--blue);">
+                <div class="rc-ver-dot" style="background:var(--blue);"></div>
+                Verified &middot; 4 cross-refs
+              </div>
+            </div>
+            <div class="rc-title">Questions and Answers about CRISPR &mdash; Broad Institute</div>
+            <div class="rc-snippet">CRISPR has been adapted from a naturally occurring genome editing system in bacteria. The bacteria use <mark>CRISPR DNA segments</mark> and CRISPR-associated (Cas) proteins as part of their immune system. First published by Doudna and Charpentier in 2012 &mdash; Nobel Prize awarded 2020.</div>
+            <div class="rc-meta">
+              <div class="rc-date">2024</div>
+              <div class="rc-tag">Explainer</div>
+              <div class="rc-tag">Research Org</div>
+            </div>
+          </div>
+          <div class="rc-right">
+            <div class="conf-score">
+              <div class="cs-num" style="color:var(--blue);">93%</div>
+              <div class="cs-label">confidence</div>
+              <div class="cs-bar"><div class="cs-fill" style="width:93%;background:var(--blue);"></div></div>
+            </div>
+            <div class="rc-sources-count">Cross-ref: 4</div>
+          </div>
+        </div>
+
+        <div class="result-section-label">Video &middot; Creator-Verified</div>
+
+        <!-- Video Result 1 -->
+        <div class="result-card video" onclick="selectResult(this,3)">
+          <div class="rc-left">
+            <div class="rc-source-row">
+              <div class="rc-source-icon">&#x25B6;</div>
+              <div class="rc-source-name">Kurzgesagt &middot; RoadView</div>
+              <div class="rc-source-type">VIDEO</div>
+              <div class="rc-verified" style="color:var(--orange);">
+                <div class="rc-ver-dot" style="background:var(--orange);"></div>
+                Creator verified
+              </div>
+            </div>
+            <div class="rc-title">CRISPR &amp; the Future of Human Evolution</div>
+            <div class="rc-snippet">Visual explainer of the CRISPR mechanism, guide RNA targeting, and real-world applications from sickle cell disease to agricultural biotech. Content verified against 3 primary sources.</div>
+            <div class="rc-meta">
+              <div class="rc-date">6 months ago &middot; 14 min</div>
+              <div class="rc-tag">Educational Video</div>
+            </div>
+          </div>
+          <div class="rc-thumb">
+            <div class="rc-thumb-grid"></div>
+            <div class="rc-play"></div>
+            <div class="rc-duration">14:22</div>
+          </div>
+        </div>
+
+        <!-- Video Result 2 -->
+        <div class="result-card video" onclick="selectResult(this,4)">
+          <div class="rc-left">
+            <div class="rc-source-row">
+              <div class="rc-source-icon">&#x25B6;</div>
+              <div class="rc-source-name">MIT OpenCourseWare &middot; RoadView</div>
+              <div class="rc-source-type">LECTURE</div>
+              <div class="rc-verified" style="color:var(--blue);">
+                <div class="rc-ver-dot" style="background:var(--blue);"></div>
+                Institution verified
+              </div>
+            </div>
+            <div class="rc-title">Lecture 12: CRISPR-Based Genome Editing &mdash; 7.016 Intro Biology</div>
+            <div class="rc-snippet">Professor Imperiali covers the molecular mechanism of Cas9, PAM sequences, off-target effects, and delivery challenges. Full lecture with slides.</div>
+            <div class="rc-meta">
+              <div class="rc-date">2023 &middot; 52 min</div>
+              <div class="rc-tag">Lecture</div>
+              <div class="rc-tag">University</div>
+            </div>
+          </div>
+          <div class="rc-thumb">
+            <div class="rc-thumb-grid"></div>
+            <div class="rc-play"></div>
+            <div class="rc-duration">52:14</div>
+          </div>
+        </div>
+
+        <div class="result-section-label">News &middot; Recency-weighted &middot; Verified</div>
+
+        <!-- News Result -->
+        <div class="result-card" onclick="selectResult(this,5)">
+          <div class="rc-left">
+            <div class="rc-source-row">
+              <div class="rc-source-icon">&#x1F4F0;</div>
+              <div class="rc-source-name">science.org</div>
+              <div class="rc-source-type">JOURNAL NEWS</div>
+              <div class="rc-verified" style="color:var(--blue);">
+                <div class="rc-ver-dot" style="background:var(--blue);"></div>
+                Verified &middot; 2 cross-refs
+              </div>
+            </div>
+            <div class="rc-title">FDA approves first CRISPR therapy for sickle cell disease</div>
+            <div class="rc-snippet">Casgevy, developed by Vertex Pharmaceuticals and CRISPR Therapeutics, became the first CRISPR-based treatment approved by the FDA &mdash; a milestone validating <mark>ex vivo editing</mark> of hematopoietic stem cells.</div>
+            <div class="rc-meta">
+              <div class="rc-date">Dec 2023</div>
+              <div class="rc-tag">Clinical</div>
+              <div class="rc-tag">FDA Approval</div>
+            </div>
+          </div>
+          <div class="rc-right">
+            <div class="conf-score">
+              <div class="cs-num" style="color:var(--orange);">88%</div>
+              <div class="cs-label">confidence</div>
+              <div class="cs-bar"><div class="cs-fill" style="width:88%;background:var(--orange);"></div></div>
+            </div>
+            <div class="rc-sources-count">Cross-ref: 2</div>
+          </div>
+        </div>
+
+        <!-- Flagged result -->
+        <div class="result-section-label" style="color:var(--pink);opacity:0.5;">&#x26A0; Low Confidence &middot; Included for completeness</div>
+        <div class="result-card" style="opacity:0.55;" onclick="selectResult(this,6)">
+          <div class="rc-left">
+            <div class="rc-source-row">
+              <div class="rc-source-icon">&#x1F4DD;</div>
+              <div class="rc-source-name">healthblog-2024.com</div>
+              <div class="rc-source-type">BLOG</div>
+              <div class="rc-verified" style="color:var(--pink);">
+                <div class="rc-ver-dot" style="background:var(--pink);"></div>
+                Unverified &middot; 0 cross-refs
+              </div>
+            </div>
+            <div class="rc-title">CRISPR Will Cure Everything by 2025 &mdash; Here's Why</div>
+            <div class="rc-snippet">Speculative claims about near-term CRISPR applications. No primary sources cited. Content could not be verified against peer-reviewed literature. Shown as potentially relevant but marked low confidence.</div>
+            <div class="rc-meta">
+              <div class="rc-date">Oct 2023</div>
+              <div class="rc-tag" style="border-color:rgba(255,0,102,0.3);color:var(--pink);">Unverified</div>
+            </div>
+          </div>
+          <div class="rc-right">
+            <div class="conf-score">
+              <div class="cs-num" style="color:var(--pink);">31%</div>
+              <div class="cs-label">confidence</div>
+              <div class="cs-bar"><div class="cs-fill" style="width:31%;background:var(--pink);"></div></div>
+            </div>
+            <div class="rc-sources-count">Cross-ref: 0</div>
+          </div>
+        </div>
+
+        <div style="height:24px;"></div>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="right-panel">
+
+      <!-- Verification detail -->
+      <div class="vp-section">
+        <div class="vp-head">
+          <div class="vp-accent" style="background:var(--blue);"></div>
+          <div class="vp-title">Source Verification</div>
+          <div class="vp-badge verified" id="vp-badge">VERIFIED</div>
+        </div>
+        <div class="vp-body" id="vp-body">
+          <div class="vc-row"><div class="vc-icon">&#x1F4C4;</div><div class="vc-label">Source</div><div class="vc-val">nature.com</div></div>
+          <div class="vc-row"><div class="vc-icon">&#x1F3DB;</div><div class="vc-label">Type</div><div class="vc-val">Peer-reviewed journal</div></div>
+          <div class="vc-row"><div class="vc-icon">&#x2713;</div><div class="vc-label">Fact-checked</div><div class="vc-val good">3 sources agree</div></div>
+          <div class="vc-row"><div class="vc-icon">&#x1F4C5;</div><div class="vc-label">Published</div><div class="vc-val">Jan 2024</div></div>
+          <div class="vc-row"><div class="vc-icon">&#x1F517;</div><div class="vc-label">Primary source</div><div class="vc-val good">Yes</div></div>
+          <div class="vc-row"><div class="vc-icon">&#x1F4B0;</div><div class="vc-label">Sponsored content</div><div class="vc-val good">No</div></div>
+          <div class="vc-row"><div class="vc-icon">&#x1F4C8;</div><div class="vc-label">SEO optimized</div><div class="vc-val good">Not detected</div></div>
+        </div>
+      </div>
+
+      <!-- Corroborating sources -->
+      <div class="vp-section">
+        <div class="vp-head">
+          <div class="vp-accent" style="background:var(--purple);"></div>
+          <div class="vp-title">Corroborating Sources</div>
+          <div class="vp-badge primary">3 AGREE</div>
+        </div>
+        <div class="source-list" id="source-list">
+          <div class="src-item">
+            <div class="src-rank">1</div>
+            <div class="src-info">
+              <div class="src-name">NIH National Library</div>
+              <div class="src-type">Government &middot; Primary</div>
+            </div>
+            <div class="src-conf" style="color:var(--blue);">95%</div>
+          </div>
+          <div class="src-item">
+            <div class="src-rank">2</div>
+            <div class="src-info">
+              <div class="src-name">Broad Institute</div>
+              <div class="src-type">Research Org &middot; Primary</div>
+            </div>
+            <div class="src-conf" style="color:var(--blue);">93%</div>
+          </div>
+          <div class="src-item">
+            <div class="src-rank">3</div>
+            <div class="src-info">
+              <div class="src-name">Cell Journal &middot; Doudna Lab</div>
+              <div class="src-type">Peer-reviewed &middot; Original Paper</div>
+            </div>
+            <div class="src-conf" style="color:var(--blue);">99%</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Creator Revenue Panel -->
+      <div class="vp-section">
+        <div class="vp-head">
+          <div class="vp-accent" style="background:var(--orange);"></div>
+          <div class="vp-title">Creator Revenue &middot; RoadView</div>
+          <div class="vp-badge primary">80% SHARE</div>
+        </div>
+      </div>
+
+      <div class="vp-creator">
+        <div class="creator-card">
+          <div class="creator-head">
+            <div class="creator-avatar" style="border-color:var(--purple);color:var(--purple);">K</div>
+            <div>
+              <div class="creator-name">Kurzgesagt</div>
+              <div class="creator-sub">14min CRISPR video &middot; 2.1M views</div>
+            </div>
+            <div class="creator-revenue">
+              <div class="cr-num">$4,820</div>
+              <div class="cr-lbl">this month</div>
+            </div>
+          </div>
+          <div class="revenue-breakdown">
+            <div class="rb-row">
+              <div class="rb-label">Ad revenue (0 ads)</div>
+              <div class="rb-bar-wrap"><div class="rb-bar" style="width:0%;background:var(--orange);"></div></div>
+              <div class="rb-val">$0</div>
+            </div>
+            <div class="rb-row">
+              <div class="rb-label">Direct tips</div>
+              <div class="rb-bar-wrap"><div class="rb-bar" style="width:55%;background:var(--orange);"></div></div>
+              <div class="rb-val">$1,240</div>
+            </div>
+            <div class="rb-row">
+              <div class="rb-label">Asset licenses</div>
+              <div class="rb-bar-wrap"><div class="rb-bar" style="width:75%;background:var(--purple);"></div></div>
+              <div class="rb-val">$2,100</div>
+            </div>
+            <div class="rb-row">
+              <div class="rb-label">Course embed</div>
+              <div class="rb-bar-wrap"><div class="rb-bar" style="width:48%;background:var(--blue);"></div></div>
+              <div class="rb-val">$880</div>
+            </div>
+            <div class="rb-row">
+              <div class="rb-label">Preset pack sales</div>
+              <div class="rb-bar-wrap"><div class="rb-bar" style="width:27%;background:var(--pink);"></div></div>
+              <div class="rb-val">$600</div>
+            </div>
+          </div>
+          <div class="creator-tags">
+            <div class="ct-tag">No ad revenue</div>
+            <div class="ct-tag">80% creator share</div>
+            <div class="ct-tag">verified content</div>
+            <div class="ct-tag">multi-stream</div>
+          </div>
+        </div>
+
+        <div class="creator-card">
+          <div class="creator-head">
+            <div class="creator-avatar" style="border-color:var(--blue);color:var(--blue);">M</div>
+            <div>
+              <div class="creator-name">MIT OpenCourseWare</div>
+              <div class="creator-sub">52min lecture &middot; 840K views</div>
+            </div>
+            <div class="creator-revenue">
+              <div class="cr-num">$1,240</div>
+              <div class="cr-lbl">this month</div>
+            </div>
+          </div>
+          <div class="revenue-breakdown">
+            <div class="rb-row">
+              <div class="rb-label">Direct tips</div>
+              <div class="rb-bar-wrap"><div class="rb-bar" style="width:30%;background:var(--orange);"></div></div>
+              <div class="rb-val">$320</div>
+            </div>
+            <div class="rb-row">
+              <div class="rb-label">Course embed</div>
+              <div class="rb-bar-wrap"><div class="rb-bar" style="width:80%;background:var(--blue);"></div></div>
+              <div class="rb-val">$920</div>
+            </div>
+          </div>
+          <div class="creator-tags">
+            <div class="ct-tag">Institution verified</div>
+            <div class="ct-tag">open access</div>
+            <div class="ct-tag">peer reviewed</div>
+          </div>
+        </div>
+
+        <div style="padding:14px 16px;border-bottom:1px solid var(--b);font-size:0.48rem;opacity:0.35;line-height:1.8;">
+          RoadView pays creators directly from viewer tips and content licensing &mdash; zero ad revenue model. No advertiser ever influences what surfaces in search results.
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  var RESULT_DATA = [
+    {
+      source:'nature.com', type:'Peer-reviewed journal', verified:'3 sources agree',
+      date:'Jan 2024', primary:'Yes', sponsored:'No', seo:'Not detected',
+      badge:'verified', badgeLabel:'VERIFIED',
+      corroborate:[
+        {name:'NIH National Library', type:'Government \u00b7 Primary', conf:'95%'},
+        {name:'Broad Institute',       type:'Research Org \u00b7 Primary', conf:'93%'},
+        {name:'Cell Journal \u00b7 Doudna', type:'Original Paper', conf:'99%'}
+      ]
+    },
+    {
+      source:'nih.gov', type:'Government portal', verified:'5 sources agree',
+      date:'Mar 2024', primary:'Yes', sponsored:'No', seo:'Not detected',
+      badge:'verified', badgeLabel:'VERIFIED',
+      corroborate:[
+        {name:'Nature Journal',   type:'Peer-reviewed', conf:'97%'},
+        {name:'Broad Institute',  type:'Research Org',  conf:'93%'},
+        {name:'Doudna Lab',       type:'Original Paper', conf:'99%'},
+        {name:'Science Direct',   type:'Journal',       conf:'90%'},
+        {name:'Cell Journal',     type:'Journal',       conf:'94%'}
+      ]
+    },
+    {
+      source:'broadinstitute.org', type:'Research organization', verified:'4 sources agree',
+      date:'2024', primary:'Yes', sponsored:'No', seo:'Not detected',
+      badge:'verified', badgeLabel:'VERIFIED',
+      corroborate:[
+        {name:'NIH.gov',          type:'Government', conf:'95%'},
+        {name:'Nature Journal',   type:'Peer-reviewed', conf:'97%'},
+        {name:'Doudna Lab 2012',  type:'Nobel prize paper', conf:'99%'},
+        {name:'Science Journal',  type:'Peer-reviewed', conf:'91%'}
+      ]
+    },
+    {
+      source:'Kurzgesagt \u00b7 RoadView', type:'Educational video \u00b7 Creator verified', verified:'3 sources agree',
+      date:'6 months ago', primary:'No', sponsored:'No', seo:'Not applicable',
+      badge:'primary', badgeLabel:'CREATOR VER.',
+      corroborate:[
+        {name:'NIH.gov (cited)',  type:'Government', conf:'95%'},
+        {name:'Nature (cited)',   type:'Peer-reviewed', conf:'97%'},
+        {name:'Broad Institute',  type:'Research Org', conf:'93%'}
+      ]
+    },
+    {
+      source:'MIT OpenCourseWare', type:'University lecture \u00b7 Institution verified', verified:'Institution verified',
+      date:'2023', primary:'Yes', sponsored:'No', seo:'Not detected',
+      badge:'verified', badgeLabel:'INSTITUTION',
+      corroborate:[
+        {name:'MIT Dept of Biology', type:'University dept', conf:'99%'},
+        {name:'NIH.gov',             type:'Government',     conf:'95%'}
+      ]
+    },
+    {
+      source:'science.org', type:'Journal news \u00b7 Science AAAS', verified:'2 sources agree',
+      date:'Dec 2023', primary:'Yes', sponsored:'No', seo:'Not detected',
+      badge:'verified', badgeLabel:'VERIFIED',
+      corroborate:[
+        {name:'FDA.gov press release', type:'Government', conf:'99%'},
+        {name:'Vertex Pharmaceuticals', type:'Company statement', conf:'85%'}
+      ]
+    },
+    {
+      source:'healthblog-2024.com', type:'Blog \u00b7 Unknown author', verified:'No cross-refs found',
+      date:'Oct 2023', primary:'No', sponsored:'Unknown', seo:'Detected \u2014 keyword stuffing',
+      badge:'warn', badgeLabel:'UNVERIFIED',
+      corroborate:[]
+    }
+  ];
+
+  function selectResult(el, idx) {
+    document.querySelectorAll('.result-card').forEach(function(c) { c.classList.remove('selected'); });
+    el.classList.add('selected');
+    var d = RESULT_DATA[idx];
+    if (!d) return;
+
+    var badge = document.getElementById('vp-badge');
+    badge.textContent = d.badgeLabel;
+    badge.className = 'vp-badge ' + d.badge;
+
+    document.getElementById('vp-body').innerHTML =
+      '<div class="vc-row"><div class="vc-icon">&#x1F4C4;</div><div class="vc-label">Source</div><div class="vc-val">' + d.source + '</div></div>' +
+      '<div class="vc-row"><div class="vc-icon">&#x1F3DB;</div><div class="vc-label">Type</div><div class="vc-val">' + d.type + '</div></div>' +
+      '<div class="vc-row"><div class="vc-icon">&#x2713;</div><div class="vc-label">Fact-checked</div><div class="vc-val ' + (d.badge === 'warn' ? 'warn' : 'good') + '">' + d.verified + '</div></div>' +
+      '<div class="vc-row"><div class="vc-icon">&#x1F4C5;</div><div class="vc-label">Published</div><div class="vc-val">' + d.date + '</div></div>' +
+      '<div class="vc-row"><div class="vc-icon">&#x1F517;</div><div class="vc-label">Primary source</div><div class="vc-val ' + (d.primary === 'Yes' ? 'good' : 'warn') + '">' + d.primary + '</div></div>' +
+      '<div class="vc-row"><div class="vc-icon">&#x1F4B0;</div><div class="vc-label">Sponsored content</div><div class="vc-val ' + (d.sponsored === 'No' ? 'good' : 'warn') + '">' + d.sponsored + '</div></div>' +
+      '<div class="vc-row"><div class="vc-icon">&#x1F4C8;</div><div class="vc-label">SEO optimized</div><div class="vc-val ' + (d.seo.indexOf('Not') !== -1 ? 'good' : 'warn') + '">' + d.seo + '</div></div>';
+
+    document.getElementById('source-list').innerHTML = d.corroborate.length
+      ? d.corroborate.map(function(s, i) {
+          return '<div class="src-item">' +
+            '<div class="src-rank">' + (i + 1) + '</div>' +
+            '<div class="src-info">' +
+              '<div class="src-name">' + s.name + '</div>' +
+              '<div class="src-type">' + s.type + '</div>' +
+            '</div>' +
+            '<div class="src-conf" style="color:var(--blue);">' + s.conf + '</div>' +
+          '</div>';
+        }).join('')
+      : '<div style="padding:12px 16px;font-size:0.5rem;opacity:0.3;color:var(--pink);">No corroborating sources found for this result.</div>';
+  }
+
+  function setFilter(el) {
+    document.querySelectorAll('.tb-filter').forEach(function(f) { f.classList.remove('active'); });
+    el.classList.add('active');
+  }
+
+  /* ── SEARCH ── */
+  var QUERIES = {
+    'crispr':    { count:7, time:'0.31s \u00b7 14 sources cross-referenced', conf:91 },
+    'quantum':   { count:9, time:'0.44s \u00b7 18 sources cross-referenced', conf:87 },
+    'blackhole': { count:6, time:'0.28s \u00b7 11 sources cross-referenced', conf:94 },
+    'default':   { count:5, time:'0.38s \u00b7 9 sources cross-referenced',  conf:82 }
+  };
+
+  function runSearch() {
+    var val = document.getElementById('main-search').value.toLowerCase();
+    var q = QUERIES['default'];
+    if (val.indexOf('crispr') !== -1 || val.indexOf('gene') !== -1) q = QUERIES.crispr;
+    else if (val.indexOf('quantum') !== -1) q = QUERIES.quantum;
+    else if (val.indexOf('black hole') !== -1 || val.indexOf('blackhole') !== -1) q = QUERIES.blackhole;
+
+    document.getElementById('result-count').textContent = q.count;
+    document.getElementById('query-time').textContent  = q.time;
+    document.getElementById('sys-conf').style.width    = q.conf + '%';
+    document.getElementById('conf-pct').textContent    = q.conf + '%';
+
+    var scroll = document.getElementById('results-scroll');
+    scroll.style.opacity = '0';
+    scroll.style.transition = 'opacity 0.2s';
+    setTimeout(function() { scroll.style.opacity = '1'; scroll.scrollTop = 0; }, 220);
+  }
+
+  document.getElementById('main-search').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') runSearch();
+  });
+</script>
+
+</body>
+</html>
