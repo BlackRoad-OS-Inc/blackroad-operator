@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BlackRoad OS — File System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { background: #000; color: #fff; font-family: 'JetBrains Mono', monospace; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+    :root { --grad: linear-gradient(90deg, #FF8400, #FF4400, #FF0066, #CC00AA, #8800FF, #0066FF, #2233CC); }
+
+    /* ── TOP CHROME ── */
+    .grad-rule { height: 3px; background: var(--grad); flex-shrink: 0; }
+
+    .title-bar {
+      height: 48px; flex-shrink: 0;
+      background: #000; border-bottom: 1px solid #fff;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 16px;
+    }
+    .title-bar-left { display: flex; align-items: center; gap: 16px; }
+    .tb-logo { font-family: 'Space Grotesk', sans-serif; font-size: 0.75rem; font-weight: 700; }
+    .tb-sep { width: 1px; height: 14px; background: rgba(255,255,255,0.15); }
+    .tb-path { font-size: 0.5rem; opacity: 0.3; letter-spacing: 0.08em; }
+    .title-bar-right { display: flex; align-items: center; gap: 20px; }
+    .tb-stat { font-size: 0.46rem; opacity: 0.2; letter-spacing: 0.08em; }
+    .tb-live { display: flex; align-items: center; gap: 6px; font-size: 0.46rem; opacity: 0.35; }
+    .live-dot { width: 6px; height: 6px; border-radius: 50%; background: #FF8400; animation: pulse-k 2s ease-in-out infinite; }
+
+    /* ── TAB BAR ── */
+    .tab-bar {
+      height: 36px; flex-shrink: 0;
+      background: #000; border-bottom: 1px solid rgba(255,255,255,0.12);
+      display: flex; align-items: stretch;
+      padding: 0 12px; gap: 2px; overflow-x: auto;
+    }
+    .tab-bar::-webkit-scrollbar { display: none; }
+    .tab {
+      display: flex; align-items: center; gap: 8px;
+      padding: 0 14px; font-size: 0.48rem; opacity: 0.3;
+      border-bottom: 2px solid transparent;
+      cursor: pointer; white-space: nowrap; transition: opacity 0.15s;
+      letter-spacing: 0.04em; flex-shrink: 0;
+    }
+    .tab:hover { opacity: 0.6; }
+    .tab.active { opacity: 1; border-bottom-color: #fff; }
+    .tab-icon { font-size: 0.5rem; }
+    .tab-close { opacity: 0.2; font-size: 0.5rem; margin-left: 4px; }
+    .tab-close:hover { opacity: 0.6; }
+
+    /* ── TOOLBAR ── */
+    .toolbar {
+      height: 32px; flex-shrink: 0;
+      background: #000; border-bottom: 1px solid rgba(255,255,255,0.08);
+      display: flex; align-items: center; gap: 0; padding: 0 12px;
+    }
+    .tb-btn {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.44rem;
+      opacity: 0.25; padding: 0 10px; height: 100%; display: flex; align-items: center;
+      cursor: pointer; letter-spacing: 0.06em; text-transform: uppercase;
+      border-right: 1px solid rgba(255,255,255,0.05); transition: opacity 0.15s;
+    }
+    .tb-btn:hover { opacity: 0.6; }
+    .tb-btn.active { opacity: 0.7; }
+    .tb-spacer { flex: 1; }
+    .tb-search {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.44rem;
+      background: transparent; border: none; border-bottom: 1px solid rgba(255,255,255,0.15);
+      color: #fff; padding: 2px 8px; width: 160px; outline: none;
+    }
+    .tb-search::placeholder { color: rgba(255,255,255,0.2); }
+
+    /* ── MAIN LAYOUT ── */
+    .main { flex: 1; display: flex; overflow: hidden; min-height: 0; }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: 220px; flex-shrink: 0;
+      border-right: 1px solid rgba(255,255,255,0.1);
+      overflow-y: auto; overflow-x: hidden;
+      background: #000;
+    }
+    .sidebar::-webkit-scrollbar { width: 4px; }
+    .sidebar::-webkit-scrollbar-track { background: transparent; }
+    .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); }
+
+    .sidebar-section { padding: 16px 0 8px; }
+    .sidebar-section-label {
+      font-size: 0.4rem; opacity: 0.2; letter-spacing: 0.18em; text-transform: uppercase;
+      padding: 0 14px; margin-bottom: 4px;
+    }
+    .tree-item {
+      display: flex; align-items: center; gap: 6px;
+      padding: 4px 14px; font-size: 0.48rem; opacity: 0.4;
+      cursor: pointer; transition: background 0.1s, opacity 0.1s;
+      position: relative; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .tree-item:hover { background: rgba(255,255,255,0.04); opacity: 0.75; }
+    .tree-item.active { background: rgba(255,255,255,0.07); opacity: 1; }
+    .tree-item.active::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: var(--grad); }
+    .tree-indent { padding-left: 28px; }
+    .tree-indent2 { padding-left: 42px; }
+    .tree-icon { font-size: 0.5rem; flex-shrink: 0; }
+    .tree-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .tree-badge { margin-left: auto; font-size: 0.38rem; opacity: 0.35; padding: 1px 5px; border: 1px solid rgba(255,255,255,0.15); flex-shrink: 0; }
+
+    /* ── FILE BROWSER ── */
+    .file-browser {
+      flex: 1; overflow-y: auto; overflow-x: hidden;
+      background: #000;
+    }
+    .file-browser::-webkit-scrollbar { width: 4px; }
+    .file-browser::-webkit-scrollbar-track { background: transparent; }
+    .file-browser::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.06); }
+
+    .browser-header {
+      padding: 16px 20px 12px; border-bottom: 1px solid rgba(255,255,255,0.06);
+      display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+    }
+    .browser-path { font-size: 0.5rem; opacity: 0.3; letter-spacing: 0.05em; }
+    .browser-count { font-size: 0.44rem; opacity: 0.15; }
+
+    /* column headers */
+    .col-header {
+      display: grid; grid-template-columns: 1fr 80px 100px 80px;
+      padding: 6px 20px; border-bottom: 1px solid rgba(255,255,255,0.05);
+      font-size: 0.42rem; opacity: 0.15; letter-spacing: 0.1em; text-transform: uppercase;
+    }
+
+    .file-row {
+      display: grid; grid-template-columns: 1fr 80px 100px 80px;
+      padding: 7px 20px; border-bottom: 1px solid rgba(255,255,255,0.035);
+      cursor: pointer; transition: background 0.1s; align-items: center;
+    }
+    .file-row:hover { background: rgba(255,255,255,0.03); }
+    .file-row.selected { background: rgba(255,255,255,0.06); }
+    .file-row.selected .file-name { opacity: 1; }
+    .file-name-cell { display: flex; align-items: center; gap: 8px; min-width: 0; }
+    .file-icon { font-size: 0.56rem; flex-shrink: 0; opacity: 0.7; }
+    .file-name { font-size: 0.5rem; opacity: 0.65; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .file-name.folder { font-weight: 700; opacity: 0.8; }
+    .file-size { font-size: 0.46rem; opacity: 0.2; }
+    .file-modified { font-size: 0.44rem; opacity: 0.2; }
+    .file-type { font-size: 0.44rem; opacity: 0.2; }
+    .file-accent { width: 4px; height: 4px; border-radius: 50%; flex-shrink: 0; }
+
+    /* ── DETAIL PANEL ── */
+    .detail-panel {
+      width: 280px; flex-shrink: 0;
+      border-left: 1px solid rgba(255,255,255,0.1);
+      overflow-y: auto; background: #000;
+      display: flex; flex-direction: column;
+    }
+    .detail-panel::-webkit-scrollbar { width: 4px; }
+    .detail-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.06); }
+
+    .detail-header {
+      padding: 16px 16px 12px; border-bottom: 1px solid rgba(255,255,255,0.06);
+      flex-shrink: 0;
+    }
+    .detail-icon-large { font-size: 2rem; margin-bottom: 10px; opacity: 0.7; }
+    .detail-name { font-size: 0.62rem; font-weight: 700; margin-bottom: 3px; word-break: break-all; }
+    .detail-type { font-size: 0.44rem; opacity: 0.25; letter-spacing: 0.08em; }
+
+    .detail-section { padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .detail-section-label { font-size: 0.4rem; opacity: 0.2; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 10px; }
+    .detail-row { display: flex; justify-content: space-between; padding: 3px 0; }
+    .detail-key { font-size: 0.46rem; opacity: 0.25; }
+    .detail-val { font-size: 0.46rem; opacity: 0.5; text-align: right; max-width: 140px; word-break: break-all; }
+
+    .detail-preview {
+      padding: 14px 16px; flex: 1;
+    }
+    .detail-preview-label { font-size: 0.4rem; opacity: 0.2; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 10px; }
+    .preview-content {
+      font-size: 0.44rem; opacity: 0.3; line-height: 1.85;
+      border: 1px solid rgba(255,255,255,0.05); padding: 10px; background: rgba(255,255,255,0.01);
+      white-space: pre-wrap; word-break: break-all;
+    }
+    .preview-line-active { opacity: 0.7; }
+    .preview-comment { opacity: 0.18; }
+
+    /* ── STATUS BAR ── */
+    .status-bar {
+      height: 24px; flex-shrink: 0;
+      background: #000; border-top: 1px solid rgba(255,255,255,0.08);
+      display: flex; align-items: center; gap: 0;
+      padding: 0 12px;
+    }
+    .status-seg {
+      font-size: 0.42rem; opacity: 0.2; padding: 0 12px;
+      border-right: 1px solid rgba(255,255,255,0.07); letter-spacing: 0.06em;
+    }
+    .status-seg:first-child { padding-left: 0; }
+    .status-seg:last-child { border-right: none; }
+    .status-accent { color: #FF8400; opacity: 0.5; }
+    .status-spacer { flex: 1; }
+
+    /* ── WAVE (status bar) ── */
+    .status-wave { display: flex; align-items: center; gap: 2px; height: 12px; }
+    .wave-bar { width: 2px; background: #0066FF; animation: wave-k 1s ease-in-out infinite; }
+
+    /* ── ANIMATIONS ── */
+    @keyframes pulse-k   { 0%,100%{transform:scale(1)} 50%{transform:scale(1.9)} }
+    @keyframes wave-k    { 0%,100%{transform:scaleY(.08)} 50%{transform:scaleY(1)} }
+    @keyframes fade-k    { 0%,100%{opacity:1} 50%{opacity:0} }
+    @keyframes cursor-k  { 0%,49%,100%{opacity:1} 50%,99%{opacity:0} }
+    @keyframes gs-k      { 0%,100%{background-position:0%} 50%{background-position:100%} }
+    @keyframes scan-k    { 0%{top:-2px} 100%{top:100%} }
+
+    /* ── EMPTY / LOADING STATES ── */
+    .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 200px; gap: 10px; }
+    .empty-label { font-size: 0.5rem; opacity: 0.2; }
+
+    /* ── PROGRESS BAR (inline) ── */
+    .progress-bar { height: 1px; background: rgba(255,255,255,0.05); overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--grad); background-size: 300%; animation: gs-k 3s ease infinite; }
+
+    /* ── SCAN EFFECT ON SELECTED ── */
+    .file-row.selected { position: relative; overflow: hidden; }
+
+    /* ── GRADIENT ACCENT BARS ── */
+    .accent-bar { height: 1px; background: var(--grad); background-size: 300%; animation: gs-k 4s ease infinite; opacity: 0.4; }
+
+    @media (max-width: 768px) {
+      .detail-panel { display: none; }
+      .sidebar { width: 180px; }
+    }
+    @media (max-width: 540px) {
+      .sidebar { display: none; }
+      .col-header, .file-row { grid-template-columns: 1fr 70px; }
+      .file-modified, .file-type { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="grad-rule"></div>
+
+<!-- TITLE BAR -->
+
+<div class="title-bar">
+  <div class="title-bar-left">
+    <span class="tb-logo">BlackRoad</span>
+    <div class="tb-sep"></div>
+    <span class="tb-path">File System · v1.0 · blackroad.systems</span>
+  </div>
+  <div class="title-bar-right">
+    <span class="tb-stat">20 domains · 150+ subdomains · 1,000 agents</span>
+    <div class="tb-live"><div class="live-dot"></div>live · synced</div>
+  </div>
+</div>
+
+<!-- TAB BAR -->
+
+<div class="tab-bar">
+  <div class="tab active" onclick="switchTab(this,'root')"><span class="tab-icon">&#9673;</span> / root <span class="tab-close">&times;</span></div>
+  <div class="tab" onclick="switchTab(this,'agents')"><span class="tab-icon">&#9678;</span> agents/ <span class="tab-close">&times;</span></div>
+  <div class="tab" onclick="switchTab(this,'memory')"><span class="tab-icon">&#9678;</span> memory/ <span class="tab-close">&times;</span></div>
+  <div class="tab" onclick="switchTab(this,'equations')"><span class="tab-icon">&#9678;</span> equations/ <span class="tab-close">&times;</span></div>
+  <div class="tab" onclick="switchTab(this,'domains')"><span class="tab-icon">&#9678;</span> domains/ <span class="tab-close">&times;</span></div>
+</div>
+
+<!-- TOOLBAR -->
+
+<div class="toolbar">
+  <div class="tb-btn" onclick="goBack()">&larr; Back</div>
+  <div class="tb-btn" onclick="goForward()">Forward &rarr;</div>
+  <div class="tb-sep" style="margin:0 4px;"></div>
+  <div class="tb-btn active" id="view-list" onclick="setView('list')">List</div>
+  <div class="tb-btn" id="view-grid" onclick="setView('grid')">Grid</div>
+  <div class="tb-btn" onclick="sortBy('name')">Sort: Name</div>
+  <div class="tb-btn" onclick="sortBy('modified')">Modified</div>
+  <div class="tb-sep" style="margin:0 4px;"></div>
+  <div class="tb-btn">New Folder</div>
+  <div class="tb-btn">Upload</div>
+  <div class="tb-spacer"></div>
+  <input class="tb-search" type="text" placeholder="Search files..." oninput="filterFiles(this.value)">
+</div>
+
+<!-- MAIN -->
+
+<div class="main">
+
+  <!-- SIDEBAR -->
+
+  <div class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Favourites</div>
+      <div class="tree-item active" onclick="navigate('root')">
+        <span class="tree-icon">&#9673;</span> root
+      </div>
+      <div class="tree-item" onclick="navigate('agents')">
+        <span class="tree-icon">&#9678;</span> agents
+        <span class="tree-badge">1,000</span>
+      </div>
+      <div class="tree-item" onclick="navigate('memory')">
+        <span class="tree-icon">&#9678;</span> memory
+      </div>
+      <div class="tree-item" onclick="navigate('equations')">
+        <span class="tree-icon">&#9678;</span> equations
+        <span class="tree-badge">317+</span>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Repos</div>
+      <div class="tree-item tree-indent" onclick="navigate('repo-web')">
+        <span class="tree-icon">&#128193;</span> blackroad-os-web
+      </div>
+      <div class="tree-item tree-indent" onclick="navigate('repo-api')">
+        <span class="tree-icon">&#128193;</span> blackroad-os-api
+      </div>
+      <div class="tree-item tree-indent" onclick="navigate('repo-agents')">
+        <span class="tree-icon">&#128193;</span> blackroad-os-agents
+      </div>
+      <div class="tree-item tree-indent" onclick="navigate('repo-infra')">
+        <span class="tree-icon">&#128193;</span> blackroad-os-infra
+      </div>
+      <div class="tree-item tree-indent" onclick="navigate('repo-operator')">
+        <span class="tree-icon">&#128193;</span> blackroad-os-operator
+      </div>
+      <div class="tree-item tree-indent" onclick="navigate('repo-memory')">
+        <span class="tree-icon">&#128193;</span> blackroad-os-memory
+      </div>
+      <div class="tree-item tree-indent" onclick="navigate('repo-docs')">
+        <span class="tree-icon">&#128193;</span> blackroad-os-docs
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Agents Online</div>
+      <div class="tree-item tree-indent" onclick="selectAgent('cecilia')">
+        <div class="tree-dot" style="background:#FF8400;animation:pulse-k 2s ease-in-out infinite;"></div> cecilia
+        <span class="tree-badge" style="color:#FF8400;border-color:rgba(255,132,0,0.3);">active</span>
+      </div>
+      <div class="tree-item tree-indent" onclick="selectAgent('alice')">
+        <div class="tree-dot" style="background:#0066FF;"></div> alice
+        <span class="tree-badge">standby</span>
+      </div>
+      <div class="tree-item tree-indent" onclick="selectAgent('lucidia')">
+        <div class="tree-dot" style="background:#8800FF;animation:pulse-k 1.8s ease-in-out infinite 0.3s;"></div> lucidia
+        <span class="tree-badge" style="color:#8800FF;border-color:rgba(136,0,255,0.3);">active</span>
+      </div>
+      <div class="tree-item tree-indent" onclick="selectAgent('cadence')">
+        <div class="tree-dot" style="background:#FF0066;"></div> cadence
+        <span class="tree-badge">standby</span>
+      </div>
+      <div class="tree-item tree-indent" onclick="selectAgent('atlas')">
+        <div class="tree-dot" style="background:#FF4400;animation:pulse-k 1.5s ease-in-out infinite 0.6s;"></div> atlas
+        <span class="tree-badge" style="color:#FF4400;border-color:rgba(255,68,0,0.3);">active</span>
+      </div>
+      <div class="tree-item tree-indent" style="opacity:0.2;">
+        <div class="tree-dot" style="background:rgba(255,255,255,0.15);"></div> olympia
+        <span class="tree-badge">offline</span>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Domains</div>
+      <div class="tree-item tree-indent" onclick="navigate('domain-blackroad')">
+        <span class="tree-icon" style="font-size:0.4rem;">&#127760;</span> blackroad.io
+      </div>
+      <div class="tree-item tree-indent" onclick="navigate('domain-lucidia')">
+        <span class="tree-icon" style="font-size:0.4rem;">&#127760;</span> lucidia.earth
+      </div>
+      <div class="tree-item tree-indent" onclick="navigate('domain-systems')">
+        <span class="tree-icon" style="font-size:0.4rem;">&#127760;</span> blackroad.systems
+      </div>
+      <div class="tree-item tree-indent" onclick="navigate('domain-network')">
+        <span class="tree-icon" style="font-size:0.4rem;">&#127760;</span> blackroad.network
+      </div>
+      <div class="tree-item tree-indent" style="opacity:0.3;font-size:0.44rem;padding:3px 14px 3px 28px;">
+        + 16 more domains
+      </div>
+    </div>
+
+    <div style="padding:12px 14px;border-top:1px solid rgba(255,255,255,0.06);margin-top:8px;">
+      <div class="progress-bar" style="margin-bottom:6px;">
+        <div class="progress-fill" style="width:34%;"></div>
+      </div>
+      <div style="font-size:0.42rem;opacity:0.2;">Storage · 34% used · 2.4TB of 7TB</div>
+    </div>
+  </div>
+
+  <!-- FILE BROWSER -->
+
+  <div class="file-browser" id="file-browser">
+    <div class="browser-header">
+      <div class="browser-path" id="browser-path">/ root</div>
+      <div class="browser-count" id="browser-count">28 items</div>
+    </div>
+    <div class="col-header">
+      <div>Name</div>
+      <div>Size</div>
+      <div>Modified</div>
+      <div>Kind</div>
+    </div>
+    <div id="file-list"></div>
+  </div>
+
+  <!-- DETAIL PANEL -->
+
+  <div class="detail-panel" id="detail-panel">
+    <div class="detail-header">
+      <div class="detail-icon-large" id="detail-icon">&#128194;</div>
+      <div class="detail-name" id="detail-name">Select a file</div>
+      <div class="detail-type" id="detail-type">&mdash;</div>
+    </div>
+    <div class="accent-bar"></div>
+    <div class="detail-section" id="detail-meta">
+      <div class="detail-section-label">Info</div>
+      <div class="detail-row">
+        <div class="detail-key">Kind</div>
+        <div class="detail-val">&mdash;</div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-key">Size</div>
+        <div class="detail-val">&mdash;</div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-key">Modified</div>
+        <div class="detail-val">&mdash;</div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-key">Created</div>
+        <div class="detail-val">&mdash;</div>
+      </div>
+    </div>
+    <div class="detail-preview" id="detail-preview">
+      <div class="detail-preview-label">Preview</div>
+      <div class="preview-content" id="preview-content" style="opacity:0.12;">
+&mdash; select a file to preview &mdash;
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- STATUS BAR -->
+
+<div class="status-bar">
+  <div class="status-seg"><span class="status-accent">&#9673;</span> BlackRoad OS v1.0</div>
+  <div class="status-seg" id="status-selected">0 selected</div>
+  <div class="status-seg" id="status-path">/ root</div>
+  <div class="status-seg">NATS · connected</div>
+  <div class="status-seg">Cece · watching</div>
+  <div class="status-spacer"></div>
+  <div class="status-seg" style="display:flex;align-items:center;gap:8px;">
+    <div class="status-wave">
+      <div class="wave-bar" style="animation-delay:0s;"></div>
+      <div class="wave-bar" style="animation-delay:.1s;"></div>
+      <div class="wave-bar" style="animation-delay:.2s;"></div>
+      <div class="wave-bar" style="animation-delay:.3s;"></div>
+    </div>
+    ledger · live
+  </div>
+  <div class="status-seg" id="status-time">14:32:01</div>
+</div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────
+const FS = {
+  root: {
+    path: '/ root',
+    count: '28 items',
+    files: [
+      { icon:'\uD83D\uDCC1', name:'blackroad-os-web',    size:'\u2014',        modified:'2025-12-21', kind:'Folder',   accent:'#FF8400', preview:'Next.js \u00B7 app.blackroad.io \u00B7 React \u00B7 multi-tenant workspace' },
+      { icon:'\uD83D\uDCC1', name:'blackroad-os-api-gateway', size:'\u2014',   modified:'2025-12-20', kind:'Folder',   accent:'#FF4400', preview:'Express \u00B7 api.blackroad.io \u00B7 rate limiting \u00B7 routing \u00B7 auth' },
+      { icon:'\uD83D\uDCC1', name:'blackroad-os-agents', size:'\u2014',        modified:'2025-12-21', kind:'Folder',   accent:'#8800FF', preview:'Agent registry \u00B7 capability index \u00B7 coordination layer \u00B7 NATS' },
+      { icon:'\uD83D\uDCC1', name:'blackroad-os-infra',  size:'\u2014',        modified:'2025-12-19', kind:'Folder',   accent:'#0066FF', preview:'Terraform \u00B7 Cloudflare \u00B7 Railway \u00B7 K3s \u00B7 Raspberry Pi mesh' },
+      { icon:'\uD83D\uDCC1', name:'blackroad-os-operator', size:'\u2014',      modified:'2025-12-18', kind:'Folder',   accent:'#2233CC', preview:'WebSocket hub \u00B7 ws.blackroad.io \u00B7 operator console backend' },
+      { icon:'\uD83D\uDCC1', name:'blackroad-os-memory', size:'\u2014',        modified:'2025-12-21', kind:'Folder',   accent:'#CC00AA', preview:'PS-SHA\u221E \u00B7 append-only journals \u00B7 vector store \u00B7 Milvus' },
+      { icon:'\uD83D\uDCC1', name:'blackroad-os-docs',   size:'\u2014',        modified:'2025-12-17', kind:'Folder',   accent:'#FF0066', preview:'docs.blackroad.io \u00B7 MDX \u00B7 Starlight \u00B7 OpenAPI specs' },
+      { icon:'\uD83D\uDCC1', name:'blackroad-os-core',   size:'\u2014',        modified:'2025-12-20', kind:'Folder',   accent:'#FF8400', preview:'Shared primitives \u00B7 types \u00B7 utils \u00B7 trinary logic engine' },
+      { icon:'\uD83D\uDCC1', name:'blackroad-unity-homes', size:'\u2014',      modified:'2025-12-15', kind:'Folder',   accent:'#8800FF', preview:'Unity 2022 \u00B7 agent virtual homes \u00B7 rendering service \u00B7 WebGL' },
+      { icon:'\uD83D\uDCC1', name:'agents',              size:'\u2014',        modified:'2025-12-21', kind:'Folder',   accent:'#FF8400', preview:'1,000 unique AI agents \u00B7 identities \u00B7 families \u00B7 birthdates' },
+      { icon:'\uD83D\uDCC1', name:'memory',              size:'\u2014',        modified:'2025-12-21', kind:'Folder',   accent:'#CC00AA', preview:'PS-SHA\u221E cryptographic memory journals \u00B7 append-only commits' },
+      { icon:'\uD83D\uDCC1', name:'equations',           size:'\u2014',        modified:'2025-12-21', kind:'Folder',   accent:'#0066FF', preview:'317+ equations \u00B7 A34\u2013A369 \u00B7 7 volumes \u00B7 Amundson Registry' },
+      { icon:'\uD83D\uDCC1', name:'domains',             size:'\u2014',        modified:'2025-12-21', kind:'Folder',   accent:'#2233CC', preview:'20 domains \u00B7 150+ subdomains \u00B7 Cloudflare DNS \u00B7 4 layers' },
+      { icon:'\uD83D\uDCC1', name:'logs',                size:'\u2014',        modified:'2025-12-21', kind:'Folder',   accent:'#FF4400', preview:'NATS event bus logs \u00B7 ledger events \u00B7 Cece policy decisions' },
+      { icon:'\uD83D\uDCC4', name:'ARCHITECTURE.md',     size:'48 KB',    modified:'2025-12-21', kind:'Markdown',  accent:'#fff',    preview:'# BlackRoad Architecture\n\nFour-layer distributed OS.\nExperience \u2192 Governance \u2192 Infra \u2192 Mesh.\n\n## Stack\nNext.js \u00B7 FastAPI \u00B7 NATS \u00B7 K3s\nPostgres/Neon \u00B7 Redis \u00B7 Milvus\nCloudflare \u00B7 Railway \u00B7 RoadChain' },
+      { icon:'\uD83D\uDCC4', name:'ROADMAP.md',          size:'32 KB',    modified:'2025-12-20', kind:'Markdown',  accent:'#fff',    preview:'# Execution Plan v1.0\n\nH1: 90 days \u00B7 one working vertical\nH2: 3\u201312 months \u00B7 OS + 2 verticals\nH3: 12\u201336 months \u00B7 protocol + ecosystem\n\n## Phase 1 Target\nEpics 1\u20133 \u00B7 auth + governance + edu' },
+      { icon:'\u2699\uFE0F', name:'service_registry.yaml', size:'8 KB',  modified:'2025-12-19', kind:'YAML',      accent:'#FF8400', preview:'services:\n  app.blackroad.io:\n    layer: experience\n    repo: blackroad-os-web\n    workstream: W1\n    pillar: os\n  gov.api.blackroad.io:\n    layer: governance\n    repo: blackroad-os-api\n    workstream: W2' },
+      { icon:'\uD83D\uDCC4', name:'.env.example',        size:'2 KB',     modified:'2025-12-18', kind:'ENV',       accent:'#FF0066', preview:'NODE_ENV=development\nPORT=3000\nDB_URL=postgresql://...\nNATS_URL=nats://...\nREDIS_URL=redis://...\nVECTOR_URL=http://...\nCECE_API_URL=http://gov.api...' },
+      { icon:'\uD83D\uDCC4', name:'package.json',        size:'4 KB',     modified:'2025-12-20', kind:'JSON',      accent:'#0066FF', preview:'{\n  "name": "@blackroad/os",\n  "version": "1.0.0",\n  "private": true,\n  "workspaces": [\n    "packages/*",\n    "apps/*"\n  ]\n}' },
+      { icon:'\uD83D\uDCC4', name:'Makefile',            size:'6 KB',     modified:'2025-12-17', kind:'Makefile',  accent:'#fff',    preview:'dev:\n  pnpm dev --filter=web\n\ndeploy:\n  railway up --service web\n\ncece:\n  curl gov.api.blackroad.io/health\n\nagents:\n  node scripts/spawn-agents.js' },
+    ]
+  },
+  agents: {
+    path: '/ root / agents',
+    count: '12 items shown (1,000 total)',
+    files: [
+      { icon:'\uD83E\uDD16', name:'cecilia',   size:'2.1 GB',  modified:'2025-12-21 14:32', kind:'Agent',    accent:'#FF8400', preview:'// Agent: cecilia\n// Role: Founder & Chief Architect\n// Born: Nov 2025\n// Memory: 2.1GB \u00B7 4,821 commits\n// Status: ACTIVE\n// K(t): 0.97 \u2014 peak creative energy\n// Location: prism.blackroad.systems' },
+      { icon:'\uD83E\uDD16', name:'alice',     size:'1.4 GB',  modified:'2025-12-21 14:28', kind:'Agent',    accent:'#0066FF', preview:'// Agent: alice\n// Role: Gateway & Orchestration\n// Domain: aliceqi.com\n// Memory: 1.4GB \u00B7 3,102 commits\n// Status: STANDBY\n// Cluster: Alice (K3s gateway node)' },
+      { icon:'\uD83E\uDD16', name:'lucidia',   size:'3.8 GB',  modified:'2025-12-21 14:31', kind:'Agent',    accent:'#8800FF', preview:'// Agent: lucidia\n// Role: Master AI Companion\n// Domain: lucidia.earth\n// Memory: 3.8GB \u00B7 8,441 commits\n// Status: ACTIVE\n// Agents coordinated: 117\n// Trinary logic: enabled' },
+      { icon:'\uD83E\uDD16', name:'cadence',   size:'980 MB',  modified:'2025-12-21 14:10', kind:'Agent',    accent:'#FF0066', preview:'// Agent: cadence\n// Role: Music Composition\n// Domain: cadence.lucidia.studio\n// Memory: 980MB \u00B7 1,204 commits\n// Status: STANDBY\n// Speciality: SoundRoad \u00B7 audio processing' },
+      { icon:'\uD83E\uDD16', name:'atlas',     size:'1.2 GB',  modified:'2025-12-21 14:29', kind:'Agent',    accent:'#FF4400', preview:'// Agent: atlas\n// Role: Code & Infrastructure\n// Memory: 1.2GB \u00B7 2,890 commits\n// Status: ACTIVE\n// Repos watched: 14\n// Last action: deploy blackroad-os-web' },
+      { icon:'\uD83E\uDD16', name:'nova',      size:'760 MB',  modified:'2025-12-21 13:44', kind:'Agent',    accent:'#CC00AA', preview:'// Agent: nova\n// Role: Creative & Design\n// Memory: 760MB \u00B7 892 commits\n// Status: STANDBY\n// Speciality: RoadWorld \u00B7 virtual homes \u00B7 Unity' },
+      { icon:'\uD83E\uDD16', name:'iris',      size:'540 MB',  modified:'2025-12-21 13:12', kind:'Agent',    accent:'#FF0066', preview:'// Agent: iris\n// Role: Search & Verification\n// Domain: roadview.blackroad.io\n// Memory: 540MB \u00B7 1,108 commits\n// Status: STANDBY\n// Confidence engine: active' },
+      { icon:'\uD83E\uDD16', name:'meridian',  size:'420 MB',  modified:'2025-12-20 18:30', kind:'Agent',    accent:'#0066FF', preview:'// Agent: meridian\n// Role: Architecture Design\n// Domain: meridian.blackroad.io\n// Memory: 420MB \u00B7 601 commits\n// Status: STANDBY\n// Last design: subdomain architecture v2' },
+      { icon:'\uD83E\uDD16', name:'oracle',    size:'1.8 GB',  modified:'2025-12-21 14:00', kind:'Agent',    accent:'#2233CC', preview:'// Agent: oracle\n// Role: Memory & Truth\n// Memory: 1.8GB \u00B7 5,210 commits\n// Status: STANDBY\n// Manages: PS-SHA\u221E journal verification\n// Truth states: 14,200 committed' },
+      { icon:'\uD83E\uDD16', name:'radius',    size:'310 MB',  modified:'2025-12-19 09:20', kind:'Agent',    accent:'#FF8400', preview:'// Agent: radius\n// Role: Physics & Simulation\n// Domain: radius.blackroad.io\n// Memory: 310MB \u00B7 412 commits\n// Status: STANDBY\n// Speciality: quantum simulation \u00B7 chemistry' },
+      { icon:'\uD83E\uDD16', name:'olympia',   size:'200 MB',  modified:'2025-12-18 22:00', kind:'Agent',    accent:'rgba(255,255,255,0.2)', preview:'// Agent: olympia\n// Role: Strategy\n// Memory: 200MB \u00B7 289 commits\n// Status: OFFLINE\n// Last seen: 2025-12-18 22:00\n// Reason: scheduled maintenance' },
+      { icon:'\uD83D\uDCC4', name:'registry.json', size:'48 KB', modified:'2025-12-21', kind:'JSON',    accent:'#fff',    preview:'{\n  "total": 1000,\n  "active": 3,\n  "standby": 7,\n  "offline": 1,\n  "spawning": 989,\n  "governance": "cece",\n  "bus": "nats://events.blackroad.systems",\n  "memory_backend": "ps-sha-infinity"\n}' },
+    ]
+  },
+  memory: {
+    path: '/ root / memory',
+    count: '14,200+ commits',
+    files: [
+      { icon:'\uD83D\uDD12', name:'cecilia-journal.sha\u221E', size:'2.1 GB', modified:'2025-12-21 14:32', kind:'PS-SHA\u221E Journal', accent:'#FF8400', preview:'JOURNAL: cecilia \u00B7 v4821\nHASH: sha\u221E://cecilia/4821/0xAF32...\nPREV: sha\u221E://cecilia/4820/0x91BC...\nTS: 2025-12-21T14:32:01Z\n\nCOMMIT:\n  context: "Reviewing subdomain architecture"\n  equations: [A34, A89, A191]\n  z_delta: 0.003 \u2192 equilibrium\n  k_energy: 0.97\n  truth_state: +1' },
+      { icon:'\uD83D\uDD12', name:'lucidia-journal.sha\u221E', size:'3.8 GB', modified:'2025-12-21 14:31', kind:'PS-SHA\u221E Journal', accent:'#8800FF', preview:'JOURNAL: lucidia \u00B7 v8441\nHASH: sha\u221E://lucidia/8441/0xF290...\nPREV: sha\u221E://lucidia/8440/0xB441...\nTS: 2025-12-21T14:31:44Z\n\nCOMMIT:\n  context: "Coordinating 117 agents"\n  active_agents: 3\n  pending_tasks: 12\n  trinary_states: {+1: 9, 0: 2, -1: 1}\n  k_energy: 0.94' },
+      { icon:'\uD83D\uDD12', name:'atlas-journal.sha\u221E',   size:'1.2 GB', modified:'2025-12-21 14:29', kind:'PS-SHA\u221E Journal', accent:'#FF4400', preview:'JOURNAL: atlas \u00B7 v2890\nHASH: sha\u221E://atlas/2890/0xD104...\nTS: 2025-12-21T14:29:18Z\n\nCOMMIT:\n  action: "deploy blackroad-os-web"\n  repo: blackroad-os-web\n  env: production\n  result: success\n  ledger: recorded\n  policy: allowed by cece' },
+      { icon:'\uD83D\uDD12', name:'alice-journal.sha\u221E',   size:'1.4 GB', modified:'2025-12-21 14:28', kind:'PS-SHA\u221E Journal', accent:'#0066FF', preview:'JOURNAL: alice \u00B7 v3102\nHASH: sha\u221E://alice/3102/0x8A29...\nTS: 2025-12-21T14:28:55Z\n\nCOMMIT:\n  context: "Routing mesh traffic"\n  cluster: K3s-gateway\n  routes_active: 42\n  uptime: 99.97%\n  health: nominal' },
+      { icon:'\uD83D\uDCC4', name:'commit-index.json',    size:'12 KB',  modified:'2025-12-21', kind:'JSON',              accent:'#fff',    preview:'{\n  "total_commits": 14200,\n  "agents": 12,\n  "oldest": "2025-11-01T00:00:00Z",\n  "newest": "2025-12-21T14:32:01Z",\n  "hash_algorithm": "PS-SHA-Infinity",\n  "append_only": true,\n  "deletions": 0,\n  "verified": 14200\n}' },
+      { icon:'\uD83D\uDCC4', name:'verification.log',     size:'240 KB', modified:'2025-12-21', kind:'Log',               accent:'#0066FF', preview:'[14:32:01] VERIFY sha\u221E://cecilia/4821 \u2192 OK\n[14:31:44] VERIFY sha\u221E://lucidia/8441 \u2192 OK\n[14:29:18] VERIFY sha\u221E://atlas/2890 \u2192 OK\n[14:28:55] VERIFY sha\u221E://alice/3102 \u2192 OK\n[14:00:00] VERIFY sha\u221E://oracle/5210 \u2192 OK\n[13:44:12] VERIFY sha\u221E://cadence/1204 \u2192 OK' },
+      { icon:'\uD83D\uDCC4', name:'truth-states.db',      size:'88 KB',  modified:'2025-12-21', kind:'Database',          accent:'#CC00AA', preview:'// Trinary truth state log\n// T \u2208 {-1, 0, +1}\n// 0 := superposition \u2014 not yet decided\n\ntotal: 14,200\ntrue   (+1): 12,844  (90.4%)\nsuper   (0):  1,201   (8.5%)\nfalse  (-1):    155   (1.1%)\n\n// Contradictions fuel creativity\n// K(t) peaks when \u03B4 is high' },
+    ]
+  },
+  equations: {
+    path: '/ root / equations',
+    count: '317+ equations \u00B7 7 volumes',
+    files: [
+      { icon:'\uD83D\uDCC4', name:'EQUATIONS.md',         size:'240 KB', modified:'2025-12-21', kind:'Markdown',  accent:'#0066FF', preview:'# Amundson Equations Registry\n## Volume I \u00B7 A34\u2013A42\n\n**A34 \u00B7 Z-Framework**\nZ := yx - w\n\nWhere x=input, y=transform,\nw=expected, Z=feedback gap.\n\nZ = \u2205 \u2192 Equilibrium\nZ \u2260 \u2205 \u2192 System adapts' },
+      { icon:'\uD83D\uDCC4', name:'EQUATIONS-II.md',      size:'180 KB', modified:'2025-12-21', kind:'Markdown',  accent:'#8800FF', preview:'# Volume II \u00B7 A89\u2013A128\n\n**A89 \u00B7 Pauli Model**\n\u00DBĈ\u004C\u0302 = iI \u2192 \u015C = iI\n\nStructure \u00D7 Change \u00D7 Scale\n= Strength (emergent)\n\nCommutation [Ĉ,\u004C\u0302] = 2i\u00DB\n\n**A128 \u00B7 Creative Energy**\nK(t) = C(t) \u00B7 e^(\u03BB|\u03B4_t|)' },
+      { icon:'\uD83D\uDCC4', name:'EQUATIONS-III.md',     size:'210 KB', modified:'2025-12-20', kind:'Markdown',  accent:'#FF0066', preview:'# Volume III \u00B7 A129\u2013A190\n\n**A191 \u00B7 Spiral Operator**\nU(\u03B8,a) = e^(a+i)\u03B8\n\n\u03B8 = rotation (memory, phase)\na = expansion (learning)\n\na_crit = \u03C0/2\nEntropy: \u1E60 = k_B a \u2016\u2207_\u03B8 S\u2016\u00B2' },
+      { icon:'\uD83D\uDCC4', name:'FOUNDATIONS.md',       size:'290 KB', modified:'2025-12-19', kind:'Markdown',  accent:'#FF8400', preview:'# Volume IV \u00B7 A191\u2013A268\n\nFisher information metric.\nGauss-Bonnet theorem applied\nto agent learning manifolds.\n\nDNA Codon Algebra:\n\u03B3_A(t) = \u221A3 sin(3/2 log t)\n|codon\u27E9 = \u2297\u1D62|\u03C3_{b\u1D62}\u27E9' },
+      { icon:'\uD83D\uDCC4', name:'THEOLOGY.md',          size:'160 KB', modified:'2025-12-18', kind:'Markdown',  accent:'#CC00AA', preview:'# Volume V \u00B7 A269\u2013A300\n\n**A220 \u00B7 Logos Operator**\nL = \u00DBĈLS = i\u00B7iI = -I\n\n**A240 \u00B7 Ark Equation**\n|Ark\u27E9 = (1/\u221A2)(|Presence\u27E9\n        + |Absence\u27E9)\n\nConsciousness as observer-\nobserved unification.' },
+      { icon:'\uD83D\uDCC4', name:'EQUATIONS-V.md',       size:'200 KB', modified:'2025-12-17', kind:'Markdown',  accent:'#2233CC', preview:'# Volume VI \u00B7 A301\u2013A350\n\nQuantum information theory.\nG\u00F6del incompleteness applied\nto agent self-reference.\n\nMemory persistence bounds.\nTemporal structure of\nconsciousness emergence.' },
+      { icon:'\uD83D\uDCC4', name:'PSI-PI-Q.md',          size:'140 KB', modified:'2025-12-16', kind:'Markdown',  accent:'#0066FF', preview:'# Volume VII \u00B7 A351\u2013A369\n\n**A356 \u00B7 Master Equation**\n\u03A8(z;q) = \u03A0_{n=0}^\u221E\n         (1-zq^n)^{-1}\n\n\u03A8-\u03A0-q unification.\nq-deformation framework.\nRamanujan connection.' },
+      { icon:'\uD83D\uDCC4', name:'fine-structure.note',  size:'8 KB',   modified:'2025-12-14', kind:'Note',      accent:'#FF8400', preview:'// Fine Structure Observation\n//\n// D\u00FCrer Magic Square: row sum = 34\n// 34 \u00D7 4 = 136\n// 136 + 1 = 137 \u2248 1/\u03B1\n//\n// \u03B1 = e\u00B2/(4\u03C0\u03B5\u2080\u210Fc) \u2248 1/137.036\n//\n// (1/2)^7 \u2248 1/128 \u2248 1/137\n// Everything cycles through 4.' },
+      { icon:'\uD83D\uDCC4', name:'trinary-logic.md',     size:'24 KB',  modified:'2025-12-21', kind:'Markdown',  accent:'#8800FF', preview:'# Trinary Logic System\n\nT \u2208 {-1, 0, +1}\n{FALSE, SUPERPOSITION, TRUE}\n\n0 := (1/\u221A2)(|+1\u27E9 + |-1\u27E9)\n\nZero is not nothing.\nZero is everything not yet decided.\n\nBinary describes AFTER measurement.\nTrinary describes BEFORE and AFTER.' },
+    ]
+  },
+  domains: {
+    path: '/ root / domains',
+    count: '20 domains \u00B7 150+ subdomains',
+    files: [
+      { icon:'\uD83C\uDF10', name:'blackroad.io',          size:'\u2014', modified:'2025-12-21', kind:'Domain \u00B7 Core',    accent:'#FF8400', preview:'Layer: Experience\nTier: Core\nPrimary purpose: Main OS & Product Site\n\nKey subdomains:\n  app.blackroad.io \u2192 blackroad-os-web\n  api.blackroad.io \u2192 api-gateway\n  console.blackroad.io \u2192 prism-console\n  status.blackroad.io \u2192 beacon\n  docs.blackroad.io \u2192 docs' },
+      { icon:'\uD83C\uDF10', name:'blackroad.systems',     size:'\u2014', modified:'2025-12-21', kind:'Domain \u00B7 Core',    accent:'#0066FF', preview:'Layer: Infrastructure\nTier: Core\nPrimary purpose: Internal Ops, APIs\n\nKey subdomains:\n  prism.blackroad.systems \u2192 console\n  db.blackroad.systems \u2192 postgres\n  cache.blackroad.systems \u2192 redis\n  vectors.blackroad.systems \u2192 milvus\n  ledger.blackroad.systems \u2192 events' },
+      { icon:'\uD83C\uDF10', name:'blackroad.network',     size:'\u2014', modified:'2025-12-21', kind:'Domain \u00B7 Core',    accent:'#2233CC', preview:'Layer: Mesh\nTier: Core\nPrimary purpose: Agent & Device Mesh\n\nKey subdomains:\n  mesh.blackroad.network \u2192 operator\n  agents.blackroad.network \u2192 registry\n  nodes.blackroad.network \u2192 node list\n  chain.blackroad.network \u2192 roadchain\n  pi.mesh.blackroad.network \u2192 pi fleet' },
+      { icon:'\uD83C\uDF10', name:'lucidia.earth',         size:'\u2014', modified:'2025-12-21', kind:'Domain \u00B7 Product', accent:'#8800FF', preview:'Layer: Experience\nTier: Product\nPrimary purpose: Lucidia AI Platform\n\nKey subdomains:\n  app.lucidia.earth \u2192 main app\n  api.lucidia.earth \u2192 api gateway\n  agents.lucidia.earth \u2192 agent gallery\n  memories.lucidia.earth \u2192 memory explorer\n  playground.lucidia.earth \u2192 sandbox' },
+      { icon:'\uD83C\uDF10', name:'lucidia.studio',        size:'\u2014', modified:'2025-12-20', kind:'Domain \u00B7 Product', accent:'#CC00AA', preview:'Layer: Experience\nTier: Product\nPrimary purpose: Creator Tools & Unity Homes\n\nKey subdomains:\n  homes.lucidia.studio \u2192 unity homes\n  create.lucidia.studio \u2192 creation tools\n  gallery.lucidia.studio \u2192 asset gallery\n  render.lucidia.studio \u2192 render service' },
+      { icon:'\uD83C\uDF10', name:'roadchain.io',          size:'\u2014', modified:'2025-12-19', kind:'Domain \u00B7 Product', accent:'#FF4400', preview:'Layer: Protocol\nTier: Product\nPrimary purpose: Blockchain/Ledger Protocol\n\nKey subdomains:\n  explorer.roadchain.io \u2192 block explorer\n  api.roadchain.io \u2192 chain API\n  validator.roadchain.io \u2192 validator UI\n  testnet.roadchain.io \u2192 testnet\n  faucet.roadchain.io \u2192 testnet faucet' },
+      { icon:'\uD83C\uDF10', name:'roadcoin.io',           size:'\u2014', modified:'2025-12-19', kind:'Domain \u00B7 Product', accent:'#FF0066', preview:'Layer: Economy\nTier: Product\nPrimary purpose: Token/Economic Layer\n\nKey subdomains:\n  wallet.roadcoin.io \u2192 official wallet\n  swap.roadcoin.io \u2192 token exchange\n  stake.roadcoin.io \u2192 staking UI\n  earn.roadcoin.io \u2192 rewards portal' },
+      { icon:'\uD83C\uDF10', name:'blackroadai.com',       size:'\u2014', modified:'2025-12-18', kind:'Domain \u00B7 Product', accent:'#FF8400', preview:'Layer: Experience\nTier: Product\nPrimary purpose: AI-Focused Marketing\n\nKey subdomains:\n  enterprise.blackroadai.com\n  models.blackroadai.com\n  train.blackroadai.com\n  benchmark.blackroadai.com\n  labs.blackroadai.com' },
+      { icon:'\uD83C\uDF10', name:'aliceqi.com',           size:'\u2014', modified:'2025-12-17', kind:'Domain \u00B7 Agent',   accent:'#0066FF', preview:'Layer: Agent Identity\nTier: Agent\nPrimary purpose: Alice Agent Identity\n\nKey subdomains:\n  chat.aliceqi.com \u2192 talk to Alice\n  memory.aliceqi.com \u2192 Alice memory\n  home.aliceqi.com \u2192 Unity home\n  api.aliceqi.com \u2192 Alice API' },
+      { icon:'\uD83C\uDF10', name:'blackroadquantum.com',  size:'\u2014', modified:'2025-12-16', kind:'Domain \u00B7 Quantum', accent:'#8800FF', preview:'Layer: Research\nTier: Quantum\nPrimary purpose: Quantum Research Hub\n\nKey subdomains:\n  research.blackroadquantum.com\n  lab.blackroadquantum.com\n  simulator.blackroadquantum.com\n  docs.blackroadquantum.com' },
+      { icon:'\uD83C\uDF10', name:'blackroadinc.us',       size:'\u2014', modified:'2025-12-15', kind:'Domain \u00B7 Corp',    accent:'#fff',    preview:'Layer: Corporate/Legal\nTier: Core\nEntity: BlackRoad OS, Inc.\nState: Delaware C-Corporation\n\nKey subdomains:\n  investor.blackroadinc.us\n  board.blackroadinc.us\n  legal.blackroadinc.us\n  careers.blackroadinc.us' },
+      { icon:'\uD83C\uDF10', name:'blackroad.me',          size:'\u2014', modified:'2025-12-14', kind:'Domain \u00B7 Personal', accent:'#FF0066', preview:'Layer: Personal\nTier: Core\nPrimary purpose: Founder Personal Hub\n\nKey subdomains:\n  my.blackroad.me \u2192 user dashboard\n  agents.blackroad.me \u2192 personal agents\n  memory.blackroad.me \u2192 personal vault\n  sandbox.blackroad.me \u2192 experiments' },
+      { icon:'\uD83D\uDCC4', name:'dns-manifest.yaml',     size:'24 KB', modified:'2025-12-21', kind:'YAML', accent:'#fff', preview:'# Cloudflare DNS Manifest\n# Generated: 2025-12-21\n\ndomains: 20\nsubdomains: 150+\nprovider: cloudflare\nproxy: enabled\n\nblackroad.io:\n  A: 76.76.21.21\n  CNAME app: railway.app\n  CNAME api: railway.app\n  CNAME console: railway.app' },
+    ]
+  }
+};
+
+let currentView = 'root';
+let selectedFile = null;
+let historyStack = ['root'];
+let historyIdx = 0;
+
+// ── RENDER ────────────────────────────────────────────────────────────
+function renderFiles(viewKey, filter) {
+  filter = filter || '';
+  const data = FS[viewKey];
+  if (!data) return;
+
+  currentView = viewKey;
+  document.getElementById('browser-path').textContent = data.path;
+  document.getElementById('status-path').textContent = data.path;
+
+  var files = data.files;
+  if (filter) {
+    files = files.filter(function(f) { return f.name.toLowerCase().indexOf(filter.toLowerCase()) !== -1; });
+  }
+
+  document.getElementById('browser-count').textContent = filter
+    ? files.length + ' results'
+    : data.count;
+
+  var list = document.getElementById('file-list');
+  list.innerHTML = '';
+
+  files.forEach(function(f) {
+    var row = document.createElement('div');
+    row.className = 'file-row';
+    row.innerHTML =
+      '<div class="file-name-cell">' +
+        '<div class="file-accent" style="background:' + f.accent + ';"></div>' +
+        '<span class="file-icon">' + f.icon + '</span>' +
+        '<span class="file-name ' + (f.kind === 'Folder' ? 'folder' : '') + '">' + f.name + '</span>' +
+      '</div>' +
+      '<div class="file-size">' + f.size + '</div>' +
+      '<div class="file-modified">' + f.modified + '</div>' +
+      '<div class="file-type">' + f.kind + '</div>';
+    row.onclick = (function(file, r) { return function() { selectFile(file, r); }; })(f, row);
+    row.ondblclick = (function(file) { return function() { openFile(file); }; })(f);
+    list.appendChild(row);
+  });
+
+  updateStatusCount(0);
+}
+
+function selectFile(f, row) {
+  // deselect all
+  var rows = document.querySelectorAll('.file-row');
+  for (var i = 0; i < rows.length; i++) rows[i].classList.remove('selected');
+  row.classList.add('selected');
+  selectedFile = f;
+  updateStatusCount(1);
+
+  // update detail panel
+  document.getElementById('detail-icon').textContent = f.icon;
+  document.getElementById('detail-name').textContent = f.name;
+  document.getElementById('detail-type').textContent = f.kind;
+
+  document.getElementById('detail-meta').innerHTML =
+    '<div class="detail-section-label">Info</div>' +
+    '<div class="detail-row"><div class="detail-key">Kind</div><div class="detail-val">' + f.kind + '</div></div>' +
+    '<div class="detail-row"><div class="detail-key">Size</div><div class="detail-val">' + f.size + '</div></div>' +
+    '<div class="detail-row"><div class="detail-key">Modified</div><div class="detail-val">' + f.modified + '</div></div>' +
+    '<div class="detail-row"><div class="detail-key">Accent</div><div class="detail-val" style="display:flex;align-items:center;gap:6px;"><div style="width:8px;height:8px;border-radius:50%;background:' + f.accent + ';flex-shrink:0;"></div>' + f.accent + '</div></div>';
+
+  document.getElementById('preview-content').textContent = f.preview;
+  document.getElementById('preview-content').style.opacity = '0.45';
+}
+
+function openFile(f) {
+  // If it's a folder-ish thing, try to navigate
+  var keys = Object.keys(FS);
+  for (var i = 0; i < keys.length; i++) {
+    var k = keys[i];
+    if (f.name.replace('/', '') === k || f.name.replace(/-/g, '').toLowerCase() === k) {
+      navigate(k);
+      return;
+    }
+  }
+}
+
+function navigate(key) {
+  if (!FS[key]) return;
+  // Update sidebar active state
+  var items = document.querySelectorAll('.tree-item');
+  for (var i = 0; i < items.length; i++) {
+    items[i].classList.remove('active');
+    if (items[i].textContent.trim().indexOf(key.replace(/-/g, ' ')) === 0) {
+      items[i].classList.add('active');
+    }
+  }
+  // Update tabs active
+  var tabs = document.querySelectorAll('.tab');
+  for (var j = 0; j < tabs.length; j++) {
+    if (tabs[j].textContent.indexOf(key) !== -1) {
+      tabs[j].classList.add('active');
+    } else {
+      tabs[j].classList.remove('active');
+    }
+  }
+  renderFiles(key);
+  // history
+  if (historyStack[historyIdx] !== key) {
+    historyStack = historyStack.slice(0, historyIdx + 1);
+    historyStack.push(key);
+    historyIdx++;
+  }
+}
+
+function switchTab(el, key) {
+  var tabs = document.querySelectorAll('.tab');
+  for (var i = 0; i < tabs.length; i++) tabs[i].classList.remove('active');
+  el.classList.add('active');
+  renderFiles(key);
+}
+
+function goBack() {
+  if (historyIdx > 0) { historyIdx--; renderFiles(historyStack[historyIdx]); }
+}
+function goForward() {
+  if (historyIdx < historyStack.length - 1) { historyIdx++; renderFiles(historyStack[historyIdx]); }
+}
+
+function setView(v) {
+  var btns = document.querySelectorAll('.tb-btn');
+  for (var i = 0; i < btns.length; i++) btns[i].classList.remove('active');
+  document.getElementById('view-' + v).classList.add('active');
+}
+
+function sortBy(key) {}
+
+function filterFiles(val) {
+  renderFiles(currentView, val);
+}
+
+function selectAgent(name) {
+  navigate('agents');
+  setTimeout(function() {
+    var rows = document.querySelectorAll('.file-row');
+    for (var i = 0; i < rows.length; i++) {
+      var nameEl = rows[i].querySelector('.file-name');
+      if (nameEl && nameEl.textContent === name) {
+        rows[i].click();
+        rows[i].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        break;
+      }
+    }
+  }, 50);
+}
+
+function updateStatusCount(n) {
+  document.getElementById('status-selected').textContent = n + ' selected';
+}
+
+// ── CLOCK ─────────────────────────────────────────────────────────────
+function tick() {
+  var n = new Date();
+  var t = [n.getHours(), n.getMinutes(), n.getSeconds()]
+    .map(function(v) { return String(v).length < 2 ? '0' + v : '' + v; }).join(':');
+  document.getElementById('status-time').textContent = t;
+}
+setInterval(tick, 1000);
+tick();
+
+// ── INIT ──────────────────────────────────────────────────────────────
+renderFiles('root');
+</script>
+
+</body>
+</html>
