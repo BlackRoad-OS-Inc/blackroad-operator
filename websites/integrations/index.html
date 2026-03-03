@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BlackRoad — Integrations</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      background: #000000 !important;
+      color: #fff;
+      font-family: 'JetBrains Mono', monospace;
+      min-height: 100vh;
+    }
+
+    * { background-color: inherit; }
+    body, .page, .hero, .sec, nav { background-color: #000000 !important; }
+
+    :root {
+      --grad: linear-gradient(90deg, #FF8400, #FF4400, #FF0066, #CC00AA, #8800FF, #0066FF, #2233CC);
+    }
+
+    /* NAV */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: #000;
+      padding: 0 24px;
+      height: 48px;
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid #fff;
+    }
+    .nav-logo { font-size: 0.75rem; font-weight: 700; font-family: 'Space Grotesk', sans-serif; }
+    .nav-links { display: flex; gap: 24px; align-items: center; }
+    .nav-links a { font-size: 0.52rem; color: #fff; opacity: 0.4; text-decoration: none; letter-spacing: 0.12em; text-transform: uppercase; transition: opacity 0.15s; }
+    .nav-links a:hover { opacity: 1; }
+    .nav-badge { font-size: 0.46rem; font-weight: 700; padding: 2px 7px; border: 1px solid #FF8400; color: #FF8400; letter-spacing: 0.08em; }
+
+    /* GRAD RULES */
+    .grad-rule { height: 3px; background: var(--grad); }
+
+    /* PAGE */
+    .page { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+
+    /* HERO */
+    .hero { padding: 72px 0 56px; border-bottom: 1px solid #fff; }
+    .hero-eyebrow { font-size: 0.52rem; opacity: 0.3; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 20px; }
+    .hero h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(3rem, 11vw, 6rem);
+      font-weight: 700; line-height: 1; letter-spacing: -0.02em;
+    }
+    .hero-sub { margin-top: 20px; font-size: 0.68rem; opacity: 0.45; line-height: 1.9; max-width: 500px; }
+    .hero-divider { height: 1px; background: var(--grad); width: 160px; margin: 32px 0; }
+    .hero-stats { display: flex; gap: 0; flex-wrap: wrap; }
+    .hero-stat { padding-right: 32px; margin-right: 32px; border-right: 1px solid rgba(255,255,255,0.12); }
+    .hero-stat:last-child { border-right: none; margin-right: 0; padding-right: 0; }
+    .stat-num { font-family: 'Space Grotesk', sans-serif; font-size: 2.2rem; font-weight: 700; line-height: 1; }
+    .stat-label { font-size: 0.46rem; opacity: 0.3; letter-spacing: 0.15em; text-transform: uppercase; margin-top: 4px; }
+
+    /* SECTION */
+    .sec { padding: 56px 0 48px; border-bottom: 1px solid #fff; }
+    .sec-label {
+      font-size: 0.52rem; color: #fff; opacity: 0.3;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      margin-bottom: 36px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .sec-label::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.1); }
+
+    /* SEARCH */
+    .search-bar {
+      display: flex; align-items: center; gap: 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.25);
+      padding-bottom: 12px; margin-bottom: 40px;
+    }
+    .search-icon { font-size: 0.6rem; opacity: 0.3; }
+    .search-input {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem; color: #fff; background: transparent;
+      border: none; outline: none; flex: 1;
+    }
+    .search-input::placeholder { color: rgba(255,255,255,0.2); }
+    .search-count { font-size: 0.48rem; opacity: 0.2; white-space: nowrap; }
+
+    /* FILTER TABS */
+    .filters { display: flex; gap: 0; flex-wrap: wrap; margin-bottom: 40px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .filter-tab {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.52rem; letter-spacing: 0.1em; text-transform: uppercase;
+      color: #fff; background: transparent; border: none;
+      padding: 10px 20px; cursor: pointer; opacity: 0.3;
+      border-bottom: 2px solid transparent; margin-bottom: -1px;
+      transition: opacity 0.15s;
+    }
+    .filter-tab:hover { opacity: 0.7; }
+    .filter-tab.active { opacity: 1; border-bottom-color: #fff; }
+
+    /* INTEGRATION GRID */
+    .int-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1px;
+      background: rgba(255,255,255,0.08);
+    }
+    .int-card {
+      background: #000;
+      padding: 28px 24px;
+      display: flex; flex-direction: column; gap: 16px;
+      transition: background 0.15s;
+      position: relative; overflow: hidden;
+      cursor: default;
+    }
+    .int-card:hover { background: #0a0a0a; }
+    .int-card:hover .card-arrow { opacity: 1; }
+    .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .card-icon {
+      width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
+      font-size: 0.72rem; font-weight: 700; flex-shrink: 0;
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+    .card-status { display: flex; align-items: center; gap: 6px; }
+    .status-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .status-dot.live { background: #22c55e; }
+    .status-dot.beta { background: #FF8400; }
+    .status-dot.soon { background: rgba(255,255,255,0.2); }
+    .status-text { font-size: 0.42rem; opacity: 0.4; letter-spacing: 0.1em; text-transform: uppercase; }
+    .card-name { font-family: 'Space Grotesk', sans-serif; font-size: 1rem; font-weight: 700; }
+    .card-desc { font-size: 0.54rem; opacity: 0.35; line-height: 1.8; flex: 1; }
+    .card-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .card-tag {
+      font-size: 0.42rem; letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 2px 7px; border: 1px solid rgba(255,255,255,0.12); opacity: 0.5;
+    }
+    .card-arrow { font-size: 0.6rem; margin-left: auto; opacity: 0; transition: opacity 0.15s; }
+    .card-accent {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      height: 2px; opacity: 0;
+      transition: opacity 0.15s;
+    }
+    .int-card:hover .card-accent { opacity: 1; }
+
+    .int-card { background: #000000 !important; }
+    .int-card:hover { background: #050505 !important; }
+    .featured-card { background: #000000 !important; }
+    .featured-card:hover { background: #050505 !important; }
+    .featured-row, .int-grid { background: rgba(255,255,255,0.08); }
+    .featured-row {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 1px;
+      background: rgba(255,255,255,0.08);
+      margin-bottom: 1px;
+    }
+    .featured-card {
+      background: #000; padding: 36px 32px;
+      display: flex; flex-direction: column; gap: 20px;
+      position: relative; overflow: hidden;
+      transition: background 0.15s;
+    }
+    .featured-card:hover { background: #080808; }
+    .featured-card:hover .card-accent { opacity: 1; }
+    .featured-card:hover .card-arrow { opacity: 1; }
+    .featured-label { font-size: 0.46rem; opacity: 0.3; letter-spacing: 0.2em; text-transform: uppercase; }
+    .featured-name { font-family: 'Space Grotesk', sans-serif; font-size: 1.6rem; font-weight: 700; line-height: 1.1; }
+    .featured-desc { font-size: 0.58rem; opacity: 0.4; line-height: 1.9; }
+    .featured-actions { display: flex; align-items: center; gap: 16px; margin-top: auto; }
+
+    /* CATEGORY SECTION */
+    .cat-header { display: flex; align-items: center; gap: 16px; padding: 28px 0 20px; border-top: 1px solid rgba(255,255,255,0.08); }
+    .cat-header:first-child { border-top: none; }
+    .cat-num { font-size: 0.48rem; opacity: 0.2; width: 24px; }
+    .cat-name { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+    .cat-count { font-size: 0.46rem; opacity: 0.25; margin-left: auto; }
+    .cat-bar { height: 1px; background: rgba(255,255,255,0.06); flex: 1; }
+
+    /* CONNECTOR TABLE */
+    .conn-table { width: 100%; }
+    .conn-row {
+      display: grid; grid-template-columns: 2fr 3fr 1fr 1fr;
+      align-items: center; gap: 16px;
+      padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.06);
+      transition: background 0.1s;
+    }
+    .conn-row:hover { background: rgba(255,255,255,0.02); }
+    .conn-row:last-child { border-bottom: none; }
+    .conn-name { font-size: 0.6rem; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+    .conn-icon-sm { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 0.5rem; border: 1px solid rgba(255,255,255,0.1); flex-shrink: 0; }
+    .conn-desc { font-size: 0.52rem; opacity: 0.3; line-height: 1.7; }
+    .conn-type { font-size: 0.46rem; opacity: 0.25; text-align: center; letter-spacing: 0.05em; }
+    .conn-status-cell { display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
+
+    /* PIPELINE VISUAL */
+    .pipeline { display: flex; align-items: center; gap: 0; padding: 32px 0; overflow-x: auto; }
+    .pipe-node {
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+      min-width: 80px; flex-shrink: 0;
+    }
+    .pipe-box {
+      width: 48px; height: 48px; border: 1px solid rgba(255,255,255,0.2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.55rem; font-weight: 700;
+      position: relative;
+    }
+    .pipe-box.active { border-color: #fff; }
+    .pipe-box.accent-orange { border-color: #FF8400; }
+    .pipe-box.accent-purple { border-color: #8800FF; }
+    .pipe-box.accent-blue { border-color: #0066FF; }
+    .pipe-label { font-size: 0.42rem; opacity: 0.3; text-align: center; }
+    .pipe-arrow { flex: 1; display: flex; align-items: center; min-width: 32px; }
+    .pipe-line { height: 1px; flex: 1; background: rgba(255,255,255,0.15); }
+    .pipe-chevron { font-size: 0.5rem; opacity: 0.2; }
+
+    /* BUTTONS */
+    .btn { font-family: 'JetBrains Mono', monospace; font-size: 0.58rem; font-weight: 700; letter-spacing: 0.05em; cursor: default; border: none; }
+    .btn-primary { background: #fff; color: #000; padding: 8px 16px; }
+    .btn-ghost { background: transparent; color: #fff; padding: 7px 15px; border: 1px solid rgba(255,255,255,0.3); }
+
+    /* BADGE */
+    .badge { font-size: 0.46rem; font-weight: 700; padding: 2px 7px; border: 1px solid; letter-spacing: 0.08em; }
+    .badge-new { color: #FF8400; border-color: #FF8400; }
+    .badge-api { color: #0066FF; border-color: #0066FF; }
+    .badge-native { color: #8800FF; border-color: #8800FF; }
+
+    /* FOOTER */
+    footer { padding: 32px 0; display: flex; justify-content: space-between; font-size: 0.5rem; opacity: 0.18; flex-wrap: wrap; gap: 8px; }
+
+    @keyframes pulse-s { 0%,100%{transform:scale(1)} 50%{transform:scale(1.7)} }
+    .pulse-dot { animation: pulse-s 2s ease-in-out infinite; }
+
+    @media (max-width: 600px) {
+      .page { padding: 0 16px; }
+      nav { padding: 0 16px; }
+      .featured-row { grid-template-columns: 1fr; }
+      .conn-row { grid-template-columns: 1fr 1fr; }
+      .conn-desc, .conn-type { display: none; }
+      .int-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body style="background:#000000 !important;">
+
+<div class="grad-rule"></div>
+
+<nav>
+  <span class="nav-logo">BlackRoad</span>
+  <div class="nav-links">
+    <a href="#">product</a>
+    <a href="#">docs</a>
+    <a href="#" style="opacity:1;">integrations</a>
+    <a href="#">pricing</a>
+    <span class="nav-badge">BETA</span>
+  </div>
+</nav>
+
+<div class="page">
+
+  <!-- HERO -->
+
+  <div class="hero">
+    <div class="hero-eyebrow">BlackRoad OS &middot; Integrations</div>
+    <h1>Connect<br>everything.</h1>
+    <p class="hero-sub">BlackRoad plugs into your entire stack &mdash; infrastructure, data, communication, payments, and productivity. No Zapier required.</p>
+    <div class="hero-divider"></div>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="stat-num">120+</div><div class="stat-label">Connectors</div></div>
+      <div class="hero-stat"><div class="stat-num">12</div><div class="stat-label">Categories</div></div>
+      <div class="hero-stat"><div class="stat-num">1</div><div class="stat-label">Universal API</div></div>
+      <div class="hero-stat"><div class="stat-num">&infin;</div><div class="stat-label">Custom Workflows</div></div>
+    </div>
+  </div>
+
+  <!-- SEARCH + FILTER -->
+
+  <div class="sec" style="padding-top: 40px; padding-bottom: 0; border-bottom: none;">
+    <div class="search-bar">
+      <span class="search-icon">&#x2315;</span>
+      <input class="search-input" type="text" placeholder="Search integrations — e.g. Slack, Stripe, GitHub&hellip;">
+      <span class="search-count">120 integrations</span>
+    </div>
+    <div class="filters">
+      <button class="filter-tab active">All</button>
+      <button class="filter-tab">Infrastructure</button>
+      <button class="filter-tab">AI &amp; Models</button>
+      <button class="filter-tab">Data &amp; Storage</button>
+      <button class="filter-tab">Communication</button>
+      <button class="filter-tab">Payments</button>
+      <button class="filter-tab">Developer</button>
+      <button class="filter-tab">Creator</button>
+    </div>
+  </div>
+
+  <!-- FEATURED -->
+
+  <div class="sec" style="padding-top: 0; border-bottom: none;">
+    <div class="sec-label">Featured</div>
+    <div class="featured-row">
+
+      <div class="featured-card">
+        <div class="card-accent" style="background: var(--grad);"></div>
+        <div class="featured-label">Native Integration</div>
+        <div style="font-size: 1.4rem; margin-bottom: -4px;">&#x26C5;</div>
+        <div class="featured-name">Cloudflare</div>
+        <div class="featured-desc">Full DNS, CDN, Workers, R2, D1, and KV management baked into BlackRoad OS. Deploy globally from one interface &mdash; no Cloudflare dashboard required.</div>
+        <div class="card-meta">
+          <span class="badge badge-native">NATIVE</span>
+          <span class="card-tag">DNS</span>
+          <span class="card-tag">CDN</span>
+          <span class="card-tag">COMPUTE</span>
+        </div>
+        <div class="featured-actions">
+          <button class="btn btn-primary">Connect</button>
+          <button class="btn btn-ghost">View Docs</button>
+          <span class="card-arrow" style="opacity:1;">&rarr;</span>
+        </div>
+      </div>
+
+      <div class="featured-card">
+        <div class="card-accent" style="background: linear-gradient(90deg,#8800FF,#0066FF);"></div>
+        <div class="featured-label">Native Integration</div>
+        <div style="font-size: 1.4rem; margin-bottom: -4px;">&#x2B21;</div>
+        <div class="featured-name">GitHub</div>
+        <div class="featured-desc">Repos, issues, PRs, Actions, and deployments connected to every BlackRoad agent. Cece can open tickets, merge PRs, and trigger pipelines autonomously.</div>
+        <div class="card-meta">
+          <span class="badge badge-native">NATIVE</span>
+          <span class="card-tag">REPOS</span>
+          <span class="card-tag">CI/CD</span>
+          <span class="card-tag">AGENTS</span>
+        </div>
+        <div class="featured-actions">
+          <button class="btn btn-primary">Connect</button>
+          <button class="btn btn-ghost">View Docs</button>
+          <span class="card-arrow" style="opacity:1;">&rarr;</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- PIPELINE VISUAL -->
+
+  <div class="sec" style="border-bottom: 1px solid rgba(255,255,255,0.08);">
+    <div class="sec-label">01 &middot; How It Works</div>
+    <div style="font-size: 0.52rem; opacity: 0.3; margin-bottom: 8px;">Data flows through the BlackRoad OS event bus &mdash; integrations connect at any layer.</div>
+    <div class="pipeline">
+      <div class="pipe-node">
+        <div class="pipe-box accent-orange">SRC</div>
+        <div class="pipe-label">Source<br>App</div>
+      </div>
+      <div class="pipe-arrow"><div class="pipe-line"></div><div class="pipe-chevron">&rsaquo;</div></div>
+      <div class="pipe-node">
+        <div class="pipe-box active">BR</div>
+        <div class="pipe-label">BlackRoad<br>Event Bus</div>
+      </div>
+      <div class="pipe-arrow"><div class="pipe-line"></div><div class="pipe-chevron">&rsaquo;</div></div>
+      <div class="pipe-node">
+        <div class="pipe-box accent-purple">CGov</div>
+        <div class="pipe-label">Cece<br>Policy</div>
+      </div>
+      <div class="pipe-arrow"><div class="pipe-line"></div><div class="pipe-chevron">&rsaquo;</div></div>
+      <div class="pipe-node">
+        <div class="pipe-box">AGT</div>
+        <div class="pipe-label">Agent<br>Action</div>
+      </div>
+      <div class="pipe-arrow"><div class="pipe-line"></div><div class="pipe-chevron">&rsaquo;</div></div>
+      <div class="pipe-node">
+        <div class="pipe-box accent-blue">DST</div>
+        <div class="pipe-label">Destination<br>Service</div>
+      </div>
+      <div class="pipe-arrow"><div class="pipe-line"></div><div class="pipe-chevron">&rsaquo;</div></div>
+      <div class="pipe-node">
+        <div class="pipe-box">LOG</div>
+        <div class="pipe-label">Ledger<br>Audit</div>
+      </div>
+    </div>
+    <div style="font-size: 0.46rem; opacity: 0.15; margin-top: 8px;">Every action is policy-checked by Cece and recorded in the immutable ledger. No silent automations.</div>
+  </div>
+
+  <!-- INFRASTRUCTURE -->
+
+  <div class="sec" style="border-bottom: none; padding-bottom: 32px;">
+    <div class="sec-label">02 &middot; Infrastructure</div>
+
+    <div class="cat-header">
+      <span class="cat-num">01</span>
+      <span class="cat-name">Compute &amp; Cloud</span>
+      <span class="cat-bar"></span>
+      <span class="cat-count">7 connectors</span>
+    </div>
+    <div class="conn-table">
+      <div class="conn-row">
+        <div class="conn-name"><div class="conn-icon-sm">&#x26C5;</div>Cloudflare</div>
+        <div class="conn-desc">DNS, CDN, Workers, R2, D1, KV, Pages &mdash; complete platform access</div>
+        <div class="conn-type">Native</div>
+        <div class="conn-status-cell"><div class="status-dot live"></div><span class="status-text">Live</span></div>
+      </div>
+      <div class="conn-row">
+        <div class="conn-name"><div class="conn-icon-sm">&#x1F682;</div>Railway</div>
+        <div class="conn-desc">Deploy services, manage environment variables, monitor logs</div>
+        <div class="conn-type">Native</div>
+        <div class="conn-status-cell"><div class="status-dot live"></div><span class="status-text">Live</span></div>
+      </div>
+      <div class="conn-row">
+        <div class="conn-name"><div class="conn-icon-sm">K3s</div>K3s / Kubernetes</div>
+        <div class="conn-desc">Lightweight cluster management &mdash; Raspberry Pi, Jetson, and beyond</div>
+        <div class="conn-type">Native</div>
+        <div class="conn-status-cell"><div class="status-dot live"></div><span class="status-text">Live</span></div>
+      </div>
+      <div class="conn-row">
+        <div class="conn-name"><div class="conn-icon-sm">&#x25B2;</div>Vercel</div>
+        <div class="conn-desc">Deploy Next.js apps, manage domains, preview deployments</div>
+        <div class="conn-type">API</div>
+        <div class="conn-status-cell"><div class="status-dot live"></div><span class="status-text">Live</span></div>
+      </div>
+      <div class="conn-row">
+        <div class="conn-name"><div class="conn-icon-sm">Pi</div>Raspberry Pi Mesh</div>
+        <div class="conn-desc">Register Pi devices as agents, distribute compute, monitor fleet</div>
+        <div class="conn-type">Native</div>
+        <div class="conn-status-cell"><div class="status-dot beta" style="animation: pulse-s 2s ease-in-out infinite;"></div><span class="status-text">Beta</span></div>
+      </div>
+      <div class="conn-row">
+        <div class="conn-name"><div class="conn-icon-sm">AWS</div>AWS</div>
+        <div class="conn-desc">S3, Lambda, EC2, RDS &mdash; bridge existing AWS infrastructure</div>
+        <div class="conn-type">API</div>
+        <div class="conn-status-cell"><div class="status-dot soon"></div><span class="status-text">Soon</span></div>
+      </div>
+      <div class="conn-row">
+        <div class="conn-name"><div class="conn-icon-sm">GCP</div>Google Cloud</div>
+        <div class="conn-desc">GCS, Cloud Run, BigQuery &mdash; full GCP surface via service accounts</div>
+        <div class="conn-type">API</div>
+        <div class="conn-status-cell"><div class="status-dot soon"></div><span class="status-text">Soon</span></div>
+      </div>
+    </div>
+
+    <div class="cat-header">
+      <span class="cat-num">02</span>
+      <span class="cat-name">Data &amp; Storage</span>
+      <span class="cat-bar"></span>
+      <span class="cat-count">8 connectors</span>
+    </div>
+    <div class="conn-table">
+      <div class="conn-row">
+        <div class="conn-name"><div class="conn-icon-sm">PG</div>PostgreSQL / Neon</div>
+        <div class="conn-desc">Primary relational store &mdash; schema migrations, query execution, branching</div>
+        <div class="conn-type">Native</div>
+        <div class="conn-status-cell"><div class="status-dot live"></div><span class="status-text">Live</span></div>
+      </div>
+      <div class="conn-row">
+        <div class="conn-name"><div class="conn-icon-sm">RD</div>Redis / Upstash</div>
+        <div class="conn-desc">Cache, queues, streams &mdash; serverless Redis with edge-native access</div>
+        <div class="conn-type">Native</div>
+        <div class="conn-status-cell"><div class="status-dot live"></div><span class="status-text">Live</span></div>
+      </div>
+      <div class="conn-row">
+        <div class="conn-name"><div class="conn-icon-sm">VEC</div>Pinecone / Milvus</div>
+        <div class="conn-desc">Vector storage for agent memory and semantic search</div>
+        <div class="conn-type">Native</div>
+        <div class="conn-status-cell"><div class="status-dot live"></div><span class="status-text">Live</span></div>
+      </div>
+      <div class="conn-row">
+        <div class="conn-name"><div class="conn-icon-sm">R2</div>Cloudflare R2</div>
+        <div class="conn-desc">S3-compatible object storage &mdash; zero egress costs</div>
+        <div class="conn-type">Native</div>
+        <div class="conn-status-cell"><div class="status-dot live"></div><span class="status-text">Live</span></div>
+      </div>
+      <div class="conn-row">
+        <div class="conn-name"><div class="conn-icon-sm">SB</div>Supabase</div>
+        <div class="conn-desc">Postgres, auth, and real-time subscriptions</div>
+        <div class="conn-type">API</div>
+        <div class="conn-status-cell"><div class="status-dot beta"></div><span class="status-text">Beta</span></div>
+      </div>
+      <div class="conn-row">
+        <div class="conn-name"><div class="conn-icon-sm">MG</div>MongoDB Atlas</div>
+        <div class="conn-desc">Document database with vector search and aggregation pipelines</div>
+        <div class="conn-type">API</div>
+        <div class="conn-status-cell"><div class="status-dot soon"></div><span class="status-text">Soon</span></div>
+      </div>
+    </div>
+
+    <div class="cat-header">
+      <span class="cat-num">03</span>
+      <span class="cat-name">Messaging &amp; Events</span>
+      <span class="cat-bar"></span>
+      <span class="cat-count">5 connectors</span>
+    </div>
+    <div class="conn-table">
+      <div class="conn-row">
+        <div class="conn-name"><div class="conn-icon-sm">NT</div>NATS</div>
+        <div class="conn-desc">Core event bus for agent-to-agent and system-to-system messaging</div>
+        <div class="conn-type">Native</div>
+        <div class="conn-status-cell"><div class="status-dot live"></div><span class="status-text">Live</span></div>
+      </div>
+      <div class="conn-row">
+        <div class="conn-name"><div class="conn-icon-sm">WS</div>WebSocket Hub</div>
+        <div class="conn-desc">Real-time browser &#x2194; agent communication layer</div>
+        <div class="conn-type">Native</div>
+        <div class="conn-status-cell"><div class="status-dot live"></div><span class="status-text">Live</span></div>
+      </div>
+      <div class="conn-row">
+        <div class="conn-name"><div class="conn-icon-sm">KF</div>Kafka</div>
+        <div class="conn-desc">High-throughput event streaming for large-scale agent meshes</div>
+        <div class="conn-type">API</div>
+        <div class="conn-status-cell"><div class="status-dot soon"></div><span class="status-text">Soon</span></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- AI & MODELS -->
+
+  <div class="sec" style="border-top: 1px solid #fff; border-bottom: none; padding-bottom: 32px;">
+    <div class="sec-label">03 &middot; AI &amp; Models</div>
+    <div class="int-grid">
+
+      <div class="int-card">
+        <div class="card-accent" style="background: linear-gradient(90deg, #FF8400, #FF0066);"></div>
+        <div class="card-top">
+          <div class="card-icon">AN</div>
+          <div class="card-status"><div class="status-dot live"></div><span class="status-text">Live</span></div>
+        </div>
+        <div class="card-name">Anthropic</div>
+        <div class="card-desc">Claude Opus, Sonnet, and Haiku &mdash; primary reasoning and code generation models for Lucidia.</div>
+        <div class="card-meta">
+          <span class="badge badge-native">NATIVE</span>
+          <span class="card-tag">LLM</span>
+          <span class="card-tag">REASONING</span>
+          <span class="card-arrow">&rarr;</span>
+        </div>
+      </div>
+
+      <div class="int-card">
+        <div class="card-accent" style="background: linear-gradient(90deg, #0066FF, #8800FF);"></div>
+        <div class="card-top">
+          <div class="card-icon">OAI</div>
+          <div class="card-status"><div class="status-dot live"></div><span class="status-text">Live</span></div>
+        </div>
+        <div class="card-name">OpenAI</div>
+        <div class="card-desc">GPT-4o, o1, Whisper, DALL&middot;E &mdash; multimodal tasks, speech, and image generation.</div>
+        <div class="card-meta">
+          <span class="badge badge-api">API</span>
+          <span class="card-tag">LLM</span>
+          <span class="card-tag">IMAGE</span>
+          <span class="card-arrow">&rarr;</span>
+        </div>
+      </div>
+
+      <div class="int-card">
+        <div class="card-accent" style="background: linear-gradient(90deg, #CC00AA, #8800FF);"></div>
+        <div class="card-top">
+          <div class="card-icon">HF</div>
+          <div class="card-status"><div class="status-dot live"></div><span class="status-text">Live</span></div>
+        </div>
+        <div class="card-name">Hugging Face</div>
+        <div class="card-desc">Open-source models, datasets, and Spaces &mdash; self-hosted inference on your Pi or Jetson.</div>
+        <div class="card-meta">
+          <span class="badge badge-native">NATIVE</span>
+          <span class="card-tag">MODELS</span>
+          <span class="card-tag">EDGE</span>
+          <span class="card-arrow">&rarr;</span>
+        </div>
+      </div>
+
+      <div class="int-card">
+        <div class="card-accent" style="background: linear-gradient(90deg, #FF4400, #CC00AA);"></div>
+        <div class="card-top">
+          <div class="card-icon">GM</div>
+          <div class="card-status"><div class="status-dot live"></div><span class="status-text">Live</span></div>
+        </div>
+        <div class="card-name">Google Gemini</div>
+        <div class="card-desc">Gemini 1.5 Flash and Pro &mdash; long context, multimodal, Google Search grounding.</div>
+        <div class="card-meta">
+          <span class="badge badge-api">API</span>
+          <span class="card-tag">LLM</span>
+          <span class="card-tag">MULTIMODAL</span>
+          <span class="card-arrow">&rarr;</span>
+        </div>
+      </div>
+
+      <div class="int-card">
+        <div class="card-accent" style="background: linear-gradient(90deg, #0066FF, #2233CC);"></div>
+        <div class="card-top">
+          <div class="card-icon">EL</div>
+          <div class="card-status"><div class="status-dot beta"></div><span class="status-text">Beta</span></div>
+        </div>
+        <div class="card-name">ElevenLabs</div>
+        <div class="card-desc">Voice cloning and synthesis for agent voice interfaces and SoundRoad.</div>
+        <div class="card-meta">
+          <span class="badge badge-new">NEW</span>
+          <span class="card-tag">VOICE</span>
+          <span class="card-tag">TTS</span>
+          <span class="card-arrow">&rarr;</span>
+        </div>
+      </div>
+
+      <div class="int-card">
+        <div class="card-accent" style="background: rgba(255,255,255,0.1);"></div>
+        <div class="card-top">
+          <div class="card-icon" style="opacity:0.3;">+</div>
+          <div class="card-status"><div class="status-dot soon"></div><span class="status-text">Soon</span></div>
+        </div>
+        <div class="card-name" style="opacity:0.4;">Mistral AI</div>
+        <div class="card-desc" style="opacity:0.2;">Fast, efficient European models &mdash; GDPR-native inference for EU deployments.</div>
+        <div class="card-meta">
+          <span class="card-tag" style="opacity:0.25;">LLM</span>
+          <span class="card-tag" style="opacity:0.25;">EU</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- COMMUNICATION -->
+
+  <div class="sec" style="border-top: 1px solid #fff; border-bottom: none; padding-bottom: 32px;">
+    <div class="sec-label">04 &middot; Communication &amp; Productivity</div>
+    <div class="conn-table">
+      <div class="conn-row">
+        <div class="conn-name"><div class="conn-icon-sm">SL</div>Slack</div>
+        <div class="conn-desc">Agents post alerts, summaries, and status updates &mdash; bidirectional commands</div>
+        <div class="conn-type">Native via Zapier</div>
+        <div class="conn-status-cell"><div class="status-dot live"></div><span class="status-text">Live</span></div>
+      </div>
+      <div class="conn-row">
+        <div class="conn-name"><div class="conn-icon-sm">GM</div>Gmail</div>
+        <div class="conn-desc">Read, draft, and send email via agent instructions &mdash; CashRoad and BackRoad flows</div>
+        <div class="conn-type">Native via Zapier</div>
+        <div class="conn-status-cell"><div class="status-dot live"></div><span class="status-text">Live</span></div>
+      </div>
+      <div class="conn-row">
+        <div class="conn-name"><div class="conn-icon-sm">GC</div>Google Calendar</div>
+        <div class="conn-desc">Schedule events, find free time, respond to invites &mdash; BackRoad 'Plans not posts'</div>
+        <div class="conn-type">Native</div>
+        <div class="conn-status-cell"><div class="status-dot live"></div><span class="status-text">Live</span></div>
+      </div>
+      <div class="conn-row">
+        <div class="conn-name"><div class="conn-icon-sm">NT</div>Notion</div>
+        <div class="conn-desc">Read and write to your knowledge base &mdash; VaultRoad semantic sync</div>
+        <div class="conn-type">API</div>
+        <div class="conn-status-cell"><div class="status-dot live"></div><span class="status-text">Live</span></div>
+      </div>
+      <div class="conn-row">
+        <div class="conn-name"><div class="conn-icon-sm">GD</div>Google Drive</div>
+        <div class="conn-desc">Search, create, and update Docs, Sheets, and Slides from any agent</div>
+        <div class="conn-type">Native</div>
+        <div class="conn-status-cell"><div class="status-dot live"></div><span class="status-text">Live</span></div>
+      </div>
+      <div class="conn-row">
+        <div class="conn-name"><div class="conn-icon-sm">LN</div>Linear</div>
+        <div class="conn-desc">Create issues, track cycles, update projects &mdash; Cece can run your sprint</div>
+        <div class="conn-type">Native</div>
+        <div class="conn-status-cell"><div class="status-dot live"></div><span class="status-text">Live</span></div>
+      </div>
+      <div class="conn-row">
+        <div class="conn-name"><div class="conn-icon-sm">AS</div>Asana</div>
+        <div class="conn-desc">Task management and project tracking integrated with governance layer</div>
+        <div class="conn-type">Native</div>
+        <div class="conn-status-cell"><div class="status-dot live"></div><span class="status-text">Live</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAYMENTS -->
+
+  <div class="sec" style="border-top: 1px solid #fff; border-bottom: none; padding-bottom: 32px;">
+    <div class="sec-label">05 &middot; Payments &amp; Finance</div>
+    <div class="int-grid">
+
+      <div class="int-card">
+        <div class="card-accent" style="background: linear-gradient(90deg, #8800FF, #CC00AA);"></div>
+        <div class="card-top">
+          <div class="card-icon">ST</div>
+          <div class="card-status"><div class="status-dot live"></div><span class="status-text">Live</span></div>
+        </div>
+        <div class="card-name">Stripe</div>
+        <div class="card-desc">Subscriptions, one-time payments, invoicing, and refunds &mdash; CashRoad and RoadCoin top-ups.</div>
+        <div class="card-meta">
+          <span class="badge badge-native">NATIVE</span>
+          <span class="card-tag">PAYMENTS</span>
+          <span class="card-tag">BILLING</span>
+          <span class="card-arrow">&rarr;</span>
+        </div>
+      </div>
+
+      <div class="int-card">
+        <div class="card-accent" style="background: linear-gradient(90deg, #0066FF, #2233CC);"></div>
+        <div class="card-top">
+          <div class="card-icon">RC</div>
+          <div class="card-status"><div class="status-dot beta"></div><span class="status-text">Beta</span></div>
+        </div>
+        <div class="card-name">RoadCoin</div>
+        <div class="card-desc">Native BlackRoad credit system &mdash; pay for compute, tip creators, stake into shared projects.</div>
+        <div class="card-meta">
+          <span class="badge badge-native">NATIVE</span>
+          <span class="card-tag">ON-CHAIN</span>
+          <span class="card-tag">CREDITS</span>
+          <span class="card-arrow">&rarr;</span>
+        </div>
+      </div>
+
+      <div class="int-card">
+        <div class="card-accent" style="background: linear-gradient(90deg, #FF8400, #FF4400);"></div>
+        <div class="card-top">
+          <div class="card-icon">PP</div>
+          <div class="card-status"><div class="status-dot soon"></div><span class="status-text">Soon</span></div>
+        </div>
+        <div class="card-name">PayPal / Venmo</div>
+        <div class="card-desc">Consumer payment rails for creator tipping and peer-to-peer transactions in BackRoad.</div>
+        <div class="card-meta">
+          <span class="badge badge-api">API</span>
+          <span class="card-tag">CONSUMER</span>
+          <span class="card-arrow">&rarr;</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- DEVELOPER TOOLS -->
+
+  <div class="sec" style="border-top: 1px solid #fff; border-bottom: 1px solid #fff; padding-bottom: 48px;">
+    <div class="sec-label">06 &middot; Developer Tools</div>
+    <div class="conn-table">
+      <div class="conn-row">
+        <div class="conn-name"><div class="conn-icon-sm">GH</div>GitHub</div>
+        <div class="conn-desc">Repos, issues, PRs, Actions &mdash; agents can read, write, and deploy autonomously</div>
+        <div class="conn-type">Native</div>
+        <div class="conn-status-cell"><div class="status-dot live"></div><span class="status-text">Live</span></div>
+      </div>
+      <div class="conn-row">
+        <div class="conn-name"><div class="conn-icon-sm">VR</div>Vercel</div>
+        <div class="conn-desc">Deploy, preview, and manage domains &mdash; one-click production from agent command</div>
+        <div class="conn-type">Native</div>
+        <div class="conn-status-cell"><div class="status-dot live"></div><span class="status-text">Live</span></div>
+      </div>
+      <div class="conn-row">
+        <div class="conn-name"><div class="conn-icon-sm">ZP</div>Zapier</div>
+        <div class="conn-desc">1000+ connectors accessible via BlackRoad workflows &mdash; until we build native versions</div>
+        <div class="conn-type">Bridge</div>
+        <div class="conn-status-cell"><div class="status-dot live"></div><span class="status-text">Live</span></div>
+      </div>
+      <div class="conn-row">
+        <div class="conn-name"><div class="conn-icon-sm">GD</div>GoDaddy</div>
+        <div class="conn-desc">Domain availability check and registration from the BlackRoad console</div>
+        <div class="conn-type">Native</div>
+        <div class="conn-status-cell"><div class="status-dot live"></div><span class="status-text">Live</span></div>
+      </div>
+      <div class="conn-row">
+        <div class="conn-name"><div class="conn-icon-sm">AT</div>Atlassian</div>
+        <div class="conn-desc">Jira and Confluence &mdash; issue tracking and wiki sync for enterprise teams</div>
+        <div class="conn-type">Native</div>
+        <div class="conn-status-cell"><div class="status-dot beta"></div><span class="status-text">Beta</span></div>
+      </div>
+      <div class="conn-row">
+        <div class="conn-name"><div class="conn-icon-sm">PT</div>Port IO</div>
+        <div class="conn-desc">Internal developer portal &mdash; service catalog and self-service infrastructure</div>
+        <div class="conn-type">Native</div>
+        <div class="conn-status-cell"><div class="status-dot beta"></div><span class="status-text">Beta</span></div>
+      </div>
+      <div class="conn-row">
+        <div class="conn-name"><div class="conn-icon-sm">MN</div>monday.com</div>
+        <div class="conn-desc">Project boards and workflow automation synced with Cece governance</div>
+        <div class="conn-type">Native</div>
+        <div class="conn-status-cell"><div class="status-dot live"></div><span class="status-text">Live</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BUILD YOUR OWN -->
+
+  <div class="sec">
+    <div class="sec-label">07 &middot; Build Your Own</div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: rgba(255,255,255,0.08);">
+
+      <div style="background: #000; padding: 32px; display: flex; flex-direction: column; gap: 16px;">
+        <div style="font-size: 0.52rem; opacity: 0.3; letter-spacing: 0.15em; text-transform: uppercase;">Custom Connector</div>
+        <div style="font-family: 'Space Grotesk', sans-serif; font-size: 1.3rem; font-weight: 700;">REST + Webhooks</div>
+        <div style="font-size: 0.54rem; opacity: 0.35; line-height: 1.8;">Any service with an API can connect to BlackRoad. Define your schema, map your events, and let Cece handle the rest.</div>
+        <div style="font-size: 0.6rem; opacity: 0.5; font-weight: 700; line-height: 2; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 14px;">
+          POST /api/integrations/connect<br>
+          <span style="opacity: 0.4; font-weight: 400;">&rarr; returns connector_id + webhook_url</span>
+        </div>
+        <button class="btn btn-ghost" style="width: fit-content; margin-top: 8px;">View API Docs</button>
+      </div>
+
+      <div style="background: #000; padding: 32px; display: flex; flex-direction: column; gap: 16px;">
+        <div style="font-size: 0.52rem; opacity: 0.3; letter-spacing: 0.15em; text-transform: uppercase;">MCP Server</div>
+        <div style="font-family: 'Space Grotesk', sans-serif; font-size: 1.3rem; font-weight: 700;">Model Context Protocol</div>
+        <div style="font-size: 0.54rem; opacity: 0.35; line-height: 1.8;">Build MCP servers that plug directly into BlackRoad agents. Tools you define become capabilities any agent can discover and invoke.</div>
+        <div style="font-size: 0.6rem; opacity: 0.5; font-weight: 700; line-height: 2; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 14px;">
+          mcp_servers: [{ url: "https://your.mcp/sse" }]<br>
+          <span style="opacity: 0.4; font-weight: 400;">&rarr; auto-registered in agent capability registry</span>
+        </div>
+        <button class="btn btn-ghost" style="width: fit-content; margin-top: 8px;">MCP Docs</button>
+      </div>
+
+    </div>
+  </div>
+
+  <footer>
+    <span>BlackRoad OS, Inc. &middot; Integrations v1.0 &middot; Est. Nov 2025</span>
+    <span>120+ connectors &middot; growing weekly</span>
+  </footer>
+
+</div>
+
+<script>
+  // Search filtering
+  const searchInput = document.querySelector('.search-input');
+  const searchCount = document.querySelector('.search-count');
+  const allCards = document.querySelectorAll('.int-card, .conn-row, .featured-card');
+
+  searchInput.addEventListener('input', function() {
+    const query = this.value.toLowerCase().trim();
+    let visible = 0;
+
+    allCards.forEach(card => {
+      const text = card.textContent.toLowerCase();
+      const match = !query || text.includes(query);
+      card.style.display = match ? '' : 'none';
+      if (match) visible++;
+    });
+
+    searchCount.textContent = query ? `${visible} results` : '120 integrations';
+  });
+
+  // Filter tabs
+  const filterTabs = document.querySelectorAll('.filter-tab');
+  const sections = document.querySelectorAll('.sec');
+
+  const categoryMap = {
+    'all': null,
+    'infrastructure': '02',
+    'ai & models': '03',
+    'data & storage': '02',
+    'communication': '04',
+    'payments': '05',
+    'developer': '06',
+    'creator': '07'
+  };
+
+  filterTabs.forEach(tab => {
+    tab.addEventListener('click', function() {
+      filterTabs.forEach(t => t.classList.remove('active'));
+      this.classList.add('active');
+
+      const filter = this.textContent.toLowerCase().trim();
+
+      if (filter === 'all') {
+        sections.forEach(sec => sec.style.display = '');
+        return;
+      }
+
+      sections.forEach(sec => {
+        const label = sec.querySelector('.sec-label');
+        if (!label) { sec.style.display = ''; return; }
+        const labelText = label.textContent.toLowerCase();
+        const sectionNum = categoryMap[filter];
+
+        if (sectionNum && labelText.includes(sectionNum)) {
+          sec.style.display = '';
+        } else if (filter === 'all' || !sectionNum) {
+          sec.style.display = '';
+        } else {
+          sec.style.display = 'none';
+        }
+      });
+    });
+  });
+</script>
+
+</body>
+</html>
