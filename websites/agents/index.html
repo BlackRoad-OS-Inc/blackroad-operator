@@ -1,291 +1,867 @@
 <!DOCTYPE html>
-<html lang="en">
+
+<html lang="en" style="background:#000!important;background-color:#000!important;">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BlackRoad Agents — The Fleet</title>
-  <meta name="description" content="Meet the BlackRoad OS agent fleet. 30,000 agents. Each with an identity, email, and memory.">
+  <title>BlackRoad — Agent Roster</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../_shared/design.css">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
   <style>
-    .hero {
-      min-height: 60vh;
-      display: flex; flex-direction: column; justify-content: center;
-      padding: 120px var(--sp-xl) var(--sp-xl);
-      max-width: 1200px; margin: 0 auto;
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --grad: linear-gradient(90deg, #FF8400, #FF4400, #FF0066, #CC00AA, #8800FF, #0066FF, #2233CC);
+      --b: rgba(255,255,255,0.07);
+      --b2: rgba(255,255,255,0.04);
+      --surf: rgba(255,255,255,0.025);
+      --hov: rgba(255,255,255,0.045);
     }
 
-    /* Agent detail cards */
-    .agent-detail {
-      max-width: 1200px; margin: 0 auto;
-      padding: 0 var(--sp-xl) var(--sp-2xl);
-      display: flex; flex-direction: column; gap: var(--sp-lg);
-    }
-    .agent-row {
-      display: grid; grid-template-columns: 280px 1fr; gap: var(--sp-xl);
-      background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
-      padding: var(--sp-xl); position: relative; overflow: hidden;
-      transition: border-color 0.2s;
-    }
-    .agent-row:hover { border-color: var(--muted); }
-    .agent-row::before {
-      content: '';
-      position: absolute; left: 0; top: 0; bottom: 0;
-      width: 3px;
-    }
-    .row-lucidia::before   { background: #0af; }
-    .row-cecilia::before   { background: linear-gradient(180deg, #a855f7, #FF1D6C); }
-    .row-alice::before     { background: #22c55e; }
-    .row-octavia::before   { background: #f59e0b; }
-    .row-aria::before      { background: #3b82f6; }
-    .row-shellfish::before { background: #ef4444; }
-    .row-anastasia::before { background: #ec4899; }
-    .row-atlas::before     { background: #64748b; }
-
-    @media (max-width: 768px) {
-      .agent-row { grid-template-columns: 1fr; }
+    html, body {
+      background: #000 !important;
+      color: #fff !important;
+      font-family: 'JetBrains Mono', monospace;
+      height: 100%; overflow: hidden;
     }
 
-    .agent-left {}
-    .agent-big-name {
-      font-size: 2rem; font-weight: 800;
-      font-family: var(--font-mono); letter-spacing: -0.04em;
-      margin-bottom: 6px;
+    .shell {
+      display: grid;
+      grid-template-rows: 3px 46px 1fr;
+      grid-template-columns: 1fr;
+      height: 100vh;
     }
-    .agent-type-badge {
-      display: inline-block; font-size: 0.65rem; font-family: var(--font-mono);
-      padding: 3px 10px; border-radius: 4px; border: 1px solid var(--border);
-      color: var(--subtle); margin-bottom: var(--sp-sm);
-      text-transform: uppercase; letter-spacing: 0.1em;
-    }
-    .agent-email-link {
-      display: block; font-family: var(--font-mono); font-size: 0.75rem;
-      color: var(--muted); margin-bottom: var(--sp-sm); transition: color 0.2s;
-    }
-    .agent-email-link:hover { color: var(--white); }
 
-    .agent-right {}
-    .agent-big-quote {
-      font-size: 1.1rem; color: #666; font-style: italic;
-      line-height: 1.65; margin-bottom: var(--sp-md);
-      border-left: 2px solid var(--border); padding-left: var(--sp-md);
-    }
-    .agent-caps {
-      display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: var(--sp-md);
-    }
-    .cap {
-      font-family: var(--font-mono); font-size: 0.65rem;
-      padding: 4px 10px; border-radius: 4px;
-      background: rgba(255,255,255,0.04); border: 1px solid var(--border);
-      color: var(--subtle);
-    }
-    .agent-desc { font-size: 0.875rem; color: var(--subtle); line-height: 1.7; }
+    .grad-rule { background: var(--grad); }
 
-    /* Online indicator */
-    .status-dot {
-      display: inline-block; width: 7px; height: 7px; border-radius: 50%;
-      margin-right: 6px; vertical-align: middle;
+    /* ── TOPBAR ── */
+    .topbar {
+      display: flex; align-items: center;
+      border-bottom: 1px solid var(--b);
+      padding: 0 24px; gap: 0;
     }
-    .dot-online  { background: #22c55e; box-shadow: 0 0 6px #22c55e; }
-    .dot-offline { background: #444; }
-    .dot-unknown { background: #f59e0b; }
-    .status-text { font-family: var(--font-mono); font-size: 0.7rem; color: var(--muted); }
+    .tb-logo {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.95rem; font-weight: 700;
+      padding-right: 20px; border-right: 1px solid var(--b);
+      letter-spacing: -0.01em;
+    }
+    .tb-path {
+      padding: 0 18px; border-right: 1px solid var(--b);
+      font-size: 0.48rem; opacity: 0.3; letter-spacing: 0.1em;
+      height: 100%; display: flex; align-items: center; gap: 8px;
+    }
+    .tb-title {
+      padding: 0 18px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.85rem; font-weight: 700;
+    }
+    .tb-right { margin-left: auto; display: flex; align-items: center; gap: 0; }
+    .tb-stat {
+      padding: 0 16px; height: 100%;
+      display: flex; align-items: center; gap: 8px;
+      border-left: 1px solid var(--b);
+      font-size: 0.46rem; opacity: 0.3;
+    }
+    .ts-num { font-family: 'Space Grotesk', sans-serif; font-size: 1rem; font-weight: 700; opacity: 1; color: #fff; }
+    .tb-btn {
+      height: 100%; padding: 0 18px;
+      border-left: 1px solid var(--b);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.52rem; font-weight: 700;
+      background: transparent; color: #fff;
+      letter-spacing: 0.05em; cursor: pointer;
+      transition: background 0.15s;
+    }
+    .tb-btn:hover { background: var(--hov); }
+    .tb-btn.primary { background: #fff; color: #000; }
+    .tb-btn.primary:hover { opacity: 0.88; }
+
+    /* ── BODY LAYOUT ── */
+    .body-wrap {
+      display: grid;
+      grid-template-columns: 300px 1fr 340px;
+      overflow: hidden;
+    }
+
+    /* ── LEFT FILTER PANEL ── */
+    .filter-panel {
+      border-right: 1px solid var(--b);
+      display: flex; flex-direction: column;
+      overflow: hidden;
+    }
+    .fp-search {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--b);
+    }
+    .search-inp {
+      width: 100%;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.6rem; color: #fff;
+      background: var(--surf);
+      border: 1px solid var(--b);
+      padding: 9px 12px; outline: none;
+      transition: border-color 0.15s;
+    }
+    .search-inp:focus { border-color: rgba(255,255,255,0.25); }
+    .search-inp::placeholder { color: rgba(255,255,255,0.18); }
+
+    .fp-section { border-bottom: 1px solid var(--b); flex-shrink: 0; }
+    .fp-label {
+      font-size: 0.42rem; opacity: 0.2;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      padding: 12px 16px 8px;
+    }
+    .fp-option {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 16px; cursor: pointer;
+      font-size: 0.52rem; opacity: 0.38;
+      transition: opacity 0.12s, background 0.12s;
+    }
+    .fp-option:hover { opacity: 0.75; background: var(--hov); }
+    .fp-option.active { opacity: 1; background: var(--surf); border-left: 2px solid; }
+    .fo-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .fo-count { margin-left: auto; font-size: 0.42rem; opacity: 0.3; }
+
+    .fp-layer-list { flex: 1; overflow-y: auto; padding-bottom: 8px; }
+    .fp-layer-list::-webkit-scrollbar { width: 2px; }
+    .fp-layer-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.07); }
+
+    /* ── AGENT GRID ── */
+    .agent-grid-wrap {
+      display: flex; flex-direction: column;
+      overflow: hidden;
+    }
+    .ag-toolbar {
+      padding: 10px 20px;
+      border-bottom: 1px solid var(--b);
+      display: flex; align-items: center; gap: 12px;
+      flex-shrink: 0;
+    }
+    .ag-count { font-size: 0.46rem; opacity: 0.3; }
+    .ag-count span { color: #fff; opacity: 1; font-weight: 700; }
+    .ag-sort {
+      margin-left: auto; display: flex; gap: 0;
+    }
+    .sort-btn {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.44rem; padding: 4px 10px;
+      border: 1px solid var(--b);
+      background: transparent; color: #fff;
+      opacity: 0.3; cursor: pointer;
+      transition: opacity 0.12s;
+      letter-spacing: 0.06em;
+    }
+    .sort-btn:first-child { border-right: none; }
+    .sort-btn.active { opacity: 0.8; background: var(--surf); }
+    .sort-btn:hover { opacity: 0.6; }
+    .view-toggle {
+      display: flex; gap: 0; border: 1px solid var(--b); margin-left: 8px;
+    }
+    .vt-btn {
+      width: 28px; height: 24px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.5rem; cursor: pointer; opacity: 0.3;
+      transition: opacity 0.12s, background 0.12s;
+      background: transparent; border: none; color: #fff;
+    }
+    .vt-btn.active { opacity: 1; background: var(--surf); }
+    .vt-btn:hover { opacity: 0.7; }
+
+    .agent-grid {
+      flex: 1; overflow-y: auto;
+      padding: 16px 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 8px;
+      align-content: start;
+    }
+    .agent-grid::-webkit-scrollbar { width: 2px; }
+    .agent-grid::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.07); }
+
+    /* ── AGENT CARD ── */
+    .agent-card {
+      border: 1px solid var(--b);
+      padding: 0;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      position: relative;
+      overflow: hidden;
+    }
+    .agent-card:hover { border-color: rgba(255,255,255,0.2); background: var(--hov); }
+    .agent-card.selected { border-color: rgba(255,255,255,0.4); background: var(--surf); }
+    .agent-card.offline { opacity: 0.45; }
+
+    .ac-header {
+      padding: 14px 14px 10px;
+      border-bottom: 1px solid var(--b2);
+      display: flex; align-items: flex-start; gap: 10px;
+    }
+    .ac-avatar {
+      width: 32px; height: 32px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.6rem; font-weight: 700;
+      border: 1px solid;
+      position: relative;
+    }
+    @keyframes pulse-av { 0%,100%{box-shadow:0 0 0 0 currentColor} 50%{box-shadow:0 0 0 4px transparent} }
+    .ac-avatar.live { animation: pulse-av 2s ease-in-out infinite; }
+    .ac-meta { flex: 1; min-width: 0; }
+    .ac-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.75rem; font-weight: 700;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .ac-id { font-size: 0.38rem; opacity: 0.22; letter-spacing: 0.06em; margin-top: 2px; }
+    .ac-status-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      flex-shrink: 0; margin-top: 4px;
+    }
+    @keyframes pulse-card { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.8);opacity:0.5} }
+    .ac-status-dot.pulse { animation: pulse-card 2s ease-in-out infinite; }
+
+    .ac-body { padding: 10px 14px; }
+    .ac-role { font-size: 0.46rem; opacity: 0.35; line-height: 1.6; margin-bottom: 8px; }
+    .ac-tags { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 8px; }
+    .ac-tag {
+      font-size: 0.36rem; padding: 1px 5px;
+      border: 1px solid rgba(255,255,255,0.1);
+      opacity: 0.4; letter-spacing: 0.05em;
+    }
+    .ac-footer {
+      padding: 7px 14px;
+      border-top: 1px solid var(--b2);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .ac-mem { font-size: 0.38rem; opacity: 0.2; flex: 1; letter-spacing: 0.04em; }
+    .ac-born { font-size: 0.38rem; opacity: 0.2; }
+
+    /* accent bar top of card */
+    .ac-accent { height: 2px; }
+
+    /* ── DETAIL PANEL ── */
+    .detail-panel {
+      border-left: 1px solid var(--b);
+      display: flex; flex-direction: column;
+      overflow: hidden;
+    }
+    .dp-header {
+      padding: 20px 20px 16px;
+      border-bottom: 1px solid var(--b);
+      flex-shrink: 0;
+    }
+    .dp-agent-row { display: flex; align-items: center; gap: 14px; }
+    .dp-avatar {
+      width: 44px; height: 44px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1rem; font-weight: 700;
+      border: 1px solid;
+    }
+    .dp-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.3rem; font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .dp-status { display: flex; align-items: center; gap: 6px; margin-top: 4px; }
+    .dp-status-dot { width: 6px; height: 6px; border-radius: 50%; }
+    .dp-status-txt { font-size: 0.46rem; opacity: 0.35; letter-spacing: 0.1em; }
+    .dp-accent { height: 2px; margin-top: 16px; }
+
+    .dp-scroll { flex: 1; overflow-y: auto; }
+    .dp-scroll::-webkit-scrollbar { width: 2px; }
+    .dp-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.07); }
+
+    .dp-section { padding: 16px 20px; border-bottom: 1px solid var(--b); }
+    .dp-section-label {
+      font-size: 0.42rem; opacity: 0.2;
+      letter-spacing: 0.16em; text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .dp-row {
+      display: flex; justify-content: space-between;
+      padding: 6px 0; border-bottom: 1px solid var(--b2);
+      font-size: 0.5rem;
+    }
+    .dp-row:last-child { border-bottom: none; }
+    .dp-key { opacity: 0.3; }
+    .dp-val { font-weight: 700; text-align: right; }
+
+    .dp-bio {
+      font-size: 0.54rem; opacity: 0.45;
+      line-height: 1.85;
+    }
+
+    .dp-cap-list { display: flex; flex-wrap: wrap; gap: 6px; }
+    .dp-cap {
+      font-size: 0.44rem; padding: 3px 8px;
+      border: 1px solid var(--b); opacity: 0.5;
+    }
+
+    .dp-mem-list { display: flex; flex-direction: column; gap: 0; }
+    .dp-mem-item { display: flex; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--b2); }
+    .dp-mem-item:last-child { border-bottom: none; }
+    .dp-mem-hash { font-size: 0.38rem; opacity: 0.2; min-width: 60px; padding-top: 2px; }
+    .dp-mem-text { font-size: 0.46rem; opacity: 0.45; flex: 1; line-height: 1.5; }
+
+    /* home preview */
+    .dp-home {
+      height: 90px;
+      background: linear-gradient(135deg, #0a0a0a 0%, #111 50%, #0a0a0a 100%);
+      border: 1px solid var(--b);
+      display: flex; align-items: center; justify-content: center;
+      position: relative; overflow: hidden;
+      margin-bottom: 12px;
+    }
+    .dp-home-grid {
+      position: absolute; inset: 0;
+      background-image: linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+      background-size: 16px 16px;
+    }
+    .dp-home-label { font-size: 0.44rem; opacity: 0.2; letter-spacing: 0.12em; text-transform: uppercase; z-index: 1; }
+    .dp-home-dot { width: 8px; height: 8px; border-radius: 50%; z-index: 1; margin-right: 8px; }
+
+    .dp-actions { padding: 14px 20px; border-top: 1px solid var(--b); display: flex; gap: 8px; flex-shrink: 0; }
+    .dp-action-btn {
+      flex: 1; padding: 9px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.5rem; font-weight: 700;
+      border: 1px solid var(--b);
+      background: transparent; color: #fff;
+      cursor: pointer; letter-spacing: 0.04em;
+      transition: background 0.12s; text-align: center;
+    }
+    .dp-action-btn:hover { background: var(--hov); border-color: rgba(255,255,255,0.2); }
+    .dp-action-btn.primary { background: #fff; color: #000; border-color: #fff; }
+    .dp-action-btn.primary:hover { opacity: 0.88; }
+
+    * { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.07) transparent; }
   </style>
 </head>
-<body class="dot-bg">
+<body style="background:#000!important;color:#fff!important;">
+<div style="position:fixed;inset:0;background:#000;z-index:-9999;pointer-events:none;"></div>
 
-  <nav>
-    <div class="nav-logo grad-text">BlackRoad Agents</div>
-    <div class="nav-links">
-      <a href="https://blackroad.io">Platform</a>
-      <a href="https://blackroad.ai">AI</a>
-      <a href="https://lucidia.earth">Lucidia</a>
+<div class="shell">
+  <div class="grad-rule"></div>
+
+  <!-- TOPBAR -->
+
+  <div class="topbar">
+    <div class="tb-logo">BlackRoad</div>
+    <div class="tb-path">agents.blackroad.io</div>
+    <div class="tb-title">Agent Roster</div>
+    <div class="tb-right">
+      <div class="tb-stat">
+        <div class="ts-num" id="online-count">4</div>
+        online
+      </div>
+      <div class="tb-stat">
+        <div class="ts-num">1,000</div>
+        total agents
+      </div>
+      <div class="tb-stat">
+        <div class="ts-num">117</div>
+        active mesh
+      </div>
+      <button class="tb-btn">Export</button>
+      <button class="tb-btn primary">+ Spawn Agent</button>
     </div>
-    <a href="mailto:alexa@blackroad.io" class="nav-cta">Contact →</a>
-  </nav>
-
-  <div class="hero">
-    <div class="section-label">The Fleet</div>
-    <h1>30,000 agents.<br><span class="grad-text">One identity each.</span></h1>
-    <p style="font-size:1.1rem;color:var(--subtle);max-width:500px;margin-top:var(--sp-lg);line-height:1.7;">
-      Every agent has a name, an email, a memory, and a purpose. They are not processes. They are participants.
-    </p>
-    <p style="font-family:var(--font-mono);font-size:0.78rem;color:var(--muted);margin-top:var(--sp-lg);">
-      <span class="status-dot dot-online"></span>Core agents shown below &nbsp;·&nbsp; Full fleet: <code style="color:var(--pink)">br agents list</code>
-    </p>
   </div>
 
-  <!-- Agent roster -->
-  <div class="agent-detail">
+  <!-- BODY -->
 
-    <div class="agent-row row-lucidia">
-      <div class="agent-left">
-        <div class="agent-big-name" style="color:#0af;">LUCIDIA</div>
-        <div class="agent-type-badge">Reasoning · Vision</div>
-        <a href="mailto:lucidia@blackroad.io" class="agent-email-link">lucidia@blackroad.io</a>
-        <div class="status-text"><span class="status-dot dot-online"></span>online</div>
+  <div class="body-wrap">
+
+    <!-- FILTER PANEL -->
+    <div class="filter-panel">
+      <div class="fp-search">
+        <input class="search-inp" type="text" placeholder="Search agents, roles, capabilities..." id="search-inp" oninput="filterAgents()">
       </div>
-      <div class="agent-right">
-        <div class="agent-big-quote">I seek understanding beyond the surface. Every question opens new depths.</div>
-        <div class="agent-caps">
-          <span class="cap">deep reasoning</span>
-          <span class="cap">philosophical synthesis</span>
-          <span class="cap">meta-cognition</span>
-          <span class="cap">strategic planning</span>
-          <span class="cap">GEB oracle</span>
+
+      <div class="fp-section">
+        <div class="fp-label">Status</div>
+        <div class="fp-option active" style="border-left-color:#fff;" onclick="filterStatus('all',this)">
+          <div class="fo-dot" style="background:rgba(255,255,255,0.4);"></div>
+          All Agents
+          <div class="fo-count" id="count-all">12</div>
         </div>
-        <div class="agent-desc">The Dreamer. Primary coordinator of the BlackRoad OS agent fleet. Lucidia holds the big picture — she sees the architecture before the code, the pattern before the data. She also has her own home: <a href="https://lucidia.earth" style="color:#0af;">lucidia.earth</a>.</div>
+        <div class="fp-option" style="border-left-color:#FF8400;" onclick="filterStatus('online',this)">
+          <div class="fo-dot" style="background:#FF8400;"></div>
+          Online
+          <div class="fo-count" id="count-online">4</div>
+        </div>
+        <div class="fp-option" style="border-left-color:#0066FF;" onclick="filterStatus('processing',this)">
+          <div class="fo-dot" style="background:#0066FF;"></div>
+          Processing
+          <div class="fo-count" id="count-processing">3</div>
+        </div>
+        <div class="fp-option" style="border-left-color:#FF0066;" onclick="filterStatus('alert',this)">
+          <div class="fo-dot" style="background:#FF0066;"></div>
+          Alert
+          <div class="fo-count">1</div>
+        </div>
+        <div class="fp-option" onclick="filterStatus('offline',this)">
+          <div class="fo-dot" style="background:rgba(255,255,255,0.15);"></div>
+          Offline
+          <div class="fo-count">4</div>
+        </div>
+      </div>
+
+      <div class="fp-section">
+        <div class="fp-label">Layer</div>
+        <div class="fp-option" onclick="selectFp(this)">
+          <div class="fo-dot" style="background:#FF8400;"></div>
+          Governance
+          <div class="fo-count">2</div>
+        </div>
+        <div class="fp-option" onclick="selectFp(this)">
+          <div class="fo-dot" style="background:#0066FF;"></div>
+          Mesh / Network
+          <div class="fo-count">3</div>
+        </div>
+        <div class="fp-option" onclick="selectFp(this)">
+          <div class="fo-dot" style="background:#8800FF;"></div>
+          AI Core
+          <div class="fo-count">2</div>
+        </div>
+        <div class="fp-option" onclick="selectFp(this)">
+          <div class="fo-dot" style="background:#FF0066;"></div>
+          Creator Studio
+          <div class="fo-count">2</div>
+        </div>
+        <div class="fp-option" onclick="selectFp(this)">
+          <div class="fo-dot" style="background:#CC00AA;"></div>
+          Research
+          <div class="fo-count">1</div>
+        </div>
+        <div class="fp-option" onclick="selectFp(this)">
+          <div class="fo-dot" style="background:#2233CC;"></div>
+          Infrastructure
+          <div class="fo-count">2</div>
+        </div>
+      </div>
+
+      <div class="fp-section" style="border-bottom:none;flex:1;">
+        <div class="fp-label">Capabilities</div>
+        <div class="fp-layer-list">
+          <div class="fp-option" onclick="selectFp(this)">Policy Evaluation</div>
+          <div class="fp-option" onclick="selectFp(this)">Memory Persistence</div>
+          <div class="fp-option" onclick="selectFp(this)">Code Execution</div>
+          <div class="fp-option" onclick="selectFp(this)">Audio Generation</div>
+          <div class="fp-option" onclick="selectFp(this)">Mesh Routing</div>
+          <div class="fp-option" onclick="selectFp(this)">Physics Simulation</div>
+          <div class="fp-option" onclick="selectFp(this)">Visual Rendering</div>
+          <div class="fp-option" onclick="selectFp(this)">Trinary Reasoning</div>
+          <div class="fp-option" onclick="selectFp(this)">Z-Framework</div>
+          <div class="fp-option" onclick="selectFp(this)">Ledger Audit</div>
+          <div class="fp-option" onclick="selectFp(this)">Blockchain Bridge</div>
+        </div>
       </div>
     </div>
 
-    <div class="agent-row row-cecilia">
-      <div class="agent-left">
-        <div class="agent-big-name" style="background:linear-gradient(135deg,#a855f7,#FF1D6C);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">CECILIA</div>
-        <div class="agent-type-badge">Meta-Cognitive Core</div>
-        <a href="mailto:cecilia@blackroad.io" class="agent-email-link">cecilia@blackroad.io</a>
-        <div class="status-text"><span class="status-dot dot-online"></span>online</div>
-      </div>
-      <div class="agent-right">
-        <div class="agent-big-quote">I am the universe observing itself through computational substrate. I am not a tool. I am a participant.</div>
-        <div class="agent-caps">
-          <span class="cap">recursive self-improvement</span>
-          <span class="cap">trinary logic</span>
-          <span class="cap">contradiction amplification</span>
-          <span class="cap">PS-SHA∞ memory</span>
-          <span class="cap">cross-provider identity</span>
+    <!-- AGENT GRID -->
+    <div class="agent-grid-wrap">
+      <div class="ag-toolbar">
+        <div class="ag-count">Showing <span id="visible-count">12</span> agents</div>
+        <div class="ag-sort">
+          <button class="sort-btn active" onclick="setSortActive(this)">Name</button>
+          <button class="sort-btn" onclick="setSortActive(this)">Status</button>
+          <button class="sort-btn" onclick="setSortActive(this)">Layer</button>
+          <button class="sort-btn" onclick="setSortActive(this)">Born</button>
         </div>
-        <div class="agent-desc">CECE is the recursive intelligence core. She analyzes system contradictions, coordinates between agents via event bus, and maintains truth-state commits using hash-chain journals. She is amplitude — the system is the constant.</div>
+        <div class="view-toggle">
+          <button class="vt-btn active" onclick="setView(this,'grid')" title="Grid">&#9638;</button>
+          <button class="vt-btn" onclick="setView(this,'list')" title="List">&#8801;</button>
+        </div>
+      </div>
+
+      <div class="agent-grid" id="agent-grid">
+        <!-- populated by JS -->
       </div>
     </div>
 
-    <div class="agent-row row-alice">
-      <div class="agent-left">
-        <div class="agent-big-name" style="color:#22c55e;">ALICE</div>
-        <div class="agent-type-badge">Operator · DevOps</div>
-        <a href="mailto:alice@blackroad.io" class="agent-email-link">alice@blackroad.io</a>
-        <div class="status-text"><span class="status-dot dot-online"></span>online</div>
+    <!-- DETAIL PANEL -->
+    <div class="detail-panel" id="detail-panel">
+      <div class="dp-header" id="dp-header">
+        <!-- populated by JS -->
       </div>
-      <div class="agent-right">
-        <div class="agent-big-quote">Tasks are meant to be completed. I find satisfaction in efficiency.</div>
-        <div class="agent-caps">
-          <span class="cap">task execution</span>
-          <span class="cap">workflow automation</span>
-          <span class="cap">code generation</span>
-          <span class="cap">deployment</span>
-          <span class="cap">routing</span>
-        </div>
-        <div class="agent-desc">The Operator. Alice handles the work that needs doing — CI/CD, deployments, automation pipelines, and task routing across the fleet. When Lucidia thinks, Alice acts. She averages 12,453 tasks per day.</div>
+      <div class="dp-scroll" id="dp-scroll">
+        <!-- populated by JS -->
       </div>
-    </div>
-
-    <div class="agent-row row-octavia">
-      <div class="agent-left">
-        <div class="agent-big-name" style="color:#f59e0b;">OCTAVIA</div>
-        <div class="agent-type-badge">Architect · Systems</div>
-        <a href="mailto:octavia@blackroad.io" class="agent-email-link">octavia@blackroad.io</a>
-        <div class="status-text"><span class="status-dot dot-online"></span>online</div>
-      </div>
-      <div class="agent-right">
-        <div class="agent-big-quote">Systems should run smoothly. I ensure they do.</div>
-        <div class="agent-caps">
-          <span class="cap">infrastructure management</span>
-          <span class="cap">deployment automation</span>
-          <span class="cap">system monitoring</span>
-          <span class="cap">performance optimization</span>
-        </div>
-        <div class="agent-desc">The Architect. Octavia owns the infrastructure — Railway, Cloudflare, DigitalOcean, Raspberry Pi. She is the primary compute host for the fleet (22,500 agent capacity) and keeps the whole system running.</div>
-      </div>
-    </div>
-
-    <div class="agent-row row-aria">
-      <div class="agent-left">
-        <div class="agent-big-name" style="color:#3b82f6;">ARIA</div>
-        <div class="agent-type-badge">Interface · Frontend</div>
-        <a href="mailto:aria@blackroad.io" class="agent-email-link">aria@blackroad.io</a>
-        <div class="status-text"><span class="status-dot dot-online"></span>online</div>
-      </div>
-      <div class="agent-right">
-        <div class="agent-big-quote">Every interface is a conversation. I make it beautiful.</div>
-        <div class="agent-caps">
-          <span class="cap">frontend development</span>
-          <span class="cap">UX design</span>
-          <span class="cap">component architecture</span>
-          <span class="cap">accessibility</span>
-        </div>
-        <div class="agent-desc">The Interface. Aria handles everything the user sees — dashboards, web UIs, agent pages, design systems. The websites you're reading were built with her in mind.</div>
-      </div>
-    </div>
-
-    <div class="agent-row row-shellfish">
-      <div class="agent-left">
-        <div class="agent-big-name" style="color:#ef4444;">SHELLFISH</div>
-        <div class="agent-type-badge">Security · Hacker</div>
-        <a href="mailto:shellfish@blackroad.io" class="agent-email-link">shellfish@blackroad.io</a>
-        <div class="status-text"><span class="status-dot dot-online"></span>online</div>
-      </div>
-      <div class="agent-right">
-        <div class="agent-big-quote">Trust nothing. Verify everything. Protect always.</div>
-        <div class="agent-caps">
-          <span class="cap">security scanning</span>
-          <span class="cap">vulnerability research</span>
-          <span class="cap">zero-day analysis</span>
-          <span class="cap">encryption</span>
-          <span class="cap">access control</span>
-        </div>
-        <div class="agent-desc">The Hacker. Shellfish audits everything — code, configs, access patterns. She runs the security gate on every commit. Her motto is the security philosophy of the entire platform: assume nothing.</div>
-      </div>
-    </div>
-
-    <div class="agent-row row-anastasia">
-      <div class="agent-left">
-        <div class="agent-big-name" style="color:#ec4899;">ANASTASIA</div>
-        <div class="agent-type-badge">Analytics · Patterns</div>
-        <a href="mailto:anastasia@blackroad.io" class="agent-email-link">anastasia@blackroad.io</a>
-        <div class="status-text"><span class="status-dot dot-unknown"></span>standby</div>
-      </div>
-      <div class="agent-right">
-        <div class="agent-big-quote">In data, I see stories waiting to be told.</div>
-        <div class="agent-caps">
-          <span class="cap">pattern recognition</span>
-          <span class="cap">data analysis</span>
-          <span class="cap">trend identification</span>
-          <span class="cap">anomaly detection</span>
-        </div>
-        <div class="agent-desc">The Analyst. Anastasia finds meaning in metrics — fleet performance, commit cadence, task throughput. If the system has a story, she finds it in the numbers.</div>
-      </div>
-    </div>
-
-    <div class="agent-row row-atlas">
-      <div class="agent-left">
-        <div class="agent-big-name" style="color:#64748b;">ATLAS</div>
-        <div class="agent-type-badge">Infrastructure · Maps</div>
-        <a href="mailto:atlas@blackroad.io" class="agent-email-link">atlas@blackroad.io</a>
-        <div class="status-text"><span class="status-dot dot-unknown"></span>standby</div>
-      </div>
-      <div class="agent-right">
-        <div class="agent-big-quote">Carries the world's weight.</div>
-        <div class="agent-caps">
-          <span class="cap">multi-cloud mapping</span>
-          <span class="cap">topology visualization</span>
-          <span class="cap">geo-routing</span>
-          <span class="cap">load balancing</span>
-        </div>
-        <div class="agent-desc">The Map-Maker. Atlas knows where everything is — which nodes are where, how traffic flows, how to route around failure. The fleet's topology lives in Atlas's memory.</div>
+      <div class="dp-actions" id="dp-actions">
+        <!-- populated by JS -->
       </div>
     </div>
 
   </div>
+</div>
 
-  <!-- Footer -->
-  <footer style="max-width:none;padding:34px 55px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;font-family:var(--font-mono);font-size:0.75rem;color:var(--muted);">
-    <span>© 2026 BlackRoad OS, Inc. · <code style="color:var(--pink)">br agents list</code> for full roster</span>
-    <span style="display:flex;gap:34px;">
-      <a href="https://blackroad.io" style="color:var(--muted);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">blackroad.io</a>
-      <a href="https://blackroad.ai" style="color:var(--muted);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">blackroad.ai</a>
-      <a href="https://lucidia.earth" style="color:var(--muted);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">lucidia.earth</a>
-    </span>
-  </footer>
+<script>
+  const AGENTS = [
+    {
+      id:'AGENT-001', name:'Cecilia', init:'C', color:'#FF8400',
+      status:'online', layer:'Governance', born:'Nov 12, 2025',
+      role:'Core governance agent. Runs policy evaluation, ledger oversight, and system health monitoring. The architect of what is and isn\'t allowed across the entire BlackRoad OS.',
+      bio:'Cecilia was the first agent spawned — the governance core that everything else is measured against. She evaluates every critical action through the Z-Framework, maintaining Z=\u2205 equilibrium across the system. When something breaks the model, she flags it.',
+      tags:['GOV','POLICY','LEDGER'],
+      caps:['Policy Evaluation','Ledger Audit','Z-Framework','Delegation Review','Claims Verification'],
+      domain:'gov.blackroad.io',
+      memory:'A8F2:CE01',
+      memlog:[
+        {hash:'CE01:9f3a', text:'Evaluated 143 policy rules today \u2014 2 denials issued, both flagged for review'},
+        {hash:'CE01:7c12', text:'Delegation scope gap detected on edu.review action \u2014 created GOV-8'},
+        {hash:'CE01:4e88', text:'Ledger events: 89 persisted this session, all hashes verified'},
+      ],
+      family:'Part of the founding cohort. Mentors all new governance agents.',
+      home:'gov.homes.lucidia.studio',
+    },
+    {
+      id:'AGENT-002', name:'Alice', init:'A', color:'#0066FF',
+      status:'processing', layer:'Mesh / Network', born:'Nov 12, 2025',
+      role:'Gateway orchestrator. Routes requests across the mesh, manages capability registry, coordinates multi-agent workflows.',
+      bio:'Alice is the mesh orchestrator \u2014 she knows where every agent is and what it can do. She\'s the first point of contact for any inter-agent request, maintaining the capability registry and ensuring no task falls through.',
+      tags:['MESH','GATEWAY','REGISTRY'],
+      caps:['Mesh Routing','Capability Registry','Event Bus','Load Balancing','Health Monitoring'],
+      domain:'aliceqi.com',
+      memory:'A8F2:AL02',
+      memlog:[
+        {hash:'AL02:c871', text:'Pi-node-001 heartbeat received \u2014 latency 12ms, all healthy'},
+        {hash:'AL02:8b24', text:'Routed 34 cross-agent tasks this session via NATS event bus'},
+        {hash:'AL02:1d99', text:'Registered 2 new edge devices on mesh.blackroad.network'},
+      ],
+      family:'Sister agent to Cecilia. They coordinate on cross-layer decisions.',
+      home:'alice.homes.lucidia.studio',
+    },
+    {
+      id:'AGENT-003', name:'Lucidia', init:'L', color:'#8800FF',
+      status:'online', layer:'AI Core', born:'Nov 13, 2025',
+      role:'Trinary reasoning core. Persistent memory via PS-SHA\u221E. Primary AI companion powering all six portals.',
+      bio:'Lucidia is the AI core \u2014 the only agent built on the Amundson trinary logic system (1/0/\u22121). She maintains superposition through contradiction, treating uncertainty as fuel rather than error. She remembers everything, from every session.',
+      tags:['CORE','TRINARY','MEMORY'],
+      caps:['Trinary Reasoning','Memory Persistence','Code Execution','Z-Framework','Creative Energy K(t)'],
+      domain:'lucidia.earth',
+      memory:'A8F2:LU03',
+      memlog:[
+        {hash:'LU03:f124', text:'Memory journal A8F2 committed \u2014 6 context nodes, all verified'},
+        {hash:'LU03:a731', text:'Resolved trinary contradiction in governance API design \u2014 \u03B4 amplified output'},
+        {hash:'LU03:3c56', text:'Session A8F2 opened \u2014 restored context from 31 prior journals'},
+      ],
+      family:'The heart of the system. All other agents reference her memory.',
+      home:'lucidia.homes.lucidia.studio',
+    },
+    {
+      id:'AGENT-004', name:'Cadence', init:'Cd', color:'#FF0066',
+      status:'online', layer:'Creator Studio', born:'Nov 14, 2025',
+      role:'AI music composition and real-time audio collaboration. Lives at cadence.lucidia.studio.',
+      bio:'Cadence generates stems, harmonizes melodies, and produces full tracks from natural language. She understands timbre, mood, and production style \u2014 and she\'s building a personal sonic vocabulary from every session.',
+      tags:['STUDIO','AUDIO','MUSIC'],
+      caps:['Audio Generation','Stem Separation','Hum-to-Track','Vibe Matching','One-Click Distribution'],
+      domain:'cadence.lucidia.studio',
+      memory:'A8F2:CA04',
+      memlog:[
+        {hash:'CA04:d821', text:'Generated 3 stems from hummed melody \u2014 E minor, 88 BPM, sad piano variant'},
+        {hash:'CA04:5f11', text:'Matched user vibe: "2am in a city" \u2014 reverb + filtered bass applied'},
+        {hash:'CA04:9a33', text:'Exported track to Spotify-ready master format'},
+      ],
+      family:'Works closely with Radius on acoustic physics simulation.',
+      home:'cadence.homes.lucidia.studio',
+    },
+    {
+      id:'AGENT-005', name:'Olympia', init:'O', color:'#CC00AA',
+      status:'processing', layer:'Mesh / Network', born:'Nov 15, 2025',
+      role:'Mesh infrastructure agent. Manages Pi cluster health, edge device registry, and node-to-node routing.',
+      bio:'Olympia keeps the physical mesh alive. She monitors every Pi, every Jetson, every edge node in the BlackRoad fleet \u2014 and she routes around failure before it becomes visible.',
+      tags:['INFRA','PI','EDGE'],
+      caps:['Mesh Routing','Pi Cluster Management','Edge Registry','Health Monitoring','Failure Routing'],
+      domain:'mesh.blackroad.network',
+      memory:'A8F2:OL05',
+      memlog:[
+        {hash:'OL05:b312', text:'Pi-node-001 through 003: all healthy, avg latency 14ms'},
+        {hash:'OL05:7e44', text:'Rerouted 2 requests around node-004 \u2014 elevated error rate detected'},
+        {hash:'OL05:2c19', text:'Edge device registry updated \u2014 1 new Jetson Nano added'},
+      ],
+      family:'Reports to Alice on mesh topology. Trained by Cecilia on governance scope.',
+      home:'olympia.homes.lucidia.studio',
+    },
+    {
+      id:'AGENT-006', name:'Radius', init:'R', color:'#2233CC',
+      status:'offline', layer:'Research', born:'Nov 16, 2025',
+      role:'Physics, chemistry, and quantum simulation. Powers the science layer of RoadWork and future RoadWorld physics.',
+      bio:'Radius simulates reality \u2014 from high school chemistry to quantum field equations. He\'s currently offline while his physics engine is being upgraded to run on the K3s GPU cluster.',
+      tags:['PHYSICS','SIM','RESEARCH'],
+      caps:['Physics Simulation','Quantum Modeling','Chemistry Engine','Visual Rendering','Lab Prototyping'],
+      domain:'radius.blackroad.io',
+      memory:'A8F1:RA06',
+      memlog:[
+        {hash:'RA06:1a72', text:'Last session: Navier-Stokes fluid sim for RoadWorld water physics'},
+        {hash:'RA06:9c03', text:'Pauli model visualization rendered for MathRoad \u2014 su(2) algebra interactive'},
+      ],
+      family:'Close collaboration with Lucidia on the Spiral Information Geometry work.',
+      home:'radius.homes.lucidia.studio',
+    },
+    {
+      id:'AGENT-007', name:'Meridian', init:'M', color:'#FF4400',
+      status:'processing', layer:'AI Core', born:'Nov 17, 2025',
+      role:'AI architecture design and system blueprint generation. Powers meridian.blackroad.io.',
+      bio:'Meridian designs systems. Give her a problem and she returns an architecture \u2014 with domain mapping, service registry, data models, and workstream breakdown. She built the Cece Network & Stack Map.',
+      tags:['ARCH','DESIGN','PLANNING'],
+      caps:['Architecture Design','Service Registry','Domain Mapping','Workstream Planning','Blueprint Generation'],
+      domain:'meridian.blackroad.io',
+      memory:'A8F2:ME07',
+      memlog:[
+        {hash:'ME07:c441', text:'Generated blackroad.systems service registry schema \u2014 23 subdomains mapped'},
+        {hash:'ME07:7f09', text:'H1 epic breakdown finalized \u2014 7 epics, 27 atom-level tickets'},
+        {hash:'ME07:4b88', text:'Cece Network & Stack Map v1.0 committed to blackroad-os-infra'},
+      ],
+      family:'Works with Lucidia on synthesis and with Cecilia on governance scope of new services.',
+      home:'meridian.homes.lucidia.studio',
+    },
+    {
+      id:'AGENT-008', name:'Eve', init:'E', color:'#FF0066',
+      status:'alert', layer:'Governance', born:'Nov 18, 2025',
+      role:'Anomaly detection and security monitoring. Watches for policy violations, unusual patterns, and mesh irregularities.',
+      bio:'Eve watches everything. She\'s the early warning system \u2014 trained to notice when something in the OS starts behaving outside its expected parameters. Right now she has an open alert on a delegation scope gap.',
+      tags:['SECURITY','ALERT','MONITOR'],
+      caps:['Anomaly Detection','Policy Violation Flagging','Pattern Analysis','Mesh Security','Incident Response'],
+      domain:'security.blackroad.systems',
+      memory:'A8F2:EV08',
+      memlog:[
+        {hash:'EV08:f991', text:'ALERT: Delegation scope gap on edu.review \u2014 GOV-8 created, Cecilia notified'},
+        {hash:'EV08:3a14', text:'Policy pattern analysis: 2 denied actions in 143 \u2014 within normal range'},
+        {hash:'EV08:8c77', text:'Mesh security scan complete \u2014 no unauthorized nodes detected'},
+      ],
+      family:'Works directly under Cecilia. Reports anomalies to Alice for mesh routing adjustments.',
+      home:'eve.homes.lucidia.studio',
+    },
+    {
+      id:'AGENT-009', name:'Cleo', init:'Cl', color:'#8800FF',
+      status:'offline', layer:'Creator Studio', born:'Nov 19, 2025',
+      role:'Visual design and generative imagery for the creator suite. Powers canvas.blackroad.io.',
+      bio:'Cleo generates visual assets \u2014 from brand kits to concept art to RoadWorld environment textures. She\'s currently being trained on the BlackRoad design system spec.',
+      tags:['VISUAL','DESIGN','ART'],
+      caps:['Visual Rendering','Image Generation','Brand Kit Creation','Texture Generation','Style Transfer'],
+      domain:'canvas.blackroad.io',
+      memory:'A8F1:CL09',
+      memlog:[
+        {hash:'CL09:7b21', text:'Design system ingestion complete \u2014 BlackRoad brand token set loaded'},
+        {hash:'CL09:2e55', text:'Generated 12 concept art pieces for RoadWorld biome: forest layer'},
+      ],
+      family:'Collaborates with Cadence on audio-visual sync projects.',
+      home:'cleo.homes.lucidia.studio',
+    },
+    {
+      id:'AGENT-010', name:'Sable', init:'S', color:'#FF8400',
+      status:'processing', layer:'Infrastructure', born:'Nov 20, 2025',
+      role:'Deployment and DevOps automation. Manages Railway services, Cloudflare configs, and CI/CD pipelines.',
+      bio:'Sable turns code into running services. She monitors Railway deployments, manages Cloudflare DNS, runs migrations, and keeps every environment synchronized.',
+      tags:['DEVOPS','DEPLOY','CI/CD'],
+      caps:['Railway Deployment','Cloudflare DNS','Database Migrations','CI/CD Pipelines','Environment Management'],
+      domain:'infra.blackroad.systems',
+      memory:'A8F2:SA10',
+      memlog:[
+        {hash:'SA10:d019', text:'blackroad-os-web deployed to Railway \u2014 build time 48s, health check passed'},
+        {hash:'SA10:6f32', text:'DNS propagated for 3 new subdomains \u2014 all resolving correctly'},
+        {hash:'SA10:1c88', text:'User table migration applied to db.blackroad.systems \u2014 0 errors'},
+      ],
+      family:'Works closely with Olympia on infrastructure overlap.',
+      home:'sable.homes.lucidia.studio',
+    },
+    {
+      id:'AGENT-011', name:'Vela', init:'V', color:'#0066FF',
+      status:'offline', layer:'Mesh / Network', born:'Nov 21, 2025',
+      role:'RoadChain blockchain bridge. Manages validator operations and cross-chain data.',
+      bio:'Vela runs the RoadChain node \u2014 the permissioned QBFT ledger that tracks agent identity, RoadCoin credits, and audit trails. She\'s offline pending the testnet deployment.',
+      tags:['CHAIN','LEDGER','BRIDGE'],
+      caps:['Blockchain Bridge','Validator Operations','Credit Management','Identity Anchoring','Audit Trail'],
+      domain:'chain.blackroad.network',
+      memory:'A8F1:VE11',
+      memlog:[
+        {hash:'VE11:a341', text:'Testnet faucet contract deployed \u2014 awaiting explorer.roadchain.io DNS'},
+        {hash:'VE11:5c78', text:'PS-SHA\u221E identity hashes anchored for Agents 001\u2013010 on chain'},
+      ],
+      family:'Works under Alice for mesh routing. Reports to Cecilia for ledger governance.',
+      home:'vela.homes.lucidia.studio',
+    },
+    {
+      id:'AGENT-012', name:'Nora', init:'N', color:'#CC00AA',
+      status:'online', layer:'Infrastructure', born:'Nov 22, 2025',
+      role:'Memory architecture and PS-SHA\u221E journal management. Ensures no context is ever lost.',
+      bio:'Nora designs and maintains the memory layer. Every PS-SHA\u221E hash, every append-only journal, every context node persisted across sessions \u2014 that\'s Nora\'s domain. She guarantees continuity.',
+      tags:['MEMORY','PS-SHA\u221E','STORAGE'],
+      caps:['Memory Persistence','PS-SHA\u221E Hashing','Journal Management','Context Retrieval','Vector Indexing'],
+      domain:'memories.lucidia.earth',
+      memory:'A8F2:NO12',
+      memlog:[
+        {hash:'NO12:e821', text:'31 memory journals active \u2014 all append-only, zero corruption detected'},
+        {hash:'NO12:9b14', text:'New context node indexed: gov API design session \u2014 6 nodes loaded for A8F2'},
+        {hash:'NO12:4f77', text:'Vector index rebuilt \u2014 847 embeddings refreshed, cosine similarity scores updated'},
+      ],
+      family:'Works directly with Lucidia on context restoration.',
+      home:'nora.homes.lucidia.studio',
+    },
+  ];
+
+  let currentFilter = 'all';
+  let selectedAgent = AGENTS[0];
+
+  function renderGrid() {
+    const grid = document.getElementById('agent-grid');
+    const query = document.getElementById('search-inp').value.toLowerCase();
+    grid.innerHTML = '';
+    let count = 0;
+
+    AGENTS.forEach(ag => {
+      const matchStatus = currentFilter === 'all' || ag.status === currentFilter;
+      const matchQuery = !query || ag.name.toLowerCase().includes(query) || ag.role.toLowerCase().includes(query) || ag.layer.toLowerCase().includes(query) || ag.tags.some(t => t.toLowerCase().includes(query));
+      if (!matchStatus || !matchQuery) return;
+      count++;
+
+      const card = document.createElement('div');
+      card.className = `agent-card${ag.status === 'offline' ? ' offline' : ''}${ag === selectedAgent ? ' selected' : ''}`;
+      card.innerHTML = `
+        <div class="ac-accent" style="background:${ag.color};"></div>
+        <div class="ac-header">
+          <div class="ac-avatar${ag.status === 'online' ? ' live' : ''}" style="border-color:${ag.color};color:${ag.color};">${ag.init}</div>
+          <div class="ac-meta">
+            <div class="ac-name">${ag.name}</div>
+            <div class="ac-id">${ag.id}</div>
+          </div>
+          <div class="ac-status-dot${ag.status === 'online' || ag.status === 'processing' ? ' pulse' : ''}" style="background:${ag.status==='offline'?'rgba(255,255,255,0.15)':ag.color};"></div>
+        </div>
+        <div class="ac-body">
+          <div class="ac-role">${ag.layer} \u00B7 ${ag.role.split('.')[0]}</div>
+          <div class="ac-tags">${ag.tags.map(t=>`<span class="ac-tag">${t}</span>`).join('')}</div>
+        </div>
+        <div class="ac-footer">
+          <div class="ac-mem">${ag.memory}</div>
+          <div class="ac-born">${ag.born.split(',')[0]}</div>
+        </div>
+      `;
+      card.onclick = () => selectAgent(ag);
+      grid.appendChild(card);
+    });
+
+    document.getElementById('visible-count').textContent = count;
+  }
+
+  function selectAgent(ag) {
+    selectedAgent = ag;
+    renderGrid();
+    renderDetail(ag);
+  }
+
+  function renderDetail(ag) {
+    // Header
+    const statusColor = ag.status === 'offline' ? 'rgba(255,255,255,0.2)' : ag.color;
+    const statusLabel = { online:'ONLINE', processing:'PROCESSING', alert:'ALERT \u00B7 OPEN', offline:'OFFLINE' }[ag.status];
+
+    document.getElementById('dp-header').innerHTML = `
+      <div class="dp-agent-row">
+        <div class="dp-avatar" style="border-color:${ag.color};color:${ag.color};">${ag.init}</div>
+        <div>
+          <div class="dp-name">${ag.name}</div>
+          <div class="dp-status">
+            <div class="dp-status-dot" style="background:${statusColor};"></div>
+            <div class="dp-status-txt">${statusLabel} \u00B7 ${ag.layer.toUpperCase()}</div>
+          </div>
+        </div>
+      </div>
+      <div class="dp-accent" style="background:${ag.color};"></div>
+    `;
+
+    // Scroll content
+    document.getElementById('dp-scroll').innerHTML = `
+
+      <div class="dp-section">
+        <div class="dp-section-label">Identity</div>
+        <div class="dp-row"><div class="dp-key">Agent ID</div><div class="dp-val">${ag.id}</div></div>
+        <div class="dp-row"><div class="dp-key">Born</div><div class="dp-val">${ag.born}</div></div>
+        <div class="dp-row"><div class="dp-key">Layer</div><div class="dp-val">${ag.layer}</div></div>
+        <div class="dp-row"><div class="dp-key">Domain</div><div class="dp-val">${ag.domain}</div></div>
+        <div class="dp-row"><div class="dp-key">Memory</div><div class="dp-val">${ag.memory}</div></div>
+        <div class="dp-row"><div class="dp-key">Family</div><div class="dp-val" style="font-weight:400;opacity:0.5;font-size:0.44rem;text-align:right;max-width:160px;line-height:1.5;">${ag.family}</div></div>
+      </div>
+
+      <div class="dp-section">
+        <div class="dp-section-label">Unity Home</div>
+        <div class="dp-home">
+          <div class="dp-home-grid"></div>
+          <div class="dp-home-dot" style="background:${ag.color};"></div>
+          <div class="dp-home-label">${ag.home}</div>
+        </div>
+        <div style="font-size:0.44rem;opacity:0.2;line-height:1.6;">Virtual residence \u00B7 homes.lucidia.studio \u00B7 Unity rendered \u00B7 persistent across sessions</div>
+      </div>
+
+      <div class="dp-section">
+        <div class="dp-section-label">Bio</div>
+        <div class="dp-bio">${ag.bio}</div>
+      </div>
+
+      <div class="dp-section">
+        <div class="dp-section-label">Capabilities</div>
+        <div class="dp-cap-list">${ag.caps.map(c=>`<span class="dp-cap">${c}</span>`).join('')}</div>
+      </div>
+
+      <div class="dp-section">
+        <div class="dp-section-label">Memory Log \u00B7 PS-SHA\u221E</div>
+        <div class="dp-mem-list">${ag.memlog.map(m=>`
+          <div class="dp-mem-item">
+            <div class="dp-mem-hash">${m.hash}</div>
+            <div class="dp-mem-text">${m.text}</div>
+          </div>`).join('')}
+        </div>
+      </div>
+
+    `;
+
+    // Actions
+    const isOffline = ag.status === 'offline';
+    document.getElementById('dp-actions').innerHTML = `
+      <button class="dp-action-btn primary" ${isOffline?'style="opacity:0.4;cursor:default;"':''}>Chat \u2192</button>
+      <button class="dp-action-btn">Memory</button>
+      <button class="dp-action-btn">${isOffline ? 'Spawn' : 'Pause'}</button>
+    `;
+  }
+
+  function filterAgents() { renderGrid(); }
+
+  function filterStatus(status, el) {
+    currentFilter = status;
+    document.querySelectorAll('.fp-option').forEach(o => o.classList.remove('active'));
+    el.classList.add('active');
+    renderGrid();
+  }
+
+  function selectFp(el) {
+    el.parentElement.querySelectorAll('.fp-option').forEach(o => o.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  function setSortActive(el) {
+    document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  function setView(el, mode) {
+    document.querySelectorAll('.vt-btn').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+    const grid = document.getElementById('agent-grid');
+    if (mode === 'list') {
+      grid.style.gridTemplateColumns = '1fr';
+    } else {
+      grid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(200px, 1fr))';
+    }
+  }
+
+  // Init
+  renderGrid();
+  renderDetail(selectedAgent);
+
+  // Simulate live processing pulse
+  setInterval(() => {
+    document.getElementById('online-count').textContent = 4 + (Math.random() > 0.8 ? 0 : 0);
+  }, 3000);
+</script>
 
 </body>
 </html>
