@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#000000 !important;">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BlackRoad RoadMap</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      background: #000000 !important;
+      color: #ffffff !important;
+      font-family: 'JetBrains Mono', monospace;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    :root {
+      --grad: linear-gradient(90deg, #FF8400, #FF4400, #FF0066, #CC00AA, #8800FF, #0066FF, #2233CC);
+    }
+
+    .grad-rule { height: 3px; background: var(--grad) !important; flex-shrink: 0; }
+
+    /* -- FULL APP SHELL -- */
+    .app-shell {
+      display: flex; flex-direction: column;
+      height: 100vh;
+      background: #000000 !important;
+    }
+
+    /* -- TOP NAV -- */
+    .top-nav {
+      height: 50px; flex-shrink: 0;
+      display: flex; align-items: center;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      background: #000000 !important;
+      z-index: 100;
+    }
+    .nav-brand {
+      display: flex; align-items: center; gap: 10px;
+      padding: 0 20px; height: 100%;
+      border-right: 1px solid rgba(255,255,255,0.08);
+      flex-shrink: 0;
+    }
+    .brand-mark {
+      width: 26px; height: 26px;
+      background: var(--grad) !important;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.55rem; font-weight: 700; color: #000;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    .brand-name { font-family: 'Space Grotesk', sans-serif; font-size: 0.8rem; font-weight: 700; color: #fff; }
+    .brand-product { font-size: 0.38rem; opacity: 0.3; letter-spacing: 0.18em; text-transform: uppercase; color: #fff; margin-left: 3px; }
+
+    /* breadcrumb */
+    .nav-breadcrumb {
+      display: flex; align-items: center; gap: 6px;
+      padding: 0 20px; flex: 1;
+    }
+    .bc-sep { opacity: 0.2; font-size: 0.55rem; }
+    .bc-item { font-size: 0.5rem; opacity: 0.4; color: #fff; cursor: pointer; transition: opacity 0.12s; }
+    .bc-item:hover { opacity: 0.9; }
+    .bc-item.current { opacity: 0.9; font-weight: 700; }
+
+    /* nav right */
+    .nav-right { display: flex; align-items: center; gap: 10px; padding: 0 16px; flex-shrink: 0; }
+    .nav-search {
+      display: flex; align-items: center; gap: 8px;
+      border: 1px solid rgba(255,255,255,0.12);
+      padding: 5px 12px; width: 220px;
+      background: #000000 !important; transition: border-color 0.15s;
+    }
+    .nav-search:focus-within { border-color: rgba(255,255,255,0.4); }
+    .ns-icon { font-size: 0.55rem; opacity: 0.25; color: #fff; }
+    .ns-input { background: none !important; border: none; color: #fff; font-family: 'JetBrains Mono', monospace; font-size: 0.52rem; outline: none; width: 100%; caret-color: #FF8400; }
+    .ns-input::placeholder { color: rgba(255,255,255,0.2); }
+    .nav-icon-btn { font-size: 0.75rem; opacity: 0.3; cursor: pointer; color: #fff; background: none; border: none; transition: opacity 0.15s; position: relative; }
+    .nav-icon-btn:hover { opacity: 0.9; }
+    .notif-pip { position: absolute; top: -2px; right: -2px; width: 6px; height: 6px; background: #FF0066 !important; border-radius: 50%; }
+    .nav-avatar { width: 28px; height: 28px; border-radius: 50%; background: #111 !important; border: 1px solid rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 0.44rem; font-weight: 700; color: #fff; cursor: pointer; }
+
+    /* -- BODY -- */
+    .app-body {
+      display: flex; flex: 1; overflow: hidden;
+      background: #000000 !important;
+    }
+
+    /* -- LEFT SIDEBAR -- */
+    .sidebar {
+      width: 220px; flex-shrink: 0;
+      border-right: 1px solid rgba(255,255,255,0.08);
+      display: flex; flex-direction: column;
+      background: #000000 !important;
+      overflow-y: auto; scrollbar-width: none;
+    }
+    .sidebar::-webkit-scrollbar { display: none; }
+
+    .sidebar-top { padding: 14px 12px 8px; }
+    .new-btn {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      width: 100%; padding: 9px 0;
+      background: #ffffff !important; color: #000000;
+      border: none; font-family: 'JetBrains Mono', monospace;
+      font-size: 0.52rem; font-weight: 700; cursor: pointer;
+      letter-spacing: 0.04em; transition: opacity 0.15s;
+    }
+    .new-btn:hover { opacity: 0.85; }
+
+    .sb-section { padding: 12px 0 4px; }
+    .sb-heading { font-size: 0.38rem; opacity: 0.2; letter-spacing: 0.2em; text-transform: uppercase; color: #fff; padding: 0 16px; margin-bottom: 4px; }
+    .sb-item {
+      display: flex; align-items: center; gap: 9px;
+      padding: 8px 16px; cursor: pointer;
+      border-left: 2px solid transparent;
+      transition: all 0.12s; text-decoration: none;
+      background: #000000 !important;
+    }
+    .sb-item:hover { background: rgba(255,255,255,0.03) !important; }
+    .sb-item.active { border-left-color: #fff; background: rgba(255,255,255,0.05) !important; }
+    .sb-icon { font-size: 0.7rem; opacity: 0.35; width: 16px; text-align: center; }
+    .sb-item.active .sb-icon { opacity: 1; }
+    .sb-label { font-size: 0.5rem; opacity: 0.4; color: #fff; }
+    .sb-item.active .sb-label { opacity: 1; font-weight: 700; }
+    .sb-count { margin-left: auto; font-size: 0.38rem; opacity: 0.2; color: #fff; }
+    .sb-dot { width: 6px; height: 6px; border-radius: 50%; margin-left: auto; }
+
+    /* source badges */
+    .source-badge {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 12px; margin: 0 8px 4px;
+      border: 1px solid rgba(255,255,255,0.08);
+      cursor: pointer; background: #000000 !important; transition: border-color 0.12s;
+    }
+    .source-badge:hover { border-color: rgba(255,255,255,0.25); }
+    .source-badge.connected { border-left: 2px solid; }
+    .sb-src-icon { font-size: 0.65rem; opacity: 0.5; width: 18px; }
+    .sb-src-name { font-size: 0.48rem; font-weight: 700; color: #fff; }
+    .sb-src-status { font-size: 0.38rem; opacity: 0.3; color: #fff; margin-left: auto; }
+
+    /* storage bar */
+    .storage-section { padding: 12px; margin-top: auto; border-top: 1px solid rgba(255,255,255,0.06); }
+    .storage-label { font-size: 0.42rem; opacity: 0.3; color: #fff; margin-bottom: 8px; display: flex; justify-content: space-between; }
+    .storage-track { height: 2px; background: rgba(255,255,255,0.08) !important; position: relative; }
+    .storage-fill { position: absolute; left: 0; top: 0; bottom: 0; background: var(--grad) !important; }
+    .storage-sources { display: flex; gap: 4px; margin-top: 8px; flex-wrap: wrap; }
+    .storage-src { font-size: 0.38rem; display: flex; align-items: center; gap: 4px; opacity: 0.4; color: #fff; }
+    .ss-dot { width: 5px; height: 5px; border-radius: 50%; }
+
+    /* -- MAIN AREA -- */
+    .main-area {
+      flex: 1; display: flex; flex-direction: column;
+      overflow: hidden; background: #000000 !important;
+    }
+
+    /* toolbar */
+    .file-toolbar {
+      height: 44px; flex-shrink: 0;
+      display: flex; align-items: center; gap: 8px;
+      padding: 0 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      background: #000000 !important;
+    }
+    .ft-btn {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 0.48rem; padding: 6px 12px;
+      border: 1px solid rgba(255,255,255,0.12); color: #fff;
+      background: #000000 !important; cursor: pointer;
+      font-family: 'JetBrains Mono', monospace; transition: border-color 0.12s;
+    }
+    .ft-btn:hover { border-color: rgba(255,255,255,0.4); }
+    .ft-btn.primary { background: #fff !important; color: #000; border-color: #fff; }
+    .ft-icon { opacity: 0.5; }
+    .ft-sep { width: 1px; height: 20px; background: rgba(255,255,255,0.08) !important; margin: 0 4px; }
+    .ft-sort {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 0.46rem; opacity: 0.35; color: #fff; cursor: pointer;
+      background: none; border: none; font-family: 'JetBrains Mono', monospace;
+      transition: opacity 0.12s; margin-left: auto;
+    }
+    .ft-sort:hover { opacity: 0.8; }
+    .view-toggle { display: flex; border: 1px solid rgba(255,255,255,0.12); }
+    .vt-btn { padding: 5px 9px; font-size: 0.6rem; cursor: pointer; color: #fff; opacity: 0.3; background: #000000 !important; border: none; transition: all 0.12s; }
+    .vt-btn:hover { opacity: 0.8; }
+    .vt-btn.active { opacity: 1; background: rgba(255,255,255,0.08) !important; }
+
+    /* file grid */
+    .file-content {
+      flex: 1; overflow-y: auto; scrollbar-width: thin;
+      scrollbar-color: rgba(255,255,255,0.1) transparent;
+      padding: 20px;
+      background: #000000 !important;
+    }
+
+    /* section headers in file area */
+    .file-section-label {
+      font-size: 0.42rem; opacity: 0.25; letter-spacing: 0.18em;
+      text-transform: uppercase; color: #fff;
+      margin-bottom: 12px; display: flex; align-items: center; gap: 12px;
+    }
+    .file-section-label::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.06); }
+
+    /* GRID VIEW */
+    .file-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 8px; margin-bottom: 28px;
+    }
+    .file-card {
+      border: 1px solid rgba(255,255,255,0.08);
+      padding: 14px 12px 10px;
+      cursor: pointer; background: #000000 !important;
+      transition: all 0.15s; position: relative;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .file-card:hover { border-color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.02) !important; }
+    .file-card.selected { border-color: rgba(255,255,255,0.6); background: rgba(255,255,255,0.04) !important; }
+    .file-card-icon {
+      font-size: 1.6rem; line-height: 1; opacity: 0.7;
+      display: flex; align-items: flex-end;
+    }
+    .file-card-preview {
+      height: 48px; display: flex; align-items: flex-end; gap: 2px;
+      overflow: hidden;
+    }
+    .fp-bar { width: 4px; border-radius: 0; }
+    .file-card-name { font-size: 0.5rem; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .file-card-meta { font-size: 0.4rem; opacity: 0.25; color: #fff; }
+    .file-card-source { position: absolute; top: 8px; right: 8px; font-size: 0.36rem; border: 1px solid rgba(255,255,255,0.15); padding: 1px 5px; color: #fff; opacity: 0.4; background: #000000 !important; }
+    .file-card-badge { position: absolute; top: 8px; left: 8px; width: 6px; height: 6px; border-radius: 50%; }
+
+    /* LIST VIEW */
+    .file-list { margin-bottom: 28px; }
+    .list-header {
+      display: grid;
+      grid-template-columns: 2fr 80px 100px 120px 80px;
+      gap: 12px; padding: 6px 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      background: #000000 !important;
+    }
+    .lh-col { font-size: 0.4rem; opacity: 0.25; letter-spacing: 0.1em; text-transform: uppercase; color: #fff; cursor: pointer; }
+    .list-row {
+      display: grid;
+      grid-template-columns: 2fr 80px 100px 120px 80px;
+      gap: 12px; padding: 9px 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      cursor: pointer; transition: background 0.12s; align-items: center;
+      background: #000000 !important;
+    }
+    .list-row:hover { background: rgba(255,255,255,0.03) !important; }
+    .list-row.selected { background: rgba(255,255,255,0.05) !important; }
+    .lr-name { display: flex; align-items: center; gap: 10px; }
+    .lr-icon { font-size: 0.9rem; opacity: 0.6; width: 20px; text-align: center; }
+    .lr-title { font-size: 0.52rem; font-weight: 700; color: #fff; }
+    .lr-sub { font-size: 0.4rem; opacity: 0.3; color: #fff; margin-top: 1px; }
+    .lr-source { font-size: 0.42rem; border: 1px solid rgba(255,255,255,0.1); padding: 2px 6px; color: #fff; opacity: 0.4; background: #000000 !important; white-space: nowrap; }
+    .lr-size { font-size: 0.46rem; opacity: 0.35; color: #fff; }
+    .lr-date { font-size: 0.44rem; opacity: 0.3; color: #fff; }
+    .lr-status { display: flex; align-items: center; justify-content: flex-end; }
+    .lr-dot { width: 6px; height: 6px; border-radius: 50%; }
+
+    /* REPO ROW special */
+    .repo-row {
+      border: 1px solid rgba(255,255,255,0.08);
+      padding: 14px 16px; margin-bottom: 6px;
+      cursor: pointer; background: #000000 !important;
+      transition: border-color 0.12s; display: flex; align-items: center; gap: 14px;
+    }
+    .repo-row:hover { border-color: rgba(255,255,255,0.3); }
+    .repo-icon { font-size: 1.1rem; opacity: 0.5; flex-shrink: 0; }
+    .repo-info { flex: 1; min-width: 0; }
+    .repo-name { font-size: 0.58rem; font-weight: 700; color: #fff; }
+    .repo-desc { font-size: 0.46rem; opacity: 0.3; color: #fff; margin-top: 2px; }
+    .repo-tags { display: flex; gap: 6px; margin-top: 8px; }
+    .repo-tag { font-size: 0.38rem; border: 1px solid rgba(255,255,255,0.1); padding: 2px 7px; color: #fff; opacity: 0.4; background: #000000 !important; }
+    .repo-meta { text-align: right; flex-shrink: 0; }
+    .repo-branch { font-size: 0.44rem; opacity: 0.4; color: #fff; margin-bottom: 4px; }
+    .repo-commits { font-size: 0.42rem; opacity: 0.25; color: #fff; }
+    .repo-bar { height: 2px; width: 60px; margin-top: 8px; margin-left: auto; }
+
+    /* -- RIGHT DETAIL PANEL -- */
+    .detail-panel {
+      width: 260px; flex-shrink: 0;
+      border-left: 1px solid rgba(255,255,255,0.08);
+      display: flex; flex-direction: column;
+      background: #000000 !important;
+      overflow-y: auto; scrollbar-width: none;
+    }
+    .detail-panel::-webkit-scrollbar { display: none; }
+
+    .dp-header {
+      padding: 16px; border-bottom: 1px solid rgba(255,255,255,0.08);
+      background: #000000 !important;
+    }
+    .dp-preview {
+      height: 100px; border: 1px solid rgba(255,255,255,0.08);
+      background: #000000 !important;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 12px; overflow: hidden; position: relative;
+    }
+    .dp-preview-inner { display: flex; align-items: flex-end; gap: 2px; height: 60px; padding: 0 12px; }
+    .dpi-bar { width: 5px; }
+    .dp-file-icon { font-size: 2.5rem; opacity: 0.4; }
+    .dp-name { font-size: 0.62rem; font-weight: 700; color: #fff; margin-bottom: 3px; }
+    .dp-type { font-size: 0.44rem; opacity: 0.3; color: #fff; }
+
+    .dp-body { flex: 1; padding: 16px; }
+    .dp-section { margin-bottom: 20px; }
+    .dp-label { font-size: 0.38rem; opacity: 0.2; letter-spacing: 0.18em; text-transform: uppercase; color: #fff; margin-bottom: 10px; }
+    .dp-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .dp-row:last-child { border-bottom: none; }
+    .dp-key { font-size: 0.44rem; opacity: 0.3; color: #fff; }
+    .dp-val { font-size: 0.44rem; color: #fff; text-align: right; }
+
+    /* version history */
+    .version-item { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .version-item:last-child { border-bottom: none; }
+    .vi-dot { width: 7px; height: 7px; border-radius: 50%; margin-top: 3px; flex-shrink: 0; }
+    .vi-info { flex: 1; }
+    .vi-msg { font-size: 0.48rem; color: #fff; }
+    .vi-meta { font-size: 0.4rem; opacity: 0.25; color: #fff; margin-top: 2px; }
+
+    /* agent activity */
+    .agent-activity { border-top: 1px solid rgba(255,255,255,0.08); padding: 14px 16px; background: #000000 !important; }
+    .aa-label { font-size: 0.38rem; opacity: 0.2; letter-spacing: 0.18em; text-transform: uppercase; color: #fff; margin-bottom: 10px; }
+    .aa-item { display: flex; align-items: center; gap: 8px; padding: 6px 0; }
+    .aa-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+    @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.8)} }
+    .aa-dot.live { animation: pulse 2s ease-in-out infinite; }
+    .aa-text { font-size: 0.44rem; opacity: 0.45; color: #fff; }
+    .aa-time { font-size: 0.38rem; opacity: 0.2; color: #fff; margin-left: auto; }
+
+    /* dp actions */
+    .dp-actions { padding: 12px 16px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; gap: 6px; background: #000000 !important; }
+    .dpa-btn {
+      width: 100%; padding: 8px; font-family: 'JetBrains Mono', monospace;
+      font-size: 0.48rem; cursor: pointer; letter-spacing: 0.04em;
+      transition: all 0.12s; border: 1px solid rgba(255,255,255,0.15);
+      color: #fff; background: #000000 !important;
+    }
+    .dpa-btn:hover { border-color: rgba(255,255,255,0.4); }
+    .dpa-btn.primary { background: #fff !important; color: #000; border-color: #fff; }
+
+    @media (max-width: 900px) {
+      .sidebar { display: none; }
+      .detail-panel { display: none; }
+    }
+  </style>
+</head>
+<body style="background:#000000 !important; color:#ffffff !important;">
+
+<div class="app-shell">
+
+  <div class="grad-rule"></div>
+
+  <!-- TOP NAV -->
+  <div class="top-nav">
+    <div class="nav-brand">
+      <div class="brand-mark">BR</div>
+      <div>
+        <span class="brand-name">BlackRoad</span>
+        <span class="brand-product">RoadMap</span>
+      </div>
+    </div>
+    <div class="nav-breadcrumb">
+      <span class="bc-item">Home</span>
+      <span class="bc-sep">&rsaquo;</span>
+      <span class="bc-item">Projects</span>
+      <span class="bc-sep">&rsaquo;</span>
+      <span class="bc-item current">blackroad-os</span>
+    </div>
+    <div class="nav-right">
+      <div class="nav-search">
+        <span class="ns-icon">&#9678;</span>
+        <input class="ns-input" type="text" placeholder="Search files, repos, notes...">
+      </div>
+      <button class="nav-icon-btn" style="position:relative;">
+        &#9678;
+        <div class="notif-pip"></div>
+      </button>
+      <button class="nav-icon-btn">&#8862;</button>
+      <div class="nav-avatar">BR</div>
+    </div>
+  </div>
+
+  <!-- APP BODY -->
+  <div class="app-body">
+
+    <!-- LEFT SIDEBAR -->
+    <aside class="sidebar">
+
+      <div class="sidebar-top">
+        <button class="new-btn" onclick="this.textContent='+ Creating...';setTimeout(()=>this.textContent='+ New',1200)">+ New</button>
+      </div>
+
+      <div class="sb-section">
+        <div class="sb-heading">Navigate</div>
+        <a class="sb-item" href="#" onclick="setView('recent',this)">
+          <span class="sb-icon">&#9673;</span>
+          <span class="sb-label">Recent</span>
+        </a>
+        <a class="sb-item active" href="#" onclick="setView('all',this)">
+          <span class="sb-icon">&#11036;</span>
+          <span class="sb-label">All Files</span>
+          <span class="sb-count">284</span>
+        </a>
+        <a class="sb-item" href="#" onclick="setView('starred',this)">
+          <span class="sb-icon">&#9672;</span>
+          <span class="sb-label">Starred</span>
+          <span class="sb-count">12</span>
+        </a>
+        <a class="sb-item" href="#" onclick="setView('shared',this)">
+          <span class="sb-icon">&#9678;</span>
+          <span class="sb-label">Shared with me</span>
+          <span class="sb-count">8</span>
+        </a>
+      </div>
+
+      <div class="sb-section">
+        <div class="sb-heading">Sources</div>
+      </div>
+
+      <div class="source-badge connected" style="border-left-color:#FF8400 !important;" onclick="setView('cloud',this)">
+        <span class="sb-src-icon">&#9729;</span>
+        <div>
+          <div class="sb-src-name">RoadCloud</div>
+          <div style="font-size:0.38rem;opacity:0.25;color:#fff;">42.8 GB &middot; Synced</div>
+        </div>
+        <span class="sb-src-status" style="color:#FF8400;">&#9679; Live</span>
+      </div>
+
+      <div class="source-badge connected" style="border-left-color:#0066FF !important;" onclick="setView('github',this)">
+        <span class="sb-src-icon">&#11041;</span>
+        <div>
+          <div class="sb-src-name">GitHub</div>
+          <div style="font-size:0.38rem;opacity:0.25;color:#fff;">18 repos &middot; Connected</div>
+        </div>
+        <span class="sb-src-status" style="color:#0066FF;">&#9679; Linked</span>
+      </div>
+
+      <div class="source-badge connected" style="border-left-color:#8800FF !important;" onclick="setView('local',this)">
+        <span class="sb-src-icon">&#9672;</span>
+        <div>
+          <div class="sb-src-name">Local Node</div>
+          <div style="font-size:0.38rem;opacity:0.25;color:#fff;">Alice &middot; K3s Edge</div>
+        </div>
+        <span class="sb-src-status" style="color:#8800FF;">&#9679; Edge</span>
+      </div>
+
+      <div class="source-badge" onclick="this.style.borderColor='rgba(255,255,255,0.3)'">
+        <span class="sb-src-icon" style="opacity:0.25;">+</span>
+        <div>
+          <div class="sb-src-name" style="opacity:0.4;">Add source</div>
+          <div style="font-size:0.38rem;opacity:0.2;color:#fff;">Notion, S3, Dropbox...</div>
+        </div>
+      </div>
+
+      <div class="sb-section">
+        <div class="sb-heading">Folders</div>
+        <a class="sb-item" href="#">
+          <span class="sb-icon">&#9654;</span>
+          <span class="sb-label">blackroad-os</span>
+          <div class="sb-dot" style="background:#FF8400 !important;"></div>
+        </a>
+        <a class="sb-item" href="#">
+          <span class="sb-icon">&#9654;</span>
+          <span class="sb-label">agent-memory</span>
+        </a>
+        <a class="sb-item" href="#">
+          <span class="sb-icon">&#9654;</span>
+          <span class="sb-label">market-reports</span>
+        </a>
+        <a class="sb-item" href="#">
+          <span class="sb-icon">&#9654;</span>
+          <span class="sb-label">studio-projects</span>
+        </a>
+        <a class="sb-item" href="#">
+          <span class="sb-icon">&#9654;</span>
+          <span class="sb-label">design-system</span>
+        </a>
+        <a class="sb-item" href="#" style="opacity:0.4;">
+          <span class="sb-icon">&#9678;</span>
+          <span class="sb-label">Trash</span>
+        </a>
+      </div>
+
+      <div class="storage-section">
+        <div class="storage-label">
+          <span>Storage</span>
+          <span>62.4 / 200 GB</span>
+        </div>
+        <div class="storage-track">
+          <div class="storage-fill" style="width:31%;"></div>
+        </div>
+        <div class="storage-sources">
+          <div class="storage-src"><div class="ss-dot" style="background:#FF8400 !important;"></div>Cloud 42.8GB</div>
+          <div class="storage-src"><div class="ss-dot" style="background:#8800FF !important;"></div>Local 19.6GB</div>
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- MAIN AREA -->
+    <div class="main-area">
+
+      <div class="file-toolbar">
+        <button class="ft-btn primary">&#11014; Upload</button>
+        <button class="ft-btn"><span class="ft-icon">+</span> New Folder</button>
+        <button class="ft-btn"><span class="ft-icon">&#8862;</span> New Doc</button>
+        <div class="ft-sep"></div>
+        <button class="ft-btn" id="syncBtn" onclick="handleSync(this)"><span class="ft-icon">&#8635;</span> Sync All</button>
+        <div class="ft-sep"></div>
+        <button class="ft-sort">Name &#8597;</button>
+        <div class="view-toggle">
+          <button class="vt-btn active" onclick="setViewMode('grid',this)" title="Grid">&#8862;</button>
+          <button class="vt-btn" onclick="setViewMode('list',this)" title="List">&#9776;</button>
+        </div>
+      </div>
+
+      <div class="file-content" id="fileContent">
+
+        <!-- PINNED / RECENT -->
+        <div class="file-section-label">Pinned</div>
+        <div class="file-grid" id="pinnedGrid">
+
+          <div class="file-card" onclick="selectFile(this,'blackroad-os','Folder','RoadCloud','2.4 GB','Mar 1 2026')">
+            <div class="file-card-source">Cloud</div>
+            <div class="file-card-badge" style="background:#FF8400 !important;"></div>
+            <div class="file-card-icon">&#128193;</div>
+            <div class="file-card-name">blackroad-os</div>
+            <div class="file-card-meta">84 items &middot; 2.4 GB</div>
+          </div>
+
+          <div class="file-card" onclick="selectFile(this,'agent-memory','Folder','Local &middot; Alice','840 MB','Mar 2 2026')">
+            <div class="file-card-source">Local</div>
+            <div class="file-card-badge" style="background:#8800FF !important;"></div>
+            <div class="file-card-icon">&#128193;</div>
+            <div class="file-card-name">agent-memory</div>
+            <div class="file-card-meta">312 items &middot; 840 MB</div>
+          </div>
+
+          <div class="file-card selected" onclick="selectFile(this,'Q1-market-report.md','Markdown','RoadCloud','48 KB','Today 9:14am')">
+            <div class="file-card-source">Cloud</div>
+            <div class="file-card-preview">
+              <div class="fp-bar" style="height:28px;background:#FF8400 !important;"></div>
+              <div class="fp-bar" style="height:38px;background:#FF4400 !important;"></div>
+              <div class="fp-bar" style="height:22px;background:#FF0066 !important;"></div>
+              <div class="fp-bar" style="height:40px;background:#8800FF !important;"></div>
+              <div class="fp-bar" style="height:30px;background:#0066FF !important;"></div>
+              <div class="fp-bar" style="height:36px;background:#8800FF !important;"></div>
+              <div class="fp-bar" style="height:24px;background:#FF0066 !important;"></div>
+            </div>
+            <div class="file-card-name">Q1-market-report.md</div>
+            <div class="file-card-meta">48 KB &middot; Today</div>
+          </div>
+
+          <div class="file-card" onclick="selectFile(this,'lucidia-memory.journal','Journal','Local &middot; Alice','1.2 GB','Mar 2 2026')">
+            <div class="file-card-source">Local</div>
+            <div class="file-card-icon">&#128450;</div>
+            <div class="file-card-name">lucidia-memory.journal</div>
+            <div class="file-card-meta">1.2 GB &middot; PS-SHA&#8734;</div>
+          </div>
+
+        </div>
+
+        <!-- REPOSITORIES -->
+        <div class="file-section-label">Repositories &middot; GitHub</div>
+        <div id="repoList" style="margin-bottom:28px;">
+
+          <div class="repo-row" onclick="selectFile(this,'blackroad-core','Repository &middot; main','GitHub','&ndash;','2h ago')">
+            <div class="repo-icon">&#11041;</div>
+            <div class="repo-info">
+              <div class="repo-name">blackroad/core</div>
+              <div class="repo-desc">Agent orchestration, NATS bus, K3s provisioning, and Redis state layer</div>
+              <div class="repo-tags">
+                <span class="repo-tag">TypeScript</span>
+                <span class="repo-tag">NATS</span>
+                <span class="repo-tag">K3s</span>
+              </div>
+            </div>
+            <div class="repo-meta">
+              <div class="repo-branch">&#9095; main &middot; 4 behind</div>
+              <div class="repo-commits">&#8593; 2,841 commits</div>
+              <div class="repo-bar" style="background:#FF8400 !important;"></div>
+            </div>
+          </div>
+
+          <div class="repo-row" onclick="selectFile(this,'blackroad-lucidia','Repository &middot; main','GitHub','&ndash;','12h ago')">
+            <div class="repo-icon">&#11041;</div>
+            <div class="repo-info">
+              <div class="repo-name">blackroad/lucidia</div>
+              <div class="repo-desc">PS-SHA&#8734; memory system, append-only journals, and agent truth-state engine</div>
+              <div class="repo-tags">
+                <span class="repo-tag">Python</span>
+                <span class="repo-tag">PS-SHA&#8734;</span>
+                <span class="repo-tag">Memory</span>
+              </div>
+            </div>
+            <div class="repo-meta">
+              <div class="repo-branch">&#9095; main &middot; current</div>
+              <div class="repo-commits">&#8593; 1,204 commits</div>
+              <div class="repo-bar" style="background:#8800FF !important;"></div>
+            </div>
+          </div>
+
+          <div class="repo-row" onclick="selectFile(this,'blackroad-studio','Repository &middot; dev','GitHub','&ndash;','Yesterday')">
+            <div class="repo-icon">&#11041;</div>
+            <div class="repo-info">
+              <div class="repo-name">blackroad/studio</div>
+              <div class="repo-desc">Creator tooling &mdash; music, visual, video, and game builder interfaces</div>
+              <div class="repo-tags">
+                <span class="repo-tag">React</span>
+                <span class="repo-tag">Tone.js</span>
+                <span class="repo-tag">WebGL</span>
+              </div>
+            </div>
+            <div class="repo-meta">
+              <div class="repo-branch">&#9095; dev &middot; 2 ahead</div>
+              <div class="repo-commits">&#8593; 622 commits</div>
+              <div class="repo-bar" style="background:#0066FF !important;"></div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ALL FILES - LIST VIEW -->
+        <div class="file-section-label">All Files</div>
+        <div id="fileList" class="file-list">
+          <div class="list-header">
+            <div class="lh-col">Name &#8595;</div>
+            <div class="lh-col">Source</div>
+            <div class="lh-col">Size</div>
+            <div class="lh-col">Modified</div>
+            <div class="lh-col">Status</div>
+          </div>
+
+          <div class="list-row selected" onclick="selectFile(this,'Q1-market-report.md','Markdown','RoadCloud','48 KB','Today 9:14am')">
+            <div class="lr-name">
+              <span class="lr-icon">&#128196;</span>
+              <div><div class="lr-title">Q1-market-report.md</div><div class="lr-sub">Markdown &middot; Olympia</div></div>
+            </div>
+            <div><span class="lr-source">Cloud</span></div>
+            <div class="lr-size">48 KB</div>
+            <div class="lr-date">Today 9:14am</div>
+            <div class="lr-status"><div class="lr-dot" style="background:#FF8400 !important;"></div></div>
+          </div>
+
+          <div class="list-row" onclick="selectFile(this,'agent-bus-config.yaml','YAML','Local &middot; Alice','6.2 KB','Mar 1 2026')">
+            <div class="lr-name">
+              <span class="lr-icon">&#9881;</span>
+              <div><div class="lr-title">agent-bus-config.yaml</div><div class="lr-sub">YAML &middot; Atlas</div></div>
+            </div>
+            <div><span class="lr-source">Local</span></div>
+            <div class="lr-size">6.2 KB</div>
+            <div class="lr-date">Mar 1 2026</div>
+            <div class="lr-status"><div class="lr-dot" style="background:#8800FF !important;"></div></div>
+          </div>
+
+          <div class="list-row" onclick="selectFile(this,'cecilia-session-0042.journal','Journal','Local &middot; Octavia','220 MB','Today 8:02am')">
+            <div class="lr-name">
+              <span class="lr-icon">&#128450;</span>
+              <div><div class="lr-title">cecilia-session-0042.journal</div><div class="lr-sub">Journal &middot; Lucidia PS-SHA&#8734;</div></div>
+            </div>
+            <div><span class="lr-source">Local</span></div>
+            <div class="lr-size">220 MB</div>
+            <div class="lr-date">Today 8:02am</div>
+            <div class="lr-status"><div class="lr-dot" style="background:#FF0066 !important;"></div></div>
+          </div>
+
+          <div class="list-row" onclick="selectFile(this,'brand-style-guide.html','HTML','RoadCloud','84 KB','Feb 28 2026')">
+            <div class="lr-name">
+              <span class="lr-icon">&#127760;</span>
+              <div><div class="lr-title">brand-style-guide.html</div><div class="lr-sub">HTML &middot; Design System</div></div>
+            </div>
+            <div><span class="lr-source">Cloud</span></div>
+            <div class="lr-size">84 KB</div>
+            <div class="lr-date">Feb 28 2026</div>
+            <div class="lr-status"><div class="lr-dot" style="background:#FF8400 !important;"></div></div>
+          </div>
+
+          <div class="list-row" onclick="selectFile(this,'untitled-track-01.brproj','Studio Project','RoadCloud','12 MB','Today 11:44am')">
+            <div class="lr-name">
+              <span class="lr-icon">&#127925;</span>
+              <div><div class="lr-title">untitled-track-01.brproj</div><div class="lr-sub">Studio Project &middot; Music</div></div>
+            </div>
+            <div><span class="lr-source">Cloud</span></div>
+            <div class="lr-size">12 MB</div>
+            <div class="lr-date">Today 11:44am</div>
+            <div class="lr-status"><div class="lr-dot" style="background:#0066FF !important;"></div></div>
+          </div>
+
+          <div class="list-row" onclick="selectFile(this,'traefik-routes.yaml','YAML','Local &middot; Alice','3.8 KB','Feb 26 2026')">
+            <div class="lr-name">
+              <span class="lr-icon">&#9881;</span>
+              <div><div class="lr-title">traefik-routes.yaml</div><div class="lr-sub">YAML &middot; Atlas &middot; K3s</div></div>
+            </div>
+            <div><span class="lr-source">Local</span></div>
+            <div class="lr-size">3.8 KB</div>
+            <div class="lr-date">Feb 26 2026</div>
+            <div class="lr-status"><div class="lr-dot" style="background:#8800FF !important;"></div></div>
+          </div>
+
+          <div class="list-row" onclick="selectFile(this,'eve-threat-model-v3.pdf','PDF','RoadCloud','2.1 MB','Feb 20 2026')">
+            <div class="lr-name">
+              <span class="lr-icon">&#128274;</span>
+              <div><div class="lr-title">eve-threat-model-v3.pdf</div><div class="lr-sub">PDF &middot; Eve &middot; Security</div></div>
+            </div>
+            <div><span class="lr-source">Cloud</span></div>
+            <div class="lr-size">2.1 MB</div>
+            <div class="lr-date">Feb 20 2026</div>
+            <div class="lr-status"><div class="lr-dot" style="background:#FF0066 !important;"></div></div>
+          </div>
+
+          <div class="list-row" onclick="selectFile(this,'olympia-nvda-analysis.csv','CSV','RoadCloud','184 KB','Today 6:30am')">
+            <div class="lr-name">
+              <span class="lr-icon">&#128202;</span>
+              <div><div class="lr-title">olympia-nvda-analysis.csv</div><div class="lr-sub">CSV &middot; Olympia &middot; Markets</div></div>
+            </div>
+            <div><span class="lr-source">Cloud</span></div>
+            <div class="lr-size">184 KB</div>
+            <div class="lr-date">Today 6:30am</div>
+            <div class="lr-status"><div class="lr-dot" style="background:#0066FF !important;"></div></div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+    <!-- DETAIL PANEL -->
+    <aside class="detail-panel">
+
+      <div class="dp-header">
+        <div class="dp-preview">
+          <div class="dp-preview-inner" id="dpPreview">
+            <div class="dpi-bar" style="height:32px;background:#FF8400 !important;"></div>
+            <div class="dpi-bar" style="height:48px;background:#FF4400 !important;"></div>
+            <div class="dpi-bar" style="height:28px;background:#FF0066 !important;"></div>
+            <div class="dpi-bar" style="height:56px;background:#8800FF !important;"></div>
+            <div class="dpi-bar" style="height:40px;background:#0066FF !important;"></div>
+            <div class="dpi-bar" style="height:44px;background:#8800FF !important;"></div>
+            <div class="dpi-bar" style="height:36px;background:#FF0066 !important;"></div>
+          </div>
+        </div>
+        <div class="dp-name" id="dpName">Q1-market-report.md</div>
+        <div class="dp-type" id="dpType">Markdown &middot; RoadCloud</div>
+      </div>
+
+      <div class="dp-body">
+        <div class="dp-section">
+          <div class="dp-label">Details</div>
+          <div class="dp-row"><span class="dp-key">Size</span><span class="dp-val" id="dpSize">48 KB</span></div>
+          <div class="dp-row"><span class="dp-key">Modified</span><span class="dp-val" id="dpDate">Today 9:14am</span></div>
+          <div class="dp-row"><span class="dp-key">Source</span><span class="dp-val" id="dpSource">RoadCloud</span></div>
+          <div class="dp-row"><span class="dp-key">Author</span><span class="dp-val">Olympia</span></div>
+          <div class="dp-row"><span class="dp-key">Indexed</span><span class="dp-val">Lucidia &#10003;</span></div>
+        </div>
+
+        <div class="dp-section">
+          <div class="dp-label">Version History</div>
+
+          <div class="version-item">
+            <div class="vi-dot" style="background:#FF8400 !important;"></div>
+            <div class="vi-info">
+              <div class="vi-msg">Add NVDA thesis section</div>
+              <div class="vi-meta">Today 9:14am &middot; Olympia</div>
+            </div>
+          </div>
+          <div class="version-item">
+            <div class="vi-dot" style="background:rgba(255,255,255,0.3) !important;"></div>
+            <div class="vi-info">
+              <div class="vi-msg">Update macro overview</div>
+              <div class="vi-meta">Mar 1 &middot; Olympia</div>
+            </div>
+          </div>
+          <div class="version-item">
+            <div class="vi-dot" style="background:rgba(255,255,255,0.3) !important;"></div>
+            <div class="vi-info">
+              <div class="vi-msg">Initial draft</div>
+              <div class="vi-meta">Feb 28 &middot; Olympia</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="agent-activity">
+        <div class="aa-label">Agent Activity</div>
+        <div class="aa-item">
+          <div class="aa-dot live" style="background:#8800FF !important;"></div>
+          <span class="aa-text">Lucidia indexing</span>
+          <span class="aa-time">Now</span>
+        </div>
+        <div class="aa-item">
+          <div class="aa-dot live" style="background:#FF8400 !important;"></div>
+          <span class="aa-text">Cecilia read access</span>
+          <span class="aa-time">4m ago</span>
+        </div>
+        <div class="aa-item">
+          <div class="aa-dot" style="background:#0066FF !important;"></div>
+          <span class="aa-text">Olympia modified</span>
+          <span class="aa-time">9m ago</span>
+        </div>
+      </div>
+
+      <div class="dp-actions">
+        <button class="dpa-btn primary">Open &rarr;</button>
+        <button class="dpa-btn">Share</button>
+        <button class="dpa-btn">Download</button>
+        <button class="dpa-btn" style="opacity:0.4;">Move to Trash</button>
+      </div>
+
+    </aside>
+
+  </div><!-- end app-body -->
+
+  <div class="grad-rule"></div>
+
+</div><!-- end app-shell -->
+
+<script>
+  // File selection
+  function selectFile(el, name, type, source, size, date) {
+    document.querySelectorAll('.file-card, .list-row, .repo-row').forEach(function(x) { x.classList.remove('selected'); });
+    el.classList.add('selected');
+    document.getElementById('dpName').textContent = name;
+    document.getElementById('dpType').textContent = type + ' \u00b7 ' + source;
+    document.getElementById('dpSize').textContent = size;
+    document.getElementById('dpDate').textContent = date;
+    document.getElementById('dpSource').textContent = source;
+  }
+
+  // View mode grid/list
+  function setViewMode(mode, btn) {
+    document.querySelectorAll('.vt-btn').forEach(function(b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+    var pinnedGrid = document.getElementById('pinnedGrid');
+    if (mode === 'list') {
+      pinnedGrid.style.gridTemplateColumns = '1fr';
+    } else {
+      pinnedGrid.style.gridTemplateColumns = '';
+    }
+  }
+
+  // Sidebar navigation
+  function setView(view, el) {
+    document.querySelectorAll('.sb-item').forEach(function(x) { x.classList.remove('active'); });
+    if (el && el.classList) el.classList.add('active');
+  }
+
+  // Sync button
+  function handleSync(btn) {
+    btn.innerHTML = '<span style="animation:spin 1s linear infinite;display:inline-block;">&#8635;</span> Syncing\u2026';
+    btn.style.opacity = '0.6';
+    setTimeout(function() {
+      btn.innerHTML = '\u2713 Synced';
+      btn.style.opacity = '1';
+      setTimeout(function() { btn.innerHTML = '<span class="ft-icon">&#8635;</span> Sync All'; }, 2000);
+    }, 2000);
+  }
+
+  // Spin keyframe for sync
+  var style = document.createElement('style');
+  style.textContent = '@keyframes spin { from{transform:rotate(0)} to{transform:rotate(360deg)} }';
+  document.head.appendChild(style);
+</script>
+
+</body>
+</html>
