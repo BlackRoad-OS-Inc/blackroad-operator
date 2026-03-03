@@ -23,6 +23,7 @@ This file provides guidance to Cecilia Code (BlackRoad OS AI development) when w
 - [Conventions](#conventions)
 - [Environment Variables](#environment-variables)
 - [Adding New Features](#adding-new-features)
+- [Claude Code Swarm System](#claude-code-swarm-system)
 
 ### AI & Memory Systems
 - [Memory System ([MEMORY])](#memory-system-memory)
@@ -520,6 +521,68 @@ Tools in `tools/` directory, invoked via `br <tool>`:
 | **Metrics** | `br metrics` | Dashboard and monitoring |
 | **Notify** | `br notify` | Multi-channel notifications |
 | **Agent Router** | `br agent` | Multi-agent task routing |
+| **Swarm** | `br swarm` | Claude Code swarm orchestrator (parallel agents via PRs) |
+
+## Claude Code Swarm System
+
+The swarm system launches parallel Claude Code agents, each working on a separate
+branch, coordinated through GitHub issues and PRs. Agents communicate via PR
+comments -- real-time group calls that are fully auditable.
+
+### Swarm Commands
+```bash
+# Launch a swarm with 4 agents
+br swarm launch "Add health check endpoints" --agents 4
+
+# Plan without creating branches/PRs
+br swarm dry-run "Refactor auth module" --agents 3
+
+# Check swarm status
+br swarm status [swarm-id]
+
+# Live monitoring dashboard
+br swarm monitor [swarm-id]
+
+# List all swarms
+br swarm list
+
+# Cancel a swarm
+br swarm cancel <swarm-id>
+```
+
+### How It Works
+1. **Plan**: Task is broken into subtasks matched to agent specialties
+2. **Branch**: Each agent gets a branch: `swarm/<swarm-id>/<agent>`
+3. **Issue**: A tracking issue is created with checkboxes for each agent
+4. **PRs**: Draft PRs are opened from each agent branch to the base
+5. **Work**: Claude Code sessions pick up agent branches and implement
+6. **Coordinate**: Agents comment on each other's PRs with updates
+7. **Merge**: When all agents complete, PRs are merged to base
+
+### Agent Roles in Swarms
+| Agent | Specialty | Swarm Role |
+|-------|-----------|------------|
+| **LUCIDIA** | Architecture & reasoning | Design interfaces and system structure |
+| **ALICE** | Routing & API design | Implement endpoints and integration |
+| **OCTAVIA** | Compute & infrastructure | Build core logic and services |
+| **PRISM** | Analysis & testing | Write tests and validation |
+| **ECHO** | Documentation & memory | Write docs and update CLAUDE.md |
+| **CIPHER** | Security & hardening | Add security checks and input validation |
+| **ARIA** | Frontend & UX | Build UI components |
+| **SILAS** | Engineering & implementation | Implement CLI commands and tooling |
+
+### Swarm Options
+| Option | Description |
+|--------|-------------|
+| `--agents N`, `-n N` | Number of agents (2-8, default: 4) |
+| `--base BRANCH`, `-b` | Base branch (default: main) |
+| `--repo SLUG`, `-r` | Repository org/repo (auto-detected) |
+| `--dry-run` | Plan only, don't create branches/PRs |
+
+### Swarm Data
+- **Plans**: `~/.blackroad/swarm/plans/<swarm-id>.json`
+- **Registry**: `~/.blackroad/swarm/registry/<swarm-id>.json`
+- **Logs**: `~/.blackroad/swarm/logs/<swarm-id>.log`
 
 ## Key Subprojects & Commands
 
