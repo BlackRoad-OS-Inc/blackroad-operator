@@ -100,7 +100,7 @@ IPs change. Planes do not. Every device and service is assigned to one or more n
 
 | Property | Value |
 |----------|-------|
-| **Hostname** | blackroad os-infinity |
+| **Hostname** | blackroad-os-infinity |
 | **Role** | Primary cloud server, failover |
 | **Provider** | DigitalOcean |
 | **Capacity** | Failover (0 default agents) |

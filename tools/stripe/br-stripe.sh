@@ -523,10 +523,8 @@ cmd_account() {
 
     local response=$(stripe_api GET "/account")
     local acct_id=$(json_val "$response" "id")
-    local business_name=$(json_val "$response" "business_profile" 2>/dev/null)
     local country=$(json_val "$response" "country")
     local email=$(json_val "$response" "email")
-    local company_name=$(echo "$response" | grep -o '"company":{[^}]*}' | head -1)
     local display_name=$(echo "$response" | grep -o '"display_name":"[^"]*"' | head -1 | cut -d'"' -f4)
     local business_type=$(json_val "$response" "business_type")
     local charges_enabled=$(json_bool "$response" "charges_enabled")
@@ -534,14 +532,14 @@ cmd_account() {
     local details_submitted=$(json_bool "$response" "details_submitted")
 
     # Company fields (nested inside "company" object)
-    local company_block=$(echo "$response" | grep -oP '"company"\s*:\s*\{[^{}]*(\{[^{}]*\}[^{}]*)*\}' | head -1)
+    local company_block=$(echo "$response" | grep -o '"company"[[:space:]]*:[[:space:]]*{[^{}]*\({[^{}]*}[^{}]*\)*}' | head -1)
     local company_name_val=$(echo "$company_block" | grep -o '"name":"[^"]*"' | head -1 | cut -d'"' -f4)
     local company_structure=$(echo "$company_block" | grep -o '"structure":"[^"]*"' | head -1 | cut -d'"' -f4)
     local tax_id_provided=$(echo "$company_block" | grep -o '"tax_id_provided":[a-z]*' | head -1 | grep -o '[a-z]*$')
     local company_phone=$(echo "$company_block" | grep -o '"phone":"[^"]*"' | head -1 | cut -d'"' -f4)
 
     # Address
-    local address_block=$(echo "$company_block" | grep -oP '"address"\s*:\s*\{[^}]*\}' | head -1)
+    local address_block=$(echo "$company_block" | grep -o '"address"[[:space:]]*:[[:space:]]*{[^}]*}' | head -1)
     local city=$(echo "$address_block" | grep -o '"city":"[^"]*"' | head -1 | cut -d'"' -f4)
     local state=$(echo "$address_block" | grep -o '"state":"[^"]*"' | head -1 | cut -d'"' -f4)
     local postal=$(echo "$address_block" | grep -o '"postal_code":"[^"]*"' | head -1 | cut -d'"' -f4)
@@ -614,6 +612,8 @@ cmd_account() {
     # Dump raw response to file for inspection
     local dump_file="$HOME/.blackroad/stripe-account-dump.json"
     echo "$response" > "$dump_file"
+    chmod 600 "$dump_file"
+    echo -e "${YELLOW}WARNING: $dump_file contains sensitive account data — do not commit${NC}"
     echo -e "${DIM}Full API response saved to: $dump_file${NC}"
 }
 
@@ -626,13 +626,13 @@ cmd_atlas() {
     local business_type=$(json_val "$response" "business_type")
 
     # Company details
-    local company_block=$(echo "$response" | grep -oP '"company"\s*:\s*\{[^{}]*(\{[^{}]*\}[^{}]*)*\}' | head -1)
+    local company_block=$(echo "$response" | grep -o '"company"[[:space:]]*:[[:space:]]*{[^{}]*\({[^{}]*}[^{}]*\)*}' | head -1)
     local company_name_val=$(echo "$company_block" | grep -o '"name":"[^"]*"' | head -1 | cut -d'"' -f4)
     local company_structure=$(echo "$company_block" | grep -o '"structure":"[^"]*"' | head -1 | cut -d'"' -f4)
     local tax_id_provided=$(echo "$company_block" | grep -o '"tax_id_provided":[a-z]*' | head -1 | grep -o '[a-z]*$')
 
     # Address
-    local address_block=$(echo "$company_block" | grep -oP '"address"\s*:\s*\{[^}]*\}' | head -1)
+    local address_block=$(echo "$company_block" | grep -o '"address"[[:space:]]*:[[:space:]]*{[^}]*}' | head -1)
     local state=$(echo "$address_block" | grep -o '"state":"[^"]*"' | head -1 | cut -d'"' -f4)
 
     echo -e "${CYAN}Company:${NC}     ${company_name_val:-Unknown}"
@@ -743,7 +743,7 @@ cmd_e2e_test() {
         run_test "GET /v1/account" "pass"
 
         # Company name
-        local co_block=$(echo "$account" | grep -oP '"company"\s*:\s*\{[^{}]*(\{[^{}]*\}[^{}]*)*\}' | head -1)
+        local co_block=$(echo "$account" | grep -o '"company"[[:space:]]*:[[:space:]]*{[^{}]*\({[^{}]*}[^{}]*\)*}' | head -1)
         local co_name=$(echo "$co_block" | grep -o '"name":"[^"]*"' | head -1 | cut -d'"' -f4)
         if [[ -n "$co_name" ]]; then
             run_test "Company name on file ($co_name)" "pass"

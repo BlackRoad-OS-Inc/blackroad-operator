@@ -66,7 +66,7 @@ Run `br stripe products create` or use `production/provision-stripe.sh` to creat
 
 | Secret Name | Where Used | Storage Location | Status |
 |---|---|---|---|
-| `GOOGLE_SERVICE_ACCOUNT_KEY` | Drive API, file sync, photo backgrounds | Railway, `~/.blackroad/google-sa.json` | **REQUIRED** |
+| `GOOGLE_SERVICE_ACCOUNT_KEY_BASE64` | Drive API, file sync, photo backgrounds | Railway, `~/.blackroad/google-sa.json` | **REQUIRED** |
 | `GOOGLE_DRIVE_FOLDER_ID` | Root shared folder for assets | Railway, Vercel | **REQUIRED** |
 | `GOOGLE_CLIENT_ID` | OAuth2 for user-facing Drive access | Vercel (NEXT_PUBLIC) | **OPTIONAL** |
 | `GOOGLE_CLIENT_SECRET` | OAuth2 token exchange | Railway | **OPTIONAL** |
@@ -183,7 +183,7 @@ STRIPE_PRICE_PRO_MONTHLY
 STRIPE_PRICE_PRO_YEARLY
 STRIPE_PRICE_ENT_MONTHLY
 STRIPE_PRICE_ENT_YEARLY
-GOOGLE_SERVICE_ACCOUNT_KEY
+GOOGLE_SERVICE_ACCOUNT_KEY_BASE64
 GOOGLE_DRIVE_FOLDER_ID
 CLOUDFLARE_API_TOKEN
 CLOUDFLARE_ACCOUNT_ID

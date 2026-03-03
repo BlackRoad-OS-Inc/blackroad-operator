@@ -80,7 +80,8 @@ jobs:
             echo "Attempt $i: status $STATUS, retrying..."
             sleep 5
           done
-          echo "Warning: health check did not return 200, deployment may still be propagating"
+          echo "::error::Health check failed for kpi-${{ matrix.worker }}: last status $STATUS"
+          exit 1
 
   notify:
     name: Deployment Summary

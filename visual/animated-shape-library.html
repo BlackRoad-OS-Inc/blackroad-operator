@@ -46,9 +46,9 @@ margin-bottom: 14px;
 .pulse-circle {
 width: 50px; height: 50px; border-radius: 50%;
 background: #fff;
-animation: circlePulse 2s ease-in-out infinite;
+animation: br-pulse 2s ease-in-out infinite;
 }
-@keyframes circlePulse {
+@keyframes br-pulse {
 0%, 100% { transform: scale(1); opacity: 1; }
 50% { transform: scale(1.4); opacity: 0.4; }
 }
@@ -273,20 +273,20 @@ width: 36px; height: 36px; border: 2px solid #fff; border-radius: 50%;
 .infinity-loop::after { right: 0; }
 .infinity-dot {
 width: 8px; height: 8px; border-radius: 50%; background: #fff;
-position: absolute; top: 50%; left: 50%; margin-top: -4px; margin-left: -4px;
+position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
 animation: infinityPath 3s linear infinite;
 }
 @keyframes infinityPath {
-  /* Smooth figure-eight (∞) path around the center of .infinity-loop */
-  0%   { transform: translate(-18px, 0); }      /* leftmost point */
-  12.5% { transform: translate(-12px, -8px); }  /* upper-left */
-  25%  { transform: translate(0, 0); }          /* center crossover */
-  37.5% { transform: translate(12px, -8px); }   /* upper-right */
-  50%  { transform: translate(18px, 0); }       /* rightmost point */
-  62.5% { transform: translate(12px, 8px); }    /* lower-right */
-  75%  { transform: translate(0, 0); }          /* center crossover */
-  87.5% { transform: translate(-12px, 8px); }   /* lower-left */
-  100% { transform: translate(-18px, 0); }      /* back to leftmost */
+  /* Smooth figure-eight path using percentage offsets relative to container */
+  0%    { left: 5%;  top: 50%; }   /* leftmost point */
+  12.5% { left: 20%; top: 30%; }   /* upper-left */
+  25%   { left: 50%; top: 50%; }   /* center crossover */
+  37.5% { left: 80%; top: 30%; }   /* upper-right */
+  50%   { left: 95%; top: 50%; }   /* rightmost point */
+  62.5% { left: 80%; top: 70%; }   /* lower-right */
+  75%   { left: 50%; top: 50%; }   /* center crossover */
+  87.5% { left: 20%; top: 70%; }   /* lower-left */
+  100%  { left: 5%;  top: 50%; }   /* back to leftmost */
 }
 
 /* 19. Scan Line */
@@ -325,9 +325,9 @@ animation: spiralPulse 3s ease-in-out infinite;
 /* 21. Typewriter Cursor */
 .typewriter-cursor {
 width: 3px; height: 40px; background: #fff;
-animation: cursorBlink 1s step-end infinite;
+animation: br-blink 1s step-end infinite;
 }
-@keyframes cursorBlink {
+@keyframes br-blink {
 0%, 100% { opacity: 1; }
 50% { opacity: 0; }
 }
@@ -381,7 +381,6 @@ animation: helix 1.5s ease-in-out infinite;
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
       animation: none !important;
-      animation-play-state: paused !important;
       transition: none !important;
     }
   }

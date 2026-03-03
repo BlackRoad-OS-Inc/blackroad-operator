@@ -21,7 +21,7 @@ DIM=$'\033[2m'
 ITALIC=$'\033[3m'
 NC=$'\033[0m'
 
-BR_ROOT="${BR_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
+BR_ROOT="${BR_ROOT:-$(cd "$(dirname "${0:A}")/../.." && pwd)}"
 OLLAMA_URL="${BLACKROAD_OLLAMA_URL:-http://localhost:11434}"
 DB="$HOME/.blackroad/fleet-nodes.db"
 

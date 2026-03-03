@@ -52,11 +52,8 @@ deploy_workflow_to_repo() {
   local workflow_file="$3"
   local workflow_name=$(basename "${workflow_file}")
 
-  # Check if .github/workflows exists
-  local has_workflows=$(gh api "repos/${org}/${repo}/contents/.github/workflows" -q 'length' 2>/dev/null || echo "0")
-
   # Create workflow via API
-  local content=$(base64 -w 0 < "${workflow_file}")
+  local content=$(base64 < "${workflow_file}" | tr -d '\n')
   local path=".github/workflows/${workflow_name}"
 
   # Check if file exists

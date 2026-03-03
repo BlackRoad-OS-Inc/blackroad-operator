@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#0a0a12">
@@ -1074,7 +1074,7 @@
         card.appendChild(info);
 
         scroll.appendChild(card);
-        sceneCanvases.push({ canvas, render: scene.render });
+        sceneCanvases.push({ canvas, ctx: canvas.getContext('2d'), render: scene.render });
       });
     }
 
@@ -1307,9 +1307,11 @@
     }
 
     // ===== PREVIEW CANVAS (Search view) =====
+    let _previewCtx = null;
     function renderPreview(time) {
       const canvas = document.getElementById('preview-canvas');
-      const ctx = canvas.getContext('2d');
+      if (!_previewCtx) _previewCtx = canvas.getContext('2d');
+      const ctx = _previewCtx;
       ctx.clearRect(0, 0, 200, 140);
 
       // Mini office scene
@@ -1328,9 +1330,11 @@
     }
 
     // ===== MORE MASCOT =====
+    let _moreMascotCtx = null;
     function renderMoreMascot(time) {
       const canvas = document.getElementById('more-mascot');
-      const ctx = canvas.getContext('2d');
+      if (!_moreMascotCtx) _moreMascotCtx = canvas.getContext('2d');
+      const ctx = _moreMascotCtx;
       ctx.clearRect(0, 0, 120, 80);
       drawSplashRobot(ctx, 48, 16, 0, time);
     }
@@ -1348,7 +1352,7 @@
       // Scene cards animate when home is visible
       if (currentView === 'home') {
         sceneCanvases.forEach(s => {
-          s.render(s.canvas.getContext('2d'), animTime);
+          s.render(s.ctx, animTime);
         });
       }
 

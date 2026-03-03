@@ -1,6 +1,6 @@
 #!/bin/zsh
 # BR Note - Quick Developer Notes
-BR_ROOT="${BR_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
+BR_ROOT="${BR_ROOT:-$(cd "$(dirname "${0:A}")/../.." && pwd)}"
 NOTE_HOME="${BR_ROOT}/tools/quick-notes"
 NOTES_FILE="${NOTE_HOME}/notes.md"
 AMBER='\033[38;5;214m'; PINK='\033[38;5;205m'; VIOLET='\033[38;5;135m'; BBLUE='\033[38;5;69m'

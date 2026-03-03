@@ -4,7 +4,7 @@
 # Save, retrieve, and manage code snippets
 #===============================================================================
 
-BR_ROOT="${BR_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
+BR_ROOT="${BR_ROOT:-$(cd "$(dirname "${0:A}")/../.." && pwd)}"
 SNIPPET_HOME="${BR_ROOT}/tools/snippet-manager"
 SNIPPET_DB="${SNIPPET_HOME}/snippets.db"
 

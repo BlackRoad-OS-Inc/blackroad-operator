@@ -6,8 +6,6 @@
  *
  * Endpoints:
  *   GET  /fleet           — full fleet status
- *   GET  /agents          — individual agent status (paginated)
- *   GET  /agents/:id      — single agent detail
  *   POST /heartbeat       — agent heartbeat ingestion
  *   GET  /tasks           — task distribution summary
  *   GET  /performance     — fleet performance KPIs

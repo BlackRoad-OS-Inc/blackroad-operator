@@ -28,6 +28,17 @@ function detectTarget(cwd: string): DeployTarget {
   )
 }
 
+/** Allowed characters for shell arguments: alphanumeric, hyphens, underscores, dots, colons */
+const SAFE_SHELL_ARG = /^[a-zA-Z0-9._:@\/-]+$/
+
+function assertSafeArg(value: string, label: string): void {
+  if (!SAFE_SHELL_ARG.test(value)) {
+    throw new Error(
+      `Refusing to interpolate unsafe ${label} into shell command: "${value}"`,
+    )
+  }
+}
+
 function exec(cmd: string): { stdout: string; stderr: string; code: number } {
   try {
     const stdout = execSync(cmd, { encoding: 'utf8', timeout: 120_000 })
@@ -54,6 +65,7 @@ export function deployToCloudflare(opts: DeployOptions): DeployResult {
     }
   }
 
+  assertSafeArg(opts.env, 'env')
   const envFlag = opts.env !== 'production' ? ` --env ${opts.env}` : ''
   const result = exec(`npx wrangler deploy${envFlag}`)
 
@@ -104,6 +116,7 @@ export function deployToVercel(opts: DeployOptions): DeployResult {
     }
   }
 
+  assertSafeArg(opts.env, 'env')
   const prodFlag = opts.env === 'production' ? ' --prod' : ''
   const result = exec(`npx vercel${prodFlag} --yes`)
 
@@ -124,6 +137,14 @@ export function deployToVercel(opts: DeployOptions): DeployResult {
 }
 
 export function deployToPi(host: string, opts: DeployOptions): DeployResult {
+  // Validate host to prevent command injection (must be an IP or hostname)
+  const hostPattern = /^[a-zA-Z0-9._-]+$/
+  if (!hostPattern.test(host)) {
+    const message = `Invalid host: "${host}". Allowed pattern: [a-zA-Z0-9._-]+`
+    logger.error(message)
+    return { provider: `pi:${host}`, success: false, error: message }
+  }
+
   if (opts.dryRun) {
     logger.info(`[dry-run] Would deploy to Pi @ ${host}`)
     return { provider: `pi:${host}`, success: true }

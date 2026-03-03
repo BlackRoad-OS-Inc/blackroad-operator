@@ -7,7 +7,7 @@ AMBER='\033[38;5;214m'; PINK='\033[38;5;205m'; VIOLET='\033[38;5;135m'; BBLUE='\
 GREEN='\033[0;32m'; RED='\033[0;31m'; BOLD='\033[1m'; DIM='\033[2m'; NC='\033[0m'
 CYAN="$AMBER"; YELLOW="$PINK"; BLUE="$BBLUE"; MAGENTA="$VIOLET"; PURPLE="$VIOLET"
 
-BR_ROOT="${BR_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
+BR_ROOT="${BR_ROOT:-$(cd "$(dirname "${0:A}")/../.." && pwd)}"
 PAIR_HOME="${BR_ROOT}/tools/pair-programming"
 SESSION_FILE="${PAIR_HOME}/current-session.json"
 AGENT_HOME="${HOME}/.blackroad-agents"

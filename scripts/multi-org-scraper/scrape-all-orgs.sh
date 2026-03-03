@@ -308,7 +308,7 @@ for r in sorted(repos, key=lambda x: -x['score'])[:10]:
   done
 
   # Add totals at top
-  sed -i "s/## Summary/## Summary\n\n- **Total Organizations**: ${#ORGS[@]}\n- **Total Repositories**: ${total_repos}\n- **Production Candidates**: ${total_products}\n- **Scan Date**: $(date -u +%Y-%m-%dT%H:%M:%SZ)/" "${report_file}"
+  sed -i'' "s/## Summary/## Summary\n\n- **Total Organizations**: ${#ORGS[@]}\n- **Total Repositories**: ${total_repos}\n- **Production Candidates**: ${total_products}\n- **Scan Date**: $(date -u +%Y-%m-%dT%H:%M:%SZ)/" "${report_file}" 2>/dev/null || sed -i "s/## Summary/## Summary\n\n- **Total Organizations**: ${#ORGS[@]}\n- **Total Repositories**: ${total_repos}\n- **Production Candidates**: ${total_products}\n- **Scan Date**: $(date -u +%Y-%m-%dT%H:%M:%SZ)/" "${report_file}"
 
   log "Master report: ${report_file}"
 }

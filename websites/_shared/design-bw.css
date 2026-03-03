@@ -37,7 +37,9 @@
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}
 
 body {
   background: var(--black);
@@ -49,6 +51,7 @@ body {
 }
 
 a { color: inherit; text-decoration: none; }
+a:focus-visible, button:focus-visible { outline: 2px solid #F5A623; outline-offset: 2px; }
 img { max-width: 100%; display: block; }
 
 /* ── Typography ─────────────────────────────────────── */
@@ -332,3 +335,14 @@ label {
 .justify-center { justify-content: center; }
 .wrap { flex-wrap: wrap; }
 .w-full { width: 100%; }
+
+/* ── Reduced Motion ────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -184,10 +184,25 @@ export default {
     const stub = env.KPI_STORE.get(id);
 
     if (request.method === 'POST' && (path === '/ingest' || path === '/ingest/batch')) {
+      // Auth check: require a valid token for ingestion
+      const authHeader = request.headers.get('Authorization') || '';
+      const token = authHeader.replace('Bearer ', '').trim();
+      if (env.INGEST_TOKEN && token !== env.INGEST_TOKEN) {
+        return json({ error: 'Unauthorized' }, 401);
+      }
+
+      // Enforce batch size limit: reject payloads with more than 1000 metrics
+      let body;
+      try { body = await request.json(); } catch { return json({ error: 'invalid JSON' }, 400); }
+      const points = Array.isArray(body) ? body : [body];
+      if (points.length > 1000) {
+        return json({ error: `Batch too large: ${points.length} metrics exceeds limit of 1000` }, 413);
+      }
+
       return stub.fetch(new Request('https://kpi/ingest', {
         method: 'POST',
-        body: request.body,
-        headers: request.headers,
+        body: JSON.stringify(points),
+        headers: { 'Content-Type': 'application/json' },
       }));
     }
 

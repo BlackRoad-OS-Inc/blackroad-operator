@@ -16,9 +16,12 @@ fi
 
 echo -e "${GREEN}[BlackRoad Security Gate]${NC} Scanning staged files..."
 
-for file in $STAGED; do
+while IFS= read -r file; do
   case "$file" in
-    .env|.env.*|!.env.example)
+    .env.example)
+      # Explicitly allow .env.example
+      ;;
+    .env|.env.*)
       if [ "$file" != ".env.example" ]; then
         echo -e "${RED}BLOCKED${NC}: $file - environment file with potential secrets"
         BLOCKED=true
@@ -48,17 +51,17 @@ for file in $STAGED; do
       BLOCKED=true
       ;;
   esac
-done
+done <<< "$STAGED"
 
 PATTERNS=(
   # AI Provider Keys
-  'ANTHROPIC_API_KEY\s*='
-  'OPENAI_API_KEY\s*='
-  'GOOGLE_API_KEY\s*='
-  'HUGGINGFACE_TOKEN\s*='
-  'HF_TOKEN\s*='
-  'COHERE_API_KEY\s*='
-  'REPLICATE_API_TOKEN\s*='
+  'ANTHROPIC_API_KEY[[:space:]]*='
+  'OPENAI_API_KEY[[:space:]]*='
+  'GOOGLE_API_KEY[[:space:]]*='
+  'HUGGINGFACE_TOKEN[[:space:]]*='
+  'HF_TOKEN[[:space:]]*='
+  'COHERE_API_KEY[[:space:]]*='
+  'REPLICATE_API_TOKEN[[:space:]]*='
   # Generic API key patterns
   'sk-[a-zA-Z0-9]{20,}'
   'sk-ant-[a-zA-Z0-9-]{20,}'
@@ -70,18 +73,18 @@ PATTERNS=(
   'github_pat_[a-zA-Z0-9_]{22,}'
   # AWS credentials
   'AKIA[0-9A-Z]{16}'
-  'aws_secret_access_key\s*='
+  'aws_secret_access_key[[:space:]]*='
   # Slack tokens
   'xox[bpoas]-[a-zA-Z0-9-]+'
   # Cloud provider tokens
-  'CLOUDFLARE_API_TOKEN\s*=\s*[a-zA-Z0-9_-]{40}'
-  'RAILWAY_TOKEN\s*='
-  'VERCEL_TOKEN\s*='
-  'DIGITALOCEAN_ACCESS_TOKEN\s*='
+  'CLOUDFLARE_API_TOKEN[[:space:]]*=[[:space:]]*[a-zA-Z0-9_-]{40}'
+  'RAILWAY_TOKEN[[:space:]]*='
+  'VERCEL_TOKEN[[:space:]]*='
+  'DIGITALOCEAN_ACCESS_TOKEN[[:space:]]*='
   'dop_v1_[a-f0-9]{64}'
   # Payment / SaaS
-  'STRIPE_API_KEY\s*=\s*sk_'
-  'SENDGRID_API_KEY\s*=\s*SG\.'
+  'STRIPE_API_KEY[[:space:]]*=[[:space:]]*sk_'
+  'SENDGRID_API_KEY[[:space:]]*=[[:space:]]*SG\.'
   # Database URLs with credentials
   'postgres(ql)?://[^:]+:[^@]+@'
   'mysql://[^:]+:[^@]+@'
@@ -91,9 +94,9 @@ PATTERNS=(
   '-----BEGIN (RSA |EC |DSA )?PRIVATE KEY-----'
   '-----BEGIN OPENSSH PRIVATE KEY-----'
   # JWT and session secrets
-  'JWT_SECRET\s*=\s*[a-zA-Z0-9+/=]{32,}'
-  'NEXTAUTH_SECRET\s*=\s*[a-zA-Z0-9+/=]{32,}'
-  'SESSION_SECRET\s*=\s*[a-zA-Z0-9+/=]{32,}'
+  'JWT_SECRET[[:space:]]*=[[:space:]]*[a-zA-Z0-9+/=]{32,}'
+  'NEXTAUTH_SECRET[[:space:]]*=[[:space:]]*[a-zA-Z0-9+/=]{32,}'
+  'SESSION_SECRET[[:space:]]*=[[:space:]]*[a-zA-Z0-9+/=]{32,}'
 )
 
 for pattern in "${PATTERNS[@]}"; do
@@ -108,14 +111,14 @@ for pattern in "${PATTERNS[@]}"; do
   fi
 done
 
-for file in $STAGED; do
+while IFS= read -r file; do
   if [ -f "$file" ]; then
     SIZE=$(wc -c < "$file" 2>/dev/null)
     if [ "$SIZE" -gt 5242880 ] 2>/dev/null; then
       echo -e "${YELLOW}WARNING${NC}: Large file ($((SIZE / 1048576))MB): $file"
     fi
   fi
-done
+done <<< "$STAGED"
 
 if [ "$BLOCKED" = true ]; then
   echo -e "${RED}Commit blocked by BlackRoad Security Gate.${NC}"

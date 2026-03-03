@@ -6,9 +6,6 @@ All output returns to BlackRoad-OS-Inc/blackroad-operator.
 """
 
 import json
-import os
-import sys
-import subprocess
 from datetime import datetime, timezone
 from dataclasses import dataclass, asdict
 from typing import Optional

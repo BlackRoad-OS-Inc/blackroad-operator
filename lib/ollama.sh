@@ -4,7 +4,7 @@
 #===============================================================================
 
 # Resolve lib directory (works in both bash and zsh)
-_OLLAMA_LIB="${BR_LIB:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}"
+_OLLAMA_LIB="${BR_LIB:-$(cd "$(dirname "${0:A}")" && pwd)}"
 [[ -z "$_BR_COLORS_LOADED" ]] && source "${_OLLAMA_LIB}/colors.sh" && _BR_COLORS_LOADED=1
 [[ -z "$_BR_CONFIG_LOADED" ]] && source "${_OLLAMA_LIB}/config.sh" && _BR_CONFIG_LOADED=1
 [[ -z "$_BR_DB_LOADED" ]] && source "${_OLLAMA_LIB}/db.sh" && _BR_DB_LOADED=1

@@ -1,7 +1,7 @@
 #!/bin/zsh
 # BR Git — AI-powered smart git operations
 
-BR_ROOT="${BR_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
+BR_ROOT="${BR_ROOT:-$(cd "$(dirname "${0:A}")/../.." && pwd)}"
 GIT_TOOLS="${BR_ROOT}/tools/git-integration"
 
 # ── Brand Palette ──────────────────────────────────────────────────────────────

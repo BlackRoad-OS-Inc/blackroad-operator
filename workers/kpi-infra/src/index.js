@@ -13,8 +13,6 @@
  *   GET /status          — full infrastructure status
  *   GET /cloudflare      — Cloudflare workers & pages status
  *   GET /railway         — Railway project status
- *   GET /vercel          — Vercel deployment status
- *   GET /digitalocean    — DigitalOcean droplet status
  *   GET /pi              — Raspberry Pi fleet status
  *   GET /summary         — aggregated infrastructure KPIs
  *   GET /health          — health check
@@ -47,11 +45,13 @@ const RAILWAY_PROJECTS = [
   { id: '1a039a7e-a60c-42c5-be68-e66f9e269209', name: 'BlackRoad Home' },
 ];
 
-const PI_DEVICES = [
-  { hostname: 'blackroad-pi', ip: '192.168.4.64', role: 'Primary', capacity: 22500 },
-  { hostname: 'aria64', ip: '192.168.4.38', role: 'Secondary', capacity: 7500 },
-  { hostname: 'alice', ip: '192.168.4.49', role: 'Tertiary', capacity: 0 },
-];
+function piDevices(env) {
+  return [
+    { hostname: 'blackroad-pi', ip: env.PI_IP_PRIMARY || 'not-set', role: 'Primary', capacity: 22500 },
+    { hostname: 'aria64', ip: env.PI_IP_SECONDARY || 'not-set', role: 'Secondary', capacity: 7500 },
+    { hostname: 'alice', ip: env.PI_IP_TERTIARY || 'not-set', role: 'Tertiary', capacity: 0 },
+  ];
+}
 
 const CF_PAGES_PROJECTS = [
   'blackroad-network', 'blackroad-systems', 'blackroad-me', 'lucidia-earth',
@@ -71,7 +71,7 @@ async function checkEndpoint(url, timeout = 5000) {
   try {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeout);
-    const res = await fetch(url, { signal: controller.signal, method: 'HEAD' });
+    const res = await fetch(url, { signal: controller.signal, method: 'GET' });
     clearTimeout(timer);
     return {
       status: res.status,
@@ -115,8 +115,8 @@ async function checkRailway(env) {
   }));
 }
 
-async function checkPiFleet() {
-  return PI_DEVICES.map(d => ({
+async function checkPiFleet(env) {
+  return piDevices(env).map(d => ({
     ...d,
     status: 'configured',
     checked_at: new Date().toISOString(),
@@ -128,7 +128,7 @@ async function collectAll(env) {
     checkCloudflareWorkers(),
     checkCloudflarePages(),
     checkRailway(env),
-    checkPiFleet(),
+    checkPiFleet(env),
   ]);
 
   const workersUp = workers.filter(w => w.ok).length;
@@ -142,7 +142,7 @@ async function collectAll(env) {
     cloudflare_pages: { total: pages.length, healthy: pagesUp },
     railway: { total: railway.length, configured: railway.length },
     pi_fleet: { total: pis.length, devices: pis.map(p => p.hostname) },
-    digitalocean: { droplets: 1, primary: '159.65.43.12' },
+    digitalocean: { droplets: 1, primary: env.DO_DROPLET_IP || 'not-set' },
     overall_health: workersUp + pagesUp > 0 ? 'operational' : 'degraded',
     collected_at: new Date().toISOString(),
   };
@@ -234,7 +234,7 @@ export default {
 
     if (path === '/pi') {
       let data = env.INFRA_CACHE ? await env.INFRA_CACHE.get('pis', 'json') : null;
-      if (!data) data = await checkPiFleet();
+      if (!data) data = await checkPiFleet(env);
       return json({ ok: true, devices: data, ts: new Date().toISOString() });
     }
 

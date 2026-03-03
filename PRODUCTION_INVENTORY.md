@@ -23,7 +23,7 @@
 - [Railway Services (11 configs)](#railway-services-11-configs)
 - [Vercel Apps (4 configs)](#vercel-apps-4-configs)
 - [Device Fleet (8 nodes)](#device-fleet-8-nodes)
-- [Agent Registry (17 agents)](#agent-registry-17-agents)
+- [Agent Registry (13 Named Agents)](#agent-registry-13-named-agents)
 - [GitHub Organizations (17 orgs)](#github-organizations-17-orgs)
 - [CLI Tools (84+ tools)](#cli-tools-84-tools)
 - [Dashboards (128 scripts)](#dashboards-128-scripts)
@@ -314,7 +314,7 @@ Configured via `wrangler.toml` `[[kv_namespaces]]` bindings.
 | 5 | Cecilia | cecilia | DB + DNS | `192.168.4.89` | 4GB |
 | 6 | Lucidia | lucidia | Object storage | `192.168.4.81` | 1GB |
 | 7 | Anastasia | anastasia | Experimental | `174.138.44.45` | — |
-| 8 | Shellfish | shellfish (codex-infinity) | Cloud bridge (DO) | `159.65.43.12` | 2GB |
+| 8 | Shellfish | shellfish (codex-infinity) | Cloud bridge (DO) | `<DROPLET_IP>` | 2GB |
 
 ### Agent Capacity Distribution
 
@@ -327,7 +327,13 @@ Configured via `wrangler.toml` `[[kv_namespaces]]` bindings.
 
 ---
 
-## Agent Registry (17 agents)
+## Agent Registry (13 Named Agents)
+
+> **Note:** The 30,000 "Total Agents" referenced at the top of this document refers to the
+> distributed agent runtime capacity across the device fleet (22,500 on Octavia Pi + 7,500
+> on Lucidia Pi). These are ephemeral worker slots, not individually named agents. The 13
+> named agents listed below are the distinct AI personalities with unique identities, roles,
+> and email addresses.
 
 ### AI Agents
 
@@ -338,9 +344,9 @@ Configured via `wrangler.toml` `[[kv_namespaces]]` bindings.
 | 3 | **OCTAVIA** | octavia@blackroad.io | Architect | 192.168.4.38 | qwen2.5-coder:3b | Green |
 | 4 | **ARIA** | aria@blackroad.io | Dreamer | 192.168.4.82 | llama3.2:3b | Blue |
 | 5 | **CECILIA (CECE)** | cecilia@blackroad.io | Core Intelligence | 192.168.4.89 | cece3b:latest | Yellow |
-| 6 | **CIPHER** | cipher@blackroad.io | Guardian | 159.65.43.12 | deepseek-coder:1.3b | Red |
+| 6 | **CIPHER** | cipher@blackroad.io | Guardian | <DROPLET_IP> | deepseek-coder:1.3b | Red |
 | 7 | **ANASTASIA** | anastasia@blackroad.io | Infrastructure | 174.138.44.45 | — | Dim |
-| 8 | **GEMATRIA** | gematria@blackroad.io | Edge Gateway | 159.65.43.12 | — | Dim |
+| 8 | **GEMATRIA** | gematria@blackroad.io | Edge Gateway | <DROPLET_IP> | — | Dim |
 | 9 | **PRISM** | prism@blackroad.io | Analyst | — | — | — |
 | 10 | **ECHO** | echo@blackroad.io | Memory | — | — | — |
 | 11 | **ORACLE** | oracle@blackroad.io | — | — | — | — |
@@ -629,7 +635,7 @@ railway variables set GOOGLE_SERVICE_ACCOUNT_KEY=$(base64 < service-account.json
 ### Infrastructure (DigitalOcean)
 
 - [ ] Verify droplets accessible
-- [ ] SSH to shellfish: `ssh root@159.65.43.12`
+- [ ] SSH to shellfish: `ssh root@<DROPLET_IP>`
 - [ ] SSH to anastasia: `ssh root@174.138.44.45`
 
 ### Device Fleet

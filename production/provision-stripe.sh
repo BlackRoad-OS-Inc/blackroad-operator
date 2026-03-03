@@ -25,7 +25,7 @@ DIM='\033[2m'
 BOLD='\033[1m'
 NC='\033[0m'
 
-OUTPUT_FILE="production/.stripe-provision-output.json"
+OUTPUT_FILE="$HOME/.blackroad/.stripe-provision-output.json"
 
 # ─── Auth ───
 if [[ -z "${STRIPE_SECRET_KEY:-}" ]]; then
@@ -121,8 +121,12 @@ echo ""
 
 # --- BlackRoad OS Enterprise ---
 echo -e "${AMBER}Creating: BlackRoad OS Enterprise${NC}"
-ENT_PROD=$(stripe_api POST "/products" \
-  "name=BlackRoad+OS+Enterprise&description=Unlimited+agents,+SSO/SAML,+SLA+99.9%%,+dedicated+support,+audit+logs&metadata[tier_id]=enterprise&metadata[product_group]=core")
+ENT_PROD=$(curl -s -X POST "https://api.stripe.com/v1/products" \
+  -H "Authorization: Bearer $STRIPE_SECRET_KEY" \
+  -d "name=BlackRoad+OS+Enterprise" \
+  --data-urlencode "description=Unlimited agents, SSO/SAML, SLA 99.9%, dedicated support, audit logs" \
+  -d "metadata[tier_id]=enterprise" \
+  -d "metadata[product_group]=core")
 ENT_PROD_ID=$(extract_id "$ENT_PROD")
 check_error "$ENT_PROD" "Enterprise Product" || exit 1
 echo -e "  ${GREEN}Product: $ENT_PROD_ID${NC}"
@@ -249,6 +253,8 @@ for repo_info in \
   "blackroad-pi-ops:Pi+Ops:Raspberry+Pi+operations+and+management"; do
 
   IFS=':' read -r repo_slug name desc <<< "$repo_info"
+  env_slug="${repo_slug^^}"
+  env_slug="${env_slug//-/_}"
 
   echo -e "${AMBER}Creating: $name${NC}"
   REPO_PROD=$(stripe_api POST "/products" \
@@ -263,23 +269,29 @@ for repo_info in \
   # Basic $9/mo
   BASIC=$(stripe_api POST "/prices" \
     "product=$REPO_PROD_ID&unit_amount=900&currency=usd&recurring[interval]=month&metadata[tier]=basic&metadata[repo]=$repo_slug")
-  BASIC_ID=$(extract_id "$BASIC")
-  add_result "STRIPE_PRICE_${repo_slug^^}_BASIC" "$BASIC_ID"
-  echo -e "  ${GREEN}Basic: $BASIC_ID ($9/mo)${NC}"
+  if check_error "$BASIC" "$name Basic Price"; then
+    BASIC_ID=$(extract_id "$BASIC")
+    add_result "STRIPE_PRICE_${env_slug}_BASIC" "$BASIC_ID"
+    echo -e "  ${GREEN}Basic: $BASIC_ID ($9/mo)${NC}"
+  fi
 
   # Pro $29/mo
   PRO=$(stripe_api POST "/prices" \
     "product=$REPO_PROD_ID&unit_amount=2900&currency=usd&recurring[interval]=month&metadata[tier]=pro&metadata[repo]=$repo_slug")
-  PRO_ID=$(extract_id "$PRO")
-  add_result "STRIPE_PRICE_${repo_slug^^}_PRO" "$PRO_ID"
-  echo -e "  ${GREEN}Pro: $PRO_ID ($29/mo)${NC}"
+  if check_error "$PRO" "$name Pro Price"; then
+    PRO_ID=$(extract_id "$PRO")
+    add_result "STRIPE_PRICE_${env_slug}_PRO" "$PRO_ID"
+    echo -e "  ${GREEN}Pro: $PRO_ID ($29/mo)${NC}"
+  fi
 
   # Enterprise $99/mo
   ENT=$(stripe_api POST "/prices" \
     "product=$REPO_PROD_ID&unit_amount=9900&currency=usd&recurring[interval]=month&metadata[tier]=enterprise&metadata[repo]=$repo_slug")
-  ENT_ID=$(extract_id "$ENT")
-  add_result "STRIPE_PRICE_${repo_slug^^}_ENT" "$ENT_ID"
-  echo -e "  ${GREEN}Enterprise: $ENT_ID ($99/mo)${NC}"
+  if check_error "$ENT" "$name Enterprise Price"; then
+    ENT_ID=$(extract_id "$ENT")
+    add_result "STRIPE_PRICE_${env_slug}_ENT" "$ENT_ID"
+    echo -e "  ${GREEN}Enterprise: $ENT_ID ($99/mo)${NC}"
+  fi
   echo ""
 done
 
@@ -291,6 +303,7 @@ echo -e "${GREEN}${BOLD}All products and prices provisioned!${NC}"
 echo ""
 
 # Write output JSON
+mkdir -p "$(dirname "$OUTPUT_FILE")"
 cat > "$OUTPUT_FILE" << JSONEOF
 {
   "provisioned_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",

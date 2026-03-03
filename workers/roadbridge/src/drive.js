@@ -292,5 +292,5 @@ export async function getFileMetadata(accessToken, fileId) {
 }
 
 function escapeDriveQuery(str) {
-  return str.replace(/'/g, "\\'");
+  return str.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
 }

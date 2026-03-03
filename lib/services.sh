@@ -3,7 +3,7 @@
 # lib/services.sh — Service connectivity checks for all BlackRoad platforms
 #===============================================================================
 
-_SVC_LIB="${BR_LIB:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}"
+_SVC_LIB="${BR_LIB:-$(cd "$(dirname "${0:A}")" && pwd)}"
 [[ -z "$_BR_COLORS_LOADED" ]] && source "${_SVC_LIB}/colors.sh" && _BR_COLORS_LOADED=1
 [[ -z "$_BR_SYSTEM_LOADED" ]] && source "${_SVC_LIB}/system.sh" && _BR_SYSTEM_LOADED=1
 

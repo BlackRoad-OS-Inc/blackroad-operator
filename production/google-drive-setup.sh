@@ -77,14 +77,14 @@ if [[ ! -f "$SA_KEY_FILE" ]]; then
 fi
 
 # Validate JSON
-if ! python3 -c "import json; json.load(open('$SA_KEY_FILE'))" 2>/dev/null; then
+if ! python3 -c "import json, sys; json.load(open(sys.argv[1]))" "$SA_KEY_FILE" 2>/dev/null; then
   echo -e "${RED}Invalid JSON file: $SA_KEY_FILE${NC}"
   exit 1
 fi
 
 # Extract service account email
-SA_EMAIL=$(python3 -c "import json; print(json.load(open('$SA_KEY_FILE'))['client_email'])" 2>/dev/null)
-PROJECT_ID=$(python3 -c "import json; print(json.load(open('$SA_KEY_FILE'))['project_id'])" 2>/dev/null)
+SA_EMAIL=$(python3 -c "import json, sys; print(json.load(open(sys.argv[1]))['client_email'])" "$SA_KEY_FILE" 2>/dev/null)
+PROJECT_ID=$(python3 -c "import json, sys; print(json.load(open(sys.argv[1]))['project_id'])" "$SA_KEY_FILE" 2>/dev/null)
 
 echo -e "${GREEN}Valid service account key:${NC}"
 echo -e "  Email:   $SA_EMAIL"
@@ -98,24 +98,24 @@ chmod 600 "$SA_DEST"
 echo -e "${GREEN}Key installed to: $SA_DEST${NC}"
 
 # ─── Step 3: Generate Base64 ───
-B64=$(base64 -w 0 "$SA_DEST" 2>/dev/null || base64 "$SA_DEST" 2>/dev/null | tr -d '\n')
+B64_FILE="$BR_DIR/google-sa-base64.txt"
+base64 -w 0 "$SA_DEST" 2>/dev/null > "$B64_FILE" || base64 "$SA_DEST" 2>/dev/null | tr -d '\n' > "$B64_FILE"
+chmod 600 "$B64_FILE"
 echo ""
-echo -e "${PINK}Base64-encoded key for environment variables:${NC}"
-echo ""
-echo "GOOGLE_SERVICE_ACCOUNT_KEY_BASE64=$B64"
+echo -e "${GREEN}Base64-encoded key written to: $B64_FILE${NC}"
 echo ""
 
 # ─── Step 4: Set in providers ───
 echo -e "${PINK}━━━ Set in deployment providers ━━━${NC}"
 echo ""
 echo "# Railway:"
-echo "railway variables set GOOGLE_SERVICE_ACCOUNT_KEY_BASE64='$B64'"
+echo "railway variables set GOOGLE_SERVICE_ACCOUNT_KEY_BASE64=\"\$(cat $B64_FILE)\""
 echo ""
 echo "# GitHub Actions (org-level):"
-echo "gh secret set GOOGLE_SERVICE_ACCOUNT_KEY --body '$B64' --org BlackRoad-OS-Inc"
+echo "gh secret set GOOGLE_SERVICE_ACCOUNT_KEY_BASE64 --body \"\$(cat $B64_FILE)\" --org BlackRoad-OS-Inc"
 echo ""
 echo "# Cloudflare Workers:"
-echo "echo '$B64' | wrangler secret put GOOGLE_SERVICE_ACCOUNT_KEY"
+echo "cat $B64_FILE | wrangler secret put GOOGLE_SERVICE_ACCOUNT_KEY_BASE64"
 echo ""
 
 # ─── Step 5: Drive folder setup ───

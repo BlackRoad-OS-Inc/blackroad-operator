@@ -314,8 +314,8 @@ vercel env add VARIABLE_NAME
 
 | Resource | Details |
 |----------|---------|
-| Primary Droplet | codex-infinity @ `159.65.43.12` |
-| Failover Droplet | shellfish @ `174.138.44.45` |
+| Primary Droplet | codex-infinity @ `<DROPLET_IP>` |
+| Failover Droplet | shellfish @ `<DROPLET_IP>` |
 
 ### Required Keys
 
@@ -545,7 +545,7 @@ export GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account.json
 | Aria | aria | Operations | `ssh pi@aria` |
 | Octavia | octavia | AI inference | `ssh pi@octavia` |
 | Codex | codex | Build / CI | `ssh pi@codex` |
-| Shellfish | shellfish | Cloud bridge (DO) | `ssh root@159.65.43.12` |
+| Shellfish | shellfish | Cloud bridge (DO) | `ssh root@<DROPLET_IP>` |
 | Anastasia | anastasia | Experimental | `ssh pi@anastasia` |
 | Cecilia | cecilia | DB + DNS | `ssh pi@192.168.4.89` |
 | Lucidia | lucidia | Object storage | `ssh pi@192.168.4.81` |

@@ -4,7 +4,7 @@
 # Manages SQLite database for file access patterns and relationships
 #===============================================================================
 
-BR_ROOT="${BR_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
+BR_ROOT="${BR_ROOT:-$(cd "$(dirname "${0:A}")/../.." && pwd)}"
 RADAR_HOME="${BR_ROOT}/tools/context-radar"
 RADAR_DB="${RADAR_HOME}/data/radar.db"
 

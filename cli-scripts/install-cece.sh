@@ -20,7 +20,7 @@ cat << 'EOF'
 EOF
 echo -e "${NC}\n"
 
-BR_ROOT="${BR_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+BR_ROOT="${BR_ROOT:-$(cd "$(dirname "${0:A}")/.." && pwd)}"
 cd "${BR_ROOT}"
 
 # Step 1: Create directories
@@ -71,7 +71,7 @@ echo -e "\n${CYAN}Step 4: Updating br CLI...${NC}"
 
 if ! grep -q "cece)" br 2>/dev/null; then
     # Find the line before the last esac and insert our routes
-    local escaped_root=$(echo "${BR_ROOT}" | sed 's/\//\\\//g')
+    escaped_root=$(echo "${BR_ROOT}" | sed 's/\//\\\//g')
     perl -i -pe "s/(        \\*\\))/        cece)\\n            ${escaped_root}\\/tools\\/cece-identity\\/br-cece.sh \"\\\$@\"\\n            ;;\\n        cece-bootstrap|bootstrap)\\n            ${escaped_root}\\/tools\\/cece-identity\\/br-cece-bootstrap.sh \"\\\$@\"\\n            ;;\\n        \$1/" br
     echo -e "${GREEN}✓ Added CECE routes to br CLI${NC}"
 else

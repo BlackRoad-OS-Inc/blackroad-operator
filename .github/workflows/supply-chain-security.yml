@@ -50,7 +50,7 @@ jobs:
 
           find .github/workflows -name "*.yml" -o -name "*.yaml" | while read workflow; do
             # Find uses: directives that aren't pinned to SHA
-            MATCHES=$(grep -n "uses:" "$workflow" | grep -v '@[a-f0-9]\{40\}' | grep -v "^#" || true)
+            MATCHES=$(grep -n "uses:" "$workflow" | grep -v '@[a-f0-9]\{40\}' | grep -v "^[[:space:]]*#" || true)
             if [ -n "$MATCHES" ]; then
               echo "⚠️ $workflow has unpinned actions:"
               echo "$MATCHES"
@@ -85,7 +85,7 @@ jobs:
 
           # Check Python lockfiles
           if [ -f requirements.txt ]; then
-            UNPINNED=$(grep -c -v '==' requirements.txt 2>/dev/null || echo "0")
+            UNPINNED=$(grep -v '^#' requirements.txt | grep -v '^$' | grep -v '^-' | grep -c -v '==' 2>/dev/null || echo "0")
             if [ "$UNPINNED" -gt 0 ]; then
               echo "⚠️ $UNPINNED unpinned Python dependencies in requirements.txt"
             else
@@ -117,11 +117,11 @@ jobs:
               echo "⚠️  Runs as root (add non-root USER directive)"
             fi
 
-            if grep -q "ADD\s" "$dockerfile" 2>/dev/null; then
+            if grep -q "ADD[[:space:]]" "$dockerfile" 2>/dev/null; then
               echo "⚠️  Uses ADD instead of COPY (prefer COPY for local files)"
             fi
 
-            if grep -q "curl.*\|.*sh\|wget.*\|.*sh" "$dockerfile" 2>/dev/null; then
+            if grep -qE "(curl|wget).*\|.*sh\b" "$dockerfile" 2>/dev/null; then
               echo "⚠️  Pipes downloaded content to shell"
             fi
 

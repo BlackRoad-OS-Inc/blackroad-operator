@@ -9,7 +9,6 @@
  *   GET  /orgs             — all org-level KPIs
  *   GET  /repos            — repo-level KPIs (paginated)
  *   GET  /repos/:org       — repos for a specific org
- *   GET  /activity         — recent commits, PRs, issues across all orgs
  *   GET  /summary          — aggregated summary stats
  *   GET  /health           — health check
  *
@@ -45,10 +44,28 @@ async function ghFetch(path, env, opts = {}) {
   return res.json();
 }
 
+/**
+ * Fetch all pages of repos for an org (handles GitHub pagination).
+ * Returns a flat array of all repo objects.
+ */
+async function ghFetchAllRepos(org, env) {
+  const allRepos = [];
+  let page = 1;
+  const perPage = 100;
+  while (true) {
+    const repos = await ghFetch(`/orgs/${org}/repos?per_page=${perPage}&sort=updated&page=${page}`, env);
+    if (!repos || repos.length === 0) break;
+    allRepos.push(...repos);
+    if (repos.length < perPage) break;
+    page++;
+  }
+  return allRepos;
+}
+
 async function collectOrgMetrics(org, env) {
   const [orgData, repos] = await Promise.all([
     ghFetch(`/orgs/${org}`, env),
-    ghFetch(`/orgs/${org}/repos?per_page=100&sort=updated`, env),
+    ghFetchAllRepos(org, env),
   ]);
 
   if (!orgData) return null;
@@ -222,7 +239,7 @@ export default {
     if (path.startsWith('/repos/')) {
       const org = path.split('/repos/')[1];
       if (!ORGS.includes(org)) return json({ error: `unknown org: ${org}` }, 404);
-      const repos = await ghFetch(`/orgs/${org}/repos?per_page=100&sort=updated`, env);
+      const repos = await ghFetchAllRepos(org, env);
       return json({
         ok: true,
         org,

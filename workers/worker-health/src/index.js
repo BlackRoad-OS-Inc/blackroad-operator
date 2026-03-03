@@ -183,6 +183,18 @@ async function checkAllServices(env) {
   return summary;
 }
 
+// ─── HTML escaping ──────────────────────────────────────────────────────────
+
+function escapeHtml(str) {
+  if (typeof str !== "string") return String(str ?? "");
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 // ─── Dashboard HTML ─────────────────────────────────────────────────────────
 
 function renderDashboard(data) {
@@ -193,10 +205,10 @@ function renderDashboard(data) {
     .map(
       (s) => `<tr>
       <td>${statusIcon(s.status)}</td>
-      <td><strong>${s.name}</strong></td>
-      <td>${s.type}</td>
-      <td>${s.category}</td>
-      <td>${s.status}</td>
+      <td><strong>${escapeHtml(s.name)}</strong></td>
+      <td>${escapeHtml(s.type)}</td>
+      <td>${escapeHtml(s.category)}</td>
+      <td>${escapeHtml(s.status)}</td>
       <td>${s.http_status}</td>
       <td>${s.latency_ms}ms</td>
     </tr>`

@@ -62,7 +62,7 @@ gh secret set STRIPE_PRICE_ENT_MONTHLY --org BlackRoad-OS-Inc
 gh secret set STRIPE_PRICE_ENT_YEARLY --org BlackRoad-OS-Inc
 
 # Google Drive
-gh secret set GOOGLE_SERVICE_ACCOUNT_KEY --org BlackRoad-OS-Inc
+gh secret set GOOGLE_SERVICE_ACCOUNT_KEY_BASE64 --org BlackRoad-OS-Inc
 gh secret set GOOGLE_DRIVE_FOLDER_ID --org BlackRoad-OS-Inc
 
 # Infrastructure

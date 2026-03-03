@@ -190,19 +190,19 @@ Standard emojis used across BlackRoad documentation and systems:
 
 ### Organization Emojis
 
-| Emoji | Meaning | Usage |
-|-------|---------|-------|
-| `[ ]` | Locked/Private | Private org/repo |
-| `[ ]` | Public | Public visibility |
+| Icon | Meaning | Usage |
+|------|---------|-------|
+| `[LOCK]` | Locked/Private | Private org/repo |
+| `[PUBLIC]` | Public | Public visibility |
 
 ### System Emojis
 
-| Emoji | Meaning | Usage |
-|-------|---------|-------|
-| `[ ]` | Globe/Domain | Domain reference |
-| `[ ]` | Pointing | Item in list |
-| `[ ]` | Down arrow | Section header |
-| `[ ]` | Roller coaster | Organization section |
+| Icon | Meaning | Usage |
+|------|---------|-------|
+| `[GLOBE]` | Globe/Domain | Domain reference |
+| `[ARROW]` | Pointing | Item in list |
+| `[DOWN]` | Down arrow | Section header |
+| `[SECTION]` | Roller coaster | Organization section |
 
 ### Agent Color Codes
 

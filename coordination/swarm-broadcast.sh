@@ -42,7 +42,7 @@ cmd_launch() {
     "event": "swarm_launch",
     "swarm_id": "${swarm_id}",
     "task": "${task}",
-    "agents": "$(echo "$agents" | tr ',' '", "')",
+    "agents": [$(echo "$agents" | sed 's/[^,]*/"&"/g')],
     "coordination": {
       "type": "github-prs",
       "branch_pattern": "swarm/${swarm_id}/agent/*",
