@@ -1,0 +1,247 @@
+name: Deploy GitHub Pages
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - 'pages/**'
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'Organization to deploy (or "all")'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - blackroad-os-inc
+          - blackroad-os
+          - blackroad-ai
+          - blackroad-cloud
+          - blackroad-security
+          - blackroad-labs
+          - blackroad-media
+          - blackroad-foundation
+          - blackroad-hardware
+          - blackroad-studio
+          - blackroad-education
+          - blackroad-interactive
+          - blackroad-ventures
+          - blackroad-gov
+          - blackbox-enterprises
+          - blackroad-archive
+
+concurrency:
+  group: deploy-pages-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PAGES_DIR: pages
+
+jobs:
+  detect-changes:
+    name: Detect Changed Pages
+    runs-on: ubuntu-latest
+    outputs:
+      orgs: ${{ steps.changes.outputs.orgs }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Determine target orgs
+        id: changes
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TARGET="${{ github.event.inputs.target }}"
+            if [ "$TARGET" = "all" ]; then
+              ORGS='["blackroad-os-inc","blackroad-os","blackroad-ai","blackroad-cloud","blackroad-security","blackroad-labs","blackroad-media","blackroad-foundation","blackroad-hardware","blackroad-studio","blackroad-education","blackroad-interactive","blackroad-ventures","blackroad-gov","blackbox-enterprises","blackroad-archive"]'
+            else
+              ORGS="[\"${TARGET}\"]"
+            fi
+          else
+            # On push, detect which page dirs changed
+            CHANGED=$(git diff --name-only HEAD~1 HEAD -- pages/ | grep -oP 'pages/\K[^/]+' | sort -u | grep -v '^_shared$' || true)
+
+            # If shared assets changed, deploy all
+            if git diff --name-only HEAD~1 HEAD -- pages/_shared/ | grep -q .; then
+              ORGS='["blackroad-os-inc","blackroad-os","blackroad-ai","blackroad-cloud","blackroad-security","blackroad-labs","blackroad-media","blackroad-foundation","blackroad-hardware","blackroad-studio","blackroad-education","blackroad-interactive","blackroad-ventures","blackroad-gov","blackbox-enterprises","blackroad-archive"]'
+            elif [ -n "$CHANGED" ]; then
+              ORGS=$(echo "$CHANGED" | jq -R -s 'split("\n") | map(select(length > 0))')
+            else
+              ORGS='[]'
+            fi
+          fi
+          echo "orgs=${ORGS}" >> "$GITHUB_OUTPUT"
+          echo "Deploying to: ${ORGS}"
+
+  deploy:
+    name: Deploy ${{ matrix.org }}
+    needs: detect-changes
+    if: needs.detect-changes.outputs.orgs != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        org: ${{ fromJson(needs.detect-changes.outputs.orgs) }}
+      max-parallel: 4
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Map org directory to GitHub org
+        id: map
+        run: |
+          declare -A ORG_MAP=(
+            ["blackroad-os-inc"]="BlackRoad-OS-Inc"
+            ["blackroad-os"]="BlackRoad-OS"
+            ["blackroad-ai"]="BlackRoad-AI"
+            ["blackroad-cloud"]="BlackRoad-Cloud"
+            ["blackroad-security"]="BlackRoad-Security"
+            ["blackroad-labs"]="BlackRoad-Labs"
+            ["blackroad-media"]="BlackRoad-Media"
+            ["blackroad-foundation"]="BlackRoad-Foundation"
+            ["blackroad-hardware"]="BlackRoad-Hardware"
+            ["blackroad-studio"]="BlackRoad-Studio"
+            ["blackroad-education"]="BlackRoad-Education"
+            ["blackroad-interactive"]="BlackRoad-Interactive"
+            ["blackroad-ventures"]="BlackRoad-Ventures"
+            ["blackroad-gov"]="BlackRoad-Gov"
+            ["blackbox-enterprises"]="Blackbox-Enterprises"
+            ["blackroad-archive"]="BlackRoad-Archive"
+          )
+
+          GITHUB_ORG="${ORG_MAP[${{ matrix.org }}]}"
+          REPO="${GITHUB_ORG,,}.github.io"
+
+          echo "github_org=${GITHUB_ORG}" >> "$GITHUB_OUTPUT"
+          echo "repo=${REPO}" >> "$GITHUB_OUTPUT"
+          echo "Deploying ${{ matrix.org }} → ${GITHUB_ORG}/${REPO}"
+
+      - name: Prepare deployment files
+        run: |
+          mkdir -p deploy-staging/_shared
+
+          # Copy org page
+          cp pages/${{ matrix.org }}/index.html deploy-staging/index.html
+
+          # Copy shared design system
+          cp pages/_shared/design.css deploy-staging/_shared/design.css
+
+          # Fix relative paths for standalone .github.io deployment
+          sed -i 's|href="../_shared/design.css"|href="_shared/design.css"|g' deploy-staging/index.html
+
+          # Update cross-org links to use .github.io URLs
+          sed -i 's|href="../blackroad-os-inc/index.html"|href="https://blackroad-os-inc.github.io"|g' deploy-staging/index.html
+          sed -i 's|href="../blackroad-os/index.html"|href="https://blackroad-os.github.io"|g' deploy-staging/index.html
+          sed -i 's|href="../blackroad-ai/index.html"|href="https://blackroad-ai.github.io"|g' deploy-staging/index.html
+          sed -i 's|href="../blackroad-cloud/index.html"|href="https://blackroad-cloud.github.io"|g' deploy-staging/index.html
+          sed -i 's|href="../blackroad-security/index.html"|href="https://blackroad-security.github.io"|g' deploy-staging/index.html
+          sed -i 's|href="../blackroad-labs/index.html"|href="https://blackroad-labs.github.io"|g' deploy-staging/index.html
+          sed -i 's|href="../blackroad-media/index.html"|href="https://blackroad-media.github.io"|g' deploy-staging/index.html
+          sed -i 's|href="../blackroad-foundation/index.html"|href="https://blackroad-foundation.github.io"|g' deploy-staging/index.html
+          sed -i 's|href="../blackroad-hardware/index.html"|href="https://blackroad-hardware.github.io"|g' deploy-staging/index.html
+          sed -i 's|href="../blackroad-studio/index.html"|href="https://blackroad-studio.github.io"|g' deploy-staging/index.html
+          sed -i 's|href="../blackroad-education/index.html"|href="https://blackroad-education.github.io"|g' deploy-staging/index.html
+          sed -i 's|href="../blackroad-interactive/index.html"|href="https://blackroad-interactive.github.io"|g' deploy-staging/index.html
+          sed -i 's|href="../blackroad-ventures/index.html"|href="https://blackroad-ventures.github.io"|g' deploy-staging/index.html
+          sed -i 's|href="../blackroad-gov/index.html"|href="https://blackroad-gov.github.io"|g' deploy-staging/index.html
+          sed -i 's|href="../blackbox-enterprises/index.html"|href="https://blackbox-enterprises.github.io"|g' deploy-staging/index.html
+          sed -i 's|href="../blackroad-archive/index.html"|href="https://blackroad-archive.github.io"|g' deploy-staging/index.html
+
+          echo "Staging contents:"
+          find deploy-staging -type f
+
+      - name: Deploy to .github.io repo
+        env:
+          GH_TOKEN: ${{ secrets.PAGES_DEPLOY_TOKEN }}
+        run: |
+          GITHUB_ORG="${{ steps.map.outputs.github_org }}"
+          REPO="${{ steps.map.outputs.repo }}"
+
+          git config --global user.name "BlackRoad Operator"
+          git config --global user.email "operator@blackroad.io"
+
+          # Clone or init the target repo
+          if git clone "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_ORG}/${REPO}.git" target-repo 2>/dev/null; then
+            cd target-repo
+          else
+            echo "Repo doesn't exist yet — creating..."
+            gh repo create "${GITHUB_ORG}/${REPO}" \
+              --public \
+              --description "${GITHUB_ORG} GitHub Pages" \
+              --homepage "https://${REPO}" || true
+
+            mkdir target-repo && cd target-repo
+            git init
+            git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_ORG}/${REPO}.git"
+          fi
+
+          # Clean and copy new files
+          find . -maxdepth 1 -not -name '.git' -not -name '.' -exec rm -rf {} + 2>/dev/null || true
+          cp -r ../deploy-staging/* .
+
+          # Add .nojekyll to bypass Jekyll processing
+          touch .nojekyll
+
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes to deploy for ${GITHUB_ORG}/${REPO}"
+          else
+            git commit -m "Deploy GitHub Pages from blackroad-operator $(date +%Y-%m-%d)"
+            git branch -M main
+            git push -u origin main
+            echo "Deployed: https://${REPO}"
+          fi
+
+      - name: Enable GitHub Pages
+        env:
+          GH_TOKEN: ${{ secrets.PAGES_DEPLOY_TOKEN }}
+        continue-on-error: true
+        run: |
+          GITHUB_ORG="${{ steps.map.outputs.github_org }}"
+          REPO="${{ steps.map.outputs.repo }}"
+
+          # Enable Pages if not already enabled
+          gh api "repos/${GITHUB_ORG}/${REPO}/pages" \
+            --method POST \
+            -f "source[branch]=main" \
+            -f "source[path]=/" 2>/dev/null || \
+          gh api "repos/${GITHUB_ORG}/${REPO}/pages" \
+            --method PUT \
+            -f "source[branch]=main" \
+            -f "source[path]=/" 2>/dev/null || \
+          echo "Pages may already be enabled or needs manual setup"
+
+  summary:
+    name: Deployment Summary
+    needs: [detect-changes, deploy]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Summary
+        run: |
+          echo "## GitHub Pages Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Trigger:** ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Orgs deployed:** ${{ needs.detect-changes.outputs.orgs }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Pages URLs" >> $GITHUB_STEP_SUMMARY
+          echo "| Organization | URL |" >> $GITHUB_STEP_SUMMARY
+          echo "|---|---|" >> $GITHUB_STEP_SUMMARY
+          echo "| BlackRoad-OS-Inc | https://blackroad-os-inc.github.io |" >> $GITHUB_STEP_SUMMARY
+          echo "| BlackRoad-OS | https://blackroad-os.github.io |" >> $GITHUB_STEP_SUMMARY
+          echo "| BlackRoad-AI | https://blackroad-ai.github.io |" >> $GITHUB_STEP_SUMMARY
+          echo "| BlackRoad-Cloud | https://blackroad-cloud.github.io |" >> $GITHUB_STEP_SUMMARY
+          echo "| BlackRoad-Security | https://blackroad-security.github.io |" >> $GITHUB_STEP_SUMMARY
+          echo "| BlackRoad-Labs | https://blackroad-labs.github.io |" >> $GITHUB_STEP_SUMMARY
+          echo "| BlackRoad-Media | https://blackroad-media.github.io |" >> $GITHUB_STEP_SUMMARY
+          echo "| BlackRoad-Foundation | https://blackroad-foundation.github.io |" >> $GITHUB_STEP_SUMMARY
+          echo "| BlackRoad-Hardware | https://blackroad-hardware.github.io |" >> $GITHUB_STEP_SUMMARY
+          echo "| BlackRoad-Studio | https://blackroad-studio.github.io |" >> $GITHUB_STEP_SUMMARY
+          echo "| BlackRoad-Education | https://blackroad-education.github.io |" >> $GITHUB_STEP_SUMMARY
+          echo "| BlackRoad-Interactive | https://blackroad-interactive.github.io |" >> $GITHUB_STEP_SUMMARY
+          echo "| BlackRoad-Ventures | https://blackroad-ventures.github.io |" >> $GITHUB_STEP_SUMMARY
+          echo "| BlackRoad-Gov | https://blackroad-gov.github.io |" >> $GITHUB_STEP_SUMMARY
+          echo "| Blackbox-Enterprises | https://blackbox-enterprises.github.io |" >> $GITHUB_STEP_SUMMARY
+          echo "| BlackRoad-Archive | https://blackroad-archive.github.io |" >> $GITHUB_STEP_SUMMARY
