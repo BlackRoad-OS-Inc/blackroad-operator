@@ -179,8 +179,9 @@ BR_TOOLS=(
     deploy      "${BR_TOOLS_DIR}/deploy-cmd/br-deploy-cmd.sh"
     audit       "${BR_TOOLS_DIR}/org-audit/br-org-audit.sh"
     org-audit   "${BR_TOOLS_DIR}/org-audit/br-org-audit.sh"
-    swarm       "${BR_TOOLS_DIR}/swarm/br-swarm.sh"
-    swarm-launch "${BR_TOOLS_DIR}/swarm/br-swarm.sh"
+    feedback    "${BR_TOOLS_DIR}/product-feedback/br-product-feedback.sh"
+    faves       "${BR_TOOLS_DIR}/product-feedback/br-product-feedback.sh"
+    dig         "${BR_TOOLS_DIR}/product-feedback/br-product-feedback.sh"
 )
 
 # Stream shortcut — delegates to gateway stream sub-command
@@ -349,6 +350,15 @@ show_help() {
     echo "║    br agent task          - Submit tasks to agent pool          ║"
     echo "║    br agent distribute    - Distribute workload across agents   ║"
     echo "║    br agent status        - Monitor agent performance           ║"
+    echo "║                                                                   ║"
+    echo "║  PRODUCT FEEDBACK (⛏️ Dig & Discover):                           ║"
+    echo "║    br feedback dig <org>  - Dig an org for useful stuff         ║"
+    echo "║    br feedback dig-all    - Dig ALL 17 organizations            ║"
+    echo "║    br feedback submit     - Submit your favorite product/tool   ║"
+    echo "║    br feedback vote <id>  - Upvote a submission                 ║"
+    echo "║    br feedback top        - See top-voted favorites             ║"
+    echo "║    br feedback report     - Full cross-org feedback report      ║"
+    echo "║    br feedback broadcast  - Call for feedback from all agents   ║"
     echo "║                                                                   ║"
     echo "║  CI/CD & MONITORING (🔧 Pipelines & Metrics):                    ║"
     echo "║    br ci create/run       - CI/CD pipeline orchestration        ║"
@@ -1486,22 +1496,6 @@ worlds.sort(reverse=True)
             ;;
         auth)
             zsh "${BR_TOOLS_DIR}/auth/br-auth.sh" "$@"
-            ;;
-        swarm)
-            local subcmd="${1:-help}"; shift 2>/dev/null || true
-            local SWARM_SCRIPT="${BR_ROOT}/swarm.sh"
-            case "$subcmd" in
-                launch|deploy)  bash "$SWARM_SCRIPT" launch "$@" ;;
-                status|st)      bash "$SWARM_SCRIPT" status "$@" ;;
-                list|ls)        bash "$SWARM_SCRIPT" list ;;
-                merge)          bash "$SWARM_SCRIPT" merge "$@" ;;
-                close|kill)     bash "$SWARM_SCRIPT" close "$@" ;;
-                comment|msg)    bash "$SWARM_SCRIPT" comment "$@" ;;
-                review)         bash "$SWARM_SCRIPT" review "$@" ;;
-                open-prs)       bash "$SWARM_SCRIPT" open-prs "$@" ;;
-                monitor|watch)  bash "${BR_ROOT}/swarm-monitor.sh" --live ;;
-                *)              bash "$SWARM_SCRIPT" help ;;
-            esac
             ;;
         *)
             # Data-driven tool dispatch
