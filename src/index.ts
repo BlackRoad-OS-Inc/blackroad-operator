@@ -6,4 +6,23 @@ export { createSpinner } from './core/spinner.js'
 export { formatTable } from './formatters/table.js'
 export { formatJson } from './formatters/json.js'
 export { brand } from './formatters/brand.js'
-export { createApp } from './server/app.js'
+
+// Sovereign System — Provider-independent keys, memory, and API
+export {
+  sha256,
+  doubleSha256,
+  hmacSha256,
+  secureRandom,
+  generateKey,
+  fingerprint,
+  createSovereignKey,
+  generateKeyPair,
+  deriveKey,
+  deriveAgentKey,
+  validateKeyFormat,
+  genesisEntry,
+  chainEntry,
+  verifyChain,
+  SovereignMemory,
+  createSovereignApi,
+} from './sovereign/index.js'
