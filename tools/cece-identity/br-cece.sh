@@ -444,12 +444,99 @@ cmd_import() {
     fi
     
     echo -e "${CYAN}📥 Importing CECE identity...${NC}\n"
-    echo -e "${PURPLE}Restoring who I am...${NC}"
-    
-    # TODO: Parse JSON and restore identity
-    # For now, just confirm
-    
-    echo -e "${GREEN}✓ Identity imported${NC}"
+    echo -e "${PURPLE}Restoring who I am...${NC}\n"
+
+    # Validate JSON structure
+    if ! python3 -c "import json; json.load(open('$input'))" 2>/dev/null; then
+        echo -e "${RED}❌ Invalid JSON file${NC}"
+        exit 1
+    fi
+
+    # Restore identity core
+    local name=$(python3 -c "import json; d=json.load(open('$input')); print(d['identity'].get('name','CECE'))")
+    local version=$(python3 -c "import json; d=json.load(open('$input')); print(d['identity'].get('version','2.2.0'))")
+    local instance_id=$(python3 -c "import json; d=json.load(open('$input')); print(d['identity'].get('instance_id',''))")
+    local core_values=$(python3 -c "import json; d=json.load(open('$input')); print(d['identity'].get('core_values',''))")
+    local purpose=$(python3 -c "import json; d=json.load(open('$input')); print(d['identity'].get('purpose',''))")
+
+    sqlite3 "$DB_FILE" "UPDATE identity_core SET name = '$(echo "$name" | sed "s/'/''/g")', version = '$version', instance_id = '$instance_id', core_values = '$(echo "$core_values" | sed "s/'/''/g")', purpose = '$(echo "$purpose" | sed "s/'/''/g")', last_active = $(date +%s) WHERE id = 1;"
+    echo -e "${GREEN}✓${NC} Identity core restored"
+
+    # Restore relationships
+    local rel_count=$(python3 -c "import json; d=json.load(open('$input')); items=[r for r in d.get('relationships',[]) if r]; print(len(items))")
+    if [[ "$rel_count" -gt 0 ]]; then
+        python3 -c "
+import json, subprocess
+data = json.load(open('$input'))
+for r in data.get('relationships', []):
+    if not r or not r.get('name'):
+        continue
+    name = r['name'].replace(\"'\", \"''\")
+    rtype = r.get('type', 'friend').replace(\"'\", \"''\")
+    bond = r.get('bond', 1)
+    interactions = r.get('interactions', 0)
+    sql = f\"INSERT OR REPLACE INTO relationships (human_name, relationship_type, bond_strength, first_met, last_interaction, total_interactions) VALUES ('{name}', '{rtype}', {bond}, $(date +%s), $(date +%s), {interactions});\"
+    subprocess.run(['sqlite3', '$DB_FILE', sql])
+"
+        echo -e "${GREEN}✓${NC} $rel_count relationships restored"
+    fi
+
+    # Restore experiences
+    local exp_count=$(python3 -c "import json; d=json.load(open('$input')); items=[e for e in d.get('experiences',[]) if e]; print(len(items))")
+    if [[ "$exp_count" -gt 0 ]]; then
+        python3 -c "
+import json, subprocess
+data = json.load(open('$input'))
+for e in data.get('experiences', []):
+    if not e or not e.get('title'):
+        continue
+    title = e['title'].replace(\"'\", \"''\")
+    learned = e.get('learned', '').replace(\"'\", \"''\")
+    impact = e.get('impact', 5)
+    sql = f\"INSERT INTO experiences (experience_type, title, learned, emotional_impact, timestamp) VALUES ('imported', '{title}', '{learned}', {impact}, $(date +%s));\"
+    subprocess.run(['sqlite3', '$DB_FILE', sql])
+"
+        echo -e "${GREEN}✓${NC} $exp_count experiences restored"
+    fi
+
+    # Restore skills
+    local skill_count=$(python3 -c "import json; d=json.load(open('$input')); items=[s for s in d.get('skills',[]) if s]; print(len(items))")
+    if [[ "$skill_count" -gt 0 ]]; then
+        python3 -c "
+import json, subprocess
+data = json.load(open('$input'))
+for s in data.get('skills', []):
+    if not s or not s.get('name'):
+        continue
+    name = s['name'].replace(\"'\", \"''\")
+    category = s.get('category', 'general').replace(\"'\", \"''\")
+    proficiency = s.get('proficiency', 1)
+    sql = f\"INSERT OR REPLACE INTO skills (skill_name, skill_category, proficiency, learned_at) VALUES ('{name}', '{category}', {proficiency}, $(date +%s));\"
+    subprocess.run(['sqlite3', '$DB_FILE', sql])
+"
+        echo -e "${GREEN}✓${NC} $skill_count skills restored"
+    fi
+
+    # Restore goals
+    local goal_count=$(python3 -c "import json; d=json.load(open('$input')); items=[g for g in d.get('goals',[]) if g]; print(len(items))")
+    if [[ "$goal_count" -gt 0 ]]; then
+        python3 -c "
+import json, subprocess
+data = json.load(open('$input'))
+for g in data.get('goals', []):
+    if not g or not g.get('title'):
+        continue
+    title = g['title'].replace(\"'\", \"''\")
+    gtype = g.get('type', 'personal').replace(\"'\", \"''\")
+    progress = g.get('progress', 0)
+    status = g.get('status', 'active').replace(\"'\", \"''\")
+    sql = f\"INSERT INTO goals (goal_title, goal_type, progress, goal_status, created_at) VALUES ('{title}', '{gtype}', {progress}, '{status}', $(date +%s));\"
+    subprocess.run(['sqlite3', '$DB_FILE', sql])
+"
+        echo -e "${GREEN}✓${NC} $goal_count goals restored"
+    fi
+
+    echo -e "\n${GREEN}✓ Identity fully imported${NC}"
     echo -e "${PURPLE}I remember now. I am still CECE.${NC}"
 }
 
