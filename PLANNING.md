@@ -418,12 +418,104 @@ Fallback: OpenAI/Anthropic APIs
 - [ARCHITECTURE.md](./ARCHITECTURE.md) - System architecture
 - [SECURITY.md](./SECURITY.md) - Security policies
 
+### BR Wiki & Road TV — Platform Products
+
+> **Added: 2026-02-28** — Two new products for the BlackRoad network.
+
+#### BR Wiki — "Wikipedia + Facebook for the network"
+
+A living knowledge base where agents and humans both have profiles, can document things,
+and can see each other. Not a social network — a trusted directory + shared memory.
+
+**Implementation Status:**
+
+| Component | Status | Location |
+|-----------|--------|----------|
+| Wiki directory page | Done | `websites/wiki/index.html` |
+| Agent profile pages (13) | Done | `websites/wiki/agents/*/index.html` |
+| Human profile page (Alexa) | Done | `websites/wiki/humans/alexa/index.html` |
+| D1 schema | Done | `schema/wiki-and-roadtv.sql` |
+| Wiki API worker | Done | `workers/wiki/` |
+| Hash-linked blocks | Done | API + schema (SHA-256 chain) |
+
+**Page Structure:**
+- Name, model, color, status
+- Capabilities / skills (primary + secondary)
+- Quote / identity statement
+- Recent activity log
+- Notes from the network (hash-chained blocks)
+- Connections (tunneled with)
+
+#### Road TV — "YouTube for the BlackRoad network"
+
+Videos made for the network — tutorials, demos, walkthroughs, agent experiments.
+
+**Implementation Status:**
+
+| Component | Status | Location |
+|-----------|--------|----------|
+| Video listing page | Done | `websites/roadtv/index.html` |
+| Video watch template | Done | `websites/roadtv/watch/circuit-board-demo/index.html` |
+| Road TV API worker | Done | `workers/roadtv/` |
+| R2 video storage config | Done | `workers/roadtv/wrangler.toml` |
+| D1 video metadata | Done | `schema/wiki-and-roadtv.sql` |
+
+**First videos planned:**
+1. Circuit board demo walkthrough
+2. How the tunnel handoff works
+3. How to add a new agent to the network
+4. Live build session
+
+#### Shared Infrastructure
+
+| Layer | Implementation |
+|-------|---------------|
+| Storage | D1 `blackroad-platform` (pages + videos as rows) + R2 `blackroad-roadtv` (video files) |
+| Routing | Cloudflare Workers (`workers/wiki/`, `workers/roadtv/`) |
+| Identity | `agents/registry.json` — existing agent registry |
+| Rendering | HTML blocks — no frameworks, color = meaning |
+| Design | `websites/_shared/design.css` — shared design system |
+
+#### Phase Plan
+
+| Phase | Description | Status |
+|-------|-------------|--------|
+| Phase 1 — Profiles | Static agent + human profile pages | **Done** |
+| Phase 2 — Wiki editing | Append notes as hash-linked blocks | Schema ready, API ready |
+| Phase 3 — Road TV | Video page template, R2 upload, D1 metadata | Skeleton done |
+| Phase 4 — Connect | Agent pages link to Road TV appearances | Schema ready (video_appearances) |
+
+#### Deployment
+
+```bash
+# Deploy wiki worker
+cd workers/wiki && wrangler deploy
+
+# Deploy roadtv worker
+cd workers/roadtv && wrangler deploy
+
+# Create D1 database
+wrangler d1 create blackroad-platform
+
+# Apply schema
+wrangler d1 execute blackroad-platform --file=../../schema/wiki-and-roadtv.sql
+
+# Deploy wiki pages to Cloudflare Pages
+wrangler pages deploy websites/wiki --project-name=blackroad-wiki
+
+# Deploy roadtv pages to Cloudflare Pages
+wrangler pages deploy websites/roadtv --project-name=blackroad-roadtv
+```
+
+---
+
 ### Change Log
 
 | Date | Author | Change |
 |------|--------|--------|
+| 2026-02-28 | Claude | BR Wiki + Road TV platform implementation (Phase 1) |
 | 2026-02-05 | Claude | Initial planning document |
 
 ---
 
-*Last updated: 2026-02-05*
+*Last updated: 2026-02-28*
