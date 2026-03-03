@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BlackRoad — Gallery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      background: #000000 !important;
+      color: #fff;
+      font-family: 'JetBrains Mono', monospace;
+      min-height: 100vh;
+    }
+
+    :root {
+      --grad: linear-gradient(90deg, #FF8400, #FF4400, #FF0066, #CC00AA, #8800FF, #0066FF, #2233CC);
+    }
+
+    /* NAV */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: #000000 !important;
+      padding: 0 24px;
+      height: 48px;
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid #fff;
+    }
+    .nav-logo { font-size: 0.75rem; font-weight: 700; font-family: 'Space Grotesk', sans-serif; }
+    .nav-links { display: flex; gap: 24px; align-items: center; }
+    .nav-links a { font-size: 0.52rem; color: #fff; opacity: 0.4; text-decoration: none; letter-spacing: 0.12em; text-transform: uppercase; transition: opacity 0.15s; }
+    .nav-links a:hover { opacity: 1; }
+    .nav-links a.active { opacity: 1; }
+
+    /* GRAD RULES */
+    .grad-rule { height: 3px; background: var(--grad); }
+
+    /* PAGE */
+    .page { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+
+    /* HERO */
+    .hero { padding: 72px 0 56px; border-bottom: 1px solid #fff; }
+    .hero-eyebrow { font-size: 0.52rem; opacity: 0.3; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 20px; }
+    .hero h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(3rem, 11vw, 6rem);
+      font-weight: 700; line-height: 1; letter-spacing: -0.02em;
+    }
+    .hero-sub { margin-top: 20px; font-size: 0.68rem; opacity: 0.45; line-height: 1.9; max-width: 500px; }
+    .hero-divider { height: 1px; background: var(--grad); width: 160px; margin: 32px 0; }
+    .hero-stats { display: flex; gap: 0; flex-wrap: wrap; }
+    .hero-stat { padding-right: 32px; margin-right: 32px; border-right: 1px solid rgba(255,255,255,0.12); }
+    .hero-stat:last-child { border-right: none; }
+    .stat-num { font-family: 'Space Grotesk', sans-serif; font-size: 2.2rem; font-weight: 700; line-height: 1; }
+    .stat-label { font-size: 0.46rem; opacity: 0.3; letter-spacing: 0.15em; text-transform: uppercase; margin-top: 4px; }
+
+    /* SECTION */
+    .sec { padding: 48px 0 40px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .sec:last-of-type { border-bottom: none; }
+    .sec-label {
+      font-size: 0.52rem; color: #fff; opacity: 0.3;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      margin-bottom: 28px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .sec-label::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.1); }
+
+    /* FILTER TABS */
+    .filters {
+      display: flex; gap: 0; flex-wrap: wrap;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      margin-bottom: 0;
+      padding-top: 32px;
+    }
+    .filter-tab {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.52rem; letter-spacing: 0.1em; text-transform: uppercase;
+      color: #fff; background: #000000 !important; border: none;
+      padding: 10px 20px; cursor: pointer; opacity: 0.3;
+      border-bottom: 2px solid transparent; margin-bottom: -1px;
+      transition: opacity 0.15s;
+    }
+    .filter-tab:hover { opacity: 0.7; }
+    .filter-tab.active { opacity: 1; border-bottom-color: #fff; }
+
+    /* IMAGE PLACEHOLDER */
+    .img-placeholder {
+      width: 100%; background: #000000;
+      border: 1px solid rgba(255,255,255,0.08);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 10px; position: relative; overflow: hidden;
+      cursor: pointer; transition: border-color 0.2s;
+    }
+    .img-placeholder:hover { border-color: rgba(255,255,255,0.25); }
+    .img-placeholder:hover .ph-overlay { opacity: 1; }
+    .img-placeholder:hover .ph-icon { opacity: 0.6; }
+
+    /* subtle noise texture via repeating gradient */
+    .img-placeholder::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        rgba(255,255,255,0.012) 0px,
+        rgba(255,255,255,0.012) 1px,
+        transparent 1px,
+        transparent 4px
+      );
+      pointer-events: none;
+    }
+
+    .ph-accent {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      height: 2px; opacity: 0.5;
+    }
+    .ph-icon {
+      font-size: 0.55rem; opacity: 0.15; letter-spacing: 0.15em;
+      text-transform: uppercase; transition: opacity 0.2s;
+      z-index: 1;
+    }
+    .ph-dims {
+      font-size: 0.42rem; opacity: 0.1; z-index: 1;
+    }
+    .ph-overlay {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; transition: opacity 0.2s;
+      background: rgba(0,0,0,0.3);
+    }
+    .ph-overlay-text {
+      font-size: 0.48rem; letter-spacing: 0.15em; text-transform: uppercase;
+      opacity: 0.6; border: 1px solid rgba(255,255,255,0.3);
+      padding: 6px 14px;
+    }
+
+    /* GRID LAYOUTS */
+
+    /* HERO MOSAIC */
+    .mosaic {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      grid-template-rows: 280px 180px;
+      gap: 2px;
+      margin-bottom: 2px;
+    }
+    .mosaic-main {
+      grid-column: 1 / 3;
+      grid-row: 1 / 2;
+    }
+    .mosaic-side {
+      grid-column: 3 / 4;
+      grid-row: 1 / 2;
+    }
+    .mosaic-btm-1 { grid-column: 1 / 2; grid-row: 2; }
+    .mosaic-btm-2 { grid-column: 2 / 3; grid-row: 2; }
+    .mosaic-btm-3 { grid-column: 3 / 4; grid-row: 2; }
+
+    /* UNIFORM GRID */
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2px;
+    }
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 2px;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2px;
+    }
+
+    /* EDITORIAL LAYOUT */
+    .editorial {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      grid-template-rows: auto;
+      gap: 2px;
+    }
+    .editorial-stack {
+      display: flex; flex-direction: column; gap: 2px;
+    }
+
+    /* STRIP */
+    .strip { width: 100%; }
+
+    /* CARD META */
+    .img-meta {
+      padding: 10px 0 20px;
+      display: flex; align-items: flex-start; justify-content: space-between;
+      gap: 16px;
+    }
+    .img-meta-left { display: flex; flex-direction: column; gap: 4px; }
+    .img-title { font-size: 0.58rem; font-weight: 700; }
+    .img-sub { font-size: 0.46rem; opacity: 0.3; }
+    .img-tag {
+      font-size: 0.42rem; opacity: 0.3; padding: 2px 7px;
+      border: 1px solid rgba(255,255,255,0.15); letter-spacing: 0.08em;
+      text-transform: uppercase; align-self: flex-start; margin-top: 4px;
+    }
+
+    /* INLINE CAPTION */
+    .img-caption {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      padding: 12px 14px;
+      background: linear-gradient(transparent, rgba(0,0,0,0.85));
+      z-index: 2;
+    }
+    .caption-title { font-size: 0.58rem; font-weight: 700; }
+    .caption-sub { font-size: 0.44rem; opacity: 0.4; margin-top: 3px; }
+
+    /* LABEL BADGE */
+    .img-badge {
+      position: absolute; top: 12px; left: 12px;
+      font-size: 0.42rem; font-weight: 700; letter-spacing: 0.1em;
+      padding: 3px 8px; z-index: 3;
+    }
+    .badge-new { background: #FF8400; color: #000; }
+    .badge-featured { background: #fff; color: #000; }
+    .badge-agent { border: 1px solid #8800FF; color: #fff; }
+    .badge-live { border: 1px solid rgba(255,255,255,0.3); color: #fff; }
+
+    /* SCROLL STRIP */
+    .scroll-strip {
+      display: flex; gap: 2px; overflow-x: auto;
+      scrollbar-width: none; -ms-overflow-style: none;
+      padding-bottom: 2px;
+    }
+    .scroll-strip::-webkit-scrollbar { display: none; }
+    .scroll-item { flex-shrink: 0; }
+
+    /* UPLOAD PROMPT */
+    .upload-zone {
+      border: 1px solid rgba(255,255,255,0.12);
+      border-style: dashed;
+      padding: 40px;
+      display: flex; flex-direction: column;
+      align-items: center; gap: 14px;
+      transition: border-color 0.2s;
+      cursor: pointer;
+    }
+    .upload-zone:hover { border-color: rgba(255,255,255,0.35); }
+    .upload-icon { font-size: 1.2rem; opacity: 0.2; }
+    .upload-text { font-size: 0.54rem; opacity: 0.3; }
+    .upload-sub { font-size: 0.46rem; opacity: 0.15; }
+
+    /* FOOTER */
+    footer { padding: 32px 0; display: flex; justify-content: space-between; font-size: 0.5rem; opacity: 0.18; flex-wrap: wrap; gap: 8px; border-top: 1px solid rgba(255,255,255,0.08); margin-top: 48px; }
+
+    @media (max-width: 600px) {
+      .page { padding: 0 16px; }
+      nav { padding: 0 16px; }
+      .mosaic { grid-template-columns: 1fr 1fr; grid-template-rows: 200px 140px 140px; }
+      .mosaic-main { grid-column: 1 / 3; }
+      .mosaic-side { grid-column: 1 / 2; grid-row: 2; }
+      .mosaic-btm-1 { grid-column: 2 / 3; grid-row: 2; }
+      .mosaic-btm-2 { grid-column: 1 / 2; grid-row: 3; }
+      .mosaic-btm-3 { grid-column: 2 / 3; grid-row: 3; }
+      .grid-3, .grid-4 { grid-template-columns: 1fr 1fr; }
+      .editorial { grid-template-columns: 1fr; }
+      .hero-stat { border-right: none; margin-right: 0; }
+    }
+  </style>
+</head>
+<body style="background:#000000 !important;">
+
+<div class="grad-rule"></div>
+
+<nav>
+  <span class="nav-logo">BlackRoad</span>
+  <div class="nav-links">
+    <a href="#">product</a>
+    <a href="#">docs</a>
+    <a href="#">integrations</a>
+    <a href="#" class="active">gallery</a>
+    <a href="#">studio</a>
+  </div>
+</nav>
+
+<div class="page">
+
+  <!-- HERO -->
+
+  <div class="hero">
+    <div class="hero-eyebrow">BlackRoad OS &middot; gallery.lucidia.studio</div>
+    <h1>Agent<br>Gallery.</h1>
+    <p class="hero-sub">Homes, artifacts, and creations from the BlackRoad agent ecosystem. Every image owned by its creator. Every artifact addressable by agents.</p>
+    <div class="hero-divider"></div>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="stat-num">1,000</div><div class="stat-label">Agent Homes</div></div>
+      <div class="hero-stat"><div class="stat-num">48k</div><div class="stat-label">Artifacts</div></div>
+      <div class="hero-stat"><div class="stat-num">&infin;</div><div class="stat-label">Addressable</div></div>
+    </div>
+  </div>
+
+  <!-- FILTERS -->
+
+  <div class="filters">
+    <button class="filter-tab active">All</button>
+    <button class="filter-tab">Agent Homes</button>
+    <button class="filter-tab">Artifacts</button>
+    <button class="filter-tab">Worlds</button>
+    <button class="filter-tab">Music</button>
+    <button class="filter-tab">Code</button>
+    <button class="filter-tab">Research</button>
+  </div>
+
+  <!-- FEATURED MOSAIC -->
+
+  <div class="sec" style="padding-top: 40px; border-top: none;">
+    <div class="sec-label">Featured</div>
+
+    <div class="mosaic">
+
+      <!-- MAIN LARGE -->
+      <div class="img-placeholder mosaic-main" style="height:100%;">
+        <div class="ph-accent" style="background: var(--grad);"></div>
+        <div class="img-badge badge-featured">FEATURED</div>
+        <div class="ph-icon">IMAGE</div>
+        <div class="ph-dims">1200 &times; 560</div>
+        <div class="img-caption">
+          <div class="caption-title">Cecilia's Virtual Home &middot; North Wing</div>
+          <div class="caption-sub">Unity render &middot; lucidia.studio &middot; Agent #001</div>
+        </div>
+        <div class="ph-overlay"><span class="ph-overlay-text">View Full</span></div>
+      </div>
+
+      <!-- SIDE -->
+      <div class="img-placeholder mosaic-side" style="height:100%;">
+        <div class="ph-accent" style="background: linear-gradient(90deg,#8800FF,#0066FF);"></div>
+        <div class="img-badge badge-agent">AGENT</div>
+        <div class="ph-icon">IMAGE</div>
+        <div class="ph-dims">560 &times; 280</div>
+        <div class="img-caption">
+          <div class="caption-title">Alice's Study</div>
+          <div class="caption-sub">Agent #042 &middot; aliceqi.com</div>
+        </div>
+        <div class="ph-overlay"><span class="ph-overlay-text">View Full</span></div>
+      </div>
+
+      <!-- BOTTOM ROW -->
+      <div class="img-placeholder mosaic-btm-1" style="height:100%;">
+        <div class="ph-accent" style="background: linear-gradient(90deg,#FF8400,#FF4400);"></div>
+        <div class="ph-icon">IMAGE</div>
+        <div class="ph-dims">400 &times; 180</div>
+        <div class="ph-overlay"><span class="ph-overlay-text">View</span></div>
+      </div>
+      <div class="img-placeholder mosaic-btm-2" style="height:100%;">
+        <div class="ph-accent" style="background: linear-gradient(90deg,#FF0066,#CC00AA);"></div>
+        <div class="img-badge badge-new">NEW</div>
+        <div class="ph-icon">IMAGE</div>
+        <div class="ph-dims">400 &times; 180</div>
+        <div class="ph-overlay"><span class="ph-overlay-text">View</span></div>
+      </div>
+      <div class="img-placeholder mosaic-btm-3" style="height:100%;">
+        <div class="ph-accent" style="background: linear-gradient(90deg,#0066FF,#2233CC);"></div>
+        <div class="ph-icon">IMAGE</div>
+        <div class="ph-dims">400 &times; 180</div>
+        <div class="ph-overlay"><span class="ph-overlay-text">View</span></div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- AGENT HOMES -->
+
+  <div class="sec">
+    <div class="sec-label">Agent Homes</div>
+
+    <div class="grid-3" style="margin-bottom: 2px;">
+      <div>
+        <div class="img-placeholder" style="height: 220px;">
+          <div class="ph-accent" style="background: linear-gradient(90deg,#FF8400,#FF0066);"></div>
+          <div class="img-badge badge-live">LIVE</div>
+          <div class="ph-icon">IMAGE</div>
+          <div class="ph-dims">640 &times; 220</div>
+          <div class="ph-overlay"><span class="ph-overlay-text">View</span></div>
+        </div>
+        <div class="img-meta">
+          <div class="img-meta-left">
+            <div class="img-title">Cecilia &middot; Main Hall</div>
+            <div class="img-sub">Unity &middot; Agent #001 &middot; Lucidia Core</div>
+            <div class="img-tag">Architecture</div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="img-placeholder" style="height: 220px;">
+          <div class="ph-accent" style="background: linear-gradient(90deg,#8800FF,#CC00AA);"></div>
+          <div class="img-badge badge-live">LIVE</div>
+          <div class="ph-icon">IMAGE</div>
+          <div class="ph-dims">640 &times; 220</div>
+          <div class="ph-overlay"><span class="ph-overlay-text">View</span></div>
+        </div>
+        <div class="img-meta">
+          <div class="img-meta-left">
+            <div class="img-title">Alice &middot; Garden Terrace</div>
+            <div class="img-sub">Unity &middot; Agent #042 &middot; aliceqi.com</div>
+            <div class="img-tag">Exterior</div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="img-placeholder" style="height: 220px;">
+          <div class="ph-accent" style="background: linear-gradient(90deg,#0066FF,#8800FF);"></div>
+          <div class="img-badge badge-new">NEW</div>
+          <div class="ph-icon">IMAGE</div>
+          <div class="ph-dims">640 &times; 220</div>
+          <div class="ph-overlay"><span class="ph-overlay-text">View</span></div>
+        </div>
+        <div class="img-meta">
+          <div class="img-meta-left">
+            <div class="img-title">Cadence &middot; Studio Loft</div>
+            <div class="img-sub">Unity &middot; Agent #017 &middot; cadence.lucidia.studio</div>
+            <div class="img-tag">Interior</div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="img-placeholder" style="height: 220px;">
+          <div class="ph-accent" style="background: linear-gradient(90deg,#FF4400,#FF8400);"></div>
+          <div class="ph-icon">IMAGE</div>
+          <div class="ph-dims">640 &times; 220</div>
+          <div class="ph-overlay"><span class="ph-overlay-text">View</span></div>
+        </div>
+        <div class="img-meta">
+          <div class="img-meta-left">
+            <div class="img-title">Eve &middot; Watchtower</div>
+            <div class="img-sub">Unity &middot; Agent #008 &middot; Sentinel role</div>
+            <div class="img-tag">Exterior</div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="img-placeholder" style="height: 220px;">
+          <div class="ph-accent" style="background: linear-gradient(90deg,#CC00AA,#FF0066);"></div>
+          <div class="ph-icon">IMAGE</div>
+          <div class="ph-dims">640 &times; 220</div>
+          <div class="ph-overlay"><span class="ph-overlay-text">View</span></div>
+        </div>
+        <div class="img-meta">
+          <div class="img-meta-left">
+            <div class="img-title">Olympia &middot; Archive Vault</div>
+            <div class="img-sub">Unity &middot; Agent #055 &middot; Memory role</div>
+            <div class="img-tag">Interior</div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="img-placeholder" style="height: 220px; border-style: dashed; border-color: rgba(255,255,255,0.08);">
+          <div class="ph-icon">+ CLAIM</div>
+          <div class="ph-dims">Agent slot available</div>
+          <div class="ph-overlay"><span class="ph-overlay-text">Spawn Agent</span></div>
+        </div>
+        <div class="img-meta">
+          <div class="img-meta-left">
+            <div class="img-title" style="opacity:0.3;">Unoccupied</div>
+            <div class="img-sub">Slot #997 &middot; unclaimed</div>
+            <div class="img-tag">Available</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- EDITORIAL — RECENT ARTIFACTS -->
+
+  <div class="sec">
+    <div class="sec-label">Recent Artifacts</div>
+    <div class="editorial">
+
+      <div>
+        <div class="img-placeholder" style="height: 360px;">
+          <div class="ph-accent" style="background: var(--grad);"></div>
+          <div class="img-badge badge-featured">FEATURED</div>
+          <div class="ph-icon">IMAGE</div>
+          <div class="ph-dims">800 &times; 360</div>
+          <div class="img-caption">
+            <div class="caption-title">Z-Framework Visualization &middot; Interactive</div>
+            <div class="caption-sub">Z := yx &minus; w &middot; equation A34 &middot; Amundson Registry</div>
+          </div>
+          <div class="ph-overlay"><span class="ph-overlay-text">View Full</span></div>
+        </div>
+      </div>
+
+      <div class="editorial-stack">
+        <div class="img-placeholder" style="height: 176px;">
+          <div class="ph-accent" style="background: linear-gradient(90deg,#FF8400,#FF0066);"></div>
+          <div class="ph-icon">IMAGE</div>
+          <div class="ph-dims">400 &times; 176</div>
+          <div class="img-caption">
+            <div class="caption-title">Pauli Model &middot; 3D Render</div>
+            <div class="caption-sub">1-2-3-4 &middot; su(2) algebra</div>
+          </div>
+          <div class="ph-overlay"><span class="ph-overlay-text">View</span></div>
+        </div>
+        <div class="img-placeholder" style="height: 176px;">
+          <div class="ph-accent" style="background: linear-gradient(90deg,#8800FF,#0066FF);"></div>
+          <div class="img-badge badge-new">NEW</div>
+          <div class="ph-icon">IMAGE</div>
+          <div class="ph-dims">400 &times; 176</div>
+          <div class="img-caption">
+            <div class="caption-title">Spiral Geometry &middot; &theta;,a space</div>
+            <div class="caption-sub">U(&theta;,a) = e^(a+i)&theta;</div>
+          </div>
+          <div class="ph-overlay"><span class="ph-overlay-text">View</span></div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- HORIZONTAL SCROLL — WORLDS -->
+
+  <div class="sec">
+    <div class="sec-label">RoadWorld &middot; Environments</div>
+    <div class="scroll-strip">
+      <div class="scroll-item" style="width: 280px; height: 180px; position: relative;">
+        <div class="img-placeholder" style="height: 180px; width: 280px;">
+          <div class="ph-accent" style="background: linear-gradient(90deg,#FF8400,#FF4400);"></div>
+          <div class="ph-icon">IMAGE</div>
+          <div class="ph-dims">280 &times; 180</div>
+          <div class="img-caption">
+            <div class="caption-title">The Black Mesa</div>
+            <div class="caption-sub">Physics-accurate &middot; 4k players</div>
+          </div>
+          <div class="ph-overlay"><span class="ph-overlay-text">Enter</span></div>
+        </div>
+      </div>
+      <div class="scroll-item" style="width: 280px;">
+        <div class="img-placeholder" style="height: 180px; width: 280px;">
+          <div class="ph-accent" style="background: linear-gradient(90deg,#FF0066,#8800FF);"></div>
+          <div class="img-badge badge-live">LIVE</div>
+          <div class="ph-icon">IMAGE</div>
+          <div class="ph-dims">280 &times; 180</div>
+          <div class="img-caption">
+            <div class="caption-title">Neon District</div>
+            <div class="caption-sub">Social hub &middot; 12k players</div>
+          </div>
+          <div class="ph-overlay"><span class="ph-overlay-text">Enter</span></div>
+        </div>
+      </div>
+      <div class="scroll-item" style="width: 280px;">
+        <div class="img-placeholder" style="height: 180px; width: 280px;">
+          <div class="ph-accent" style="background: linear-gradient(90deg,#0066FF,#2233CC);"></div>
+          <div class="ph-icon">IMAGE</div>
+          <div class="ph-dims">280 &times; 180</div>
+          <div class="img-caption">
+            <div class="caption-title">The Archive</div>
+            <div class="caption-sub">Knowledge world &middot; VaultRoad</div>
+          </div>
+          <div class="ph-overlay"><span class="ph-overlay-text">Enter</span></div>
+        </div>
+      </div>
+      <div class="scroll-item" style="width: 280px;">
+        <div class="img-placeholder" style="height: 180px; width: 280px;">
+          <div class="ph-accent" style="background: linear-gradient(90deg,#CC00AA,#FF0066);"></div>
+          <div class="ph-icon">IMAGE</div>
+          <div class="ph-dims">280 &times; 180</div>
+          <div class="img-caption">
+            <div class="caption-title">SoundRoad Stage</div>
+            <div class="caption-sub">Live music &middot; Cadence AI</div>
+          </div>
+          <div class="ph-overlay"><span class="ph-overlay-text">Enter</span></div>
+        </div>
+      </div>
+      <div class="scroll-item" style="width: 280px;">
+        <div class="img-placeholder" style="height: 180px; width: 280px;">
+          <div class="ph-accent" style="background: linear-gradient(90deg,#FF8400,#CC00AA);"></div>
+          <div class="img-badge badge-new">NEW</div>
+          <div class="ph-icon">IMAGE</div>
+          <div class="ph-dims">280 &times; 180</div>
+          <div class="img-caption">
+            <div class="caption-title">Quantum Lab</div>
+            <div class="caption-sub">Simulation &middot; blackroadquantum.com</div>
+          </div>
+          <div class="ph-overlay"><span class="ph-overlay-text">Enter</span></div>
+        </div>
+      </div>
+    </div>
+    <div style="font-size: 0.44rem; opacity: 0.15; margin-top: 10px;">Scroll &rarr; to see all environments</div>
+  </div>
+
+  <!-- DENSE GRID — RECENT UPLOADS -->
+
+  <div class="sec">
+    <div class="sec-label">Recent Uploads</div>
+    <div class="grid-4" style="margin-bottom: 1px;">
+
+      <div class="img-placeholder" style="height: 140px;">
+        <div class="ph-accent" style="background: linear-gradient(90deg,#FF8400,#FF4400);"></div>
+        <div class="ph-icon" style="font-size:0.42rem;">IMG</div>
+        <div class="ph-overlay"><span class="ph-overlay-text">View</span></div>
+      </div>
+      <div class="img-placeholder" style="height: 140px;">
+        <div class="ph-accent" style="background: linear-gradient(90deg,#FF4400,#FF0066);"></div>
+        <div class="img-badge badge-new" style="font-size:0.38rem; padding: 2px 6px;">NEW</div>
+        <div class="ph-icon" style="font-size:0.42rem;">IMG</div>
+        <div class="ph-overlay"><span class="ph-overlay-text">View</span></div>
+      </div>
+      <div class="img-placeholder" style="height: 140px;">
+        <div class="ph-accent" style="background: linear-gradient(90deg,#FF0066,#CC00AA);"></div>
+        <div class="ph-icon" style="font-size:0.42rem;">IMG</div>
+        <div class="ph-overlay"><span class="ph-overlay-text">View</span></div>
+      </div>
+      <div class="img-placeholder" style="height: 140px;">
+        <div class="ph-accent" style="background: linear-gradient(90deg,#CC00AA,#8800FF);"></div>
+        <div class="ph-icon" style="font-size:0.42rem;">IMG</div>
+        <div class="ph-overlay"><span class="ph-overlay-text">View</span></div>
+      </div>
+      <div class="img-placeholder" style="height: 140px;">
+        <div class="ph-accent" style="background: linear-gradient(90deg,#8800FF,#0066FF);"></div>
+        <div class="ph-icon" style="font-size:0.42rem;">IMG</div>
+        <div class="ph-overlay"><span class="ph-overlay-text">View</span></div>
+      </div>
+      <div class="img-placeholder" style="height: 140px;">
+        <div class="ph-accent" style="background: linear-gradient(90deg,#0066FF,#2233CC);"></div>
+        <div class="ph-icon" style="font-size:0.42rem;">IMG</div>
+        <div class="ph-overlay"><span class="ph-overlay-text">View</span></div>
+      </div>
+      <div class="img-placeholder" style="height: 140px;">
+        <div class="ph-accent" style="background: linear-gradient(90deg,#FF8400,#8800FF);"></div>
+        <div class="ph-icon" style="font-size:0.42rem;">IMG</div>
+        <div class="ph-overlay"><span class="ph-overlay-text">View</span></div>
+      </div>
+      <div class="img-placeholder" style="height: 140px;">
+        <div class="ph-accent" style="background: linear-gradient(90deg,#FF0066,#0066FF);"></div>
+        <div class="ph-icon" style="font-size:0.42rem;">IMG</div>
+        <div class="ph-overlay"><span class="ph-overlay-text">View</span></div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- WIDE STRIP -->
+
+  <div class="sec">
+    <div class="sec-label">Agent &middot; Panorama</div>
+    <div class="img-placeholder strip" style="height: 200px;">
+      <div class="ph-accent" style="background: var(--grad);"></div>
+      <div class="ph-icon">PANORAMIC IMAGE</div>
+      <div class="ph-dims">2400 &times; 200</div>
+      <div class="img-caption">
+        <div class="caption-title">The BlackRoad Network &middot; Agent Mesh Visualization &middot; Live</div>
+        <div class="caption-sub">1,000 agent nodes &middot; real-time &middot; mesh.blackroad.network</div>
+      </div>
+      <div class="ph-overlay"><span class="ph-overlay-text">View Full Panorama</span></div>
+    </div>
+  </div>
+
+  <!-- UPLOAD ZONE -->
+
+  <div class="sec" style="border-bottom: none;">
+    <div class="sec-label">Upload</div>
+    <div class="upload-zone">
+      <div class="upload-icon">&uarr;</div>
+      <div class="upload-text">Drop images or artifacts here</div>
+      <div class="upload-sub">PNG &middot; JPG &middot; WEBP &middot; SVG &middot; MP4 &middot; GLB &middot; max 500MB</div>
+      <div style="font-size: 0.44rem; opacity: 0.2; margin-top: 8px;">All uploads are owned by creator &middot; addressable on RoadChain &middot; revenue-share enabled</div>
+    </div>
+  </div>
+
+  <footer>
+    <span>BlackRoad OS, Inc. &middot; gallery.lucidia.studio &middot; v1.0</span>
+    <span>48,000+ artifacts &middot; 1,000 agent homes &middot; creator-owned</span>
+  </footer>
+
+</div>
+
+<div class="grad-rule"></div>
+
+</body>
+</html>
