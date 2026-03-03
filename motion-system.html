@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BlackRoad — Motion System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { background: #000 !important; color: #fff !important; font-family: 'JetBrains Mono', monospace; min-height: 100vh; }
+    :root { --grad: linear-gradient(90deg, #FF8400, #FF4400, #FF0066, #CC00AA, #8800FF, #0066FF, #2233CC); }
+
+    nav { position: sticky; top: 0; z-index: 100; background: #000; padding: 0 24px; height: 48px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #fff; }
+    .nav-logo { font-size: 0.75rem; font-weight: 700; font-family: 'Space Grotesk', sans-serif; }
+    .nav-links { display: flex; gap: 24px; }
+    .nav-links a { font-size: 0.52rem; color: #fff; opacity: 0.4; text-decoration: none; letter-spacing: 0.12em; text-transform: uppercase; transition: opacity 0.15s; }
+    .nav-links a:hover { opacity: 1; }
+    .grad-rule { height: 3px; background: var(--grad); }
+    .page { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+    .sec { padding: 56px 0 48px; border-bottom: 1px solid #fff; }
+    .sec-label { font-size: 0.52rem; color: #fff; opacity: 0.3; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 36px; display: flex; align-items: center; gap: 12px; }
+    .sec-label::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.1); }
+
+    /* HERO */
+    .hero { padding: 80px 0 64px; border-bottom: 1px solid #fff; }
+    .hero-eyebrow { font-size: 0.52rem; opacity: 0.3; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 20px; }
+    .hero h1 { font-family: 'Space Grotesk', sans-serif; font-size: clamp(3rem, 11vw, 6rem); font-weight: 700; line-height: 1; letter-spacing: -0.02em; }
+    .hero-sub { margin-top: 20px; font-size: 0.68rem; opacity: 0.4; line-height: 1.9; max-width: 520px; }
+    .hero-divider { height: 1px; background: var(--grad); width: 160px; margin: 32px 0; }
+    .hero-stats { display: flex; gap: 0; flex-wrap: wrap; }
+    .hero-stat { padding-right: 32px; margin-right: 32px; border-right: 1px solid rgba(255,255,255,0.12); }
+    .hero-stat:last-child { border-right: none; }
+    .stat-num { font-family: 'Space Grotesk', sans-serif; font-size: 2.2rem; font-weight: 700; line-height: 1; }
+    .stat-label { font-size: 0.46rem; opacity: 0.3; letter-spacing: 0.15em; text-transform: uppercase; margin-top: 4px; }
+
+    /* SHOWCASE STAGE */
+    .stage {
+      border: 1px solid rgba(255,255,255,0.1);
+      background: #000;
+      overflow: hidden;
+      position: relative;
+      height: 320px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 0;
+    }
+    .stage-bg {
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 60% 50% at 20% 50%, rgba(136,0,255,0.06) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 60% at 80% 30%, rgba(0,102,255,0.05) 0%, transparent 70%),
+        radial-gradient(ellipse 50% 40% at 50% 80%, rgba(255,132,0,0.04) 0%, transparent 70%);
+    }
+    .stage-grid {
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+    .stage-content { position: relative; z-index: 2; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; }
+    .stage-label { position: absolute; top: 12px; left: 16px; font-size: 0.44rem; opacity: 0.2; letter-spacing: 0.14em; text-transform: uppercase; z-index: 3; }
+    .stage-id { position: absolute; bottom: 12px; right: 16px; font-size: 0.42rem; opacity: 0.12; z-index: 3; }
+
+    /* PRIMITIVE GRID */
+    .primitive-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; }
+    .primitive-cell {
+      padding: 24px 20px;
+      border-right: 1px solid rgba(255,255,255,0.08);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      display: flex; flex-direction: column; align-items: flex-start; gap: 12px;
+      cursor: default;
+      transition: background 0.15s;
+      position: relative;
+    }
+    .primitive-cell:nth-child(4n) { border-right: none; }
+    .primitive-cell:hover { background: rgba(255,255,255,0.02); }
+    .p-preview { width: 100%; height: 40px; display: flex; align-items: center; justify-content: center; }
+    .p-num { position: absolute; top: 10px; right: 12px; font-size: 0.4rem; opacity: 0.12; }
+    .p-name { font-size: 0.6rem; font-weight: 700; }
+    .p-timing { font-size: 0.44rem; opacity: 0.18; letter-spacing: 0.06em; }
+    .p-desc { font-size: 0.46rem; opacity: 0.22; line-height: 1.65; }
+
+    /* COMPOSITE SHOWCASES */
+    .composite-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+    .composite-cell {
+      padding: 36px 28px;
+      border-right: 1px solid rgba(255,255,255,0.08);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      display: flex; flex-direction: column; gap: 24px;
+    }
+    .composite-cell:nth-child(even) { border-right: none; }
+    .composite-cell:nth-last-child(-n+2) { border-bottom: none; }
+    .composite-preview {
+      flex: 1; min-height: 140px;
+      display: flex; align-items: center; justify-content: center;
+      border: 1px solid rgba(255,255,255,0.05);
+      background: rgba(255,255,255,0.01);
+      position: relative; overflow: hidden;
+    }
+    .composite-meta { }
+    .composite-name { font-family: 'Space Grotesk', sans-serif; font-size: 1rem; font-weight: 700; margin-bottom: 5px; }
+    .composite-desc { font-size: 0.5rem; opacity: 0.28; line-height: 1.75; }
+    .composite-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+    .ctag { font-size: 0.42rem; opacity: 0.2; border: 1px solid rgba(255,255,255,0.12); padding: 2px 7px; letter-spacing: 0.06em; }
+
+    /* TIMING TABLE */
+    .timing-row { display: flex; align-items: center; gap: 20px; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .timing-row:first-child { border-top: 1px solid rgba(255,255,255,0.06); }
+    .timing-row:last-child { border-bottom: none; }
+    .t-name { font-size: 0.58rem; font-weight: 700; min-width: 130px; }
+    .t-curve { flex: 1; height: 2px; position: relative; overflow: visible; }
+    .t-curve svg { width: 100%; height: 32px; display: block; margin-top: -15px; }
+    .t-val { font-size: 0.48rem; opacity: 0.2; min-width: 100px; text-align: right; }
+    .t-use { font-size: 0.46rem; opacity: 0.18; min-width: 140px; text-align: right; }
+
+    /* RULES */
+    .rule-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+    .rule-col { padding: 0; }
+    .rule-col:first-child { padding-right: 32px; border-right: 1px solid rgba(255,255,255,0.08); }
+    .rule-col:last-child { padding-left: 32px; }
+    .rule-head { font-size: 0.5rem; font-weight: 700; letter-spacing: 0.15em; opacity: 0.35; margin-bottom: 14px; }
+    .rule-item { font-size: 0.54rem; opacity: 0.3; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); line-height: 1.55; }
+    .rule-item:last-child { border-bottom: none; }
+
+    /* KEYFRAME VIEWER */
+    .kf-block { padding: 20px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .kf-block:last-child { border-bottom: none; }
+    .kf-header { display: flex; align-items: center; gap: 16px; margin-bottom: 10px; }
+    .kf-preview-small { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .kf-name { font-size: 0.6rem; font-weight: 700; }
+    .kf-time { font-size: 0.46rem; opacity: 0.2; margin-left: auto; }
+    .kf-code { font-size: 0.46rem; opacity: 0.18; line-height: 1.9; padding: 10px 14px; border: 1px solid rgba(255,255,255,0.05); background: rgba(255,255,255,0.01); }
+    .kf-code .at { opacity: 0.4; }
+    .kf-code .prop { opacity: 0.55; }
+    .kf-code .val { opacity: 0.7; }
+    .kf-code .cm { opacity: 0.2; }
+
+    /* ALL ANIMATION KEYFRAMES */
+    @keyframes fade-k    { 0%,100%{opacity:1} 50%{opacity:0} }
+    @keyframes slideX-k  { 0%{transform:translateX(-18px);opacity:0} 15%{opacity:1} 85%{opacity:1} 100%{transform:translateX(18px);opacity:0} }
+    @keyframes slideY-k  { 0%{transform:translateY(-12px);opacity:0} 15%{opacity:1} 85%{opacity:1} 100%{transform:translateY(12px);opacity:0} }
+    @keyframes pulse-k   { 0%,100%{transform:scale(1)} 50%{transform:scale(2.2)} }
+    @keyframes spin-k    { from{transform:rotate(0)} to{transform:rotate(360deg)} }
+    @keyframes blink-k   { 0%,49%,100%{opacity:1} 50%,99%{opacity:0} }
+    @keyframes bounce-k  { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-14px)} }
+    @keyframes grow-k    { 0%,100%{transform:scaleX(0.06)} 50%{transform:scaleX(1)} }
+    @keyframes shake-k   { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 60%{transform:translateX(6px)} }
+    @keyframes wave-k    { 0%,100%{transform:scaleY(.06)} 50%{transform:scaleY(1)} }
+    @keyframes flip-k    { 0%{transform:rotateY(0)} 100%{transform:rotateY(360deg)} }
+    @keyframes cc-k      { 0%{background:#FF8400}25%{background:#FF0066}50%{background:#8800FF}75%{background:#0066FF}100%{background:#FF8400} }
+    @keyframes gs-k      { 0%,100%{background-position:0%} 50%{background-position:100%} }
+    @keyframes bp-k      { 0%,100%{border-color:#FF8400} 33%{border-color:#FF0066} 66%{border-color:#0066FF} }
+    @keyframes cursor-k  { 0%,49%,100%{opacity:1} 50%,99%{opacity:0} }
+    @keyframes orbit-k   { from{transform:rotate(0deg) translateX(14px)} to{transform:rotate(360deg) translateX(14px)} }
+    @keyframes float-k   { 0%,100%{transform:translateY(0) rotate(0deg)} 33%{transform:translateY(-8px) rotate(1deg)} 66%{transform:translateY(-4px) rotate(-1deg)} }
+    @keyframes ripple-k  { 0%{transform:scale(0.5);opacity:0.8} 100%{transform:scale(2.5);opacity:0} }
+    @keyframes scan-k    { 0%{transform:translateY(-100%)} 100%{transform:translateY(400%)} }
+    @keyframes typewriter-k { from{width:0} to{width:100%} }
+    @keyframes glitch-k  { 0%,90%,100%{transform:translateX(0) skew(0deg)} 92%{transform:translateX(-4px) skew(-1deg)} 94%{transform:translateX(4px) skew(1deg)} 96%{transform:translateX(-2px) skew(0deg)} }
+    @keyframes morph-k   { 0%,100%{border-radius:50%} 50%{border-radius:0%} }
+    @keyframes breathe-k { 0%,100%{transform:scale(1);opacity:0.5} 50%{transform:scale(1.12);opacity:1} }
+
+    /* STAGE HERO ANIMATION */
+    @keyframes hero-orbit-a { from{transform:rotate(0deg) translateX(80px)} to{transform:rotate(360deg) translateX(80px)} }
+    @keyframes hero-orbit-b { from{transform:rotate(120deg) translateX(55px)} to{transform:rotate(480deg) translateX(55px)} }
+    @keyframes hero-orbit-c { from{transform:rotate(240deg) translateX(35px)} to{transform:rotate(600deg) translateX(35px)} }
+    @keyframes hero-pulse   { 0%,100%{transform:scale(1);opacity:0.8} 50%{transform:scale(1.15);opacity:1} }
+    @keyframes hero-ring    { 0%,100%{transform:scale(1);opacity:0.2} 50%{transform:scale(1.4);opacity:0} }
+    @keyframes hero-scan    { 0%{transform:translateY(-60px);opacity:0} 10%{opacity:0.15} 90%{opacity:0.15} 100%{transform:translateY(60px);opacity:0} }
+
+    footer { padding: 32px 0; display: flex; justify-content: space-between; font-size: 0.5rem; opacity: 0.18; flex-wrap: wrap; gap: 8px; }
+
+    @media (max-width: 680px) {
+      .page { padding: 0 16px; } nav { padding: 0 16px; }
+      .primitive-grid { grid-template-columns: repeat(2, 1fr); }
+      .primitive-cell:nth-child(4n) { border-right: 1px solid rgba(255,255,255,0.08); }
+      .primitive-cell:nth-child(2n) { border-right: none; }
+      .composite-grid, .rule-grid { grid-template-columns: 1fr; }
+      .composite-cell { border-right: none !important; }
+      .rule-col:first-child { border-right: none; padding-right: 0; padding-bottom: 24px; border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 24px; }
+      .rule-col:last-child { padding-left: 0; }
+    }
+  </style>
+</head>
+<body style="background:#000;color:#fff;">
+<div class="grad-rule"></div>
+<nav>
+  <span class="nav-logo">BlackRoad</span>
+  <div class="nav-links">
+    <a href="#primitives">primitives</a>
+    <a href="#composite">composite</a>
+    <a href="#timing">timing</a>
+    <a href="#keyframes">keyframes</a>
+    <a href="#rules">rules</a>
+  </div>
+</nav>
+
+<div class="page">
+
+  <!-- HERO -->
+
+  <div class="hero">
+    <div class="hero-eyebrow">BlackRoad OS, Inc. · Motion System v1.0</div>
+    <h1>Motion<br>Primitives</h1>
+    <p class="hero-sub">Every animation in the BlackRoad system, documented. CSS-only. No libraries. Designed for shapes and status — never for text.</p>
+    <div class="hero-divider"></div>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="stat-num">17</div><div class="stat-label">Primitives</div></div>
+      <div class="hero-stat"><div class="stat-num">6</div><div class="stat-label">Composite Patterns</div></div>
+      <div class="hero-stat"><div class="stat-num">4</div><div class="stat-label">Timing Curves</div></div>
+      <div class="hero-stat"><div class="stat-num">0</div><div class="stat-label">Animated Text · Ever</div></div>
+    </div>
+  </div>
+
+  <!-- HERO STAGE -->
+
+  <div class="sec" style="padding-top:48px;">
+    <div class="sec-label">Showcase · Orbital System</div>
+
+    <div class="stage">
+      <div class="stage-bg"></div>
+      <div class="stage-grid"></div>
+      <div class="stage-label">Composite · orbit + pulse + fade + grow + color-cycle + border-pulse</div>
+      <div class="stage-id">A01–A16</div>
+
+      <!-- The big showcase: orbital system -->
+      <div class="stage-content">
+        <div style="position:relative;width:200px;height:200px;display:flex;align-items:center;justify-content:center;">
+
+          <!-- Outer ring ripple -->
+          <div style="position:absolute;width:160px;height:160px;border-radius:50%;border:1px solid rgba(255,132,0,0.3);animation:hero-ring 3s ease-out infinite;"></div>
+          <div style="position:absolute;width:160px;height:160px;border-radius:50%;border:1px solid rgba(0,102,255,0.3);animation:hero-ring 3s ease-out infinite 1s;"></div>
+          <div style="position:absolute;width:160px;height:160px;border-radius:50%;border:1px solid rgba(136,0,255,0.3);animation:hero-ring 3s ease-out infinite 2s;"></div>
+
+          <!-- Orbit tracks -->
+          <div style="position:absolute;width:160px;height:160px;border-radius:50%;border:1px solid rgba(255,255,255,0.04);"></div>
+          <div style="position:absolute;width:110px;height:110px;border-radius:50%;border:1px solid rgba(255,255,255,0.04);"></div>
+          <div style="position:absolute;width:70px;height:70px;border-radius:50%;border:1px solid rgba(255,255,255,0.04);"></div>
+
+          <!-- Center core -->
+          <div style="position:relative;z-index:10;">
+            <div style="width:18px;height:18px;border-radius:50%;background:#fff;animation:hero-pulse 2.5s ease-in-out infinite;box-shadow:0 0 20px rgba(255,255,255,0.15);"></div>
+          </div>
+
+          <!-- Orbit A — outer -->
+          <div style="position:absolute;width:160px;height:160px;animation:hero-orbit-a 8s linear infinite;">
+            <div style="position:absolute;top:50%;left:50%;width:10px;height:10px;border-radius:50%;background:#FF8400;transform:translate(-50%,-50%);box-shadow:0 0 12px rgba(255,132,0,0.5);"></div>
+          </div>
+
+          <!-- Orbit B — mid (counter) -->
+          <div style="position:absolute;width:110px;height:110px;animation:hero-orbit-b 5.5s linear infinite reverse;">
+            <div style="position:absolute;top:50%;left:50%;width:8px;height:8px;border-radius:50%;background:#FF0066;transform:translate(-50%,-50%);box-shadow:0 0 10px rgba(255,0,102,0.5);"></div>
+          </div>
+
+          <!-- Orbit C — inner -->
+          <div style="position:absolute;width:70px;height:70px;animation:hero-orbit-c 3.5s linear infinite;">
+            <div style="position:absolute;top:50%;left:50%;width:6px;height:6px;border-radius:50%;background:#8800FF;transform:translate(-50%,-50%);box-shadow:0 0 8px rgba(136,0,255,0.6);"></div>
+          </div>
+
+          <!-- Scan line -->
+          <div style="position:absolute;width:200px;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.08),transparent);animation:hero-scan 4s ease-in-out infinite;pointer-events:none;"></div>
+
+        </div>
+
+        <!-- Wave bars on the right -->
+        <div style="position:absolute;right:32px;bottom:32px;display:flex;align-items:center;gap:3px;height:28px;">
+          <div style="width:2px;background:#FF8400;animation:wave-k 1s ease-in-out infinite 0s;"></div>
+          <div style="width:2px;background:#FF4400;animation:wave-k 1s ease-in-out infinite .08s;"></div>
+          <div style="width:2px;background:#FF0066;animation:wave-k 1s ease-in-out infinite .16s;"></div>
+          <div style="width:2px;background:#CC00AA;animation:wave-k 1s ease-in-out infinite .24s;"></div>
+          <div style="width:2px;background:#8800FF;animation:wave-k 1s ease-in-out infinite .32s;"></div>
+          <div style="width:2px;background:#0066FF;animation:wave-k 1s ease-in-out infinite .40s;"></div>
+          <div style="width:2px;background:#2233CC;animation:wave-k 1s ease-in-out infinite .48s;"></div>
+        </div>
+
+        <!-- Typewriter label bottom-left -->
+        <div style="position:absolute;left:24px;bottom:24px;display:flex;align-items:center;gap:6px;">
+          <span style="font-size:0.52rem;opacity:0.3;overflow:hidden;white-space:nowrap;animation:typewriter-k 2s steps(16,end) infinite alternate;">lucidia · active</span>
+          <span style="display:inline-block;width:1px;height:12px;background:#fff;opacity:0.4;animation:cursor-k 0.8s step-end infinite;"></span>
+        </div>
+
+        <!-- Floating badges -->
+        <div style="position:absolute;top:20px;right:80px;font-size:0.44rem;opacity:0;animation:fade-k 4s ease-in-out 1s infinite;border:1px solid rgba(255,132,0,0.3);padding:3px 8px;color:rgba(255,132,0,0.6);">orbit A</div>
+        <div style="position:absolute;top:44px;right:80px;font-size:0.44rem;opacity:0;animation:fade-k 4s ease-in-out 2.3s infinite;border:1px solid rgba(255,0,102,0.3);padding:3px 8px;color:rgba(255,0,102,0.6);">orbit B</div>
+        <div style="position:absolute;top:68px;right:80px;font-size:0.44rem;opacity:0;animation:fade-k 4s ease-in-out 3.6s infinite;border:1px solid rgba(136,0,255,0.3);padding:3px 8px;color:rgba(136,0,255,0.6);">orbit C</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 01 PRIMITIVES -->
+
+  <div class="sec" id="primitives">
+    <div class="sec-label">01 · All 17 Primitives</div>
+
+    <div class="primitive-grid">
+
+      <!-- 01 fade -->
+      <div class="primitive-cell">
+        <div class="p-num">01</div>
+        <div class="p-preview">
+          <div style="width:10px;height:10px;border-radius:50%;background:#0066FF;animation:fade-k 2s ease-in-out infinite;"></div>
+        </div>
+        <div class="p-name">fade</div>
+        <div class="p-timing">ease · 2s · infinite</div>
+        <div class="p-desc">opacity 1→0→1. The base state transition. Use for: loading states, presence indicators, soft transitions.</div>
+      </div>
+
+      <!-- 02 slide-x -->
+      <div class="primitive-cell">
+        <div class="p-num">02</div>
+        <div class="p-preview">
+          <div style="width:10px;height:10px;border-radius:50%;background:#FF0066;animation:slideX-k 2s ease-in-out infinite;"></div>
+        </div>
+        <div class="p-name">slide-x</div>
+        <div class="p-timing">ease · 2s · infinite</div>
+        <div class="p-desc">translateX −18→18 with fade in/out. Use for: data streaming, message passing, horizontal progress.</div>
+      </div>
+
+      <!-- 03 slide-y -->
+      <div class="primitive-cell">
+        <div class="p-num">03</div>
+        <div class="p-preview">
+          <div style="width:10px;height:10px;border-radius:50%;background:#8800FF;animation:slideY-k 2s ease-in-out infinite;"></div>
+        </div>
+        <div class="p-name">slide-y</div>
+        <div class="p-timing">ease · 2s · infinite</div>
+        <div class="p-desc">translateY −12→12 with fade. Use for: vertical data, agent queues, upload/download indicators.</div>
+      </div>
+
+      <!-- 04 pulse -->
+      <div class="primitive-cell">
+        <div class="p-num">04</div>
+        <div class="p-preview">
+          <div style="width:9px;height:9px;border-radius:50%;background:#FF8400;animation:pulse-k 1.5s ease-in-out infinite;"></div>
+        </div>
+        <div class="p-name">pulse</div>
+        <div class="p-timing">ease · 1.5s · infinite</div>
+        <div class="p-desc">scale 1→2.2→1. Use for: alert states, active agent dots, live indicators, heartbeat signals.</div>
+      </div>
+
+      <!-- 05 spin -->
+      <div class="primitive-cell">
+        <div class="p-num">05</div>
+        <div class="p-preview">
+          <div style="width:12px;height:12px;border-radius:50%;background:#0066FF;animation:spin-k 2s linear infinite;"></div>
+        </div>
+        <div class="p-name">spin</div>
+        <div class="p-timing">linear · 2s · infinite</div>
+        <div class="p-desc">rotate 0→360°. Use for: loading states, processing indicators. Must be on shapes — never on logos.</div>
+      </div>
+
+      <!-- 06 blink -->
+      <div class="primitive-cell">
+        <div class="p-num">06</div>
+        <div class="p-preview">
+          <div style="width:10px;height:10px;border-radius:50%;background:#CC00AA;animation:blink-k 1s step-end infinite;"></div>
+        </div>
+        <div class="p-name">blink</div>
+        <div class="p-timing">step-end · 1s · infinite</div>
+        <div class="p-desc">Hard opacity cut. No easing. Use for: cursor states, binary on/off signals, terminal indicators.</div>
+      </div>
+
+      <!-- 07 bounce -->
+      <div class="primitive-cell">
+        <div class="p-num">07</div>
+        <div class="p-preview">
+          <div style="width:10px;height:10px;border-radius:50%;background:#FF4400;animation:bounce-k 1s ease-in-out infinite;"></div>
+        </div>
+        <div class="p-name">bounce</div>
+        <div class="p-timing">ease · 1s · infinite</div>
+        <div class="p-desc">translateY 0→−14→0. Use for: notification callouts, empty states, attention-drawing UI moments.</div>
+      </div>
+
+      <!-- 08 grow -->
+      <div class="primitive-cell">
+        <div class="p-num">08</div>
+        <div class="p-preview">
+          <div style="width:60px;height:2px;background:var(--grad);background-size:300%;transform-origin:left;animation:grow-k 2s ease-in-out infinite,gs-k 3s ease infinite;"></div>
+        </div>
+        <div class="p-name">grow</div>
+        <div class="p-timing">ease · 2s · infinite</div>
+        <div class="p-desc">scaleX 0→1→0. Always on gradient rule bars. Use for: progress loaders, section reveals, data fills.</div>
+      </div>
+
+      <!-- 09 shake -->
+      <div class="primitive-cell">
+        <div class="p-num">09</div>
+        <div class="p-preview">
+          <div style="width:10px;height:10px;border-radius:50%;background:#FF0066;animation:shake-k 1s ease-in-out infinite;"></div>
+        </div>
+        <div class="p-name">shake</div>
+        <div class="p-timing">ease · 1s · infinite</div>
+        <div class="p-desc">translateX ±6px. Use sparingly: error states, invalid inputs, system warnings. Never decorative.</div>
+      </div>
+
+      <!-- 10 orbit -->
+      <div class="primitive-cell">
+        <div class="p-num">10</div>
+        <div class="p-preview" style="position:relative;">
+          <div style="width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.3);position:absolute;"></div>
+          <div style="width:8px;height:8px;border-radius:50%;background:#8800FF;position:absolute;animation:orbit-k 2s linear infinite;"></div>
+        </div>
+        <div class="p-name">orbit</div>
+        <div class="p-timing">linear · 2s · infinite</div>
+        <div class="p-desc">rotate + translateX around origin. Use for: multi-agent coordination, relationship indicators.</div>
+      </div>
+
+      <!-- 11 cursor -->
+      <div class="primitive-cell">
+        <div class="p-num">11</div>
+        <div class="p-preview">
+          <div style="display:flex;align-items:center;gap:2px;font-size:0.7rem;font-weight:700;">BR<span style="display:inline-block;width:1.5px;height:14px;background:#fff;animation:cursor-k 0.8s step-end infinite;"></span></div>
+        </div>
+        <div class="p-name">cursor</div>
+        <div class="p-timing">step-end · 0.8s · infinite</div>
+        <div class="p-desc">Blinking text insertion cursor. Always step-end — no easing on a cursor. Terminal and input contexts only.</div>
+      </div>
+
+      <!-- 12 wave -->
+      <div class="primitive-cell">
+        <div class="p-num">12</div>
+        <div class="p-preview">
+          <div style="display:flex;align-items:center;gap:3px;height:28px;">
+            <div style="width:2px;background:#FF8400;animation:wave-k 1s ease-in-out infinite 0s;"></div>
+            <div style="width:2px;background:#FF4400;animation:wave-k 1s ease-in-out infinite .12s;"></div>
+            <div style="width:2px;background:#FF0066;animation:wave-k 1s ease-in-out infinite .24s;"></div>
+            <div style="width:2px;background:#8800FF;animation:wave-k 1s ease-in-out infinite .36s;"></div>
+            <div style="width:2px;background:#0066FF;animation:wave-k 1s ease-in-out infinite .48s;"></div>
+          </div>
+        </div>
+        <div class="p-name">wave</div>
+        <div class="p-timing">ease · 1s · staggered</div>
+        <div class="p-desc">scaleY staggered bars. Each bar offset by ~120ms. Use for: audio processing, agent activity, data streams.</div>
+      </div>
+
+      <!-- 13 flip -->
+      <div class="primitive-cell">
+        <div class="p-num">13</div>
+        <div class="p-preview">
+          <div style="width:12px;height:12px;background:#FF8400;animation:flip-k 2s ease-in-out infinite;"></div>
+        </div>
+        <div class="p-name">flip</div>
+        <div class="p-timing">ease · 2s · infinite</div>
+        <div class="p-desc">rotateY 0→360°. Use for: token/coin states, boolean toggles, data card transitions. 3D axis only.</div>
+      </div>
+
+      <!-- 14 color-cycle -->
+      <div class="primitive-cell">
+        <div class="p-num">14</div>
+        <div class="p-preview">
+          <div style="width:10px;height:10px;border-radius:50%;animation:cc-k 3s linear infinite;"></div>
+        </div>
+        <div class="p-name">color-cycle</div>
+        <div class="p-timing">linear · 3s · infinite</div>
+        <div class="p-desc">orange→pink→purple→blue→orange. Use on dots and fills only. Never on text. Always linear easing.</div>
+      </div>
+
+      <!-- 15 grad-shift -->
+      <div class="primitive-cell">
+        <div class="p-num">15</div>
+        <div class="p-preview">
+          <div style="width:80px;height:4px;border-radius:2px;background:var(--grad);background-size:300%;animation:gs-k 3s ease infinite;"></div>
+        </div>
+        <div class="p-name">grad-shift</div>
+        <div class="p-timing">ease · 3s · infinite</div>
+        <div class="p-desc">background-position 0%→100%→0%. Use on gradient rule bars and progress strips. Gives gradient a living quality.</div>
+      </div>
+
+      <!-- 16 border-pulse -->
+      <div class="primitive-cell">
+        <div class="p-num">16</div>
+        <div class="p-preview">
+          <div style="width:20px;height:20px;border-radius:50%;border:2px solid;animation:bp-k 2s ease-in-out infinite;"></div>
+        </div>
+        <div class="p-name">border-pulse</div>
+        <div class="p-timing">ease · 2s · infinite</div>
+        <div class="p-desc">border-color cycles through palette. Use for: selection rings, focus indicators, watched states.</div>
+      </div>
+
+      <!-- 17 morph -->
+      <div class="primitive-cell" style="border-bottom:none;">
+        <div class="p-num">17</div>
+        <div class="p-preview">
+          <div style="width:14px;height:14px;background:#FF8400;animation:morph-k 2s ease-in-out infinite,cc-k 4s linear infinite;"></div>
+        </div>
+        <div class="p-name">morph</div>
+        <div class="p-timing">ease · 2s · infinite</div>
+        <div class="p-desc">border-radius 50%→0%→50%. Circle to square and back. Use for: state transitions, mode changes, identity shifts.</div>
+      </div>
+
+      <!-- 18 breathe (bonus) -->
+      <div class="primitive-cell" style="border-bottom:none;">
+        <div class="p-num">+</div>
+        <div class="p-preview">
+          <div style="width:28px;height:28px;border-radius:50%;background:rgba(136,0,255,0.3);border:1px solid rgba(136,0,255,0.4);animation:breathe-k 3s ease-in-out infinite;"></div>
+        </div>
+        <div class="p-name">breathe</div>
+        <div class="p-timing">ease · 3s · infinite</div>
+        <div class="p-desc">scale 1→1.12 + opacity 0.5→1. Slow, calming. Use for: idle agent states, ambient presence, background elements.</div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- 02 COMPOSITE PATTERNS -->
+
+  <div class="sec" id="composite">
+    <div class="sec-label">02 · Composite Patterns</div>
+
+    <div class="composite-grid">
+
+      <!-- Agent Status -->
+      <div class="composite-cell">
+        <div class="composite-preview">
+          <div style="display:flex;flex-direction:column;gap:10px;padding:16px;">
+            <div style="display:flex;align-items:center;gap:10px;font-size:0.55rem;">
+              <div style="width:8px;height:8px;border-radius:50%;background:#FF8400;animation:pulse-k 1.5s ease-in-out infinite;flex-shrink:0;"></div>
+              cecilia · active · 4h 12m
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;font-size:0.55rem;opacity:0.6;">
+              <div style="width:8px;height:8px;border-radius:50%;background:#0066FF;flex-shrink:0;"></div>
+              atlas · standby
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;font-size:0.55rem;opacity:0.5;">
+              <div style="width:8px;height:8px;border-radius:50%;background:#FF0066;animation:pulse-k 2s ease-in-out infinite 0.3s;flex-shrink:0;"></div>
+              nova · alert · 3 pending
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;font-size:0.55rem;opacity:0.2;">
+              <div style="width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.15);flex-shrink:0;"></div>
+              olympia · offline
+            </div>
+          </div>
+        </div>
+        <div class="composite-meta">
+          <div class="composite-name">Agent Status Cluster</div>
+          <div class="composite-desc">pulse + color-cycle + fade. Active agents pulse in their color. Alert agents pulse faster. Offline agents get no animation — opacity only.</div>
+          <div class="composite-tags">
+            <span class="ctag">pulse</span>
+            <span class="ctag">color</span>
+            <span class="ctag">opacity</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Loading Bar -->
+      <div class="composite-cell">
+        <div class="composite-preview">
+          <div style="padding:24px;width:100%;display:flex;flex-direction:column;gap:16px;">
+            <div style="display:flex;justify-content:space-between;font-size:0.48rem;opacity:0.3;margin-bottom:4px;">
+              <span>Initializing Lucidia</span>
+              <span style="animation:fade-k 1.5s ease-in-out infinite;">loading</span>
+            </div>
+            <div style="height:2px;background:rgba(255,255,255,0.06);overflow:hidden;">
+              <div style="height:100%;width:100%;background:var(--grad);background-size:300%;transform-origin:left;animation:grow-k 2.5s ease-in-out infinite,gs-k 3s ease infinite;"></div>
+            </div>
+            <div style="height:2px;background:rgba(255,255,255,0.06);overflow:hidden;">
+              <div style="height:100%;width:100%;background:var(--grad);background-size:300%;transform-origin:left;animation:grow-k 2.5s ease-in-out infinite 0.4s,gs-k 3s ease infinite;"></div>
+            </div>
+            <div style="height:2px;background:rgba(255,255,255,0.06);overflow:hidden;">
+              <div style="height:100%;width:100%;background:var(--grad);background-size:300%;transform-origin:left;animation:grow-k 2.5s ease-in-out infinite 0.8s,gs-k 3s ease infinite;"></div>
+            </div>
+          </div>
+        </div>
+        <div class="composite-meta">
+          <div class="composite-name">Staggered Loader</div>
+          <div class="composite-desc">grow + grad-shift + fade, staggered. Multiple gradient bars with 400ms delay increments. Used for: boot sequences, multi-step loading, data pipelines.</div>
+          <div class="composite-tags">
+            <span class="ctag">grow</span>
+            <span class="ctag">grad-shift</span>
+            <span class="ctag">stagger</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Audio Waveform -->
+      <div class="composite-cell">
+        <div class="composite-preview">
+          <div style="display:flex;align-items:center;gap:12px;padding:16px;">
+            <div style="display:flex;align-items:center;gap:2px;height:48px;">
+              <div style="width:2px;background:#FF8400;animation:wave-k 0.8s ease-in-out infinite 0s;"></div>
+              <div style="width:2px;background:#FF4400;animation:wave-k 0.8s ease-in-out infinite 0.06s;"></div>
+              <div style="width:2px;background:#FF0066;animation:wave-k 0.8s ease-in-out infinite 0.12s;"></div>
+              <div style="width:2px;background:#CC00AA;animation:wave-k 0.8s ease-in-out infinite 0.18s;"></div>
+              <div style="width:2px;background:#8800FF;animation:wave-k 0.8s ease-in-out infinite 0.24s;"></div>
+              <div style="width:2px;background:#0066FF;animation:wave-k 0.8s ease-in-out infinite 0.30s;"></div>
+              <div style="width:2px;background:#2233CC;animation:wave-k 0.8s ease-in-out infinite 0.36s;"></div>
+              <div style="width:2px;background:#8800FF;animation:wave-k 0.8s ease-in-out infinite 0.42s;"></div>
+              <div style="width:2px;background:#FF0066;animation:wave-k 0.8s ease-in-out infinite 0.48s;"></div>
+              <div style="width:2px;background:#FF8400;animation:wave-k 0.8s ease-in-out infinite 0.54s;"></div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:4px;">
+              <div style="font-size:0.56rem;opacity:0.6;">cadence · processing</div>
+              <div style="font-size:0.46rem;opacity:0.25;">SoundRoad · 2min 34s</div>
+            </div>
+          </div>
+        </div>
+        <div class="composite-meta">
+          <div class="composite-name">Spectrum Waveform</div>
+          <div class="composite-desc">wave × N bars, each offset by 60ms, each assigned a gradient color. Full spectrum left-to-right. Used in SoundRoad, Cadence, and audio processing indicators.</div>
+          <div class="composite-tags">
+            <span class="ctag">wave</span>
+            <span class="ctag">stagger</span>
+            <span class="ctag">spectrum</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Terminal Typing -->
+      <div class="composite-cell">
+        <div class="composite-preview">
+          <div style="padding:20px;font-size:0.5rem;line-height:1.9;width:100%;">
+            <div style="opacity:0.2;margin-bottom:2px;">// blackroad-os-web</div>
+            <div style="opacity:0.4;">const agent = await Agent.spawn({</div>
+            <div style="opacity:0.4;">&nbsp;&nbsp;id: 'lucidia', memory: 'ps-sha∞'</div>
+            <div style="opacity:0.4;">})</div>
+            <div style="opacity:0.2;margin-top:4px;">// memory loaded ✓ &nbsp;equations: 317</div>
+            <div style="display:flex;align-items:center;margin-top:6px;">
+              <span style="opacity:0.5;">await agent.run()</span>
+              <span style="display:inline-block;width:1.5px;height:12px;background:#fff;opacity:0.5;margin-left:1px;animation:cursor-k 0.8s step-end infinite;"></span>
+            </div>
+          </div>
+        </div>
+        <div class="composite-meta">
+          <div class="composite-name">Terminal Block</div>
+          <div class="composite-desc">cursor + static code. The cursor blinks at step-end — never eased. Comments at 20% opacity, code at 40–50%, active line at full weight with cursor appended.</div>
+          <div class="composite-tags">
+            <span class="ctag">cursor</span>
+            <span class="ctag">opacity</span>
+            <span class="ctag">mono</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Data Stream -->
+      <div class="composite-cell">
+        <div class="composite-preview">
+          <div style="padding:20px;display:flex;flex-direction:column;gap:8px;width:100%;">
+            <div style="display:flex;align-items:center;gap:8px;animation:slideX-k 3s ease-in-out infinite;">
+              <div style="width:6px;height:6px;border-radius:50%;background:#FF8400;flex-shrink:0;"></div>
+              <div style="font-size:0.48rem;opacity:0.4;">event:agent.spawn · cecilia · 14:32:01</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;animation:slideX-k 3s ease-in-out infinite 0.6s;">
+              <div style="width:6px;height:6px;border-radius:50%;background:#8800FF;flex-shrink:0;"></div>
+              <div style="font-size:0.48rem;opacity:0.4;">ledger:policy.eval → allow</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;animation:slideX-k 3s ease-in-out infinite 1.2s;">
+              <div style="width:6px;height:6px;border-radius:50%;background:#0066FF;flex-shrink:0;"></div>
+              <div style="font-size:0.48rem;opacity:0.4;">memory:commit · sha∞ · verified</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;animation:slideX-k 3s ease-in-out infinite 1.8s;">
+              <div style="width:6px;height:6px;border-radius:50%;background:#FF0066;flex-shrink:0;"></div>
+              <div style="font-size:0.48rem;opacity:0.4;">event:task.complete → K(t): 0.94</div>
+            </div>
+          </div>
+        </div>
+        <div class="composite-meta">
+          <div class="composite-name">Event Stream</div>
+          <div class="composite-desc">slide-x with staggered delay. Each event row slides in from left, fades out right. Colored dot matches event type/agent. Used in Cece governance ledger and NATS bus visualization.</div>
+          <div class="composite-tags">
+            <span class="ctag">slide-x</span>
+            <span class="ctag">stagger</span>
+            <span class="ctag">fade</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Orbit System -->
+      <div class="composite-cell">
+        <div class="composite-preview" style="overflow:hidden;">
+          <div style="position:relative;width:100px;height:100px;display:flex;align-items:center;justify-content:center;">
+            <div style="position:absolute;width:90px;height:90px;border-radius:50%;border:1px solid rgba(255,255,255,0.05);"></div>
+            <div style="position:absolute;width:60px;height:60px;border-radius:50%;border:1px solid rgba(255,255,255,0.05);"></div>
+            <div style="width:10px;height:10px;border-radius:50%;background:#fff;position:relative;z-index:2;animation:breathe-k 2.5s ease-in-out infinite;"></div>
+            <div style="position:absolute;width:90px;height:90px;animation:hero-orbit-a 6s linear infinite;">
+              <div style="position:absolute;top:50%;left:50%;width:7px;height:7px;border-radius:50%;background:#FF8400;transform:translate(-50%,-50%);"></div>
+            </div>
+            <div style="position:absolute;width:60px;height:60px;animation:hero-orbit-a 4s linear infinite reverse;">
+              <div style="position:absolute;top:50%;left:50%;width:5px;height:5px;border-radius:50%;background:#8800FF;transform:translate(-50%,-50%);"></div>
+            </div>
+          </div>
+        </div>
+        <div class="composite-meta">
+          <div class="composite-name">Agent Orbit System</div>
+          <div class="composite-desc">orbit + breathe + fade. Core breathes at rest. Satellites orbit at different speeds and directions. Scale the system: more agents = more orbit rings. Used in agent overview dashboards.</div>
+          <div class="composite-tags">
+            <span class="ctag">orbit</span>
+            <span class="ctag">breathe</span>
+            <span class="ctag">multi-ring</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- 03 TIMING -->
+
+  <div class="sec" id="timing">
+    <div class="sec-label">03 · Timing Curves</div>
+
+    <div style="margin-bottom:24px;font-size:0.52rem;opacity:0.2;line-height:1.85;max-width:560px;">Four curves. Each has a purpose. Never mix ease and linear in the same animation unless combining grow + grad-shift intentionally.</div>
+
+    <div class="timing-row">
+      <div class="t-name">ease</div>
+      <div class="t-curve">
+        <svg viewBox="0 0 200 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M0 28 C40 28, 60 4, 200 4" stroke="rgba(255,255,255,0.4)" stroke-width="1.5" fill="none"/>
+          <circle cx="0" cy="28" r="2" fill="rgba(255,255,255,0.2)"/>
+          <circle cx="200" cy="4" r="2" fill="rgba(255,255,255,0.2)"/>
+        </svg>
+      </div>
+      <div class="t-val">cubic-bezier(0.25, 0.1, 0.25, 1)</div>
+      <div class="t-use">fade, pulse, slide, bounce, shake</div>
+    </div>
+    <div class="timing-row">
+      <div class="t-name">linear</div>
+      <div class="t-curve">
+        <svg viewBox="0 0 200 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M0 28 L200 4" stroke="rgba(255,255,255,0.4)" stroke-width="1.5" fill="none"/>
+          <circle cx="0" cy="28" r="2" fill="rgba(255,255,255,0.2)"/>
+          <circle cx="200" cy="4" r="2" fill="rgba(255,255,255,0.2)"/>
+        </svg>
+      </div>
+      <div class="t-val">linear</div>
+      <div class="t-use">spin, orbit, color-cycle, grad-shift</div>
+    </div>
+    <div class="timing-row">
+      <div class="t-name">ease-in-out</div>
+      <div class="t-curve">
+        <svg viewBox="0 0 200 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M0 28 C60 28, 140 4, 200 4" stroke="rgba(255,255,255,0.4)" stroke-width="1.5" fill="none"/>
+          <circle cx="0" cy="28" r="2" fill="rgba(255,255,255,0.2)"/>
+          <circle cx="200" cy="4" r="2" fill="rgba(255,255,255,0.2)"/>
+        </svg>
+      </div>
+      <div class="t-val">cubic-bezier(0.42, 0, 0.58, 1)</div>
+      <div class="t-use">breathe, wave, border-pulse, grow</div>
+    </div>
+    <div class="timing-row" style="border-bottom:none;">
+      <div class="t-name">step-end</div>
+      <div class="t-curve">
+        <svg viewBox="0 0 200 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M0 28 L100 28 L100 4 L200 4" stroke="rgba(255,255,255,0.4)" stroke-width="1.5" fill="none"/>
+          <circle cx="0" cy="28" r="2" fill="rgba(255,255,255,0.2)"/>
+          <circle cx="200" cy="4" r="2" fill="rgba(255,255,255,0.2)"/>
+        </svg>
+      </div>
+      <div class="t-val">steps(1, end)</div>
+      <div class="t-use">cursor, blink — hard cuts only</div>
+    </div>
+
+    <!-- Duration guidance -->
+    <div style="margin-top:32px;display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-top:1px solid rgba(255,255,255,0.06);">
+      <div style="padding:20px 16px 0 0;border-right:1px solid rgba(255,255,255,0.06);">
+        <div style="font-size:0.44rem;opacity:0.18;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:6px;">Micro</div>
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:1.4rem;font-weight:700;opacity:0.7;">0.8s</div>
+        <div style="font-size:0.46rem;opacity:0.2;margin-top:4px;line-height:1.65;">cursor, blink. Hard state indicators.</div>
+      </div>
+      <div style="padding:20px 16px 0;border-right:1px solid rgba(255,255,255,0.06);">
+        <div style="font-size:0.44rem;opacity:0.18;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:6px;">Standard</div>
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:1.4rem;font-weight:700;opacity:0.7;">1–2s</div>
+        <div style="font-size:0.46rem;opacity:0.2;margin-top:4px;line-height:1.65;">pulse, spin, wave, bounce, fade.</div>
+      </div>
+      <div style="padding:20px 16px 0;border-right:1px solid rgba(255,255,255,0.06);">
+        <div style="font-size:0.44rem;opacity:0.18;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:6px;">Slow</div>
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:1.4rem;font-weight:700;opacity:0.7;">2–3s</div>
+        <div style="font-size:0.46rem;opacity:0.2;margin-top:4px;line-height:1.65;">orbit, grow, grad-shift, breathe.</div>
+      </div>
+      <div style="padding:20px 0 0 16px;">
+        <div style="font-size:0.44rem;opacity:0.18;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:6px;">Ambient</div>
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:1.4rem;font-weight:700;opacity:0.7;">4s+</div>
+        <div style="font-size:0.46rem;opacity:0.2;margin-top:4px;line-height:1.65;">bg elements, ambient presence only.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 04 KEYFRAME REFERENCE -->
+
+  <div class="sec" id="keyframes">
+    <div class="sec-label">04 · Keyframe Reference</div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;">
+
+      <div style="border-right:1px solid rgba(255,255,255,0.06);padding-right:24px;">
+
+        <div class="kf-block">
+          <div class="kf-header">
+            <div class="kf-preview-small"><div style="width:8px;height:8px;border-radius:50%;background:#0066FF;animation:fade-k 2s ease-in-out infinite;"></div></div>
+            <div class="kf-name">fade-k</div>
+            <div class="kf-time">ease · 2s</div>
+          </div>
+          <div class="kf-code"><span class="at">@keyframes</span> <span class="prop">fade-k</span> {<br>&nbsp;&nbsp;<span class="at">0%</span>,<span class="at">100%</span> { <span class="prop">opacity</span>: <span class="val">1</span> }<br>&nbsp;&nbsp;<span class="at">50%</span> { <span class="prop">opacity</span>: <span class="val">0</span> }<br>}</div>
+        </div>
+
+        <div class="kf-block">
+          <div class="kf-header">
+            <div class="kf-preview-small"><div style="width:8px;height:8px;border-radius:50%;background:#FF8400;animation:pulse-k 1.5s ease-in-out infinite;"></div></div>
+            <div class="kf-name">pulse-k</div>
+            <div class="kf-time">ease · 1.5s</div>
+          </div>
+          <div class="kf-code"><span class="at">@keyframes</span> <span class="prop">pulse-k</span> {<br>&nbsp;&nbsp;<span class="at">0%</span>,<span class="at">100%</span> { <span class="prop">transform</span>: <span class="val">scale(1)</span> }<br>&nbsp;&nbsp;<span class="at">50%</span> { <span class="prop">transform</span>: <span class="val">scale(2.2)</span> }<br>}</div>
+        </div>
+
+        <div class="kf-block">
+          <div class="kf-header">
+            <div class="kf-preview-small"><div style="width:8px;height:8px;border-radius:50%;background:#FF0066;animation:slideX-k 2s ease-in-out infinite;"></div></div>
+            <div class="kf-name">slideX-k</div>
+            <div class="kf-time">ease · 2s</div>
+          </div>
+          <div class="kf-code"><span class="at">@keyframes</span> <span class="prop">slideX-k</span> {<br>&nbsp;&nbsp;<span class="at">0%</span> { <span class="prop">transform</span>: <span class="val">translateX(-18px)</span>; <span class="prop">opacity</span>: <span class="val">0</span> }<br>&nbsp;&nbsp;<span class="at">15%</span>,<span class="at">85%</span> { <span class="prop">opacity</span>: <span class="val">1</span> }<br>&nbsp;&nbsp;<span class="at">100%</span> { <span class="prop">transform</span>: <span class="val">translateX(18px)</span>; <span class="prop">opacity</span>: <span class="val">0</span> }<br>}</div>
+        </div>
+
+        <div class="kf-block">
+          <div class="kf-header">
+            <div class="kf-preview-small"><div style="width:40px;height:2px;background:var(--grad);background-size:300%;transform-origin:left;animation:grow-k 2s ease-in-out infinite,gs-k 3s ease infinite;"></div></div>
+            <div class="kf-name">grow-k</div>
+            <div class="kf-time">ease · 2s</div>
+          </div>
+          <div class="kf-code"><span class="at">@keyframes</span> <span class="prop">grow-k</span> {<br>&nbsp;&nbsp;<span class="at">0%</span>,<span class="at">100%</span> { <span class="prop">transform</span>: <span class="val">scaleX(0.06)</span> }<br>&nbsp;&nbsp;<span class="at">50%</span> { <span class="prop">transform</span>: <span class="val">scaleX(1)</span> }<br>} <span class="cm">/* pair with gs-k */</span></div>
+        </div>
+
+        <div class="kf-block" style="border-bottom:none;">
+          <div class="kf-header">
+            <div class="kf-preview-small"><div style="width:40px;height:3px;background:var(--grad);background-size:300%;animation:gs-k 3s ease infinite;"></div></div>
+            <div class="kf-name">gs-k</div>
+            <div class="kf-time">ease · 3s</div>
+          </div>
+          <div class="kf-code"><span class="at">@keyframes</span> <span class="prop">gs-k</span> {<br>&nbsp;&nbsp;<span class="at">0%</span>,<span class="at">100%</span> { <span class="prop">background-position</span>: <span class="val">0%</span> }<br>&nbsp;&nbsp;<span class="at">50%</span> { <span class="prop">background-position</span>: <span class="val">100%</span> }<br>} <span class="cm">/* requires background-size:300% */</span></div>
+        </div>
+
+      </div>
+
+      <div style="padding-left:24px;">
+
+        <div class="kf-block">
+          <div class="kf-header">
+            <div class="kf-preview-small"><div style="width:8px;height:8px;border-radius:50%;animation:cc-k 3s linear infinite;"></div></div>
+            <div class="kf-name">cc-k</div>
+            <div class="kf-time">linear · 3s</div>
+          </div>
+          <div class="kf-code"><span class="at">@keyframes</span> <span class="prop">cc-k</span> {<br>&nbsp;&nbsp;<span class="at">0%</span> { <span class="prop">background</span>: <span class="val">#FF8400</span> }<br>&nbsp;&nbsp;<span class="at">25%</span> { <span class="prop">background</span>: <span class="val">#FF0066</span> }<br>&nbsp;&nbsp;<span class="at">50%</span> { <span class="prop">background</span>: <span class="val">#8800FF</span> }<br>&nbsp;&nbsp;<span class="at">75%</span> { <span class="prop">background</span>: <span class="val">#0066FF</span> }<br>&nbsp;&nbsp;<span class="at">100%</span> { <span class="prop">background</span>: <span class="val">#FF8400</span> }<br>}</div>
+        </div>
+
+        <div class="kf-block">
+          <div class="kf-header">
+            <div class="kf-preview-small"><div style="width:14px;height:14px;border-radius:50%;border:2px solid;animation:bp-k 2s ease-in-out infinite;"></div></div>
+            <div class="kf-name">bp-k</div>
+            <div class="kf-time">ease · 2s</div>
+          </div>
+          <div class="kf-code"><span class="at">@keyframes</span> <span class="prop">bp-k</span> {<br>&nbsp;&nbsp;<span class="at">0%</span>,<span class="at">100%</span> { <span class="prop">border-color</span>: <span class="val">#FF8400</span> }<br>&nbsp;&nbsp;<span class="at">33%</span> { <span class="prop">border-color</span>: <span class="val">#FF0066</span> }<br>&nbsp;&nbsp;<span class="at">66%</span> { <span class="prop">border-color</span>: <span class="val">#0066FF</span> }<br>}</div>
+        </div>
+
+        <div class="kf-block">
+          <div class="kf-header">
+            <div class="kf-preview-small"><span style="font-size:0.6rem;font-weight:700;">BR<span style="display:inline-block;width:1px;height:11px;background:#fff;animation:cursor-k 0.8s step-end infinite;vertical-align:middle;"></span></span></div>
+            <div class="kf-name">cursor-k</div>
+            <div class="kf-time">step-end · 0.8s</div>
+          </div>
+          <div class="kf-code"><span class="at">@keyframes</span> <span class="prop">cursor-k</span> {<br>&nbsp;&nbsp;<span class="at">0%</span>,<span class="at">49%</span>,<span class="at">100%</span> { <span class="prop">opacity</span>: <span class="val">1</span> }<br>&nbsp;&nbsp;<span class="at">50%</span>,<span class="at">99%</span> { <span class="prop">opacity</span>: <span class="val">0</span> }<br>} <span class="cm">/* always step-end — never ease */</span></div>
+        </div>
+
+        <div class="kf-block">
+          <div class="kf-header">
+            <div class="kf-preview-small"><div style="width:11px;height:11px;border-radius:50%;background:#8800FF;animation:breathe-k 3s ease-in-out infinite;"></div></div>
+            <div class="kf-name">breathe-k</div>
+            <div class="kf-time">ease-in-out · 3s</div>
+          </div>
+          <div class="kf-code"><span class="at">@keyframes</span> <span class="prop">breathe-k</span> {<br>&nbsp;&nbsp;<span class="at">0%</span>,<span class="at">100%</span> { <span class="prop">transform</span>: <span class="val">scale(1)</span>; <span class="prop">opacity</span>: <span class="val">0.5</span> }<br>&nbsp;&nbsp;<span class="at">50%</span> { <span class="prop">transform</span>: <span class="val">scale(1.12)</span>; <span class="prop">opacity</span>: <span class="val">1</span> }<br>}</div>
+        </div>
+
+        <div class="kf-block" style="border-bottom:none;">
+          <div class="kf-header">
+            <div class="kf-preview-small"><div style="width:12px;height:12px;background:#FF8400;animation:morph-k 2s ease-in-out infinite,cc-k 4s linear infinite;"></div></div>
+            <div class="kf-name">morph-k</div>
+            <div class="kf-time">ease-in-out · 2s</div>
+          </div>
+          <div class="kf-code"><span class="at">@keyframes</span> <span class="prop">morph-k</span> {<br>&nbsp;&nbsp;<span class="at">0%</span>,<span class="at">100%</span> { <span class="prop">border-radius</span>: <span class="val">50%</span> }<br>&nbsp;&nbsp;<span class="at">50%</span> { <span class="prop">border-radius</span>: <span class="val">0%</span> }<br>} <span class="cm">/* combine with cc-k for full effect */</span></div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 05 RULES -->
+
+  <div class="sec" id="rules">
+    <div class="sec-label">05 · Rules</div>
+    <div class="rule-grid">
+      <div class="rule-col">
+        <div class="rule-head">DO</div>
+        <div class="rule-item">Animate shapes, dots, borders, and gradient bars</div>
+        <div class="rule-item">Use pulse for active agent status indicators</div>
+        <div class="rule-item">Use step-end for cursor and blink — never eased</div>
+        <div class="rule-item">Combine grow + gs-k on gradient rule bars always</div>
+        <div class="rule-item">Stagger wave bars by ~60–120ms per element</div>
+        <div class="rule-item">Keep animation-fill-mode unset for infinite loops</div>
+        <div class="rule-item">Match linear timing to continuous rotations only</div>
+        <div class="rule-item">Use breathe (3s) for idle/ambient presence states</div>
+        <div class="rule-item">Reduce animation for users who prefer reduced motion</div>
+        <div class="rule-item">Assign gradient color to wave bars left→right spectrum</div>
+      </div>
+      <div class="rule-col">
+        <div class="rule-head">DON'T</div>
+        <div class="rule-item">Never animate text color, size, or position</div>
+        <div class="rule-item">Never use gradient-text + animation together</div>
+        <div class="rule-item">Never ease a cursor or blink — step-end only</div>
+        <div class="rule-item">Never use more than 2 animations on one element</div>
+        <div class="rule-item">Never animate the wordmark or logo in any way</div>
+        <div class="rule-item">Never use animation for purely decorative flare</div>
+        <div class="rule-item">No bounce or shake as decorative — error states only</div>
+        <div class="rule-item">No animation durations under 0.5s — too aggressive</div>
+        <div class="rule-item">Never use ease on spin or orbit — must stay linear</div>
+        <div class="rule-item">No more than 4 animated elements visible at once</div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <span>BlackRoad OS, Inc. · Motion System v1.0 · CSS only · no libraries</span>
+    <span>JetBrains Mono · Space Grotesk · 17 primitives · 6 composite patterns</span>
+  </footer>
+
+</div>
+<div class="grad-rule"></div>
+</body>
+</html>
