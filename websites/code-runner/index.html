@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BlackRoad — Code Runner</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --grad: linear-gradient(90deg, #FF8400, #FF4400, #FF0066, #CC00AA, #8800FF, #0066FF, #2233CC);
+      --bg: #000;
+      --surface: #0a0a0a;
+      --elevated: #111;
+      --border: #1e1e1e;
+      --border-bright: #2a2a2a;
+      --text: #fff;
+      --dim: rgba(255,255,255,0.4);
+      --muted: rgba(255,255,255,0.18);
+      --accent-orange: #FF8400;
+      --accent-pink: #FF0066;
+      --accent-purple: #8800FF;
+      --accent-blue: #0066FF;
+    }
+
+    html, body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'JetBrains Mono', monospace;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    /* ── GRAD RULE ── */
+    .grad-rule { height: 3px; background: var(--grad); flex-shrink: 0; }
+    .grad-line  { height: 1px; background: var(--grad); }
+
+    /* ── LAYOUT ── */
+    .shell {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    /* ── NAV ── */
+    nav {
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      background: var(--bg);
+    }
+    .nav-left { display: flex; align-items: center; gap: 16px; }
+    .nav-logo {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+    .nav-sep { width: 1px; height: 16px; background: var(--border-bright); }
+    .nav-title { font-size: 0.58rem; opacity: 0.35; letter-spacing: 0.15em; text-transform: uppercase; }
+    .nav-right { display: flex; align-items: center; gap: 12px; }
+    .status-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: #FF8400;
+      animation: pulse-anim 2s ease-in-out infinite;
+    }
+    @keyframes pulse-anim { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.6);opacity:0.6} }
+    .status-label { font-size: 0.5rem; opacity: 0.35; letter-spacing: 0.1em; }
+
+    /* ── TOOLBAR ── */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      flex-shrink: 0;
+      flex-wrap: wrap;
+    }
+
+    .lang-select-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .lang-select-wrap::after {
+      content: '\25BE';
+      position: absolute;
+      right: 10px;
+      font-size: 0.6rem;
+      opacity: 0.4;
+      pointer-events: none;
+    }
+    select {
+      appearance: none;
+      background: var(--elevated);
+      border: 1px solid var(--border-bright);
+      color: var(--text);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.62rem;
+      padding: 6px 28px 6px 10px;
+      cursor: pointer;
+      outline: none;
+      min-width: 160px;
+    }
+    select:focus { border-color: rgba(255,255,255,0.3); }
+
+    .version-select { min-width: 80px; }
+
+    .toolbar-sep { width: 1px; height: 20px; background: var(--border-bright); }
+
+    .btn-run {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #fff;
+      color: #000;
+      border: none;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.62rem;
+      font-weight: 700;
+      padding: 7px 16px;
+      cursor: pointer;
+      letter-spacing: 0.05em;
+      transition: opacity 0.15s;
+    }
+    .btn-run:hover { opacity: 0.85; }
+    .btn-run:disabled { opacity: 0.3; cursor: not-allowed; }
+    .btn-run.running { background: var(--elevated); color: var(--text); border: 1px solid var(--border-bright); }
+
+    .run-icon { font-size: 0.7rem; }
+
+    .btn-clear {
+      background: transparent;
+      border: 1px solid var(--border-bright);
+      color: var(--dim);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.58rem;
+      padding: 6px 12px;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .btn-clear:hover { border-color: rgba(255,255,255,0.3); color: var(--text); }
+
+    .shortcut-hint { font-size: 0.48rem; opacity: 0.2; margin-left: auto; letter-spacing: 0.08em; }
+
+    /* ── MAIN SPLIT ── */
+    .main {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    /* ── EDITOR PANE ── */
+    .editor-pane {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-width: 0;
+      border-right: 1px solid var(--border);
+    }
+
+    .pane-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 16px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+    .pane-label {
+      font-size: 0.48rem;
+      opacity: 0.3;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+    .pane-file {
+      font-size: 0.55rem;
+      opacity: 0.5;
+      margin-left: auto;
+    }
+    .cursor-blink {
+      display: inline-block;
+      width: 1px; height: 10px;
+      background: #fff;
+      vertical-align: middle;
+      animation: blink-k 0.8s step-end infinite;
+      margin-left: 2px;
+    }
+    @keyframes blink-k { 0%,49%,100%{opacity:1} 50%,99%{opacity:0} }
+
+    .editor-wrap {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    .line-numbers {
+      width: 44px;
+      padding: 14px 0;
+      text-align: right;
+      font-size: 0.6rem;
+      line-height: 1.6;
+      color: rgba(255,255,255,0.15);
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      user-select: none;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .line-numbers span {
+      display: block;
+      padding-right: 10px;
+      height: calc(0.6rem * 1.6);
+    }
+
+    textarea#code {
+      flex: 1;
+      background: var(--bg);
+      color: var(--text);
+      border: none;
+      outline: none;
+      resize: none;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      line-height: 1.6;
+      padding: 14px 16px;
+      tab-size: 2;
+      caret-color: #FF8400;
+      min-height: 0;
+    }
+    textarea#code::selection { background: rgba(136,0,255,0.25); }
+
+    /* ── OUTPUT PANE ── */
+    .output-pane {
+      display: flex;
+      flex-direction: column;
+      width: 42%;
+      min-width: 280px;
+      background: var(--surface);
+    }
+
+    .output-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .tab {
+      padding: 9px 16px;
+      font-size: 0.52rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      opacity: 0.3;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: opacity 0.15s;
+    }
+    .tab.active { opacity: 1; border-bottom-color: #fff; }
+    .tab:hover:not(.active) { opacity: 0.6; }
+
+    .output-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 14px;
+      min-height: 0;
+    }
+    .output-body::-webkit-scrollbar { width: 4px; }
+    .output-body::-webkit-scrollbar-track { background: transparent; }
+    .output-body::-webkit-scrollbar-thumb { background: var(--border-bright); }
+
+    .output-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      gap: 12px;
+      opacity: 0.2;
+    }
+    .output-empty-icon { font-size: 1.8rem; }
+    .output-empty-text { font-size: 0.52rem; letter-spacing: 0.12em; text-transform: uppercase; }
+
+    .output-content { display: none; width: 100%; }
+    .output-content.visible { display: block; }
+
+    .output-line {
+      font-size: 0.62rem;
+      line-height: 1.8;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .output-line.stdout { color: var(--text); }
+    .output-line.stderr { color: #FF4400; }
+    .output-line.info { color: rgba(255,255,255,0.35); }
+    .output-line.success { color: #00CC66; }
+    .output-line.time { color: rgba(255,255,255,0.2); font-size: 0.5rem; margin-top: 10px; letter-spacing: 0.06em; }
+
+    /* ── LOADER ── */
+    .loader-bar {
+      height: 2px;
+      background: var(--grad);
+      background-size: 300%;
+      width: 0%;
+      transition: width 0.3s ease;
+      animation: gs-k 2s linear infinite;
+    }
+    @keyframes gs-k { 0%,100%{background-position:0%} 50%{background-position:100%} }
+
+    /* ── STATUSBAR ── */
+    .statusbar {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 5px 16px;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+      font-size: 0.48rem;
+      flex-shrink: 0;
+    }
+    .sb-item { display: flex; align-items: center; gap: 5px; color: var(--muted); }
+    .sb-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+    .sb-item.active { color: var(--dim); }
+    .sb-right { margin-left: auto; color: var(--muted); }
+
+    /* ── LANG SNIPPETS ── */
+    .snippets-panel {
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+      padding: 8px 16px;
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      flex-wrap: wrap;
+      flex-shrink: 0;
+    }
+    .snippet-label { font-size: 0.45rem; opacity: 0.2; letter-spacing: 0.12em; text-transform: uppercase; margin-right: 4px; }
+    .snippet-btn {
+      background: var(--elevated);
+      border: 1px solid var(--border-bright);
+      color: var(--dim);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.48rem;
+      padding: 3px 8px;
+      cursor: pointer;
+      letter-spacing: 0.04em;
+      transition: all 0.15s;
+    }
+    .snippet-btn:hover { border-color: rgba(255,255,255,0.25); color: var(--text); }
+
+    /* ── SCROLL STYLE ── */
+    * { scrollbar-width: thin; scrollbar-color: #222 transparent; }
+
+    /* ── RESIZABLE ── */
+    .resize-handle {
+      width: 4px;
+      cursor: col-resize;
+      background: var(--border);
+      transition: background 0.15s;
+      flex-shrink: 0;
+    }
+    .resize-handle:hover { background: rgba(255,255,255,0.15); }
+  </style>
+</head>
+<body>
+
+<div class="shell">
+
+  <div class="grad-rule"></div>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-left">
+      <span class="nav-logo">BlackRoad</span>
+      <div class="nav-sep"></div>
+      <span class="nav-title">Code Runner</span>
+    </div>
+    <div class="nav-right">
+      <div class="status-dot" id="statusDot"></div>
+      <span class="status-label" id="statusLabel">READY</span>
+    </div>
+  </nav>
+
+  <!-- LOADER BAR -->
+  <div class="loader-bar" id="loaderBar" style="width:0%;animation:none;"></div>
+
+  <!-- TOOLBAR -->
+  <div class="toolbar">
+    <div class="lang-select-wrap">
+      <select id="langSelect" onchange="onLangChange()">
+        <optgroup label="Popular">
+          <option value="python|3.10.0">Python</option>
+          <option value="javascript|18.15.0">JavaScript</option>
+          <option value="typescript|5.0.3">TypeScript</option>
+          <option value="rust|1.68.2">Rust</option>
+          <option value="go|1.16.2">Go</option>
+          <option value="java|15.0.2">Java</option>
+          <option value="c|10.2.0">C</option>
+          <option value="cpp|10.2.0">C++</option>
+          <option value="csharp|6.12.0">C#</option>
+          <option value="kotlin|1.8.20">Kotlin</option>
+          <option value="swift|5.3.3">Swift</option>
+          <option value="ruby|3.0.1">Ruby</option>
+        </optgroup>
+        <optgroup label="Scripting">
+          <option value="bash|5.2.0">Bash</option>
+          <option value="php|8.2.3">PHP</option>
+          <option value="perl|5.36.0">Perl</option>
+          <option value="lua|5.4.4">Lua</option>
+          <option value="r|4.1.1">R</option>
+          <option value="powershell|7.3.0">PowerShell</option>
+        </optgroup>
+        <optgroup label="Functional">
+          <option value="haskell|9.4.4">Haskell</option>
+          <option value="elixir|1.14.3">Elixir</option>
+          <option value="erlang|25.3">Erlang</option>
+          <option value="clojure|1.11.1">Clojure</option>
+          <option value="fsharp|5.0.201">F#</option>
+          <option value="ocaml|4.14.0">OCaml</option>
+          <option value="racket|8.3">Racket</option>
+        </optgroup>
+        <optgroup label="Systems">
+          <option value="zig|0.10.1">Zig</option>
+          <option value="nim|1.6.14">Nim</option>
+          <option value="d|10.3.0">D</option>
+          <option value="fortran|10.2.0">Fortran</option>
+          <option value="pascal|3.2.2">Pascal</option>
+          <option value="cobol|3.1.2">COBOL</option>
+        </optgroup>
+        <optgroup label="Data / ML">
+          <option value="julia|1.8.5">Julia</option>
+          <option value="octave|7.3.0">Octave</option>
+        </optgroup>
+        <optgroup label="Web / Other">
+          <option value="coffeescript|2.7.0">CoffeeScript</option>
+          <option value="groovy|3.0.7">Groovy</option>
+          <option value="scala|3.2.2">Scala</option>
+          <option value="dart|2.19.6">Dart</option>
+          <option value="crystal|1.8.2">Crystal</option>
+          <option value="vlang|0.3.3">V</option>
+          <option value="prolog|8.4.3">Prolog</option>
+          <option value="brainfuck|2.7.3">Brainfuck</option>
+        </optgroup>
+      </select>
+    </div>
+
+    <div class="toolbar-sep"></div>
+
+    <button class="btn-run" id="runBtn" onclick="runCode()">
+      <span class="run-icon">&#9654;</span> RUN
+    </button>
+
+    <button class="btn-clear" onclick="clearAll()">CLEAR</button>
+
+    <span class="shortcut-hint">&#8984; + Enter to run</span>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main" id="mainSplit">
+
+    <!-- EDITOR PANE -->
+    <div class="editor-pane" id="editorPane">
+      <div class="pane-header">
+        <span class="pane-label">Editor</span>
+        <span class="pane-file" id="fileLabel">main.py<span class="cursor-blink"></span></span>
+      </div>
+      <div class="editor-wrap">
+        <div class="line-numbers" id="lineNumbers">
+          <span>1</span>
+        </div>
+        <textarea id="code" spellcheck="false" placeholder="# Write your code here...">
+# BlackRoad OS — Code Runner
+# Python 3 · Hello, World
+
+def greet(name: str) -> str:
+    return f"Hello, {name}! Welcome to BlackRoad OS."
+
+agents = ["Cecilia", "Cadence", "Alice", "Eve", "Olympia"]
+
+for agent in agents:
+    print(greet(agent))
+
+print()
+print("BlackRoad OS · 1,000 agents · Community over extraction.")</textarea>
+      </div>
+
+      <!-- SNIPPETS -->
+      <div class="snippets-panel" id="snippetsPanel">
+        <span class="snippet-label">Examples</span>
+      </div>
+    </div>
+
+    <!-- RESIZE HANDLE -->
+    <div class="resize-handle" id="resizeHandle"></div>
+
+    <!-- OUTPUT PANE -->
+    <div class="output-pane" id="outputPane">
+      <div class="output-tabs">
+        <div class="tab active" onclick="switchTab('stdout')">Output</div>
+        <div class="tab" onclick="switchTab('stderr')">Errors</div>
+      </div>
+      <div class="output-body" id="outputBody">
+        <div class="output-empty" id="outputEmpty">
+          <div class="output-empty-icon">&#9654;</div>
+          <div class="output-empty-text">Run code to see output</div>
+        </div>
+        <div class="output-content" id="outputContent"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- STATUSBAR -->
+  <div class="statusbar">
+    <div class="sb-item active" id="sb-lang">
+      <div class="sb-dot"></div>
+      <span id="sb-lang-label">Python 3</span>
+    </div>
+    <div class="sb-item" id="sb-lines">
+      <span id="sb-lines-label">12 lines</span>
+    </div>
+    <div class="sb-item" id="sb-cursor">
+      <span id="sb-cursor-label">Ln 1, Col 1</span>
+    </div>
+    <div class="sb-right" id="sb-right">Piston API · 50+ languages</div>
+  </div>
+
+  <div class="grad-rule"></div>
+
+</div>
+
+<script>
+  // ── LANGUAGE CONFIG ──
+  const LANG_CONFIG = {
+    python: {
+      ext: 'py', label: 'Python 3',
+      snippets: {
+        'Hello World': '# Hello World\nprint("Hello, BlackRoad!")',
+        'For Loop': 'for i in range(5):\n    print(f"Agent {i}")',
+        'Function': 'def add(a, b):\n    return a + b\n\nprint(add(3, 4))',
+        'List Comp': 'squares = [x**2 for x in range(10)]\nprint(squares)',
+        'Class': 'class Agent:\n    def __init__(self, name):\n        self.name = name\n    def greet(self):\n        print(f"Hi, I am {self.name}")\n\nAgent("Cecilia").greet()',
+      }
+    },
+    javascript: {
+      ext: 'js', label: 'JavaScript',
+      snippets: {
+        'Hello World': 'console.log("Hello, BlackRoad!");',
+        'Arrow Fn': 'const greet = name => `Hello, ${name}!`;\nconsole.log(greet("Cecilia"));',
+        'Promise': 'const p = Promise.resolve(42);\np.then(v => console.log("Value:", v));',
+        'Array Ops': 'const nums = [1,2,3,4,5];\nconsole.log(nums.map(x => x * 2).filter(x => x > 4));',
+        'Class': 'class Agent {\n  constructor(name) { this.name = name; }\n  greet() { console.log(`I am ${this.name}`); }\n}\nnew Agent("Alice").greet();',
+      }
+    },
+    typescript: {
+      ext: 'ts', label: 'TypeScript',
+      snippets: {
+        'Hello World': 'const msg: string = "Hello, BlackRoad!";\nconsole.log(msg);',
+        'Interface': 'interface Agent {\n  name: string;\n  id: number;\n}\n\nconst a: Agent = { name: "Cecilia", id: 1 };\nconsole.log(a);',
+        'Generic Fn': 'function identity<T>(val: T): T { return val; }\nconsole.log(identity<string>("BlackRoad"));',
+      }
+    },
+    rust: {
+      ext: 'rs', label: 'Rust',
+      snippets: {
+        'Hello World': 'fn main() {\n    println!("Hello, BlackRoad!");\n}',
+        'Loop': 'fn main() {\n    for i in 0..5 {\n        println!("Agent {}", i);\n    }\n}',
+        'Struct': 'struct Agent {\n    name: String,\n}\nimpl Agent {\n    fn greet(&self) {\n        println!("I am {}", self.name);\n    }\n}\nfn main() {\n    let a = Agent { name: String::from("Cecilia") };\n    a.greet();\n}',
+      }
+    },
+    go: {
+      ext: 'go', label: 'Go',
+      snippets: {
+        'Hello World': 'package main\nimport "fmt"\nfunc main() {\n    fmt.Println("Hello, BlackRoad!")\n}',
+        'Goroutine': 'package main\nimport (\n    "fmt"\n    "sync"\n)\nfunc main() {\n    var wg sync.WaitGroup\n    for i := 0; i < 3; i++ {\n        wg.Add(1)\n        go func(n int) {\n            defer wg.Done()\n            fmt.Printf("Agent %d\\n", n)\n        }(i)\n    }\n    wg.Wait()\n}',
+      }
+    },
+    java: {
+      ext: 'java', label: 'Java',
+      snippets: {
+        'Hello World': 'public class Main {\n    public static void main(String[] args) {\n        System.out.println("Hello, BlackRoad!");\n    }\n}',
+        'Loop': 'public class Main {\n    public static void main(String[] args) {\n        for (int i = 0; i < 5; i++) {\n            System.out.println("Agent " + i);\n        }\n    }\n}',
+      }
+    },
+    c: {
+      ext: 'c', label: 'C',
+      snippets: {
+        'Hello World': '#include <stdio.h>\nint main() {\n    printf("Hello, BlackRoad!\\n");\n    return 0;\n}',
+        'Loop': '#include <stdio.h>\nint main() {\n    for (int i = 0; i < 5; i++) {\n        printf("Agent %d\\n", i);\n    }\n    return 0;\n}',
+      }
+    },
+    cpp: {
+      ext: 'cpp', label: 'C++',
+      snippets: {
+        'Hello World': '#include <iostream>\nusing namespace std;\nint main() {\n    cout << "Hello, BlackRoad!" << endl;\n    return 0;\n}',
+        'Vector': '#include <iostream>\n#include <vector>\nusing namespace std;\nint main() {\n    vector<string> agents = {"Cecilia","Alice","Eve"};\n    for (auto& a : agents) cout << a << "\\n";\n    return 0;\n}',
+      }
+    },
+    bash: {
+      ext: 'sh', label: 'Bash',
+      snippets: {
+        'Hello World': 'echo "Hello, BlackRoad!"',
+        'Loop': 'for i in 1 2 3 4 5; do\n  echo "Agent $i"\ndone',
+        'Functions': 'greet() {\n  echo "Hello, $1!"\n}\ngreet "Cecilia"\ngreet "Alice"',
+      }
+    },
+    ruby: {
+      ext: 'rb', label: 'Ruby',
+      snippets: {
+        'Hello World': 'puts "Hello, BlackRoad!"',
+        'Block': '[1,2,3,4,5].each { |n| puts "Agent #{n}" }',
+        'Class': 'class Agent\n  def initialize(name)\n    @name = name\n  end\n  def greet\n    puts "Hello from #{@name}!"\n  end\nend\nAgent.new("Cecilia").greet',
+      }
+    },
+    php: {
+      ext: 'php', label: 'PHP',
+      snippets: {
+        'Hello World': '<?php\necho "Hello, BlackRoad!\\n";',
+        'Loop': '<?php\nfor ($i = 0; $i < 5; $i++) {\n    echo "Agent $i\\n";\n}',
+      }
+    },
+    csharp: {
+      ext: 'cs', label: 'C#',
+      snippets: {
+        'Hello World': 'using System;\nclass Program {\n    static void Main() {\n        Console.WriteLine("Hello, BlackRoad!");\n    }\n}',
+        'LINQ': 'using System;\nusing System.Linq;\nclass Program {\n    static void Main() {\n        var nums = Enumerable.Range(1, 5);\n        foreach (var n in nums.Select(x => x * 2))\n            Console.WriteLine(n);\n    }\n}',
+      }
+    },
+    kotlin: {
+      ext: 'kt', label: 'Kotlin',
+      snippets: {
+        'Hello World': 'fun main() {\n    println("Hello, BlackRoad!")\n}',
+        'Lambda': 'fun main() {\n    val agents = listOf("Cecilia","Alice","Eve")\n    agents.forEach { println("Agent: $it") }\n}',
+      }
+    },
+    lua: {
+      ext: 'lua', label: 'Lua',
+      snippets: {
+        'Hello World': 'print("Hello, BlackRoad!")',
+        'Loop': 'for i = 1, 5 do\n  print("Agent " .. i)\nend',
+      }
+    },
+    r: {
+      ext: 'r', label: 'R',
+      snippets: {
+        'Hello World': 'cat("Hello, BlackRoad!\\n")',
+        'Vector': 'x <- 1:10\nprint(x^2)',
+      }
+    },
+    haskell: {
+      ext: 'hs', label: 'Haskell',
+      snippets: {
+        'Hello World': 'main :: IO ()\nmain = putStrLn "Hello, BlackRoad!"',
+        'List': 'main :: IO ()\nmain = mapM_ print [x^2 | x <- [1..10]]',
+      }
+    },
+    julia: {
+      ext: 'jl', label: 'Julia',
+      snippets: {
+        'Hello World': 'println("Hello, BlackRoad!")',
+        'Comprehension': 'squares = [x^2 for x in 1:10]\nprintln(squares)',
+      }
+    },
+    swift: {
+      ext: 'swift', label: 'Swift',
+      snippets: {
+        'Hello World': 'print("Hello, BlackRoad!")',
+        'Loop': 'for i in 0..<5 {\n    print("Agent \\(i)")\n}',
+      }
+    },
+    scala: {
+      ext: 'scala', label: 'Scala',
+      snippets: {
+        'Hello World': '@main def run() = println("Hello, BlackRoad!")',
+        'List Ops': '@main def run() =\n  val nums = List(1,2,3,4,5)\n  nums.map(_ * 2).foreach(println)',
+      }
+    },
+    dart: {
+      ext: 'dart', label: 'Dart',
+      snippets: {
+        'Hello World': 'void main() {\n  print("Hello, BlackRoad!");\n}',
+      }
+    },
+    elixir: {
+      ext: 'ex', label: 'Elixir',
+      snippets: {
+        'Hello World': 'IO.puts("Hello, BlackRoad!")',
+        'Enum': 'Enum.each(1..5, fn x -> IO.puts("Agent #{x}") end)',
+      }
+    },
+    perl: {
+      ext: 'pl', label: 'Perl',
+      snippets: {
+        'Hello World': 'print "Hello, BlackRoad!\\n";',
+      }
+    },
+    brainfuck: {
+      ext: 'bf', label: 'Brainfuck',
+      snippets: {
+        'Hello World': '++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++.',
+      }
+    }
+  };
+
+  // ── DEFAULT SNIPPETS ──
+  function buildSnippets(lang) {
+    const panel = document.getElementById('snippetsPanel');
+    panel.innerHTML = '<span class="snippet-label">Examples</span>';
+    const cfg = LANG_CONFIG[lang];
+    if (!cfg || !cfg.snippets) return;
+    Object.entries(cfg.snippets).forEach(([name, code]) => {
+      const btn = document.createElement('button');
+      btn.className = 'snippet-btn';
+      btn.textContent = name;
+      btn.onclick = () => {
+        document.getElementById('code').value = code;
+        updateLineNumbers();
+      };
+      panel.appendChild(btn);
+    });
+  }
+
+  // ── LANG CHANGE ──
+  function onLangChange() {
+    const val = document.getElementById('langSelect').value;
+    const [lang] = val.split('|');
+    const cfg = LANG_CONFIG[lang];
+    if (cfg) {
+      document.getElementById('fileLabel').innerHTML = 'main.' + cfg.ext + '<span class="cursor-blink"></span>';
+      document.getElementById('sb-lang-label').textContent = cfg.label;
+      buildSnippets(lang);
+      if (cfg.snippets && cfg.snippets['Hello World']) {
+        document.getElementById('code').value = cfg.snippets['Hello World'];
+      }
+    }
+    updateLineNumbers();
+  }
+
+  // ── LINE NUMBERS ──
+  function updateLineNumbers() {
+    const ta = document.getElementById('code');
+    const ln = document.getElementById('lineNumbers');
+    const lines = ta.value.split('\n').length;
+    ln.innerHTML = Array.from({length: lines}, (_, i) =>
+      '<span>' + (i + 1) + '</span>'
+    ).join('');
+    document.getElementById('sb-lines-label').textContent = lines + ' line' + (lines !== 1 ? 's' : '');
+  }
+
+  // ── CURSOR TRACKING ──
+  document.getElementById('code').addEventListener('keyup', (e) => {
+    const ta = e.target;
+    const pos = ta.selectionStart;
+    const text = ta.value.substring(0, pos);
+    const lines = text.split('\n');
+    const ln = lines.length;
+    const col = lines[lines.length - 1].length + 1;
+    document.getElementById('sb-cursor-label').textContent = 'Ln ' + ln + ', Col ' + col;
+    updateLineNumbers();
+  });
+
+  document.getElementById('code').addEventListener('input', updateLineNumbers);
+
+  // Sync scroll of textarea and line numbers
+  document.getElementById('code').addEventListener('scroll', () => {
+    document.getElementById('lineNumbers').scrollTop = document.getElementById('code').scrollTop;
+  });
+
+  // Tab key support
+  document.getElementById('code').addEventListener('keydown', (e) => {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const ta = e.target;
+      const start = ta.selectionStart;
+      const end = ta.selectionEnd;
+      ta.value = ta.value.substring(0, start) + '  ' + ta.value.substring(end);
+      ta.selectionStart = ta.selectionEnd = start + 2;
+    }
+    // Cmd/Ctrl + Enter to run
+    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+      e.preventDefault();
+      runCode();
+    }
+  });
+
+  // ── RUN CODE ──
+  async function runCode() {
+    const btn = document.getElementById('runBtn');
+    const dot = document.getElementById('statusDot');
+    const lbl = document.getElementById('statusLabel');
+    const loader = document.getElementById('loaderBar');
+    const code = document.getElementById('code').value.trim();
+    const val = document.getElementById('langSelect').value;
+    const [lang, version] = val.split('|');
+
+    if (!code) return;
+
+    // UI: running state
+    btn.disabled = true;
+    btn.classList.add('running');
+    btn.innerHTML = '<span class="run-icon">&#9673;</span> RUNNING';
+    dot.style.background = '#FF8400';
+    lbl.textContent = 'RUNNING';
+    loader.style.width = '0%';
+    loader.style.animation = 'gs-k 2s linear infinite';
+    loader.style.transition = 'width 0.5s ease';
+
+    // Animate loader
+    setTimeout(() => loader.style.width = '70%', 50);
+
+    // Show output panel
+    document.getElementById('outputEmpty').style.display = 'none';
+    const content = document.getElementById('outputContent');
+    content.classList.add('visible');
+    content.innerHTML = '<div class="output-line info">// Executing ' + lang + ' via Piston API...</div>';
+
+    const startTime = Date.now();
+
+    try {
+      const res = await fetch('https://emkc.org/api/v2/piston/execute', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          language: lang,
+          version: version,
+          files: [{ name: 'main', content: code }]
+        })
+      });
+
+      const data = await res.json();
+      const elapsed = ((Date.now() - startTime) / 1000).toFixed(2);
+
+      loader.style.animation = 'none';
+      loader.style.width = '100%';
+      setTimeout(() => { loader.style.transition = 'width 0.3s'; loader.style.width = '0%'; }, 400);
+
+      content.innerHTML = '';
+
+      if (data.run) {
+        const stdout = data.run.stdout;
+        const stderr = data.run.stderr;
+        const exitCode = data.run.code;
+
+        if (stdout) {
+          stdout.split('\n').forEach(line => {
+            const div = document.createElement('div');
+            div.className = 'output-line stdout';
+            div.textContent = line;
+            content.appendChild(div);
+          });
+        }
+
+        if (stderr) {
+          stderr.split('\n').filter(l => l).forEach(line => {
+            const div = document.createElement('div');
+            div.className = 'output-line stderr';
+            div.textContent = line;
+            content.appendChild(div);
+          });
+        }
+
+        if (!stdout && !stderr) {
+          const div = document.createElement('div');
+          div.className = 'output-line info';
+          div.textContent = '// No output';
+          content.appendChild(div);
+        }
+
+        const timeDiv = document.createElement('div');
+        timeDiv.className = 'output-line time';
+        timeDiv.textContent = '\u2500\u2500 exit ' + exitCode + ' \u00b7 ' + elapsed + 's \u00b7 ' + lang + ' ' + version;
+        content.appendChild(timeDiv);
+
+        if (exitCode === 0) {
+          dot.style.background = '#00CC66';
+          lbl.textContent = 'SUCCESS';
+        } else {
+          dot.style.background = '#FF4400';
+          lbl.textContent = 'EXIT ' + exitCode;
+        }
+      } else {
+        content.innerHTML = '<div class="output-line stderr">Error: ' + JSON.stringify(data) + '</div>';
+        dot.style.background = '#FF4400';
+        lbl.textContent = 'ERROR';
+      }
+
+    } catch (err) {
+      loader.style.animation = 'none';
+      loader.style.width = '0%';
+      content.innerHTML = '<div class="output-line stderr">Network error: ' + err.message + '</div><div class="output-line info">// Make sure you are connected to the internet</div>';
+      dot.style.background = '#FF4400';
+      lbl.textContent = 'NETWORK ERR';
+    }
+
+    // Reset button
+    setTimeout(() => {
+      btn.disabled = false;
+      btn.classList.remove('running');
+      btn.innerHTML = '<span class="run-icon">&#9654;</span> RUN';
+      setTimeout(() => {
+        dot.style.background = '#FF8400';
+        dot.style.animation = 'pulse-anim 2s ease-in-out infinite';
+        lbl.textContent = 'READY';
+      }, 2000);
+    }, 300);
+  }
+
+  // ── CLEAR ──
+  function clearAll() {
+    document.getElementById('code').value = '';
+    document.getElementById('outputEmpty').style.display = 'flex';
+    document.getElementById('outputContent').classList.remove('visible');
+    document.getElementById('outputContent').innerHTML = '';
+    updateLineNumbers();
+  }
+
+  // ── TAB SWITCH ──
+  function switchTab(tab) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    event.target.classList.add('active');
+  }
+
+  // ── RESIZE HANDLE ──
+  const handle = document.getElementById('resizeHandle');
+  const main = document.getElementById('mainSplit');
+  const editorPane = document.getElementById('editorPane');
+  const outputPane = document.getElementById('outputPane');
+  let dragging = false;
+
+  handle.addEventListener('mousedown', () => { dragging = true; document.body.style.cursor = 'col-resize'; });
+  document.addEventListener('mousemove', (e) => {
+    if (!dragging) return;
+    const rect = main.getBoundingClientRect();
+    const editorW = e.clientX - rect.left;
+    const totalW = rect.width;
+    if (editorW > 200 && editorW < totalW - 200) {
+      editorPane.style.flex = 'none';
+      editorPane.style.width = editorW + 'px';
+      outputPane.style.flex = '1';
+      outputPane.style.width = '';
+    }
+  });
+  document.addEventListener('mouseup', () => { dragging = false; document.body.style.cursor = ''; });
+
+  // ── INIT ──
+  updateLineNumbers();
+  buildSnippets('python');
+</script>
+
+</body>
+</html>
