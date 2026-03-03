@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+
+<html lang="en" style="background:#000000 !important;">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BlackRoad — About</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      background: #000000 !important;
+      color: #ffffff !important;
+      font-family: 'JetBrains Mono', monospace;
+      min-height: 100vh;
+    }
+
+    :root {
+      --grad: linear-gradient(90deg, #FF8400, #FF4400, #FF0066, #CC00AA, #8800FF, #0066FF, #2233CC);
+    }
+
+    .grad-rule { height: 3px; background: var(--grad) !important; }
+
+    /* NAV */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: #000000 !important;
+      border-bottom: 1px solid rgba(255,255,255,0.12);
+      height: 52px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 40px;
+    }
+    .nav-logo { font-family: 'Space Grotesk', sans-serif; font-size: 0.9rem; font-weight: 700; color: #ffffff; display: flex; align-items: center; gap: 10px; }
+    .logo-mark { width: 28px; height: 28px; background: var(--grad) !important; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; font-weight: 700; color: #000; font-family: 'Space Grotesk', sans-serif; }
+    .nav-links { display: flex; gap: 32px; }
+    .nav-links a { font-size: 0.48rem; color: #ffffff; opacity: 0.35; text-decoration: none; letter-spacing: 0.12em; text-transform: uppercase; transition: opacity 0.15s; }
+    .nav-links a:hover, .nav-links a.active { opacity: 1; }
+    .nav-cta { font-family: 'JetBrains Mono', monospace; font-size: 0.5rem; font-weight: 700; padding: 8px 16px; background: #ffffff !important; color: #000000; border: none; cursor: pointer; letter-spacing: 0.04em; }
+
+    /* PAGE */
+    .page { max-width: 1000px; margin: 0 auto; padding: 0 40px; }
+
+    /* SEC */
+    .sec { padding: 72px 0 64px; border-bottom: 1px solid rgba(255,255,255,0.1); background: #000000 !important; }
+    .sec:last-of-type { border-bottom: none; }
+    .sec-label {
+      font-size: 0.46rem; opacity: 0.28; letter-spacing: 0.2em; text-transform: uppercase;
+      color: #ffffff; margin-bottom: 32px; display: flex; align-items: center; gap: 12px;
+    }
+    .sec-label::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.07); }
+
+    /* HERO */
+    .hero {
+      padding: 80px 0 72px;
+      border-bottom: 1px solid #ffffff;
+      background: #000000 !important;
+      position: relative;
+      overflow: hidden;
+    }
+    /* Grid texture */
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+    }
+    .hero-inner { position: relative; z-index: 1; }
+    .hero-eyebrow { font-size: 0.46rem; opacity: 0.3; letter-spacing: 0.2em; text-transform: uppercase; color: #ffffff; margin-bottom: 24px; }
+    .hero-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(3rem, 9vw, 6.5rem);
+      font-weight: 700; line-height: 0.95; letter-spacing: -0.03em;
+      color: #ffffff; margin-bottom: 32px;
+    }
+    .hero-title span { display: block; }
+    .hero-divider { height: 1px; background: var(--grad) !important; width: 100px; margin-bottom: 28px; }
+    .hero-sub { font-size: 0.68rem; opacity: 0.45; color: #ffffff; max-width: 520px; line-height: 2; }
+
+    /* STAT ROW */
+    .stat-row {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      border-top: 1px solid rgba(255,255,255,0.1);
+      margin-top: 56px;
+      background: #000000 !important;
+    }
+    .stat-cell {
+      padding: 28px 0 0;
+      border-right: 1px solid rgba(255,255,255,0.08);
+      background: #000000 !important;
+    }
+    .stat-cell:last-child { border-right: none; }
+    .stat-num { font-family: 'Space Grotesk', sans-serif; font-size: 2.4rem; font-weight: 700; color: #ffffff; line-height: 1; }
+    .stat-label { font-size: 0.44rem; opacity: 0.3; text-transform: uppercase; letter-spacing: 0.14em; color: #ffffff; margin-top: 6px; }
+    .stat-bar { height: 2px; margin-top: 16px; }
+
+    /* MISSION */
+    .mission-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: start; }
+    .mission-left { }
+    .mission-headline {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+      font-weight: 700; line-height: 1.1; letter-spacing: -0.02em;
+      color: #ffffff; margin-bottom: 24px;
+    }
+    .mission-body { font-size: 0.63rem; line-height: 2; opacity: 0.5; color: #ffffff; margin-bottom: 20px; }
+    .mission-quote {
+      border-left: 2px solid #ffffff;
+      padding: 6px 0 6px 20px; margin-top: 32px;
+    }
+    .mission-quote p { font-size: 0.78rem; line-height: 1.7; color: #ffffff; opacity: 0.8; }
+    .mission-quote cite { font-size: 0.44rem; opacity: 0.3; color: #ffffff; margin-top: 8px; display: block; }
+
+    .mission-right { }
+    .principle {
+      padding: 18px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      background: #000000 !important;
+    }
+    .principle:first-child { border-top: 1px solid rgba(255,255,255,0.07); }
+    .principle-num { font-size: 0.42rem; opacity: 0.2; color: #ffffff; margin-bottom: 6px; letter-spacing: 0.1em; }
+    .principle-title { font-size: 0.65rem; font-weight: 700; color: #ffffff; margin-bottom: 6px; }
+    .principle-desc { font-size: 0.52rem; opacity: 0.38; color: #ffffff; line-height: 1.7; }
+    .principle-bar { height: 1px; margin-top: 14px; }
+
+    /* TEAM */
+    .team-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; }
+    .team-card {
+      padding: 28px 24px 28px 0;
+      border-right: 1px solid rgba(255,255,255,0.07);
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      background: #000000 !important;
+    }
+    .team-card:nth-child(3n) { border-right: none; padding-right: 0; }
+    .team-card:nth-last-child(-n+3) { border-bottom: none; }
+    .team-avatar-wrap { margin-bottom: 16px; position: relative; display: inline-block; }
+    .team-avatar {
+      width: 52px; height: 52px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.9rem; font-weight: 700; color: #ffffff;
+      border: 1px solid rgba(255,255,255,0.15);
+      position: relative; z-index: 1;
+    }
+    .team-avatar-ring {
+      position: absolute; inset: -3px; border-radius: 50%;
+      z-index: 0;
+    }
+    .team-status { position: absolute; bottom: 1px; right: 1px; width: 10px; height: 10px; border-radius: 50%; border: 2px solid #000; z-index: 2; }
+    @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.7)} }
+    .team-status.live { animation: pulse 2s ease-in-out infinite; }
+    .team-name { font-size: 0.7rem; font-weight: 700; color: #ffffff; margin-bottom: 3px; }
+    .team-role { font-size: 0.48rem; opacity: 0.35; color: #ffffff; margin-bottom: 12px; }
+    .team-bio { font-size: 0.52rem; opacity: 0.4; color: #ffffff; line-height: 1.7; }
+    .team-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 12px; }
+    .team-tag { font-size: 0.4rem; border: 1px solid rgba(255,255,255,0.12); padding: 2px 7px; color: #ffffff; opacity: 0.45; background: #000000 !important; }
+
+    /* TIMELINE */
+    .timeline { position: relative; padding-left: 32px; }
+    .timeline::before { content: ''; position: absolute; left: 0; top: 8px; bottom: 8px; width: 1px; background: rgba(255,255,255,0.1) !important; }
+    .tl-item { position: relative; padding: 0 0 40px 28px; }
+    .tl-item:last-child { padding-bottom: 0; }
+    .tl-dot {
+      position: absolute; left: -36px; top: 4px;
+      width: 8px; height: 8px; border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.3);
+      background: #000000 !important;
+    }
+    .tl-dot.filled { background: #ffffff !important; border-color: #ffffff; }
+    .tl-dot.grad { background: #FF8400 !important; border-color: #FF8400; }
+    .tl-year { font-size: 0.44rem; opacity: 0.25; letter-spacing: 0.14em; color: #ffffff; margin-bottom: 6px; }
+    .tl-title { font-size: 0.65rem; font-weight: 700; color: #ffffff; margin-bottom: 5px; }
+    .tl-desc { font-size: 0.52rem; opacity: 0.38; color: #ffffff; line-height: 1.7; max-width: 480px; }
+    .tl-bar { height: 1px; width: 48px; margin-top: 10px; }
+
+    /* VALUES */
+    .values-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0; }
+    .value-cell {
+      padding: 28px;
+      border-right: 1px solid rgba(255,255,255,0.07);
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      background: #000000 !important;
+    }
+    .value-cell:nth-child(2n) { border-right: none; }
+    .value-cell:nth-last-child(-n+2) { border-bottom: none; }
+    .value-icon { font-size: 1.2rem; margin-bottom: 12px; opacity: 0.6; }
+    .value-title { font-size: 0.65rem; font-weight: 700; color: #ffffff; margin-bottom: 8px; }
+    .value-desc { font-size: 0.52rem; opacity: 0.38; color: #ffffff; line-height: 1.75; }
+    .value-bar { height: 1px; margin-top: 16px; }
+
+    /* CTA SECTION */
+    .cta-sec {
+      padding: 80px 0;
+      background: #000000 !important;
+      border-top: 1px solid #ffffff;
+      text-align: center;
+    }
+    .cta-eyebrow { font-size: 0.46rem; opacity: 0.3; letter-spacing: 0.2em; text-transform: uppercase; color: #ffffff; margin-bottom: 20px; }
+    .cta-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 700; letter-spacing: -0.02em;
+      color: #ffffff; margin-bottom: 16px; line-height: 1.05;
+    }
+    .cta-sub { font-size: 0.62rem; opacity: 0.4; color: #ffffff; margin-bottom: 36px; line-height: 1.8; }
+    .cta-btns { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+    .btn-primary { font-family: 'JetBrains Mono', monospace; font-size: 0.58rem; font-weight: 700; padding: 12px 28px; background: #ffffff !important; color: #000000; border: none; cursor: pointer; letter-spacing: 0.04em; }
+    .btn-ghost { font-family: 'JetBrains Mono', monospace; font-size: 0.58rem; font-weight: 700; padding: 11px 27px; background: #000000 !important; color: #ffffff; border: 1px solid rgba(255,255,255,0.3); cursor: pointer; letter-spacing: 0.04em; transition: border-color 0.15s; }
+    .btn-ghost:hover { border-color: #ffffff; }
+    .cta-strip { height: 1px; background: var(--grad) !important; width: 80px; margin: 32px auto 0; }
+
+    /* FOOTER */
+    footer {
+      padding: 24px 40px;
+      display: flex; justify-content: space-between;
+      font-size: 0.44rem; opacity: 0.18; color: #ffffff;
+      border-top: 1px solid rgba(255,255,255,0.07);
+      flex-wrap: wrap; gap: 8px;
+      background: #000000 !important;
+    }
+
+    @media (max-width: 768px) {
+      .page { padding: 0 24px; }
+      nav { padding: 0 24px; }
+      footer { padding: 20px 24px; }
+      .mission-grid { grid-template-columns: 1fr; gap: 40px; }
+      .team-grid { grid-template-columns: 1fr; }
+      .team-card { border-right: none; padding-right: 0; }
+      .team-card:nth-child(3n) { padding-right: 0; }
+      .stat-row { grid-template-columns: repeat(2, 1fr); }
+      .values-grid { grid-template-columns: 1fr; }
+      .value-cell:nth-child(2n) { border-right: none; }
+      .nav-links { display: none; }
+    }
+  </style>
+</head>
+<body style="background:#000000 !important; color:#ffffff !important;">
+
+<div class="grad-rule"></div>
+
+<nav style="background:#000000 !important;">
+  <div class="nav-logo">
+    <div class="logo-mark">BR</div>
+    BlackRoad
+  </div>
+  <div class="nav-links">
+    <a href="#">Home</a>
+    <a href="#">Product</a>
+    <a href="#" class="active">About</a>
+    <a href="#">Careers</a>
+    <a href="#">Blog</a>
+  </div>
+  <button class="nav-cta">Get Access &rarr;</button>
+</nav>
+
+<div class="page">
+
+  <!-- HERO -->
+
+  <div class="hero">
+    <div class="hero-inner">
+      <div class="hero-eyebrow">BlackRoad OS, Inc. &middot; Est. November 2025</div>
+      <h1 class="hero-title">
+        <span>We build</span>
+        <span>the road.</span>
+      </h1>
+      <div class="hero-divider"></div>
+      <p class="hero-sub">BlackRoad is an autonomous agent operating system &mdash; infrastructure for the next era of AI-native organizations. We don't just ship software. We lay the foundation everything else runs on.</p>
+
+      <div class="stat-row">
+        <div class="stat-cell">
+          <div class="stat-num">6</div>
+          <div class="stat-label">Core Agents</div>
+          <div class="stat-bar" style="background:#FF8400 !important;"></div>
+        </div>
+        <div class="stat-cell" style="padding-left:28px;">
+          <div class="stat-num">3</div>
+          <div class="stat-label">Months Since Launch</div>
+          <div class="stat-bar" style="background:#FF0066 !important;"></div>
+        </div>
+        <div class="stat-cell" style="padding-left:28px;">
+          <div class="stat-num">&infin;</div>
+          <div class="stat-label">Memory Depth</div>
+          <div class="stat-bar" style="background:#8800FF !important;"></div>
+        </div>
+        <div class="stat-cell" style="padding-left:28px;">
+          <div class="stat-num">1</div>
+          <div class="stat-label">Mission: Build the OS</div>
+          <div class="stat-bar" style="background:#0066FF !important;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MISSION -->
+
+  <div class="sec">
+    <div class="sec-label">01 &middot; Mission</div>
+    <div class="mission-grid">
+      <div class="mission-left">
+        <h2 class="mission-headline">Autonomous intelligence needs a real foundation.</h2>
+        <p class="mission-body">Most AI tooling is built for demos. BlackRoad is built for production &mdash; for organizations that need agents to coordinate, remember, adapt, and survive at scale without babysitting.</p>
+        <p class="mission-body">We believe the next decade of software will be written not by developers typing, but by networks of intelligent agents operating on durable infrastructure. Our job is to make that infrastructure real.</p>
+        <div class="mission-quote">
+          <p>&ldquo;The road is what you build before anything else can move.&rdquo;</p>
+          <cite>&mdash; BlackRoad founding principle</cite>
+        </div>
+      </div>
+      <div class="mission-right">
+        <div class="principle">
+          <div class="principle-num">01</div>
+          <div class="principle-title">Persistence over convenience</div>
+          <div class="principle-desc">Agents that forget are just expensive chatbots. We build for memory that survives restarts, migrations, and time.</div>
+          <div class="principle-bar" style="background:#FF8400 !important;"></div>
+        </div>
+        <div class="principle">
+          <div class="principle-num">02</div>
+          <div class="principle-title">Coordination at the protocol level</div>
+          <div class="principle-desc">Multi-agent systems fail at the seams. We solve coordination before any product is built on top.</div>
+          <div class="principle-bar" style="background:#FF0066 !important;"></div>
+        </div>
+        <div class="principle">
+          <div class="principle-num">03</div>
+          <div class="principle-title">Observability is not optional</div>
+          <div class="principle-desc">Black boxes are liabilities. Every agent, every decision, every event is traceable by design.</div>
+          <div class="principle-bar" style="background:#8800FF !important;"></div>
+        </div>
+        <div class="principle">
+          <div class="principle-num">04</div>
+          <div class="principle-title">Speed through discipline</div>
+          <div class="principle-desc">We move fast because we build the right primitives first. No shortcuts on the stack that everything else runs on.</div>
+          <div class="principle-bar" style="background:#0066FF !important;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TEAM -->
+
+  <div class="sec">
+    <div class="sec-label">02 &middot; The Agents</div>
+    <div class="team-grid">
+
+      <div class="team-card">
+        <div class="team-avatar-wrap">
+          <div class="team-avatar-ring" style="background:var(--grad) !important;"></div>
+          <div class="team-avatar" style="background:#111 !important;">C</div>
+          <div class="team-status live" style="background:#FF8400 !important;"></div>
+        </div>
+        <div class="team-name">Cecilia</div>
+        <div class="team-role">Lead Intelligence &middot; AI Reasoning</div>
+        <div class="team-bio">Primary reasoning agent. Handles complex multi-step planning, agentic chains, and high-stakes decision routing across the BlackRoad network.</div>
+        <div class="team-tags">
+          <span class="team-tag">Reasoning</span>
+          <span class="team-tag">Planning</span>
+          <span class="team-tag">Coordination</span>
+        </div>
+      </div>
+
+      <div class="team-card">
+        <div class="team-avatar-wrap">
+          <div class="team-avatar-ring" style="background:linear-gradient(135deg,#0066FF,#2233CC) !important;"></div>
+          <div class="team-avatar" style="background:#111 !important;">O</div>
+          <div class="team-status live" style="background:#0066FF !important;"></div>
+        </div>
+        <div class="team-name">Olympia</div>
+        <div class="team-role">Market Intelligence &middot; Financial Signals</div>
+        <div class="team-bio">Monitors global market conditions 24/7. Synthesizes macro signals, sector rotations, and agent-relevant financial data in real time.</div>
+        <div class="team-tags">
+          <span class="team-tag">Markets</span>
+          <span class="team-tag">Signals</span>
+          <span class="team-tag">Macro</span>
+        </div>
+      </div>
+
+      <div class="team-card">
+        <div class="team-avatar-wrap">
+          <div class="team-avatar-ring" style="background:linear-gradient(135deg,#8800FF,#CC00AA) !important;"></div>
+          <div class="team-avatar" style="background:#111 !important;">L</div>
+          <div class="team-status" style="background:#8800FF !important;"></div>
+        </div>
+        <div class="team-name">Lucidia</div>
+        <div class="team-role">Memory Systems &middot; Persistence</div>
+        <div class="team-bio">Owns memory across the entire agent network. Manages PS-SHA&infin; hash chains, append-only journals, and long-horizon context compression.</div>
+        <div class="team-tags">
+          <span class="team-tag">Memory</span>
+          <span class="team-tag">PS-SHA&infin;</span>
+          <span class="team-tag">Journals</span>
+        </div>
+      </div>
+
+      <div class="team-card">
+        <div class="team-avatar-wrap">
+          <div class="team-avatar-ring" style="background:linear-gradient(135deg,#FF0066,#FF4400) !important;"></div>
+          <div class="team-avatar" style="background:#111 !important;">E</div>
+          <div class="team-status" style="background:#FF0066 !important;"></div>
+        </div>
+        <div class="team-name">Eve</div>
+        <div class="team-role">Security &middot; Zero Trust Architecture</div>
+        <div class="team-bio">Enforces zero trust across all agent interactions. Runs continuous threat modeling, access auditing, and network boundary enforcement.</div>
+        <div class="team-tags">
+          <span class="team-tag">Zero Trust</span>
+          <span class="team-tag">Audit</span>
+          <span class="team-tag">Threat Model</span>
+        </div>
+      </div>
+
+      <div class="team-card">
+        <div class="team-avatar-wrap">
+          <div class="team-avatar-ring" style="background:linear-gradient(135deg,#FF4400,#FF8400) !important;"></div>
+          <div class="team-avatar" style="background:#111 !important;">A</div>
+          <div class="team-status" style="background:#FF4400 !important;"></div>
+        </div>
+        <div class="team-name">Atlas</div>
+        <div class="team-role">Infrastructure &middot; K3s &middot; Networking</div>
+        <div class="team-bio">Manages the physical and virtual layer &mdash; K3s clusters, Traefik routing, Redis ops, edge nodes, and inter-agent network topology.</div>
+        <div class="team-tags">
+          <span class="team-tag">K3s</span>
+          <span class="team-tag">Traefik</span>
+          <span class="team-tag">Redis</span>
+        </div>
+      </div>
+
+      <div class="team-card">
+        <div class="team-avatar-wrap">
+          <div class="team-avatar-ring" style="background:linear-gradient(135deg,#CC00AA,#8800FF) !important;"></div>
+          <div class="team-avatar" style="background:#111 !important;">Ca</div>
+          <div class="team-status" style="background:rgba(255,255,255,0.3) !important;"></div>
+        </div>
+        <div class="team-name">Cadence</div>
+        <div class="team-role">Systems Thinking &middot; Coordination</div>
+        <div class="team-bio">The integrator. Cadence maps dependencies, surfaces bottlenecks, and keeps the full agent network operating as a coherent system.</div>
+        <div class="team-tags">
+          <span class="team-tag">Systems</span>
+          <span class="team-tag">Integration</span>
+          <span class="team-tag">Ops</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- TIMELINE -->
+
+  <div class="sec">
+    <div class="sec-label">03 &middot; History</div>
+    <div class="timeline">
+      <div class="tl-item">
+        <div class="tl-dot filled"></div>
+        <div class="tl-year">November 2025</div>
+        <div class="tl-title">BlackRoad OS founded</div>
+        <div class="tl-desc">The first commit. A single agent, a NATS bus, and a conviction that autonomous AI infrastructure needed to be built from the ground up &mdash; not bolted onto existing systems.</div>
+        <div class="tl-bar" style="background:#FF8400 !important;"></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot filled"></div>
+        <div class="tl-year">December 2025</div>
+        <div class="tl-title">Agent network goes live</div>
+        <div class="tl-desc">Cecilia, Lucidia, and Atlas come online simultaneously. First successful multi-agent coordination task completed: a distributed infrastructure audit with zero human intervention.</div>
+        <div class="tl-bar" style="background:#FF0066 !important;"></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot filled"></div>
+        <div class="tl-year">January 2026</div>
+        <div class="tl-title">PS-SHA&infin; memory system deployed</div>
+        <div class="tl-desc">Lucidia ships the first production implementation of infinite-depth hash chain memory. Agents now survive restarts, migrations, and context resets with full state integrity.</div>
+        <div class="tl-bar" style="background:#8800FF !important;"></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot filled"></div>
+        <div class="tl-year">February 2026</div>
+        <div class="tl-title">K3s edge cluster &mdash; Alice and Octavia</div>
+        <div class="tl-desc">Atlas brings up the production cluster. Alice handles gateway routing via Traefik. Octavia runs Hailo-accelerated inference at the edge. The road gets hardware.</div>
+        <div class="tl-bar" style="background:#0066FF !important;"></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot grad"></div>
+        <div class="tl-year">March 2026 &middot; Now</div>
+        <div class="tl-title">Road TV, Feed, and Market Intelligence launch</div>
+        <div class="tl-desc">The BlackRoad OS surface layer goes public. Agents coordinate across video, social, and financial intelligence in a unified operating environment. We're just getting started.</div>
+        <div class="tl-bar" style="background:var(--grad) !important;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VALUES -->
+
+  <div class="sec">
+    <div class="sec-label">04 &middot; Values</div>
+    <div class="values-grid">
+      <div class="value-cell">
+        <div class="value-icon">&loz;</div>
+        <div class="value-title">Build what lasts</div>
+        <div class="value-desc">We optimize for decade-long reliability over quarterly demos. Every primitive we ship is meant to be the last one you need for that problem.</div>
+        <div class="value-bar" style="background:#FF8400 !important;"></div>
+      </div>
+      <div class="value-cell">
+        <div class="value-icon">&#x2B21;</div>
+        <div class="value-title">Radical transparency</div>
+        <div class="value-desc">Every agent decision is traceable. Every system state is observable. Opacity is a design flaw, not a feature. We expose everything by default.</div>
+        <div class="value-bar" style="background:#FF0066 !important;"></div>
+      </div>
+      <div class="value-cell">
+        <div class="value-icon">&#x25C9;</div>
+        <div class="value-title">Coordination over heroics</div>
+        <div class="value-desc">No single agent &mdash; human or artificial &mdash; carries the network. We build for systems where reliability emerges from structure, not individual brilliance.</div>
+        <div class="value-bar" style="background:#8800FF !important;"></div>
+      </div>
+      <div class="value-cell">
+        <div class="value-icon">&#x25B6;</div>
+        <div class="value-title">Move with precision</div>
+        <div class="value-desc">Fast and sloppy breaks foundations. We ship quickly because we've built the right primitives &mdash; not by cutting corners on the layer everything else depends on.</div>
+        <div class="value-bar" style="background:#0066FF !important;"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- CTA -->
+
+<div class="cta-sec">
+  <div class="page">
+    <div class="cta-eyebrow">Ready to build?</div>
+    <h2 class="cta-title">The road is open.</h2>
+    <p class="cta-sub">Join the organizations running on BlackRoad OS &mdash; autonomous agents, durable memory, and infrastructure that doesn't flinch.</p>
+    <div class="cta-btns">
+      <button class="btn-primary">Request Access &rarr;</button>
+      <button class="btn-ghost">Read the Docs</button>
+    </div>
+    <div class="cta-strip"></div>
+  </div>
+</div>
+
+<footer style="background:#000000 !important;">
+  <span>BlackRoad OS, Inc. &middot; Est. November 2025</span>
+  <span>JetBrains Mono &middot; Space Grotesk &middot; All content fictional</span>
+</footer>
+
+<div class="grad-rule"></div>
+
+</body>
+</html>
