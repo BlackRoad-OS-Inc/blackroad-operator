@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#000!important;">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BlackRoad — Prism Console</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --grad: linear-gradient(90deg, #FF8400, #FF4400, #FF0066, #CC00AA, #8800FF, #0066FF, #2233CC);
+      --b:  rgba(255,255,255,0.07);
+      --b2: rgba(255,255,255,0.04);
+      --surf: rgba(255,255,255,0.025);
+      --hov:  rgba(255,255,255,0.045);
+      --orange: #FF8400;
+      --pink:   #FF0066;
+      --purple: #8800FF;
+      --blue:   #0066FF;
+      --red:    #FF4400;
+    }
+
+    html, body {
+      background: #000 !important;
+      color: #fff !important;
+      font-family: 'JetBrains Mono', monospace;
+      height: 100%; overflow: hidden;
+    }
+
+    /* SCANLINE OVERLAY */
+    body::after {
+      content: '';
+      position: fixed; inset: 0; z-index: 9999;
+      pointer-events: none;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.03) 2px,
+        rgba(0,0,0,0.03) 4px
+      );
+    }
+
+    /* SHELL */
+    .shell {
+      display: grid;
+      grid-template-rows: 3px 48px 1fr 24px;
+      grid-template-columns: 1fr;
+      height: 100vh;
+    }
+    .grad-rule { background: var(--grad); }
+
+    /* TOPBAR */
+    .topbar {
+      display: flex; align-items: center;
+      border-bottom: 1px solid var(--b);
+      background: #000;
+    }
+    .tb-logo {
+      padding: 0 18px; height: 100%;
+      display: flex; align-items: center;
+      border-right: 1px solid var(--b);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.9rem; font-weight: 700;
+      letter-spacing: -0.01em; gap: 10px;
+    }
+    .tb-logo-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.38rem; padding: 2px 6px;
+      border: 1px solid var(--orange);
+      color: var(--orange); letter-spacing: 0.1em;
+    }
+    .tb-tabs { display: flex; height: 100%; }
+    .tb-tab {
+      padding: 0 18px; height: 100%;
+      display: flex; align-items: center; gap: 7px;
+      font-size: 0.5rem; letter-spacing: 0.1em;
+      text-transform: uppercase; cursor: pointer;
+      opacity: 0.3; border-right: 1px solid var(--b);
+      transition: opacity 0.15s, background 0.15s;
+    }
+    .tb-tab:hover { opacity: 0.7; background: var(--hov); }
+    .tb-tab.active { opacity: 1; background: var(--surf); border-bottom: 2px solid var(--orange); }
+    .tb-tab-dot { width: 5px; height: 5px; border-radius: 50%; }
+
+    .tb-right { margin-left: auto; display: flex; align-items: center; height: 100%; }
+    .tb-alert {
+      padding: 0 16px; height: 100%;
+      display: flex; align-items: center; gap: 8px;
+      border-left: 1px solid var(--b);
+      font-size: 0.46rem;
+    }
+    .ta-dot { width: 6px; height: 6px; border-radius: 50%; }
+    @keyframes blink-a { 0%,49%,100%{opacity:1} 50%,99%{opacity:0} }
+    .ta-dot.blink { animation: blink-a 1s step-end infinite; }
+    .tb-user {
+      padding: 0 16px; height: 100%;
+      border-left: 1px solid var(--b);
+      display: flex; align-items: center; gap: 8px;
+      font-size: 0.46rem; opacity: 0.4;
+    }
+    .tb-clock {
+      padding: 0 16px; height: 100%;
+      border-left: 1px solid var(--b);
+      display: flex; align-items: center;
+      font-size: 0.5rem; opacity: 0.3;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* MAIN GRID */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 260px 1fr 1fr 260px;
+      grid-template-rows: 1fr 1fr;
+      gap: 0;
+      overflow: hidden;
+      border-top: none;
+    }
+
+    /* PANEL BASE */
+    .panel {
+      border-right: 1px solid var(--b);
+      border-bottom: 1px solid var(--b);
+      display: flex; flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+    .panel:last-child { border-right: none; }
+    .panel.span2 { grid-column: span 2; }
+    .panel.full-h { grid-row: span 2; }
+
+    .pn-head {
+      display: flex; align-items: center;
+      padding: 8px 14px;
+      border-bottom: 1px solid var(--b);
+      flex-shrink: 0; gap: 8px;
+      background: rgba(255,255,255,0.01);
+    }
+    .pn-accent { width: 3px; height: 12px; flex-shrink: 0; }
+    .pn-title {
+      font-size: 0.44rem; letter-spacing: 0.16em;
+      text-transform: uppercase; opacity: 0.4; flex: 1;
+    }
+    .pn-badge {
+      font-size: 0.38rem; padding: 2px 6px;
+      border: 1px solid; letter-spacing: 0.08em;
+    }
+    .pn-badge.live  { border-color: rgba(255,132,0,0.4); color: var(--orange); }
+    .pn-badge.ok    { border-color: rgba(0,102,255,0.4);  color: var(--blue); }
+    .pn-badge.warn  { border-color: rgba(255,0,102,0.4);  color: var(--pink); animation: blink-a 1.5s step-end infinite; }
+    .pn-badge.dim   { border-color: var(--b); opacity: 0.35; color: #fff; }
+    .pn-action {
+      font-size: 0.4rem; opacity: 0.25; cursor: pointer;
+      transition: opacity 0.15s; letter-spacing: 0.06em;
+    }
+    .pn-action:hover { opacity: 0.7; }
+
+    .pn-body { flex: 1; overflow-y: auto; padding: 0; }
+    .pn-body::-webkit-scrollbar { width: 2px; }
+    .pn-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.07); }
+
+    /* SYSTEM STATUS */
+    .ss-list { padding: 8px 0; }
+    .ss-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 7px 14px;
+      border-bottom: 1px solid var(--b2);
+      font-size: 0.5rem;
+    }
+    .ss-row:last-child { border-bottom: none; }
+    .ss-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+    @keyframes pulse-ss { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(2);opacity:0.4} }
+    .ss-dot.pulse { animation: pulse-ss 2s ease-in-out infinite; }
+    .ss-name { flex: 1; opacity: 0.5; }
+    .ss-uptime { font-size: 0.42rem; opacity: 0.25; min-width: 36px; text-align: right; }
+    .ss-bar-wrap { width: 50px; height: 2px; background: rgba(255,255,255,0.07); }
+    .ss-bar { height: 100%; }
+
+    /* miniature sparkline in status */
+    .ss-spark { display: flex; align-items: flex-end; gap: 1px; height: 14px; width: 36px; }
+    .ss-sp-bar { flex: 1; }
+
+    /* LEDGER STREAM */
+    .ledger-stream { padding: 6px 0; }
+    .le-item {
+      display: flex; gap: 0;
+      padding: 6px 14px;
+      border-bottom: 1px solid var(--b2);
+      align-items: flex-start;
+      transition: background 0.1s;
+    }
+    .le-item:hover { background: var(--hov); }
+    .le-item.new { background: rgba(255,132,0,0.03); }
+    .le-ts { font-size: 0.4rem; opacity: 0.2; min-width: 44px; padding-top: 1px; flex-shrink: 0; }
+    .le-actor {
+      font-size: 0.44rem; font-weight: 700;
+      min-width: 52px; flex-shrink: 0; padding-top: 1px;
+    }
+    .le-action {
+      font-size: 0.44rem; opacity: 0.45;
+      flex: 1; line-height: 1.5; padding: 0 8px;
+    }
+    .le-decision {
+      font-size: 0.38rem; padding: 1px 5px;
+      border: 1px solid; flex-shrink: 0;
+      letter-spacing: 0.06em;
+    }
+    .le-decision.allow { border-color: rgba(0,102,255,0.35); color: var(--blue); }
+    .le-decision.deny  { border-color: rgba(255,0,102,0.35);  color: var(--pink); }
+    .le-decision.log   { border-color: var(--b); opacity: 0.3; color: #fff; }
+
+    /* POLICY EDITOR */
+    .policy-list { display: flex; flex-direction: column; gap: 0; }
+    .pol-item {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--b2);
+      cursor: pointer; transition: background 0.12s;
+    }
+    .pol-item:hover { background: var(--hov); }
+    .pol-item.active { background: var(--surf); border-left: 2px solid var(--orange); }
+    .pol-row1 { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+    .pol-id { font-size: 0.4rem; opacity: 0.2; letter-spacing: 0.06em; }
+    .pol-scope { font-size: 0.52rem; font-weight: 700; flex: 1; }
+    .pol-dec {
+      font-size: 0.38rem; padding: 2px 6px; border: 1px solid;
+      letter-spacing: 0.06em;
+    }
+    .pol-dec.allow { border-color: rgba(0,102,255,0.4); color: var(--blue); }
+    .pol-dec.deny  { border-color: rgba(255,0,102,0.4); color: var(--pink); }
+    .pol-action { font-size: 0.46rem; opacity: 0.35; }
+    .pol-meta { font-size: 0.4rem; opacity: 0.2; margin-top: 2px; }
+
+    /* Z-FRAMEWORK MONITOR */
+    .z-display {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 20px 14px; gap: 16px;
+    }
+    .z-equation {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.6rem; font-weight: 700;
+      letter-spacing: -0.02em; opacity: 0.9;
+      text-align: center;
+    }
+    .z-vars {
+      display: grid; grid-template-columns: repeat(3,1fr);
+      gap: 6px; width: 100%;
+    }
+    .z-var {
+      padding: 8px 10px; border: 1px solid var(--b);
+      text-align: center;
+    }
+    .z-var-label { font-size: 0.4rem; opacity: 0.2; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 4px; }
+    .z-var-val { font-size: 0.8rem; font-weight: 700; font-family: 'Space Grotesk', sans-serif; }
+    .z-result {
+      width: 100%; padding: 10px 14px; text-align: center;
+      border: 1px solid;
+    }
+    .z-result.equilibrium { border-color: rgba(255,132,0,0.3); background: rgba(255,132,0,0.04); }
+    .z-result.adapting    { border-color: rgba(255,0,102,0.3);  background: rgba(255,0,102,0.04); }
+    .z-result-label { font-size: 0.44rem; opacity: 0.3; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 4px; }
+    .z-result-val { font-size: 0.65rem; font-weight: 700; }
+
+    /* TERMINAL */
+    .terminal-wrap {
+      display: flex; flex-direction: column;
+      overflow: hidden; height: 100%;
+    }
+    .terminal-output {
+      flex: 1; overflow-y: auto; padding: 10px 14px;
+      font-size: 0.52rem; line-height: 1.8;
+    }
+    .terminal-output::-webkit-scrollbar { width: 2px; }
+    .terminal-output::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.07); }
+    .t-line { display: flex; gap: 8px; }
+    .t-prompt { opacity: 0.2; flex-shrink: 0; }
+    .t-cmd { opacity: 0.7; }
+    .t-out { opacity: 0.45; padding-left: 16px; }
+    .t-out.ok    { color: var(--blue);   opacity: 0.7; }
+    .t-out.err   { color: var(--pink);   opacity: 0.7; }
+    .t-out.warn  { color: var(--orange); opacity: 0.7; }
+    .t-out.dim   { opacity: 0.25; }
+    .t-cursor {
+      display: inline-block; width: 7px; height: 1em;
+      background: #fff; vertical-align: text-bottom; opacity: 0.7;
+    }
+    @keyframes cur-blink { 0%,49%,100%{opacity:0.7} 50%,99%{opacity:0} }
+    .t-cursor { animation: cur-blink 0.8s step-end infinite; }
+
+    .terminal-input-row {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 14px;
+      border-top: 1px solid var(--b);
+      flex-shrink: 0;
+    }
+    .t-in-prompt { font-size: 0.52rem; opacity: 0.3; flex-shrink: 0; }
+    .t-in {
+      flex: 1; font-family: 'JetBrains Mono', monospace;
+      font-size: 0.52rem; color: #fff;
+      background: transparent; border: none; outline: none;
+    }
+    .t-in::placeholder { color: rgba(255,255,255,0.15); }
+
+    /* AGENT COMMS */
+    .comms-list { padding: 6px 0; }
+    .cm-item {
+      padding: 8px 14px;
+      border-bottom: 1px solid var(--b2);
+    }
+    .cm-head { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+    .cm-from { font-size: 0.5rem; font-weight: 700; }
+    .cm-ts   { font-size: 0.4rem; opacity: 0.2; margin-left: auto; }
+    .cm-msg  { font-size: 0.48rem; opacity: 0.4; line-height: 1.6; }
+    .cm-dot  { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+
+    /* METRICS MINI */
+    .metrics-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 0;
+    }
+    .met-cell {
+      padding: 12px 14px;
+      border-right: 1px solid var(--b2);
+      border-bottom: 1px solid var(--b2);
+    }
+    .met-cell:nth-child(2n) { border-right: none; }
+    .met-label { font-size: 0.4rem; opacity: 0.2; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 5px; }
+    .met-val { font-family: 'Space Grotesk', sans-serif; font-size: 1.2rem; font-weight: 700; line-height: 1; }
+    .met-sub { font-size: 0.4rem; opacity: 0.2; margin-top: 3px; }
+    .met-delta { font-size: 0.42rem; margin-top: 4px; }
+    .met-delta.up { color: var(--orange); }
+
+    /* STATUSBAR */
+    .statusbar {
+      border-top: 1px solid var(--b);
+      background: rgba(255,255,255,0.01);
+      display: flex; align-items: center;
+      padding: 0 14px; gap: 0;
+      font-size: 0.42rem;
+    }
+    .sb-item {
+      padding: 0 12px; height: 100%;
+      display: flex; align-items: center; gap: 6px;
+      border-right: 1px solid var(--b);
+      opacity: 0.25; white-space: nowrap;
+    }
+    .sb-item:first-child { padding-left: 0; }
+    .sb-item.live { opacity: 0.6; }
+    .sb-dot { width: 4px; height: 4px; border-radius: 50%; }
+    .sb-right { margin-left: auto; display: flex; }
+
+    /* ANIMATIONS */
+    @keyframes fadeIn { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:none} }
+    .le-item.new { animation: fadeIn 0.3s ease; }
+
+    * { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.06) transparent; }
+  </style>
+</head>
+<body style="background:#000!important;color:#fff!important;">
+<div style="position:fixed;inset:0;background:#000;z-index:-9999;pointer-events:none;"></div>
+
+<div class="shell">
+  <div class="grad-rule"></div>
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="tb-logo">
+      Prism
+      <div class="tb-logo-badge">CONSOLE</div>
+    </div>
+    <div class="tb-tabs">
+      <div class="tb-tab active" onclick="switchTab(this)">
+        <div class="tb-tab-dot" style="background:var(--orange);"></div>
+        Overview
+      </div>
+      <div class="tb-tab" onclick="switchTab(this)">
+        <div class="tb-tab-dot" style="background:var(--blue);"></div>
+        Ledger
+      </div>
+      <div class="tb-tab" onclick="switchTab(this)">
+        <div class="tb-tab-dot" style="background:var(--purple);"></div>
+        Policies
+      </div>
+      <div class="tb-tab" onclick="switchTab(this)">
+        <div class="tb-tab-dot" style="background:var(--pink);"></div>
+        Agents
+      </div>
+      <div class="tb-tab" onclick="switchTab(this)">
+        <div class="tb-tab-dot" style="background:var(--red);"></div>
+        Terminal
+      </div>
+    </div>
+    <div class="tb-right">
+      <div class="tb-alert">
+        <div class="ta-dot blink" style="background:var(--pink);"></div>
+        <span style="color:var(--pink);opacity:0.8;">1 open alert</span>
+        <span style="opacity:0.2;">&middot;</span>
+        <span style="opacity:0.4;">GOV-8 &middot; Eve</span>
+      </div>
+      <div class="tb-user">
+        <span style="opacity:0.6;">root</span>
+        <span>&middot;</span>
+        <span>prism.blackroad.systems</span>
+      </div>
+      <div class="tb-clock" id="tb-clock">00:00:00</div>
+    </div>
+  </div>
+
+  <!-- MAIN GRID: 4col x 2row -->
+  <div class="main-grid">
+
+    <!-- COL 1 ROW 1: System Status -->
+    <div class="panel full-h">
+      <div class="pn-head">
+        <div class="pn-accent" style="background:var(--orange);"></div>
+        <div class="pn-title">System Status</div>
+        <div class="pn-badge live">LIVE</div>
+      </div>
+      <div class="pn-body">
+        <div class="ss-list" id="sys-status">
+          <!-- populated by JS -->
+        </div>
+
+        <div style="padding:10px 14px; border-top:1px solid var(--b); margin-top:4px;">
+          <div style="font-size:0.4rem;opacity:0.18;letter-spacing:0.14em;text-transform:uppercase;margin-bottom:10px;">Metrics</div>
+          <div class="metrics-grid">
+            <div class="met-cell">
+              <div class="met-label">Policy Evals</div>
+              <div class="met-val" id="met-evals">143</div>
+              <div class="met-delta up">&uarr; +12 today</div>
+            </div>
+            <div class="met-cell">
+              <div class="met-label">Ledger Events</div>
+              <div class="met-val" id="met-ledger">89</div>
+              <div class="met-delta up">&uarr; live</div>
+            </div>
+            <div class="met-cell">
+              <div class="met-label">Denials</div>
+              <div class="met-val">2</div>
+              <div class="met-sub">of 143 &middot; 1.4%</div>
+            </div>
+            <div class="met-cell">
+              <div class="met-label">Agents Online</div>
+              <div class="met-val" id="met-agents">4</div>
+              <div class="met-sub">of 12 spawned</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="padding:10px 14px;border-top:1px solid var(--b);">
+          <div style="font-size:0.4rem;opacity:0.18;letter-spacing:0.14em;text-transform:uppercase;margin-bottom:10px;">Cece &middot; Z-Framework</div>
+          <div class="z-vars">
+            <div class="z-var">
+              <div class="z-var-label">x &middot; input</div>
+              <div class="z-var-val" id="z-x">&check;</div>
+            </div>
+            <div class="z-var">
+              <div class="z-var-label">y &middot; transform</div>
+              <div class="z-var-val" id="z-y">&check;</div>
+            </div>
+            <div class="z-var">
+              <div class="z-var-label">w &middot; expected</div>
+              <div class="z-var-val" id="z-w">&check;</div>
+            </div>
+          </div>
+          <div class="z-result equilibrium" id="z-result" style="margin-top:8px;">
+            <div class="z-result-label">Z := yx &minus; w</div>
+            <div class="z-result-val" id="z-val">Z = &empty; &middot; Equilibrium</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COL 2 ROW 1: Live Ledger Stream -->
+    <div class="panel">
+      <div class="pn-head">
+        <div class="pn-accent" style="background:var(--blue);"></div>
+        <div class="pn-title">Ledger &middot; Live Stream</div>
+        <div class="pn-badge live">LOGGING</div>
+        <div class="pn-action" onclick="clearLedger()">Clear</div>
+      </div>
+      <div class="pn-body">
+        <div class="ledger-stream" id="ledger-stream">
+          <!-- populated by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- COL 3 ROW 1: Policy Editor -->
+    <div class="panel">
+      <div class="pn-head">
+        <div class="pn-accent" style="background:var(--purple);"></div>
+        <div class="pn-title">Policies &middot; Cece</div>
+        <div class="pn-badge ok">7 ACTIVE</div>
+        <div class="pn-action">+ New</div>
+      </div>
+      <div class="pn-body">
+        <div class="policy-list" id="policy-list">
+          <!-- populated by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- COL 4 ROW 1: Agent Comms -->
+    <div class="panel full-h">
+      <div class="pn-head">
+        <div class="pn-accent" style="background:var(--pink);"></div>
+        <div class="pn-title">Agent Comms</div>
+        <div class="pn-badge live">LIVE</div>
+      </div>
+      <div class="pn-body">
+        <div class="comms-list" id="comms-list">
+          <!-- populated by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- COL 2 ROW 2: Terminal -->
+    <div class="panel span2">
+      <div class="pn-head">
+        <div class="pn-accent" style="background:var(--orange);"></div>
+        <div class="pn-title">Terminal &middot; blackroad-os</div>
+        <div class="pn-badge dim">root@prism</div>
+        <div class="pn-action" onclick="clearTerminal()">Clear</div>
+      </div>
+      <div class="terminal-wrap">
+        <div class="terminal-output" id="terminal-output">
+          <!-- populated by JS -->
+        </div>
+        <div class="terminal-input-row">
+          <div class="t-in-prompt">root@prism:~$</div>
+          <input class="t-in" id="t-in" placeholder="type a command..." autocomplete="off" spellcheck="false">
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- STATUSBAR -->
+  <div class="statusbar">
+    <div class="sb-item live">
+      <div class="sb-dot" style="background:var(--orange);"></div>
+      prism.blackroad.systems
+    </div>
+    <div class="sb-item">Z = &empty;</div>
+    <div class="sb-item live">
+      <div class="sb-dot" style="background:var(--blue);"></div>
+      <span id="sb-ledger">89</span> ledger events
+    </div>
+    <div class="sb-item">PS-SHA&infin; &middot; A8F2</div>
+    <div class="sb-item live">
+      <div class="sb-dot" style="background:var(--purple);"></div>
+      4 agents online
+    </div>
+    <div class="sb-item">7 policies active</div>
+    <div class="sb-item">Horizon 1 &middot; Day 14/90</div>
+    <div class="sb-right">
+      <div class="sb-item">v1.0.0-alpha</div>
+      <div class="sb-item">BlackRoad OS, Inc.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  /* CLOCK */
+  function tick() {
+    const n = new Date();
+    const pad = v => v.toString().padStart(2,'0');
+    document.getElementById('tb-clock').textContent =
+      pad(n.getHours()) + ':' + pad(n.getMinutes()) + ':' + pad(n.getSeconds());
+  }
+  tick(); setInterval(tick, 1000);
+
+  /* SYSTEM STATUS */
+  const SERVICES = [
+    { name:'app.blackroad.io',      up:98,  color:'#0066FF' },
+    { name:'api.blackroad.io',      up:100, color:'#FF8400' },
+    { name:'gov.api.blackroad.io',  up:100, color:'#8800FF' },
+    { name:'ledger.blackroad.sys',  up:100, color:'#FF0066' },
+    { name:'db.blackroad.systems',  up:94,  color:'#FF4400' },
+    { name:'mesh.blackroad.net',    up:87,  color:'#CC00AA' },
+    { name:'agents.blackroad.io',   up:100, color:'#0066FF' },
+    { name:'ws.blackroad.io',       up:96,  color:'#2233CC' },
+    { name:'cdn.blackroad.io',      up:100, color:'#FF8400' },
+  ];
+
+  function buildSysStatus() {
+    const el = document.getElementById('sys-status');
+    el.innerHTML = SERVICES.map(function(s) {
+      const bars = Array.from({length:8}, function() {
+        return '<div class="ss-sp-bar" style="height:' + (30 + Math.random()*70) + '%;background:' + s.color + ';opacity:0.5;"></div>';
+      }).join('');
+      return '<div class="ss-row">' +
+        '<div class="ss-dot' + (s.up===100?' pulse':'') + '" style="background:' + (s.up>90?s.color:'rgba(255,255,255,0.2)') + ';"></div>' +
+        '<div class="ss-name">' + s.name + '</div>' +
+        '<div class="ss-spark">' + bars + '</div>' +
+        '<div class="ss-uptime">' + s.up + '%</div>' +
+        '</div>';
+    }).join('');
+  }
+  buildSysStatus();
+
+  /* LEDGER */
+  const LEDGER_SEEDS = [
+    { actor:'Cecilia', color:'#FF8400', action:'policy.evaluate \u00b7 edu.teacher-can-review', decision:'allow' },
+    { actor:'Alice',   color:'#0066FF', action:'mesh.route \u00b7 pi-node-001 \u2192 api-gateway',  decision:'log'   },
+    { actor:'Lucidia', color:'#8800FF', action:'memory.commit \u00b7 journal A8F2:9c3d',        decision:'log'   },
+    { actor:'Cecilia', color:'#FF8400', action:'policy.evaluate \u00b7 edu.student-can-submit', decision:'allow' },
+    { actor:'Eve',     color:'#FF0066', action:'anomaly.flag \u00b7 delegation scope gap',       decision:'deny'  },
+    { actor:'Sable',   color:'#FF8400', action:'deploy.push \u00b7 blackroad-os-web \u2192 railway', decision:'log'   },
+    { actor:'Alice',   color:'#0066FF', action:'registry.update \u00b7 new edge device added',  decision:'log'   },
+    { actor:'Cecilia', color:'#FF8400', action:'policy.evaluate \u00b7 app.user-can-login',     decision:'allow' },
+    { actor:'Nora',    color:'#CC00AA', action:'memory.index \u00b7 6 context nodes persisted', decision:'log'   },
+    { actor:'Olympia', color:'#CC00AA', action:'mesh.heartbeat \u00b7 pi-node-003 \u00b7 14ms',      decision:'log'   },
+  ];
+
+  var ledgerCount = 89;
+  var evalCount   = 143;
+
+  function ts() {
+    var n = new Date();
+    return n.getHours().toString().padStart(2,'0') + ':' + n.getMinutes().toString().padStart(2,'0') + ':' + n.getSeconds().toString().padStart(2,'0');
+  }
+
+  function addLedgerEntry(entry, isNew) {
+    var el = document.getElementById('ledger-stream');
+    var div = document.createElement('div');
+    div.className = 'le-item' + (isNew ? ' new' : '');
+    div.innerHTML =
+      '<div class="le-ts">' + ts() + '</div>' +
+      '<div class="le-actor" style="color:' + entry.color + ';">' + entry.actor + '</div>' +
+      '<div class="le-action">' + entry.action + '</div>' +
+      '<div class="le-decision ' + entry.decision + '">' + entry.decision.toUpperCase() + '</div>';
+    el.insertBefore(div, el.firstChild);
+    // Keep max 40 entries
+    while (el.children.length > 40) el.removeChild(el.lastChild);
+
+    // Update counters
+    ledgerCount++;
+    document.getElementById('met-ledger').textContent = ledgerCount;
+    document.getElementById('sb-ledger').textContent  = ledgerCount;
+    if (entry.decision === 'allow') {
+      evalCount++;
+      document.getElementById('met-evals').textContent = evalCount;
+    }
+  }
+
+  // Seed with initial entries
+  LEDGER_SEEDS.slice().reverse().forEach(function(e) { addLedgerEntry(e, false); });
+
+  // Live stream
+  setInterval(function() {
+    var e = LEDGER_SEEDS[Math.floor(Math.random() * LEDGER_SEEDS.length)];
+    addLedgerEntry(e, true);
+  }, 3200);
+
+  function clearLedger() {
+    document.getElementById('ledger-stream').innerHTML = '';
+  }
+
+  /* POLICIES */
+  var POLICIES = [
+    { id:'POL-001', scope:'app.user.*',           action:'login',  decision:'allow', created:'Nov 13', evals:42 },
+    { id:'POL-002', scope:'edu.teacher.*',         action:'create', decision:'allow', created:'Nov 14', evals:18 },
+    { id:'POL-003', scope:'edu.student.*',         action:'submit', decision:'allow', created:'Nov 14', evals:31 },
+    { id:'POL-004', scope:'edu.teacher.*',         action:'review', decision:'allow', created:'Nov 14', evals:14 },
+    { id:'POL-005', scope:'gov.admin.*',           action:'all',    decision:'allow', created:'Nov 12', evals:27 },
+    { id:'POL-006', scope:'mesh.agent.*',          action:'route',  decision:'allow', created:'Nov 15', evals:11 },
+    { id:'POL-007', scope:'edu.unassigned.student.*', action:'submit', decision:'deny', created:'Nov 16', evals:2 },
+  ];
+
+  function buildPolicies() {
+    var el = document.getElementById('policy-list');
+    el.innerHTML = POLICIES.map(function(p, i) {
+      return '<div class="pol-item' + (i===0?' active':'') + '" onclick="selectPolicy(this)">' +
+        '<div class="pol-row1">' +
+          '<div class="pol-id">' + p.id + '</div>' +
+          '<div class="pol-scope">' + p.scope + '</div>' +
+          '<div class="pol-dec ' + p.decision + '">' + p.decision.toUpperCase() + '</div>' +
+        '</div>' +
+        '<div class="pol-action">action: ' + p.action + '</div>' +
+        '<div class="pol-meta">created ' + p.created + ' \u00b7 ' + p.evals + ' evaluations</div>' +
+      '</div>';
+    }).join('');
+  }
+  buildPolicies();
+
+  function selectPolicy(el) {
+    document.querySelectorAll('.pol-item').forEach(function(p) { p.classList.remove('active'); });
+    el.classList.add('active');
+  }
+
+  /* AGENT COMMS */
+  var COMMS = [
+    { from:'Eve',     color:'#FF0066', ts:'09:24', msg:'ALERT: Delegation scope gap detected on edu.review action. GOV-8 created. Awaiting Cecilia review.' },
+    { from:'Cecilia', color:'#FF8400', ts:'09:23', msg:'Policy evaluation batch complete. 143 evals, 2 denials. Ledger hashes verified. Z=\u2205 on all scopes.' },
+    { from:'Alice',   color:'#0066FF', ts:'09:18', msg:'Pi-node-001 heartbeat OK. Pi-node-004 showing elevated error rate \u2014 routing around it. Olympia notified.' },
+    { from:'Sable',   color:'#FF8400', ts:'09:12', msg:'blackroad-os-web deployed to Railway prod. Build 48s. Health check passed. User table migration applied.' },
+    { from:'Lucidia', color:'#8800FF', ts:'09:09', msg:'Memory journal A8F2 committed. 6 context nodes persisted. Restored prior session context on startup.' },
+    { from:'Nora',    color:'#CC00AA', ts:'08:55', msg:'Vector index rebuild complete. 847 embeddings refreshed. Cosine similarity scores updated for all active journals.' },
+    { from:'Olympia', color:'#CC00AA', ts:'08:41', msg:'Pi-node-003 registered on mesh.blackroad.network. All 3 active nodes healthy, avg latency 14ms.' },
+  ];
+
+  function buildComms() {
+    var el = document.getElementById('comms-list');
+    el.innerHTML = COMMS.map(function(c) {
+      return '<div class="cm-item">' +
+        '<div class="cm-head">' +
+          '<div class="cm-dot" style="background:' + c.color + ';"></div>' +
+          '<div class="cm-from" style="color:' + c.color + ';">' + c.from + '</div>' +
+          '<div class="cm-ts">' + c.ts + '</div>' +
+        '</div>' +
+        '<div class="cm-msg">' + c.msg + '</div>' +
+      '</div>';
+    }).join('');
+  }
+  buildComms();
+
+  // Live comms drip
+  var COMMS_LIVE = [
+    { from:'Alice',   color:'#0066FF', msg:'Mesh heartbeat cycle complete. All registered nodes responded within threshold.' },
+    { from:'Cecilia', color:'#FF8400', msg:'Policy scope review in progress. edu.review delegation gap \u2014 delegation model update pending.' },
+    { from:'Lucidia', color:'#8800FF', msg:'Trinary contradiction resolved. \u03b4 amplified session output. Memory updated.' },
+    { from:'Sable',   color:'#FF8400', msg:'INFRA-3 progress: db.blackroad.systems Postgres instance responding on port 5432.' },
+    { from:'Eve',     color:'#FF0066', msg:'Monitoring normal. No additional anomalies since GOV-8 flag. Watching edu scope closely.' },
+  ];
+
+  setInterval(function() {
+    var c = COMMS_LIVE[Math.floor(Math.random() * COMMS_LIVE.length)];
+    var now = new Date();
+    var t = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+    var el = document.getElementById('comms-list');
+    var div = document.createElement('div');
+    div.className = 'cm-item';
+    div.style.cssText = 'animation:fadeIn 0.3s ease;opacity:0;';
+    div.innerHTML =
+      '<div class="cm-head">' +
+        '<div class="cm-dot" style="background:' + c.color + ';"></div>' +
+        '<div class="cm-from" style="color:' + c.color + ';">' + c.from + '</div>' +
+        '<div class="cm-ts">' + t + '</div>' +
+      '</div>' +
+      '<div class="cm-msg">' + c.msg + '</div>';
+    el.insertBefore(div, el.firstChild);
+    setTimeout(function() { div.style.opacity = '1'; }, 50);
+    while (el.children.length > 14) el.removeChild(el.lastChild);
+  }, 5500);
+
+  /* TERMINAL */
+  var BOOT_LOG = [
+    { type:'dim',  text:'BlackRoad OS \u2014 Prism Console v1.0.0-alpha' },
+    { type:'dim',  text:'prism.blackroad.systems \u00b7 root session' },
+    { type:'dim',  text:'\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500' },
+    { type:'ok',   text:'[BOOT] Governance spine online \u00b7 gov.api.blackroad.io' },
+    { type:'ok',   text:'[BOOT] Ledger service connected \u00b7 ledger.blackroad.systems' },
+    { type:'ok',   text:'[BOOT] Policy store loaded \u00b7 7 policies active' },
+    { type:'ok',   text:'[BOOT] Agent mesh connected \u00b7 4/12 agents online' },
+    { type:'ok',   text:'[BOOT] Memory layer ready \u00b7 PS-SHA\u221e \u00b7 A8F2' },
+    { type:'warn', text:'[WARN] GOV-8 open \u00b7 delegation scope gap \u00b7 edu.review \u00b7 Eve flagged' },
+    { type:'ok',   text:'[READY] Z = \u2205 \u00b7 System at equilibrium \u00b7 All clear' },
+    { type:'dim',  text:'' },
+  ];
+
+  var termOut = document.getElementById('terminal-output');
+
+  function appendTermLine(type, text) {
+    var div = document.createElement('div');
+    div.className = 't-line';
+    div.innerHTML = type === 'cmd'
+      ? '<span class="t-prompt">root@prism:~$</span><span class="t-cmd">' + text + '</span>'
+      : '<span class="t-out ' + type + '">' + text + '</span>';
+    termOut.appendChild(div);
+    termOut.scrollTop = termOut.scrollHeight;
+  }
+
+  BOOT_LOG.forEach(function(l, i) {
+    setTimeout(function() { appendTermLine(l.type, l.text); }, i * 60);
+  });
+
+  // Append cursor line after boot
+  setTimeout(function() {
+    var div = document.createElement('div');
+    div.className = 't-line';
+    div.innerHTML = '<span class="t-prompt">root@prism:~$</span> <span class="t-cursor"></span>';
+    div.id = 'cursor-line';
+    termOut.appendChild(div);
+    termOut.scrollTop = termOut.scrollHeight;
+  }, BOOT_LOG.length * 60 + 100);
+
+  // Terminal commands
+  var CMDS = {
+    'help': [
+      {t:'ok',  v:'Available commands:'},
+      {t:'dim', v:'  status       \u2014 system health overview'},
+      {t:'dim', v:'  agents       \u2014 list all agents and status'},
+      {t:'dim', v:'  ledger       \u2014 show last 5 ledger events'},
+      {t:'dim', v:'  policies     \u2014 list active policies'},
+      {t:'dim', v:'  z            \u2014 Z-Framework state'},
+      {t:'dim', v:'  memory       \u2014 PS-SHA\u221e journal summary'},
+      {t:'dim', v:'  clear        \u2014 clear terminal'},
+      {t:'dim', v:'  cece         \u2014 run Cece governance check'},
+      {t:'dim', v:'  deploy       \u2014 trigger deployment pipeline'},
+    ],
+    'status': [
+      {t:'ok',  v:'System Status \u00b7 ' + new Date().toLocaleTimeString()},
+      {t:'ok',  v:'  app.blackroad.io      \u2191 98%'},
+      {t:'ok',  v:'  api.blackroad.io      \u2191 100%'},
+      {t:'ok',  v:'  gov.api.blackroad.io  \u2191 100%'},
+      {t:'ok',  v:'  ledger.blackroad.sys  \u2191 100%'},
+      {t:'ok',  v:'  db.blackroad.systems  \u2191 94%'},
+      {t:'warn',v:'  mesh.blackroad.net    \u2191 87% \u00b7 pi-node-004 degraded'},
+    ],
+    'agents': [
+      {t:'ok',  v:'Agent Roster \u00b7 4/12 online'},
+      {t:'ok',  v:'  AGENT-001 Cecilia  ONLINE     gov layer'},
+      {t:'ok',  v:'  AGENT-002 Alice    PROCESSING mesh \u00b7 gateway'},
+      {t:'ok',  v:'  AGENT-003 Lucidia  ONLINE     trinary core'},
+      {t:'ok',  v:'  AGENT-004 Cadence  ONLINE     studio \u00b7 audio'},
+      {t:'dim', v:'  AGENT-006 Radius   OFFLINE    physics sim'},
+      {t:'dim', v:'  AGENT-011 Vela     OFFLINE    blockchain'},
+    ],
+    'z': [
+      {t:'ok',  v:'Z-Framework Monitor'},
+      {t:'ok',  v:'  Z := yx \u2212 w'},
+      {t:'ok',  v:'  x (input)      \u2192 validated'},
+      {t:'ok',  v:'  y (transform)  \u2192 policy applied'},
+      {t:'ok',  v:'  w (expected)   \u2192 matched'},
+      {t:'ok',  v:'  Z = \u2205 \u2192 Equilibrium. No adaptation required.'},
+    ],
+    'ledger': [
+      {t:'ok',  v:'Last 5 ledger events:'},
+      {t:'dim', v:'  09:24 Cecilia  policy.evaluate edu.teacher-can-review  ALLOW'},
+      {t:'dim', v:'  09:23 Alice    mesh.route pi-node-001 \u2192 api-gateway     LOG'},
+      {t:'dim', v:'  09:22 Lucidia  memory.commit journal A8F2:9c3d          LOG'},
+      {t:'warn',v:'  09:21 Eve      anomaly.flag delegation scope gap        DENY'},
+      {t:'dim', v:'  09:20 Sable    deploy.push blackroad-os-web             LOG'},
+    ],
+    'policies': [
+      {t:'ok',  v:'Active Policies \u00b7 7 total'},
+      {t:'dim', v:'  POL-001  app.user.*            login   \u2192 ALLOW'},
+      {t:'dim', v:'  POL-002  edu.teacher.*         create  \u2192 ALLOW'},
+      {t:'dim', v:'  POL-003  edu.student.*         submit  \u2192 ALLOW'},
+      {t:'dim', v:'  POL-004  edu.teacher.*         review  \u2192 ALLOW'},
+      {t:'dim', v:'  POL-005  gov.admin.*           all     \u2192 ALLOW'},
+      {t:'dim', v:'  POL-006  mesh.agent.*          route   \u2192 ALLOW'},
+      {t:'warn',v:'  POL-007  edu.unassigned.student submit  \u2192 DENY'},
+    ],
+    'memory': [
+      {t:'ok',  v:'PS-SHA\u221e Memory Layer'},
+      {t:'dim', v:'  Active session: A8F2'},
+      {t:'dim', v:'  Total journals: 31'},
+      {t:'dim', v:'  Context nodes loaded: 6'},
+      {t:'dim', v:'  Last commit: A8F2:9c3d \u00b7 Z-Framework policy session'},
+      {t:'dim', v:'  Managed by: Nora (AGENT-012)'},
+    ],
+    'cece': [
+      {t:'ok',  v:'Running Cece governance check...'},
+      {t:'ok',  v:'  \u2713 Policy store: 7 active rules loaded'},
+      {t:'ok',  v:'  \u2713 Ledger: 89 events persisted, hashes verified'},
+      {t:'ok',  v:'  \u2713 Delegations: 5 scopes active'},
+      {t:'warn',v:'  \u26a0 GOV-8: delegation gap on edu.review \u2014 open for review'},
+      {t:'ok',  v:'  Z = \u2205 on all resolved scopes \u00b7 System clear'},
+    ],
+    'deploy': [
+      {t:'ok',  v:'Triggering deployment pipeline...'},
+      {t:'dim', v:'  \u2192 Running tests on blackroad-os-web'},
+      {t:'ok',  v:'  \u2713 Tests passed (24/24)'},
+      {t:'dim', v:'  \u2192 Building Docker image'},
+      {t:'ok',  v:'  \u2713 Image built \u00b7 48s'},
+      {t:'dim', v:'  \u2192 Pushing to Railway prod'},
+      {t:'ok',  v:'  \u2713 Deployed \u00b7 app.blackroad.io live'},
+    ],
+    'clear': 'CLEAR',
+  };
+
+  var termIn = document.getElementById('t-in');
+  termIn.addEventListener('keydown', function(e) {
+    if (e.key !== 'Enter') return;
+    var val = termIn.value.trim();
+    termIn.value = '';
+    if (!val) return;
+
+    // Remove cursor line
+    var cur = document.getElementById('cursor-line');
+    if (cur) cur.remove();
+
+    appendTermLine('cmd', val);
+
+    var res = CMDS[val.toLowerCase()];
+    if (res === 'CLEAR') {
+      clearTerminal(); return;
+    } else if (res) {
+      res.forEach(function(r, i) { setTimeout(function() { appendTermLine(r.t, r.v); }, i * 40); });
+      setTimeout(function() {
+        appendTermLine('dim', '');
+        var div = document.createElement('div');
+        div.className = 't-line';
+        div.innerHTML = '<span class="t-prompt">root@prism:~$</span> <span class="t-cursor"></span>';
+        div.id = 'cursor-line';
+        termOut.appendChild(div);
+        termOut.scrollTop = termOut.scrollHeight;
+      }, (res.length + 1) * 40);
+    } else {
+      appendTermLine('err', 'command not found: ' + val + ' \u00b7 type \'help\' for options');
+      appendTermLine('dim', '');
+      var div = document.createElement('div');
+      div.className = 't-line';
+      div.innerHTML = '<span class="t-prompt">root@prism:~$</span> <span class="t-cursor"></span>';
+      div.id = 'cursor-line';
+      termOut.appendChild(div);
+      termOut.scrollTop = termOut.scrollHeight;
+    }
+  });
+
+  function clearTerminal() {
+    termOut.innerHTML = '';
+    var div = document.createElement('div');
+    div.className = 't-line';
+    div.innerHTML = '<span class="t-prompt">root@prism:~$</span> <span class="t-cursor"></span>';
+    div.id = 'cursor-line';
+    termOut.appendChild(div);
+  }
+
+  /* TAB SWITCH */
+  function switchTab(el) {
+    document.querySelectorAll('.tb-tab').forEach(function(t) { t.classList.remove('active'); });
+    el.classList.add('active');
+  }
+
+  /* Z-FRAMEWORK PULSE */
+  setInterval(function() {
+    var isGap = Math.random() > 0.88;
+    var zResult = document.getElementById('z-result');
+    var zVal    = document.getElementById('z-val');
+    if (isGap) {
+      zResult.className = 'z-result adapting';
+      zVal.textContent = 'Z \u2260 \u2205 \u00b7 Adapting...';
+      setTimeout(function() {
+        zResult.className = 'z-result equilibrium';
+        zVal.textContent = 'Z = \u2205 \u00b7 Equilibrium';
+      }, 2000);
+    }
+  }, 6000);
+</script>
+
+</body>
+</html>
