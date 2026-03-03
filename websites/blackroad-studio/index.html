@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#000000 !important;">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BlackRoad Studio</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      background: #000000 !important;
+      color: #ffffff !important;
+      font-family: 'JetBrains Mono', monospace;
+      min-height: 100vh;
+    }
+
+    :root {
+      --grad: linear-gradient(90deg, #FF8400, #FF4400, #FF0066, #CC00AA, #8800FF, #0066FF, #2233CC);
+    }
+
+    .grad-rule { height: 3px; background: var(--grad) !important; }
+
+    /* -- NAV -- */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: #000000 !important;
+      border-bottom: 1px solid rgba(255,255,255,0.12);
+      height: 52px;
+      display: flex; align-items: center;
+      padding: 0 0 0 0;
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 10px;
+      padding: 0 24px;
+      border-right: 1px solid rgba(255,255,255,0.1);
+      height: 100%; flex-shrink: 0;
+    }
+    .logo-mark { width: 26px; height: 26px; background: var(--grad) !important; display: flex; align-items: center; justify-content: center; font-size: 0.55rem; font-weight: 700; color: #000; font-family: 'Space Grotesk', sans-serif; }
+    .logo-text { font-family: 'Space Grotesk', sans-serif; font-size: 0.85rem; font-weight: 700; color: #ffffff; }
+    .logo-tag { font-size: 0.38rem; opacity: 0.3; letter-spacing: 0.14em; text-transform: uppercase; color: #ffffff; margin-left: 4px; }
+
+    .nav-tabs { display: flex; gap: 0; height: 100%; }
+    .nav-tab { font-size: 0.46rem; padding: 0 18px; display: flex; align-items: center; color: #ffffff; opacity: 0.3; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; }
+    .nav-tab:hover { opacity: 0.7; }
+    .nav-tab.active { opacity: 1; border-bottom-color: #ffffff; }
+
+    .nav-right { display: flex; align-items: center; gap: 14px; margin-left: auto; padding-right: 20px; }
+    .nav-badge { font-size: 0.42rem; border: 1px solid rgba(255,255,255,0.2); padding: 4px 10px; color: #ffffff; opacity: 0.5; background: #000000 !important; }
+    .nav-publish { font-family: 'JetBrains Mono', monospace; font-size: 0.5rem; font-weight: 700; padding: 8px 16px; background: #ffffff !important; color: #000000; border: none; cursor: pointer; letter-spacing: 0.04em; }
+    .nav-avatar { width: 28px; height: 28px; border-radius: 50%; background: #111 !important; border: 1px solid rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 0.44rem; font-weight: 700; color: #ffffff; cursor: pointer; }
+
+    /* -- LAYOUT -- */
+    .studio-layout {
+      display: grid;
+      grid-template-columns: 200px 1fr 280px;
+      min-height: calc(100vh - 55px);
+      background: #000000 !important;
+    }
+
+    /* -- LEFT SIDEBAR -- */
+    .studio-sidebar {
+      border-right: 1px solid rgba(255,255,255,0.08);
+      padding: 20px 0;
+      background: #000000 !important;
+      position: sticky; top: 52px;
+      height: calc(100vh - 52px);
+      overflow-y: auto; scrollbar-width: none;
+    }
+    .studio-sidebar::-webkit-scrollbar { display: none; }
+
+    .ss-section { margin-bottom: 8px; }
+    .ss-heading { font-size: 0.38rem; opacity: 0.2; letter-spacing: 0.2em; text-transform: uppercase; color: #ffffff; padding: 12px 20px 6px; }
+    .ss-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 20px; cursor: pointer;
+      color: #ffffff; text-decoration: none;
+      border-left: 2px solid transparent;
+      transition: all 0.12s;
+      background: #000000 !important;
+    }
+    .ss-item:hover { background: rgba(255,255,255,0.03) !important; }
+    .ss-item.active { border-left-color: #ffffff; background: rgba(255,255,255,0.05) !important; }
+    .ss-icon { font-size: 0.75rem; opacity: 0.4; width: 18px; text-align: center; }
+    .ss-item.active .ss-icon { opacity: 1; }
+    .ss-label { font-size: 0.5rem; opacity: 0.4; color: #ffffff; }
+    .ss-item.active .ss-label { opacity: 1; font-weight: 700; }
+    .ss-count { margin-left: auto; font-size: 0.38rem; opacity: 0.2; color: #ffffff; }
+
+    .ss-divider { height: 1px; background: rgba(255,255,255,0.06) !important; margin: 8px 16px; }
+
+    /* TOOL CARDS in sidebar */
+    .tool-card {
+      margin: 8px 12px;
+      border: 1px solid rgba(255,255,255,0.08);
+      padding: 12px;
+      cursor: pointer;
+      background: #000000 !important;
+      transition: border-color 0.12s;
+    }
+    .tool-card:hover { border-color: rgba(255,255,255,0.25); }
+    .tc-icon { font-size: 1rem; margin-bottom: 6px; opacity: 0.6; }
+    .tc-name { font-size: 0.5rem; font-weight: 700; color: #ffffff; margin-bottom: 2px; }
+    .tc-desc { font-size: 0.42rem; opacity: 0.3; color: #ffffff; line-height: 1.5; }
+    .tc-bar { height: 1px; margin-top: 8px; }
+
+    /* -- MAIN CANVAS -- */
+    .studio-main {
+      background: #000000 !important;
+      display: flex; flex-direction: column;
+    }
+
+    /* PROJECT HEADER */
+    .project-header {
+      padding: 24px 28px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      background: #000000 !important;
+    }
+    .project-meta { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+    .project-type { font-size: 0.42rem; border: 1px solid rgba(255,255,255,0.15); padding: 3px 9px; color: #ffffff; opacity: 0.5; background: #000000 !important; letter-spacing: 0.08em; text-transform: uppercase; }
+    .project-status-dot { width: 6px; height: 6px; border-radius: 50%; }
+    @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.7)} }
+    .project-status-dot.live { animation: pulse 2s ease-in-out infinite; }
+    .project-status-text { font-size: 0.42rem; opacity: 0.3; color: #ffffff; }
+    .project-autosave { font-size: 0.4rem; opacity: 0.2; color: #ffffff; margin-left: auto; }
+
+    .project-title-input {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.4rem; font-weight: 700; color: #ffffff;
+      background: none !important; border: none; outline: none;
+      width: 100%; caret-color: #FF8400;
+      margin-bottom: 16px;
+    }
+    .project-title-input::placeholder { opacity: 0.2; }
+
+    /* TABS under title */
+    .canvas-tabs { display: flex; gap: 0; }
+    .canvas-tab { font-size: 0.44rem; padding: 10px 16px; cursor: pointer; color: #ffffff; opacity: 0.3; border-bottom: 2px solid transparent; letter-spacing: 0.08em; text-transform: uppercase; transition: all 0.12s; }
+    .canvas-tab:hover { opacity: 0.7; }
+    .canvas-tab.active { opacity: 1; border-bottom-color: #ffffff; }
+
+    /* -- WORKSPACE -- */
+    .workspace { flex: 1; display: grid; grid-template-rows: auto 1fr; background: #000000 !important; }
+
+    /* TOOLBAR */
+    .toolbar {
+      display: flex; align-items: center; gap: 4px;
+      padding: 10px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      flex-wrap: wrap;
+      background: #000000 !important;
+    }
+    .tb-group { display: flex; gap: 2px; margin-right: 12px; }
+    .tb-btn {
+      font-size: 0.55rem; padding: 5px 9px; cursor: pointer;
+      color: #ffffff; opacity: 0.35; border: 1px solid transparent;
+      background: #000000 !important; font-family: 'JetBrains Mono', monospace;
+      transition: all 0.12s;
+    }
+    .tb-btn:hover { opacity: 0.9; border-color: rgba(255,255,255,0.15); }
+    .tb-btn.active { opacity: 1; border-color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.05) !important; }
+    .tb-divider { width: 1px; height: 20px; background: rgba(255,255,255,0.08) !important; margin: 0 8px; }
+    .tb-select {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.48rem;
+      background: #000000 !important; color: #ffffff; border: 1px solid rgba(255,255,255,0.12);
+      padding: 4px 8px; outline: none; opacity: 0.6;
+    }
+    .tb-color { width: 18px; height: 18px; border-radius: 50%; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); flex-shrink: 0; }
+    .tb-ml { margin-left: auto; }
+    .tb-ai-btn {
+      display: flex; align-items: center; gap: 7px;
+      font-family: 'JetBrains Mono', monospace; font-size: 0.46rem;
+      background: #000000 !important; color: #ffffff; border: 1px solid rgba(255,255,255,0.2);
+      padding: 5px 12px; cursor: pointer; transition: border-color 0.12s;
+    }
+    .tb-ai-btn:hover { border-color: rgba(255,255,255,0.5); }
+    .ai-dot { width: 5px; height: 5px; border-radius: 50%; animation: pulse 1.5s ease-in-out infinite; }
+
+    /* CANVAS AREA - MUSIC MODE */
+    .canvas-area {
+      padding: 24px;
+      overflow-y: auto;
+      background: #000000 !important;
+      display: flex; flex-direction: column; gap: 16px;
+    }
+
+    /* WAVEFORM TRACK */
+    .track-row {
+      display: flex; align-items: center; gap: 12px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: #000000 !important;
+      padding: 0;
+      overflow: hidden;
+    }
+    .track-info {
+      width: 140px; flex-shrink: 0;
+      padding: 14px 14px;
+      border-right: 1px solid rgba(255,255,255,0.08);
+      background: #000000 !important;
+    }
+    .track-name { font-size: 0.52rem; font-weight: 700; color: #ffffff; margin-bottom: 4px; }
+    .track-type { font-size: 0.4rem; opacity: 0.3; color: #ffffff; }
+    .track-controls { display: flex; gap: 6px; margin-top: 8px; }
+    .tc-btn { font-size: 0.5rem; opacity: 0.35; cursor: pointer; color: #ffffff; background: none; border: none; padding: 0; transition: opacity 0.12s; }
+    .tc-btn:hover { opacity: 1; }
+    .tc-btn.solo { color: #FF8400; opacity: 0.7; }
+    .track-canvas { flex: 1; height: 64px; position: relative; overflow: hidden; }
+
+    /* Animated waveform bars */
+    .waveform { display: flex; align-items: center; gap: 1.5px; height: 100%; padding: 0 8px; }
+    .wv-bar { flex-shrink: 0; width: 3px; border-radius: 0; opacity: 0.7; }
+    @keyframes wv1 { 0%,100%{transform:scaleY(0.2)} 50%{transform:scaleY(1)} }
+    @keyframes wv2 { 0%,100%{transform:scaleY(0.5)} 50%{transform:scaleY(0.15)} }
+    @keyframes wv3 { 0%,100%{transform:scaleY(0.1)} 50%{transform:scaleY(0.8)} }
+
+    /* PLAYHEAD */
+    .playhead {
+      position: absolute; top: 0; bottom: 0; left: 38%;
+      width: 1px; background: #FF8400 !important;
+      pointer-events: none;
+    }
+    .playhead::before { content: ''; position: absolute; top: 0; left: -4px; width: 9px; height: 9px; background: #FF8400 !important; clip-path: polygon(0 0, 100% 0, 50% 100%); }
+
+    /* TIMELINE RULER */
+    .timeline-ruler {
+      display: flex; align-items: center;
+      padding: 0 0 0 154px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      background: #000000 !important;
+    }
+    .ruler-inner { flex: 1; display: flex; height: 24px; align-items: flex-end; padding: 0 8px; position: relative; }
+    .ruler-tick { position: absolute; bottom: 0; display: flex; flex-direction: column; align-items: center; }
+    .ruler-line { width: 1px; background: rgba(255,255,255,0.15) !important; }
+    .ruler-label { font-size: 0.36rem; opacity: 0.2; color: #ffffff; margin-bottom: 2px; }
+
+    /* AI SUGGESTIONS PANEL */
+    .ai-suggestions {
+      border: 1px solid rgba(255,255,255,0.1);
+      padding: 16px;
+      background: #000000 !important;
+      position: relative;
+    }
+    .ai-suggestions::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: var(--grad) !important; }
+    .ai-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+    .ai-icon { width: 18px; height: 18px; background: var(--grad) !important; display: flex; align-items: center; justify-content: center; font-size: 0.38rem; font-weight: 700; color: #000; }
+    .ai-title { font-size: 0.48rem; font-weight: 700; color: #ffffff; letter-spacing: 0.06em; }
+    .ai-model { font-size: 0.38rem; opacity: 0.25; color: #ffffff; margin-left: auto; }
+    .ai-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+    .ai-chip {
+      font-size: 0.46rem; border: 1px solid rgba(255,255,255,0.15);
+      padding: 6px 12px; color: #ffffff; opacity: 0.6; cursor: pointer;
+      background: #000000 !important; transition: all 0.12s;
+    }
+    .ai-chip:hover { opacity: 1; border-color: rgba(255,255,255,0.4); }
+
+    /* -- RIGHT PANEL -- */
+    .studio-panel {
+      border-left: 1px solid rgba(255,255,255,0.08);
+      background: #000000 !important;
+      display: flex; flex-direction: column;
+    }
+
+    .panel-tabs { display: flex; border-bottom: 1px solid rgba(255,255,255,0.08); background: #000000 !important; }
+    .panel-tab { flex: 1; font-size: 0.42rem; padding: 12px 8px; text-align: center; cursor: pointer; color: #ffffff; opacity: 0.3; border-bottom: 2px solid transparent; letter-spacing: 0.08em; text-transform: uppercase; transition: all 0.12s; }
+    .panel-tab:hover { opacity: 0.7; }
+    .panel-tab.active { opacity: 1; border-bottom-color: #ffffff; }
+
+    .panel-body { flex: 1; overflow-y: auto; scrollbar-width: none; padding: 20px 16px; background: #000000 !important; }
+    .panel-body::-webkit-scrollbar { display: none; }
+
+    .panel-section { margin-bottom: 24px; }
+    .panel-label { font-size: 0.4rem; opacity: 0.25; letter-spacing: 0.18em; text-transform: uppercase; color: #ffffff; margin-bottom: 12px; }
+
+    /* KNOB / SLIDER ROW */
+    .knob-row { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,0.05); background: #000000 !important; }
+    .knob-row:last-child { border-bottom: none; }
+    .knob-label { font-size: 0.48rem; opacity: 0.45; color: #ffffff; min-width: 70px; }
+    .knob-slider { flex: 1; -webkit-appearance: none; appearance: none; height: 1px; background: rgba(255,255,255,0.15) !important; outline: none; }
+    .knob-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 10px; height: 10px; border-radius: 50%; background: #ffffff !important; cursor: pointer; }
+    .knob-val { font-size: 0.44rem; opacity: 0.3; color: #ffffff; min-width: 32px; text-align: right; }
+
+    /* EQ DISPLAY */
+    .eq-display { display: flex; align-items: flex-end; gap: 4px; height: 48px; padding: 0 4px; border: 1px solid rgba(255,255,255,0.07); background: #000000 !important; margin-bottom: 16px; }
+    .eq-bar { flex: 1; cursor: pointer; transition: height 0.2s; border-radius: 0; }
+
+    /* LAYERS */
+    .layer-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px; border: 1px solid rgba(255,255,255,0.07);
+      margin-bottom: 6px; cursor: pointer;
+      background: #000000 !important; transition: border-color 0.12s;
+    }
+    .layer-item:hover { border-color: rgba(255,255,255,0.2); }
+    .layer-item.selected { border-color: rgba(255,255,255,0.4); }
+    .layer-eye { font-size: 0.5rem; opacity: 0.3; cursor: pointer; transition: opacity 0.12s; }
+    .layer-eye:hover { opacity: 1; }
+    .layer-swatch { width: 10px; height: 10px; flex-shrink: 0; }
+    .layer-name { font-size: 0.5rem; color: #ffffff; opacity: 0.6; flex: 1; }
+    .layer-lock { font-size: 0.45rem; opacity: 0.2; }
+
+    /* ASSETS */
+    .asset-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .asset-item {
+      aspect-ratio: 1; border: 1px solid rgba(255,255,255,0.08);
+      background: #0a0a0a !important; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: border-color 0.12s;
+    }
+    .asset-item:hover { border-color: rgba(255,255,255,0.3); }
+    .asset-inner { display: flex; align-items: flex-end; gap: 2px; height: 28px; padding: 0 4px; }
+    .asset-bar { width: 4px; }
+
+    /* EARNINGS STRIP */
+    .earnings-strip {
+      border-top: 1px solid rgba(255,255,255,0.08);
+      padding: 16px;
+      background: #000000 !important;
+    }
+    .earn-label { font-size: 0.38rem; opacity: 0.2; letter-spacing: 0.16em; text-transform: uppercase; color: #ffffff; margin-bottom: 8px; }
+    .earn-row { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 4px; }
+    .earn-num { font-family: 'Space Grotesk', sans-serif; font-size: 1.3rem; font-weight: 700; color: #ffffff; line-height: 1; }
+    .earn-change { font-size: 0.44rem; color: #FF8400; }
+    .earn-desc { font-size: 0.42rem; opacity: 0.25; color: #ffffff; }
+    .earn-bar { height: 1px; background: var(--grad) !important; margin-top: 10px; }
+
+    /* FOOTER */
+    footer { padding: 16px 28px; font-size: 0.42rem; opacity: 0.15; color: #ffffff; border-top: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 6px; background: #000000 !important; }
+
+    @media (max-width: 900px) {
+      .studio-layout { grid-template-columns: 1fr; }
+      .studio-sidebar, .studio-panel { display: none; }
+    }
+  </style>
+</head>
+<body style="background:#000000 !important; color:#ffffff !important;">
+
+<div class="grad-rule"></div>
+
+<!-- NAV -->
+<nav style="background:#000000 !important;">
+  <div class="nav-logo">
+    <div class="logo-mark">BR</div>
+    <div class="logo-text">BlackRoad <span class="logo-tag">Studio</span></div>
+  </div>
+  <div class="nav-tabs">
+    <div class="nav-tab active">Music</div>
+    <div class="nav-tab">Visual</div>
+    <div class="nav-tab">Video</div>
+    <div class="nav-tab">Write</div>
+    <div class="nav-tab">Code</div>
+    <div class="nav-tab">Game</div>
+  </div>
+  <div class="nav-right">
+    <span class="nav-badge">Draft &middot; Autosaved</span>
+    <button class="nav-publish">Publish &rarr;</button>
+    <div class="nav-avatar">BR</div>
+  </div>
+</nav>
+
+<div class="studio-layout">
+
+  <!-- LEFT SIDEBAR -->
+  <aside class="studio-sidebar" style="background:#000000 !important;">
+
+    <div class="ss-section">
+      <div class="ss-heading">Studio</div>
+      <a class="ss-item active" href="#">
+        <span class="ss-icon">&#9678;</span>
+        <span class="ss-label">Projects</span>
+        <span class="ss-count">12</span>
+      </a>
+      <a class="ss-item" href="#">
+        <span class="ss-icon">&#8862;</span>
+        <span class="ss-label">Templates</span>
+      </a>
+      <a class="ss-item" href="#">
+        <span class="ss-icon">&#9672;</span>
+        <span class="ss-label">Assets</span>
+        <span class="ss-count">84</span>
+      </a>
+      <a class="ss-item" href="#">
+        <span class="ss-icon">&#9829;</span>
+        <span class="ss-label">Saved</span>
+      </a>
+    </div>
+
+    <div class="ss-divider"></div>
+
+    <div class="ss-section">
+      <div class="ss-heading">Create</div>
+    </div>
+
+    <div class="tool-card" onclick="this.style.borderColor='rgba(255,132,0,0.5)'">
+      <div class="tc-icon">&#9834;</div>
+      <div class="tc-name">Music</div>
+      <div class="tc-desc">Compose, produce, and export tracks with AI assistance</div>
+      <div class="tc-bar" style="background:#FF8400 !important;"></div>
+    </div>
+
+    <div class="tool-card" onclick="this.style.borderColor='rgba(255,0,102,0.5)'">
+      <div class="tc-icon">&#9672;</div>
+      <div class="tc-name">Visual Art</div>
+      <div class="tc-desc">Draw, design, and animate original artwork</div>
+      <div class="tc-bar" style="background:#FF0066 !important;"></div>
+    </div>
+
+    <div class="tool-card" onclick="this.style.borderColor='rgba(136,0,255,0.5)'">
+      <div class="tc-icon">&#9654;</div>
+      <div class="tc-name">Video</div>
+      <div class="tc-desc">Edit, caption, and score your video projects</div>
+      <div class="tc-bar" style="background:#8800FF !important;"></div>
+    </div>
+
+    <div class="tool-card" onclick="this.style.borderColor='rgba(0,102,255,0.5)'">
+      <div class="tc-icon">&#11041;</div>
+      <div class="tc-name">Game Builder</div>
+      <div class="tc-desc">Scaffold mechanics, assets, and playable worlds</div>
+      <div class="tc-bar" style="background:#0066FF !important;"></div>
+    </div>
+
+  </aside>
+
+  <!-- MAIN CANVAS -->
+  <main class="studio-main" style="background:#000000 !important;">
+
+    <!-- PROJECT HEADER -->
+    <div class="project-header">
+      <div class="project-meta">
+        <span class="project-type">Music Project</span>
+        <div class="project-status-dot live" style="background:#FF8400 !important;"></div>
+        <span class="project-status-text">Recording &middot; 140 BPM &middot; A Minor</span>
+        <span class="project-autosave">Last saved 12s ago</span>
+      </div>
+      <input class="project-title-input" type="text" value="Untitled Track 01" placeholder="Project name&hellip;">
+      <div class="canvas-tabs">
+        <div class="canvas-tab active">Arrange</div>
+        <div class="canvas-tab">Mix</div>
+        <div class="canvas-tab">Master</div>
+        <div class="canvas-tab">Score</div>
+        <div class="canvas-tab">Lyrics</div>
+      </div>
+    </div>
+
+    <!-- WORKSPACE -->
+    <div class="workspace">
+
+      <!-- TOOLBAR -->
+      <div class="toolbar">
+        <div class="tb-group">
+          <button class="tb-btn active">&#9654;</button>
+          <button class="tb-btn">&#9208;</button>
+          <button class="tb-btn">&#9209;</button>
+          <button class="tb-btn">&#9198;</button>
+        </div>
+        <div class="tb-divider"></div>
+        <div class="tb-group">
+          <button class="tb-btn active">&#9210; REC</button>
+        </div>
+        <div class="tb-divider"></div>
+        <select class="tb-select">
+          <option>140 BPM</option>
+          <option>120 BPM</option>
+          <option>160 BPM</option>
+        </select>
+        <select class="tb-select" style="margin-left:6px;">
+          <option>A Minor</option>
+          <option>C Major</option>
+          <option>D Dorian</option>
+        </select>
+        <div class="tb-divider"></div>
+        <div class="tb-group">
+          <div class="tb-color" style="background:#FF8400 !important;" title="Orange"></div>
+          <div class="tb-color" style="background:#FF0066 !important;" title="Pink"></div>
+          <div class="tb-color" style="background:#8800FF !important;" title="Purple"></div>
+          <div class="tb-color" style="background:#0066FF !important;" title="Blue"></div>
+        </div>
+        <div class="tb-divider"></div>
+        <button class="tb-btn">&#8862; Snap</button>
+        <button class="tb-btn active">&#9672; Grid</button>
+        <div class="tb-divider"></div>
+        <div class="tb-ai-btn tb-ml" style="background:#000000 !important;">
+          <div class="ai-dot" style="background:#FF8400 !important;"></div>
+          Cecilia &middot; AI Assist
+        </div>
+      </div>
+
+      <!-- CANVAS AREA -->
+      <div class="canvas-area">
+
+        <!-- TIMELINE RULER -->
+        <div class="timeline-ruler">
+          <div class="ruler-inner">
+            <div class="ruler-tick" style="left:0%"><div class="ruler-label">0:00</div><div class="ruler-line" style="height:8px;"></div></div>
+            <div class="ruler-tick" style="left:12.5%"><div class="ruler-label">0:08</div><div class="ruler-line" style="height:6px;"></div></div>
+            <div class="ruler-tick" style="left:25%"><div class="ruler-label">0:16</div><div class="ruler-line" style="height:8px;"></div></div>
+            <div class="ruler-tick" style="left:37.5%"><div class="ruler-label">0:24</div><div class="ruler-line" style="height:6px;"></div></div>
+            <div class="ruler-tick" style="left:50%"><div class="ruler-label">0:32</div><div class="ruler-line" style="height:8px;"></div></div>
+            <div class="ruler-tick" style="left:62.5%"><div class="ruler-label">0:40</div><div class="ruler-line" style="height:6px;"></div></div>
+            <div class="ruler-tick" style="left:75%"><div class="ruler-label">0:48</div><div class="ruler-line" style="height:8px;"></div></div>
+            <div class="ruler-tick" style="left:87.5%"><div class="ruler-label">0:56</div><div class="ruler-line" style="height:6px;"></div></div>
+          </div>
+        </div>
+
+        <!-- TRACKS -->
+        <div class="track-row">
+          <div class="track-info">
+            <div class="track-name">Vocals</div>
+            <div class="track-type">Microphone &middot; Mono</div>
+            <div class="track-controls">
+              <button class="tc-btn">&#9834;</button>
+              <button class="tc-btn solo">S</button>
+              <button class="tc-btn">M</button>
+              <button class="tc-btn">&#128274;</button>
+            </div>
+          </div>
+          <div class="track-canvas">
+            <div class="waveform" id="wv1"></div>
+            <div class="playhead"></div>
+          </div>
+        </div>
+
+        <div class="track-row">
+          <div class="track-info">
+            <div class="track-name">Drums</div>
+            <div class="track-type">Beat &middot; Stereo</div>
+            <div class="track-controls">
+              <button class="tc-btn">&#9834;</button>
+              <button class="tc-btn">S</button>
+              <button class="tc-btn">M</button>
+              <button class="tc-btn">&#128274;</button>
+            </div>
+          </div>
+          <div class="track-canvas">
+            <div class="waveform" id="wv2"></div>
+            <div class="playhead"></div>
+          </div>
+        </div>
+
+        <div class="track-row">
+          <div class="track-info">
+            <div class="track-name">Bass</div>
+            <div class="track-type">Synth &middot; Mono</div>
+            <div class="track-controls">
+              <button class="tc-btn">&#9834;</button>
+              <button class="tc-btn">S</button>
+              <button class="tc-btn">M</button>
+              <button class="tc-btn">&#128274;</button>
+            </div>
+          </div>
+          <div class="track-canvas">
+            <div class="waveform" id="wv3"></div>
+            <div class="playhead"></div>
+          </div>
+        </div>
+
+        <div class="track-row">
+          <div class="track-info">
+            <div class="track-name">Keys</div>
+            <div class="track-type">MIDI &middot; Stereo</div>
+            <div class="track-controls">
+              <button class="tc-btn">&#9834;</button>
+              <button class="tc-btn">S</button>
+              <button class="tc-btn">M</button>
+              <button class="tc-btn">&#128274;</button>
+            </div>
+          </div>
+          <div class="track-canvas">
+            <div class="waveform" id="wv4"></div>
+            <div class="playhead"></div>
+          </div>
+        </div>
+
+        <div class="track-row">
+          <div class="track-info">
+            <div class="track-name">FX / Pads</div>
+            <div class="track-type">Atmosphere &middot; Stereo</div>
+            <div class="track-controls">
+              <button class="tc-btn">&#9834;</button>
+              <button class="tc-btn">S</button>
+              <button class="tc-btn">M</button>
+              <button class="tc-btn">&#128274;</button>
+            </div>
+          </div>
+          <div class="track-canvas">
+            <div class="waveform" id="wv5"></div>
+            <div class="playhead"></div>
+          </div>
+        </div>
+
+        <!-- ADD TRACK -->
+        <div style="border:1px dashed rgba(255,255,255,0.1);padding:14px 20px;display:flex;align-items:center;gap:10px;cursor:pointer;background:#000000 !important;transition:border-color 0.12s;" onmouseover="this.style.borderColor='rgba(255,255,255,0.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'">
+          <span style="font-size:0.65rem;opacity:0.3;">+</span>
+          <span style="font-size:0.5rem;opacity:0.3;letter-spacing:0.1em;text-transform:uppercase;">Add Track</span>
+        </div>
+
+        <!-- AI SUGGESTIONS -->
+        <div class="ai-suggestions">
+          <div class="ai-header">
+            <div class="ai-icon">C</div>
+            <span class="ai-title">Cecilia &middot; Suggestions</span>
+            <span class="ai-model">Music Model v2</span>
+          </div>
+          <div class="ai-chips">
+            <div class="ai-chip" onclick="this.style.borderColor='rgba(255,132,0,0.6)';this.style.opacity='1'">&#9834; Add chord progression</div>
+            <div class="ai-chip" onclick="this.style.borderColor='rgba(255,132,0,0.6)';this.style.opacity='1'">&#9672; Harmonize vocals</div>
+            <div class="ai-chip" onclick="this.style.borderColor='rgba(255,132,0,0.6)';this.style.opacity='1'">&#11041; Suggest bridge section</div>
+            <div class="ai-chip" onclick="this.style.borderColor='rgba(255,132,0,0.6)';this.style.opacity='1'">&#9654; Generate drum fill</div>
+            <div class="ai-chip" onclick="this.style.borderColor='rgba(255,132,0,0.6)';this.style.opacity='1'">&#9673; Auto-tune vocals</div>
+            <div class="ai-chip" onclick="this.style.borderColor='rgba(255,132,0,0.6)';this.style.opacity='1'">&#8599; Export stems</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- RIGHT PANEL -->
+  <aside class="studio-panel" style="background:#000000 !important;">
+
+    <div class="panel-tabs">
+      <div class="panel-tab active" onclick="setPanelTab(this)">Mix</div>
+      <div class="panel-tab" onclick="setPanelTab(this)">Layers</div>
+      <div class="panel-tab" onclick="setPanelTab(this)">Assets</div>
+      <div class="panel-tab" onclick="setPanelTab(this)">Publish</div>
+    </div>
+
+    <div class="panel-body">
+
+      <div class="panel-section">
+        <div class="panel-label">EQ</div>
+        <div class="eq-display" id="eqDisplay"></div>
+      </div>
+
+      <div class="panel-section">
+        <div class="panel-label">Master Channel</div>
+        <div class="knob-row">
+          <span class="knob-label">Volume</span>
+          <input class="knob-slider" type="range" min="0" max="100" value="78" oninput="this.nextElementSibling.textContent=this.value">
+          <span class="knob-val">78</span>
+        </div>
+        <div class="knob-row">
+          <span class="knob-label">Pan</span>
+          <input class="knob-slider" type="range" min="-100" max="100" value="0" oninput="this.nextElementSibling.textContent=this.value">
+          <span class="knob-val">0</span>
+        </div>
+        <div class="knob-row">
+          <span class="knob-label">Reverb</span>
+          <input class="knob-slider" type="range" min="0" max="100" value="22" oninput="this.nextElementSibling.textContent=this.value">
+          <span class="knob-val">22</span>
+        </div>
+        <div class="knob-row">
+          <span class="knob-label">Delay</span>
+          <input class="knob-slider" type="range" min="0" max="100" value="15" oninput="this.nextElementSibling.textContent=this.value">
+          <span class="knob-val">15</span>
+        </div>
+        <div class="knob-row">
+          <span class="knob-label">Compress</span>
+          <input class="knob-slider" type="range" min="0" max="100" value="45" oninput="this.nextElementSibling.textContent=this.value">
+          <span class="knob-val">45</span>
+        </div>
+        <div class="knob-row">
+          <span class="knob-label">Limiter</span>
+          <input class="knob-slider" type="range" min="0" max="100" value="60" oninput="this.nextElementSibling.textContent=this.value">
+          <span class="knob-val">60</span>
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <div class="panel-label">Layers</div>
+        <div class="layer-item selected">
+          <span class="layer-eye">&#9673;</span>
+          <div class="layer-swatch" style="background:#FF8400 !important;"></div>
+          <span class="layer-name">Vocals</span>
+          <span class="layer-lock">&#128274;</span>
+        </div>
+        <div class="layer-item">
+          <span class="layer-eye">&#9673;</span>
+          <div class="layer-swatch" style="background:#0066FF !important;"></div>
+          <span class="layer-name">Drums</span>
+          <span class="layer-lock"></span>
+        </div>
+        <div class="layer-item">
+          <span class="layer-eye">&#9673;</span>
+          <div class="layer-swatch" style="background:#8800FF !important;"></div>
+          <span class="layer-name">Bass</span>
+          <span class="layer-lock"></span>
+        </div>
+        <div class="layer-item">
+          <span class="layer-eye">&#9673;</span>
+          <div class="layer-swatch" style="background:#FF0066 !important;"></div>
+          <span class="layer-name">Keys</span>
+          <span class="layer-lock"></span>
+        </div>
+        <div class="layer-item">
+          <span class="layer-eye" style="opacity:0.15;">&#9678;</span>
+          <div class="layer-swatch" style="background:#2233CC !important;"></div>
+          <span class="layer-name" style="opacity:0.3;">FX / Pads</span>
+          <span class="layer-lock"></span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- EARNINGS STRIP -->
+    <div class="earnings-strip">
+      <div class="earn-label">Creator Earnings &middot; This Month</div>
+      <div class="earn-row">
+        <div class="earn-num">$284</div>
+        <div class="earn-change">&#9650; +38%</div>
+      </div>
+      <div class="earn-desc">From streams, licenses, and asset sales</div>
+      <div class="earn-bar"></div>
+    </div>
+
+  </aside>
+
+</div>
+
+<footer style="background:#000000 !important;">
+  <span>BlackRoad OS, Inc. &middot; Studio &middot; March 2026</span>
+  <span>JetBrains Mono &middot; Space Grotesk &middot; Music Module v2</span>
+</footer>
+
+<div class="grad-rule"></div>
+
+<script>
+  // Generate waveform bars for each track
+  var colors = {
+    wv1: '#FF8400', wv2: '#0066FF', wv3: '#8800FF', wv4: '#FF0066', wv5: '#FF4400'
+  };
+
+  ['wv1','wv2','wv3','wv4','wv5'].forEach(function(id) {
+    var el = document.getElementById(id);
+    var count = 120;
+    var color = colors[id];
+    for (var i = 0; i < count; i++) {
+      var bar = document.createElement('div');
+      bar.className = 'wv-bar';
+      var h = Math.random() * 48 + 4;
+      bar.style.height = h + 'px';
+      bar.style.background = color;
+      bar.style.opacity = (0.3 + Math.random() * 0.6).toString();
+      // animate some bars
+      if (Math.random() > 0.6) {
+        var animName = ['wv1','wv2','wv3'][Math.floor(Math.random()*3)];
+        var dur = (1 + Math.random() * 1.5).toFixed(1);
+        var delay = (Math.random() * 1).toFixed(2);
+        bar.style.animation = animName + ' ' + dur + 's ease-in-out ' + delay + 's infinite';
+      }
+      el.appendChild(bar);
+    }
+  });
+
+  // Generate EQ bars
+  var eq = document.getElementById('eqDisplay');
+  var eqColors = ['#FF8400','#FF4400','#FF0066','#CC00AA','#8800FF','#0066FF','#2233CC'];
+  for (var i = 0; i < 14; i++) {
+    var bar = document.createElement('div');
+    bar.className = 'eq-bar';
+    var h = Math.floor(Math.random() * 36 + 8);
+    bar.style.height = h + 'px';
+    bar.style.background = eqColors[i % eqColors.length];
+    bar.style.opacity = '0.7';
+    bar.addEventListener('click', function() {
+      var newH = Math.floor(Math.random() * 36 + 8);
+      this.style.height = newH + 'px';
+    });
+    eq.appendChild(bar);
+  }
+
+  // Canvas tab switching
+  document.querySelectorAll('.canvas-tab').forEach(function(t) {
+    t.addEventListener('click', function() {
+      document.querySelectorAll('.canvas-tab').forEach(function(x) { x.classList.remove('active'); });
+      this.classList.add('active');
+    });
+  });
+
+  // Nav tab switching
+  document.querySelectorAll('.nav-tab').forEach(function(t) {
+    t.addEventListener('click', function() {
+      document.querySelectorAll('.nav-tab').forEach(function(x) { x.classList.remove('active'); });
+      this.classList.add('active');
+    });
+  });
+
+  function setPanelTab(el) {
+    document.querySelectorAll('.panel-tab').forEach(function(t) { t.classList.remove('active'); });
+    el.classList.add('active');
+  }
+
+  // Layer selection
+  document.querySelectorAll('.layer-item').forEach(function(item) {
+    item.addEventListener('click', function() {
+      document.querySelectorAll('.layer-item').forEach(function(x) { x.classList.remove('selected'); });
+      this.classList.add('selected');
+    });
+  });
+</script>
+
+</body>
+</html>
