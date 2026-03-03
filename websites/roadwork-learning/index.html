@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#000!important;">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RoadWork — Adaptive Learning · BlackRoad</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --grad: linear-gradient(90deg, #FF8400, #FF4400, #FF0066, #CC00AA, #8800FF, #0066FF, #2233CC);
+      --b:   rgba(255,255,255,0.07);
+      --b2:  rgba(255,255,255,0.04);
+      --surf: rgba(255,255,255,0.025);
+      --hov:  rgba(255,255,255,0.045);
+      --orange: #FF8400; --pink: #FF0066; --purple: #8800FF; --blue: #0066FF;
+    }
+
+    html, body { background:#000!important; color:#fff!important; font-family:'JetBrains Mono',monospace; height:100%; overflow:hidden; }
+
+    .shell { display:grid; grid-template-rows:3px 46px 1fr; height:100vh; }
+    .grad-rule { background:var(--grad); }
+
+    /* -- TOPBAR -- */
+    .topbar { display:flex; align-items:center; border-bottom:1px solid var(--b); background:#000; }
+    .tb-brand { padding:0 20px; height:100%; display:flex; align-items:center; gap:10px; border-right:1px solid var(--b); }
+    .tb-brand-name { font-family:'Space Grotesk',sans-serif; font-size:0.95rem; font-weight:700; }
+    .tb-brand-sub  { font-size:0.42rem; opacity:0.25; letter-spacing:0.12em; text-transform:uppercase; }
+    .tb-nav { display:flex; height:100%; }
+    .tb-link { padding:0 16px; height:100%; display:flex; align-items:center; font-size:0.48rem; opacity:0.3; letter-spacing:0.08em; text-transform:uppercase; cursor:pointer; border-right:1px solid var(--b); transition:opacity 0.15s,background 0.15s; }
+    .tb-link:hover { opacity:0.7; background:var(--hov); }
+    .tb-link.active { opacity:1; background:var(--surf); border-bottom:2px solid var(--orange); }
+    .tb-right { margin-left:auto; display:flex; align-items:center; height:100%; }
+    .tb-role { padding:0 16px; height:100%; border-left:1px solid var(--b); display:flex; align-items:center; gap:8px; font-size:0.46rem; }
+    .role-dot { width:6px; height:6px; border-radius:50%; }
+    .tb-streak { padding:0 16px; height:100%; border-left:1px solid var(--b); display:flex; align-items:center; gap:8px; font-size:0.46rem; }
+    .streak-num { font-family:'Space Grotesk',sans-serif; font-size:1.1rem; font-weight:700; color:var(--orange); }
+
+    /* -- BODY -- */
+    .body { display:grid; grid-template-columns:280px 1fr 320px; overflow:hidden; height:100%; }
+
+    /* -- LEFT SIDEBAR -- course nav -- */
+    .course-nav { border-right:1px solid var(--b); display:flex; flex-direction:column; overflow:hidden; }
+    .cn-head { padding:14px 16px; border-bottom:1px solid var(--b); flex-shrink:0; }
+    .cn-head-label { font-size:0.4rem; opacity:0.2; letter-spacing:0.16em; text-transform:uppercase; margin-bottom:8px; }
+    .cn-subject-pill { display:flex; align-items:center; gap:8px; padding:8px 10px; border:1px solid var(--b); cursor:pointer; transition:background 0.12s; }
+    .cn-subject-pill:hover { background:var(--hov); }
+    .cn-pill-icon { width:20px; height:20px; display:flex; align-items:center; justify-content:center; font-size:0.65rem; }
+    .cn-pill-name { font-size:0.55rem; font-weight:700; flex:1; }
+    .cn-pill-lvl  { font-size:0.4rem; opacity:0.25; }
+
+    .cn-scroll { flex:1; overflow-y:auto; }
+    .cn-scroll::-webkit-scrollbar { width:2px; }
+    .cn-scroll::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.06); }
+
+    .cn-section { border-bottom:1px solid var(--b2); }
+    .cn-section-head { padding:10px 16px 6px; font-size:0.4rem; opacity:0.2; letter-spacing:0.14em; text-transform:uppercase; }
+    .cn-lesson { display:flex; align-items:center; gap:10px; padding:9px 16px; cursor:pointer; font-size:0.5rem; opacity:0.4; border-bottom:1px solid var(--b2); transition:opacity 0.12s,background 0.12s; }
+    .cn-lesson:last-child { border-bottom:none; }
+    .cn-lesson:hover { opacity:0.8; background:var(--hov); }
+    .cn-lesson.active { opacity:1; background:var(--surf); border-left:2px solid var(--orange); }
+    .cn-lesson.done   { opacity:0.3; }
+    .cn-lesson.locked { opacity:0.2; cursor:default; }
+    .cn-l-num { font-size:0.38rem; opacity:0.4; min-width:18px; }
+    .cn-l-name { flex:1; }
+    .cn-l-icon { font-size:0.6rem; }
+
+    .cn-progress { padding:12px 16px; border-top:1px solid var(--b); flex-shrink:0; }
+    .cn-prog-label { font-size:0.4rem; opacity:0.2; letter-spacing:0.12em; text-transform:uppercase; margin-bottom:8px; display:flex; justify-content:space-between; }
+    .cn-prog-bar { height:2px; background:rgba(255,255,255,0.08); margin-bottom:10px; }
+    .cn-prog-fill { height:100%; background:var(--orange); transition:width 0.5s; }
+    .cn-prog-stats { display:flex; gap:0; }
+    .cn-stat { flex:1; text-align:center; }
+    .cn-stat-num { font-family:'Space Grotesk',sans-serif; font-size:1rem; font-weight:700; }
+    .cn-stat-lbl { font-size:0.38rem; opacity:0.2; margin-top:2px; letter-spacing:0.1em; }
+
+    /* -- MAIN CONTENT -- */
+    .main-content { display:flex; flex-direction:column; overflow:hidden; }
+
+    /* Mode toggle */
+    .mode-bar { display:flex; border-bottom:1px solid var(--b); flex-shrink:0; }
+    .mode-btn { flex:1; padding:10px 0; text-align:center; font-size:0.46rem; letter-spacing:0.1em; text-transform:uppercase; opacity:0.25; cursor:pointer; border-right:1px solid var(--b); transition:opacity 0.15s,background 0.15s; }
+    .mode-btn:last-child { border-right:none; }
+    .mode-btn:hover { opacity:0.6; background:var(--hov); }
+    .mode-btn.active { opacity:1; background:var(--surf); }
+
+    /* -- LESSON VIEW -- */
+    .lesson-view { flex:1; overflow-y:auto; padding:28px 36px; }
+    .lesson-view::-webkit-scrollbar { width:2px; }
+    .lesson-view::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.06); }
+
+    .lv-eyebrow { font-size:0.44rem; opacity:0.25; letter-spacing:0.16em; text-transform:uppercase; margin-bottom:12px; display:flex; align-items:center; gap:10px; }
+    .lv-eyebrow::after { content:''; flex:1; height:1px; background:rgba(255,255,255,0.06); }
+    .lv-title { font-family:'Space Grotesk',sans-serif; font-size:2rem; font-weight:700; letter-spacing:-0.02em; line-height:1.1; margin-bottom:8px; }
+    .lv-meta  { font-size:0.46rem; opacity:0.25; margin-bottom:28px; display:flex; gap:16px; }
+
+    /* Visual explanation block */
+    .vx-block { margin-bottom:24px; border:1px solid var(--b); overflow:hidden; }
+    .vx-head  { padding:10px 16px; border-bottom:1px solid var(--b); display:flex; align-items:center; gap:10px; background:var(--surf); }
+    .vx-label { font-size:0.42rem; opacity:0.3; letter-spacing:0.14em; text-transform:uppercase; flex:1; }
+    .vx-meta  { font-size:0.4rem; opacity:0.18; }
+    .vx-body  { padding:18px 20px; }
+
+    /* Text blocks */
+    .lv-p { font-size:0.64rem; opacity:0.55; line-height:2; margin-bottom:16px; }
+    .lv-p strong { color:#fff; opacity:1; font-weight:700; }
+
+    /* Concept cards */
+    .concept-row { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:20px; }
+    .concept-card { padding:14px; border:1px solid var(--b); }
+    .cc-icon { font-size:1.2rem; margin-bottom:8px; }
+    .cc-title { font-size:0.58rem; font-weight:700; margin-bottom:6px; }
+    .cc-desc  { font-size:0.48rem; opacity:0.4; line-height:1.7; }
+
+    /* Visual formula display */
+    .formula-block { padding:20px; border:1px solid rgba(255,132,0,0.15); background:rgba(255,132,0,0.03); margin-bottom:20px; text-align:center; }
+    .formula-eq { font-family:'Space Grotesk',sans-serif; font-size:1.8rem; font-weight:700; letter-spacing:-0.02em; margin-bottom:8px; }
+    .formula-note { font-size:0.48rem; opacity:0.3; line-height:1.8; }
+
+    /* Visual analogy */
+    .analogy-block { padding:16px 20px; border-left:3px solid var(--orange); background:rgba(255,132,0,0.03); margin-bottom:20px; }
+    .analogy-label { font-size:0.4rem; opacity:0.25; letter-spacing:0.14em; text-transform:uppercase; margin-bottom:8px; }
+    .analogy-text  { font-size:0.6rem; opacity:0.6; line-height:1.85; }
+
+    /* Visualizer */
+    .visualizer { height:120px; border:1px solid var(--b); background:#0a0a0a; display:flex; align-items:center; justify-content:center; margin-bottom:20px; position:relative; overflow:hidden; }
+    .vis-grid { position:absolute; inset:0; background-image:linear-gradient(rgba(255,255,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.025) 1px,transparent 1px); background-size:20px 20px; }
+    .vis-label { font-size:0.42rem; opacity:0.15; letter-spacing:0.12em; text-transform:uppercase; z-index:1; }
+
+    /* Wave bars for audio viz */
+    .wave-viz { display:flex; align-items:flex-end; gap:3px; height:60px; z-index:1; }
+    .wv-bar { width:4px; border-radius:1px; }
+    @keyframes wv-anim { 0%,100%{transform:scaleY(0.1)} 50%{transform:scaleY(1)} }
+
+    /* DNA helix hint */
+    .helix-row { display:flex; align-items:center; gap:8px; z-index:1; flex-wrap:wrap; justify-content:center; }
+    .hx-node { width:12px; height:12px; border-radius:50%; opacity:0.8; }
+    .hx-line { flex:1; max-width:16px; height:1px; background:rgba(255,255,255,0.15); }
+
+    /* Check-in question */
+    .checkin { border:1px solid var(--b); padding:20px; margin-bottom:20px; }
+    .checkin-q { font-size:0.62rem; opacity:0.8; line-height:1.7; margin-bottom:16px; font-weight:700; }
+    .checkin-opts { display:flex; flex-direction:column; gap:8px; }
+    .checkin-opt { padding:10px 14px; border:1px solid var(--b); font-size:0.55rem; opacity:0.45; cursor:pointer; transition:all 0.15s; display:flex; align-items:center; gap:10px; }
+    .checkin-opt:hover { opacity:0.8; background:var(--hov); border-color:rgba(255,255,255,0.2); }
+    .checkin-opt.correct { border-color:rgba(0,102,255,0.5); background:rgba(0,102,255,0.05); opacity:1; color:#fff; }
+    .checkin-opt.wrong   { border-color:rgba(255,0,102,0.4); background:rgba(255,0,102,0.04); opacity:0.6; }
+    .co-letter { width:18px; height:18px; border:1px solid var(--b); display:flex; align-items:center; justify-content:center; font-size:0.44rem; flex-shrink:0; }
+    .checkin-feedback { padding:12px 14px; border:1px solid; margin-top:10px; font-size:0.52rem; line-height:1.6; display:none; }
+    .checkin-feedback.show { display:block; }
+    .checkin-feedback.ok  { border-color:rgba(0,102,255,0.35); color:var(--blue); }
+    .checkin-feedback.err { border-color:rgba(255,0,102,0.35); color:var(--pink); }
+
+    /* Lesson nav bottom */
+    .lesson-footer { padding:16px 36px; border-top:1px solid var(--b); display:flex; align-items:center; gap:12px; flex-shrink:0; }
+    .lf-prev { padding:9px 20px; border:1px solid var(--b); font-family:'JetBrains Mono',monospace; font-size:0.52rem; background:transparent; color:#fff; cursor:pointer; opacity:0.4; transition:opacity 0.15s; }
+    .lf-prev:hover { opacity:0.8; }
+    .lf-progress { flex:1; text-align:center; font-size:0.44rem; opacity:0.2; }
+    .lf-next { padding:9px 24px; border:none; background:#fff; color:#000; font-family:'JetBrains Mono',monospace; font-size:0.52rem; font-weight:700; cursor:pointer; transition:opacity 0.15s; }
+    .lf-next:hover { opacity:0.88; }
+
+    /* -- RIGHT PANEL -- AI Tutor -- */
+    .tutor-panel { border-left:1px solid var(--b); display:flex; flex-direction:column; overflow:hidden; }
+    .tp-head { padding:12px 16px; border-bottom:1px solid var(--b); flex-shrink:0; display:flex; align-items:center; gap:10px; }
+    .tp-avatar { width:28px; height:28px; border:1px solid var(--purple); display:flex; align-items:center; justify-content:center; font-size:0.55rem; font-weight:700; color:var(--purple); }
+    .tp-name { font-size:0.6rem; font-weight:700; }
+    .tp-status { font-size:0.4rem; opacity:0.3; }
+    .tp-mode { margin-left:auto; font-size:0.38rem; opacity:0.2; padding:2px 7px; border:1px solid var(--b); }
+
+    .tp-context { padding:10px 14px; border-bottom:1px solid var(--b); flex-shrink:0; }
+    .tc-label { font-size:0.38rem; opacity:0.18; letter-spacing:0.12em; text-transform:uppercase; margin-bottom:6px; }
+    .tc-tags  { display:flex; gap:6px; flex-wrap:wrap; }
+    .tc-tag   { font-size:0.4rem; padding:2px 7px; border:1px solid var(--b); opacity:0.4; }
+
+    .tp-messages { flex:1; overflow-y:auto; padding:12px 14px; display:flex; flex-direction:column; gap:10px; }
+    .tp-messages::-webkit-scrollbar { width:2px; }
+    .tp-messages::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.06); }
+
+    .msg { display:flex; gap:8px; }
+    .msg.user { flex-direction:row-reverse; }
+    .msg-bubble { max-width:85%; padding:10px 12px; font-size:0.52rem; line-height:1.7; }
+    .msg.ai   .msg-bubble { background:var(--surf); border:1px solid var(--b); opacity:0.9; }
+    .msg.user .msg-bubble { background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.1); }
+    .msg-dot  { width:6px; height:6px; border-radius:50%; flex-shrink:0; margin-top:12px; }
+
+    .typing-ind { display:flex; gap:3px; padding:10px 12px; background:var(--surf); border:1px solid var(--b); width:fit-content; }
+    @keyframes typ-dot { 0%,60%,100%{transform:translateY(0);opacity:0.3} 30%{transform:translateY(-4px);opacity:1} }
+    .typing-ind span { width:4px; height:4px; border-radius:50%; background:#fff; display:inline-block; }
+    .typing-ind span:nth-child(1) { animation:typ-dot 1.2s ease-in-out infinite 0s; }
+    .typing-ind span:nth-child(2) { animation:typ-dot 1.2s ease-in-out infinite 0.2s; }
+    .typing-ind span:nth-child(3) { animation:typ-dot 1.2s ease-in-out infinite 0.4s; }
+
+    .tp-input-area { padding:10px 14px; border-top:1px solid var(--b); flex-shrink:0; }
+    .tp-suggestions { display:flex; flex-direction:column; gap:4px; margin-bottom:8px; }
+    .tp-sugg { font-size:0.46rem; padding:6px 10px; border:1px solid var(--b); opacity:0.35; cursor:pointer; transition:opacity 0.12s,background 0.12s; }
+    .tp-sugg:hover { opacity:0.8; background:var(--hov); }
+    .tp-input-row { display:flex; gap:8px; align-items:center; }
+    .tp-inp { flex:1; font-family:'JetBrains Mono',monospace; font-size:0.52rem; color:#fff; background:transparent; border:none; border-bottom:1px solid rgba(255,255,255,0.15); padding:6px 0; outline:none; }
+    .tp-inp::placeholder { color:rgba(255,255,255,0.15); }
+    .tp-inp:focus { border-bottom-color:rgba(255,255,255,0.4); }
+    .tp-send { width:28px; height:28px; background:#fff; border:none; color:#000; font-size:0.65rem; cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-family:'JetBrains Mono',monospace; font-weight:700; }
+    .tp-send:hover { opacity:0.88; }
+
+    * { scrollbar-width:thin; scrollbar-color:rgba(255,255,255,0.06) transparent; }
+
+    @keyframes fadeUp { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
+    .fade-up { animation:fadeUp 0.35s ease forwards; }
+  </style>
+</head>
+<body style="background:#000!important;color:#fff!important;">
+<div style="position:fixed;inset:0;background:#000;z-index:-9999;pointer-events:none;"></div>
+
+<div class="shell">
+  <div class="grad-rule"></div>
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="tb-brand">
+      <div>
+        <div class="tb-brand-name">RoadWork</div>
+        <div class="tb-brand-sub">edu.blackroad.io</div>
+      </div>
+    </div>
+    <div class="tb-nav">
+      <div class="tb-link active" onclick="switchTab(this)">Learn</div>
+      <div class="tb-link" onclick="switchTab(this)">Assignments</div>
+      <div class="tb-link" onclick="switchTab(this)">Progress</div>
+      <div class="tb-link" onclick="switchTab(this)">Explore</div>
+    </div>
+    <div class="tb-right">
+      <div class="tb-role">
+        <div class="role-dot" style="background:var(--blue);"></div>
+        <span style="opacity:0.5;">student</span>
+        <span style="opacity:0.2;">·</span>
+        <span style="opacity:0.7;">Alex</span>
+      </div>
+      <div class="tb-streak">
+        <div class="streak-num">7</div>
+        <div style="font-size:0.42rem;opacity:0.3;">day streak</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BODY -->
+  <div class="body">
+
+    <!-- LEFT: Course nav -->
+    <div class="course-nav">
+      <div class="cn-head">
+        <div class="cn-head-label">Current Subject</div>
+        <div class="cn-subject-pill">
+          <div class="cn-pill-icon">&#x269B;</div>
+          <div class="cn-pill-name">Physics</div>
+          <div class="cn-pill-lvl">Grade 11</div>
+        </div>
+      </div>
+      <div class="cn-scroll">
+
+        <div class="cn-section">
+          <div class="cn-section-head">Unit 1 &middot; Motion</div>
+          <div class="cn-lesson done"><div class="cn-l-num">01</div><div class="cn-l-name">Displacement &amp; Velocity</div><div class="cn-l-icon" style="color:var(--blue);">&#x2713;</div></div>
+          <div class="cn-lesson done"><div class="cn-l-num">02</div><div class="cn-l-name">Acceleration</div><div class="cn-l-icon" style="color:var(--blue);">&#x2713;</div></div>
+          <div class="cn-lesson done"><div class="cn-l-num">03</div><div class="cn-l-name">Kinematic Equations</div><div class="cn-l-icon" style="color:var(--blue);">&#x2713;</div></div>
+        </div>
+
+        <div class="cn-section">
+          <div class="cn-section-head">Unit 2 &middot; Forces</div>
+          <div class="cn-lesson done"><div class="cn-l-num">04</div><div class="cn-l-name">Newton's First Law</div><div class="cn-l-icon" style="color:var(--blue);">&#x2713;</div></div>
+          <div class="cn-lesson done"><div class="cn-l-num">05</div><div class="cn-l-name">Newton's Second Law</div><div class="cn-l-icon" style="color:var(--blue);">&#x2713;</div></div>
+          <div class="cn-lesson active"><div class="cn-l-num">06</div><div class="cn-l-name">Newton's Third Law</div><div class="cn-l-icon" style="color:var(--orange);">&#x25B6;</div></div>
+          <div class="cn-lesson locked"><div class="cn-l-num">07</div><div class="cn-l-name">Friction &amp; Normal Force</div><div class="cn-l-icon">&#x1F512;</div></div>
+          <div class="cn-lesson locked"><div class="cn-l-num">08</div><div class="cn-l-name">Tension &amp; Pulleys</div><div class="cn-l-icon">&#x1F512;</div></div>
+        </div>
+
+        <div class="cn-section">
+          <div class="cn-section-head">Unit 3 &middot; Energy</div>
+          <div class="cn-lesson locked"><div class="cn-l-num">09</div><div class="cn-l-name">Work &amp; Energy</div><div class="cn-l-icon">&#x1F512;</div></div>
+          <div class="cn-lesson locked"><div class="cn-l-num">10</div><div class="cn-l-name">Conservation of Energy</div><div class="cn-l-icon">&#x1F512;</div></div>
+          <div class="cn-lesson locked"><div class="cn-l-num">11</div><div class="cn-l-name">Power</div><div class="cn-l-icon">&#x1F512;</div></div>
+        </div>
+
+        <div class="cn-section" style="border-bottom:none;">
+          <div class="cn-section-head">Other Subjects</div>
+          <div class="cn-lesson" onclick="switchSubject('Math')"><div class="cn-pill-icon">&#x2211;</div><div class="cn-l-name">Math &middot; Calculus</div><div class="cn-l-icon" style="opacity:0.3;">&#x2192;</div></div>
+          <div class="cn-lesson" onclick="switchSubject('Chemistry')"><div class="cn-pill-icon">&#x2697;</div><div class="cn-l-name">Chemistry &middot; Bonding</div><div class="cn-l-icon" style="opacity:0.3;">&#x2192;</div></div>
+          <div class="cn-lesson" onclick="switchSubject('Code')"><div class="cn-pill-icon">&lt;/&gt;</div><div class="cn-l-name">Coding &middot; Python</div><div class="cn-l-icon" style="opacity:0.3;">&#x2192;</div></div>
+        </div>
+      </div>
+
+      <div class="cn-progress">
+        <div class="cn-prog-label">
+          <span>Unit 2 Progress</span>
+          <span>40%</span>
+        </div>
+        <div class="cn-prog-bar"><div class="cn-prog-fill" style="width:40%;"></div></div>
+        <div class="cn-prog-stats">
+          <div class="cn-stat"><div class="cn-stat-num">5</div><div class="cn-stat-lbl">Completed</div></div>
+          <div class="cn-stat"><div class="cn-stat-num">1</div><div class="cn-stat-lbl">Active</div></div>
+          <div class="cn-stat"><div class="cn-stat-num">3</div><div class="cn-stat-lbl">Locked</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN: Lesson content -->
+    <div class="main-content">
+      <div class="mode-bar">
+        <div class="mode-btn active" onclick="setMode(this,'read')">Read</div>
+        <div class="mode-btn" onclick="setMode(this,'visual')">Visual</div>
+        <div class="mode-btn" onclick="setMode(this,'analogy')">Gaming Analogy</div>
+        <div class="mode-btn" onclick="setMode(this,'practice')">Practice</div>
+      </div>
+
+      <div class="lesson-view" id="lesson-view">
+
+        <div class="lv-eyebrow">Unit 2 &middot; Forces &middot; Lesson 06</div>
+        <div class="lv-title">Newton's Third Law</div>
+        <div class="lv-meta">
+          <span>~15 min</span>
+          <span>&middot;</span>
+          <span>Grade 11</span>
+          <span>&middot;</span>
+          <span>Generated for Alex</span>
+        </div>
+
+        <div class="vx-block">
+          <div class="vx-head">
+            <div class="vx-label">Core Concept</div>
+            <div class="vx-meta">generated for your learning style</div>
+          </div>
+          <div class="vx-body">
+            <div class="formula-block">
+              <div class="formula-eq">F<sub style="font-size:0.6em;">A&#x2192;B</sub> = &#x2212;F<sub style="font-size:0.6em;">B&#x2192;A</sub></div>
+              <div class="formula-note">
+                Every action force has an equal and opposite reaction force.<br>
+                The forces act on <strong style="color:#fff;opacity:1;">different objects</strong> &mdash; they never cancel each other.
+              </div>
+            </div>
+            <div class="concept-row">
+              <div class="concept-card">
+                <div class="cc-icon">&#x1F680;</div>
+                <div class="cc-title">Action</div>
+                <div class="cc-desc">Rocket pushes gas backward with force F.</div>
+              </div>
+              <div class="concept-card">
+                <div class="cc-icon">&#x2194;</div>
+                <div class="cc-title">Reaction</div>
+                <div class="cc-desc">Gas pushes rocket forward with equal force F.</div>
+              </div>
+              <div class="concept-card">
+                <div class="cc-icon">&#x1F3AF;</div>
+                <div class="cc-title">Key Insight</div>
+                <div class="cc-desc">Different objects. Same magnitude. Opposite direction.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="lv-p">
+          Newton's Third Law says: <strong>for every force, there is an equal and opposite force on a different object.</strong> When you push a wall, the wall pushes back on you with the exact same amount of force &mdash; you just don't move it because it's anchored to the Earth.
+        </div>
+
+        <div class="analogy-block">
+          <div class="analogy-label">Gaming analogy &middot; chosen for you</div>
+          <div class="analogy-text">
+            Think of it like a fighting game hitbox collision. When your character's punch lands, the game applies damage to <em>your opponent</em> &mdash; but your hand also registers the collision force, which is why you can't phase through walls. The engine applies equal opposing force vectors on both hitboxes simultaneously. Newton's Third Law is literally baked into every physics engine.
+          </div>
+        </div>
+
+        <div class="vx-block">
+          <div class="vx-head">
+            <div class="vx-label">Force Pair Visualizer</div>
+            <div class="vx-meta">interactive</div>
+          </div>
+          <div class="vx-body">
+            <div class="visualizer" id="force-vis">
+              <div class="vis-grid"></div>
+              <div id="vis-content" style="display:flex;align-items:center;gap:0;z-index:1;width:80%;justify-content:center;">
+                <div style="text-align:right;flex:1;">
+                  <div style="font-size:0.55rem;font-weight:700;color:var(--orange);">Skater A</div>
+                  <div style="font-size:0.44rem;opacity:0.4;margin-top:2px;">pushes &#x2192;</div>
+                </div>
+                <div style="width:80px;display:flex;flex-direction:column;align-items:center;gap:4px;margin:0 16px;">
+                  <div style="display:flex;gap:0;width:100%;align-items:center;">
+                    <div style="height:2px;flex:1;background:var(--orange);"></div>
+                    <div style="font-size:0.7rem;color:var(--orange);">&#x2192;</div>
+                  </div>
+                  <div style="font-size:0.38rem;opacity:0.2;">F pair</div>
+                  <div style="display:flex;gap:0;width:100%;align-items:center;">
+                    <div style="font-size:0.7rem;color:var(--blue);">&#x2190;</div>
+                    <div style="height:2px;flex:1;background:var(--blue);"></div>
+                  </div>
+                </div>
+                <div style="text-align:left;flex:1;">
+                  <div style="font-size:0.55rem;font-weight:700;color:var(--blue);">Skater B</div>
+                  <div style="font-size:0.44rem;opacity:0.4;margin-top:2px;">&#x2190; pushes back</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="lv-p">
+          The tricky part is understanding why action-reaction pairs <strong>don't cancel out</strong>. They act on <em>different objects</em>. When Skater A pushes Skater B, the reaction force acts on A &mdash; not B. So each skater accelerates in opposite directions. They can't cancel because they're not on the same object.
+        </div>
+
+        <!-- Check-in question -->
+        <div class="checkin" id="checkin-1">
+          <div class="checkin-q">Quick check: Two ice skaters push off each other. Skater A has twice the mass of Skater B. Which statement is true about the forces?</div>
+          <div class="checkin-opts">
+            <div class="checkin-opt" onclick="checkAnswer(this,'a','b')">
+              <div class="co-letter">A</div>
+              Skater A pushes B with more force because A is heavier.
+            </div>
+            <div class="checkin-opt" onclick="checkAnswer(this,'b','b')">
+              <div class="co-letter">B</div>
+              Both skaters push each other with the exact same force magnitude.
+            </div>
+            <div class="checkin-opt" onclick="checkAnswer(this,'c','b')">
+              <div class="co-letter">C</div>
+              Skater B pushes A with more force as a reaction.
+            </div>
+            <div class="checkin-opt" onclick="checkAnswer(this,'d','b')">
+              <div class="co-letter">D</div>
+              There's no reaction force because A initiated the push.
+            </div>
+          </div>
+          <div class="checkin-feedback ok" id="fb-ok">
+            Correct! Newton's Third Law says equal magnitude regardless of mass. Mass affects <em>acceleration</em> (F=ma) &mdash; not the force pair. Skater B accelerates more because B is lighter, not because B receives more force.
+          </div>
+          <div class="checkin-feedback err" id="fb-err">
+            Not quite. The force pair is always equal in magnitude &mdash; mass doesn't change the forces. Try again: which property does mass actually affect?
+          </div>
+        </div>
+
+        <div style="height:32px;"></div>
+      </div>
+
+      <div class="lesson-footer">
+        <button class="lf-prev">&#x2190; Lesson 05</button>
+        <div class="lf-progress">Lesson 6 of 11 &middot; Unit 2 Forces</div>
+        <button class="lf-next" onclick="nextLesson()">Complete &amp; Continue &#x2192;</button>
+      </div>
+    </div>
+
+    <!-- RIGHT: AI Tutor -->
+    <div class="tutor-panel">
+      <div class="tp-head">
+        <div class="tp-avatar">L</div>
+        <div>
+          <div class="tp-name">Lucidia</div>
+          <div class="tp-status">AI Tutor &middot; Physics &middot; Grade 11</div>
+        </div>
+        <div class="tp-mode">TRINARY</div>
+      </div>
+
+      <div class="tp-context">
+        <div class="tc-label">Active Context</div>
+        <div class="tc-tags">
+          <div class="tc-tag">Newton's 3rd Law</div>
+          <div class="tc-tag">Alex &middot; Grade 11</div>
+          <div class="tc-tag">gamer metaphors</div>
+          <div class="tc-tag">visual learner</div>
+        </div>
+      </div>
+
+      <div class="tp-messages" id="tp-messages">
+        <div class="msg ai fade-up">
+          <div class="msg-dot" style="background:var(--purple);"></div>
+          <div class="msg-bubble">Hey Alex! Ready to tackle Newton's Third Law? This one trips people up because the equal forces seem like they should cancel &mdash; but they don't. Let me know if anything's unclear and I'll try a different angle.</div>
+        </div>
+        <div class="msg ai">
+          <div class="msg-dot" style="background:var(--purple);"></div>
+          <div class="msg-bubble">I picked the fighting game analogy for you based on your past sessions. Does that framing click, or want me to try a different one?</div>
+        </div>
+        <div class="msg user">
+          <div class="msg-dot" style="background:rgba(255,255,255,0.3);"></div>
+          <div class="msg-bubble">the fighting game thing makes sense. but why don't the forces cancel?</div>
+        </div>
+        <div class="msg ai" id="typing-msg" style="display:none;">
+          <div class="msg-dot" style="background:var(--purple);"></div>
+          <div class="typing-ind"><span></span><span></span><span></span></div>
+        </div>
+      </div>
+
+      <div class="tp-input-area">
+        <div class="tp-suggestions" id="suggestions">
+          <div class="tp-sugg" onclick="sendSugg(this)">Why don't action-reaction forces cancel out?</div>
+          <div class="tp-sugg" onclick="sendSugg(this)">Can you try a sports analogy instead?</div>
+          <div class="tp-sugg" onclick="sendSugg(this)">Show me the math behind the skater example</div>
+        </div>
+        <div class="tp-input-row">
+          <input class="tp-inp" id="tp-inp" placeholder="Ask Lucidia anything..." autocomplete="off" spellcheck="false">
+          <button class="tp-send" onclick="sendMessage()">&#x2192;</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  /* -- TABS -- */
+  function switchTab(el) {
+    document.querySelectorAll('.tb-link').forEach(function(t) { t.classList.remove('active'); });
+    el.classList.add('active');
+  }
+  function setMode(el, mode) {
+    document.querySelectorAll('.mode-btn').forEach(function(b) { b.classList.remove('active'); });
+    el.classList.add('active');
+  }
+  function switchSubject(s) {}
+
+  /* -- CHECK-IN -- */
+  var answered = false;
+  function checkAnswer(el, choice, correct) {
+    if (answered) return;
+    answered = true;
+    var opts = document.querySelectorAll('.checkin-opt');
+    opts.forEach(function(o) { o.style.pointerEvents = 'none'; });
+    if (choice === correct) {
+      el.classList.add('correct');
+      document.getElementById('fb-ok').classList.add('show');
+      setTimeout(function() { addAIMsg("Great job! You got it. The key thing to internalize: forces act on different objects, so they can't cancel. Want to try a harder example &mdash; maybe with a car and a bug colliding?"); }, 600);
+    } else {
+      el.classList.add('wrong');
+      opts.forEach(function(o) { if (o.children[0].textContent === correct.toUpperCase()) o.classList.add('correct'); });
+      document.getElementById('fb-err').classList.add('show');
+      setTimeout(function() { addAIMsg("Close! Here's the key distinction: both forces are equal in magnitude. What changes with mass is acceleration &mdash; F=ma means lighter Skater B accelerates more from the same force. Want me to break down the math?"); }, 600);
+    }
+  }
+
+  /* -- NEXT LESSON -- */
+  function nextLesson() {
+    var lv = document.getElementById('lesson-view');
+    lv.style.opacity = '0';
+    lv.style.transition = 'opacity 0.3s';
+    setTimeout(function() { lv.style.opacity = '1'; lv.scrollTop = 0; }, 300);
+    addAIMsg("Nice work completing Lesson 6! Friction and Normal Force is next &mdash; it builds directly on what you just learned. Heads up: the tricky part will be decomposing force vectors on inclined planes. We'll get there.");
+  }
+
+  /* -- AI TUTOR -- */
+  var AI_RESPONSES = {
+    'cancel': "Forces can only cancel if they act on the <em>same</em> object. Action-reaction pairs always act on <em>different</em> objects &mdash; so there's nothing to cancel. When you punch a wall: the wall-pushes-you force acts on YOU, not the wall. Two separate objects, two separate force equations.",
+    'sport':  "Sure! Think of two basketball players jumping for a rebound. When they collide mid-air, each player exerts a force on the other &mdash; equal magnitude, opposite direction. The smaller player gets pushed back more (less mass &rarr; more acceleration from the same force). That's Newton's Third Law + Second Law working together.",
+    'math':   "For the skaters: Let's say A = 80kg, B = 40kg, and the push force F = 120N.<br><br>Both feel F = 120N (Newton's 3rd).<br><br>A: a = F/m = 120/80 = 1.5 m/s&sup2;<br>B: a = F/m = 120/40 = 3.0 m/s&sup2;<br><br>Same force, double the acceleration for B because half the mass.",
+    'default': "Good question! That's exactly the kind of thinking that builds real physics intuition. The key is always to ask: which object is this force acting on? Newton's Third Law is about pairs &mdash; same magnitude, opposite direction, always on different objects.",
+  };
+
+  function getResponse(msg) {
+    var m = msg.toLowerCase();
+    if (m.indexOf('cancel') !== -1 || m.indexOf("don't") !== -1 || m.indexOf('why') !== -1) return AI_RESPONSES.cancel;
+    if (m.indexOf('sport') !== -1 || m.indexOf('basket') !== -1 || m.indexOf('football') !== -1 || m.indexOf('analogy') !== -1) return AI_RESPONSES.sport;
+    if (m.indexOf('math') !== -1 || m.indexOf('number') !== -1 || m.indexOf('skater') !== -1 || m.indexOf('calculat') !== -1) return AI_RESPONSES.math;
+    return AI_RESPONSES['default'];
+  }
+
+  function addMsg(text, isUser) {
+    var msgs = document.getElementById('tp-messages');
+    var div = document.createElement('div');
+    div.className = 'msg ' + (isUser ? 'user' : 'ai') + ' fade-up';
+    div.innerHTML =
+      '<div class="msg-dot" style="background:' + (isUser ? 'rgba(255,255,255,0.3)' : 'var(--purple)') + ';"></div>' +
+      '<div class="msg-bubble">' + text + '</div>';
+    msgs.appendChild(div);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  function addAIMsg(text) {
+    var typing = document.getElementById('typing-msg');
+    typing.style.display = 'flex';
+    document.getElementById('tp-messages').scrollTop = 9999;
+    setTimeout(function() {
+      typing.style.display = 'none';
+      addMsg(text, false);
+    }, 1200);
+  }
+
+  function sendMessage() {
+    var inp = document.getElementById('tp-inp');
+    var val = inp.value.trim();
+    if (!val) return;
+    inp.value = '';
+    addMsg(val, true);
+    document.getElementById('suggestions').style.display = 'none';
+    setTimeout(function() { addAIMsg(getResponse(val)); }, 400);
+  }
+
+  function sendSugg(el) {
+    var val = el.textContent;
+    document.getElementById('tp-inp').value = val;
+    sendMessage();
+  }
+
+  document.getElementById('tp-inp').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') sendMessage();
+  });
+
+  // Show typing indicator for initial response after a delay
+  setTimeout(function() {
+    var typing = document.getElementById('typing-msg');
+    typing.style.display = 'flex';
+    document.getElementById('tp-messages').scrollTop = 9999;
+    setTimeout(function() {
+      typing.style.display = 'none';
+      addMsg("Great question! Forces can only cancel if they act on the <em>same</em> object. Action-reaction pairs always act on <em>different</em> objects. When your character's fist hits the wall in a game &mdash; the 'pushback' force is registered on <em>your character</em>, not the wall. Two objects, two separate equations.", false);
+    }, 1800);
+  }, 1200);
+</script>
+
+</body>
+</html>
