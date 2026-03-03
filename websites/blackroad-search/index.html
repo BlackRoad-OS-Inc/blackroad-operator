@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#000000 !important;">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BlackRoad Search</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      background: #000000 !important;
+      color: #ffffff !important;
+      font-family: 'JetBrains Mono', monospace;
+      min-height: 100vh;
+    }
+
+    :root {
+      --grad: linear-gradient(90deg, #FF8400, #FF4400, #FF0066, #CC00AA, #8800FF, #0066FF, #2233CC);
+    }
+
+    /* ── HOMEPAGE (pre-search) ── */
+    #homepage {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: #000000 !important;
+    }
+
+    /* top mini nav */
+    .home-nav {
+      display: flex; justify-content: flex-end; align-items: center;
+      padding: 16px 28px; gap: 20px;
+      background: #000000 !important;
+    }
+    .home-nav a { font-size: 0.48rem; color: #ffffff; opacity: 0.35; text-decoration: none; letter-spacing: 0.1em; text-transform: uppercase; transition: opacity 0.15s; }
+    .home-nav a:hover { opacity: 1; }
+    .home-nav-avatar { width: 28px; height: 28px; border-radius: 50%; background: #111 !important; border: 1px solid rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 0.46rem; font-weight: 700; color: #ffffff; cursor: pointer; }
+
+    /* center hero */
+    .home-center {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 0 24px 80px;
+      background: #000000 !important;
+    }
+
+    /* logo */
+    .home-logo {
+      display: flex; flex-direction: column; align-items: center;
+      margin-bottom: 40px;
+    }
+    .home-logo-mark {
+      width: 64px; height: 64px;
+      background: var(--grad) !important;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.4rem; font-weight: 700; color: #000000;
+      margin-bottom: 16px;
+    }
+    .home-logo-text {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 2.2rem; font-weight: 700; color: #ffffff; letter-spacing: -0.02em;
+    }
+    .home-logo-sub { font-size: 0.44rem; opacity: 0.25; letter-spacing: 0.18em; text-transform: uppercase; color: #ffffff; margin-top: 5px; }
+
+    /* search box */
+    .home-search-wrap { width: 100%; max-width: 580px; margin-bottom: 16px; }
+    .search-box {
+      width: 100%;
+      display: flex; align-items: center;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: #000000 !important;
+      transition: border-color 0.2s;
+    }
+    .search-box:focus-within { border-color: rgba(255,255,255,0.6); }
+    .search-icon { padding: 0 14px; opacity: 0.25; font-size: 0.75rem; flex-shrink: 0; color: #ffffff; }
+    .search-input-main {
+      flex: 1; background: none !important; border: none;
+      color: #ffffff; font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem; padding: 14px 0;
+      outline: none; caret-color: #FF8400;
+    }
+    .search-input-main::placeholder { color: rgba(255,255,255,0.2); }
+    .search-mic { padding: 0 12px; opacity: 0.25; font-size: 0.7rem; cursor: pointer; color: #ffffff; transition: opacity 0.15s; }
+    .search-mic:hover { opacity: 0.7; }
+    .search-divider-v { width: 1px; height: 24px; background: rgba(255,255,255,0.1) !important; flex-shrink: 0; }
+    .search-cam { padding: 0 12px; opacity: 0.25; font-size: 0.65rem; cursor: pointer; color: #ffffff; transition: opacity 0.15s; }
+    .search-cam:hover { opacity: 0.7; }
+
+    .home-btns { display: flex; gap: 10px; margin-top: 4px; }
+    .home-btn {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.52rem;
+      padding: 9px 18px; border: 1px solid rgba(255,255,255,0.15);
+      color: #ffffff; background: #000000 !important; cursor: pointer;
+      letter-spacing: 0.04em; transition: border-color 0.15s;
+    }
+    .home-btn:hover { border-color: rgba(255,255,255,0.4); }
+
+    /* agent status strip */
+    .agent-strip {
+      display: flex; gap: 20px; margin-top: 40px; flex-wrap: wrap; justify-content: center;
+    }
+    .agent-pill {
+      display: flex; align-items: center; gap: 7px;
+      font-size: 0.44rem; opacity: 0.35; color: #ffffff; cursor: pointer; transition: opacity 0.15s;
+    }
+    .agent-pill:hover { opacity: 0.8; }
+    .ap-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+    @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.8)} }
+    .ap-dot.live { animation: pulse 2s ease-in-out infinite; }
+
+    /* shortcuts */
+    .shortcuts {
+      margin-top: 48px; display: flex; gap: 16px; flex-wrap: wrap; justify-content: center;
+    }
+    .shortcut { display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; }
+    .shortcut-icon {
+      width: 48px; height: 48px;
+      background: #0a0a0a !important;
+      border: 1px solid rgba(255,255,255,0.08);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.8rem; transition: border-color 0.15s;
+    }
+    .shortcut:hover .shortcut-icon { border-color: rgba(255,255,255,0.3); }
+    .shortcut-label { font-size: 0.42rem; opacity: 0.3; color: #ffffff; }
+
+    /* bottom bar */
+    .home-footer {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 16px 28px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      background: #000000 !important;
+    }
+    .hf-left { font-size: 0.44rem; opacity: 0.2; color: #ffffff; }
+    .hf-links { display: flex; gap: 20px; }
+    .hf-links a { font-size: 0.44rem; opacity: 0.2; color: #ffffff; text-decoration: none; transition: opacity 0.15s; }
+    .hf-links a:hover { opacity: 0.6; }
+
+    /* ── RESULTS PAGE (post-search) ── */
+    #resultspage {
+      display: none;
+      flex-direction: column;
+      min-height: 100vh;
+      background: #000000 !important;
+    }
+    #resultspage.visible { display: flex; }
+
+    /* results nav */
+    .results-nav {
+      position: sticky; top: 0; z-index: 100;
+      background: #000000 !important;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding: 0 28px;
+    }
+    .results-nav-top {
+      display: flex; align-items: center; gap: 20px;
+      height: 56px;
+    }
+    .results-logo {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1rem; font-weight: 700; color: #ffffff;
+      flex-shrink: 0; display: flex; align-items: center; gap: 8px;
+      text-decoration: none; cursor: pointer;
+    }
+    .results-logo-mark {
+      width: 24px; height: 24px; flex-shrink: 0;
+      background: var(--grad) !important;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.5rem; font-weight: 700; color: #000000;
+    }
+    .results-search-wrap { flex: 1; max-width: 580px; }
+    .results-search-box {
+      display: flex; align-items: center;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: #000000 !important;
+      transition: border-color 0.2s;
+    }
+    .results-search-box:focus-within { border-color: rgba(255,255,255,0.55); }
+    .results-search-icon { padding: 0 12px; opacity: 0.25; font-size: 0.65rem; color: #ffffff; flex-shrink: 0; }
+    .results-search-input {
+      flex: 1; background: none !important; border: none;
+      color: #ffffff; font-family: 'JetBrains Mono', monospace;
+      font-size: 0.62rem; padding: 10px 0;
+      outline: none; caret-color: #FF8400;
+    }
+    .results-search-input::placeholder { color: rgba(255,255,255,0.2); }
+    .results-search-btn {
+      background: #ffffff !important; color: #000000;
+      border: none; font-family: 'JetBrains Mono', monospace;
+      font-size: 0.5rem; font-weight: 700; padding: 10px 14px;
+      cursor: pointer; flex-shrink: 0; letter-spacing: 0.04em;
+    }
+    .results-nav-actions { display: flex; align-items: center; gap: 14px; margin-left: auto; }
+    .rna-link { font-size: 0.46rem; opacity: 0.3; color: #ffffff; cursor: pointer; text-decoration: none; transition: opacity 0.15s; }
+    .rna-link:hover { opacity: 0.8; }
+    .rna-avatar { width: 28px; height: 28px; border-radius: 50%; background: #111 !important; border: 1px solid rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 0.44rem; font-weight: 700; color: #ffffff; cursor: pointer; }
+
+    /* tabs row */
+    .results-tabs {
+      display: flex; gap: 0;
+      background: #000000 !important;
+    }
+    .rtab {
+      font-size: 0.46rem; padding: 10px 16px; cursor: pointer;
+      color: #ffffff; opacity: 0.3; border-bottom: 2px solid transparent;
+      letter-spacing: 0.08em; text-transform: uppercase; transition: all 0.12s;
+    }
+    .rtab:hover { opacity: 0.7; }
+    .rtab.active { opacity: 1; border-bottom-color: #ffffff; }
+
+    /* results layout */
+    .results-layout {
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      gap: 0;
+      max-width: 1080px;
+      margin: 0 auto;
+      width: 100%;
+      padding: 0 28px;
+      background: #000000 !important;
+    }
+
+    /* main results */
+    .results-main { padding: 24px 40px 40px 0; background: #000000 !important; }
+    .results-count { font-size: 0.46rem; opacity: 0.25; color: #ffffff; margin-bottom: 24px; }
+
+    /* answer box (AI summary) */
+    .answer-box {
+      border: 1px solid rgba(255,255,255,0.12);
+      padding: 20px;
+      margin-bottom: 28px;
+      background: #000000 !important;
+      position: relative;
+      overflow: hidden;
+    }
+    .answer-box::before {
+      content: '';
+      position: absolute; left: 0; top: 0; bottom: 0;
+      width: 2px;
+      background: var(--grad) !important;
+    }
+    .answer-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .answer-icon {
+      width: 20px; height: 20px;
+      background: var(--grad) !important;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.45rem; font-weight: 700; color: #000000;
+      flex-shrink: 0;
+    }
+    .answer-label { font-size: 0.46rem; font-weight: 700; color: #ffffff; letter-spacing: 0.08em; text-transform: uppercase; }
+    .answer-label-sub { font-size: 0.4rem; opacity: 0.3; color: #ffffff; margin-left: auto; }
+    .answer-text { font-size: 0.6rem; line-height: 1.9; opacity: 0.65; color: #ffffff; }
+    .answer-sources { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    .answer-src { font-size: 0.42rem; border: 1px solid rgba(255,255,255,0.12); padding: 3px 8px; color: #ffffff; opacity: 0.4; background: #000000 !important; cursor: pointer; }
+    .answer-src:hover { opacity: 0.8; }
+
+    /* search result */
+    .result {
+      margin-bottom: 28px;
+      padding-bottom: 28px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      background: #000000 !important;
+    }
+    .result:last-of-type { border-bottom: none; }
+    .result-url { font-size: 0.44rem; opacity: 0.3; color: #ffffff; margin-bottom: 4px; display: flex; align-items: center; gap: 7px; }
+    .result-favicon { width: 14px; height: 14px; background: #0a0a0a !important; border: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center; font-size: 0.38rem; flex-shrink: 0; }
+    .result-title { font-family: 'Space Grotesk', sans-serif; font-size: 1rem; font-weight: 700; color: #ffffff; cursor: pointer; margin-bottom: 5px; transition: opacity 0.12s; line-height: 1.2; }
+    .result-title:hover { opacity: 0.7; text-decoration: underline; }
+    .result-snippet { font-size: 0.56rem; opacity: 0.45; color: #ffffff; line-height: 1.8; }
+    .result-snippet em { color: #ffffff; opacity: 1; font-style: normal; font-weight: 700; background: rgba(255,255,255,0.08) !important; padding: 0 3px; }
+    .result-meta { display: flex; gap: 12px; margin-top: 8px; }
+    .result-tag { font-size: 0.4rem; border: 1px solid rgba(255,255,255,0.1); padding: 2px 7px; color: #ffffff; opacity: 0.35; background: #000000 !important; cursor: pointer; }
+    .result-tag:hover { opacity: 0.7; }
+    .result-date { font-size: 0.4rem; opacity: 0.2; color: #ffffff; }
+
+    /* sitelinks */
+    .sitelinks { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+    .sitelink { padding: 8px 10px; border: 1px solid rgba(255,255,255,0.07); cursor: pointer; background: #000000 !important; transition: border-color 0.12s; }
+    .sitelink:hover { border-color: rgba(255,255,255,0.25); }
+    .sl-title { font-size: 0.52rem; font-weight: 700; color: #ffffff; margin-bottom: 2px; }
+    .sl-desc { font-size: 0.44rem; opacity: 0.3; color: #ffffff; }
+
+    /* video result */
+    .result-videos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
+    .result-video { cursor: pointer; background: #000000 !important; }
+    .rv-thumb {
+      aspect-ratio: 16/9; background: #0a0a0a !important;
+      border: 1px solid rgba(255,255,255,0.08);
+      display: flex; align-items: center; justify-content: center;
+      position: relative; overflow: hidden; margin-bottom: 6px;
+    }
+    .rv-vis { display: flex; align-items: flex-end; gap: 2px; height: 30px; padding: 0 8px; }
+    .rv-bar { width: 4px; }
+    .rv-play { position: absolute; width: 24px; height: 24px; border-radius: 50%; background: rgba(255,255,255,0.9) !important; display: flex; align-items: center; justify-content: center; font-size: 0.55rem; color: #000; }
+    .rv-dur { position: absolute; bottom: 4px; right: 4px; font-size: 0.38rem; background: rgba(0,0,0,0.8) !important; color: #ffffff; padding: 1px 4px; }
+    .rv-title { font-size: 0.48rem; font-weight: 700; color: #ffffff; line-height: 1.4; }
+    .rv-src { font-size: 0.4rem; opacity: 0.3; color: #ffffff; margin-top: 2px; }
+
+    /* image results */
+    .result-images { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 12px; }
+    .result-image {
+      aspect-ratio: 1; background: #0a0a0a !important;
+      border: 1px solid rgba(255,255,255,0.07);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; overflow: hidden; transition: border-color 0.12s;
+    }
+    .result-image:hover { border-color: rgba(255,255,255,0.3); }
+    .ri-vis { display: flex; align-items: flex-end; gap: 2px; height: 36px; padding: 0 6px; }
+    .ri-bar { width: 5px; border-radius: 0; }
+
+    /* pagination */
+    .pagination { display: flex; gap: 4px; margin-top: 32px; align-items: center; }
+    .pag-btn {
+      font-size: 0.52rem; padding: 7px 12px; border: 1px solid rgba(255,255,255,0.12);
+      color: #ffffff; cursor: pointer; background: #000000 !important; transition: border-color 0.12s;
+    }
+    .pag-btn:hover { border-color: rgba(255,255,255,0.4); }
+    .pag-btn.active { background: #ffffff !important; color: #000000; border-color: #ffffff; }
+
+    /* RIGHT PANEL */
+    .results-panel { padding: 24px 0 40px; border-left: 1px solid rgba(255,255,255,0.07); padding-left: 28px; background: #000000 !important; }
+
+    /* knowledge card */
+    .knowledge-card { background: #000000 !important; border: 1px solid rgba(255,255,255,0.1); padding: 20px; margin-bottom: 24px; }
+    .kc-label { font-size: 0.4rem; opacity: 0.25; letter-spacing: 0.16em; text-transform: uppercase; color: #ffffff; margin-bottom: 4px; }
+    .kc-title { font-family: 'Space Grotesk', sans-serif; font-size: 1.2rem; font-weight: 700; color: #ffffff; margin-bottom: 4px; }
+    .kc-type { font-size: 0.46rem; opacity: 0.35; color: #ffffff; margin-bottom: 14px; }
+    .kc-divider { height: 1px; background: var(--grad) !important; margin-bottom: 14px; }
+    .kc-body { font-size: 0.54rem; opacity: 0.5; color: #ffffff; line-height: 1.8; margin-bottom: 16px; }
+    .kc-row { display: flex; padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,0.05); background: #000000 !important; }
+    .kc-row:last-child { border-bottom: none; }
+    .kc-key { font-size: 0.46rem; opacity: 0.3; color: #ffffff; min-width: 90px; }
+    .kc-val { font-size: 0.46rem; color: #ffffff; }
+    .kc-links { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+    .kc-link { font-size: 0.44rem; border: 1px solid rgba(255,255,255,0.15); padding: 4px 9px; color: #ffffff; opacity: 0.5; cursor: pointer; background: #000000 !important; }
+    .kc-link:hover { opacity: 1; }
+
+    /* related searches */
+    .related-label { font-size: 0.42rem; opacity: 0.25; letter-spacing: 0.16em; text-transform: uppercase; color: #ffffff; margin-bottom: 10px; }
+    .related-item { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; background: #000000 !important; }
+    .related-item:last-child { border-bottom: none; }
+    .related-item:hover .ri-text { opacity: 0.9; }
+    .ri-icon { font-size: 0.55rem; opacity: 0.2; flex-shrink: 0; }
+    .ri-text { font-size: 0.52rem; opacity: 0.45; color: #ffffff; transition: opacity 0.12s; }
+    .ri-arrow { margin-left: auto; font-size: 0.5rem; opacity: 0.15; }
+
+    /* results footer */
+    .results-footer { padding: 20px 28px; font-size: 0.42rem; opacity: 0.15; color: #ffffff; border-top: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 6px; background: #000000 !important; }
+
+    @media (max-width: 800px) {
+      .results-layout { grid-template-columns: 1fr; padding: 0 20px; }
+      .results-panel { display: none; }
+      .results-main { padding: 20px 0 40px; }
+      .result-videos { grid-template-columns: repeat(2, 1fr); }
+      .result-images { grid-template-columns: repeat(3, 1fr); }
+    }
+  </style>
+</head>
+<body style="background:#000000 !important; color:#ffffff !important;">
+
+<!-- HOMEPAGE -->
+<div id="homepage">
+
+  <div class="home-nav">
+    <a href="#">Road TV</a>
+    <a href="#">Feed</a>
+    <a href="#">Markets</a>
+    <a href="#">Settings</a>
+    <div class="home-nav-avatar">BR</div>
+  </div>
+
+  <div class="home-center">
+
+    <div class="home-logo">
+      <div class="home-logo-mark">BR</div>
+      <div class="home-logo-text">BlackRoad</div>
+      <div class="home-logo-sub">Intelligent Search · Powered by Agents</div>
+    </div>
+
+    <div class="home-search-wrap">
+      <div class="search-box">
+        <span class="search-icon">&#9678;</span>
+        <input class="search-input-main" id="homeSearchInput" type="text" placeholder="Search the road&#8230;" autocomplete="off" onkeydown="handleHomeKey(event)">
+        <span class="search-mic" title="Voice">&#9673;</span>
+        <div class="search-divider-v"></div>
+        <span class="search-cam" title="Visual search">&#8862;</span>
+      </div>
+    </div>
+
+    <div class="home-btns">
+      <button class="home-btn" onclick="doSearch()">Search</button>
+      <button class="home-btn" onclick="doSearch()">I'm Feeling Lucky</button>
+    </div>
+
+    <div class="agent-strip">
+      <div class="agent-pill"><div class="ap-dot live" style="background:#FF8400 !important;"></div>Cecilia · Searching</div>
+      <div class="agent-pill"><div class="ap-dot live" style="background:#0066FF !important;"></div>Olympia · Market Data</div>
+      <div class="agent-pill"><div class="ap-dot" style="background:#8800FF !important;"></div>Lucidia · Memory Index</div>
+      <div class="agent-pill"><div class="ap-dot" style="background:#FF0066 !important;"></div>Eve · Safe Search</div>
+    </div>
+
+    <div class="shortcuts">
+      <div class="shortcut"><div class="shortcut-icon">&#9654;</div><div class="shortcut-label">Road TV</div></div>
+      <div class="shortcut"><div class="shortcut-icon">&#9672;</div><div class="shortcut-label">Feed</div></div>
+      <div class="shortcut"><div class="shortcut-icon">&#9678;</div><div class="shortcut-label">Markets</div></div>
+      <div class="shortcut"><div class="shortcut-icon">&#11041;</div><div class="shortcut-label">Agents</div></div>
+      <div class="shortcut"><div class="shortcut-icon">&#8862;</div><div class="shortcut-label">Docs</div></div>
+      <div class="shortcut"><div class="shortcut-icon">&#9673;</div><div class="shortcut-label">API</div></div>
+    </div>
+
+  </div>
+
+  <div class="home-footer">
+    <div class="hf-left">BlackRoad OS, Inc. · 2026</div>
+    <div class="hf-links">
+      <a href="#">Privacy</a>
+      <a href="#">Terms</a>
+      <a href="#">Settings</a>
+      <a href="#">About</a>
+    </div>
+  </div>
+
+</div>
+
+<!-- RESULTS PAGE -->
+<div id="resultspage">
+
+  <div style="height:3px;background:var(--grad) !important;"></div>
+
+  <div class="results-nav" style="background:#000000 !important;">
+    <div class="results-nav-top">
+      <div class="results-logo" onclick="goHome()">
+        <div class="results-logo-mark">BR</div>
+        BlackRoad
+      </div>
+      <div class="results-search-wrap">
+        <div class="results-search-box">
+          <span class="results-search-icon">&#9678;</span>
+          <input class="results-search-input" id="resultsSearchInput" type="text" autocomplete="off" onkeydown="handleResultsKey(event)">
+          <button class="results-search-btn" onclick="doSearch()">Search</button>
+        </div>
+      </div>
+      <div class="results-nav-actions">
+        <a class="rna-link" href="#">Settings</a>
+        <div class="rna-avatar">BR</div>
+      </div>
+    </div>
+    <div class="results-tabs">
+      <div class="rtab active" onclick="setTab(this)">All</div>
+      <div class="rtab" onclick="setTab(this)">Images</div>
+      <div class="rtab" onclick="setTab(this)">Videos</div>
+      <div class="rtab" onclick="setTab(this)">News</div>
+      <div class="rtab" onclick="setTab(this)">Markets</div>
+      <div class="rtab" onclick="setTab(this)">Agents</div>
+    </div>
+  </div>
+
+  <div class="results-layout">
+
+    <!-- MAIN RESULTS -->
+    <div class="results-main">
+      <div class="results-count" id="resultsCount">About 4,820,000 results (0.38 seconds)</div>
+
+      <!-- AI ANSWER BOX -->
+      <div class="answer-box">
+        <div class="answer-header">
+          <div class="answer-icon">BR</div>
+          <span class="answer-label">Cecilia · AI Answer</span>
+          <span class="answer-label-sub">Synthesized from 14 sources</span>
+        </div>
+        <div class="answer-text" id="answerText">
+          BlackRoad OS is a distributed autonomous agent operating system built for AI-native organizations. It runs a coordinated network of specialized agents &mdash; including Cecilia for reasoning, Olympia for market intelligence, Lucidia for memory, Eve for security, and Atlas for infrastructure. The system uses NATS for event-bus coordination, K3s for orchestration, and a proprietary PS-SHA&#8734; hash chain for persistent agent memory.
+        </div>
+        <div class="answer-sources">
+          <span class="answer-src">blackroad.io</span>
+          <span class="answer-src">docs.blackroad.io</span>
+          <span class="answer-src">road.tv/agents</span>
+          <span class="answer-src">+ 11 more</span>
+        </div>
+      </div>
+
+      <!-- RESULT 1 with sitelinks -->
+      <div class="result">
+        <div class="result-url">
+          <div class="result-favicon">BR</div>
+          blackroad.io
+        </div>
+        <div class="result-title" id="r1title">BlackRoad OS &mdash; Autonomous Agent Infrastructure</div>
+        <div class="result-snippet" id="r1snip">The canonical operating system for distributed <em>AI agents</em>. BlackRoad coordinates intelligence across Cecilia, Olympia, Lucidia, Eve, Atlas, and Cadence &mdash; all running on a production K3s cluster with NATS event bus and Redis state management.</div>
+        <div class="sitelinks">
+          <div class="sitelink"><div class="sl-title">Agent Network</div><div class="sl-desc">Meet the agents powering BlackRoad</div></div>
+          <div class="sitelink"><div class="sl-title">Documentation</div><div class="sl-desc">API references and integration guides</div></div>
+          <div class="sitelink"><div class="sl-title">Road TV</div><div class="sl-desc">Video content from the BlackRoad agents</div></div>
+          <div class="sitelink"><div class="sl-title">Market Reports</div><div class="sl-desc">Weekly intelligence from Olympia</div></div>
+        </div>
+      </div>
+
+      <!-- RESULT 2 videos -->
+      <div class="result">
+        <div class="result-url"><div class="result-favicon">TV</div>road.tv</div>
+        <div class="result-title">Road TV · Videos about BlackRoad OS</div>
+        <div class="result-snippet">Watch the latest deep dives, live Q&amp;As, and technical walkthroughs from the <em>BlackRoad</em> agent network on Road TV.</div>
+        <div class="result-videos">
+          <div class="result-video">
+            <div class="rv-thumb">
+              <div class="rv-vis">
+                <div class="rv-bar" style="height:20px;background:#FF8400 !important;"></div>
+                <div class="rv-bar" style="height:28px;background:#FF4400 !important;"></div>
+                <div class="rv-bar" style="height:16px;background:#FF0066 !important;"></div>
+                <div class="rv-bar" style="height:24px;background:#8800FF !important;"></div>
+                <div class="rv-bar" style="height:30px;background:#0066FF !important;"></div>
+              </div>
+              <div class="rv-play">&#9654;</div>
+              <div class="rv-dur">28:14</div>
+            </div>
+            <div class="rv-title">Agent Bus Architecture</div>
+            <div class="rv-src">Cecilia · 48k views</div>
+          </div>
+          <div class="result-video">
+            <div class="rv-thumb">
+              <div class="rv-vis">
+                <div class="rv-bar" style="height:24px;background:#0066FF !important;"></div>
+                <div class="rv-bar" style="height:18px;background:#2233CC !important;"></div>
+                <div class="rv-bar" style="height:30px;background:#0066FF !important;"></div>
+                <div class="rv-bar" style="height:20px;background:#8800FF !important;"></div>
+                <div class="rv-bar" style="height:26px;background:#0066FF !important;"></div>
+              </div>
+              <div class="rv-play">&#9654;</div>
+              <div class="rv-dur">22:45</div>
+            </div>
+            <div class="rv-title">Weekly Market Report</div>
+            <div class="rv-src">Olympia · 6.8k views</div>
+          </div>
+          <div class="result-video">
+            <div class="rv-thumb">
+              <div class="rv-vis">
+                <div class="rv-bar" style="height:28px;background:#8800FF !important;"></div>
+                <div class="rv-bar" style="height:20px;background:#CC00AA !important;"></div>
+                <div class="rv-bar" style="height:34px;background:#8800FF !important;"></div>
+                <div class="rv-bar" style="height:22px;background:#CC00AA !important;"></div>
+                <div class="rv-bar" style="height:26px;background:#8800FF !important;"></div>
+              </div>
+              <div class="rv-play">&#9654;</div>
+              <div class="rv-dur">38:55</div>
+            </div>
+            <div class="rv-title">PS-SHA&#8734; Memory Chains</div>
+            <div class="rv-src">Lucidia · 29k views</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RESULT 3 -->
+      <div class="result">
+        <div class="result-url"><div class="result-favicon">D</div>docs.blackroad.io</div>
+        <div class="result-title">PS-SHA&#8734; &mdash; Infinite Memory Hash Chain Documentation</div>
+        <div class="result-snippet">Technical reference for <em>BlackRoad</em>'s append-only journal system. PS-SHA&#8734; uses a cryptographic hash chain to maintain agent memory integrity across process restarts, node migrations, and context resets. Includes implementation guides and API references.</div>
+        <div class="result-meta">
+          <span class="result-tag">Documentation</span>
+          <span class="result-tag">Memory</span>
+          <span class="result-date">Updated Jan 2026</span>
+        </div>
+      </div>
+
+      <!-- RESULT 4 images -->
+      <div class="result">
+        <div class="result-url"><div class="result-favicon">&#9672;</div>feed.blackroad.io</div>
+        <div class="result-title">Images · BlackRoad OS Agent Network</div>
+        <div class="result-snippet">Diagrams, architecture maps, and system visualizations from the <em>BlackRoad</em> infrastructure team.</div>
+        <div class="result-images">
+          <div class="result-image">
+            <div class="ri-vis">
+              <div class="ri-bar" style="height:26px;background:#FF8400 !important;"></div>
+              <div class="ri-bar" style="height:36px;background:#FF4400 !important;"></div>
+              <div class="ri-bar" style="height:20px;background:#FF0066 !important;"></div>
+              <div class="ri-bar" style="height:30px;background:#CC00AA !important;"></div>
+            </div>
+          </div>
+          <div class="result-image">
+            <div class="ri-vis">
+              <div class="ri-bar" style="height:30px;background:#8800FF !important;"></div>
+              <div class="ri-bar" style="height:20px;background:#0066FF !important;"></div>
+              <div class="ri-bar" style="height:36px;background:#8800FF !important;"></div>
+              <div class="ri-bar" style="height:24px;background:#2233CC !important;"></div>
+            </div>
+          </div>
+          <div class="result-image">
+            <div class="ri-vis">
+              <div class="ri-bar" style="height:20px;background:#FF0066 !important;"></div>
+              <div class="ri-bar" style="height:34px;background:#8800FF !important;"></div>
+              <div class="ri-bar" style="height:26px;background:#0066FF !important;"></div>
+              <div class="ri-bar" style="height:30px;background:#FF0066 !important;"></div>
+            </div>
+          </div>
+          <div class="result-image">
+            <div class="ri-vis">
+              <div class="ri-bar" style="height:28px;background:#FF4400 !important;"></div>
+              <div class="ri-bar" style="height:18px;background:#FF8400 !important;"></div>
+              <div class="ri-bar" style="height:36px;background:#FF4400 !important;"></div>
+              <div class="ri-bar" style="height:24px;background:#FF8400 !important;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RESULT 5 -->
+      <div class="result">
+        <div class="result-url"><div class="result-favicon">K</div>k3s.blackroad.io</div>
+        <div class="result-title">Alice &amp; Octavia &mdash; BlackRoad Edge Cluster Architecture</div>
+        <div class="result-snippet">Alice handles gateway routing via Traefik on the <em>BlackRoad</em> K3s cluster. Octavia runs Hailo-accelerated edge inference. Together they form the physical foundation of the agent network &mdash; the nodes the road actually runs on.</div>
+        <div class="result-meta">
+          <span class="result-tag">Infrastructure</span>
+          <span class="result-tag">K3s</span>
+          <span class="result-tag">Edge</span>
+          <span class="result-date">Feb 2026</span>
+        </div>
+      </div>
+
+      <!-- RESULT 6 -->
+      <div class="result">
+        <div class="result-url"><div class="result-favicon">N</div>nats.blackroad.io</div>
+        <div class="result-title">NATS Event Bus &mdash; BlackRoad Agent Coordination Protocol</div>
+        <div class="result-snippet">How <em>BlackRoad</em> uses NATS for real-time, high-throughput message passing between agents. Covers subject hierarchy, consumer groups, JetStream persistence, and back-pressure handling at scale.</div>
+        <div class="result-meta">
+          <span class="result-tag">NATS</span>
+          <span class="result-tag">Coordination</span>
+          <span class="result-date">Dec 2025</span>
+        </div>
+      </div>
+
+      <!-- PAGINATION -->
+      <div class="pagination">
+        <button class="pag-btn active">1</button>
+        <button class="pag-btn">2</button>
+        <button class="pag-btn">3</button>
+        <button class="pag-btn">4</button>
+        <button class="pag-btn">5</button>
+        <button class="pag-btn">&#183;&#183;&#183;</button>
+        <button class="pag-btn">10</button>
+        <button class="pag-btn" style="margin-left:8px;">Next &#8594;</button>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="results-panel">
+
+      <div class="knowledge-card">
+        <div class="kc-label">Knowledge Panel</div>
+        <div class="kc-title" id="kcTitle">BlackRoad OS</div>
+        <div class="kc-type">Autonomous Agent Infrastructure · Est. Nov 2025</div>
+        <div class="kc-divider"></div>
+        <div class="kc-body">BlackRoad OS is an autonomous agent operating system &mdash; infrastructure for the next era of AI-native organizations. It coordinates a network of specialized agents via NATS, K3s, and proprietary memory architecture.</div>
+        <div class="kc-row"><span class="kc-key">Founded</span><span class="kc-val">November 2025</span></div>
+        <div class="kc-row"><span class="kc-key">Agents</span><span class="kc-val">Cecilia, Olympia, Lucidia, Eve, Atlas, Cadence</span></div>
+        <div class="kc-row"><span class="kc-key">Stack</span><span class="kc-val">NATS · K3s · Redis · Traefik</span></div>
+        <div class="kc-row"><span class="kc-key">Memory</span><span class="kc-val">PS-SHA&#8734; Hash Chains</span></div>
+        <div class="kc-row"><span class="kc-key">Status</span><span class="kc-val">&#9679; Live · Production</span></div>
+        <div class="kc-links">
+          <span class="kc-link">Website</span>
+          <span class="kc-link">Docs</span>
+          <span class="kc-link">Road TV</span>
+          <span class="kc-link">Feed</span>
+        </div>
+      </div>
+
+      <div>
+        <div class="related-label">Related Searches</div>
+        <div class="related-item" onclick="searchRelated('BlackRoad agent network')">
+          <span class="ri-icon">&#9678;</span><span class="ri-text">BlackRoad agent network</span><span class="ri-arrow">&#8599;</span>
+        </div>
+        <div class="related-item" onclick="searchRelated('NATS event bus agent coordination')">
+          <span class="ri-icon">&#9678;</span><span class="ri-text">NATS event bus agent coordination</span><span class="ri-arrow">&#8599;</span>
+        </div>
+        <div class="related-item" onclick="searchRelated('PS-SHA infinity memory')">
+          <span class="ri-icon">&#9678;</span><span class="ri-text">PS-SHA&#8734; memory persistence</span><span class="ri-arrow">&#8599;</span>
+        </div>
+        <div class="related-item" onclick="searchRelated('K3s edge cluster Traefik')">
+          <span class="ri-icon">&#9678;</span><span class="ri-text">K3s edge cluster Traefik routing</span><span class="ri-arrow">&#8599;</span>
+        </div>
+        <div class="related-item" onclick="searchRelated('autonomous agent OS 2026')">
+          <span class="ri-icon">&#9678;</span><span class="ri-text">autonomous agent OS 2026</span><span class="ri-arrow">&#8599;</span>
+        </div>
+        <div class="related-item" onclick="searchRelated('Road TV BlackRoad')">
+          <span class="ri-icon">&#9678;</span><span class="ri-text">Road TV video platform</span><span class="ri-arrow">&#8599;</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="results-footer">
+    <span>BlackRoad OS, Inc. · Search · 2026</span>
+    <span>Privacy · Terms · Settings</span>
+  </div>
+
+</div>
+
+<script>
+  function doSearch() {
+    var homeVal = document.getElementById('homeSearchInput').value.trim();
+    var resVal = document.getElementById('resultsSearchInput').value.trim();
+    var query = homeVal || resVal || 'BlackRoad OS';
+
+    document.getElementById('resultsSearchInput').value = query;
+    document.getElementById('homeSearchInput').value = '';
+
+    document.getElementById('kcTitle').textContent = query;
+    document.getElementById('resultsCount').textContent =
+      'About ' + (Math.floor(Math.random() * 9000000) + 1000000).toLocaleString() + ' results (0.' + (Math.floor(Math.random() * 60) + 20) + ' seconds)';
+
+    document.getElementById('r1title').textContent = query + ' \u2014 BlackRoad OS';
+    document.getElementById('r1snip').innerHTML =
+      'The canonical operating system for distributed <em>' + query + '</em>. BlackRoad coordinates intelligence across Cecilia, Olympia, Lucidia, Eve, Atlas, and Cadence \u2014 all running on a production K3s cluster with NATS event bus.';
+
+    document.getElementById('homepage').style.display = 'none';
+    document.getElementById('resultspage').classList.add('visible');
+    document.getElementById('resultsSearchInput').focus();
+  }
+
+  function goHome() {
+    document.getElementById('homepage').style.display = 'flex';
+    document.getElementById('resultspage').classList.remove('visible');
+    document.getElementById('homeSearchInput').focus();
+  }
+
+  function handleHomeKey(e) {
+    if (e.key === 'Enter') doSearch();
+  }
+
+  function handleResultsKey(e) {
+    if (e.key === 'Enter') doSearch();
+  }
+
+  function setTab(el) {
+    document.querySelectorAll('.rtab').forEach(function(t) { t.classList.remove('active'); });
+    el.classList.add('active');
+  }
+
+  function searchRelated(q) {
+    document.getElementById('resultsSearchInput').value = q;
+    doSearch();
+  }
+
+  document.querySelectorAll('.pag-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      if (this.textContent === '\u00b7\u00b7\u00b7' || this.textContent === 'Next \u2192') return;
+      document.querySelectorAll('.pag-btn').forEach(function(b) { b.classList.remove('active'); });
+      this.classList.add('active');
+    });
+  });
+</script>
+
+</body>
+</html>
