@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PitStop — Learn Everything</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { background: #000 !important; color: #fff; font-family: 'Inter', sans-serif; height: 100vh; overflow: hidden; }
+
+:root {
+  --grad: linear-gradient(90deg, #FF8400, #FF4400, #FF0066, #CC00AA, #8800FF, #0066FF, #2233CC);
+  --orange: #FF8400; --pink: #FF0066; --purple: #8800FF; --blue: #0066FF;
+}
+
+.grad-rule { height: 3px; background: var(--grad); flex-shrink: 0; }
+.shell { display: flex; flex-direction: column; height: 100vh; background: #000 !important; }
+
+/* ── NAV ── */
+.topnav {
+  height: 48px; flex-shrink: 0;
+  display: flex; align-items: center;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  background: #000 !important; z-index: 50; position: relative;
+}
+.tn-brand {
+  display: flex; align-items: center; gap: 9px;
+  padding: 0 18px; border-right: 1px solid rgba(255,255,255,0.08);
+  height: 100%; flex-shrink: 0;
+}
+.tn-mark {
+  width: 24px; height: 24px; background: var(--grad);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Space Grotesk', sans-serif; font-size: 0.5rem; font-weight: 700; color: #000;
+}
+.tn-name { font-family: 'Space Grotesk', sans-serif; font-size: 0.78rem; font-weight: 700; }
+.tn-sub  { font-family: 'JetBrains Mono', monospace; font-size: 0.38rem; opacity: 0.3; letter-spacing: 0.18em; text-transform: uppercase; margin-left: 2px; }
+
+.tn-tabs { display: flex; height: 100%; padding-left: 8px; }
+.tn-tab {
+  display: flex; align-items: center; gap: 5px;
+  padding: 0 14px; font-size: 0.5rem; font-weight: 500;
+  opacity: 0.3; cursor: pointer; border-bottom: 2px solid transparent;
+  transition: all 0.12s;
+}
+.tn-tab:hover { opacity: 0.7; }
+.tn-tab.active { opacity: 1; border-bottom-color: #fff; }
+
+.tn-right { margin-left: auto; display: flex; align-items: center; gap: 8px; padding: 0 14px; }
+.tn-search {
+  display: flex; align-items: center; gap: 7px;
+  border: 1px solid rgba(255,255,255,0.1); padding: 5px 10px;
+}
+.tn-search input { background: none; border: none; outline: none; color: #fff; font-family: 'JetBrains Mono', monospace; font-size: 0.5rem; width: 200px; caret-color: var(--orange); }
+.tn-search input::placeholder { color: rgba(255,255,255,0.2); }
+.tn-search-ic { font-size: 0.55rem; opacity: 0.2; }
+.streak-badge {
+  display: flex; align-items: center; gap: 5px;
+  border: 1px solid rgba(255,132,0,0.3); padding: 4px 10px;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.44rem; color: var(--orange);
+}
+.tn-avatar { width: 26px; height: 26px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.2); background: #111 !important; display: flex; align-items: center; justify-content: center; font-size: 0.42rem; font-weight: 700; cursor: pointer; }
+
+/* ── BODY ── */
+.body-wrap { display: flex; flex: 1; overflow: hidden; }
+
+/* ── LEFT SIDEBAR ── */
+.sidebar {
+  width: 220px; flex-shrink: 0;
+  border-right: 1px solid rgba(255,255,255,0.07);
+  display: flex; flex-direction: column;
+  background: #000 !important; overflow-y: auto; scrollbar-width: none;
+}
+.sidebar::-webkit-scrollbar { display: none; }
+
+.xp-block { padding: 14px 12px; border-bottom: 1px solid rgba(255,255,255,0.07); }
+.xp-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.xp-label { font-family: 'JetBrains Mono', monospace; font-size: 0.38rem; opacity: 0.25; letter-spacing: 0.15em; text-transform: uppercase; }
+.xp-val { font-family: 'Space Grotesk', sans-serif; font-size: 1.1rem; font-weight: 700; color: var(--orange); }
+.xp-track { height: 2px; background: rgba(255,255,255,0.07); position: relative; }
+.xp-fill { position: absolute; top: 0; left: 0; height: 100%; background: var(--grad); }
+.xp-next { font-family: 'JetBrains Mono', monospace; font-size: 0.38rem; opacity: 0.25; margin-top: 5px; }
+
+.sb-section { padding: 12px 0 4px; }
+.sb-head { font-family: 'JetBrains Mono', monospace; font-size: 0.37rem; letter-spacing: 0.2em; text-transform: uppercase; opacity: 0.2; padding: 0 14px; margin-bottom: 4px; }
+.sb-item {
+  display: flex; align-items: center; gap: 9px;
+  padding: 8px 14px; cursor: pointer;
+  border-left: 2px solid transparent; transition: all 0.12s;
+}
+.sb-item:hover { background: rgba(255,255,255,0.03) !important; }
+.sb-item.active { border-left-color: #fff; background: rgba(255,255,255,0.04) !important; }
+.sbi-icon { font-size: 0.75rem; width: 18px; text-align: center; opacity: 0.4; }
+.sb-item.active .sbi-icon { opacity: 1; }
+.sbi-text { font-size: 0.5rem; opacity: 0.45; }
+.sb-item.active .sbi-text { opacity: 1; font-weight: 600; }
+.sbi-badge { margin-left: auto; font-family: 'JetBrains Mono', monospace; font-size: 0.36rem; background: rgba(255,132,0,0.2) !important; color: var(--orange); padding: 1px 5px; }
+
+/* subject chips */
+.subject-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; padding: 8px 10px 12px; }
+.subj-chip {
+  border: 1px solid rgba(255,255,255,0.08); padding: 8px 6px;
+  text-align: center; cursor: pointer; transition: all 0.12s;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+}
+.subj-chip:hover { border-color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.02) !important; }
+.subj-chip.active { border-color: rgba(255,255,255,0.5); background: rgba(255,255,255,0.04) !important; }
+.subj-emoji { font-size: 1rem; }
+.subj-name { font-size: 0.4rem; opacity: 0.5; }
+.subj-chip.active .subj-name { opacity: 1; font-weight: 600; }
+.subj-prog { width: 100%; height: 1px; background: rgba(255,255,255,0.08); margin-top: 3px; position: relative; }
+.subj-prog-fill { position: absolute; top: 0; left: 0; height: 100%; }
+
+/* ── MAIN ── */
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: #000 !important; }
+
+/* ── SCREEN STATES ── */
+.screen { flex: 1; overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.1) transparent; display: none; }
+.screen.active { display: flex; flex-direction: column; }
+
+/* ══════════════════════════
+   HOME SCREEN
+══════════════════════════ */
+.home-screen { padding: 28px 28px 40px; }
+
+/* hero greeting */
+.hero-greeting {
+  margin-bottom: 28px;
+}
+.hg-eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 0.44rem; opacity: 0.3; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 8px; }
+.hg-title { font-family: 'Space Grotesk', sans-serif; font-size: 2rem; font-weight: 700; line-height: 1.1; margin-bottom: 10px; }
+.hg-sub { font-size: 0.62rem; opacity: 0.4; max-width: 500px; line-height: 1.7; }
+
+/* continue learning */
+.section-label { font-family: 'JetBrains Mono', monospace; font-size: 0.4rem; opacity: 0.25; letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 12px; display: flex; align-items: center; gap: 12px; }
+.section-label::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.06); }
+
+.continue-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 28px; }
+.continue-card {
+  border: 1px solid rgba(255,255,255,0.08); padding: 16px;
+  cursor: pointer; transition: all 0.15s; position: relative; overflow: hidden;
+  background: #000 !important;
+}
+.continue-card:hover { border-color: rgba(255,255,255,0.3); }
+.cc-subject { font-size: 0.42rem; opacity: 0.35; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 8px; }
+.cc-title { font-size: 0.62rem; font-weight: 600; margin-bottom: 12px; line-height: 1.4; }
+.cc-progress-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.cc-track { flex: 1; height: 2px; background: rgba(255,255,255,0.07); position: relative; }
+.cc-fill { position: absolute; top: 0; left: 0; height: 100%; }
+.cc-pct { font-family: 'JetBrains Mono', monospace; font-size: 0.42rem; opacity: 0.4; }
+.cc-meta { font-size: 0.44rem; opacity: 0.3; }
+.cc-accent { position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+.cc-resume {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 0.44rem; font-weight: 600; padding: 5px 10px;
+  background: rgba(255,255,255,0.06) !important; border: 1px solid rgba(255,255,255,0.1);
+  cursor: pointer; transition: all 0.12s;
+}
+.cc-resume:hover { background: rgba(255,255,255,0.12) !important; }
+
+/* quick ask */
+.quick-ask-wrap { margin-bottom: 28px; }
+.quick-ask-box {
+  border: 1px solid rgba(255,255,255,0.15); padding: 0;
+  transition: border-color 0.15s; background: #000 !important;
+}
+.quick-ask-box:focus-within { border-color: rgba(255,255,255,0.5); }
+.qa-top { display: flex; align-items: center; padding: 12px 16px; gap: 12px; }
+.qa-icon { font-size: 1rem; opacity: 0.4; }
+.qa-input {
+  flex: 1; background: none; border: none; outline: none;
+  color: #fff; font-family: 'Inter', sans-serif; font-size: 0.7rem;
+  caret-color: var(--orange);
+}
+.qa-input::placeholder { color: rgba(255,255,255,0.2); }
+.qa-send {
+  background: #fff !important; color: #000; border: none;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.44rem;
+  font-weight: 700; padding: 7px 14px; cursor: pointer; transition: opacity 0.12s;
+}
+.qa-send:hover { opacity: 0.85; }
+.qa-chips { display: flex; gap: 6px; padding: 0 16px 12px; flex-wrap: wrap; }
+.qa-chip {
+  font-size: 0.44rem; border: 1px solid rgba(255,255,255,0.1);
+  padding: 4px 10px; cursor: pointer; transition: all 0.12s;
+  color: rgba(255,255,255,0.45);
+}
+.qa-chip:hover { border-color: rgba(255,255,255,0.35); color: #fff; }
+
+/* subjects grid */
+.subjects-full { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 28px; }
+.subj-card {
+  border: 1px solid rgba(255,255,255,0.08); padding: 16px 14px;
+  cursor: pointer; transition: all 0.15s; background: #000 !important;
+  display: flex; flex-direction: column; gap: 8px;
+  position: relative; overflow: hidden;
+}
+.subj-card:hover { border-color: rgba(255,255,255,0.28); }
+.subj-card-emoji { font-size: 1.4rem; }
+.subj-card-name { font-size: 0.58rem; font-weight: 600; }
+.subj-card-count { font-family: 'JetBrains Mono', monospace; font-size: 0.42rem; opacity: 0.3; }
+.subj-card-bar { position: absolute; bottom: 0; left: 0; right: 0; height: 2px; }
+.subj-card-bar-fill { height: 100%; }
+
+/* ══════════════════════════
+   LEARN / TUTOR SCREEN
+══════════════════════════ */
+.learn-screen { display: flex; flex: 1; overflow: hidden; }
+
+/* lesson content */
+.lesson-main {
+  flex: 1; overflow-y: auto;
+  scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.1) transparent;
+  padding: 28px 32px;
+}
+
+.lesson-header { margin-bottom: 24px; }
+.lh-breadcrumb { font-family: 'JetBrains Mono', monospace; font-size: 0.42rem; opacity: 0.3; margin-bottom: 10px; display: flex; gap: 6px; align-items: center; }
+.lh-sep { opacity: 0.4; }
+.lh-title { font-family: 'Space Grotesk', sans-serif; font-size: 1.6rem; font-weight: 700; margin-bottom: 8px; line-height: 1.2; }
+.lh-meta { display: flex; align-items: center; gap: 12px; }
+.lh-tag { font-family: 'JetBrains Mono', monospace; font-size: 0.4rem; border: 1px solid rgba(255,255,255,0.15); padding: 2px 7px; opacity: 0.5; }
+.lh-time { font-family: 'JetBrains Mono', monospace; font-size: 0.42rem; opacity: 0.25; }
+
+/* lesson body content */
+.lesson-body { max-width: 680px; }
+.lesson-p { font-size: 0.66rem; line-height: 1.8; opacity: 0.7; margin-bottom: 18px; }
+.lesson-h2 { font-family: 'Space Grotesk', sans-serif; font-size: 1rem; font-weight: 700; margin: 24px 0 12px; }
+.lesson-h3 { font-size: 0.72rem; font-weight: 600; margin: 18px 0 8px; opacity: 0.85; }
+
+/* concept box */
+.concept-box {
+  border-left: 3px solid var(--orange);
+  padding: 14px 18px; margin: 18px 0;
+  background: rgba(255,132,0,0.04) !important;
+}
+.cb-label { font-family: 'JetBrains Mono', monospace; font-size: 0.38rem; color: var(--orange); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 8px; }
+.cb-text { font-size: 0.64rem; line-height: 1.7; opacity: 0.75; }
+.cb-formula {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.8rem;
+  text-align: center; padding: 12px;
+  border: 1px solid rgba(255,132,0,0.2);
+  margin: 12px 0; background: rgba(0,0,0,0.5) !important;
+  color: var(--orange);
+}
+
+/* visual explainer */
+.visual-box {
+  border: 1px solid rgba(255,255,255,0.08); margin: 18px 0;
+  overflow: hidden;
+}
+.vb-header { padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.02) !important; }
+.vb-label { font-family: 'JetBrains Mono', monospace; font-size: 0.4rem; opacity: 0.4; }
+.vb-body { padding: 20px; min-height: 120px; position: relative; }
+
+/* animated graph */
+.graph-svg { width: 100%; height: 120px; }
+.graph-line { stroke: var(--orange); stroke-width: 2; fill: none; stroke-dasharray: 400; stroke-dashoffset: 400; animation: drawLine 2s ease forwards; }
+.graph-area { fill: rgba(255,132,0,0.08); clip-path: url(#graphClip); }
+@keyframes drawLine { to { stroke-dashoffset: 0; } }
+@keyframes barGrow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+
+/* analogy selector */
+.analogy-strip { display: flex; gap: 6px; margin: 14px 0 10px; }
+.analogy-btn {
+  font-size: 0.44rem; border: 1px solid rgba(255,255,255,0.1); padding: 5px 12px;
+  cursor: pointer; transition: all 0.12s; color: rgba(255,255,255,0.4);
+  background: #000 !important;
+}
+.analogy-btn:hover { border-color: rgba(255,255,255,0.35); color: #fff; }
+.analogy-btn.active { border-color: #fff; color: #fff; background: rgba(255,255,255,0.05) !important; }
+
+/* practice problem */
+.practice-box {
+  border: 1px solid rgba(255,255,255,0.1); padding: 20px;
+  margin: 24px 0; background: rgba(255,255,255,0.01) !important;
+}
+.pb-label { font-family: 'JetBrains Mono', monospace; font-size: 0.38rem; opacity: 0.25; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 12px; }
+.pb-question { font-size: 0.68rem; font-weight: 500; margin-bottom: 18px; line-height: 1.5; }
+.pb-options { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+.pb-option {
+  display: flex; align-items: center; gap: 10px;
+  border: 1px solid rgba(255,255,255,0.1); padding: 10px 14px;
+  cursor: pointer; transition: all 0.15s; font-size: 0.58rem;
+  background: #000 !important;
+}
+.pb-option:hover { border-color: rgba(255,255,255,0.35); background: rgba(255,255,255,0.02) !important; }
+.pb-option.correct { border-color: rgba(74,222,128,0.6); background: rgba(74,222,128,0.06) !important; color: rgba(74,222,128,0.9); }
+.pb-option.wrong   { border-color: rgba(255,0,102,0.5); background: rgba(255,0,102,0.06) !important; color: rgba(255,0,102,0.7); }
+.pb-letter { font-family: 'JetBrains Mono', monospace; font-size: 0.5rem; opacity: 0.4; width: 16px; }
+.pb-explain {
+  padding: 12px 14px; border-left: 3px solid rgba(74,222,128,0.5);
+  background: rgba(74,222,128,0.04) !important; font-size: 0.58rem;
+  line-height: 1.6; opacity: 0.75; display: none;
+}
+.pb-explain.show { display: block; }
+.pb-actions { display: flex; gap: 8px; margin-top: 12px; }
+.pb-btn {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.44rem; font-weight: 700;
+  padding: 7px 16px; cursor: pointer; border: none; transition: all 0.12s;
+}
+.pb-btn.primary { background: #fff !important; color: #000; }
+.pb-btn.ghost { background: #000 !important; color: #fff; border: 1px solid rgba(255,255,255,0.2); }
+
+/* next lesson */
+.next-lesson-row { display: flex; align-items: center; gap: 16px; border: 1px solid rgba(255,255,255,0.1); padding: 16px; margin-top: 28px; cursor: pointer; transition: border-color 0.15s; }
+.next-lesson-row:hover { border-color: rgba(255,255,255,0.35); }
+.nl-info { flex: 1; }
+.nl-label { font-family: 'JetBrains Mono', monospace; font-size: 0.38rem; opacity: 0.25; text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 5px; }
+.nl-title { font-size: 0.62rem; font-weight: 600; }
+.nl-arrow { font-size: 1.2rem; opacity: 0.3; }
+
+/* ── AI TUTOR PANEL ── */
+.tutor-panel {
+  width: 300px; flex-shrink: 0;
+  border-left: 1px solid rgba(255,255,255,0.07);
+  display: flex; flex-direction: column;
+  background: #000 !important;
+}
+.tp-header {
+  padding: 14px; border-bottom: 1px solid rgba(255,255,255,0.07);
+  display: flex; align-items: center; gap: 10px;
+}
+.tp-avatar {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: rgba(136,0,255,0.3) !important;
+  border: 1px solid rgba(136,0,255,0.5);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.46rem; font-weight: 700;
+  position: relative;
+}
+.tp-pulse { width: 7px; height: 7px; border-radius: 50%; background: var(--purple); position: absolute; bottom: -1px; right: -1px; border: 1px solid #000; animation: tpulse 2s ease-in-out infinite; }
+@keyframes tpulse { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.6);opacity:0.5} }
+.tp-info { flex: 1; }
+.tp-name { font-size: 0.54rem; font-weight: 600; }
+.tp-status { font-family: 'JetBrains Mono', monospace; font-size: 0.38rem; opacity: 0.35; margin-top: 1px; }
+.tp-mode-btns { display: flex; gap: 4px; }
+.tp-mode { font-size: 0.38rem; border: 1px solid rgba(255,255,255,0.1); padding: 3px 7px; cursor: pointer; color: rgba(255,255,255,0.35); transition: all 0.12s; background: #000 !important; }
+.tp-mode.active { border-color: var(--purple); color: var(--purple); }
+
+/* chat messages */
+.tp-messages { flex: 1; overflow-y: auto; scrollbar-width: none; padding: 14px; display: flex; flex-direction: column; gap: 14px; }
+.tp-messages::-webkit-scrollbar { display: none; }
+
+.msg { display: flex; gap: 8px; }
+.msg.user { flex-direction: row-reverse; }
+.msg-av { width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 0.36rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+.msg-av.tutor { background: rgba(136,0,255,0.3) !important; }
+.msg-av.user-av { background: rgba(255,132,0,0.3) !important; }
+.msg-bubble {
+  max-width: 85%; padding: 10px 12px;
+  font-size: 0.54rem; line-height: 1.6;
+}
+.msg.tutor .msg-bubble { background: rgba(255,255,255,0.04) !important; border: 1px solid rgba(255,255,255,0.08); }
+.msg.user .msg-bubble { background: rgba(255,132,0,0.1) !important; border: 1px solid rgba(255,132,0,0.25); text-align: right; }
+.msg-bubble code { font-family: 'JetBrains Mono', monospace; font-size: 0.88em; color: var(--orange); }
+.msg-bubble strong { font-weight: 600; }
+
+/* typing indicator */
+.typing-dots { display: flex; gap: 3px; padding: 8px 12px; background: rgba(255,255,255,0.04) !important; border: 1px solid rgba(255,255,255,0.08); width: fit-content; }
+.dot-bounce { width: 5px; height: 5px; border-radius: 50%; background: rgba(255,255,255,0.4); animation: bounce 1.2s ease-in-out infinite; }
+.dot-bounce:nth-child(2) { animation-delay: 0.15s; }
+.dot-bounce:nth-child(3) { animation-delay: 0.3s; }
+@keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
+
+/* quick replies */
+.tp-quick-replies { padding: 8px 14px; display: flex; flex-wrap: wrap; gap: 5px; border-top: 1px solid rgba(255,255,255,0.06); }
+.qr-btn { font-size: 0.42rem; border: 1px solid rgba(255,255,255,0.1); padding: 4px 9px; cursor: pointer; color: rgba(255,255,255,0.4); transition: all 0.12s; background: #000 !important; }
+.qr-btn:hover { color: #fff; border-color: rgba(255,255,255,0.35); }
+
+/* input */
+.tp-input-row {
+  padding: 10px 14px; border-top: 1px solid rgba(255,255,255,0.07);
+  display: flex; gap: 7px; align-items: flex-end;
+}
+.tp-textarea {
+  flex: 1; background: #000 !important; border: 1px solid rgba(255,255,255,0.1);
+  color: #fff; font-family: 'Inter', sans-serif; font-size: 0.52rem;
+  padding: 8px 10px; outline: none; resize: none;
+  min-height: 32px; max-height: 80px; line-height: 1.5; caret-color: var(--purple);
+}
+.tp-textarea:focus { border-color: rgba(136,0,255,0.5); }
+.tp-textarea::placeholder { color: rgba(255,255,255,0.18); }
+.tp-send { padding: 7px 12px; background: var(--purple) !important; color: #fff; border: none; font-family: 'JetBrains Mono', monospace; font-size: 0.46rem; font-weight: 700; cursor: pointer; transition: opacity 0.12s; }
+.tp-send:hover { opacity: 0.8; }
+
+/* ── VIDEO SCREEN ── */
+.video-screen { padding: 28px; }
+.video-gen-hero {
+  border: 1px solid rgba(255,255,255,0.1); padding: 0; overflow: hidden; margin-bottom: 28px;
+}
+.vgh-top { padding: 20px 24px 0; }
+.vgh-label { font-family: 'JetBrains Mono', monospace; font-size: 0.38rem; color: var(--orange); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 10px; opacity: 0.8; }
+.vgh-title { font-family: 'Space Grotesk', sans-serif; font-size: 1.3rem; font-weight: 700; margin-bottom: 8px; }
+.vgh-sub { font-size: 0.56rem; opacity: 0.4; line-height: 1.6; max-width: 580px; margin-bottom: 20px; }
+
+.vgh-input-row { display: flex; gap: 0; border: 1px solid rgba(255,255,255,0.15); }
+.vgh-input { flex: 1; background: #000 !important; border: none; color: #fff; font-family: 'Inter', sans-serif; font-size: 0.64rem; padding: 14px 16px; outline: none; caret-color: var(--orange); }
+.vgh-input::placeholder { color: rgba(255,255,255,0.2); }
+.vgh-gen { background: #fff !important; color: #000; border: none; font-family: 'JetBrains Mono', monospace; font-size: 0.5rem; font-weight: 700; padding: 14px 22px; cursor: pointer; white-space: nowrap; transition: opacity 0.12s; }
+.vgh-gen:hover { opacity: 0.85; }
+
+.vgh-formats { display: flex; gap: 8px; padding: 16px 24px; border-top: 1px solid rgba(255,255,255,0.06); }
+.fmt-chip { display: flex; align-items: center; gap: 6px; border: 1px solid rgba(255,255,255,0.1); padding: 5px 12px; cursor: pointer; font-size: 0.44rem; color: rgba(255,255,255,0.4); transition: all 0.12s; }
+.fmt-chip.active { border-color: var(--orange); color: var(--orange); }
+.fmt-chip:hover { border-color: rgba(255,255,255,0.3); color: #fff; }
+
+/* generated video cards */
+.video-results { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.vid-card { border: 1px solid rgba(255,255,255,0.08); cursor: pointer; transition: all 0.15s; background: #000 !important; }
+.vid-card:hover { border-color: rgba(255,255,255,0.28); }
+.vid-thumb { height: 100px; position: relative; overflow: hidden; background: #0a0a0a !important; display: flex; align-items: center; justify-content: center; }
+.vid-thumb-bars { display: flex; align-items: flex-end; gap: 2px; height: 60px; }
+.vtb { width: 5px; animation: barPulse 1.5s ease-in-out infinite; }
+@keyframes barPulse { 0%,100%{transform:scaleY(0.3)} 50%{transform:scaleY(1)} }
+.vid-play { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 32px; height: 32px; border: 2px solid rgba(255,255,255,0.4); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; padding-left: 2px; }
+.vid-duration { position: absolute; bottom: 6px; right: 8px; font-family: 'JetBrains Mono', monospace; font-size: 0.38rem; background: rgba(0,0,0,0.8) !important; padding: 1px 5px; }
+.vid-info { padding: 10px 12px; }
+.vid-subject { font-family: 'JetBrains Mono', monospace; font-size: 0.38rem; opacity: 0.3; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; }
+.vid-title { font-size: 0.52rem; font-weight: 600; line-height: 1.4; margin-bottom: 6px; }
+.vid-meta { font-family: 'JetBrains Mono', monospace; font-size: 0.4rem; opacity: 0.25; }
+
+@media (max-width: 900px) {
+  .sidebar { display: none; }
+  .tutor-panel { display: none; }
+  .continue-cards, .subjects-full { grid-template-columns: 1fr 1fr; }
+  .video-results { grid-template-columns: 1fr 1fr; }
+}
+
+  </style>
+</head>
+<body>
+<div class="shell">
+  <div class="grad-rule"></div>
+
+  <!-- NAV -->
+
+  <nav class="topnav">
+    <div class="tn-brand">
+      <div class="tn-mark">PS</div>
+      <div>
+        <span class="tn-name">PitStop</span>
+        <span class="tn-sub">by BlackRoad</span>
+      </div>
+    </div>
+    <div class="tn-tabs">
+      <div class="tn-tab active" onclick="switchScreen('home',this)">Home</div>
+      <div class="tn-tab" onclick="switchScreen('learn',this)">Learn</div>
+      <div class="tn-tab" onclick="switchScreen('video',this)">AI Videos</div>
+      <div class="tn-tab" onclick="switchScreen('practice',this)">Practice</div>
+    </div>
+    <div class="tn-right">
+      <div class="tn-search">
+        <span class="tn-search-ic">◎</span>
+        <input type="text" placeholder="Search any topic, concept, problem…">
+      </div>
+      <div class="streak-badge">🔥 14 day streak</div>
+      <div class="tn-avatar">AL</div>
+    </div>
+  </nav>
+
+  <div class="body-wrap">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="xp-block">
+    <div class="xp-top">
+      <span class="xp-label">XP Today</span>
+      <span class="xp-val">840</span>
+    </div>
+    <div class="xp-track"><div class="xp-fill" style="width:68%;"></div></div>
+    <div class="xp-next">340 XP to Level 12</div>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-head">Navigate</div>
+    <div class="sb-item active" onclick="switchScreen('home',null);setSbActive(this)">
+      <span class="sbi-icon">⌂</span>
+      <span class="sbi-text">Home</span>
+    </div>
+    <div class="sb-item" onclick="switchScreen('learn',null);setSbActive(this)">
+      <span class="sbi-icon">◈</span>
+      <span class="sbi-text">Continue Learning</span>
+      <span class="sbi-badge">3</span>
+    </div>
+    <div class="sb-item" onclick="switchScreen('video',null);setSbActive(this)">
+      <span class="sbi-icon">▶</span>
+      <span class="sbi-text">AI Video Tutor</span>
+    </div>
+    <div class="sb-item" onclick="setSbActive(this)">
+      <span class="sbi-icon">◻</span>
+      <span class="sbi-text">Practice Problems</span>
+      <span class="sbi-badge">12</span>
+    </div>
+    <div class="sb-item" onclick="setSbActive(this)">
+      <span class="sbi-icon">◉</span>
+      <span class="sbi-text">Flashcards</span>
+    </div>
+    <div class="sb-item" onclick="setSbActive(this)">
+      <span class="sbi-icon">★</span>
+      <span class="sbi-text">Saved Notes</span>
+    </div>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-head">My Subjects</div>
+  </div>
+  <div class="subject-grid">
+    <div class="subj-chip active" onclick="this.classList.toggle('active')">
+      <span class="subj-emoji">∫</span>
+      <span class="subj-name">Calculus</span>
+      <div class="subj-prog"><div class="subj-prog-fill" style="width:72%;background:var(--orange);"></div></div>
+    </div>
+    <div class="subj-chip" onclick="this.classList.toggle('active')">
+      <span class="subj-emoji">⚛</span>
+      <span class="subj-name">Physics</span>
+      <div class="subj-prog"><div class="subj-prog-fill" style="width:45%;background:var(--blue);"></div></div>
+    </div>
+    <div class="subj-chip" onclick="this.classList.toggle('active')">
+      <span class="subj-emoji">🧪</span>
+      <span class="subj-name">Org. Chem</span>
+      <div class="subj-prog"><div class="subj-prog-fill" style="width:28%;background:var(--pink);"></div></div>
+    </div>
+    <div class="subj-chip" onclick="this.classList.toggle('active')">
+      <span class="subj-emoji">λ</span>
+      <span class="subj-name">CS / Code</span>
+      <div class="subj-prog"><div class="subj-prog-fill" style="width:60%;background:var(--purple);"></div></div>
+    </div>
+    <div class="subj-chip" onclick="this.classList.toggle('active')">
+      <span class="subj-emoji">∑</span>
+      <span class="subj-name">Linear Alg</span>
+      <div class="subj-prog"><div class="subj-prog-fill" style="width:15%;background:var(--orange);"></div></div>
+    </div>
+    <div class="subj-chip" onclick="this.classList.toggle('active')">
+      <span class="subj-emoji">📊</span>
+      <span class="subj-name">Statistics</span>
+      <div class="subj-prog"><div class="subj-prog-fill" style="width:0%;"></div></div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN CONTENT -->
+<div class="main">
+
+  <!-- ══ HOME SCREEN ══ -->
+  <div class="screen active home-screen" id="home-screen">
+    <div class="hero-greeting">
+      <div class="hg-eyebrow">Monday, March 2nd · 14-day streak 🔥</div>
+      <div class="hg-title">Welcome back, Alexa.<br>What are we learning today?</div>
+      <div class="hg-sub">You're 72% through Calculus II. Olympia analyzed your session history and suggests reviewing integration by parts before moving to sequences.</div>
+    </div>
+
+    <!-- Quick Ask -->
+    <div class="section-label">Ask Anything</div>
+    <div class="quick-ask-wrap">
+      <div class="quick-ask-box">
+        <div class="qa-top">
+          <span class="qa-icon">✦</span>
+          <input class="qa-input" placeholder="Ask a question, paste a problem, or describe what you don't understand…" onkeydown="if(event.key==='Enter'){handleQuickAsk(this)}">
+          <button class="qa-send" onclick="handleQuickAsk(this.previousElementSibling)">Ask →</button>
+        </div>
+        <div class="qa-chips">
+          <div class="qa-chip" onclick="fillAsk(this)">Explain integration by parts</div>
+          <div class="qa-chip" onclick="fillAsk(this)">What is a reaction mechanism?</div>
+          <div class="qa-chip" onclick="fillAsk(this)">Solve this derivative: d/dx[x²sin(x)]</div>
+          <div class="qa-chip" onclick="fillAsk(this)">What is eigenvalue decomposition?</div>
+          <div class="qa-chip" onclick="fillAsk(this)">How do SN1 vs SN2 reactions differ?</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Continue Learning -->
+    <div class="section-label">Continue Learning</div>
+    <div class="continue-cards">
+      <div class="continue-card" onclick="switchScreen('learn',null)">
+        <div class="cc-accent" style="background:var(--orange);"></div>
+        <div class="cc-subject">Calculus II</div>
+        <div class="cc-title">Integration by Parts</div>
+        <div class="cc-progress-row">
+          <div class="cc-track"><div class="cc-fill" style="width:60%;background:var(--orange);"></div></div>
+          <span class="cc-pct">60%</span>
+        </div>
+        <div class="cc-meta">Last studied 2h ago · Unit 4 of 8</div>
+        <div style="margin-top:10px;"><span class="cc-resume">Resume →</span></div>
+      </div>
+      <div class="continue-card">
+        <div class="cc-accent" style="background:var(--blue);"></div>
+        <div class="cc-subject">Physics II</div>
+        <div class="cc-title">Electromagnetic Induction & Faraday's Law</div>
+        <div class="cc-progress-row">
+          <div class="cc-track"><div class="cc-fill" style="width:30%;background:var(--blue);"></div></div>
+          <span class="cc-pct">30%</span>
+        </div>
+        <div class="cc-meta">Last studied yesterday · Unit 6 of 12</div>
+        <div style="margin-top:10px;"><span class="cc-resume">Resume →</span></div>
+      </div>
+      <div class="continue-card">
+        <div class="cc-accent" style="background:var(--pink);"></div>
+        <div class="cc-subject">Organic Chemistry</div>
+        <div class="cc-title">Nucleophilic Substitution: SN1 vs SN2</div>
+        <div class="cc-progress-row">
+          <div class="cc-track"><div class="cc-fill" style="width:18%;background:var(--pink);"></div></div>
+          <span class="cc-pct">18%</span>
+        </div>
+        <div class="cc-meta">New lesson · Unit 3 of 10</div>
+        <div style="margin-top:10px;"><span class="cc-resume">Start →</span></div>
+      </div>
+    </div>
+
+    <!-- Browse Subjects -->
+    <div class="section-label">All Subjects · K–Masters</div>
+    <div class="subjects-full">
+      <div class="subj-card" onclick="switchScreen('learn',null)">
+        <span class="subj-card-emoji">∫</span>
+        <div class="subj-card-name">Mathematics</div>
+        <div class="subj-card-count">K-12 · Calc · Linear Alg · Diff Eq · Stats · Topology</div>
+        <div class="subj-card-bar"><div class="subj-card-bar-fill" style="width:72%;background:var(--orange);"></div></div>
+      </div>
+      <div class="subj-card">
+        <span class="subj-card-emoji">⚛</span>
+        <div class="subj-card-name">Physics</div>
+        <div class="subj-card-count">Mechanics · E&M · Quantum · Thermodynamics · Relativity</div>
+        <div class="subj-card-bar"><div class="subj-card-bar-fill" style="width:45%;background:var(--blue);"></div></div>
+      </div>
+      <div class="subj-card">
+        <span class="subj-card-emoji">🧪</span>
+        <div class="subj-card-name">Chemistry</div>
+        <div class="subj-card-count">Gen Chem · Organic · Biochem · Physical Chem · Analytical</div>
+        <div class="subj-card-bar"><div class="subj-card-bar-fill" style="width:28%;background:var(--pink);"></div></div>
+      </div>
+      <div class="subj-card">
+        <span class="subj-card-emoji">λ</span>
+        <div class="subj-card-name">Computer Science</div>
+        <div class="subj-card-count">DSA · OS · Networks · ML · Systems · Compilers</div>
+        <div class="subj-card-bar"><div class="subj-card-bar-fill" style="width:60%;background:var(--purple);"></div></div>
+      </div>
+      <div class="subj-card">
+        <span class="subj-card-emoji">📖</span>
+        <div class="subj-card-name">English & Writing</div>
+        <div class="subj-card-count">Grammar · Essays · Literature · Research · Academic Writing</div>
+        <div class="subj-card-bar"><div class="subj-card-bar-fill" style="width:0%;"></div></div>
+      </div>
+      <div class="subj-card">
+        <span class="subj-card-emoji">🌍</span>
+        <div class="subj-card-name">History & Social</div>
+        <div class="subj-card-count">US History · World History · Government · Economics · Geo</div>
+        <div class="subj-card-bar"><div class="subj-card-bar-fill" style="width:0%;"></div></div>
+      </div>
+      <div class="subj-card">
+        <span class="subj-card-emoji">🔬</span>
+        <div class="subj-card-name">Biology</div>
+        <div class="subj-card-count">Cell Bio · Genetics · Ecology · Evolution · Anatomy · Molecular</div>
+        <div class="subj-card-bar"><div class="subj-card-bar-fill" style="width:0%;"></div></div>
+      </div>
+      <div class="subj-card">
+        <span class="subj-card-emoji">📐</span>
+        <div class="subj-card-name">Test Prep</div>
+        <div class="subj-card-count">SAT · ACT · AP Exams · GRE · MCAT · LSAT · State Standards</div>
+        <div class="subj-card-bar"><div class="subj-card-bar-fill" style="width:0%;"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ LEARN SCREEN ══ -->
+  <div class="screen" id="learn-screen">
+    <div class="learn-screen">
+
+      <!-- LESSON CONTENT -->
+      <div class="lesson-main">
+        <div class="lesson-header">
+          <div class="lh-breadcrumb">
+            <span>Mathematics</span><span class="lh-sep">›</span>
+            <span>Calculus II</span><span class="lh-sep">›</span>
+            <span>Unit 4: Integration Techniques</span>
+          </div>
+          <div class="lh-title">Integration by Parts</div>
+          <div class="lh-meta">
+            <span class="lh-tag">CALCULUS</span>
+            <span class="lh-tag">UNDERGRADUATE</span>
+            <span class="lh-tag">TECHNIQUE</span>
+            <span class="lh-time">~18 min · Generated for you</span>
+          </div>
+        </div>
+
+        <div class="lesson-body">
+          <p class="lesson-p">Integration by parts is one of the most powerful techniques in your calculus toolkit. It lets you integrate products of functions — the kind of integral that substitution can't touch. Whenever you see something like ∫x·eˣ dx or ∫x·sin(x) dx, this is your move.</p>
+
+          <div class="concept-box">
+            <div class="cb-label">Core Formula</div>
+            <div class="cb-formula">∫ u dv = uv − ∫ v du</div>
+            <div class="cb-text">This comes directly from the product rule for derivatives. If you can identify u and dv from your integrand, you can transform a hard integral into a (hopefully) simpler one.</div>
+          </div>
+
+          <div class="lesson-h2">Choosing u and dv — The LIATE Rule</div>
+          <p class="lesson-p">The hardest part is knowing what to call u and what to call dv. The LIATE mnemonic gives you a priority order for choosing u:</p>
+
+          <div class="visual-box">
+            <div class="vb-header">
+              <span class="vb-label">LIATE Priority — Choose u from the top</span>
+            </div>
+            <div class="vb-body" style="padding:16px 20px;">
+              <div style="display:flex;flex-direction:column;gap:8px;">
+                <div style="display:flex;align-items:center;gap:12px;">
+                  <div style="width:2px;height:28px;background:var(--orange);flex-shrink:0;"></div>
+                  <div><span style="font-weight:700;font-size:0.58rem;">L</span><span style="font-size:0.54rem;opacity:0.6;"> — Logarithmic: ln(x), log(x)</span></div>
+                </div>
+                <div style="display:flex;align-items:center;gap:12px;">
+                  <div style="width:2px;height:28px;background:var(--pink);flex-shrink:0;"></div>
+                  <div><span style="font-weight:700;font-size:0.58rem;">I</span><span style="font-size:0.54rem;opacity:0.6;"> — Inverse trig: arctan(x), arcsin(x)</span></div>
+                </div>
+                <div style="display:flex;align-items:center;gap:12px;">
+                  <div style="width:2px;height:28px;background:var(--purple);flex-shrink:0;"></div>
+                  <div><span style="font-weight:700;font-size:0.58rem;">A</span><span style="font-size:0.54rem;opacity:0.6;"> — Algebraic: x², x³, polynomials</span></div>
+                </div>
+                <div style="display:flex;align-items:center;gap:12px;">
+                  <div style="width:2px;height:28px;background:var(--blue);flex-shrink:0;"></div>
+                  <div><span style="font-weight:700;font-size:0.58rem;">T</span><span style="font-size:0.54rem;opacity:0.6;"> — Trig: sin(x), cos(x), tan(x)</span></div>
+                </div>
+                <div style="display:flex;align-items:center;gap:12px;">
+                  <div style="width:2px;height:28px;background:rgba(255,255,255,0.3);flex-shrink:0;"></div>
+                  <div><span style="font-weight:700;font-size:0.58rem;">E</span><span style="font-size:0.54rem;opacity:0.6;"> — Exponential: eˣ, 2ˣ (usually dv)</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="lesson-h2">Worked Example</div>
+          <p class="lesson-p">Let's solve ∫ x·eˣ dx step by step. This is the classic integration by parts problem.</p>
+
+          <div class="visual-box">
+            <div class="vb-header"><span class="vb-label">Step-by-step solution</span></div>
+            <div class="vb-body" style="display:flex;flex-direction:column;gap:12px;">
+              <div style="display:flex;gap:14px;align-items:flex-start;">
+                <div style="width:20px;height:20px;border-radius:50%;background:var(--orange);display:flex;align-items:center;justify-content:center;font-size:0.44rem;font-weight:700;color:#000;flex-shrink:0;">1</div>
+                <div>
+                  <div style="font-size:0.54rem;font-weight:600;margin-bottom:3px;">Identify u and dv</div>
+                  <div style="font-family:'JetBrains Mono',monospace;font-size:0.56rem;color:var(--orange);">u = x  →  du = dx</div>
+                  <div style="font-family:'JetBrains Mono',monospace;font-size:0.56rem;color:var(--blue);">dv = eˣ dx  →  v = eˣ</div>
+                </div>
+              </div>
+              <div style="display:flex;gap:14px;align-items:flex-start;">
+                <div style="width:20px;height:20px;border-radius:50%;background:var(--purple);display:flex;align-items:center;justify-content:center;font-size:0.44rem;font-weight:700;color:#fff;flex-shrink:0;">2</div>
+                <div>
+                  <div style="font-size:0.54rem;font-weight:600;margin-bottom:3px;">Apply the formula: ∫ u dv = uv − ∫ v du</div>
+                  <div style="font-family:'JetBrains Mono',monospace;font-size:0.56rem;">∫ x·eˣ dx = x·eˣ − ∫ eˣ dx</div>
+                </div>
+              </div>
+              <div style="display:flex;gap:14px;align-items:flex-start;">
+                <div style="width:20px;height:20px;border-radius:50%;background:rgba(74,222,128,0.6);display:flex;align-items:center;justify-content:center;font-size:0.44rem;font-weight:700;color:#000;flex-shrink:0;">3</div>
+                <div>
+                  <div style="font-size:0.54rem;font-weight:600;margin-bottom:3px;">Evaluate the remaining integral</div>
+                  <div style="font-family:'JetBrains Mono',monospace;font-size:0.56rem;color:rgba(74,222,128,0.9);">= x·eˣ − eˣ + C = eˣ(x − 1) + C ✓</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="lesson-h2">Explain it a different way</div>
+          <p class="lesson-p">PitStop generates this lesson for your learning style. Switch the analogy:</p>
+          <div class="analogy-strip">
+            <div class="analogy-btn active" onclick="setAnalogy(this,'Default')">Default</div>
+            <div class="analogy-btn" onclick="setAnalogy(this,'Cooking')">🍳 Cooking</div>
+            <div class="analogy-btn" onclick="setAnalogy(this,'Sports')">⚽ Sports</div>
+            <div class="analogy-btn" onclick="setAnalogy(this,'Music')">🎵 Music</div>
+            <div class="analogy-btn" onclick="setAnalogy(this,'Gaming')">🎮 Gaming</div>
+          </div>
+          <p class="lesson-p" id="analogyText">Think of integration by parts as a trade. You're trading a complex integral for a hopefully simpler one. You pick one part of your product to "use up" (u) and another to "integrate" (dv). After the trade, you have a new integral to deal with — but it should be easier. Sometimes you have to do the trade twice.</p>
+
+          <!-- PRACTICE PROBLEM -->
+          <div class="lesson-h2">Practice Problem</div>
+          <div class="practice-box" id="practiceBox">
+            <div class="pb-label">Try it yourself</div>
+            <div class="pb-question">Evaluate: ∫ x·cos(x) dx</div>
+            <div class="pb-options">
+              <div class="pb-option" onclick="checkAnswer(this,false)">
+                <span class="pb-letter">A</span>
+                x·sin(x) + C
+              </div>
+              <div class="pb-option" onclick="checkAnswer(this,true)">
+                <span class="pb-letter">B</span>
+                x·sin(x) + cos(x) + C
+              </div>
+              <div class="pb-option" onclick="checkAnswer(this,false)">
+                <span class="pb-letter">C</span>
+                x·cos(x) − sin(x) + C
+              </div>
+              <div class="pb-option" onclick="checkAnswer(this,false)">
+                <span class="pb-letter">D</span>
+                −x·cos(x) + sin(x) + C
+              </div>
+            </div>
+            <div class="pb-explain" id="pbExplain">
+              ✓ Correct! Let u = x (du = dx) and dv = cos(x)dx (v = sin(x)). Applying ∫u dv = uv − ∫v du gives x·sin(x) − ∫sin(x)dx = x·sin(x) + cos(x) + C.
+            </div>
+            <div class="pb-actions">
+              <button class="pb-btn ghost" onclick="newProblem()">New Problem →</button>
+              <button class="pb-btn ghost" onclick="showHint()">Hint</button>
+            </div>
+          </div>
+
+          <div class="next-lesson-row" onclick="switchScreen('home',null)">
+            <div class="nl-info">
+              <div class="nl-label">Next Lesson</div>
+              <div class="nl-title">Trigonometric Substitution — when to use it and how</div>
+            </div>
+            <div class="nl-arrow">→</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI TUTOR PANEL -->
+      <div class="tutor-panel">
+        <div class="tp-header">
+          <div class="tp-avatar">
+            LU
+            <div class="tp-pulse"></div>
+          </div>
+          <div class="tp-info">
+            <div class="tp-name">Lucidia</div>
+            <div class="tp-status">AI Tutor · Calculus II</div>
+          </div>
+          <div class="tp-mode-btns">
+            <div class="tp-mode active" onclick="setMode(this)">Tutor</div>
+            <div class="tp-mode" onclick="setMode(this)">Quiz</div>
+            <div class="tp-mode" onclick="setMode(this)">Solve</div>
+          </div>
+        </div>
+
+        <div class="tp-messages" id="tpMessages">
+          <div class="msg tutor">
+            <div class="msg-av tutor">LU</div>
+            <div class="msg-bubble">Hey Alexa 👋 I see you're on integration by parts. This tripped you up last week — want me to focus on the u-selection strategy?</div>
+          </div>
+          <div class="msg user">
+            <div class="msg-av user-av">AL</div>
+            <div class="msg-bubble">Yeah I keep picking the wrong u. How do I know which is which?</div>
+          </div>
+          <div class="msg tutor">
+            <div class="msg-av tutor">LU</div>
+            <div class="msg-bubble">Great question. Use <strong>LIATE</strong> — it's a priority list. Whatever appears higher in the list becomes u.<br><br>Logs → Inverse trig → Algebraic → Trig → Exponential<br><br>So for <code>x·eˣ</code>, x is Algebraic (higher) → u = x. The eˣ is Exponential (lower) → dv. Makes sense?</div>
+          </div>
+          <div class="msg tutor">
+            <div class="msg-av tutor">LU</div>
+            <div class="msg-bubble">Try the practice problem. I'll watch your answer and explain what happened — right or wrong.</div>
+          </div>
+        </div>
+
+        <div class="tp-quick-replies">
+          <div class="qr-btn" onclick="sendQuick(this)">Why does LIATE work?</div>
+          <div class="qr-btn" onclick="sendQuick(this)">Show me another example</div>
+          <div class="qr-btn" onclick="sendQuick(this)">When do I apply it twice?</div>
+          <div class="qr-btn" onclick="sendQuick(this)">I'm confused</div>
+        </div>
+
+        <div class="tp-input-row">
+          <textarea class="tp-textarea" placeholder="Ask Lucidia anything…" rows="1" onInput="autoGrow(this)" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg(this)}"></textarea>
+          <button class="tp-send" onclick="sendMsg(this.previousElementSibling)">↑</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ VIDEO SCREEN ══ -->
+  <div class="screen" id="video-screen">
+    <div class="video-screen">
+
+      <div class="video-gen-hero">
+        <div class="vgh-top">
+          <div class="vgh-label">✦ AI Video Generation · PitStop</div>
+          <div class="vgh-title">Any concept. Any length.<br>Generated for you, now.</div>
+          <div class="vgh-sub">Not a library of pre-recorded videos. A video created specifically for your question, at your level, in your preferred style — in under 30 seconds.</div>
+          <div class="vgh-input-row">
+            <input class="vgh-input" id="videoInput" placeholder="Describe what you want explained — 'Why do SN2 reactions invert stereochemistry?' or 'Explain eigenvalues visually'…">
+            <button class="vgh-gen" onclick="handleVideoGen()">Generate Video →</button>
+          </div>
+        </div>
+        <div class="vgh-formats">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:0.4rem;opacity:0.3;margin-right:4px;">Length:</span>
+          <div class="fmt-chip active" onclick="setFmt(this)">⏱ 30 sec</div>
+          <div class="fmt-chip" onclick="setFmt(this)">▶ 3 min</div>
+          <div class="fmt-chip" onclick="setFmt(this)">◉ 10 min</div>
+          <div class="fmt-chip" onclick="setFmt(this)">◈ Deep dive</div>
+          <span style="margin-left:16px;font-family:'JetBrains Mono',monospace;font-size:0.4rem;opacity:0.3;margin-right:4px;">Style:</span>
+          <div class="fmt-chip active" onclick="setFmt(this)">Whiteboard</div>
+          <div class="fmt-chip" onclick="setFmt(this)">Animation</div>
+          <div class="fmt-chip" onclick="setFmt(this)">Talking head</div>
+        </div>
+      </div>
+
+      <div class="section-label">Recent Generations</div>
+      <div class="video-results">
+        <div class="vid-card">
+          <div class="vid-thumb">
+            <div class="vid-thumb-bars">
+              <div class="vtb" style="height:40px;background:var(--orange);animation-delay:0s;"></div>
+              <div class="vtb" style="height:55px;background:var(--pink);animation-delay:0.2s;"></div>
+              <div class="vtb" style="height:35px;background:var(--purple);animation-delay:0.4s;"></div>
+              <div class="vtb" style="height:60px;background:var(--blue);animation-delay:0.1s;"></div>
+              <div class="vtb" style="height:42px;background:var(--orange);animation-delay:0.3s;"></div>
+              <div class="vtb" style="height:50px;background:var(--pink);animation-delay:0.15s;"></div>
+            </div>
+            <div class="vid-play">▶</div>
+            <div class="vid-duration">3:24</div>
+          </div>
+          <div class="vid-info">
+            <div class="vid-subject">CALCULUS · WHITEBOARD</div>
+            <div class="vid-title">Integration by Parts — Visual walkthrough with worked examples</div>
+            <div class="vid-meta">Generated 2h ago · 3 min</div>
+          </div>
+        </div>
+        <div class="vid-card">
+          <div class="vid-thumb">
+            <div class="vid-thumb-bars">
+              <div class="vtb" style="height:50px;background:var(--pink);animation-delay:0.1s;"></div>
+              <div class="vtb" style="height:38px;background:var(--purple);animation-delay:0.25s;"></div>
+              <div class="vtb" style="height:62px;background:var(--orange);animation-delay:0.4s;"></div>
+              <div class="vtb" style="height:30px;background:var(--blue);animation-delay:0.05s;"></div>
+              <div class="vtb" style="height:55px;background:var(--pink);animation-delay:0.35s;"></div>
+            </div>
+            <div class="vid-play">▶</div>
+            <div class="vid-duration">0:47</div>
+          </div>
+          <div class="vid-info">
+            <div class="vid-subject">ORG. CHEM · ANIMATION</div>
+            <div class="vid-title">SN1 vs SN2: Why does substrate structure matter?</div>
+            <div class="vid-meta">Generated yesterday · 30 sec</div>
+          </div>
+        </div>
+        <div class="vid-card">
+          <div class="vid-thumb">
+            <div class="vid-thumb-bars">
+              <div class="vtb" style="height:45px;background:var(--blue);animation-delay:0.2s;"></div>
+              <div class="vtb" style="height:60px;background:var(--purple);animation-delay:0s;"></div>
+              <div class="vtb" style="height:32px;background:var(--orange);animation-delay:0.3s;"></div>
+              <div class="vtb" style="height:50px;background:var(--pink);animation-delay:0.15s;"></div>
+              <div class="vtb" style="height:40px;background:var(--blue);animation-delay:0.45s;"></div>
+            </div>
+            <div class="vid-play">▶</div>
+            <div class="vid-duration">9:58</div>
+          </div>
+          <div class="vid-info">
+            <div class="vid-subject">LINEAR ALGEBRA · WHITEBOARD</div>
+            <div class="vid-title">Eigenvalues & Eigenvectors explained with geometric intuition</div>
+            <div class="vid-meta">Generated 3 days ago · 10 min</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- main -->
+
+  </div><!-- body-wrap -->
+
+  <div class="grad-rule"></div>
+</div>
+
+<script>
+  const analogies = {
+    Default: "Think of integration by parts as a trade. You're trading a complex integral for a hopefully simpler one. You pick one part of your product to 'use up' (u) and another to 'integrate' (dv). After the trade, you have a new integral to deal with — but it should be easier.",
+    Cooking: "Integration by parts is like breaking a complex dish into prep work. You handle one ingredient first (u) — chop, dice, prep. That makes the second ingredient (dv) easier to cook. Together they create the final dish, minus whatever cleanup is left (∫v du).",
+    Sports: "It's like a double play in baseball. One fielder (u) catches the ball and throws to another (v). The second player does their job based on what was handed to them. Together they complete the out (solve the integral) that neither could do alone.",
+    Music: "Think of it like a chord change. You resolve one part of the tension (u) by voicing it a certain way, which transforms the harmonic problem into a simpler resolution (∫v du). The final answer is the phrase that emerges from the interplay.",
+    Gaming: "Integration by parts is like a combo move. You use your primary skill (u) which sets up a secondary attack (v). The first move depletes (differentiates), but the second one lands the damage (∫v du). Chain them correctly and you clear the level."
+  };
+
+  function switchScreen(screen, tab) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(screen + '-screen').classList.add('active');
+    if (tab) {
+      document.querySelectorAll('.tn-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+    }
+  }
+
+  function setSbActive(el) {
+    document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  function setAnalogy(btn, key) {
+    document.querySelectorAll('.analogy-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('analogyText').textContent = analogies[key];
+  }
+
+  function checkAnswer(opt, correct) {
+    document.querySelectorAll('.pb-option').forEach(o => {
+      o.style.pointerEvents = 'none';
+    });
+    opt.classList.add(correct ? 'correct' : 'wrong');
+    if (!correct) {
+      document.querySelectorAll('.pb-option')[1].classList.add('correct');
+    }
+    document.getElementById('pbExplain').classList.add('show');
+    if (correct) addTutorMsg("🎉 Nicely done! That's the correct answer. The key was choosing u = x (algebraic, top of LIATE) and dv = cos(x)dx. Ready for a harder one?");
+    else addTutorMsg("Not quite — but close. The correct answer is B. Remember: integrate dv first to get v = sin(x), then apply uv − ∫v du. Want me to walk through it step by step?");
+  }
+
+  function newProblem() {
+    const problems = [
+      "Evaluate: ∫ x·sin(x) dx",
+      "Evaluate: ∫ ln(x) dx",
+      "Evaluate: ∫ x²·eˣ dx",
+      "Evaluate: ∫ x·ln(x) dx"
+    ];
+    document.querySelector('.pb-question').textContent = problems[Math.floor(Math.random()*problems.length)];
+    document.querySelectorAll('.pb-option').forEach(o => { o.classList.remove('correct','wrong'); o.style.pointerEvents = ''; });
+    document.getElementById('pbExplain').classList.remove('show');
+  }
+
+  function showHint() {
+    addTutorMsg("Hint: For ∫ x·cos(x) dx — x is algebraic and cos(x) is trig. By LIATE, set u = x and dv = cos(x)dx. Then du = dx and v = sin(x). Now apply the formula.");
+  }
+
+  function sendQuick(btn) {
+    const text = btn.textContent;
+    addUserMsg(text);
+    setTimeout(() => {
+      const responses = {
+        "Why does LIATE work?": "LIATE works because of how derivatives behave. Logs simplify when differentiated (ln x → 1/x). Algebraic terms reduce degree when differentiated. Exponentials and trig stay the same or transform predictably. By making the 'gets simpler' thing be u, you guarantee ∫v du is easier than what you started with.",
+        "Show me another example": "Let's do ∫ ln(x) dx. This looks like it doesn't even have a product — but treat it as ∫ ln(x)·1 dx. u = ln(x), dv = 1·dx → du = 1/x dx, v = x. Then: x·ln(x) − ∫x·(1/x)dx = x·ln(x) − ∫1 dx = x·ln(x) − x + C ✓",
+        "When do I apply it twice?": "Apply it twice when the first round leaves you with another IBP integral. Classic case: ∫ x²eˣ dx. First pass: u=x², dv=eˣdx → x²eˣ − 2∫xeˣdx. Now ∫xeˣdx needs another IBP. Sometimes the second pass regenerates the original — then you solve algebraically!",
+        "I'm confused": "That's completely okay — this is one of the trickier techniques. Let's slow down. Which part specifically is unclear: (1) choosing u and dv, (2) applying the formula, or (3) evaluating the resulting integral? Tell me and I'll break it down differently."
+      };
+      addTutorMsg(responses[text] || "Great question! Let me think through that with you...");
+    }, 800);
+  }
+
+  function sendMsg(textarea) {
+    const text = textarea.value.trim();
+    if (!text) return;
+    addUserMsg(text);
+    textarea.value = '';
+    textarea.style.height = '';
+    showTyping();
+    setTimeout(() => {
+      removeTyping();
+      addTutorMsg("Got it. Let me look at that from a few angles. Based on where you are in the curriculum, I think the key insight you're missing is how the choice of u determines whether the new integral simplifies or gets harder. Want me to show a counterexample where the wrong u choice makes it worse?");
+    }, 1400);
+  }
+
+  function addUserMsg(text) {
+    const msgs = document.getElementById('tpMessages');
+    const div = document.createElement('div');
+    div.className = 'msg user';
+    div.innerHTML = `<div class="msg-av user-av">AL</div><div class="msg-bubble">${text}</div>`;
+    msgs.appendChild(div);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  function addTutorMsg(text) {
+    const msgs = document.getElementById('tpMessages');
+    const div = document.createElement('div');
+    div.className = 'msg tutor';
+    div.innerHTML = `<div class="msg-av tutor">LU</div><div class="msg-bubble">${text}</div>`;
+    msgs.appendChild(div);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  function showTyping() {
+    const msgs = document.getElementById('tpMessages');
+    const div = document.createElement('div');
+    div.className = 'msg tutor'; div.id = 'typingIndicator';
+    div.innerHTML = `<div class="msg-av tutor">LU</div><div class="typing-dots"><div class="dot-bounce"></div><div class="dot-bounce"></div><div class="dot-bounce"></div></div>`;
+    msgs.appendChild(div); msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  function removeTyping() {
+    const t = document.getElementById('typingIndicator');
+    if (t) t.remove();
+  }
+
+  function handleQuickAsk(input) {
+    if (!input.value) return;
+    switchScreen('learn', document.querySelectorAll('.tn-tab')[1]);
+    setTimeout(() => { addUserMsg(input.value); showTyping(); setTimeout(() => { removeTyping(); addTutorMsg("Great question. Let me break that down for you in the context of what you've already learned..."); }, 1200); }, 300);
+  }
+
+  function fillAsk(chip) {
+    document.querySelector('.qa-input').value = chip.textContent;
+  }
+
+  function handleVideoGen() {
+    const input = document.getElementById('videoInput');
+    if (!input.value.trim()) return;
+    const btn = document.querySelector('.vgh-gen');
+    btn.textContent = 'Generating…';
+    setTimeout(() => { btn.textContent = '✓ Ready — watch below'; }, 2000);
+    setTimeout(() => { btn.textContent = 'Generate Video →'; }, 4000);
+  }
+
+  function setFmt(btn) {
+    const group = btn.parentElement;
+    const siblings = Array.from(group.querySelectorAll('.fmt-chip'));
+    const myGroup = btn.style;
+    btn.classList.toggle('active');
+  }
+
+  function setMode(btn) {
+    document.querySelectorAll('.tp-mode').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+
+  function autoGrow(el) {
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 80) + 'px';
+  }
+</script>
+
+</body>
+</html>

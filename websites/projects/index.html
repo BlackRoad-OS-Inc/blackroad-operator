@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BlackRoad — Projects</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      background: #000 !important;
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    :root {
+      --grad: linear-gradient(90deg, #FF8400, #FF4400, #FF0066, #CC00AA, #8800FF, #0066FF, #2233CC);
+      --orange: #FF8400;
+      --red:    #FF4400;
+      --pink:   #FF0066;
+      --purple: #8800FF;
+      --blue:   #0066FF;
+      --navy:   #2233CC;
+    }
+
+    .grad-rule { height: 3px; background: var(--grad); flex-shrink: 0; }
+
+    /* ── SHELL ── */
+    .shell { display: flex; flex-direction: column; height: 100vh; background: #000 !important; }
+
+    /* ── TOP NAV ── */
+    .topnav {
+      height: 48px; flex-shrink: 0;
+      display: flex; align-items: center;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      background: #000 !important;
+      position: relative; z-index: 50;
+    }
+    .tn-brand {
+      display: flex; align-items: center; gap: 9px;
+      padding: 0 18px; border-right: 1px solid rgba(255,255,255,0.08);
+      height: 100%; flex-shrink: 0;
+    }
+    .tn-mark {
+      width: 24px; height: 24px;
+      background: var(--grad);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.5rem; font-weight: 700; color: #000;
+    }
+    .tn-name { font-family: 'Space Grotesk', sans-serif; font-size: 0.78rem; font-weight: 700; }
+    .tn-product { font-family: 'JetBrains Mono', monospace; font-size: 0.38rem; opacity: 0.3; letter-spacing: 0.18em; text-transform: uppercase; margin-left: 2px; }
+
+    /* project switcher */
+    .tn-project {
+      display: flex; align-items: center; gap: 8px;
+      padding: 0 16px; border-right: 1px solid rgba(255,255,255,0.08);
+      height: 100%; cursor: pointer; transition: background 0.12s;
+    }
+    .tn-project:hover { background: rgba(255,255,255,0.03); }
+    .tnp-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--orange); }
+    .tnp-name { font-size: 0.54rem; font-weight: 600; }
+    .tnp-arr { font-size: 0.5rem; opacity: 0.25; margin-left: 2px; }
+
+    /* view tabs */
+    .tn-tabs { display: flex; height: 100%; margin-left: 4px; }
+    .tn-tab {
+      display: flex; align-items: center; gap: 6px;
+      padding: 0 14px; font-size: 0.5rem; font-weight: 500;
+      opacity: 0.35; cursor: pointer; border-bottom: 2px solid transparent;
+      transition: all 0.12s; user-select: none;
+    }
+    .tn-tab:hover { opacity: 0.7; }
+    .tn-tab.active { opacity: 1; border-bottom-color: #fff; }
+    .tn-tab-icon { font-size: 0.65rem; }
+
+    /* right side */
+    .tn-right { margin-left: auto; display: flex; align-items: center; gap: 8px; padding: 0 14px; }
+    .tn-search {
+      display: flex; align-items: center; gap: 7px;
+      border: 1px solid rgba(255,255,255,0.1);
+      padding: 5px 10px; background: #000 !important;
+    }
+    .tn-search input {
+      background: none; border: none; outline: none;
+      color: #fff; font-family: 'JetBrains Mono', monospace;
+      font-size: 0.5rem; width: 160px; caret-color: var(--orange);
+    }
+    .tn-search input::placeholder { color: rgba(255,255,255,0.2); }
+    .tn-search-icon { font-size: 0.55rem; opacity: 0.2; }
+    .tn-btn {
+      display: flex; align-items: center; gap: 5px;
+      padding: 6px 12px; font-family: 'JetBrains Mono', monospace;
+      font-size: 0.46rem; font-weight: 700; cursor: pointer;
+      transition: all 0.12s; border: none;
+    }
+    .tn-btn.primary { background: #fff !important; color: #000; }
+    .tn-btn.primary:hover { opacity: 0.88; }
+    .tn-avatar {
+      width: 26px; height: 26px; border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: #111 !important;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.42rem; font-weight: 700; cursor: pointer;
+    }
+
+    /* ── BODY ── */
+    .body-row { display: flex; flex: 1; overflow: hidden; }
+
+    /* ── LEFT SIDEBAR ── */
+    .sidebar {
+      width: 210px; flex-shrink: 0;
+      border-right: 1px solid rgba(255,255,255,0.07);
+      display: flex; flex-direction: column;
+      background: #000 !important;
+      overflow-y: auto; scrollbar-width: none;
+    }
+    .sidebar::-webkit-scrollbar { display: none; }
+
+    .sb-section { padding: 16px 0 4px; }
+    .sb-head {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.37rem; letter-spacing: 0.2em;
+      text-transform: uppercase; opacity: 0.22;
+      padding: 0 14px; margin-bottom: 4px;
+    }
+    .sb-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 7px 14px; cursor: pointer;
+      border-left: 2px solid transparent;
+      transition: all 0.12s;
+    }
+    .sb-item:hover { background: rgba(255,255,255,0.03) !important; }
+    .sb-item.active { border-left-color: #fff; background: rgba(255,255,255,0.04) !important; }
+    .sbi-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .sbi-label { font-size: 0.5rem; opacity: 0.5; }
+    .sb-item.active .sbi-label { opacity: 1; font-weight: 600; }
+    .sbi-count { margin-left: auto; font-family: 'JetBrains Mono', monospace; font-size: 0.38rem; opacity: 0.25; }
+
+    /* sprint info block */
+    .sprint-block {
+      margin: 12px 10px;
+      border: 1px solid rgba(255,255,255,0.08);
+      padding: 10px 12px;
+    }
+    .sb-sprint-label { font-family: 'JetBrains Mono', monospace; font-size: 0.37rem; opacity: 0.25; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 6px; }
+    .sb-sprint-name { font-size: 0.52rem; font-weight: 600; margin-bottom: 8px; }
+    .sprint-progress-track { height: 2px; background: rgba(255,255,255,0.08); margin-bottom: 4px; }
+    .sprint-progress-fill { height: 100%; background: var(--grad); }
+    .sprint-stats { display: flex; justify-content: space-between; font-family: 'JetBrains Mono', monospace; font-size: 0.38rem; opacity: 0.3; }
+
+    /* agent stack */
+    .agent-stack { display: flex; padding: 8px 14px; gap: -4px; }
+    .agent-pip {
+      width: 22px; height: 22px; border-radius: 50%;
+      border: 2px solid #000;
+      background: #111 !important;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.38rem; font-weight: 700;
+      margin-left: -6px; cursor: pointer;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .agent-pip:first-child { margin-left: 0; }
+    .agent-more { opacity: 0.35; }
+
+    /* ── MAIN AREA ── */
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+    /* subheader */
+    .subheader {
+      height: 44px; flex-shrink: 0;
+      display: flex; align-items: center; gap: 12px;
+      padding: 0 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      background: #000 !important;
+    }
+    .sh-title { font-family: 'Space Grotesk', sans-serif; font-size: 0.88rem; font-weight: 700; }
+    .sh-badge {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.42rem;
+      border: 1px solid rgba(255,255,255,0.15); padding: 2px 7px;
+      opacity: 0.5;
+    }
+    .sh-divider { width: 1px; height: 18px; background: rgba(255,255,255,0.08); }
+    .sh-filter {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 0.46rem; opacity: 0.4; cursor: pointer;
+      padding: 4px 8px; border: 1px solid transparent;
+      transition: all 0.12s;
+    }
+    .sh-filter:hover { border-color: rgba(255,255,255,0.2); opacity: 0.8; }
+    .sh-filter.on { border-color: rgba(255,255,255,0.3); opacity: 1; background: rgba(255,255,255,0.04) !important; }
+    .sh-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+    .sh-group-btn {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.44rem; opacity: 0.35; cursor: pointer;
+      background: none; border: 1px solid rgba(255,255,255,0.1);
+      color: #fff; padding: 4px 10px; transition: all 0.12s;
+    }
+    .sh-group-btn:hover { opacity: 0.8; border-color: rgba(255,255,255,0.3); }
+
+    /* ── KANBAN ── */
+    .kanban-scroll { flex: 1; overflow-x: auto; overflow-y: hidden; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.1) transparent; }
+    .kanban-board { display: flex; gap: 12px; padding: 16px 20px; height: 100%; min-width: max-content; }
+
+    .kanban-col { width: 272px; flex-shrink: 0; display: flex; flex-direction: column; }
+    .kc-header {
+      display: flex; align-items: center; gap: 8px;
+      padding: 0 0 10px; margin-bottom: 0;
+    }
+    .kc-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .kc-name { font-size: 0.54rem; font-weight: 600; flex: 1; }
+    .kc-count { font-family: 'JetBrains Mono', monospace; font-size: 0.42rem; opacity: 0.3; }
+    .kc-add { font-size: 0.8rem; opacity: 0.2; cursor: pointer; transition: opacity 0.12s; background: none; border: none; color: #fff; }
+    .kc-add:hover { opacity: 0.8; }
+
+    .kc-cards { flex: 1; overflow-y: auto; scrollbar-width: none; display: flex; flex-direction: column; gap: 6px; padding-bottom: 12px; }
+    .kc-cards::-webkit-scrollbar { display: none; }
+
+    /* ── TASK CARD ── */
+    .task-card {
+      border: 1px solid rgba(255,255,255,0.08);
+      padding: 12px;
+      cursor: pointer; background: #000 !important;
+      transition: all 0.15s; position: relative;
+    }
+    .task-card:hover { border-color: rgba(255,255,255,0.25); background: rgba(255,255,255,0.02) !important; }
+    .task-card.selected { border-color: rgba(255,255,255,0.5); background: rgba(255,255,255,0.03) !important; }
+    .task-card-accent { position: absolute; left: 0; top: 0; bottom: 0; width: 2px; }
+
+    .tc-tags { display: flex; gap: 4px; margin-bottom: 8px; flex-wrap: wrap; }
+    .tc-tag {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.38rem;
+      border: 1px solid rgba(255,255,255,0.12); padding: 1px 6px;
+      opacity: 0.5;
+    }
+    .tc-title { font-size: 0.54rem; font-weight: 600; line-height: 1.4; margin-bottom: 8px; }
+    .tc-desc { font-size: 0.46rem; opacity: 0.35; line-height: 1.6; margin-bottom: 10px; }
+
+    /* subtask progress */
+    .tc-subtasks { margin-bottom: 10px; }
+    .tc-sub-row { display: flex; align-items: center; gap: 6px; margin-bottom: 3px; }
+    .tc-sub-check {
+      width: 10px; height: 10px; border: 1px solid rgba(255,255,255,0.25);
+      flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+      font-size: 0.4rem; cursor: pointer;
+    }
+    .tc-sub-check.done { border-color: rgba(255,255,255,0.6); background: rgba(255,255,255,0.1) !important; }
+    .tc-sub-text { font-size: 0.44rem; opacity: 0.4; }
+    .tc-sub-text.done { text-decoration: line-through; opacity: 0.22; }
+
+    .tc-progress-bar { height: 1px; background: rgba(255,255,255,0.07); margin-bottom: 10px; position: relative; }
+    .tc-progress-fill { position: absolute; top: 0; left: 0; height: 100%; }
+
+    .tc-meta { display: flex; align-items: center; gap: 8px; }
+    .tc-priority {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.38rem;
+      padding: 1px 6px; font-weight: 700;
+    }
+    .pri-high   { background: rgba(255,0,102,0.15) !important; color: #FF0066; }
+    .pri-med    { background: rgba(255,132,0,0.15) !important; color: #FF8400; }
+    .pri-low    { background: rgba(0,102,255,0.15) !important; color: #0066FF; }
+    .tc-due     { font-family: 'JetBrains Mono', monospace; font-size: 0.42rem; opacity: 0.28; margin-left: auto; }
+    .tc-due.overdue { color: #FF0066; opacity: 0.8; }
+
+    .tc-footer { display: flex; align-items: center; margin-top: 8px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 8px; }
+    .tc-assignee {
+      width: 18px; height: 18px; border-radius: 50%;
+      background: #111 !important; border: 1px solid rgba(255,255,255,0.12);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.35rem; font-weight: 700; font-family: 'JetBrains Mono', monospace;
+      margin-right: -5px;
+    }
+    .tc-stats { margin-left: auto; display: flex; gap: 10px; }
+    .tc-stat { font-family: 'JetBrains Mono', monospace; font-size: 0.4rem; opacity: 0.25; display: flex; align-items: center; gap: 3px; }
+
+    /* drop zone */
+    .drop-zone {
+      border: 1px dashed rgba(255,255,255,0.1);
+      padding: 10px; text-align: center;
+      font-size: 0.44rem; opacity: 0.25;
+      cursor: pointer; transition: all 0.12s;
+    }
+    .drop-zone:hover { border-color: rgba(255,255,255,0.3); opacity: 0.6; }
+
+    /* ── STAT BAR ── */
+    .stat-bar {
+      display: flex; border-bottom: 1px solid rgba(255,255,255,0.07);
+      flex-shrink: 0;
+    }
+    .stat-cell {
+      flex: 1; padding: 10px 20px;
+      border-right: 1px solid rgba(255,255,255,0.06);
+      display: flex; flex-direction: column; gap: 3px;
+    }
+    .stat-cell:last-child { border-right: none; }
+    .stat-val { font-family: 'Space Grotesk', sans-serif; font-size: 1.3rem; font-weight: 700; line-height: 1; }
+    .stat-lbl { font-family: 'JetBrains Mono', monospace; font-size: 0.38rem; opacity: 0.25; letter-spacing: 0.12em; text-transform: uppercase; }
+    .stat-delta { font-family: 'JetBrains Mono', monospace; font-size: 0.4rem; margin-top: 1px; }
+    .delta-up { color: #4ADE80; }
+    .delta-dn { color: #FF4400; }
+
+    /* ── DETAIL PANEL ── */
+    .detail-panel {
+      width: 280px; flex-shrink: 0;
+      border-left: 1px solid rgba(255,255,255,0.08);
+      display: flex; flex-direction: column;
+      background: #000 !important;
+      overflow-y: auto; scrollbar-width: none;
+      transition: width 0.2s;
+    }
+    .detail-panel::-webkit-scrollbar { display: none; }
+
+    .dp-top { padding: 14px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .dp-top-row { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 10px; }
+    .dp-status-select {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.42rem;
+      border: 1px solid rgba(255,255,255,0.12);
+      padding: 3px 8px; color: #fff;
+      background: #000 !important; cursor: pointer; outline: none;
+      flex-shrink: 0;
+    }
+    .dp-title { font-size: 0.72rem; font-weight: 700; line-height: 1.3; margin-bottom: 8px; }
+    .dp-desc { font-size: 0.48rem; opacity: 0.4; line-height: 1.7; }
+
+    .dp-section { padding: 12px 14px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .dp-sec-label { font-family: 'JetBrains Mono', monospace; font-size: 0.36rem; opacity: 0.2; letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 10px; }
+    .dp-field { display: flex; align-items: center; gap: 8px; margin-bottom: 9px; }
+    .dp-field-label { font-size: 0.44rem; opacity: 0.3; width: 70px; flex-shrink: 0; }
+    .dp-field-val { font-size: 0.46rem; font-weight: 500; }
+    .dp-field-mono { font-family: 'JetBrains Mono', monospace; font-size: 0.44rem; }
+
+    .dp-assignees { display: flex; gap: 4px; flex-wrap: wrap; }
+    .dp-assignee {
+      display: flex; align-items: center; gap: 5px;
+      border: 1px solid rgba(255,255,255,0.1);
+      padding: 3px 8px;
+    }
+    .dp-av { width: 14px; height: 14px; border-radius: 50%; background: #111 !important; display: flex; align-items: center; justify-content: center; font-size: 0.3rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+    .dp-aname { font-size: 0.44rem; }
+
+    .dp-activity { padding: 12px 14px; }
+    .dp-act-item { display: flex; gap: 8px; margin-bottom: 12px; }
+    .dp-act-av { width: 20px; height: 20px; border-radius: 50%; background: #111 !important; display: flex; align-items: center; justify-content: center; font-size: 0.35rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; flex-shrink: 0; }
+    .dp-act-body { flex: 1; }
+    .dp-act-text { font-size: 0.46rem; opacity: 0.55; line-height: 1.5; }
+    .dp-act-text strong { opacity: 1; color: #fff; }
+    .dp-act-time { font-family: 'JetBrains Mono', monospace; font-size: 0.38rem; opacity: 0.2; margin-top: 3px; }
+
+    .dp-comment-row {
+      padding: 10px 14px;
+      border-top: 1px solid rgba(255,255,255,0.07);
+      display: flex; gap: 8px; align-items: flex-end;
+    }
+    .dp-comment-input {
+      flex: 1; background: #000 !important;
+      border: 1px solid rgba(255,255,255,0.1);
+      color: #fff; font-family: 'Inter', sans-serif;
+      font-size: 0.48rem; padding: 7px 10px; outline: none;
+      resize: none; min-height: 32px; max-height: 80px;
+      caret-color: var(--orange); line-height: 1.5;
+    }
+    .dp-comment-input::placeholder { color: rgba(255,255,255,0.2); }
+    .dp-send {
+      padding: 6px 12px; background: #fff !important; color: #000;
+      border: none; font-family: 'JetBrains Mono', monospace;
+      font-size: 0.44rem; font-weight: 700; cursor: pointer; flex-shrink: 0;
+    }
+
+    /* ── ANIMATIONS ── */
+    @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.7)} }
+    .pulse { animation: pulse 2s ease-in-out infinite; }
+
+    @keyframes slideIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
+    .slide-in { animation: slideIn 0.2s ease forwards; }
+
+    @media (max-width: 900px) {
+      .sidebar { display: none; }
+      .detail-panel { display: none; }
+      .stat-bar .stat-cell:nth-child(n+4) { display: none; }
+    }
+  </style>
+</head>
+<body>
+<div class="shell">
+  <div class="grad-rule"></div>
+
+  <!-- TOP NAV -->
+  <nav class="topnav">
+    <div class="tn-brand">
+      <div class="tn-mark">BR</div>
+      <div>
+        <span class="tn-name">BlackRoad</span>
+        <span class="tn-product">Projects</span>
+      </div>
+    </div>
+
+    <div class="tn-project">
+      <div class="tnp-dot"></div>
+      <span class="tnp-name">blackroad-os</span>
+      <span class="tnp-arr">&#9662;</span>
+    </div>
+
+    <div class="tn-tabs">
+      <div class="tn-tab active" onclick="switchView('kanban',this)">
+        <span class="tn-tab-icon">&#8862;</span> Board
+      </div>
+      <div class="tn-tab" onclick="switchView('list',this)">
+        <span class="tn-tab-icon">&#9776;</span> List
+      </div>
+      <div class="tn-tab" onclick="switchView('timeline',this)">
+        <span class="tn-tab-icon">&#9473;</span> Timeline
+      </div>
+    </div>
+
+    <div class="tn-right">
+      <div class="tn-search">
+        <span class="tn-search-icon">&#9678;</span>
+        <input type="text" placeholder="Search tasks...">
+      </div>
+      <button class="tn-btn primary" onclick="flashNew(this)">+ Task</button>
+      <div class="tn-avatar">AL</div>
+    </div>
+  </nav>
+
+  <div class="body-row">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sb-section">
+        <div class="sb-head">Projects</div>
+        <div class="sb-item active">
+          <div class="sbi-dot" style="background:var(--orange);"></div>
+          <span class="sbi-label">blackroad-os</span>
+          <span class="sbi-count">42</span>
+        </div>
+        <div class="sb-item">
+          <div class="sbi-dot" style="background:var(--purple);"></div>
+          <span class="sbi-label">lucidia</span>
+          <span class="sbi-count">28</span>
+        </div>
+        <div class="sb-item">
+          <div class="sbi-dot" style="background:var(--blue);"></div>
+          <span class="sbi-label">roadwork</span>
+          <span class="sbi-count">15</span>
+        </div>
+        <div class="sb-item">
+          <div class="sbi-dot" style="background:var(--pink);"></div>
+          <span class="sbi-label">pitstop</span>
+          <span class="sbi-count">31</span>
+        </div>
+        <div class="sb-item" style="opacity:0.4;">
+          <div class="sbi-dot" style="background:rgba(255,255,255,0.2);"></div>
+          <span class="sbi-label">+ New project</span>
+        </div>
+      </div>
+
+      <div class="sprint-block">
+        <div class="sb-sprint-label">Current Sprint</div>
+        <div class="sb-sprint-name">Sprint 08 — Core Auth</div>
+        <div class="sprint-progress-track">
+          <div class="sprint-progress-fill" style="width:64%;"></div>
+        </div>
+        <div class="sprint-stats">
+          <span>16/25 tasks</span>
+          <span>6d left</span>
+        </div>
+      </div>
+
+      <div class="sb-section">
+        <div class="sb-head">My Tasks</div>
+        <div class="sb-item">
+          <span class="sbi-label">Assigned to me</span>
+          <span class="sbi-count">8</span>
+        </div>
+        <div class="sb-item">
+          <span class="sbi-label">Due this week</span>
+          <span class="sbi-count" style="color:var(--pink);opacity:1;">3</span>
+        </div>
+        <div class="sb-item">
+          <span class="sbi-label">Overdue</span>
+          <span class="sbi-count" style="color:var(--pink);opacity:1;">1</span>
+        </div>
+      </div>
+
+      <div class="sb-section">
+        <div class="sb-head">Agents</div>
+        <div style="padding:6px 14px;">
+          <div class="agent-stack">
+            <div class="agent-pip" style="border-color:#000;" title="Cecilia">CE</div>
+            <div class="agent-pip" style="border-color:#000;" title="Atlas">AT</div>
+            <div class="agent-pip" style="border-color:#000;" title="Olympia">OL</div>
+            <div class="agent-pip" style="border-color:#000;" title="Eve">EV</div>
+            <div class="agent-pip agent-more" title="+3 more">+3</div>
+          </div>
+          <div style="font-size:0.42rem;opacity:0.25;padding-top:6px;">4 agents active on this project</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <div class="main">
+
+      <!-- STAT BAR -->
+      <div class="stat-bar">
+        <div class="stat-cell">
+          <div class="stat-val">42</div>
+          <div class="stat-lbl">Total Tasks</div>
+          <div class="stat-delta delta-up">&#9650; 6 this sprint</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-val">16</div>
+          <div class="stat-lbl">In Progress</div>
+          <div class="stat-delta" style="opacity:0.3;">64% sprint done</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-val">3</div>
+          <div class="stat-lbl">Due Soon</div>
+          <div class="stat-delta delta-dn">1 overdue</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-val">78%</div>
+          <div class="stat-lbl">Velocity</div>
+          <div class="stat-delta delta-up">&#9650; vs last sprint</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-val">7</div>
+          <div class="stat-lbl">Active Agents</div>
+          <div class="stat-delta" style="opacity:0.3;">Cecilia, Atlas +5</div>
+        </div>
+      </div>
+
+      <!-- SUBHEADER -->
+      <div class="subheader">
+        <span class="sh-title">blackroad-os</span>
+        <span class="sh-badge">SPRINT 08</span>
+        <div class="sh-divider"></div>
+        <div class="sh-filter on" onclick="this.classList.toggle('on')">&#9679; Priority</div>
+        <div class="sh-filter" onclick="this.classList.toggle('on')">Assignee</div>
+        <div class="sh-filter" onclick="this.classList.toggle('on')">Label</div>
+        <div class="sh-filter" onclick="this.classList.toggle('on')">Due date</div>
+        <div class="sh-right">
+          <button class="sh-group-btn">Group: Status &#9662;</button>
+        </div>
+      </div>
+
+      <!-- KANBAN -->
+      <div class="kanban-scroll" id="kanbanView">
+        <div class="kanban-board">
+
+          <!-- BACKLOG -->
+          <div class="kanban-col">
+            <div class="kc-header">
+              <div class="kc-dot" style="background:rgba(255,255,255,0.25);"></div>
+              <span class="kc-name">Backlog</span>
+              <span class="kc-count">6</span>
+              <button class="kc-add" onclick="addCard('backlog')">+</button>
+            </div>
+            <div class="kc-cards" id="backlog">
+              <div class="task-card" onclick="selectTask(this,'BLK-041','RoadCoin wallet integration','Connect RoadCoin economic layer to user accounts.','Backlog')">
+                <div class="task-card-accent" style="background:var(--purple);"></div>
+                <div class="tc-tags"><span class="tc-tag">feature</span><span class="tc-tag">roadcoin</span></div>
+                <div class="tc-title">RoadCoin wallet integration</div>
+                <div class="tc-meta">
+                  <span class="tc-priority pri-med">MED</span>
+                  <span class="tc-due">Apr 20</span>
+                </div>
+                <div class="tc-footer">
+                  <div class="tc-assignee">CE</div>
+                  <div class="tc-stats"><span class="tc-stat">&#9633; 0/4</span></div>
+                </div>
+              </div>
+              <div class="task-card" onclick="selectTask(this,'BLK-040','Agent log viewer UI','Build UI for browsing Cece ledger events.','Backlog')">
+                <div class="task-card-accent" style="background:var(--blue);"></div>
+                <div class="tc-tags"><span class="tc-tag">ui</span><span class="tc-tag">cece</span></div>
+                <div class="tc-title">Agent log viewer UI</div>
+                <div class="tc-meta">
+                  <span class="tc-priority pri-low">LOW</span>
+                  <span class="tc-due">Apr 28</span>
+                </div>
+                <div class="tc-footer">
+                  <div class="tc-assignee">AT</div>
+                  <div class="tc-stats"><span class="tc-stat">&#9633; 0/3</span></div>
+                </div>
+              </div>
+              <div class="drop-zone" onclick="addCard('backlog')">+ Add task</div>
+            </div>
+          </div>
+
+          <!-- IN PROGRESS -->
+          <div class="kanban-col">
+            <div class="kc-header">
+              <div class="kc-dot" style="background:var(--orange);"></div>
+              <span class="kc-name">In Progress</span>
+              <span class="kc-count">7</span>
+              <button class="kc-add" onclick="addCard('inprog')">+</button>
+            </div>
+            <div class="kc-cards" id="inprog">
+              <div class="task-card selected" onclick="selectTask(this,'BLK-034','User auth & session management','Implement JWT-based auth with magic link + password options.','In Progress')">
+                <div class="task-card-accent" style="background:var(--orange);"></div>
+                <div class="tc-tags"><span class="tc-tag">auth</span><span class="tc-tag">core</span><span class="tc-tag">sprint-08</span></div>
+                <div class="tc-title">User auth & session management</div>
+                <div class="tc-subtasks">
+                  <div class="tc-sub-row"><div class="tc-sub-check done">&#10003;</div><span class="tc-sub-text done">Magic link email flow</span></div>
+                  <div class="tc-sub-row"><div class="tc-sub-check done">&#10003;</div><span class="tc-sub-text done">JWT token issuance</span></div>
+                  <div class="tc-sub-row"><div class="tc-sub-check"></div><span class="tc-sub-text">Session refresh logic</span></div>
+                  <div class="tc-sub-row"><div class="tc-sub-check"></div><span class="tc-sub-text">Role-based gating</span></div>
+                </div>
+                <div class="tc-progress-bar"><div class="tc-progress-fill" style="width:50%;background:var(--orange);"></div></div>
+                <div class="tc-meta">
+                  <span class="tc-priority pri-high">HIGH</span>
+                  <span class="tc-due">Apr 4</span>
+                </div>
+                <div class="tc-footer">
+                  <div class="tc-assignee">CE</div>
+                  <div class="tc-assignee">EV</div>
+                  <div class="tc-stats"><span class="tc-stat">&#9633; 2/4</span><span class="tc-stat">&#9678; 5</span></div>
+                </div>
+              </div>
+              <div class="task-card" onclick="selectTask(this,'BLK-033','Cece policy evaluate endpoint','Build /policy/evaluate REST endpoint.','In Progress')">
+                <div class="task-card-accent" style="background:var(--purple);"></div>
+                <div class="tc-tags"><span class="tc-tag">governance</span><span class="tc-tag">api</span></div>
+                <div class="tc-title">Cece policy evaluate endpoint</div>
+                <div class="tc-progress-bar"><div class="tc-progress-fill" style="width:67%;background:var(--purple);"></div></div>
+                <div class="tc-meta">
+                  <span class="tc-priority pri-high">HIGH</span>
+                  <span class="tc-due">Apr 3</span>
+                </div>
+                <div class="tc-footer">
+                  <div class="tc-assignee">CE</div>
+                  <div class="tc-stats"><span class="tc-stat">&#9633; 2/3</span></div>
+                </div>
+              </div>
+              <div class="drop-zone">+ Add task</div>
+            </div>
+          </div>
+
+          <!-- REVIEW -->
+          <div class="kanban-col">
+            <div class="kc-header">
+              <div class="kc-dot" style="background:var(--blue);"></div>
+              <span class="kc-name">In Review</span>
+              <span class="kc-count">4</span>
+              <button class="kc-add">+</button>
+            </div>
+            <div class="kc-cards">
+              <div class="task-card" onclick="selectTask(this,'BLK-029','DB schema migrations v2','Add ledger_events, policies, and assignments tables.','In Review')">
+                <div class="task-card-accent" style="background:var(--blue);"></div>
+                <div class="tc-tags"><span class="tc-tag">db</span><span class="tc-tag">migrations</span></div>
+                <div class="tc-title">DB schema migrations v2</div>
+                <div class="tc-meta">
+                  <span class="tc-priority pri-high">HIGH</span>
+                  <span class="tc-due">Apr 1</span>
+                </div>
+                <div class="tc-footer">
+                  <div class="tc-assignee">AT</div>
+                  <div class="tc-stats"><span class="tc-stat">&#9633; 4/4</span></div>
+                </div>
+              </div>
+              <div class="drop-zone">+ Add task</div>
+            </div>
+          </div>
+
+          <!-- DONE -->
+          <div class="kanban-col">
+            <div class="kc-header">
+              <div class="kc-dot" style="background:rgba(74,222,128,0.7);"></div>
+              <span class="kc-name">Done</span>
+              <span class="kc-count">17</span>
+              <button class="kc-add">+</button>
+            </div>
+            <div class="kc-cards">
+              <div class="task-card" style="opacity:0.55;" onclick="selectTask(this,'BLK-025','Railway service provisioning','Create Railway projects for services.','Done')">
+                <div class="task-card-accent" style="background:rgba(74,222,128,0.6);"></div>
+                <div class="tc-tags"><span class="tc-tag">infra</span></div>
+                <div class="tc-title">Railway service provisioning</div>
+                <div class="tc-meta">
+                  <span class="tc-priority pri-med">MED</span>
+                  <span class="tc-due" style="color:rgba(74,222,128,0.7);">&#10003; Mar 26</span>
+                </div>
+                <div class="tc-footer">
+                  <div class="tc-assignee">AT</div>
+                  <div class="tc-stats"><span class="tc-stat">&#9633; 3/3</span></div>
+                </div>
+              </div>
+              <div class="task-card" style="opacity:0.55;" onclick="selectTask(this,'BLK-022','Next.js app shell','Scaffold blackroad-os-web.','Done')">
+                <div class="task-card-accent" style="background:rgba(74,222,128,0.6);"></div>
+                <div class="tc-tags"><span class="tc-tag">core</span><span class="tc-tag">frontend</span></div>
+                <div class="tc-title">Next.js app shell</div>
+                <div class="tc-meta">
+                  <span class="tc-priority pri-high">HIGH</span>
+                  <span class="tc-due" style="color:rgba(74,222,128,0.7);">&#10003; Mar 24</span>
+                </div>
+                <div class="tc-footer">
+                  <div class="tc-assignee">CE</div>
+                  <div class="tc-stats"><span class="tc-stat">&#9633; 6/6</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- DETAIL PANEL -->
+    <aside class="detail-panel" id="detailPanel">
+      <div class="dp-top">
+        <div class="dp-top-row">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:0.42rem;opacity:0.3;" id="dpId">BLK-034</span>
+          <select class="dp-status-select" id="dpStatus">
+            <option>In Progress</option>
+            <option>To Do</option>
+            <option>In Review</option>
+            <option>Done</option>
+            <option>Backlog</option>
+          </select>
+        </div>
+        <div class="dp-title" id="dpTitle">User auth & session management</div>
+        <div class="dp-desc" id="dpDesc">Implement JWT-based auth with magic link + password options, session persistence, and refresh flow.</div>
+      </div>
+
+      <div class="dp-section">
+        <div class="dp-sec-label">Details</div>
+        <div class="dp-field">
+          <span class="dp-field-label">Priority</span>
+          <span class="tc-priority pri-high">HIGH</span>
+        </div>
+        <div class="dp-field">
+          <span class="dp-field-label">Due</span>
+          <span class="dp-field-mono">Apr 4, 2026</span>
+        </div>
+        <div class="dp-field">
+          <span class="dp-field-label">Sprint</span>
+          <span class="dp-field-mono">Sprint 08</span>
+        </div>
+      </div>
+
+      <div class="dp-section">
+        <div class="dp-sec-label">Assigned Agents</div>
+        <div class="dp-assignees">
+          <div class="dp-assignee">
+            <div class="dp-av" style="background:rgba(255,132,0,0.3) !important;">CE</div>
+            <span class="dp-aname">Cecilia</span>
+          </div>
+          <div class="dp-assignee">
+            <div class="dp-av" style="background:rgba(255,0,102,0.3) !important;">EV</div>
+            <span class="dp-aname">Eve</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="dp-activity">
+        <div class="dp-sec-label">Activity</div>
+        <div class="dp-act-item">
+          <div class="dp-act-av" style="background:rgba(255,132,0,0.3) !important;">CE</div>
+          <div class="dp-act-body">
+            <div class="dp-act-text"><strong>Cecilia</strong> completed subtask "JWT token issuance"</div>
+            <div class="dp-act-time">2h ago</div>
+          </div>
+        </div>
+        <div class="dp-act-item">
+          <div class="dp-act-av">AL</div>
+          <div class="dp-act-body">
+            <div class="dp-act-text"><strong>Alexa</strong> created task and assigned to Cecilia + Eve</div>
+            <div class="dp-act-time">Mar 28</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dp-comment-row">
+        <textarea class="dp-comment-input" placeholder="Add a comment..." rows="1"></textarea>
+        <button class="dp-send">Send</button>
+      </div>
+    </aside>
+
+  </div>
+
+  <div class="grad-rule"></div>
+</div>
+
+<script>
+  function switchView(view, tab) {
+    document.querySelectorAll('.tn-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('kanbanView').style.display = view === 'kanban' ? '' : 'none';
+  }
+
+  function selectTask(el, id, title, desc, status) {
+    document.querySelectorAll('.task-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    document.getElementById('dpId').textContent = id;
+    document.getElementById('dpTitle').textContent = title;
+    document.getElementById('dpDesc').textContent = desc;
+    document.getElementById('dpStatus').value = status;
+  }
+
+  function addCard(col) {
+    const title = prompt('Task title:');
+    if (!title) return;
+    const container = document.getElementById(col);
+    const dropZone = container.querySelector('.drop-zone');
+    const card = document.createElement('div');
+    card.className = 'task-card slide-in';
+    card.innerHTML = '<div class="task-card-accent" style="background:var(--orange);"></div><div class="tc-tags"><span class="tc-tag">new</span></div><div class="tc-title">' + title + '</div><div class="tc-meta"><span class="tc-priority pri-med">MED</span><span class="tc-due">TBD</span></div>';
+    container.insertBefore(card, dropZone);
+  }
+
+  function flashNew(btn) {
+    btn.textContent = '✓ Opening...';
+    setTimeout(() => { btn.textContent = '+ Task'; addCard('inprog'); }, 400);
+  }
+</script>
+
+</body>
+</html>
