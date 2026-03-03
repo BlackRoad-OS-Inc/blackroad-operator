@@ -1485,6 +1485,22 @@ worlds.sort(reverse=True)
         auth)
             zsh "${BR_TOOLS_DIR}/auth/br-auth.sh" "$@"
             ;;
+        swarm)
+            local subcmd="${1:-help}"; shift 2>/dev/null || true
+            local SWARM_SCRIPT="${BR_ROOT}/swarm.sh"
+            case "$subcmd" in
+                launch|deploy)  bash "$SWARM_SCRIPT" launch "$@" ;;
+                status|st)      bash "$SWARM_SCRIPT" status "$@" ;;
+                list|ls)        bash "$SWARM_SCRIPT" list ;;
+                merge)          bash "$SWARM_SCRIPT" merge "$@" ;;
+                close|kill)     bash "$SWARM_SCRIPT" close "$@" ;;
+                comment|msg)    bash "$SWARM_SCRIPT" comment "$@" ;;
+                review)         bash "$SWARM_SCRIPT" review "$@" ;;
+                open-prs)       bash "$SWARM_SCRIPT" open-prs "$@" ;;
+                monitor|watch)  bash "${BR_ROOT}/swarm-monitor.sh" --live ;;
+                *)              bash "$SWARM_SCRIPT" help ;;
+            esac
+            ;;
         *)
             # Data-driven tool dispatch
             if dispatch_tool "$cmd" "$@"; then
