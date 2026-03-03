@@ -15,7 +15,8 @@ export const invokeCommand = new Command('invoke')
         task,
       })
       console.log(result.content)
-    } catch {
+    } catch (err) {
       logger.error(`Failed to invoke agent "${agent}".`)
+      logger.debug(err instanceof Error ? err.message : String(err))
     }
   })
