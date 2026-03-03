@@ -698,14 +698,6 @@ curl http://127.0.0.1:8421/memory/verify</div>
       }
     }
 
-    // Escape HTML to prevent XSS when rendering untrusted API data
-    function esc(str) {
-      if (str == null) return '';
-      const div = document.createElement('div');
-      div.textContent = String(str);
-      return div.innerHTML;
-    }
-
     function connectApi() {
       const url = document.getElementById('api-url-display').value;
       API_URL = url;
@@ -741,12 +733,12 @@ curl http://127.0.0.1:8421/memory/verify</div>
         const tbody = document.getElementById('recent-memories');
         tbody.innerHTML = recent.map(e => `
           <tr>
-            <td><code>${esc(e.id)}</code></td>
-            <td><span class="tag tag-${esc(e.type)}">${esc(e.type)}</span></td>
-            <td>${esc(e.agent)}</td>
-            <td>${esc(e.content.slice(0, 80))}${e.content.length > 80 ? '...' : ''}</td>
-            <td>${esc(e.confidence)}</td>
-            <td>${esc(new Date(e.timestamp).toLocaleString())}</td>
+            <td><code>${e.id}</code></td>
+            <td><span class="tag tag-${e.type}">${e.type}</span></td>
+            <td>${e.agent}</td>
+            <td>${e.content.slice(0, 80)}${e.content.length > 80 ? '...' : ''}</td>
+            <td>${e.confidence}</td>
+            <td>${new Date(e.timestamp).toLocaleString()}</td>
           </tr>
         `).join('');
       }
@@ -832,14 +824,14 @@ curl http://127.0.0.1:8421/memory/verify</div>
       const tbody = document.getElementById('keys-list');
       tbody.innerHTML = (resp.keys || []).map(k => `
         <tr>
-          <td><code>${esc(k.id)}</code></td>
-          <td><span class="tag tag-${esc(k.purpose === 'pat' ? 'commitment' : k.purpose === 'api' ? 'observation' : 'fact')}">${esc(k.purpose)}</span></td>
-          <td><code style="font-size:11px">${esc(k.key)}</code></td>
-          <td><code>${esc(k.fingerprint)}</code></td>
-          <td>${esc((k.scopes || []).join(', '))}</td>
-          <td>${esc(new Date(k.created).toLocaleDateString())}</td>
+          <td><code>${k.id}</code></td>
+          <td><span class="tag tag-${k.purpose === 'pat' ? 'commitment' : k.purpose === 'api' ? 'observation' : 'fact'}">${k.purpose}</span></td>
+          <td><code style="font-size:11px">${k.key}</code></td>
+          <td><code>${k.fingerprint}</code></td>
+          <td>${k.scopes.join(', ')}</td>
+          <td>${new Date(k.created).toLocaleDateString()}</td>
           <td>${k.revoked ? '<span style="color:var(--red)">REVOKED</span>' : '<span style="color:var(--green)">ACTIVE</span>'}</td>
-          <td><button class="btn btn-sm" onclick="revokeKey('${esc(k.id)}')" ${k.revoked ? 'disabled' : ''}>Revoke</button></td>
+          <td><button class="btn btn-sm" onclick="revokeKey('${k.id}')" ${k.revoked ? 'disabled' : ''}>Revoke</button></td>
         </tr>
       `).join('');
     }
@@ -878,12 +870,12 @@ curl http://127.0.0.1:8421/memory/verify</div>
       el.innerHTML = resp.leaks.map(l => `
         <div style="padding:8px;border:1px solid var(--border);border-radius:8px;margin-bottom:8px">
           <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-            <code>${esc(l.id)}</code>
-            <span style="color:var(--text-dim)">${esc(new Date(l.leaked).toLocaleString())}</span>
+            <code>${l.id}</code>
+            <span style="color:var(--text-dim)">${new Date(l.leaked).toLocaleString()}</span>
           </div>
-          <div style="color:var(--hot-pink);font-weight:600">${esc(l.source)} &rarr; ${esc(l.target)}</div>
-          <div style="margin-top:4px">${esc(l.content)}</div>
-          <div style="margin-top:4px;font-size:11px;color:var(--text-dim)">Chain: ${esc(l.chain.length)} blocks | Signature: ${esc(l.signature.slice(0, 24))}...</div>
+          <div style="color:var(--hot-pink);font-weight:600">${l.source} &rarr; ${l.target}</div>
+          <div style="margin-top:4px">${l.content}</div>
+          <div style="margin-top:4px;font-size:11px;color:var(--text-dim)">Chain: ${l.chain.length} blocks | Signature: ${l.signature.slice(0, 24)}...</div>
         </div>
       `).join('');
     }

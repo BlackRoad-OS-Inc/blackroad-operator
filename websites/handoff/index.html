@@ -314,8 +314,8 @@
     }
 
     // ── DETECT MODE ──
-    // color mode triggers: ?color, ?tunnel, or meta[name="br-mode"] tag
-    // also fires when postMessage({tunnel:true}) received from same-origin parent
+    // color mode triggers: ?color, ?tunnel, custom header x-br-identity
+    // also fires when postMessage({tunnel:true}) received
     function getMode() {
       const p = new URLSearchParams(window.location.search);
       if (p.has('color') || p.has('tunnel') || p.has('identity')) return 'color';
@@ -376,8 +376,6 @@
 
     // ── POSTMESSAGE TUNNEL ──
     window.addEventListener('message', (e) => {
-      // Only accept messages from same origin or expected parent
-      if (e.origin !== window.location.origin) return;
       if (e.data?.tunnel === true || e.data?.state === 'color') {
         activateColor('postmessage');
       }

@@ -100,8 +100,7 @@ for i in m['integrations']:
         for v in i.get('env_vars', []):
             val = os.environ.get(v)
             if val:
-                length = len(val)
-                masked = f'*** (set, length={length})'
+                masked = val[:4] + '...' + val[-4:] if len(val) > 12 else '***'
                 print(f'  \033[0;32m✓\033[0m {v} = {masked}')
             else:
                 print(f'  \033[0;31m✗\033[0m {v} = (not set)')

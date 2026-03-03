@@ -3,8 +3,6 @@ import chalk from 'chalk'
 
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error'
 
-const VALID_LOG_LEVELS: readonly LogLevel[] = ['debug', 'info', 'warn', 'error']
-
 const LEVEL_ORDER: Record<LogLevel, number> = {
   debug: 0,
   info: 1,
@@ -12,18 +10,40 @@ const LEVEL_ORDER: Record<LogLevel, number> = {
   error: 3,
 }
 
-function parseLogLevel(raw: string | undefined): LogLevel {
-  if (!raw) return 'info'
-  const normalized = raw.trim().toLowerCase()
-  if (VALID_LOG_LEVELS.includes(normalized as LogLevel)) {
-    return normalized as LogLevel
-  }
-  console.warn(`[logger] Invalid BLACKROAD_LOG_LEVEL "${raw}", falling back to "info"`)
-  return 'info'
+const DEFAULT_LOG_LEVEL: LogLevel = 'info'
+const VALID_LOG_LEVELS: readonly LogLevel[] = ['debug', 'info', 'warn', 'error']
+
+function isValidLogLevel(value: string): value is LogLevel {
+  return (VALID_LOG_LEVELS as readonly string[]).includes(value)
 }
 
-let currentLevel: LogLevel = parseLogLevel(process.env['BLACKROAD_LOG_LEVEL'])
+let warnedInvalidEnvLevel = false
 
+function getInitialLogLevel(): LogLevel {
+  const raw = process.env['BLACKROAD_LOG_LEVEL']
+  if (!raw) {
+    return DEFAULT_LOG_LEVEL
+  }
+
+  const normalized = raw.trim().toLowerCase()
+  if (isValidLogLevel(normalized)) {
+    return normalized
+  }
+
+  if (!warnedInvalidEnvLevel) {
+    warnedInvalidEnvLevel = true
+    console.warn(
+      chalk.yellow('⚠'),
+      `Invalid BLACKROAD_LOG_LEVEL "${raw}", falling back to "${DEFAULT_LOG_LEVEL}". Valid levels: ${VALID_LOG_LEVELS.join(
+        ', ',
+      )}.`,
+    )
+  }
+
+  return DEFAULT_LOG_LEVEL
+}
+
+let currentLevel: LogLevel = getInitialLogLevel()
 function shouldLog(level: LogLevel): boolean {
   return LEVEL_ORDER[level] >= LEVEL_ORDER[currentLevel]
 }

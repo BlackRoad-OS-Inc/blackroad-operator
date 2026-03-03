@@ -36,7 +36,7 @@ function hexToBytes(hex: string): Uint8Array {
 async function hmacSign(keyHex: string, msg: string): Promise<string> {
   const key = await crypto.subtle.importKey(
     'raw',
-    hexToBytes(keyHex),
+    hexToBytes(keyHex) as unknown as ArrayBuffer,
     { name: 'HMAC', hash: 'SHA-256' },
     false,
     ['sign'],
@@ -56,13 +56,7 @@ export async function verifyToken(
 
   const msg = `${hdr}.${payloadB64}`
   const expected = await hmacSign(masterKey, msg)
-  // Constant-time comparison to prevent timing side-channel attacks
-  if (expected.length !== sigB64.length) return { ok: false, error: 'invalid signature' }
-  const a = new TextEncoder().encode(expected)
-  const b = new TextEncoder().encode(sigB64)
-  let diff = 0
-  for (let i = 0; i < a.length; i++) diff |= a[i] ^ b[i]
-  if (diff !== 0) return { ok: false, error: 'invalid signature' }
+  if (expected !== sigB64) return { ok: false, error: 'invalid signature' }
 
   let payload: TokenPayload
   try {

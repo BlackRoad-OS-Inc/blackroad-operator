@@ -24,11 +24,10 @@ export function createApp() {
 
   const corsOptions =
     allowedOriginsEnv === '*'
-      ? {}
+      ? { origin: '*' as const }
       : {
-          origin: (origin: string | null) => {
-            if (!origin) return false
-            return allowedOrigins.includes(origin)
+          origin: (origin: string) => {
+            return allowedOrigins.includes(origin) ? origin : ''
           },
         }
 

@@ -1,6 +1,5 @@
 // Copyright (c) 2025-2026 BlackRoad OS, Inc. All Rights Reserved.
-import { access, mkdir, writeFile } from 'node:fs/promises'
-import { readdir } from 'node:fs/promises'
+import { mkdir, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { Command } from 'commander'
 import { logger } from '../../core/logger.js'
@@ -15,8 +14,7 @@ export const initCommand = new Command('init')
     'Template to use (worker, api)',
     'worker',
   )
-  .option('--force', 'Overwrite existing files')
-  .action(async (name: string, opts: { template: string; force?: boolean }) => {
+  .action(async (name: string, opts: { template: string }) => {
     const template = templates.find((t) => t.name === opts.template)
     if (!template) {
       logger.error(
@@ -32,17 +30,6 @@ export const initCommand = new Command('init')
 
     try {
       const dir = join(process.cwd(), name)
-      // Guard against overwriting existing directory unless --force
-      try {
-        await access(dir)
-        const entries = await readdir(dir)
-        if (entries.length > 0 && !opts.force) {
-          spinner.fail(`Directory "${name}" already exists and is not empty. Use --force to overwrite.`)
-          return
-        }
-      } catch {
-        // Directory doesn't exist — safe to proceed
-      }
       for (const [filePath, content] of Object.entries(template.files)) {
         const fullPath = join(dir, filePath)
         await mkdir(dirname(fullPath), { recursive: true })
