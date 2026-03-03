@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#000!important;background-color:#000!important;">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BlackRoad OS — Workspace</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --grad: linear-gradient(90deg, #FF8400, #FF4400, #FF0066, #CC00AA, #8800FF, #0066FF, #2233CC);
+      --b: rgba(255,255,255,0.07);
+      --b2: rgba(255,255,255,0.04);
+      --surf: rgba(255,255,255,0.025);
+      --hov: rgba(255,255,255,0.05);
+    }
+
+    html, body {
+      background: #000 !important;
+      color: #fff !important;
+      font-family: 'JetBrains Mono', monospace;
+      height: 100%; overflow: hidden;
+    }
+
+    /* -- SHELL -- */
+    .shell {
+      display: grid;
+      grid-template-rows: 3px 46px 1fr;
+      grid-template-columns: 48px 220px 1fr 280px;
+      height: 100vh;
+      background: #000;
+    }
+    .grad-rule { grid-column: 1/-1; background: var(--grad); }
+
+    /* -- TOPBAR -- */
+    .topbar {
+      grid-column: 1/-1;
+      display: flex; align-items: center;
+      border-bottom: 1px solid var(--b);
+      background: #000;
+    }
+    .tb-brand {
+      width: 48px; height: 100%;
+      display: flex; align-items: center; justify-content: center;
+      border-right: 1px solid var(--b);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.7rem; font-weight: 700;
+      letter-spacing: -0.02em;
+      flex-shrink: 0;
+    }
+    .tb-path {
+      display: flex; align-items: center; gap: 0;
+      padding: 0 16px;
+      border-right: 1px solid var(--b);
+      height: 100%;
+      font-size: 0.5rem; opacity: 0.3; letter-spacing: 0.08em;
+      gap: 8px;
+    }
+    .tb-path span { opacity: 0.5; }
+    .tb-tabs {
+      display: flex; height: 100%;
+      flex: 1;
+    }
+    .tb-tab {
+      display: flex; align-items: center; gap: 7px;
+      padding: 0 18px;
+      border-right: 1px solid var(--b);
+      font-size: 0.5rem; opacity: 0.3;
+      cursor: pointer; transition: opacity 0.15s;
+      letter-spacing: 0.08em; white-space: nowrap;
+    }
+    .tb-tab:hover { opacity: 0.7; background: var(--hov); }
+    .tb-tab.active { opacity: 1; background: var(--surf); border-bottom: 2px solid #fff; }
+    .tb-tab-dot { width: 5px; height: 5px; border-radius: 50%; }
+    .tb-right {
+      display: flex; align-items: center; gap: 0;
+      margin-left: auto;
+    }
+    .tb-status {
+      display: flex; align-items: center; gap: 8px;
+      padding: 0 16px; height: 100%;
+      border-left: 1px solid var(--b);
+      font-size: 0.46rem; opacity: 0.3;
+    }
+    .ts-dot { width: 5px; height: 5px; border-radius: 50%; background: #FF8400; }
+    @keyframes pulse-s { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.8);opacity:0.5} }
+    .ts-dot.live { animation: pulse-s 2s ease-in-out infinite; }
+    .tb-avatar {
+      width: 46px; height: 100%;
+      border-left: 1px solid var(--b);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.55rem; font-weight: 700;
+      cursor: pointer; opacity: 0.6; transition: opacity 0.15s;
+    }
+    .tb-avatar:hover { opacity: 1; background: var(--hov); }
+
+    /* -- ICON RAIL -- */
+    .icon-rail {
+      border-right: 1px solid var(--b);
+      display: flex; flex-direction: column;
+      align-items: center;
+      padding: 12px 0;
+      gap: 4px;
+      background: #000;
+      overflow: hidden;
+    }
+    .ir-btn {
+      width: 32px; height: 32px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.55rem;
+      cursor: pointer; opacity: 0.25;
+      transition: opacity 0.15s, background 0.15s;
+      border: 1px solid transparent;
+    }
+    .ir-btn:hover { opacity: 0.8; background: var(--hov); }
+    .ir-btn.active { opacity: 1; border-color: var(--b); background: var(--surf); }
+    .ir-sep { width: 24px; height: 1px; background: var(--b); margin: 6px 0; }
+
+    /* -- LEFT NAV -- */
+    .left-nav {
+      border-right: 1px solid var(--b);
+      display: flex; flex-direction: column;
+      overflow: hidden;
+      background: #000;
+    }
+    .ln-section { flex-shrink: 0; }
+    .ln-label {
+      font-size: 0.42rem; opacity: 0.2;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      padding: 14px 14px 6px;
+    }
+    .ln-item {
+      display: flex; align-items: center; gap: 9px;
+      padding: 8px 14px;
+      font-size: 0.54rem; opacity: 0.35;
+      cursor: pointer; transition: opacity 0.12s, background 0.12s;
+      border-left: 2px solid transparent;
+    }
+    .ln-item:hover { opacity: 0.75; background: var(--hov); }
+    .ln-item.active { opacity: 1; border-left-color: #fff; background: var(--surf); }
+    .ln-item-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+    .ln-badge {
+      margin-left: auto;
+      font-size: 0.4rem; padding: 1px 5px;
+      border: 1px solid rgba(255,255,255,0.12);
+      opacity: 0.5;
+    }
+    .ln-sep { height: 1px; background: var(--b); margin: 6px 0; }
+
+    /* portals quick-launch */
+    .portals-launch { padding: 10px 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+    .pl-btn {
+      padding: 7px 6px;
+      border: 1px solid var(--b);
+      font-size: 0.44rem; opacity: 0.3;
+      cursor: pointer; transition: opacity 0.12s, background 0.12s;
+      text-align: center; letter-spacing: 0.06em;
+    }
+    .pl-btn:hover { opacity: 0.8; background: var(--hov); }
+
+    /* -- MAIN CONTENT -- */
+    .main {
+      display: grid;
+      grid-template-rows: auto 1fr;
+      overflow: hidden;
+      background: #000;
+    }
+
+    /* welcome strip */
+    .welcome-strip {
+      padding: 20px 24px 16px;
+      border-bottom: 1px solid var(--b);
+      display: flex; align-items: flex-end; justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .ws-left {}
+    .ws-eyebrow { font-size: 0.44rem; opacity: 0.2; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 4px; }
+    .ws-headline {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.4rem; font-weight: 700;
+      letter-spacing: -0.02em; line-height: 1;
+    }
+    .ws-sub { font-size: 0.5rem; opacity: 0.3; margin-top: 6px; line-height: 1.7; }
+    .ws-right { display: flex; gap: 8px; align-items: center; }
+    .ws-btn {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.52rem; font-weight: 700;
+      padding: 7px 14px; border: none;
+      letter-spacing: 0.04em; cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .ws-btn.primary { background: #fff; color: #000; }
+    .ws-btn.ghost { background: transparent; color: #fff; border: 1px solid var(--b); }
+    .ws-btn:hover { opacity: 0.8; }
+
+    /* content scroll zone */
+    .content-scroll {
+      overflow-y: auto; padding: 20px 24px;
+      display: flex; flex-direction: column; gap: 20px;
+    }
+    .content-scroll::-webkit-scrollbar { width: 2px; }
+    .content-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); }
+
+    /* -- WIDGETS -- */
+    .widget-row { display: grid; gap: 12px; }
+    .row-3 { grid-template-columns: repeat(3,1fr); }
+    .row-2 { grid-template-columns: 2fr 1fr; }
+    .row-2b { grid-template-columns: 1fr 1fr; }
+
+    .widget {
+      border: 1px solid var(--b);
+      padding: 18px;
+      background: #000;
+      position: relative;
+      overflow: hidden;
+    }
+    .widget::before {
+      content: '';
+      position: absolute; left: 0; top: 0; bottom: 0;
+      width: 2px;
+    }
+    .w-label {
+      font-size: 0.42rem; opacity: 0.22;
+      letter-spacing: 0.16em; text-transform: uppercase;
+      margin-bottom: 12px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .w-label::after { content: ''; flex: 1; height: 1px; background: var(--b2); }
+    .w-big {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 2rem; font-weight: 700; line-height: 1;
+    }
+    .w-sub { font-size: 0.46rem; opacity: 0.25; margin-top: 5px; line-height: 1.6; }
+    .w-delta { font-size: 0.46rem; margin-top: 6px; }
+    .w-delta.up { color: #FF8400; }
+    .w-delta.ok { opacity: 0.3; }
+
+    /* mini sparkline */
+    .sparkline {
+      display: flex; align-items: flex-end; gap: 2px;
+      height: 28px; margin-top: 12px;
+    }
+    .sp-bar { flex: 1; background: rgba(255,255,255,0.12); transition: background 0.2s; }
+    .sp-bar:hover { background: rgba(255,255,255,0.3); }
+
+    /* -- TASK BOARD -- */
+    .task-board { display: grid; grid-template-columns: repeat(3,1fr); gap: 0; border: 1px solid var(--b); }
+    .task-col { border-right: 1px solid var(--b); }
+    .task-col:last-child { border-right: none; }
+    .tc-head {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--b);
+      display: flex; align-items: center; gap: 8px;
+      font-size: 0.46rem; letter-spacing: 0.12em; text-transform: uppercase;
+    }
+    .tc-dot { width: 5px; height: 5px; border-radius: 50%; }
+    .tc-count { margin-left: auto; opacity: 0.3; font-size: 0.42rem; }
+    .task-list { display: flex; flex-direction: column; gap: 0; padding: 8px; }
+    .task-card {
+      padding: 10px 10px;
+      border: 1px solid var(--b2);
+      margin-bottom: 6px;
+      cursor: pointer; transition: border-color 0.12s, background 0.12s;
+    }
+    .task-card:hover { border-color: rgba(255,255,255,0.15); background: var(--hov); }
+    .task-card:last-child { margin-bottom: 0; }
+    .tk-id { font-size: 0.4rem; opacity: 0.2; margin-bottom: 5px; letter-spacing: 0.08em; }
+    .tk-title { font-size: 0.54rem; line-height: 1.55; margin-bottom: 6px; }
+    .tk-meta { display: flex; align-items: center; gap: 6px; }
+    .tk-tag {
+      font-size: 0.38rem; padding: 1px 5px;
+      border: 1px solid rgba(255,255,255,0.1);
+      opacity: 0.4; letter-spacing: 0.06em;
+    }
+    .tk-assignee { margin-left: auto; font-size: 0.4rem; opacity: 0.2; }
+    .tc-add {
+      margin: 0 8px 8px;
+      padding: 7px 10px;
+      border: 1px dashed rgba(255,255,255,0.08);
+      font-size: 0.46rem; opacity: 0.2;
+      cursor: pointer; text-align: center;
+      transition: opacity 0.15s;
+    }
+    .tc-add:hover { opacity: 0.5; }
+
+    /* -- ACTIVITY FEED -- */
+    .activity { display: flex; flex-direction: column; gap: 0; }
+    .act-item {
+      display: flex; gap: 10px; padding: 9px 0;
+      border-bottom: 1px solid var(--b2);
+      align-items: flex-start;
+    }
+    .act-item:last-child { border-bottom: none; }
+    .act-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+    .act-body { flex: 1; }
+    .act-text { font-size: 0.52rem; opacity: 0.55; line-height: 1.55; }
+    .act-text strong { opacity: 1; color: #fff; }
+    .act-time { font-size: 0.4rem; opacity: 0.2; margin-top: 2px; }
+
+    /* -- CECE GOVERNANCE -- */
+    .gov-panel { display: flex; flex-direction: column; gap: 0; }
+    .gov-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 0;
+      border-bottom: 1px solid var(--b2);
+      font-size: 0.5rem;
+    }
+    .gov-item:last-child { border-bottom: none; }
+    .gov-icon { font-size: 0.5rem; width: 16px; text-align: center; opacity: 0.4; flex-shrink: 0; }
+    .gov-label { opacity: 0.4; flex: 1; }
+    .gov-val { font-weight: 700; }
+    .gov-badge {
+      font-size: 0.38rem; padding: 2px 6px;
+      border: 1px solid; letter-spacing: 0.06em;
+    }
+    .gov-badge.ok { border-color: rgba(255,132,0,0.4); color: #FF8400; }
+    .gov-badge.live { border-color: rgba(0,102,255,0.4); color: #0066FF; }
+    .gov-badge.clear { border-color: rgba(255,255,255,0.15); opacity: 0.4; }
+
+    /* -- QUICK ACTIONS -- */
+    .qa-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .qa-btn {
+      padding: 10px 12px;
+      border: 1px solid var(--b);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.5rem; font-weight: 700;
+      background: transparent; color: #fff;
+      cursor: pointer; text-align: left;
+      letter-spacing: 0.04em; transition: background 0.12s, border-color 0.12s;
+    }
+    .qa-btn:hover { background: var(--hov); border-color: rgba(255,255,255,0.18); }
+    .qa-sub { font-size: 0.4rem; opacity: 0.3; font-weight: 400; margin-top: 3px; display: block; }
+
+    /* -- RIGHT PANEL -- */
+    .right-panel {
+      border-left: 1px solid var(--b);
+      display: flex; flex-direction: column;
+      overflow: hidden;
+      background: #000;
+    }
+    .rp-section {
+      border-bottom: 1px solid var(--b);
+      flex-shrink: 0;
+    }
+    .rp-section.fill { flex: 1; overflow-y: auto; }
+    .rp-section.fill::-webkit-scrollbar { width: 2px; }
+    .rp-section.fill::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.07); }
+    .rp-head {
+      padding: 10px 14px;
+      display: flex; align-items: center;
+      font-size: 0.44rem; opacity: 0.25;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      border-bottom: 1px solid var(--b2);
+    }
+    .rp-head-action {
+      margin-left: auto;
+      font-size: 0.4rem; cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .rp-head-action:hover { opacity: 0.8; }
+
+    /* system health */
+    .sys-rows { padding: 8px 14px; }
+    .sys-row {
+      display: flex; align-items: center; gap: 8px;
+      padding: 6px 0;
+      border-bottom: 1px solid var(--b2);
+      font-size: 0.48rem;
+    }
+    .sys-row:last-child { border-bottom: none; }
+    .sys-label { opacity: 0.35; flex: 1; }
+    .sys-bar-wrap { width: 60px; height: 3px; background: rgba(255,255,255,0.08); }
+    .sys-bar { height: 100%; }
+    .sys-val { font-size: 0.44rem; opacity: 0.5; min-width: 28px; text-align: right; }
+    @keyframes bar-anim { from { width: 0; } }
+
+    /* agent roster */
+    .agent-roster { padding: 8px 14px; }
+    .ar-row {
+      display: flex; align-items: center; gap: 8px;
+      padding: 7px 0; border-bottom: 1px solid var(--b2);
+    }
+    .ar-row:last-child { border-bottom: none; }
+    .ar-d { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    @keyframes pulse-ar { 0%,100%{transform:scale(1)} 50%{transform:scale(1.8)} }
+    .ar-d.pulse { animation: pulse-ar 2s ease-in-out infinite; }
+    .ar-n { font-size: 0.52rem; font-weight: 700; flex: 1; }
+    .ar-s { font-size: 0.4rem; opacity: 0.2; }
+    .ar-tag { font-size: 0.38rem; padding: 1px 5px; border: 1px solid rgba(255,255,255,0.1); opacity: 0.35; }
+
+    /* memory log */
+    .mem-log { padding: 8px 14px; }
+    .ml-item {
+      display: flex; gap: 8px;
+      padding: 6px 0; border-bottom: 1px solid var(--b2);
+      align-items: flex-start;
+    }
+    .ml-item:last-child { border-bottom: none; }
+    .ml-hash { font-size: 0.4rem; opacity: 0.2; min-width: 56px; padding-top: 1px; }
+    .ml-text { font-size: 0.46rem; opacity: 0.45; flex: 1; line-height: 1.5; }
+
+    /* cece footer */
+    .cece-footer {
+      padding: 10px 14px;
+      border-top: 1px solid var(--b);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .cf-dot { width: 6px; height: 6px; border-radius: 50%; background: #FF8400; }
+    .cf-label { font-size: 0.46rem; font-weight: 700; }
+    .cf-status { font-size: 0.4rem; opacity: 0.25; margin-left: auto; }
+
+    /* -- CLOCK -- */
+    #clock { font-size: 0.46rem; opacity: 0.2; }
+
+    * { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.07) transparent; }
+
+    @media (max-width: 900px) {
+      .shell { grid-template-columns: 48px 1fr; }
+      .left-nav { display: none; }
+      .right-panel { display: none; }
+      .row-3 { grid-template-columns: 1fr; }
+      .row-2, .row-2b { grid-template-columns: 1fr; }
+      .task-board { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body style="background:#000!important;color:#fff!important;">
+<div style="position:fixed;inset:0;background:#000;z-index:-9999;pointer-events:none;"></div>
+
+<div class="shell">
+
+  <!-- GRAD RULE -->
+  <div class="grad-rule"></div>
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="tb-brand">BR</div>
+    <div class="tb-path">
+      <span>app.blackroad.io</span>
+      &rsaquo;
+      workspace
+    </div>
+    <div class="tb-tabs">
+      <div class="tb-tab active" onclick="switchTab(this)">
+        <div class="tb-tab-dot" style="background:#FF8400;"></div>
+        Overview
+      </div>
+      <div class="tb-tab" onclick="switchTab(this)">
+        <div class="tb-tab-dot" style="background:#0066FF;"></div>
+        Tasks
+      </div>
+      <div class="tb-tab" onclick="switchTab(this)">
+        <div class="tb-tab-dot" style="background:#8800FF;"></div>
+        Lucidia
+      </div>
+      <div class="tb-tab" onclick="switchTab(this)">
+        <div class="tb-tab-dot" style="background:#FF0066;"></div>
+        Portals
+      </div>
+      <div class="tb-tab" onclick="switchTab(this)">
+        <div class="tb-tab-dot" style="background:#CC00AA;"></div>
+        Settings
+      </div>
+    </div>
+    <div class="tb-right">
+      <div class="tb-status">
+        <div class="ts-dot live"></div>
+        <span>All systems operational</span>
+        <span style="opacity:0.4;">&middot;</span>
+        <span id="clock">00:00:00</span>
+      </div>
+      <div class="tb-avatar">AL</div>
+    </div>
+  </div>
+
+  <!-- ICON RAIL -->
+  <div class="icon-rail">
+    <div class="ir-btn active" title="Home">&#8962;</div>
+    <div class="ir-btn" title="Lucidia Chat">&#9672;</div>
+    <div class="ir-btn" title="Tasks">&#9638;</div>
+    <div class="ir-btn" title="Memory">&#9673;</div>
+    <div class="ir-btn" title="Agents">&#9678;</div>
+    <div class="ir-sep"></div>
+    <div class="ir-btn" title="Education">&#9635;</div>
+    <div class="ir-btn" title="Creator Studio">&#9671;</div>
+    <div class="ir-btn" title="Social">&#9672;</div>
+    <div class="ir-sep"></div>
+    <div class="ir-btn" title="Settings" style="margin-top:auto;">&#9881;</div>
+  </div>
+
+  <!-- LEFT NAV -->
+  <div class="left-nav">
+    <div class="ln-section">
+      <div class="ln-label">Workspace</div>
+      <div class="ln-item active" onclick="selectNav(this)">
+        <div class="ln-item-dot" style="background:#fff;"></div>
+        Overview
+      </div>
+      <div class="ln-item" onclick="selectNav(this)">
+        <div class="ln-item-dot" style="background:#0066FF;"></div>
+        Tasks
+        <div class="ln-badge">7</div>
+      </div>
+      <div class="ln-item" onclick="selectNav(this)">
+        <div class="ln-item-dot" style="background:#8800FF;"></div>
+        Lucidia Chat
+      </div>
+      <div class="ln-item" onclick="selectNav(this)">
+        <div class="ln-item-dot" style="background:#FF0066;"></div>
+        Memory Vault
+      </div>
+      <div class="ln-item" onclick="selectNav(this)">
+        <div class="ln-item-dot" style="background:#FF8400;"></div>
+        Agents
+        <div class="ln-badge">4</div>
+      </div>
+    </div>
+
+    <div class="ln-sep"></div>
+
+    <div class="ln-section">
+      <div class="ln-label">Portals</div>
+      <div class="ln-item" onclick="selectNav(this)">
+        <div class="ln-item-dot" style="background:#8800FF;"></div>
+        RoadWork
+      </div>
+      <div class="ln-item" onclick="selectNav(this)">
+        <div class="ln-item-dot" style="background:#FF0066;"></div>
+        RoadView
+      </div>
+      <div class="ln-item" onclick="selectNav(this)">
+        <div class="ln-item-dot" style="background:#0066FF;"></div>
+        RoadWorld
+      </div>
+      <div class="ln-item" onclick="selectNav(this)">
+        <div class="ln-item-dot" style="background:#CC00AA;"></div>
+        BackRoad
+      </div>
+      <div class="ln-item" onclick="selectNav(this)">
+        <div class="ln-item-dot" style="background:#FF4400;"></div>
+        RoadGlitch
+      </div>
+    </div>
+
+    <div class="ln-sep"></div>
+
+    <div class="ln-section">
+      <div class="ln-label">Quick Launch</div>
+      <div class="portals-launch">
+        <div class="pl-btn">+ Note</div>
+        <div class="pl-btn">+ Task</div>
+        <div class="pl-btn">+ Flow</div>
+        <div class="pl-btn">+ Agent</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="main">
+
+    <!-- Welcome strip -->
+    <div class="welcome-strip">
+      <div class="ws-left">
+        <div class="ws-eyebrow">Monday, March 03 &middot; Horizon 1 &middot; Day 15 of 90</div>
+        <div class="ws-headline">Good morning, Alexa.</div>
+        <div class="ws-sub">7 tasks active &middot; 4 agents online &middot; Cece policy spine: operational &middot; Epic 1 in progress</div>
+      </div>
+      <div class="ws-right">
+        <button class="ws-btn ghost">View Roadmap</button>
+        <button class="ws-btn primary">Open Lucidia &rarr;</button>
+      </div>
+    </div>
+
+    <!-- Scrollable content -->
+    <div class="content-scroll">
+
+      <!-- Row 1: 3 stat widgets -->
+      <div class="widget-row row-3">
+
+        <div class="widget" style="--wc:#FF8400;">
+          <div style="position:absolute;left:0;top:0;bottom:0;width:2px;background:#FF8400;"></div>
+          <div class="w-label">H1 Progress</div>
+          <div class="w-big">15<span style="font-size:1rem;opacity:0.4;">/90</span></div>
+          <div class="w-sub">Days elapsed &middot; Horizon 1</div>
+          <div class="sparkline" id="h1-spark"></div>
+          <div class="w-delta up">&uarr; Epic 1 in review &middot; Epic 3 starts today</div>
+        </div>
+
+        <div class="widget">
+          <div style="position:absolute;left:0;top:0;bottom:0;width:2px;background:#0066FF;"></div>
+          <div class="w-label">System Load</div>
+          <div class="w-big">23<span style="font-size:1rem;opacity:0.4;">%</span></div>
+          <div class="w-sub">K3s cluster &middot; Alice gateway</div>
+          <div class="sparkline" id="load-spark"></div>
+          <div class="w-delta ok">Nominal &middot; 4 agents active</div>
+        </div>
+
+        <div class="widget">
+          <div style="position:absolute;left:0;top:0;bottom:0;width:2px;background:#8800FF;"></div>
+          <div class="w-label">Memory Sessions</div>
+          <div class="w-big">31</div>
+          <div class="w-sub">PS-SHA&infin; journals &middot; all-time</div>
+          <div class="sparkline" id="mem-spark"></div>
+          <div class="w-delta up">&uarr; 3 new context nodes today</div>
+        </div>
+
+      </div>
+
+      <!-- Row 2: Task board -->
+      <div class="widget" style="padding:0;">
+        <div class="w-label" style="padding:14px 18px 0;margin-bottom:0;">
+          Active Tasks &middot; Epic 1&ndash;3 &middot; H1
+        </div>
+        <div class="task-board">
+
+          <!-- Ready -->
+          <div class="task-col">
+            <div class="tc-head">
+              <div class="tc-dot" style="background:rgba(255,255,255,0.3);"></div>
+              Ready
+              <div class="tc-count">3</div>
+            </div>
+            <div class="task-list">
+              <div class="task-card">
+                <div class="tk-id">WEB-1 &middot; W1</div>
+                <div class="tk-title">Scaffold Next.js app shell for app.blackroad.io</div>
+                <div class="tk-meta">
+                  <span class="tk-tag">P1</span>
+                  <span class="tk-tag">ui</span>
+                  <span class="tk-assignee">Alexa</span>
+                </div>
+              </div>
+              <div class="task-card">
+                <div class="tk-id">INFRA-1 &middot; W3</div>
+                <div class="tk-title">Cloudflare DNS record for app.blackroad.io</div>
+                <div class="tk-meta">
+                  <span class="tk-tag">infra</span>
+                  <span class="tk-tag">dns</span>
+                  <span class="tk-assignee">Alice</span>
+                </div>
+              </div>
+              <div class="task-card">
+                <div class="tk-id">EDU-1 &middot; W4</div>
+                <div class="tk-title">Homework domain model: Assignment + Submission</div>
+                <div class="tk-meta">
+                  <span class="tk-tag">P2</span>
+                  <span class="tk-tag">db</span>
+                  <span class="tk-assignee">Alexa</span>
+                </div>
+              </div>
+            </div>
+            <div class="tc-add">+ Add task</div>
+          </div>
+
+          <!-- In Progress -->
+          <div class="task-col">
+            <div class="tc-head">
+              <div class="tc-dot" style="background:#FF8400;"></div>
+              In Progress
+              <div class="tc-count">2</div>
+            </div>
+            <div class="task-list">
+              <div class="task-card" style="border-color:rgba(255,132,0,0.2);">
+                <div class="tk-id">GOV-2 &middot; W2</div>
+                <div class="tk-title">Scaffold gov.api.blackroad.io governance service</div>
+                <div class="tk-meta">
+                  <span class="tk-tag">P4</span>
+                  <span class="tk-tag">api</span>
+                  <span class="tk-assignee">Cecilia</span>
+                </div>
+              </div>
+              <div class="task-card" style="border-color:rgba(255,132,0,0.2);">
+                <div class="tk-id">INFRA-3 &middot; W3</div>
+                <div class="tk-title">Provision db.blackroad.systems Postgres instance</div>
+                <div class="tk-meta">
+                  <span class="tk-tag">infra</span>
+                  <span class="tk-tag">db</span>
+                  <span class="tk-assignee">Alexa</span>
+                </div>
+              </div>
+            </div>
+            <div class="tc-add">+ Add task</div>
+          </div>
+
+          <!-- Done -->
+          <div class="task-col">
+            <div class="tc-head">
+              <div class="tc-dot" style="background:#0066FF;"></div>
+              Done
+              <div class="tc-count">2</div>
+            </div>
+            <div class="task-list">
+              <div class="task-card" style="opacity:0.5;">
+                <div class="tk-id">WEB-2 &middot; W1</div>
+                <div class="tk-title">User model + session management (JWT)</div>
+                <div class="tk-meta">
+                  <span class="tk-tag">P1</span>
+                  <span class="tk-tag">auth</span>
+                  <span class="tk-assignee">Alexa</span>
+                </div>
+              </div>
+              <div class="task-card" style="opacity:0.5;">
+                <div class="tk-id">GOV-1 &middot; W2</div>
+                <div class="tk-title">Define minimal user policy schema for Cece</div>
+                <div class="tk-meta">
+                  <span class="tk-tag">P4</span>
+                  <span class="tk-tag">policy</span>
+                  <span class="tk-assignee">Cecilia</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Row 3: Activity + Quick Actions -->
+      <div class="widget-row row-2b">
+
+        <div class="widget">
+          <div style="position:absolute;left:0;top:0;bottom:0;width:2px;background:#CC00AA;"></div>
+          <div class="w-label">Activity</div>
+          <div class="activity">
+            <div class="act-item">
+              <div class="act-dot" style="background:#FF8400;"></div>
+              <div class="act-body">
+                <div class="act-text"><strong>Cecilia</strong> evaluated 3 policy rules &mdash; all passed &middot; ledger updated</div>
+                <div class="act-time">4 min ago</div>
+              </div>
+            </div>
+            <div class="act-item">
+              <div class="act-dot" style="background:#0066FF;"></div>
+              <div class="act-body">
+                <div class="act-text"><strong>Alice</strong> registered mesh heartbeat from pi-node-001 &middot; latency 12ms</div>
+                <div class="act-time">11 min ago</div>
+              </div>
+            </div>
+            <div class="act-item">
+              <div class="act-dot" style="background:#8800FF;"></div>
+              <div class="act-body">
+                <div class="act-text"><strong>Lucidia</strong> committed memory journal A8F2 &middot; 6 context nodes persisted</div>
+                <div class="act-time">23 min ago</div>
+              </div>
+            </div>
+            <div class="act-item">
+              <div class="act-dot" style="background:#fff;opacity:0.3;"></div>
+              <div class="act-body">
+                <div class="act-text"><strong>Alexa</strong> completed WEB-2 &mdash; user model merged to main</div>
+                <div class="act-time">1h ago</div>
+              </div>
+            </div>
+            <div class="act-item">
+              <div class="act-dot" style="background:#FF0066;"></div>
+              <div class="act-body">
+                <div class="act-text"><strong>Cadence</strong> came online &middot; studio layer &middot; audio module ready</div>
+                <div class="act-time">2h ago</div>
+              </div>
+            </div>
+            <div class="act-item">
+              <div class="act-dot" style="background:#FF8400;"></div>
+              <div class="act-body">
+                <div class="act-text"><strong>Cecilia</strong> flagged missing delegation scope on edu.review action &mdash; GOV-8 created</div>
+                <div class="act-time">3h ago</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="widget">
+          <div style="position:absolute;left:0;top:0;bottom:0;width:2px;background:#FF0066;"></div>
+          <div class="w-label">Quick Actions</div>
+          <div class="qa-grid">
+            <button class="qa-btn">
+              Ask Lucidia
+              <span class="qa-sub">Open chat with memory</span>
+            </button>
+            <button class="qa-btn">
+              New Task
+              <span class="qa-sub">Add to Epic board</span>
+            </button>
+            <button class="qa-btn">
+              Deploy
+              <span class="qa-sub">Push to Railway</span>
+            </button>
+            <button class="qa-btn">
+              Cece Check
+              <span class="qa-sub">Run policy eval</span>
+            </button>
+            <button class="qa-btn">
+              Memory Log
+              <span class="qa-sub">View PS-SHA&infin; journal</span>
+            </button>
+            <button class="qa-btn">
+              Open RoadWork
+              <span class="qa-sub">edu.blackroad.io</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right-panel">
+
+    <!-- System Health -->
+    <div class="rp-section">
+      <div class="rp-head">
+        System Health
+        <div class="rp-head-action" style="opacity:0.3;">View all &rarr;</div>
+      </div>
+      <div class="sys-rows">
+        <div class="sys-row">
+          <div class="sys-label">app.blackroad.io</div>
+          <div class="sys-bar-wrap"><div class="sys-bar" style="width:98%;background:#0066FF;animation:bar-anim 0.8s ease;"></div></div>
+          <div class="sys-val">98%</div>
+        </div>
+        <div class="sys-row">
+          <div class="sys-label">api gateway</div>
+          <div class="sys-bar-wrap"><div class="sys-bar" style="width:100%;background:#FF8400;animation:bar-anim 1s ease;"></div></div>
+          <div class="sys-val">100%</div>
+        </div>
+        <div class="sys-row">
+          <div class="sys-label">gov.api</div>
+          <div class="sys-bar-wrap"><div class="sys-bar" style="width:100%;background:#8800FF;animation:bar-anim 1.1s ease;"></div></div>
+          <div class="sys-val">100%</div>
+        </div>
+        <div class="sys-row">
+          <div class="sys-label">db.blackroad</div>
+          <div class="sys-bar-wrap"><div class="sys-bar" style="width:94%;background:#FF0066;animation:bar-anim 1.2s ease;"></div></div>
+          <div class="sys-val">94%</div>
+        </div>
+        <div class="sys-row">
+          <div class="sys-label">mesh network</div>
+          <div class="sys-bar-wrap"><div class="sys-bar" style="width:87%;background:#CC00AA;animation:bar-anim 1.3s ease;"></div></div>
+          <div class="sys-val">87%</div>
+        </div>
+        <div class="sys-row">
+          <div class="sys-label">ledger</div>
+          <div class="sys-bar-wrap"><div class="sys-bar" style="width:100%;background:#2233CC;animation:bar-anim 1.4s ease;"></div></div>
+          <div class="sys-val">100%</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Agents -->
+    <div class="rp-section">
+      <div class="rp-head">
+        Active Agents
+        <div class="rp-head-action" style="opacity:0.3;">Manage &rarr;</div>
+      </div>
+      <div class="agent-roster">
+        <div class="ar-row">
+          <div class="ar-d pulse" style="background:#FF8400;"></div>
+          <div class="ar-n">Cecilia</div>
+          <div class="ar-s">gov layer</div>
+          <div class="ar-tag">ONLINE</div>
+        </div>
+        <div class="ar-row">
+          <div class="ar-d pulse" style="background:#0066FF;"></div>
+          <div class="ar-n">Alice</div>
+          <div class="ar-s">mesh &middot; gateway</div>
+          <div class="ar-tag">ONLINE</div>
+        </div>
+        <div class="ar-row">
+          <div class="ar-d" style="background:#8800FF;"></div>
+          <div class="ar-n">Lucidia</div>
+          <div class="ar-s">trinary core</div>
+          <div class="ar-tag">ONLINE</div>
+        </div>
+        <div class="ar-row">
+          <div class="ar-d" style="background:#FF0066;"></div>
+          <div class="ar-n">Cadence</div>
+          <div class="ar-s">studio &middot; audio</div>
+          <div class="ar-tag">ONLINE</div>
+        </div>
+        <div class="ar-row" style="opacity:0.35;">
+          <div class="ar-d" style="background:rgba(255,255,255,0.15);"></div>
+          <div class="ar-n">Radius</div>
+          <div class="ar-s">physics sim</div>
+          <div class="ar-tag">OFFLINE</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cece Governance -->
+    <div class="rp-section">
+      <div class="rp-head">
+        Cece &middot; Governance
+        <div class="rp-head-action" style="opacity:0.3;">Ledger &rarr;</div>
+      </div>
+      <div class="sys-rows">
+        <div class="gov-panel">
+          <div class="gov-item">
+            <div class="gov-icon">&#9878;</div>
+            <div class="gov-label">Policy evaluations</div>
+            <div class="gov-val">143</div>
+            <div class="gov-badge ok">ACTIVE</div>
+          </div>
+          <div class="gov-item">
+            <div class="gov-icon">&#128211;</div>
+            <div class="gov-label">Ledger events</div>
+            <div class="gov-val">89</div>
+            <div class="gov-badge live">LOGGING</div>
+          </div>
+          <div class="gov-item">
+            <div class="gov-icon">&#128683;</div>
+            <div class="gov-label">Denied actions</div>
+            <div class="gov-val">2</div>
+            <div class="gov-badge clear">REVIEW</div>
+          </div>
+          <div class="gov-item">
+            <div class="gov-icon">&#9672;</div>
+            <div class="gov-label">Active policies</div>
+            <div class="gov-val">7</div>
+            <div class="gov-badge ok">LIVE</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Memory log -->
+    <div class="rp-section fill">
+      <div class="rp-head">
+        Memory &middot; PS-SHA&infin;
+        <div class="rp-head-action" style="opacity:0.3;">Explore &rarr;</div>
+      </div>
+      <div class="mem-log">
+        <div class="ml-item">
+          <div class="ml-hash">A8F2:9c3d</div>
+          <div class="ml-text">Z-Framework policy evaluation mapping &middot; governance API design session</div>
+        </div>
+        <div class="ml-item">
+          <div class="ml-hash">A8F2:7e1a</div>
+          <div class="ml-text">Epic 1 auth baseline &middot; user model &middot; Railway deployment config</div>
+        </div>
+        <div class="ml-item">
+          <div class="ml-hash">A8F1:c924</div>
+          <div class="ml-text">Pauli model su(2) algebra &mdash; &Ucirc;&Ccirc;L&#770; = iI emergence theorem</div>
+        </div>
+        <div class="ml-item">
+          <div class="ml-hash">A8F1:3b7f</div>
+          <div class="ml-text">Education pack: Assignment + Submission schema &middot; GOV-8 policy rules</div>
+        </div>
+        <div class="ml-item">
+          <div class="ml-hash">A8F0:d412</div>
+          <div class="ml-text">K3s cluster topology &middot; Alice gateway config &middot; mesh heartbeat protocol</div>
+        </div>
+        <div class="ml-item">
+          <div class="ml-hash">A8F0:88ea</div>
+          <div class="ml-text">K(t) creative energy formula &middot; trinary contradiction handling system</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cece footer -->
+    <div class="cece-footer">
+      <div class="cf-dot"></div>
+      <div class="cf-label">Cece</div>
+      <div class="cf-status">Z = &empty; &middot; equilibrium &middot; all clear</div>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+  // Live clock
+  function tick() {
+    const now = new Date();
+    const h = now.getHours().toString().padStart(2,'0');
+    const m = now.getMinutes().toString().padStart(2,'0');
+    const s = now.getSeconds().toString().padStart(2,'0');
+    document.getElementById('clock').textContent = h + ':' + m + ':' + s;
+  }
+  tick(); setInterval(tick, 1000);
+
+  // Build sparklines
+  function buildSpark(id, vals, color) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const max = Math.max.apply(null, vals);
+    vals.forEach(function(v) {
+      const bar = document.createElement('div');
+      bar.className = 'sp-bar';
+      bar.style.height = Math.max(10, (v / max) * 100) + '%';
+      bar.style.background = color;
+      el.appendChild(bar);
+    });
+  }
+  buildSpark('h1-spark', [2,3,2,4,5,4,6,5,7,8,7,9,10,11,15], '#FF8400');
+  buildSpark('load-spark', [18,22,19,25,21,23,20,22,24,21,23,22,23,21,23], '#0066FF');
+  buildSpark('mem-spark', [20,21,21,22,24,24,25,26,27,27,28,29,29,30,31], '#8800FF');
+
+  // Tab switching
+  function switchTab(el) {
+    document.querySelectorAll('.tb-tab').forEach(function(t) { t.classList.remove('active'); });
+    el.classList.add('active');
+  }
+
+  // Nav item selection
+  function selectNav(el) {
+    document.querySelectorAll('.ln-item').forEach(function(i) { i.classList.remove('active'); });
+    el.classList.add('active');
+  }
+
+  // Simulate live ledger counter
+  var ledgerCount = 89;
+  setInterval(function() {
+    var chance = Math.random();
+    if (chance > 0.7) {
+      ledgerCount++;
+    }
+  }, 4000);
+
+  // Animate task cards on hover
+  document.querySelectorAll('.task-card').forEach(function(card) {
+    card.addEventListener('click', function() {
+      card.style.borderColor = 'rgba(255,255,255,0.3)';
+      setTimeout(function() { card.style.borderColor = ''; }, 400);
+    });
+  });
+</script>
+
+</body>
+</html>
