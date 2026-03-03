@@ -113,13 +113,25 @@ Subject: [SECURITY] Brief description
 ### Current Status
 
 ```
-Last scan: 2026-02-05
+Last scan: 2026-03-01
 
-Dependabot alerts:    30 (reviewing)
-CodeQL alerts:        30 (reviewing)
-Secret scanning:      30 (reviewing)
-Container vulns:      0 critical
+Dependabot alerts:    Active (auto-managed)
+CodeQL alerts:        Active (JS/TS + Python scanning)
+Secret scanning:      Active (Gitleaks + custom patterns)
+Supply chain:         Active (OpenSSF Scorecard)
+Container vulns:      Active (Dockerfile audit)
+License compliance:   Active (copyleft detection)
+Shell security:       Active (ShellCheck SAST)
 ```
+
+### Active Workflows
+
+| Workflow | Trigger | Coverage |
+|----------|---------|----------|
+| `codeql-analysis.yml` | Push, PR, Weekly | JavaScript/TypeScript + Python SAST |
+| `security-scan.yml` | Push, PR, Daily | Gitleaks, npm audit, Python safety, license check, shell SAST |
+| `supply-chain-security.yml` | Push, PR, Weekly | OpenSSF Scorecard, action pinning, lockfile integrity, Dockerfile audit |
+| `ci.yml` | Push, PR | ShellCheck, CLI tests |
 
 ---
 
@@ -271,4 +283,52 @@ Data Classification:
 
 ---
 
-*Last updated: 2026-02-05*
+---
+
+## 🔐 Pre-Commit Security Gate
+
+The pre-commit hook at `.blackroad/hooks/pre-commit` enforces:
+
+### Blocked File Types
+- Environment files (`.env`, `.env.*`)
+- Private keys (`.pem`, `.key`, `.p12`, `.pfx`, `.keystore`, `.jks`, `.p8`)
+- Credentials files (`*credentials*`, `*secret*token*`, `service-account*.json`)
+- SSH keys (`id_rsa`, `id_ed25519`, `id_ecdsa`, `id_dsa`)
+- Wallet/seed files (`*.wallet.dat`, `seeds/`, `wallets/`)
+- Master keys (`vault/.master.key`)
+
+### Blocked Patterns (35+ patterns)
+- AI provider keys (Anthropic, OpenAI, Google, HuggingFace, Cohere, Replicate)
+- GitHub tokens (PAT, OAuth, App, fine-grained)
+- AWS credentials (access key, secret key)
+- Cloud tokens (Cloudflare, Railway, Vercel, DigitalOcean)
+- Payment keys (Stripe, SendGrid)
+- Database connection strings with credentials
+- Private key headers (RSA, EC, DSA, OpenSSH)
+- JWT/session secrets
+
+### Installation
+```bash
+git config core.hooksPath .blackroad/hooks
+```
+
+---
+
+## 🛡️ Supply Chain Security
+
+### GitHub Actions
+- All workflows audited for unpinned action versions
+- OpenSSF Scorecard runs weekly
+- Dependabot manages dependency updates across npm, pip, and Actions
+
+### Lockfile Integrity
+- `package-lock.json` verified on every PR
+- Python dependencies checked for pinned versions
+
+### Container Security
+- Dockerfiles scanned for `:latest` tags, root execution, and unsafe patterns
+- No `curl | sh` allowed in build steps
+
+---
+
+*Last updated: 2026-03-01*

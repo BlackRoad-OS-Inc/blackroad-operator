@@ -1,0 +1,132 @@
+name: Supply Chain Security
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  schedule:
+    - cron: '0 5 * * 3' # Wednesday 5 AM UTC
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  scorecard:
+    name: OpenSSF Scorecard
+    runs-on: [self-hosted, linux, arm64, blackroad]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Run Scorecard
+        uses: ossf/scorecard-action@v2
+        with:
+          results_file: results.sarif
+          results_format: sarif
+          publish_results: false
+        continue-on-error: true
+
+      - name: Upload Scorecard results
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: results.sarif
+        continue-on-error: true
+
+  verify-actions:
+    name: Verify GitHub Actions Integrity
+    runs-on: [self-hosted, linux, arm64, blackroad]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Audit GitHub Actions for pinned versions
+        run: |
+          echo "🔍 Checking GitHub Actions for pinned SHA versions..."
+          UNPINNED=0
+
+          find .github/workflows -name "*.yml" -o -name "*.yaml" | while read workflow; do
+            # Find uses: directives that aren't pinned to SHA
+            MATCHES=$(grep -n "uses:" "$workflow" | grep -v '@[a-f0-9]\{40\}' | grep -v "^#" || true)
+            if [ -n "$MATCHES" ]; then
+              echo "⚠️ $workflow has unpinned actions:"
+              echo "$MATCHES"
+              UNPINNED=$((UNPINNED + 1))
+            fi
+          done
+
+          echo ""
+          echo "ℹ️  Consider pinning actions to full SHA for supply chain security"
+          echo "   Example: actions/checkout@v4 → actions/checkout@<full-sha>"
+
+  verify-lockfiles:
+    name: Verify Lockfile Integrity
+    runs-on: [self-hosted, linux, arm64, blackroad]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check lockfile presence
+        run: |
+          echo "🔍 Verifying lockfile integrity..."
+
+          # Check npm lockfile
+          if [ -f package.json ] && [ ! -f package-lock.json ]; then
+            echo "::warning::package.json exists without package-lock.json"
+          elif [ -f package-lock.json ]; then
+            echo "✅ package-lock.json present"
+            # Verify lockfile version
+            LOCKFILE_VERSION=$(python3 -c "import json; print(json.load(open('package-lock.json')).get('lockfileVersion', 'unknown'))" 2>/dev/null || echo "unknown")
+            echo "   Lockfile version: $LOCKFILE_VERSION"
+          fi
+
+          # Check Python lockfiles
+          if [ -f requirements.txt ]; then
+            UNPINNED=$(grep -c -v '==' requirements.txt 2>/dev/null || echo "0")
+            if [ "$UNPINNED" -gt 0 ]; then
+              echo "⚠️ $UNPINNED unpinned Python dependencies in requirements.txt"
+            else
+              echo "✅ All Python dependencies pinned"
+            fi
+          fi
+
+  container-scan:
+    name: Container Image Scan
+    runs-on: [self-hosted, linux, arm64, blackroad]
+    if: hashFiles('**/Dockerfile') != ''
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Find and scan Dockerfiles
+        run: |
+          echo "🔍 Scanning Dockerfiles for security issues..."
+
+          find . -name "Dockerfile*" -not -path "./.git/*" -not -path "./node_modules/*" | while read dockerfile; do
+            echo "--- Scanning: $dockerfile ---"
+
+            # Check for security anti-patterns
+            if grep -q "FROM.*:latest" "$dockerfile" 2>/dev/null; then
+              echo "⚠️  Uses :latest tag (pin to specific version)"
+            fi
+
+            if grep -q "^USER root" "$dockerfile" 2>/dev/null || ! grep -q "^USER" "$dockerfile" 2>/dev/null; then
+              echo "⚠️  Runs as root (add non-root USER directive)"
+            fi
+
+            if grep -q "ADD\s" "$dockerfile" 2>/dev/null; then
+              echo "⚠️  Uses ADD instead of COPY (prefer COPY for local files)"
+            fi
+
+            if grep -q "curl.*\|.*sh\|wget.*\|.*sh" "$dockerfile" 2>/dev/null; then
+              echo "⚠️  Pipes downloaded content to shell"
+            fi
+
+            echo ""
+          done
+
+          echo "✅ Dockerfile scan complete"
+        continue-on-error: true
