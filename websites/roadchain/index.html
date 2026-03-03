@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RoadChain — BlackRoad OS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; background-color: transparent; }
+    html, body { background-color: #000 !important; }
+
+    :root {
+      --grad: linear-gradient(90deg, #FF8400, #FF4400, #FF0066, #CC00AA, #8800FF, #0066FF, #2233CC);
+      --grad-diag: linear-gradient(135deg, #FF8400, #FF0066, #8800FF, #0066FF);
+      --orange: #FF8400;
+      --pink: #FF0066;
+      --purple: #8800FF;
+      --blue: #0066FF;
+    }
+
+    html, body {
+      background: #000;
+      color: #fff;
+      font-family: 'JetBrains Mono', monospace;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── GRAD RULES ── */
+    .grad-rule { height: 3px; background: var(--grad); }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: #000;
+      padding: 0 32px;
+      height: 48px;
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid #fff;
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 12px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.85rem; font-weight: 700;
+    }
+    .nav-logo-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.45rem; opacity: 0.35;
+      letter-spacing: 0.15em; text-transform: uppercase;
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 2px 6px;
+    }
+    .nav-links { display: flex; gap: 28px; align-items: center; }
+    .nav-links a {
+      font-size: 0.5rem; color: #fff; opacity: 0.4;
+      text-decoration: none; letter-spacing: 0.12em;
+      text-transform: uppercase; transition: opacity 0.15s;
+    }
+    .nav-links a:hover { opacity: 1; }
+    .nav-cta {
+      background: #fff; color: #000;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.5rem; font-weight: 700;
+      letter-spacing: 0.08em;
+      padding: 6px 14px; border: none; cursor: pointer;
+    }
+
+    /* ── PAGE ── */
+    .page { max-width: 1100px; margin: 0 auto; padding: 0 32px; }
+
+    /* ── HERO ── */
+    .hero {
+      padding: 80px 0 64px;
+      border-bottom: 1px solid #fff;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-bg-grid {
+      display: none;
+    }
+    .hero-eyebrow {
+      font-size: 0.5rem; opacity: 0.3;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      margin-bottom: 24px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .hero-eyebrow::before {
+      content: '';
+      width: 32px; height: 1px;
+      background: var(--grad);
+    }
+    .hero h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(3.5rem, 10vw, 6.5rem);
+      font-weight: 700; line-height: 0.95;
+      letter-spacing: -0.03em;
+      position: relative;
+    }
+    .hero-sub {
+      margin-top: 28px;
+      font-size: 0.68rem; opacity: 0.4;
+      line-height: 2; max-width: 520px;
+    }
+    .hero-divider {
+      width: 120px; height: 2px;
+      background: var(--grad);
+      margin: 36px 0;
+    }
+    .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+    .btn-primary {
+      background: #fff; color: #000;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.6rem; font-weight: 700;
+      padding: 12px 24px; border: none; cursor: pointer;
+      letter-spacing: 0.05em;
+    }
+    .btn-ghost {
+      background: transparent; color: #fff;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.6rem; font-weight: 700;
+      padding: 11px 23px; border: 1px solid #fff; cursor: pointer;
+      letter-spacing: 0.05em;
+    }
+    .hero-note {
+      font-size: 0.45rem; opacity: 0.2;
+      letter-spacing: 0.08em; margin-left: 4px;
+    }
+
+    /* ── LIVE TICKER ── */
+    .ticker {
+      border-top: 1px solid rgba(255,255,255,0.08);
+      border-bottom: 1px solid #fff;
+      padding: 12px 0;
+      overflow: hidden;
+      position: relative;
+    }
+    .ticker-track {
+      display: flex; gap: 48px;
+      animation: ticker-scroll 28s linear infinite;
+      white-space: nowrap;
+    }
+    @keyframes ticker-scroll {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    .ticker-item {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 0.52rem;
+    }
+    .ticker-label { opacity: 0.3; letter-spacing: 0.1em; text-transform: uppercase; }
+    .ticker-value { font-weight: 700; }
+    .ticker-sep { opacity: 0.15; }
+
+    /* ── STATS ── */
+    .stats-row {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      border-bottom: 1px solid #fff;
+    }
+    .stat-cell {
+      padding: 40px 32px;
+      border-right: 1px solid rgba(255,255,255,0.1);
+    }
+    .stat-cell:last-child { border-right: none; }
+    .stat-num {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 700; line-height: 1;
+    }
+    .stat-label {
+      font-size: 0.48rem; opacity: 0.3;
+      letter-spacing: 0.15em; text-transform: uppercase;
+      margin-top: 8px;
+    }
+    .stat-sub {
+      font-size: 0.45rem; opacity: 0.15;
+      margin-top: 4px;
+    }
+    .stat-dot {
+      display: inline-block;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      margin-right: 6px;
+    }
+
+    /* ── SECTION ── */
+    .sec { padding: 64px 0 56px; border-bottom: 1px solid #fff; }
+    .sec-label {
+      font-size: 0.5rem; opacity: 0.3;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      margin-bottom: 40px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .sec-label::after {
+      content: ''; flex: 1; height: 1px;
+      background: rgba(255,255,255,0.08);
+    }
+    .sec-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 700; line-height: 1.1;
+      letter-spacing: -0.02em;
+      margin-bottom: 16px;
+    }
+    .sec-body {
+      font-size: 0.65rem; opacity: 0.4;
+      line-height: 2; max-width: 480px;
+    }
+
+    /* ── BLOCK EXPLORER PREVIEW ── */
+    .explorer {
+      border: 1px solid rgba(255,255,255,0.15);
+      margin-top: 40px;
+      background: #000 !important;
+    }
+    .explorer-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .explorer-title {
+      font-size: 0.52rem; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+    }
+    .explorer-status {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 0.46rem; opacity: 0.5;
+    }
+    .live-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #FF8400;
+      animation: live-pulse 1.8s ease-in-out infinite;
+    }
+    @keyframes live-pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(1.6); }
+    }
+
+    .explorer-cols {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      padding: 10px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .col-head {
+      font-size: 0.42rem; opacity: 0.25;
+      letter-spacing: 0.12em; text-transform: uppercase;
+    }
+
+    .block-row {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      padding: 12px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      transition: background 0.15s;
+      cursor: default;
+    }
+    .block-row:hover { background: rgba(255,255,255,0.03); }
+    .block-row:last-child { border-bottom: none; }
+
+    .b-num { font-size: 0.58rem; font-weight: 700; color: #0066FF; }
+    .b-hash { font-size: 0.5rem; opacity: 0.4; }
+    .b-txs { font-size: 0.55rem; opacity: 0.7; }
+    .b-val { font-size: 0.55rem; opacity: 0.7; }
+    .b-time { font-size: 0.5rem; opacity: 0.3; }
+
+    .explorer-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 20px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    .explorer-footer-txt { font-size: 0.44rem; opacity: 0.2; }
+    .view-all {
+      font-size: 0.46rem; font-weight: 700;
+      color: #fff; opacity: 0.5;
+      text-decoration: none; letter-spacing: 0.08em;
+      text-transform: uppercase;
+      transition: opacity 0.15s;
+    }
+    .view-all:hover { opacity: 1; }
+
+    /* ── FEATURES GRID ── */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;
+      margin-top: 48px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .feature-card {
+      padding: 32px 28px;
+      border-right: 1px solid rgba(255,255,255,0.08);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      transition: background 0.2s;
+    }
+    .feature-card:nth-child(3n) { border-right: none; }
+    .feature-card:nth-last-child(-n+3) { border-bottom: none; }
+    .feature-card:hover { background: rgba(255,255,255,0.02); }
+
+    .feat-icon {
+      width: 32px; height: 32px;
+      margin-bottom: 20px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .feat-icon svg { width: 100%; height: 100%; }
+    .feat-title {
+      font-size: 0.7rem; font-weight: 700;
+      margin-bottom: 10px;
+      letter-spacing: 0.02em;
+    }
+    .feat-body {
+      font-size: 0.52rem; opacity: 0.35;
+      line-height: 2;
+    }
+
+    /* ── PROTOCOL SPECS ── */
+    .specs-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      margin-top: 48px;
+    }
+    .spec-group { padding: 0 0 32px; }
+    .spec-group:first-child { padding-right: 48px; border-right: 1px solid rgba(255,255,255,0.08); }
+    .spec-group:last-child { padding-left: 48px; }
+    .spec-group-title {
+      font-size: 0.48rem; opacity: 0.3;
+      letter-spacing: 0.15em; text-transform: uppercase;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .spec-row {
+      display: flex; align-items: baseline;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .spec-row:last-child { border-bottom: none; }
+    .spec-key { font-size: 0.52rem; opacity: 0.35; }
+    .spec-val { font-size: 0.6rem; font-weight: 700; }
+    .spec-val.accent { color: #FF8400; }
+    .spec-val.blue { color: #0066FF; }
+    .spec-val.purple { color: #8800FF; }
+
+    /* ── VALIDATOR MAP ── */
+    .validator-list { margin-top: 40px; }
+    .validator-row {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr 1fr 1fr 120px;
+      align-items: center;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .val-head {
+      font-size: 0.42rem; opacity: 0.25;
+      letter-spacing: 0.12em; text-transform: uppercase;
+    }
+    .val-name { font-size: 0.6rem; font-weight: 700; }
+    .val-addr { font-size: 0.46rem; opacity: 0.3; margin-top: 2px; }
+    .val-stat { font-size: 0.55rem; opacity: 0.6; }
+    .val-uptime { font-size: 0.55rem; color: #FF8400; font-weight: 700; }
+    .val-blocks { font-size: 0.55rem; opacity: 0.6; }
+    .val-status {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 0.46rem; opacity: 0.5; letter-spacing: 0.06em;
+    }
+    .v-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+
+    /* ── ROADCOIN CTA ── */
+    .cta-band {
+      padding: 56px 0;
+      border-bottom: 1px solid #fff;
+      display: flex; align-items: center;
+      justify-content: space-between; gap: 32px;
+      flex-wrap: wrap;
+    }
+    .cta-left {}
+    .cta-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: 700; line-height: 1.1;
+      letter-spacing: -0.02em;
+      margin-bottom: 12px;
+    }
+    .cta-sub { font-size: 0.6rem; opacity: 0.35; line-height: 1.9; max-width: 420px; }
+    .cta-actions { display: flex; gap: 12px; margin-top: 28px; }
+
+    /* ── ROADCOIN TOKENS ── */
+    .token-row {
+      display: flex; align-items: center; gap: 0;
+      border: 1px solid rgba(255,255,255,0.1);
+      margin-top: 40px;
+    }
+    .token-cell {
+      flex: 1; padding: 24px 28px;
+      border-right: 1px solid rgba(255,255,255,0.08);
+    }
+    .token-cell:last-child { border-right: none; }
+    .tok-label { font-size: 0.44rem; opacity: 0.25; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 8px; }
+    .tok-val { font-size: 0.9rem; font-weight: 700; }
+    .tok-change { font-size: 0.46rem; margin-top: 4px; }
+    .pos { color: #FF8400; }
+    .neg { color: #FF0066; opacity: 0.7; }
+
+    /* ── FOOTER ── */
+    footer {
+      padding: 32px 0;
+      display: flex; justify-content: space-between;
+      align-items: center;
+      font-size: 0.46rem; opacity: 0.18;
+      flex-wrap: wrap; gap: 8px;
+    }
+
+    /* ── ANIMATIONS ── */
+    @keyframes count-up { from { opacity: 0; } to { opacity: 1; } }
+    .fade-in { animation: count-up 0.8s ease forwards; }
+
+    /* ── GRAD BAR ── */
+    .grad-bar { height: 2px; background: var(--grad); }
+    .grad-bar-sm { height: 1px; background: var(--grad); width: 48px; }
+
+    /* ── BADGE ── */
+    .badge {
+      font-size: 0.42rem; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 3px 8px; border: 1px solid;
+      display: inline-flex; align-items: center;
+    }
+    .badge-qbft { color: #8800FF; border-color: #8800FF; }
+    .badge-live { color: #FF8400; border-color: rgba(255,132,0,0.4); background: rgba(255,132,0,0.08); }
+    .badge-permissioned { color: rgba(255,255,255,0.5); border-color: rgba(255,255,255,0.2); }
+
+    /* ── GLOBAL BLACK OVERRIDE ── */
+    body, body * {
+      background-color: transparent;
+    }
+    body {
+      background-color: #000 !important;
+    }
+
+    @media (max-width: 768px) {
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .features-grid { grid-template-columns: 1fr; }
+      .specs-grid { grid-template-columns: 1fr; }
+      .spec-group:first-child { padding-right: 0; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 32px; margin-bottom: 32px; }
+      .spec-group:last-child { padding-left: 0; }
+      .validator-row { grid-template-columns: 1fr 1fr; gap: 8px; }
+      .page { padding: 0 16px; }
+      nav { padding: 0 16px; }
+    }
+  </style>
+</head>
+<body style="background:#000 !important;color:#fff;">
+<div class="grad-rule"></div>
+
+<nav>
+  <div class="nav-logo">
+    RoadChain <span class="nav-logo-tag">by BlackRoad</span>
+  </div>
+  <div class="nav-links">
+    <a href="#explorer">Explorer</a>
+    <a href="#protocol">Protocol</a>
+    <a href="#validators">Validators</a>
+    <a href="#docs">Docs</a>
+    <button class="nav-cta">Launch App</button>
+  </div>
+</nav>
+
+<div class="page">
+
+  <!-- HERO -->
+  <div class="hero" id="home">
+    <div class="hero-bg-grid"></div>
+    <div class="hero-eyebrow">RoadChain Protocol · v1.0 · QBFT Consensus</div>
+    <h1>The ledger<br>that never<br>forgets.</h1>
+    <p class="hero-sub">RoadChain is BlackRoad's permissioned QBFT blockchain — a cryptographic audit trail for identity, credits, and governance events across the entire OS.</p>
+    <div class="hero-divider"></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:28px;">
+      <span class="badge badge-qbft">QBFT Consensus</span>
+      <span class="badge badge-live">● Live</span>
+      <span class="badge badge-permissioned">Permissioned</span>
+    </div>
+    <div class="hero-actions">
+      <button class="btn-primary">Explore Blocks</button>
+      <button class="btn-ghost">Read Docs</button>
+      <span class="hero-note">No token speculation. Infrastructure only.</span>
+    </div>
+  </div>
+
+  <!-- LIVE TICKER -->
+  <div class="ticker">
+    <div class="ticker-track">
+      <span class="ticker-item"><span class="ticker-label">Block</span><span class="ticker-value">#1,847,293</span></span>
+      <span class="ticker-sep">·</span>
+      <span class="ticker-item"><span class="ticker-label">TPS</span><span class="ticker-value">2,847</span></span>
+      <span class="ticker-sep">·</span>
+      <span class="ticker-item"><span class="ticker-label">Validators</span><span class="ticker-value">12 active</span></span>
+      <span class="ticker-sep">·</span>
+      <span class="ticker-item"><span class="ticker-label">RoadCoin</span><span class="ticker-value">RC 1 = 0.001 compute unit</span></span>
+      <span class="ticker-sep">·</span>
+      <span class="ticker-item"><span class="ticker-label">Finality</span><span class="ticker-value">~1.2s</span></span>
+      <span class="ticker-sep">·</span>
+      <span class="ticker-item"><span class="ticker-label">Total Tx</span><span class="ticker-value">84,209,441</span></span>
+      <span class="ticker-sep">·</span>
+      <span class="ticker-item"><span class="ticker-label">Gas</span><span class="ticker-value">0 RC (flat fee)</span></span>
+      <span class="ticker-sep">·</span>
+      <!-- Repeat for seamless loop -->
+      <span class="ticker-item"><span class="ticker-label">Block</span><span class="ticker-value">#1,847,293</span></span>
+      <span class="ticker-sep">·</span>
+      <span class="ticker-item"><span class="ticker-label">TPS</span><span class="ticker-value">2,847</span></span>
+      <span class="ticker-sep">·</span>
+      <span class="ticker-item"><span class="ticker-label">Validators</span><span class="ticker-value">12 active</span></span>
+      <span class="ticker-sep">·</span>
+      <span class="ticker-item"><span class="ticker-label">RoadCoin</span><span class="ticker-value">RC 1 = 0.001 compute unit</span></span>
+      <span class="ticker-sep">·</span>
+      <span class="ticker-item"><span class="ticker-label">Finality</span><span class="ticker-value">~1.2s</span></span>
+      <span class="ticker-sep">·</span>
+      <span class="ticker-item"><span class="ticker-label">Total Tx</span><span class="ticker-value">84,209,441</span></span>
+      <span class="ticker-sep">·</span>
+      <span class="ticker-item"><span class="ticker-label">Gas</span><span class="ticker-value">0 RC (flat fee)</span></span>
+      <span class="ticker-sep">·</span>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="stat-cell">
+      <div class="stat-num">1.8M+</div>
+      <div class="stat-label">Blocks Produced</div>
+      <div class="stat-sub">Since genesis · Nov 2025</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-num">84M+</div>
+      <div class="stat-label">Transactions</div>
+      <div class="stat-sub">Identities, credits, events</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-num">~1.2s</div>
+      <div class="stat-label">Avg Finality</div>
+      <div class="stat-sub">QBFT BFT consensus</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-num">100%</div>
+      <div class="stat-label">Uptime</div>
+      <div class="stat-sub"><span class="stat-dot" style="background:#FF8400;"></span>All validators online</div>
+    </div>
+  </div>
+
+  <!-- BLOCK EXPLORER -->
+  <div class="sec" id="explorer">
+    <div class="sec-label">01 · Block Explorer</div>
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:32px;flex-wrap:wrap;">
+      <div>
+        <div class="sec-title">Latest Blocks</div>
+        <div class="sec-body">Every governance event, credit transfer, and identity proof is cryptographically sealed and publicly auditable.</div>
+      </div>
+      <div style="padding-top:8px;">
+        <a href="#" class="view-all">View All Blocks →</a>
+      </div>
+    </div>
+
+    <div class="explorer">
+      <div class="explorer-header">
+        <div class="explorer-title">Live Chain · roadchain.io</div>
+        <div class="explorer-status">
+          <div class="live-dot"></div>
+          Syncing in real-time
+        </div>
+      </div>
+
+      <div class="explorer-cols">
+        <div class="col-head">Block</div>
+        <div class="col-head">Hash</div>
+        <div class="col-head">Txs</div>
+        <div class="col-head">Gas Used</div>
+        <div class="col-head">Age</div>
+      </div>
+
+      <div class="block-row">
+        <div class="b-num">#1,847,293</div>
+        <div class="b-hash">0x4f2a…c81e</div>
+        <div class="b-txs">247 txs</div>
+        <div class="b-val">flat</div>
+        <div class="b-time">2s ago</div>
+      </div>
+      <div class="block-row">
+        <div class="b-num">#1,847,292</div>
+        <div class="b-hash">0x9d1c…a23f</div>
+        <div class="b-txs">183 txs</div>
+        <div class="b-val">flat</div>
+        <div class="b-time">4s ago</div>
+      </div>
+      <div class="block-row">
+        <div class="b-num">#1,847,291</div>
+        <div class="b-hash">0x2e8b…d74c</div>
+        <div class="b-txs">312 txs</div>
+        <div class="b-val">flat</div>
+        <div class="b-time">6s ago</div>
+      </div>
+      <div class="block-row">
+        <div class="b-num">#1,847,290</div>
+        <div class="b-hash">0x7a3f…e19d</div>
+        <div class="b-txs">198 txs</div>
+        <div class="b-val">flat</div>
+        <div class="b-time">8s ago</div>
+      </div>
+      <div class="block-row">
+        <div class="b-num">#1,847,289</div>
+        <div class="b-hash">0xc62d…b45a</div>
+        <div class="b-txs">271 txs</div>
+        <div class="b-val">flat</div>
+        <div class="b-time">10s ago</div>
+      </div>
+      <div class="block-row">
+        <div class="b-num">#1,847,288</div>
+        <div class="b-hash">0x1b9e…f38c</div>
+        <div class="b-txs">89 txs</div>
+        <div class="b-val">flat</div>
+        <div class="b-time">12s ago</div>
+      </div>
+
+      <div class="explorer-footer">
+        <div class="explorer-footer-txt">Network: RoadChain Mainnet · Chain ID: 4200 · QBFT PoA</div>
+        <a href="#" class="view-all">explorer.roadchain.io →</a>
+      </div>
+    </div>
+
+    <!-- Grad decoration -->
+    <div style="margin-top:24px;">
+      <div style="height:1px;background:linear-gradient(90deg,#0066FF,transparent);"></div>
+    </div>
+  </div>
+
+  <!-- FEATURES -->
+  <div class="sec" id="protocol">
+    <div class="sec-label">02 · What RoadChain Does</div>
+    <div class="sec-title">Infrastructure,<br>not speculation.</div>
+    <div class="sec-body">RoadChain isn't a public crypto chain. It's a private, high-performance ledger that powers every critical operation in the BlackRoad OS.</div>
+
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feat-icon">
+          <svg viewBox="0 0 32 32" fill="none">
+            <rect x="4" y="4" width="24" height="24" stroke="#FF8400" stroke-width="1.5"/>
+            <rect x="10" y="10" width="12" height="12" stroke="#FF8400" stroke-width="1" opacity="0.5"/>
+            <circle cx="16" cy="16" r="2" fill="#FF8400"/>
+          </svg>
+        </div>
+        <div class="feat-title">Identity Anchoring</div>
+        <div class="feat-body">Every agent, user, and device gets a PS-SHA∞ identity hash sealed to the chain. Once born, an agent's cryptographic identity is immutable and verifiable across the entire OS.</div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feat-icon">
+          <svg viewBox="0 0 32 32" fill="none">
+            <path d="M4 16 L12 8 L20 16 L28 8" stroke="#0066FF" stroke-width="1.5"/>
+            <path d="M4 24 L12 16 L20 24 L28 16" stroke="#0066FF" stroke-width="1" opacity="0.4"/>
+          </svg>
+        </div>
+        <div class="feat-title">Credit Settlement</div>
+        <div class="feat-body">RoadCoin transfers — compute credits, creator payments, platform fees — settle on-chain with 1.2-second finality and no gas cost to end users. One flat fee, forever.</div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feat-icon">
+          <svg viewBox="0 0 32 32" fill="none">
+            <path d="M16 4 L28 10 L28 22 L16 28 L4 22 L4 10 Z" stroke="#8800FF" stroke-width="1.5"/>
+            <path d="M16 12 L22 15 L22 21 L16 24 L10 21 L10 15 Z" stroke="#8800FF" stroke-width="1" opacity="0.5"/>
+          </svg>
+        </div>
+        <div class="feat-title">Governance Ledger</div>
+        <div class="feat-body">Every policy decision Cece makes — allow, deny, delegate — is permanently logged to the chain. Full auditability for compliance and SOC 2 alignment with zero data egress.</div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feat-icon">
+          <svg viewBox="0 0 32 32" fill="none">
+            <circle cx="8" cy="16" r="4" stroke="#FF0066" stroke-width="1.5"/>
+            <circle cx="24" cy="16" r="4" stroke="#FF0066" stroke-width="1.5"/>
+            <line x1="12" y1="16" x2="20" y2="16" stroke="#FF0066" stroke-width="1"/>
+          </svg>
+        </div>
+        <div class="feat-title">Cross-Chain Bridge</div>
+        <div class="feat-body">bridge.roadchain.io connects to external chains for asset migration and interoperability. Audited bridging logic with time-locked withdrawals and multi-sig validator approval.</div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feat-icon">
+          <svg viewBox="0 0 32 32" fill="none">
+            <rect x="4" y="12" width="8" height="16" stroke="#FF8400" stroke-width="1.5"/>
+            <rect x="14" y="8" width="8" height="20" stroke="#FF8400" stroke-width="1.5"/>
+            <rect x="24" y="4" width="4" height="24" stroke="#FF8400" stroke-width="1.5"/>
+          </svg>
+        </div>
+        <div class="feat-title">Agent Economy</div>
+        <div class="feat-body">30,000+ agents transact autonomously — requesting compute, earning credits for completed tasks, paying into shared resource pools. All settled trustlessly on-chain.</div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feat-icon">
+          <svg viewBox="0 0 32 32" fill="none">
+            <path d="M16 4 L28 28 L4 28 Z" stroke="#0066FF" stroke-width="1.5"/>
+            <line x1="16" y1="12" x2="16" y2="20" stroke="#0066FF" stroke-width="1.5"/>
+            <circle cx="16" cy="23" r="1" fill="#0066FF"/>
+          </svg>
+        </div>
+        <div class="feat-title">Proof of Existence</div>
+        <div class="feat-body">Content creators can anchor file hashes to the chain — proving authorship and timestamp without revealing content. The record is permanent, the data stays yours.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROTOCOL SPECS -->
+  <div class="sec">
+    <div class="sec-label">03 · Protocol Specs</div>
+    <div class="specs-grid">
+      <div class="spec-group">
+        <div class="spec-group-title">Consensus & Performance</div>
+        <div class="spec-row">
+          <span class="spec-key">Consensus</span>
+          <span class="spec-val accent">QBFT (Byzantine Fault Tolerant)</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-key">Block Time</span>
+          <span class="spec-val">~2 seconds</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-key">Finality</span>
+          <span class="spec-val">~1.2 seconds</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-key">Max TPS</span>
+          <span class="spec-val">10,000+</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-key">Gas Model</span>
+          <span class="spec-val">Flat fee · no gas wars</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-key">Chain ID</span>
+          <span class="spec-val blue">4200</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-key">EVM Compatible</span>
+          <span class="spec-val">Yes</span>
+        </div>
+      </div>
+      <div class="spec-group">
+        <div class="spec-group-title">Network & Security</div>
+        <div class="spec-row">
+          <span class="spec-key">Type</span>
+          <span class="spec-val purple">Permissioned PoA</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-key">Active Validators</span>
+          <span class="spec-val">12</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-key">BFT Threshold</span>
+          <span class="spec-val">f &lt; n/3 (4 fault tolerance)</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-key">Node Discovery</span>
+          <span class="spec-val">Allowlist-based</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-key">Encryption</span>
+          <span class="spec-val">TLS 1.3 · P2P encrypted</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-key">Hash Function</span>
+          <span class="spec-val accent">PS-SHA∞ + Keccak-256</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-key">Testnet</span>
+          <span class="spec-val">testnet.roadchain.io</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VALIDATORS -->
+  <div class="sec" id="validators">
+    <div class="sec-label">04 · Active Validators</div>
+    <div class="sec-title">12 trusted nodes.<br>Zero single point of failure.</div>
+    <div class="sec-body">QBFT requires 2/3 of validators to agree before any block is finalized. Even if 4 validators go offline simultaneously, the chain continues.</div>
+
+    <div class="validator-list">
+      <div class="validator-row" style="border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:10px;margin-bottom:4px;">
+        <div class="val-head">Validator</div>
+        <div class="val-head">Uptime</div>
+        <div class="val-head">Blocks Signed</div>
+        <div class="val-head">Location</div>
+        <div class="val-head">Status</div>
+      </div>
+      <div class="validator-row">
+        <div><div class="val-name">alice-v1</div><div class="val-addr">0x4a2f…c81e</div></div>
+        <div class="val-uptime">100.0%</div>
+        <div class="val-blocks">1,847,291</div>
+        <div class="val-stat">US-West</div>
+        <div class="val-status"><div class="v-dot" style="background:#FF8400;"></div>Online</div>
+      </div>
+      <div class="validator-row">
+        <div><div class="val-name">cecilia-v1</div><div class="val-addr">0x9d1c…a23f</div></div>
+        <div class="val-uptime">100.0%</div>
+        <div class="val-blocks">1,847,291</div>
+        <div class="val-stat">US-East</div>
+        <div class="val-status"><div class="v-dot" style="background:#FF8400;"></div>Online</div>
+      </div>
+      <div class="validator-row">
+        <div><div class="val-name">cadence-v1</div><div class="val-addr">0x2e8b…d74c</div></div>
+        <div class="val-uptime">99.98%</div>
+        <div class="val-blocks">1,846,922</div>
+        <div class="val-stat">EU-West</div>
+        <div class="val-status"><div class="v-dot" style="background:#FF8400;"></div>Online</div>
+      </div>
+      <div class="validator-row">
+        <div><div class="val-name">eve-v1</div><div class="val-addr">0x7a3f…e19d</div></div>
+        <div class="val-uptime">99.97%</div>
+        <div class="val-blocks">1,846,737</div>
+        <div class="val-stat">AP-South</div>
+        <div class="val-status"><div class="v-dot" style="background:#FF8400;"></div>Online</div>
+      </div>
+      <div class="validator-row">
+        <div><div class="val-name">olympia-v1</div><div class="val-addr">0xc62d…b45a</div></div>
+        <div class="val-uptime">100.0%</div>
+        <div class="val-blocks">1,847,291</div>
+        <div class="val-stat">US-Central</div>
+        <div class="val-status"><div class="v-dot" style="background:#FF8400;"></div>Online</div>
+      </div>
+      <div class="validator-row">
+        <div><div class="val-name">meridian-v1</div><div class="val-addr">0x1b9e…f38c</div></div>
+        <div class="val-uptime">99.99%</div>
+        <div class="val-blocks">1,847,108</div>
+        <div class="val-stat">EU-Central</div>
+        <div class="val-status"><div class="v-dot" style="background:#FF8400;"></div>Online</div>
+      </div>
+    </div>
+
+    <div style="margin-top:16px;font-size:0.46rem;opacity:0.2;">
+      + 6 additional validators · Showing 6 of 12 · <a href="#" style="color:#fff;opacity:0.5;text-decoration:none;">View all →</a>
+    </div>
+  </div>
+
+  <!-- ROADCOIN CTA -->
+  <div class="cta-band">
+    <div class="cta-left">
+      <div class="cta-title">RoadCoin powers<br>every transaction.</div>
+      <div class="cta-sub">RC is the on-chain credit unit. Not a speculative token — a utility instrument. 1 RC = 0.001 compute units. Spend it on AI inference, storage, and agent tasks. Earn it by contributing to the network.</div>
+      <div class="cta-actions">
+        <button class="btn-primary">Get RoadCoin</button>
+        <button class="btn-ghost">Read Tokenomics</button>
+      </div>
+    </div>
+    <div>
+      <div class="token-row">
+        <div class="token-cell">
+          <div class="tok-label">RC Price</div>
+          <div class="tok-val">$0.0042</div>
+          <div class="tok-change pos">+2.1% today</div>
+        </div>
+        <div class="token-cell">
+          <div class="tok-label">Circulating</div>
+          <div class="tok-val">48.2M</div>
+          <div class="tok-change" style="opacity:0.2;">of 1B max</div>
+        </div>
+        <div class="token-cell">
+          <div class="tok-label">24h Volume</div>
+          <div class="tok-val">$284K</div>
+          <div class="tok-change pos">+12.4%</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM LINKS -->
+  <div class="sec" id="docs" style="border-bottom:none;">
+    <div class="sec-label">05 · Resources</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;border:1px solid rgba(255,255,255,0.1);">
+      <a href="#" style="text-decoration:none;color:#fff;padding:28px 24px;border-right:1px solid rgba(255,255,255,0.08);transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.03)'" onmouseout="this.style.background='transparent'">
+        <div style="font-size:0.48rem;opacity:0.3;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:10px;">Documentation</div>
+        <div style="font-size:0.68rem;font-weight:700;margin-bottom:6px;">docs.roadchain.io</div>
+        <div style="font-size:0.48rem;opacity:0.25;line-height:1.8;">API references, node setup guides, and integration patterns.</div>
+      </a>
+      <a href="#" style="text-decoration:none;color:#fff;padding:28px 24px;border-right:1px solid rgba(255,255,255,0.08);transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.03)'" onmouseout="this.style.background='transparent'">
+        <div style="font-size:0.48rem;opacity:0.3;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:10px;">Testnet</div>
+        <div style="font-size:0.68rem;font-weight:700;margin-bottom:6px;">testnet.roadchain.io</div>
+        <div style="font-size:0.48rem;opacity:0.25;line-height:1.8;">Free faucet. Build and test before going to mainnet.</div>
+      </a>
+      <a href="#" style="text-decoration:none;color:#fff;padding:28px 24px;border-right:1px solid rgba(255,255,255,0.08);transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.03)'" onmouseout="this.style.background='transparent'">
+        <div style="font-size:0.48rem;opacity:0.3;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:10px;">Bridge</div>
+        <div style="font-size:0.68rem;font-weight:700;margin-bottom:6px;">bridge.roadchain.io</div>
+        <div style="font-size:0.48rem;opacity:0.25;line-height:1.8;">Cross-chain asset migration. Audited. Time-locked withdrawals.</div>
+      </a>
+      <a href="#" style="text-decoration:none;color:#fff;padding:28px 24px;transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.03)'" onmouseout="this.style.background='transparent'">
+        <div style="font-size:0.48rem;opacity:0.3;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:10px;">Status</div>
+        <div style="font-size:0.68rem;font-weight:700;margin-bottom:6px;">chain.blackroad.network</div>
+        <div style="font-size:0.48rem;opacity:0.25;line-height:1.8;">Real-time network health, validator status, incident history.</div>
+      </a>
+    </div>
+  </div>
+
+  <footer>
+    <span>RoadChain Protocol · BlackRoad OS, Inc. · Chain ID 4200 · Est. Nov 2025</span>
+    <span>QBFT · EVM Compatible · Permissioned · SOC 2 Target</span>
+  </footer>
+
+</div>
+
+<div class="grad-rule"></div>
+
+<!-- Live block counter simulation -->
+<script>
+  // Animate block numbers incrementing
+  let blockNum = 1847293;
+  const blockEls = document.querySelectorAll('.b-num');
+
+  setInterval(() => {
+    blockNum++;
+    blockEls.forEach((el, i) => {
+      el.textContent = `#${(blockNum - i).toLocaleString()}`;
+    });
+    // Update ticker
+    const tickerBlocks = document.querySelectorAll('.ticker-value');
+    if (tickerBlocks[0]) tickerBlocks[0].textContent = `#${blockNum.toLocaleString()}`;
+    if (tickerBlocks[7]) tickerBlocks[7].textContent = `#${blockNum.toLocaleString()}`;
+
+    // Update times
+    const times = document.querySelectorAll('.b-time');
+    times.forEach((el, i) => {
+      el.textContent = `${(i * 2 + 2)}s ago`;
+    });
+  }, 2000);
+</script>
+
+</body>
+</html>
