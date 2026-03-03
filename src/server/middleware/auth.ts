@@ -56,7 +56,13 @@ export async function verifyToken(
 
   const msg = `${hdr}.${payloadB64}`
   const expected = await hmacSign(masterKey, msg)
-  if (expected !== sigB64) return { ok: false, error: 'invalid signature' }
+  // Constant-time comparison to prevent timing side-channel attacks
+  if (expected.length !== sigB64.length) return { ok: false, error: 'invalid signature' }
+  const a = new TextEncoder().encode(expected)
+  const b = new TextEncoder().encode(sigB64)
+  let diff = 0
+  for (let i = 0; i < a.length; i++) diff |= a[i] ^ b[i]
+  if (diff !== 0) return { ok: false, error: 'invalid signature' }
 
   let payload: TokenPayload
   try {

@@ -25,6 +25,12 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SWARM_DIR="${SCRIPT_DIR}/.swarm"
 REPO="${SWARM_REPO:-BlackRoad-OS-Inc/blackroad-operator}"
 
+# Require jq for JSON processing
+if ! command -v jq &>/dev/null; then
+  echo -e "${RED}jq (JSON CLI) required. Install: https://jqlang.github.io/jq/download/${NC}"
+  exit 1
+fi
+
 has_gh() {
   command -v gh &>/dev/null && gh auth status &>/dev/null 2>&1
 }
@@ -124,7 +130,9 @@ render_dashboard() {
           indicator="${RED}x no branch${NC}"
         fi
 
-        echo -e "    ${color}[${basename^^}]${NC} ${role}  ${indicator}"
+        local upper_basename
+        upper_basename=$(printf '%s' "$basename" | tr '[:lower:]' '[:upper:]')
+        echo -e "    ${color}[${upper_basename}]${NC} ${role}  ${indicator}"
         echo -e "      ${DIM}${branch}${NC}"
       done
 

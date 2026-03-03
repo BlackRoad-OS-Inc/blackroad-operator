@@ -19,9 +19,7 @@ canvas {
 </style>
 </head>
 <body>
-<canvas id="c" aria-hidden="true">
-  Animated background visualization for the BlackRoad interface.
-</canvas>
+<canvas id="c" aria-hidden="true">Animated background visualization for the BlackRoad interface.</canvas>
 <script>
 const C = document.getElementById('c');
 const X = C.getContext('2d');
@@ -30,11 +28,12 @@ let W, H, frame = 0;
 
 function resize() {
   const dpr = window.devicePixelRatio || 1;
-  const rect = C.getBoundingClientRect();
-  W = rect.width;
-  H = rect.height;
+  W = window.innerWidth;
+  H = window.innerHeight;
   C.width  = W * dpr;
   C.height = H * dpr;
+  C.style.width  = W + 'px';
+  C.style.height = H + 'px';
   X.setTransform(dpr, 0, 0, dpr, 0, 0);
 }
 resize();
@@ -94,35 +93,23 @@ function drawLn(x1,y1,w,p,a=1,lw=.8) {
 }
 
 // ─── SCENE CONFIG ────────────────────────────────────────
-// 4 templates × ~4s each = 16s loop at 60fps = 960 frames
-// Each template: 240 frames
-// build:0-120, hold:120-180, exit:180-240
-const LOOP   = 960;   // legacy "frame" based loop length (at 60fps)
-const SEG    = 240;   // legacy "frame" based segment length (at 60fps)
+// 4 templates × ~4s each = 16s loop
+// Each template: 4s
+// build:0-2s, hold:2-3s, exit:3-4s
+const LOOP_MS  = 16000;
+const SEG_MS   = 4000;
+let startTime = null;
 
-// Time-based durations derived from the original 60fps assumptions
-const FPS_TARGET = 60;
-const LOOP_MS    = (LOOP / FPS_TARGET) * 1000; // ~16000ms
-const SEG_MS     = (SEG  / FPS_TARGET) * 1000; // ~4000ms
-
-// Start time for the looping scene animation
-let SCENE_START_MS = null;
-
-// scene index and local progress 0..1
-// NOTE: `f` is kept for backwards compatibility but is no longer used
-function scene(f) {
-  if (SCENE_START_MS === null) {
-    SCENE_START_MS = performance.now();
-  }
-  const now = performance.now();
-  // Elapsed time within the loop, wrapped to [0, LOOP_MS)
-  let elapsed = now - SCENE_START_MS;
-  if (elapsed < 0) elapsed = 0;
-  const ee = ((elapsed % LOOP_MS) + LOOP_MS) % LOOP_MS;
-  const si  = Math.floor(ee / SEG_MS);
-  const sp  = (ee % SEG_MS) / SEG_MS;
+// scene index and local progress 0..1 (time-based)
+function scene(elapsed) {
+  const ms = ((elapsed % LOOP_MS) + LOOP_MS) % LOOP_MS;
+  const si  = Math.floor(ms / SEG_MS);
+  const sp  = (ms % SEG_MS) / SEG_MS;
   return [si, sp];
 }
+
+// Reduced motion preference
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 // ─── TEMPLATES ───────────────────────────────────────────
 // 0 = PROFILE   1 = WIKI   2 = ROAD TV   3 = DIRECTORY
@@ -332,14 +319,15 @@ function drawTV(sp) {
   }
 
   // Scan line on video
-  const scanY = vy - vh/2 + ((frame*0.5)%vh);
+  const elapsed = startTime ? performance.now() - startTime : 0;
+  const scanY = vy - vh/2 + ((elapsed*0.03)%vh);
   ln(px-vw/2, scanY, px+vw/2, scanY, a*.06, .5);
 
   // Progress bar
   const pby = vy + vh/2 + ph*.018;
   const pbp = clamp((build-.5)/.3, 0, 1);
   hln(px, pby, vw*.9, a*pbp*.2, .8);
-  const prog = (.3 + frame*.001) % 1;
+  const prog = (.3 + elapsed*.00006) % 1;
   drawLn(px - vw*.45, pby, vw*.9*prog, pbp, a*.55, 1.5);
   dot(px - vw*.45 + vw*.9*prog, pby, 3.5, a*pbp*.65);
 
@@ -449,7 +437,7 @@ function drawDirectory(sp) {
 }
 
 // ─── PERSISTENT UI LAYER ─────────────────────────────────
-function drawPersist() {
+function drawPersist(elapsed) {
   // Corner brackets
   const bl=22, bo=16;
   const corners=[[bo,bo,1,1],[W-bo,bo,-1,1],[bo,H-bo,1,-1],[W-bo,H-bo,-1,-1]];
@@ -460,11 +448,11 @@ function drawPersist() {
   X.restore();
 
   // Scan line
-  const sy = (frame * .3) % H;
+  const sy = (elapsed * .018) % H;
   ln(0, sy, W, sy, .03, .5);
 
   // Scene indicator dots (bottom center)
-  const [si] = scene(frame);
+  const [si] = scene(elapsed);
   const dotSpacing = 16;
   const dotsX = W/2 - (3*dotSpacing)/2;
   for(let i=0;i<4;i++){
@@ -476,7 +464,7 @@ function drawPersist() {
   }
 
   // Frame counter tick (top-right, ultra subtle)
-  const tf = (frame % 60) / 60;
+  const tf = ((elapsed / 16.67) % 60) / 60;
   arc(W-bo, bo, 6, .08, .8, -Math.PI/2, -Math.PI/2 + tf*PI2);
 }
 
@@ -499,13 +487,17 @@ function drawTransition(sp) {
 }
 
 // ─── MAIN ────────────────────────────────────────────────
-function draw() {
-  frame++;
+let animId = null;
+
+function draw(timestamp) {
+  if (startTime === null) startTime = timestamp;
+  const elapsed = timestamp - startTime;
+
   X.clearRect(0,0,W,H);
   X.fillStyle='#000';
   X.fillRect(0,0,W,H);
 
-  const [si, sp] = scene(frame);
+  const [si, sp] = scene(elapsed);
 
   // Draw active template
   if(si===0) drawProfile(sp);
@@ -517,11 +509,27 @@ function draw() {
   drawTransition(sp);
 
   // Always-on layer
-  drawPersist();
+  drawPersist(elapsed);
 
-  requestAnimationFrame(draw);
+  animId = requestAnimationFrame(draw);
 }
-draw();
+
+// Pause when tab is hidden to save CPU/battery
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    if (animId) { cancelAnimationFrame(animId); animId = null; }
+  } else {
+    startTime = null;
+    if (!animId) animId = requestAnimationFrame(draw);
+  }
+});
+
+// Respect prefers-reduced-motion: show static first frame only
+if (prefersReducedMotion) {
+  draw(0);
+} else {
+  animId = requestAnimationFrame(draw);
+}
 </script>
 </body>
 </html>

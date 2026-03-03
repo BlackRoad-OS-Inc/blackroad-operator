@@ -8,20 +8,16 @@ export const logsCommand = new Command('logs')
   .option('-n <lines>', 'Number of lines', '50')
   .action(async (opts: { n: string }) => {
     const client = new GatewayClient()
+    const DEFAULT_LIMIT = 50
+    const MAX_LIMIT = 1000
+    let limit = parseInt(opts.n, 10)
+    if (!Number.isFinite(limit) || limit < 1) limit = DEFAULT_LIMIT
+    if (limit > MAX_LIMIT) limit = MAX_LIMIT
     try {
-      // Parse and validate the requested number of lines
-      const DEFAULT_LIMIT = 50
-      const MAX_LIMIT = 1000
-      let limit = parseInt(opts.n, 10)
-      if (!Number.isFinite(limit) || isNaN(limit) || limit <= 0) {
-        limit = DEFAULT_LIMIT
-      } else if (limit > MAX_LIMIT) {
-        limit = MAX_LIMIT
-      }
-      const params = new URLSearchParams({ limit: String(limit) })
-
+      const url = new URL('/v1/logs', 'http://placeholder')
+      url.searchParams.set('limit', String(limit))
       const data = await client.get<{ logs: string[] }>(
-        `/v1/logs?${params.toString()}`,
+        `${url.pathname}?${url.searchParams.toString()}`,
       )
       if (data.logs.length === 0) {
         logger.info('No logs available.')
