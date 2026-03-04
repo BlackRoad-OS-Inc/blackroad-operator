@@ -3,6 +3,7 @@ import { Command } from 'commander'
 import { GatewayClient } from '../../core/client.js'
 import { logger } from '../../core/logger.js'
 import { formatTable } from '../../formatters/table.js'
+import { formatError } from '../../core/errors.js'
 
 interface Agent {
   name: string
@@ -21,11 +22,14 @@ export const agentsCommand = new Command('agents')
         console.log(JSON.stringify(data.agents, null, 2))
         return
       }
-      console.log(formatTable(
-        ['Name', 'Title', 'Role'],
-        data.agents.map((a) => [a.name, a.title, a.role]),
-      ))
-    } catch {
-      logger.error('Failed to fetch agents from gateway.')
+      console.log(
+        formatTable(
+          ['Name', 'Title', 'Role'],
+          data.agents.map((a) => [a.name, a.title, a.role]),
+        ),
+      )
+    } catch (error) {
+      logger.error(formatError(error))
+      process.exitCode = 1
     }
   })

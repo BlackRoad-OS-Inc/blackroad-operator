@@ -1,0 +1,31 @@
+# Copyright (c) 2025-2026 BlackRoad OS, Inc. All Rights Reserved.
+services:
+  gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    ports:
+      - '8787:8787'
+    environment:
+      NODE_ENV: production
+      BLACKROAD_GATEWAY_BIND: '0.0.0.0'
+      BLACKROAD_GATEWAY_PORT: '8787'
+      BLACKROAD_GATEWAY_ALLOW_REMOTE: 'false'
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD', 'wget', '-qO-', 'http://localhost:8787/healthz']
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '1.0'
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true

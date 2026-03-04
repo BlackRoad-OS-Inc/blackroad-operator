@@ -8,10 +8,23 @@ export const brand = {
   electricBlue: chalk.hex('#2979FF'),
 
   logo() {
-    return this.hotPink('▙') + this.amber('▟') + ' ' + this.violet('BlackRoad') + ' ' + this.electricBlue('OS')
+    return (
+      this.hotPink('▙') +
+      this.amber('▟') +
+      ' ' +
+      this.violet('BlackRoad') +
+      ' ' +
+      this.electricBlue('OS')
+    )
   },
 
   header(text: string) {
-    return this.hotPink('━'.repeat(60)) + '\n' + chalk.bold(text) + '\n' + this.hotPink('━'.repeat(60))
+    return (
+      this.hotPink('━'.repeat(60)) +
+      '\n' +
+      chalk.bold(text) +
+      '\n' +
+      this.hotPink('━'.repeat(60))
+    )
   },
 }
