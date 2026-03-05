@@ -31,7 +31,14 @@ jobs:
           AGENT=$(echo "$BRANCH" | cut -d'/' -f4)
           COMMIT_MSG=$(git log -1 --pretty=%s)
           COMMIT_SHA="${{ github.sha }}"
-          FILES_CHANGED=$(git diff --name-only HEAD~1 2>/dev/null | head -20 | tr '\n' ', ' || echo "unknown")
+          if git rev-parse HEAD~1 >/dev/null 2>&1; then
+            FILES_CHANGED=$(git diff --name-only HEAD~1 2>/dev/null | head -20 | tr '\n' ', ')
+            if [ -z "$FILES_CHANGED" ]; then
+              FILES_CHANGED="unknown"
+            fi
+          else
+            FILES_CHANGED="unknown"
+          fi
 
           echo "swarm_id=${SWARM_ID}" >> "$GITHUB_OUTPUT"
           echo "agent=${AGENT}" >> "$GITHUB_OUTPUT"
