@@ -48,22 +48,22 @@ jobs:
             }
 
             // Parse workflow ID components
-            const [prefix, date, scope, seq] = workflowId.split('-');
+            const [prefix, date, idScope, seq] = workflowId.split('-');
 
             // Extract dependencies from body
             const depsMatch = issue.body?.match(/Dependencies?:\s*([^\n]+)/i);
-            const deps = depsMatch 
+            const deps = depsMatch
               ? depsMatch[1].split(',').map(d => d.trim()).filter(d => d)
               : [];
 
             // Extract other metadata from labels
-            const trafficLight = issue.labels.find(l => 
+            const trafficLight = issue.labels.find(l =>
               l.name.match(/[🟢🟡🔴]/)
             )?.name || '🟢';
 
             const state = issue.state === 'closed' ? 'Done' : 'Active';
-            
-            const scope = issue.labels.find(l => 
+
+            const scope = issue.labels.find(l =>
               ['Local', 'Service', 'System', 'Public', 'Experimental'].includes(l.name)
             )?.name || 'Service';
 
@@ -105,9 +105,9 @@ jobs:
           touch .blackroad/workflow-index.jsonl
           
           # Check if entry already exists (by ID)
-          if grep -q "\"id\":\"$WORKFLOW_ID\"" .blackroad/workflow-index.jsonl; then
+          if grep -F -q "\"id\":\"$WORKFLOW_ID\"" .blackroad/workflow-index.jsonl; then
             # Update existing entry (remove old, append new)
-            grep -v "\"id\":\"$WORKFLOW_ID\"" .blackroad/workflow-index.jsonl > .blackroad/workflow-index.tmp
+            grep -F -v "\"id\":\"$WORKFLOW_ID\"" .blackroad/workflow-index.jsonl > .blackroad/workflow-index.tmp
             mv .blackroad/workflow-index.tmp .blackroad/workflow-index.jsonl
           fi
           

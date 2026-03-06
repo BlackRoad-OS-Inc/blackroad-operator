@@ -142,7 +142,7 @@ jobs:
               echo "✅ Found index in $repo"
               
               # Check each dep from this repo
-              for dep_id in $(echo "$CROSS_DEPS" | jq -r "select(.repo==\"$repo\") | .depId"); do
+              for dep_id in $(echo "$CROSS_DEPS" | jq -r ".[] | select(.repo==\"$repo\") | .depId"); do
                 if grep -q "\"id\":\"$dep_id\"" /tmp/dep-index.jsonl; then
                   STATE=$(grep "\"id\":\"$dep_id\"" /tmp/dep-index.jsonl | jq -r '.state')
                   if [ "$STATE" != "Done" ]; then
