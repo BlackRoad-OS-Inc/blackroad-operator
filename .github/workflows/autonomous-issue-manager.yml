@@ -43,25 +43,22 @@ jobs:
   triage:
     name: "Smart Triage"
     if: github.event_name == 'issues' && github.event.action == 'opened'
-    runs-on: [self-hosted, blackroad-fleet]
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
 
       - name: AI Analysis
         id: ai
+        env:
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
         run: |
-          TITLE="${{ github.event.issue.title }}"
-          BODY="${{ github.event.issue.body }}"
-
           # Call AI for smart categorization
           ANALYSIS=$(curl -s -X POST "${{ env.BLACKROAD_AGENT_API }}/analyze-issue" \
             -H "Content-Type: application/json" \
-            -d '{
-              "title": "'"$TITLE"'",
-              "body": "'"$(echo "$BODY" | head -c 2000 | jq -Rs .)"'",
-              "repo": "${{ github.repository }}"
-            }' 2>/dev/null || echo '{}')
+            -d "$(jq -n --arg title "$ISSUE_TITLE" --arg body "$(echo "$ISSUE_BODY" | head -c 2000)" --arg repo "${{ github.repository }}" '{title: $title, body: $body, repo: $repo}')" \
+            2>/dev/null || echo '{}')
 
           echo "analysis=$ANALYSIS" >> $GITHUB_OUTPUT
 
@@ -76,28 +73,29 @@ jobs:
 
       - name: Keyword-Based Labeling
         id: keywords
+        env:
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
         run: |
-          TITLE="${{ github.event.issue.title }}"
-          BODY="${{ github.event.issue.body }}"
-          TEXT="$TITLE $BODY"
+          TEXT="$ISSUE_TITLE $ISSUE_BODY"
           LABELS=""
 
           # Type detection
-          echo "$TEXT" | grep -qi "bug\|error\|broken\|not working\|crash\|fail" && LABELS="$LABELS,bug"
-          echo "$TEXT" | grep -qi "feature\|add\|new\|enhance\|request" && LABELS="$LABELS,enhancement"
-          echo "$TEXT" | grep -qi "question\|how\|help\|what\|why" && LABELS="$LABELS,question"
-          echo "$TEXT" | grep -qi "doc\|documentation\|readme\|typo" && LABELS="$LABELS,documentation"
+          echo "$TEXT" | grep -qi "bug\|error\|broken\|not working\|crash\|fail" && LABELS="${LABELS},bug" || true
+          echo "$TEXT" | grep -qi "feature\|add\|new\|enhance\|request" && LABELS="${LABELS},enhancement" || true
+          echo "$TEXT" | grep -qi "question\|how\|help\|what\|why" && LABELS="${LABELS},question" || true
+          echo "$TEXT" | grep -qi "doc\|documentation\|readme\|typo" && LABELS="${LABELS},documentation" || true
 
           # Area detection
-          echo "$TEXT" | grep -qi "security\|vulnerability\|cve\|auth" && LABELS="$LABELS,security"
-          echo "$TEXT" | grep -qi "performance\|slow\|memory\|cpu" && LABELS="$LABELS,performance"
-          echo "$TEXT" | grep -qi "ui\|frontend\|css\|style\|design" && LABELS="$LABELS,frontend"
-          echo "$TEXT" | grep -qi "api\|backend\|server\|database" && LABELS="$LABELS,backend"
-          echo "$TEXT" | grep -qi "ci\|deploy\|workflow\|action" && LABELS="$LABELS,infrastructure"
+          echo "$TEXT" | grep -qi "security\|vulnerability\|cve\|auth" && LABELS="${LABELS},security" || true
+          echo "$TEXT" | grep -qi "performance\|slow\|memory\|cpu" && LABELS="${LABELS},performance" || true
+          echo "$TEXT" | grep -qi "ui\|frontend\|css\|style\|design" && LABELS="${LABELS},frontend" || true
+          echo "$TEXT" | grep -qi "api\|backend\|server\|database" && LABELS="${LABELS},backend" || true
+          echo "$TEXT" | grep -qi "ci\|deploy\|workflow\|action" && LABELS="${LABELS},infrastructure" || true
 
           # Priority detection
-          echo "$TEXT" | grep -qi "urgent\|critical\|asap\|important\|blocker" && LABELS="$LABELS,priority:high"
-          echo "$TEXT" | grep -qi "minor\|low\|when possible" && LABELS="$LABELS,priority:low"
+          echo "$TEXT" | grep -qi "urgent\|critical\|asap\|important\|blocker" && LABELS="${LABELS},priority:high" || true
+          echo "$TEXT" | grep -qi "minor\|low\|when possible" && LABELS="${LABELS},priority:low" || true
 
           # Clean up labels
           LABELS=$(echo "$LABELS" | sed 's/^,//' | sed 's/,,/,/g')
@@ -199,7 +197,7 @@ jobs:
   stale-cleanup:
     name: "Stale Cleanup"
     if: github.event_name == 'schedule' || github.event.inputs.action == 'cleanup_stale'
-    runs-on: [self-hosted, blackroad-fleet]
+    runs-on: ubuntu-latest
 
     steps:
       - name: Find Stale Issues
@@ -277,7 +275,7 @@ jobs:
   failure-issue:
     name: "Create Failure Issue"
     if: github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'failure'
-    runs-on: [self-hosted, blackroad-fleet]
+    runs-on: ubuntu-latest
 
     steps:
       - name: Check for Existing Issue
@@ -351,7 +349,7 @@ jobs:
   report:
     name: "Generate Issue Report"
     if: github.event.inputs.action == 'generate_report'
-    runs-on: [self-hosted, blackroad-fleet]
+    runs-on: ubuntu-latest
 
     steps:
       - name: Generate Statistics
