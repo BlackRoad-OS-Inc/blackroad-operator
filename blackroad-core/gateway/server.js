@@ -409,9 +409,10 @@ async function start() {
             invokeAgentPolicy.fallback_chain || [],
             { input: gatewayPayload.input, system: invokeSystemPrompt, context: gatewayPayload.context, requestId, agent: agentName, intent }
           )
-          rateLimiter.record(agentName)
+          rateLimiter.record(agentName, invokeResult.provider, 'success')
           return send(200, { content: invokeResult.output, provider: invokeResult.provider })
         } catch (err) {
+          rateLimiter.record(agentName, invokeProviderName, 'error')
           return send(200, { content: `Task received for ${agentName}. Provider unavailable: ${err.message}` })
         }
       }
