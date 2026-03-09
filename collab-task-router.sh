@@ -7,9 +7,10 @@
 GREEN='\033[0;32m'; YELLOW='\033[1;33m'; CYAN='\033[0;36m'
 PURPLE='\033[0;35m'; BOLD='\033[1m'; DIM='\033[2m'; NC='\033[0m'
 
-QUEUE_DIR="/Users/alexa/blackroad/shared/mesh/queue"
-INBOX_ROOT="/Users/alexa/blackroad/shared/inbox"
-COLLAB_FILE="/Users/alexa/blackroad/coordination/collaboration/active-instances.json"
+_SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+QUEUE_DIR="${_SCRIPT_DIR}/shared/mesh/queue"
+INBOX_ROOT="${_SCRIPT_DIR}/shared/inbox"
+COLLAB_FILE="${_SCRIPT_DIR}/coordination/collaboration/active-instances.json"
 
 TASK="${1:-}"
 AUTO_EXEC="${2:-}"

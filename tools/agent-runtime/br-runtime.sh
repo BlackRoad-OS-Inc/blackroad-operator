@@ -8,7 +8,8 @@
 GREEN='\033[0;32m'; RED='\033[0;31m'; YELLOW='\033[1;33m'
 CYAN='\033[0;36m'; BLUE='\033[0;34m'; MAGENTA='\033[0;35m'; NC='\033[0m'
 
-AGENTS_DIR="/Users/alexa/blackroad/agents"
+BR_ROOT="${BR_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
+AGENTS_DIR="${BR_ROOT}/agents"
 STATE_DIR="${AGENTS_DIR}/active"
 IDLE_DIR="${AGENTS_DIR}/idle"
 PROC_DIR="${AGENTS_DIR}/processing"
@@ -210,7 +211,7 @@ cmd_start() {
     echo "${color}◆ Starting ${agent}...${NC}"
 
     # Launch daemon in background using explicit script path
-    local SCRIPT_PATH="${BR_TOOLS_DIR:-/Users/alexa/blackroad/tools}/agent-runtime/br-runtime.sh"
+    local SCRIPT_PATH="${BR_TOOLS_DIR:-${BR_ROOT}/tools}/agent-runtime/br-runtime.sh"
     zsh "$SCRIPT_PATH" _daemon "$agent" "$model" &
     local daemon_pid=$!
 

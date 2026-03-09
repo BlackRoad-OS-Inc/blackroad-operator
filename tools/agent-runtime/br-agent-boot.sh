@@ -1,11 +1,12 @@
 #!/bin/zsh
 # BlackRoad Agent Boot — starts all 6 named agents on login
 # Called by launchd: com.blackroad.agents.plist
+BR_ROOT="${BR_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 AMBER='\033[38;5;214m'; PINK='\033[38;5;205m'; VIOLET='\033[38;5;135m'; BBLUE='\033[38;5;69m'
 GREEN='\033[0;32m'; RED='\033[0;31m'; BOLD='\033[1m'; DIM='\033[2m'; NC='\033[0m'
 CYAN="$AMBER"; YELLOW="$PINK"; BLUE="$BBLUE"; MAGENTA="$VIOLET"; PURPLE="$VIOLET"
 
-RUNTIME="/Users/alexa/blackroad/tools/agent-runtime/br-runtime.sh"
+RUNTIME="${BR_ROOT}/tools/agent-runtime/br-runtime.sh"
 LOG="$HOME/.blackroad/logs/agent-boot.log"
 mkdir -p "$HOME/.blackroad/logs"
 

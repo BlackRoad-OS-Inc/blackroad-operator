@@ -7,7 +7,8 @@ AMBER='\033[38;5;214m'; PINK='\033[38;5;205m'; VIOLET='\033[38;5;135m'; BBLUE='\
 GREEN='\033[0;32m'; RED='\033[0;31m'; BOLD='\033[1m'; DIM='\033[2m'; NC='\033[0m'
 CYAN="$AMBER"; YELLOW="$PINK"; BLUE="$BBLUE"; MAGENTA="$VIOLET"; PURPLE="$VIOLET"
 
-PAIR_HOME="/Users/alexa/blackroad/tools/pair-programming"
+BR_ROOT="${BR_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
+PAIR_HOME="${BR_ROOT}/tools/pair-programming"
 SESSION_FILE="${PAIR_HOME}/current-session.json"
 AGENT_HOME="${HOME}/.blackroad-agents"
 
@@ -203,7 +204,7 @@ review_pair() {
     echo ""
     
     # Use the git review tool
-    /Users/alexa/blackroad/tools/git-integration/br-git.sh review
+    "${BR_ROOT}/tools/git-integration/br-git.sh" review
     
     echo ""
     echo -e "${CYAN}Need help fixing something? Ask me: br pair ask 'how do I...?'${NC}"
@@ -261,7 +262,7 @@ suggest_pair() {
         
         # Suggest related snippets
         echo -e "${YELLOW}Relevant snippets:${NC}"
-        /Users/alexa/blackroad/tools/snippet-manager/br-snippet.sh suggest
+        "${BR_ROOT}/tools/snippet-manager/br-snippet.sh" suggest
         
     else
         echo -e "${YELLOW}No active changes detected${NC}"
