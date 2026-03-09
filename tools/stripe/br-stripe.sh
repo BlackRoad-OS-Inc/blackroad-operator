@@ -518,6 +518,313 @@ cmd_portal() {
     fi
 }
 
+cmd_account() {
+    echo -e "${PINK}=== Stripe Account Details ===${NC}\n"
+
+    local response=$(stripe_api GET "/account")
+    local acct_id=$(json_val "$response" "id")
+    local business_name=$(json_val "$response" "business_profile" 2>/dev/null)
+    local country=$(json_val "$response" "country")
+    local email=$(json_val "$response" "email")
+    local company_name=$(echo "$response" | grep -o '"company":{[^}]*}' | head -1)
+    local display_name=$(echo "$response" | grep -o '"display_name":"[^"]*"' | head -1 | cut -d'"' -f4)
+    local business_type=$(json_val "$response" "business_type")
+    local charges_enabled=$(json_bool "$response" "charges_enabled")
+    local payouts_enabled=$(json_bool "$response" "payouts_enabled")
+    local details_submitted=$(json_bool "$response" "details_submitted")
+
+    # Company fields (nested inside "company" object)
+    local company_block=$(echo "$response" | grep -oP '"company"\s*:\s*\{[^{}]*(\{[^{}]*\}[^{}]*)*\}' | head -1)
+    local company_name_val=$(echo "$company_block" | grep -o '"name":"[^"]*"' | head -1 | cut -d'"' -f4)
+    local company_structure=$(echo "$company_block" | grep -o '"structure":"[^"]*"' | head -1 | cut -d'"' -f4)
+    local tax_id_provided=$(echo "$company_block" | grep -o '"tax_id_provided":[a-z]*' | head -1 | grep -o '[a-z]*$')
+    local company_phone=$(echo "$company_block" | grep -o '"phone":"[^"]*"' | head -1 | cut -d'"' -f4)
+
+    # Address
+    local address_block=$(echo "$company_block" | grep -oP '"address"\s*:\s*\{[^}]*\}' | head -1)
+    local city=$(echo "$address_block" | grep -o '"city":"[^"]*"' | head -1 | cut -d'"' -f4)
+    local state=$(echo "$address_block" | grep -o '"state":"[^"]*"' | head -1 | cut -d'"' -f4)
+    local postal=$(echo "$address_block" | grep -o '"postal_code":"[^"]*"' | head -1 | cut -d'"' -f4)
+    local addr_country=$(echo "$address_block" | grep -o '"country":"[^"]*"' | head -1 | cut -d'"' -f4)
+
+    echo -e "${CYAN}Account${NC}"
+    echo -e "  ID:            $acct_id"
+    echo -e "  Email:         $email"
+    echo -e "  Country:       $country"
+    echo -e "  Display Name:  $display_name"
+    echo -e "  Business Type: $business_type"
+    echo ""
+
+    echo -e "${CYAN}Company${NC}"
+    echo -e "  Name:          ${company_name_val:-N/A}"
+    echo -e "  Structure:     ${company_structure:-N/A}"
+    echo -e "  Phone:         ${company_phone:-N/A}"
+    if [[ -n "$city" ]]; then
+        echo -e "  Address:       $city, $state $postal $addr_country"
+    fi
+    echo ""
+
+    echo -e "${CYAN}Tax / EIN${NC}"
+    if [[ "$tax_id_provided" == "true" ]]; then
+        echo -e "  ${GREEN}EIN on file:   YES${NC}"
+        echo -e "  ${DIM}(Stripe masks the full EIN via API for security)${NC}"
+        echo -e "  ${DIM}View full EIN at: https://dashboard.stripe.com/settings/company${NC}"
+    else
+        echo -e "  ${YELLOW}EIN on file:   NO${NC}"
+        echo -e "  ${DIM}If using Atlas, EIN may still be pending from IRS.${NC}"
+        echo -e "  ${DIM}Check: https://dashboard.stripe.com/atlas${NC}"
+    fi
+    echo ""
+
+    echo -e "${CYAN}Capabilities${NC}"
+    echo -e "  Charges:  $([ "$charges_enabled" = "true" ] && echo -e "${GREEN}enabled${NC}" || echo -e "${RED}disabled${NC}")"
+    echo -e "  Payouts:  $([ "$payouts_enabled" = "true" ] && echo -e "${GREEN}enabled${NC}" || echo -e "${RED}disabled${NC}")"
+    echo -e "  Details:  $([ "$details_submitted" = "true" ] && echo -e "${GREEN}submitted${NC}" || echo -e "${YELLOW}incomplete${NC}")"
+    echo ""
+
+    # Check for persons (officers/directors)
+    echo -e "${CYAN}Officers / Representatives${NC}"
+    local persons=$(stripe_api GET "/accounts/$acct_id/persons?limit=10" 2>/dev/null)
+    if echo "$persons" | grep -q '"id":"person_'; then
+        echo "$persons" | grep -o '"id":"person_[^"]*"' | while read -r line; do
+            local pid=$(echo "$line" | cut -d'"' -f4)
+            local pdata=$(stripe_api GET "/accounts/$acct_id/persons/$pid" 2>/dev/null)
+            local fname=$(json_val "$pdata" "first_name")
+            local lname=$(json_val "$pdata" "last_name")
+            local ptitle=$(echo "$pdata" | grep -o '"title":"[^"]*"' | head -1 | cut -d'"' -f4)
+            local prole=$(echo "$pdata" | grep -o '"relationship":{[^}]*}' | head -1)
+            local is_rep=$(echo "$prole" | grep -o '"representative":true' | head -1)
+            local is_dir=$(echo "$prole" | grep -o '"director":true' | head -1)
+            local is_owner=$(echo "$prole" | grep -o '"owner":true' | head -1)
+
+            local roles=""
+            [[ -n "$is_rep" ]] && roles="Representative"
+            [[ -n "$is_dir" ]] && roles="${roles:+$roles, }Director"
+            [[ -n "$is_owner" ]] && roles="${roles:+$roles, }Owner"
+
+            echo -e "  ${GREEN}●${NC} $fname $lname"
+            [[ -n "$ptitle" ]] && echo -e "    Title: $ptitle"
+            [[ -n "$roles" ]] && echo -e "    Roles: $roles"
+        done
+    else
+        echo -e "  ${DIM}No persons found (may require Connect account)${NC}"
+    fi
+    echo ""
+
+    # Dump raw response to file for inspection
+    local dump_file="$HOME/.blackroad/stripe-account-dump.json"
+    echo "$response" > "$dump_file"
+    echo -e "${DIM}Full API response saved to: $dump_file${NC}"
+}
+
+cmd_atlas() {
+    echo -e "${PINK}=== Stripe Atlas — Company Status ===${NC}\n"
+
+    # Atlas info comes from the account endpoint
+    local response=$(stripe_api GET "/account")
+    local acct_id=$(json_val "$response" "id")
+    local business_type=$(json_val "$response" "business_type")
+
+    # Company details
+    local company_block=$(echo "$response" | grep -oP '"company"\s*:\s*\{[^{}]*(\{[^{}]*\}[^{}]*)*\}' | head -1)
+    local company_name_val=$(echo "$company_block" | grep -o '"name":"[^"]*"' | head -1 | cut -d'"' -f4)
+    local company_structure=$(echo "$company_block" | grep -o '"structure":"[^"]*"' | head -1 | cut -d'"' -f4)
+    local tax_id_provided=$(echo "$company_block" | grep -o '"tax_id_provided":[a-z]*' | head -1 | grep -o '[a-z]*$')
+
+    # Address
+    local address_block=$(echo "$company_block" | grep -oP '"address"\s*:\s*\{[^}]*\}' | head -1)
+    local state=$(echo "$address_block" | grep -o '"state":"[^"]*"' | head -1 | cut -d'"' -f4)
+
+    echo -e "${CYAN}Company:${NC}     ${company_name_val:-Unknown}"
+    echo -e "${CYAN}Type:${NC}        $business_type"
+    echo -e "${CYAN}Structure:${NC}   ${company_structure:-N/A}"
+    echo -e "${CYAN}State:${NC}       ${state:-N/A}"
+    echo ""
+
+    echo -e "${PINK}── EIN Status ──${NC}"
+    if [[ "$tax_id_provided" == "true" ]]; then
+        echo -e "${GREEN}  EIN has been assigned by the IRS and is on file with Stripe.${NC}"
+        echo ""
+        echo -e "  ${BOLD}To view your full EIN:${NC}"
+        echo -e "  1. https://dashboard.stripe.com/settings/company"
+        echo -e "  2. Scroll to 'Tax ID' / 'Employer Identification Number'"
+        echo -e "  3. It will be displayed as XX-XXXXXXX"
+        echo ""
+        echo -e "  ${BOLD}Or check your Atlas documents:${NC}"
+        echo -e "  - IRS CP 575 letter (EIN confirmation)"
+        echo -e "  - SS-4 Application confirmation"
+        echo -e "  - https://dashboard.stripe.com/atlas"
+    else
+        echo -e "${YELLOW}  EIN is NOT yet on file with Stripe.${NC}"
+        echo ""
+        echo -e "  ${BOLD}Possible reasons:${NC}"
+        echo -e "  1. IRS hasn't processed the SS-4 application yet"
+        echo -e "     (Can take 4-8 weeks after Atlas incorporation)"
+        echo -e "  2. Atlas incorporation is still in progress"
+        echo -e "  3. EIN was applied for separately and not linked"
+        echo ""
+        echo -e "  ${BOLD}What to do:${NC}"
+        echo -e "  - Check https://dashboard.stripe.com/atlas for status"
+        echo -e "  - Check your email for IRS CP 575 letter"
+        echo -e "  - Call IRS Business line: 1-800-829-4933 (M-F 7am-7pm)"
+        echo -e "    Have your SS-4 application date ready"
+    fi
+    echo ""
+
+    # Try to get tax IDs from the tax_ids endpoint (if available)
+    echo -e "${PINK}── Tax IDs on Account ──${NC}"
+    local tax_ids=$(stripe_api GET "/tax_ids?limit=10" 2>/dev/null)
+    if echo "$tax_ids" | grep -q '"id":"txi_'; then
+        echo "$tax_ids" | grep -o '"id":"txi_[^"]*"' | while read -r line; do
+            local txi_id=$(echo "$line" | cut -d'"' -f4)
+            local txi=$(stripe_api GET "/tax_ids/$txi_id" 2>/dev/null)
+            local txi_type=$(json_val "$txi" "type")
+            local txi_value=$(json_val "$txi" "value")
+            local txi_country=$(json_val "$txi" "country")
+            echo -e "  ${GREEN}●${NC} $txi_type: $txi_value ($txi_country)"
+        done
+    else
+        echo -e "  ${DIM}No tax IDs found via /v1/tax_ids endpoint${NC}"
+        echo -e "  ${DIM}(EIN for Atlas companies is on the account object, not tax_ids)${NC}"
+    fi
+    echo ""
+}
+
+cmd_e2e_test() {
+    echo -e "${PINK}=== Stripe End-to-End Test ===${NC}\n"
+    local passed=0
+    local failed=0
+    local total=0
+
+    run_test() {
+        local name="$1"
+        local result="$2"
+        total=$((total + 1))
+        if [[ "$result" == "pass" ]]; then
+            echo -e "  ${GREEN}PASS${NC}  $name"
+            passed=$((passed + 1))
+        else
+            echo -e "  ${RED}FAIL${NC}  $name — $result"
+            failed=$((failed + 1))
+        fi
+    }
+
+    # Test 1: Authentication
+    echo -e "${CYAN}Authentication${NC}"
+    if [[ -f "$CONFIG_FILE" ]]; then
+        source "$CONFIG_FILE"
+        if [[ -n "$STRIPE_SECRET_KEY" ]]; then
+            local mode="LIVE"
+            [[ "$STRIPE_SECRET_KEY" == sk_test_* ]] && mode="TEST"
+            run_test "API key configured ($mode mode)" "pass"
+        else
+            run_test "API key configured" "key is empty"
+        fi
+    else
+        run_test "API key configured" "no config file at $CONFIG_FILE"
+    fi
+
+    # Test 2: API connectivity
+    echo -e "\n${CYAN}API Connectivity${NC}"
+    local balance=$(stripe_api GET "/balance" 2>/dev/null)
+    local bal_obj=$(json_val "$balance" "object")
+    if [[ "$bal_obj" == "balance" ]]; then
+        run_test "GET /v1/balance" "pass"
+    else
+        local err=$(echo "$balance" | grep -o '"message":"[^"]*"' | head -1 | cut -d'"' -f4)
+        run_test "GET /v1/balance" "${err:-no response}"
+    fi
+
+    # Test 3: Account retrieval
+    echo -e "\n${CYAN}Account / Atlas${NC}"
+    local account=$(stripe_api GET "/account" 2>/dev/null)
+    local acct_id=$(json_val "$account" "id")
+    if [[ -n "$acct_id" ]]; then
+        run_test "GET /v1/account" "pass"
+
+        # Company name
+        local co_block=$(echo "$account" | grep -oP '"company"\s*:\s*\{[^{}]*(\{[^{}]*\}[^{}]*)*\}' | head -1)
+        local co_name=$(echo "$co_block" | grep -o '"name":"[^"]*"' | head -1 | cut -d'"' -f4)
+        if [[ -n "$co_name" ]]; then
+            run_test "Company name on file ($co_name)" "pass"
+        else
+            run_test "Company name on file" "not set"
+        fi
+
+        # EIN / tax_id_provided
+        local tax_flag=$(echo "$co_block" | grep -o '"tax_id_provided":[a-z]*' | head -1 | grep -o '[a-z]*$')
+        if [[ "$tax_flag" == "true" ]]; then
+            run_test "EIN on file with Stripe" "pass"
+        else
+            run_test "EIN on file with Stripe" "not yet — check Atlas dashboard"
+        fi
+
+        # Charges enabled
+        local charges=$(json_bool "$account" "charges_enabled")
+        if [[ "$charges" == "true" ]]; then
+            run_test "Charges enabled" "pass"
+        else
+            run_test "Charges enabled" "disabled"
+        fi
+
+        # Payouts enabled
+        local payouts=$(json_bool "$account" "payouts_enabled")
+        if [[ "$payouts" == "true" ]]; then
+            run_test "Payouts enabled" "pass"
+        else
+            run_test "Payouts enabled" "disabled"
+        fi
+    else
+        local err=$(echo "$account" | grep -o '"message":"[^"]*"' | head -1 | cut -d'"' -f4)
+        run_test "GET /v1/account" "${err:-no response}"
+    fi
+
+    # Test 4: Products
+    echo -e "\n${CYAN}Products & Pricing${NC}"
+    local prods=$(stripe_api GET "/products?active=true&limit=5" 2>/dev/null)
+    if echo "$prods" | grep -q '"id":"prod_'; then
+        local prod_count=$(echo "$prods" | grep -o '"id":"prod_' | wc -l | tr -d ' ')
+        run_test "Active products found ($prod_count)" "pass"
+    else
+        run_test "Active products found" "none — run: br stripe products create"
+    fi
+
+    # Test 5: Customers
+    echo -e "\n${CYAN}Customers${NC}"
+    local custs=$(stripe_api GET "/customers?limit=1" 2>/dev/null)
+    if echo "$custs" | grep -q '"id":"cus_'; then
+        run_test "Customer records exist" "pass"
+    else
+        run_test "Customer records exist" "none yet"
+    fi
+
+    # Test 6: Subscriptions
+    echo -e "\n${CYAN}Subscriptions${NC}"
+    local subs=$(stripe_api GET "/subscriptions?status=active&limit=1" 2>/dev/null)
+    if echo "$subs" | grep -q '"id":"sub_'; then
+        run_test "Active subscriptions" "pass"
+    else
+        run_test "Active subscriptions" "none yet"
+    fi
+
+    # Summary
+    echo -e "\n${PINK}── Summary ──${NC}"
+    echo -e "  Total:  $total"
+    echo -e "  ${GREEN}Passed: $passed${NC}"
+    if [[ $failed -gt 0 ]]; then
+        echo -e "  ${RED}Failed: $failed${NC}"
+    else
+        echo -e "  Failed: 0"
+    fi
+    echo ""
+
+    if [[ $failed -eq 0 ]]; then
+        echo -e "${GREEN}All tests passed. Stripe is fully operational.${NC}"
+    else
+        echo -e "${YELLOW}Some tests failed. Check the items above.${NC}"
+    fi
+}
+
 cmd_help() {
   echo -e ""
   echo -e "  ${AMBER}${BOLD}◆ BR STRIPE${NC}  ${DIM}Stripe billing from your terminal.${NC}"
@@ -536,8 +843,14 @@ cmd_help() {
   echo -e "  ${AMBER}  products create                 ${NC} Create canonical BlackRoad pricing"
   echo -e "  ${AMBER}  sync                            ${NC} Pull Stripe data to local SQLite cache"
   echo -e "  ${AMBER}  webhook-test [event]            ${NC} Fire test webhook via Stripe CLI"
+  echo -e "  ${AMBER}  account                         ${NC} Full account details + EIN status"
+  echo -e "  ${AMBER}  atlas                           ${NC} Stripe Atlas company & EIN lookup"
+  echo -e "  ${AMBER}  e2e-test                        ${NC} End-to-end connectivity test"
   echo -e ""
   echo -e "  ${BOLD}EXAMPLES${NC}"
+  echo -e "  ${DIM}  br stripe account${NC}                # View account + EIN status"
+  echo -e "  ${DIM}  br stripe atlas${NC}                  # Atlas company & EIN lookup"
+  echo -e "  ${DIM}  br stripe e2e-test${NC}               # Run all Stripe tests"
   echo -e "  ${DIM}  br stripe revenue${NC}"
   echo -e "  ${DIM}  br stripe customers search hello@blackroad.io${NC}"
   echo -e "  ${DIM}  br stripe subscriptions list${NC}"
@@ -574,7 +887,10 @@ case "${1:-help}" in
         esac
         ;;
     revenue|rev|mrr) cmd_revenue ;;
-    webhook-test|webhook|test) cmd_webhook_test "${@:2}" ;;
+    webhook-test|webhook) cmd_webhook_test "${@:2}" ;;
+    account|acct) cmd_account ;;
+    atlas|ein) cmd_atlas ;;
+    e2e-test|e2e|test) cmd_e2e_test ;;
     sync) cmd_sync ;;
     portal) cmd_portal "${@:2}" ;;
     help|--help|-h) cmd_help ;;
