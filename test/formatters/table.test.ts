@@ -4,7 +4,13 @@ import { formatTable } from '../../src/formatters/table.js'
 
 describe('formatTable', () => {
   it('should format headers and rows', () => {
-    const result = formatTable(['Name', 'Role'], [['alice', 'ops'], ['octavia', 'arch']])
+    const result = formatTable(
+      ['Name', 'Role'],
+      [
+        ['alice', 'ops'],
+        ['octavia', 'arch'],
+      ],
+    )
     expect(result).toContain('Name')
     expect(result).toContain('alice')
     expect(result).toContain('octavia')

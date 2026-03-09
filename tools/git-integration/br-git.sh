@@ -1,7 +1,8 @@
 #!/bin/zsh
 # BR Git — AI-powered smart git operations
 
-GIT_TOOLS="/Users/alexa/blackroad/tools/git-integration"
+BR_ROOT="${BR_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
+GIT_TOOLS="${BR_ROOT}/tools/git-integration"
 
 # ── Brand Palette ──────────────────────────────────────────────────────────────
 AMBER='\033[38;5;214m'

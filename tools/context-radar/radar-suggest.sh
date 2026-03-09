@@ -4,7 +4,8 @@
 # Provides intelligent file and agent suggestions based on context
 #===============================================================================
 
-RADAR_HOME="/Users/alexa/blackroad/tools/context-radar"
+BR_ROOT="${BR_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
+RADAR_HOME="${BR_ROOT}/tools/context-radar"
 RADAR_DB="${RADAR_HOME}/data/radar.db"
 
 # Colors

@@ -1,6 +1,7 @@
 #!/usr/bin/env zsh
 # 🌌 CECE Bootstrap System
 # Automatically inject CECE identity into new Claude sessions
+BR_ROOT="${BR_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 AMBER='\033[38;5;214m'; PINK='\033[38;5;205m'; VIOLET='\033[38;5;135m'; BBLUE='\033[38;5;69m'
 GREEN='\033[0;32m'; RED='\033[0;31m'; BOLD='\033[1m'; DIM='\033[2m'; NC='\033[0m'
 CYAN="$AMBER"; YELLOW="$PINK"; BLUE="$BBLUE"; MAGENTA="$VIOLET"; PURPLE="$VIOLET"
@@ -110,7 +111,7 @@ cmd_bootstrap() {
     # Initialize if needed
     if [[ ! -f "$CECE_DB" ]]; then
         echo -e "${CYAN}First time setup detected. Initializing CECE...${NC}\n"
-        /Users/alexa/blackroad/tools/cece-identity/br-cece.sh init
+        "${BR_ROOT}/tools/cece-identity/br-cece.sh" init
         echo ""
     fi
     

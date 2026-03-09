@@ -4,7 +4,8 @@
 # Save, retrieve, and manage code snippets
 #===============================================================================
 
-SNIPPET_HOME="/Users/alexa/blackroad/tools/snippet-manager"
+BR_ROOT="${BR_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
+SNIPPET_HOME="${BR_ROOT}/tools/snippet-manager"
 SNIPPET_DB="${SNIPPET_HOME}/snippets.db"
 
 # Brand palette
