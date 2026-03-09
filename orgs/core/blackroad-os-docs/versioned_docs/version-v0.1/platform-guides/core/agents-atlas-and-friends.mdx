@@ -1,0 +1,31 @@
+---
+id: agents-atlas-and-friends
+title: Agents – Atlas and Friends
+slug: /platform/core/agents-atlas-and-friends
+sidebar_position: 6
+---
+
+Agents are the workers inside BlackRoad OS. Each agent is registered in Operator, anchored with PS-SHA∞ identity data, and consumes jobs through a shared contract defined in `blackroad-os-core`.
+
+## What makes an agent
+- **Identity** — PS-SHA∞ anchor ties the agent to an auditable worldline.
+- **Metadata** — capabilities, version, and contact points (e.g., supported job kinds).
+- **State** — lifecycle data surfaced to Prism and API (ready, busy, degraded, disabled).
+- **Context** — `AgentContext` carries configuration, environment handles, and journal access for emitting events.
+
+## Atlas (today)
+- Ops-aware assistant focused on running and debugging the OS itself.
+- Can inspect agents, jobs, and environment wiring; ideal for incident support and deployment validation.
+- Emits DomainEvents for every action so the RoadChain trail stays intact.
+
+## Future agents (examples)
+- **Lucidia** — exploratory or research-heavy agent.
+- **Finance agents** — ledgering, forecasting, treasury actions.
+- **Infra agents** — provisioning or DNS updates under strict guardrails.
+
+## Registration and surfacing
+- Agents register with Operator, which keeps the registry exposed at `/internal/agents` and to the API layer.
+- Jobs target agents by ID or capability; Operator enforces lifecycle transitions and emits events on every change.
+- Prism renders agent state directly from the API, so agents should keep metadata and health signals current.
+
+If you are building a new agent, start with the core types, emit DomainEvents consistently, and ensure PS-SHA∞ anchors are present so RoadChain can prove the agent’s lineage.

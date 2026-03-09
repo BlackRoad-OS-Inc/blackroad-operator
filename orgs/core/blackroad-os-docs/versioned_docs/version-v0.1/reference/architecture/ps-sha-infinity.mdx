@@ -1,0 +1,24 @@
+---
+id: architecture-ps-sha-infinity
+title: PS-SHA∞ Journaling
+sidebar_position: 3
+slug: /reference/architecture/ps-sha-infinity
+---
+
+PS-SHA∞ is the cryptographic journaling backbone that underpins integrity and continuity across BlackRoad OS. It is modeled as an append-only log with hash-chained entries so tampering is immediately detectable. Every meaningful task, decision, and agent emission can be recorded here to satisfy auditability requirements without slowing down the system.
+
+## Concept
+
+Each `JournalEntry` links to its predecessor via a hash, forming an immutable chain. The structure captures who initiated the action, what capability was invoked, the payload or diff, and the timestamp. This design preserves provenance while keeping storage pluggable: today it may be file or database backed; tomorrow it could anchor into RoadChain or another trust layer.
+
+## Current implementation status
+
+A development stub (`DevPsShaInfinity`) exists in `blackroad-os-core` to normalize the interface and exercise journaling in tests. It does not provide production-grade cryptography. TODO: add references to the formal math, proof strategies, and anchoring mechanisms once the RoadChain implementation lands.
+
+## How it is used
+
+Agents and orchestrators call the PS-SHA∞ interface whenever they execute a step worth remembering. The append-only contract means entries are never mutated, only appended, and verification walks the chain to ensure continuity. This pattern makes it straightforward to answer “who did what, when, and why” during audits or incident investigations.
+
+## What comes next
+
+Expect stronger identity primitives, hardware-backed keys where appropriate, and richer metadata (policy IDs, attestation fingerprints) as the system matures. The journaling model is intentionally minimal today so integrators can reason about it alongside the [Finance Layer](/packs/finance/finance-layer) and other core workflows.

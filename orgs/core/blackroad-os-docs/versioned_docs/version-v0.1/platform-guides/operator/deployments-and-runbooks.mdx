@@ -1,0 +1,22 @@
+---
+id: operator-deployments-and-runbooks
+title: Deployments & Runbooks
+sidebar_position: 5
+slug: /platform/operator/deployments-and-runbooks
+---
+
+Deployment, incident, and maintenance runbooks live alongside Terraform in `blackroad-os-infra/runbooks`. They capture repeatable procedures so operators can move quickly without skipping safety gates. This page summarizes the flow; always defer to the runbook for environment-specific commands.
+
+## Deployment flow
+
+- Prepare infrastructure changes in `blackroad-os-infra`, pairing them with any service releases that depend on new resources.
+- Apply to `dev` first, validate health checks, then promote to `staging` and `prod` with human sign-off recorded via PS-SHA∞ entries.
+- Coordinate app releases (API, Operator, Prism Console, Web) so API contracts and agent expectations stay aligned across environments.
+
+## Incident runbooks
+
+Incident runbooks describe detection, triage, rollback, and communication steps. They lean on event streams and journal data to reconstruct timelines quickly. TODO: link specific incident playbooks once codified.
+
+## Maintenance
+
+Maintenance runbooks cover certificate rotation, database upgrades, and other periodic tasks. Only authorized operators should apply Terraform or modify shared secrets. When changes intersect with finance agents or regulated data, ensure approvals from the designated human orchestrator before proceeding.

@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BlackRoad Chat - AI Powered</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root { --gradient: linear-gradient(135deg, #FF9D00, #FF6B00, #FF0066, #D600AA, #7700FF, #0066FF); }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #02030a;
+      color: white;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .navbar {
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(20px);
+      padding: 16px 32px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .navbar h1 {
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-size: 24px;
+      font-weight: 900;
+    }
+    .user-info {
+      background: rgba(255,255,255,0.1);
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+    }
+    .container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      max-width: 1000px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+      background: rgba(255,255,255,0.02);
+      border-radius: 16px;
+      margin-bottom: 24px;
+    }
+    .message {
+      margin-bottom: 16px;
+      padding: 16px;
+      border-radius: 12px;
+    }
+    .message.user {
+      background: rgba(119, 0, 255, 0.2);
+      margin-left: 64px;
+    }
+    .message.assistant {
+      background: rgba(255, 157, 0, 0.2);
+      margin-right: 64px;
+    }
+    .message strong {
+      display: block;
+      margin-bottom: 8px;
+      opacity: 0.7;
+      font-size: 14px;
+    }
+    .input-area {
+      display: flex;
+      gap: 16px;
+    }
+    input {
+      flex: 1;
+      padding: 16px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.05);
+      color: white;
+      font-size: 16px;
+    }
+    input:focus { outline: none; border-color: #7700FF; }
+    button {
+      padding: 16px 32px;
+      border-radius: 12px;
+      border: none;
+      background: var(--gradient);
+      color: white;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    button:hover { transform: scale(1.05); }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .loading {
+      text-align: center;
+      padding: 16px;
+      opacity: 0.7;
+    }
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <h1>BlackRoad Chat</h1>
+    <div class="user-info" id="userInfo">Not logged in</div>
+  </div>
+  <div class="container">
+    <div class="chat-messages" id="chatMessages">
+      <div class="message assistant">
+        <strong>BlackRoad AI</strong>
+        <p>Hello! I'm powered by 30,000 AI agents. Ask me anything!</p>
+      </div>
+    </div>
+    <div class="input-area">
+      <input type="text" id="messageInput" placeholder="Type your message..." />
+      <button onclick="sendMessage()" id="sendBtn">Send</button>
+    </div>
+  </div>
+
+  <!-- BlackRoad Unified API -->
+  <script src="/blackroad-api.js"></script>
+  <script>
+    const chatMessages = document.getElementById('chatMessages');
+    const messageInput = document.getElementById('messageInput');
+    const sendBtn = document.getElementById('sendBtn');
+    let conversationId = null;
+
+    // Check auth status
+    async function checkAuth() {
+      if (!window.blackroad.isAuthenticated()) {
+        document.getElementById('userInfo').textContent = 'Guest Mode';
+        return;
+      }
+      try {
+        const user = await window.blackroad.loadCurrentUser();
+        document.getElementById('userInfo').textContent = user?.name || user?.email || 'User';
+      } catch (error) {
+        console.error('Auth check failed:', error);
+      }
+    }
+
+    async function sendMessage() {
+      const message = messageInput.value.trim();
+      if (!message) return;
+
+      // Add user message to chat
+      addMessage('user', 'You', message);
+      messageInput.value = '';
+      sendBtn.disabled = true;
+
+      // Show loading
+      const loadingId = addMessage('assistant', 'BlackRoad AI', '<div class="loading">Thinking...</div>');
+
+      try {
+        const data = await window.blackroad.chat(message, conversationId);
+        conversationId = data.conversation_id;
+
+        // Remove loading message
+        document.getElementById(loadingId).remove();
+
+        // Add AI response
+        addMessage('assistant', 'BlackRoad AI', data.message || 'I received your message!');
+      } catch (error) {
+        document.getElementById(loadingId).remove();
+        addMessage('assistant', 'BlackRoad AI', 'Sorry, I encountered an error. Please try again.');
+      } finally {
+        sendBtn.disabled = false;
+      }
+    }
+
+    function addMessage(type, sender, text) {
+      const id = 'msg-' + Date.now();
+      const msgDiv = document.createElement('div');
+      msgDiv.id = id;
+      msgDiv.className = `message ${type}`;
+      msgDiv.innerHTML = `<strong>${sender}</strong><p>${text}</p>`;
+      chatMessages.appendChild(msgDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+      return id;
+    }
+
+    // Enter key to send
+    messageInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') sendMessage();
+    });
+
+    // Check auth on load
+    checkAuth();
+  </script>
+</body>
+</html>

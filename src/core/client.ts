@@ -4,7 +4,8 @@ export class GatewayClient {
   readonly baseUrl: string
 
   constructor(baseUrl?: string) {
-    this.baseUrl = baseUrl ?? process.env['BLACKROAD_GATEWAY_URL'] ?? 'http://127.0.0.1:8787'
+    this.baseUrl =
+      baseUrl ?? process.env['BLACKROAD_GATEWAY_URL'] ?? 'http://127.0.0.1:8787'
   }
 
   async get<T>(path: string): Promise<T> {
