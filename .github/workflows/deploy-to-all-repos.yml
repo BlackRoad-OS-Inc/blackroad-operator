@@ -37,7 +37,7 @@ jobs:
     outputs:
       repos: ${{ steps.list.outputs.repos }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: List target repos
         id: list
@@ -76,7 +76,7 @@ jobs:
       matrix:
         repo: ${{ fromJson(needs.prepare.outputs.repos) }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Deploy workflow files
         run: |
@@ -118,7 +118,7 @@ jobs:
             check:
               runs-on: ubuntu-latest
               steps:
-                - uses: actions/checkout@v4
+                - uses: actions/checkout@v6
                 - name: Detect stack
                   run: |
                     [ -f package.json ] && echo "STACK=node" >> $GITHUB_ENV
@@ -141,7 +141,7 @@ jobs:
             report:
               runs-on: ubuntu-latest
               steps:
-                - uses: actions/checkout@v4
+                - uses: actions/checkout@v6
                 - name: Generate report
                   run: |
                     echo '{"repo":"${{ github.repository }}","time":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"}' > /tmp/report.json
