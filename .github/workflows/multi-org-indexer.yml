@@ -42,7 +42,7 @@ jobs:
           - BlackRoad-Archive
       fail-fast: false
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Scrape ${{ matrix.org }}
         env:
@@ -76,7 +76,7 @@ jobs:
           echo "Found ${count} repos in ${{ matrix.org }}"
 
       - name: Upload Index
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: index-${{ matrix.org }}
           path: index/${{ matrix.org }}/
@@ -86,10 +86,10 @@ jobs:
     needs: scrape-all-orgs
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Download All Indexes
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           path: index/
 
@@ -161,7 +161,7 @@ jobs:
     if: github.event_name == 'repository_dispatch'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Process Discovery Report
         run: |
