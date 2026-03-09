@@ -1,0 +1,25 @@
+---
+id: architecture-agents-and-orchestration
+title: Agents and Orchestration
+sidebar_position: 2
+slug: /reference/architecture/agents-and-orchestration
+---
+
+Agents are the atomic workers inside BlackRoad OS. Each agent advertises capabilities, consumes tasks through the event bus, and emits journal entries for every significant action. The intent is to keep agents composable and observable so humans can inspect, approve, or override critical steps without rewriting code paths.
+
+## Core concepts
+
+- **Agent** – a unit that owns business logic, typically bound to a narrow domain such as ledgering or treasury. Agents may run standalone or inside orchestrators.
+- **Capability** – a declared operation an agent can perform. Capabilities make routing explicit and let orchestrators compose complex flows.
+- **Task** – a discrete piece of work, such as “run monthly close.” Tasks carry metadata, initiator context, and expected outputs.
+- **Event Bus** – transports tasks and events between producers and consumers. It decouples initiators from workers and keeps journaling central.
+
+## Walkthrough: Run Monthly Close
+
+1. A scheduler or external caller creates a “Run Monthly Close” task through `blackroad-os-api`.
+2. The task is dispatched onto the event bus with a requested capability and scope (entity, period, currency).
+3. Finance agents in `blackroad-os-operator` pull the task, coordinate ledger checks, and produce working entries.
+4. Every state transition emits events and PS-SHA∞ journal entries so downstream systems and auditors can trace actions.
+5. When human sign-off is required, the orchestrator escalates to the appropriate approver before closing the loop.
+
+The same pattern applies to incident response, treasury moves, and infrastructure changes. For a catalog of finance-specific agents, see the [Finance Layer](/packs/finance/finance-layer). To extend the system with new automations, follow the guidance in [Extending Agents](/platform/api/extending-agents).

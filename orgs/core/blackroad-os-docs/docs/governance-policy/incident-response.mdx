@@ -1,0 +1,23 @@
+---
+id: incident-response
+title: Incidents & Incident Response
+sidebar_position: 3
+---
+
+BlackRoad OS treats incidents as shared responsibilities between agents and humans. Automation accelerates detection and containment, while humans provide judgment and regulatory context. This page outlines the flow and points you to infra runbooks for detailed procedures.
+
+## Detection
+
+Metrics, health checks, and future alerting pipelines feed into the operator and Prism Console. Agents can emit anomaly events when they detect policy violations or missing data. TODO: formalize the alert catalogue and thresholds.
+
+## Triage
+
+Operators review events and journal entries to reconstruct timelines. Determine scope (which agents, which environments), identify blast radius, and decide whether to pause automations. Coordination between the API and operator ensures actions are reversible and traceable.
+
+## Response
+
+Common responses include rolling back a deployment, disabling a capability, or applying configuration overrides. Use PS-SHA∞ journaling to record every step, including who approved the action. Follow environment-specific rollback steps from `blackroad-os-infra/runbooks` and confirm health checks before restoring normal operations.
+
+## Postmortem
+
+After stabilization, capture a postmortem that includes timeline, root causes, and prevention steps. Link journal entries and event IDs so auditors can replay the sequence. Update runbooks and agent policies to prevent recurrence, and communicate findings to stakeholders who rely on the [Finance Layer](/packs/finance/finance-layer) or other critical workflows.

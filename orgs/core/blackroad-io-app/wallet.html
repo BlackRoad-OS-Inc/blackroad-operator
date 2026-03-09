@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BlackRoad Crypto Wallet</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root { --gradient: linear-gradient(135deg, #FF9D00, #FF6B00, #FF0066, #D600AA, #7700FF, #0066FF); }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #02030a;
+      color: white;
+      min-height: 100vh;
+      padding: 24px;
+    }
+    .container { max-width: 1000px; margin: 0 auto; }
+    h1 {
+      font-size: 48px;
+      font-weight: 900;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 32px;
+    }
+    .wallet-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+    .wallet-card {
+      background: rgba(255,255,255,0.05);
+      border: 2px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      padding: 24px;
+    }
+    .wallet-card h2 {
+      font-size: 24px;
+      margin-bottom: 16px;
+    }
+    .balance {
+      font-size: 36px;
+      font-weight: 900;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin: 16px 0;
+    }
+    .address {
+      background: rgba(0,0,0,0.3);
+      padding: 12px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 13px;
+      word-break: break-all;
+      margin: 12px 0;
+    }
+    button {
+      padding: 12px 24px;
+      border-radius: 8px;
+      border: none;
+      background: var(--gradient);
+      color: white;
+      font-weight: 700;
+      cursor: pointer;
+      margin: 8px 8px 8px 0;
+      transition: transform 0.2s;
+    }
+    button:hover { transform: scale(1.05); }
+    .transaction-list {
+      background: rgba(255,255,255,0.05);
+      border-radius: 16px;
+      padding: 24px;
+    }
+    .transaction-item {
+      padding: 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .status {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .status.connected { background: rgba(0, 255, 136, 0.2); color: #00ff88; }
+    .status.pending { background: rgba(255, 157, 0, 0.2); color: #FF9D00; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔐 Crypto Wallet</h1>
+
+    <div class="wallet-grid">
+      <!-- Coinbase Wallet -->
+      <div class="wallet-card">
+        <h2>🪙 Coinbase</h2>
+        <span class="status connected">CONNECTED</span>
+        <div class="balance" id="coinbaseBalance">$0.00</div>
+        <div class="address">
+          <strong>Wallet ID:</strong><br>
+          7fe12e7c-e76e-5c28-bbd7-5e7fed78e1f1
+        </div>
+        <button onclick="refreshCoinbase()">Refresh Balance</button>
+        <button onclick="window.open('https://www.coinbase.com', '_blank')">Open Coinbase</button>
+      </div>
+
+      <!-- Ledger Hardware Wallet -->
+      <div class="wallet-card">
+        <h2>🔐 Ledger</h2>
+        <span class="status" id="ledgerStatus">DISCONNECTED</span>
+        <div class="balance">Hardware Wallet</div>
+        <div class="address">
+          <strong>Connection:</strong><br>
+          USB-C Physical Device
+        </div>
+        <button onclick="window.location.href='/ledger.html'">Open Ledger App</button>
+        <button onclick="quickConnect()">Quick Connect</button>
+      </div>
+
+      <!-- Bitcoin Wallet -->
+      <div class="wallet-card">
+        <h2>₿ Bitcoin</h2>
+        <span class="status connected">ACTIVE</span>
+        <div class="balance" id="btcBalance">0.1 BTC</div>
+        <div class="address">
+          <strong>Address:</strong><br>
+          3NJYuq8KA1xBea6JNg32XgDwjpvLkrR5VH
+        </div>
+        <button onclick="copyAddress('3NJYuq8KA1xBea6JNg32XgDwjpvLkrR5VH')">Copy Address</button>
+        <button onclick="window.open('https://www.geckoterminal.com', '_blank')">GeckoTerminal</button>
+      </div>
+    </div>
+
+    <div class="transaction-list">
+      <h2 style="margin-bottom: 24px;">Recent Transactions</h2>
+      <div id="transactions">
+        <div class="transaction-item">
+          <div>
+            <strong>Coinbase Deposit</strong><br>
+            <span style="opacity: 0.7; font-size: 14px;">2 hours ago</span>
+          </div>
+          <div style="text-align: right;">
+            <strong style="color: #00ff88;">+$1,250</strong><br>
+            <span class="status connected">Confirmed</span>
+          </div>
+        </div>
+        <div class="transaction-item">
+          <div>
+            <strong>Ledger Transfer</strong><br>
+            <span style="opacity: 0.7; font-size: 14px;">1 day ago</span>
+          </div>
+          <div style="text-align: right;">
+            <strong style="color: #FF0066;">-0.05 BTC</strong><br>
+            <span class="status connected">Confirmed</span>
+          </div>
+        </div>
+        <div class="transaction-item">
+          <div>
+            <strong>Krak Payment</strong><br>
+            <span style="opacity: 0.7; font-size: 14px;">3 days ago</span>
+          </div>
+          <div style="text-align: right;">
+            <strong style="color: #00ff88;">+$500</strong><br>
+            <span class="status pending">Pending</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    async function connectLedger() {
+      try {
+        if (!navigator.usb) {
+          alert('WebUSB not supported. Use Chrome or Edge browser.');
+          return;
+        }
+
+        const device = await navigator.usb.requestDevice({
+          filters: [{ vendorId: 0x2c97 }] // Ledger vendor ID
+        });
+
+        await device.open();
+        await device.selectConfiguration(1);
+        await device.claimInterface(0);
+
+        document.getElementById('ledgerStatus').textContent = 'CONNECTED';
+        document.getElementById('ledgerStatus').className = 'status connected';
+        
+        localStorage.setItem('ledger_connected', 'true');
+        alert('Ledger connected successfully!');
+        
+      } catch (error) {
+        console.error('Ledger connection failed:', error);
+        alert('Failed to connect Ledger: ' + error.message);
+      }
+    }
+
+    async function signTransaction() {
+      if (!localStorage.getItem('ledger_connected')) {
+        alert('Please connect your Ledger first');
+        return;
+      }
+      
+      alert('Transaction signing requires Ledger app. Please confirm on device.');
+    }
+
+    async function refreshCoinbase() {
+      // Mock API call - replace with real Coinbase API
+      const balance = Math.random() * 10000;
+      document.getElementById('coinbaseBalance').textContent = '$' + balance.toFixed(2);
+    }
+
+    function copyAddress(address) {
+      navigator.clipboard.writeText(address);
+      alert('Address copied: ' + address);
+    }
+
+    // Check if Ledger was previously connected
+    if (localStorage.getItem('ledger_connected')) {
+      document.getElementById('ledgerStatus').textContent = 'READY';
+      document.getElementById('ledgerStatus').className = 'status connected';
+    }
+
+    // Initial balance load
+    refreshCoinbase();
+  </script>
+  <script src="/blackroad-api.js"></script>
+</body>
+</html>

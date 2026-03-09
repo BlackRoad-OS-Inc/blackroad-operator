@@ -1,0 +1,30 @@
+---
+id: operator-runtime
+title: Operator Runtime
+slug: /platform/operator/runtime
+sidebar_position: 1
+---
+
+`blackroad-os-operator` is the runtime where agents live, jobs run, and DomainEvents originate. It coordinates work, keeps a registry of agents, and exposes internal HTTP routes for orchestration tools.
+
+## Responsibilities
+- Host agents (Atlas and future peers) with PS-SHA∞ identity anchors and metadata.
+- Manage the job queue, lifecycle transitions, and worker loop that executes tasks.
+- Emit DomainEvents and persist journal entries for every notable state change.
+- Provide `/internal/*` HTTP endpoints for health checks, orchestration, and debugging.
+
+## Core concepts
+- **Agent Registry** — catalog of agents with IDs, capabilities, and state; used by Prism and the API.
+- **Job Queue** — accepted work items with statuses (`queued`, `running`, `succeeded`, `failed`, `cancelled`).
+- **Worker loop** — pulls jobs from the queue, runs the chosen agent, and records results plus events.
+- **EventBus & JournalStore** — emit DomainEvents and capture journal entries that ultimately roll into RoadChain blocks.
+
+## Example internal endpoints
+- `GET /internal/health` — runtime liveness.
+- `GET /internal/agents` — list registered agents.
+- `GET /internal/agents/:id` — inspect a specific agent, including PS-SHA∞ identity data.
+- `POST /internal/jobs` — submit a job to the queue.
+- `GET /internal/jobs/:id` — check job status.
+- `GET /internal/events` — stream or page through recent DomainEvents.
+
+Types come from `blackroad-os-core`. Keep Operator thin: it runs agents and emits events, while `blackroad-os-api` is the only HTTP surface intended for external consumers.

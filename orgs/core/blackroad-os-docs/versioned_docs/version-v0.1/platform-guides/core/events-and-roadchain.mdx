@@ -1,0 +1,29 @@
+---
+id: events-and-roadchain
+title: Events and RoadChain
+slug: /platform/core/events-and-roadchain
+sidebar_position: 5
+---
+
+Events are the connective tissue of BlackRoad OS. They describe what happened, when, and which identities were involved. RoadChain turns those events into an auditable, hash-linked journal.
+
+## DomainEvents
+- Emitted by the Operator runtime whenever jobs or agents change state.
+- Carry references to agents, jobs, PS-SHA∞ anchors, and contextual metadata.
+- Intended for both real-time consumption (Prism dashboards) and long-term audit.
+
+## Journal entries
+- Every DomainEvent is persisted as a `JournalEntry` with timestamps and signatures.
+- Journal entries are immutable; corrections are additive via new events, not edits.
+
+## RoadChain blocks
+- RoadChain groups journal entries into ordered blocks.
+- Each block is hash-linked to the previous one for tamper evidence.
+- Blocks can be referenced in incident reports, finance audits, or investor updates to prove lineage of actions.
+
+## How Prism will visualize it
+- **Events feed** — chronological list with filters for agent, job, severity, or identity.
+- **RoadChain explorer** — block-level view showing grouped journal entries, hashes, and linked metadata.
+- **Tracebacks** — follow a job through events to the block where it was sealed.
+
+Keep the event schema tight and reuse core types so every surface (Operator logs, API responses, Prism, future wallets) can rely on the same vocabulary.
