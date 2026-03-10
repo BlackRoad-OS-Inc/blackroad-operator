@@ -1,0 +1,406 @@
+# BlackRoad OS — Service Registry
+# All public identifiers, domains, and infrastructure references.
+# NO API KEYS OR SECRETS — those go in .env files only.
+# Copyright (c) 2024-2026 BlackRoad OS, Inc. All rights reserved.
+
+# ============================================================
+# Cloudflare
+# ============================================================
+cloudflare:
+  account_id: "848cf0b18d51e0170e0d1537aec3505a"
+
+  domains:
+    - zone: blackroad.io
+      registrar: cloudflare
+      subdomains:
+        - name: "@"
+          purpose: Main platform / landing
+        - name: www
+          purpose: Redirect to blackroad.io
+        - name: api
+          purpose: REST API service
+        - name: core
+          purpose: Core OS service
+        - name: operator
+          purpose: Operator CLI service
+        - name: pay
+          purpose: Payment gateway (Stripe)
+        - name: payments
+          purpose: Payment gateway alias
+        - name: cmd
+          purpose: Command interface
+        - name: tools
+          purpose: Tool scripts
+        - name: agents
+          purpose: Agent system
+        - name: prism
+          purpose: Prism console
+        - name: mesh
+          purpose: Network mesh
+        - name: hub
+          purpose: Central hub
+        - name: jobs
+          purpose: Job queue
+        - name: dashboard
+          purpose: Dashboard app
+        - name: ai
+          purpose: AI services
+        - name: storage
+          purpose: Object storage (MinIO)
+        - name: docs
+          purpose: Documentation site
+        - name: auth
+          purpose: Authentication
+        - name: worlds
+          purpose: Worlds/metaverse
+        - name: "*"
+          purpose: Wildcard catch-all
+
+    - zone: blackroad.systems
+      registrar: cloudflare
+      purpose: System services / infrastructure
+
+    - zone: blackroad.ai
+      registrar: cloudflare
+      subdomains:
+        - name: agent
+          purpose: Agent API
+        - name: api
+          purpose: AI API
+
+  tunnel:
+    id: "52915859-da18-4aa6-add5-7bd9fcac2e0b"
+    name: blackroad
+    host: blackroad-pi
+
+  r2_buckets:
+    - name: blackroad-models
+      size: 135GB
+      purpose: Local LLM model storage
+
+  kv_namespaces:
+    - id: "b6c3379f5951468b99ec33264b9dd6dd"
+      purpose: Email inbox routing
+
+  workers:
+    count: 75+
+    key_workers:
+      - name: auth
+        config: workers/auth/wrangler.toml
+        purpose: Token revocation + auth
+      - name: email
+        config: workers/email/wrangler.toml
+        purpose: Email routing (*@blackroad.io)
+      - name: copilot
+        config: workers/copilot/
+        purpose: AI copilot worker
+
+  pages_projects: 10+
+
+# ============================================================
+# Stripe
+# ============================================================
+stripe:
+  account_id: "acct_1S70Zn3e5FMFdlFw"
+  config: integrations/stripe/stripe-config.ts
+
+  products:
+    - id: prod_blackroad_os_pro
+      name: BlackRoad OS Pro
+      price: $49/mo
+      features: 30K agent coordination minutes
+
+    - id: prod_blackroad_os_enterprise
+      name: BlackRoad OS Enterprise
+      price: $299/mo
+      features: Unlimited agents, 99.9% SLA
+
+    - id: prod_agent_credits
+      name: Agent Credits
+      price: $10/pack
+      features: 1K agent-minutes per pack
+
+    - id: prod_blackroad_api
+      name: API Access
+      price: $99/mo
+      features: 100K requests/month
+
+  webhooks:
+    - checkout.session.completed
+    - customer.subscription.created
+    - customer.subscription.updated
+    - customer.subscription.deleted
+    - invoice.paid
+    - invoice.payment_failed
+    - payment_intent.succeeded
+    - payment_intent.failed
+
+  # Secret env vars (in .env only):
+  # STRIPE_SECRET_KEY, STRIPE_PUBLISHABLE_KEY, STRIPE_WEBHOOK_SECRET
+  # STRIPE_PRICE_PRO_MONTHLY, STRIPE_PRICE_ENTERPRISE_MONTHLY
+  # STRIPE_PRICE_CREDITS, STRIPE_PRICE_API_MONTHLY
+
+# ============================================================
+# Clerk
+# ============================================================
+clerk:
+  config: integrations/clerk/clerk-config.ts
+
+  organizations:
+    - slug: blackroad-os-inc
+      max_members: 100
+      roles: [admin, billing, agent-management, all-orgs-access]
+
+    - slug: blackroad-os
+      max_members: 500
+      roles: [platform, agents, CLI, deploy, memory, collaboration]
+
+    - slug: blackroad-ai
+      max_members: 50
+      roles: [models, inference, training, GPU access]
+
+    - slug: blackroad-cloud
+      max_members: 50
+      roles: [infrastructure, orchestration, networking]
+
+    - slug: blackroad-security
+      max_members: 30
+      roles: [scanning, audit, compliance, WAF, IDS]
+
+  sso_providers: [google, github, microsoft, apple, saml]
+  mfa: enabled
+
+  user_metadata:
+    - blackroad_tier
+    - agent_limit
+    - stripe_customer_id
+    - org_ids
+    - api_key_hash
+    - last_deploy_at
+    - credits_balance
+    - preferred_model
+    - cece_identity_hash
+
+  webhooks:
+    - user.created
+    - user.updated
+    - user.deleted
+    - organization.created
+    - organization.updated
+    - organizationMembership.created
+    - organizationMembership.deleted
+    - session.created
+    - session.ended
+
+  routes:
+    sign_in: /sign-in
+    sign_up: /sign-up
+    after_sign_in: /dashboard
+    after_sign_up: /onboarding
+
+  # Secret env vars (in .env only):
+  # NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY, CLERK_SECRET_KEY, CLERK_WEBHOOK_SECRET
+
+# ============================================================
+# Railway
+# ============================================================
+railway:
+  config: integrations/railway/config.yaml
+
+  projects:
+    - id: "9d3d2549-3778-4c86-8afd-cefceaaa74d2"
+      name: RoadWork Production
+    - id: "6d4ab1b5-3e97-460e-bba0-4db86691c476"
+      name: RoadWork Staging
+    - id: "aa968fb7-ec35-4a8b-92dc-1eba70fa8478"
+      name: BlackRoad Core Services
+    - id: "e8b256aa-8708-4eb2-ba24-99eba4fe7c2e"
+      name: BlackRoad Operator
+    - id: "85e6de55-fefd-4e8d-a9ec-d20c235c2551"
+      name: BlackRoad Master
+    - id: "8ac583cb-ffad-40bd-8676-6569783274d1"
+      name: BlackRoad Beacon
+    - id: "b61ecd98-adb2-4788-a2e0-f98e322af53a"
+      name: BlackRoad Packs
+    - id: "47f557cf-09b8-40df-8d77-b34f91ba90cc"
+      name: Prism Console
+    - id: "1a039a7e-a60c-42c5-be68-e66f9e269209"
+      name: BlackRoad Home
+
+  # Secret env vars: RAILWAY_TOKEN
+
+# ============================================================
+# Vercel
+# ============================================================
+vercel:
+  config: integrations/vercel/config.yaml
+
+  projects:
+    - blackroad-os-prism-console
+    - blackroad-os
+    - blackroad-os-mesh
+    - blackroad-os-helper
+    - blackroad-os-landing-worker
+    - containers-template
+    - clerk-docs
+
+  # Secret env vars: VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID
+
+# ============================================================
+# DigitalOcean
+# ============================================================
+digitalocean:
+  config: integrations/digitalocean/config.yaml
+
+  droplets:
+    - name: blackroad-os-infinity
+      ip: 159.65.43.12
+      size: s-4vcpu-8gb
+
+  spaces:
+    region: nyc3
+
+  # Secret env vars: DIGITALOCEAN_ACCESS_TOKEN, DIGITALOCEAN_SPACES_KEY, DIGITALOCEAN_SPACES_SECRET
+
+# ============================================================
+# Email (SendGrid)
+# ============================================================
+sendgrid:
+  config: integrations/email/config.yaml
+
+  domains:
+    - blackroad.io
+    - blackroad.ai
+    - blackroad.systems
+
+  templates:
+    - welcome
+    - alert
+    - deployment
+    - invoice
+    - agent_report
+
+  contact: blackroad.systems@gmail.com
+
+  # Secret env vars: SENDGRID_API_KEY
+
+# ============================================================
+# Banking (Mercury)
+# ============================================================
+mercury:
+  config: integrations/mercury/config.yaml
+
+  webhooks:
+    - transaction.created
+    - transaction.updated
+    - transaction.failed
+    - account.updated
+
+  # Secret env vars: MERCURY_API_TOKEN, MERCURY_WEBHOOK_SECRET
+
+# ============================================================
+# Project Management
+# ============================================================
+notion:
+  config: integrations/notion/config.yaml
+  # Secret env vars: NOTION_API_KEY, NOTION_ROADMAP_DB_ID, NOTION_TASKS_DB_ID, NOTION_INTEGRATIONS_DB_ID
+
+linear:
+  config: integrations/linear/config.yaml
+  # Secret env vars: LINEAR_API_KEY, LINEAR_WEBHOOK_SECRET
+
+jira:
+  config: integrations/jira/config.yaml
+  # Secret env vars: JIRA_DOMAIN, JIRA_EMAIL, JIRA_API_TOKEN, JIRA_WEBHOOK_SECRET
+
+# ============================================================
+# AI Providers (all via tokenless gateway)
+# ============================================================
+ai_providers:
+  gateway: http://127.0.0.1:8787
+  providers:
+    - name: ollama
+      config: blackroad-core/gateway/providers/ollama.js
+      local: true
+    - name: anthropic
+      config: blackroad-core/gateway/providers/anthropic.js
+      env: ANTHROPIC_API_KEY
+    - name: openai
+      config: blackroad-core/gateway/providers/openai.js
+      env: OPENAI_API_KEY
+    - name: gemini
+      config: blackroad-core/gateway/providers/gemini.js
+      env: GOOGLE_AI_API_KEY
+    - name: grok
+      config: integrations/grok/config.yaml
+      env: XAI_API_KEY
+    - name: huggingface
+      config: integrations/huggingface/config.yaml
+      env: HUGGINGFACE_TOKEN
+
+# ============================================================
+# Comms & Social
+# ============================================================
+slack:
+  config: integrations/slack/config.yaml
+  # Secret env vars: SLACK_BOT_TOKEN, SLACK_SIGNING_SECRET, SLACK_WEBHOOK_URL
+
+instagram:
+  config: integrations/instagram/config.yaml
+  # Secret env vars: INSTAGRAM_ACCESS_TOKEN, INSTAGRAM_APP_ID, INSTAGRAM_APP_SECRET
+
+google_drive:
+  config: integrations/google-drive/config.yaml
+  # Secret env vars: GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REFRESH_TOKEN
+
+salesforce:
+  config: integrations/salesforce/config.yaml
+  # Secret env vars: SALESFORCE_INSTANCE_URL, SALESFORCE_ACCESS_TOKEN, SALESFORCE_CLIENT_ID, SALESFORCE_CLIENT_SECRET
+
+# ============================================================
+# Networking
+# ============================================================
+tailscale:
+  config: integrations/tailscale/config.yaml
+  # Secret env vars: TAILSCALE_API_KEY, TAILSCALE_TAILNET
+
+enclave:
+  config: integrations/enclave/config.yaml
+  # Secret env vars: ENCLAVE_API_KEY, ENCLAVE_ORG_ID
+
+# ============================================================
+# Infrastructure (Internal)
+# ============================================================
+infrastructure:
+  production_template: blackroad-infra/production/.env.production.template
+
+  database:
+    type: postgresql
+    host: 10.10.0.2
+    port: 5432
+    name: Cecilia
+    # Secret: DATABASE_URL
+
+  cache:
+    type: redis
+    host: 10.10.0.2
+    port: 6379
+    name: Cecilia
+    # Secret: REDIS_URL
+
+  storage:
+    type: minio
+    host: 10.10.0.3
+    port: 9000
+    name: Lucidia
+    # Secret: MINIO_ACCESS_KEY, MINIO_SECRET_KEY
+
+  pi_fleet:
+    nodes:
+      - name: blackroad-pi
+        role: Primary / tunnel host
+      - name: lucidia-pi
+        role: Storage / MinIO
+      - name: alice-pi
+        role: DevOps agent
+    # Secrets: PI_LUCIDIA_IP, PI_BLACKROAD_IP, PI_ALICE_IP, PI_SSH_KEY_PATH
