@@ -28,4 +28,33 @@ describe('formatTable', () => {
     const lines = result.split('\n')
     expect(lines[2].length).toBe(lines[3].length)
   })
+
+  it('should use box-drawing characters for separators', () => {
+    const result = formatTable(['A', 'B'], [['1', '2']])
+    expect(result).toContain('┼')
+    expect(result).toContain('│')
+  })
+
+  it('should handle missing cells gracefully', () => {
+    const result = formatTable(['A', 'B', 'C'], [['1']])
+    expect(result).toContain('A')
+    // Should not throw on undefined cells
+  })
+
+  it('should produce correct number of lines', () => {
+    const result = formatTable(
+      ['H1'],
+      [['r1'], ['r2'], ['r3']],
+    )
+    const lines = result.split('\n')
+    // header + separator + 3 rows = 5 lines
+    expect(lines).toHaveLength(5)
+  })
+
+  it('should handle single column', () => {
+    const result = formatTable(['Only'], [['one'], ['two']])
+    expect(result).not.toContain('│')
+    expect(result).not.toContain('┼')
+    expect(result).toContain('Only')
+  })
 })
