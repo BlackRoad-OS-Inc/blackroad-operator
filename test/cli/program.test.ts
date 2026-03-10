@@ -23,8 +23,8 @@ describe('CLI program', () => {
     expect(commandNames).toContain('init')
   })
 
-  it('should have 8 commands', () => {
-    expect(program.commands).toHaveLength(8)
+  it('should have 9 commands', () => {
+    expect(program.commands).toHaveLength(9)
   })
 
   it('gateway command should have subcommands', () => {

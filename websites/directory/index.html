@@ -1,283 +1,381 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BlackRoad — Directory</title>
+  <title>BlackRoad — Infrastructure Directory</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Inter:wght@400;500;600;700&family=Press+Start+2P&display=swap" rel="stylesheet">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    html, body {
-      background: #000000;
-      color: #ffffff;
-      font-family: 'JetBrains Mono', monospace;
-      min-height: 100vh;
+    :root {
+      --black: #000; --deep: #080810; --surface: #0e0e1a; --surface2: #14142a;
+      --border: #1e1e2e; --muted: #444460; --subtle: #888899; --white: #fff;
+      --amber: #F5A623; --pink: #FF1D6C; --violet: #9C27B0; --blue: #2979FF;
+      --cyan: #00E5FF; --green: #00ff88;
+      --grad: linear-gradient(135deg, #F5A623 0%, #FF1D6C 38.2%, #9C27B0 61.8%, #2979FF 100%);
+      --font-mono: 'JetBrains Mono', monospace;
+      --font-sans: 'Inter', sans-serif;
+      --font-pixel: 'Press Start 2P', monospace;
     }
-
-    header {
-      background: #000000;
-      padding: 20px 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-bottom: 1px solid #ffffff;
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--black); color: var(--white);
+      font-family: var(--font-sans); line-height: 1.618;
+      -webkit-font-smoothing: antialiased; overflow-x: hidden;
     }
+    a { color: inherit; text-decoration: none; }
 
-    .logo {
-      font-size: 1.2rem;
-      font-weight: 700;
-      color: #ffffff;
-      letter-spacing: 0.05em;
+    /* NAV */
+    .top-bar {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 32px;
+      background: rgba(0,0,0,0.85); backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
     }
-
-    nav {
-      font-size: 0.65rem;
-      display: flex;
-      gap: 20px;
+    .top-bar::after {
+      content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
+      background: var(--grad); opacity: 0.4;
     }
-
-    nav a {
-      color: #888888;
-      text-decoration: none;
+    .logo { font-family: var(--font-mono); font-weight: 700; font-size: 1rem; letter-spacing: -0.02em; }
+    .logo-mark {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 24px; height: 24px; background: var(--grad); border-radius: 5px;
+      font-size: 12px; font-weight: 800; margin-right: 8px; vertical-align: middle;
     }
+    .nav-links { display: flex; gap: 24px; font-size: 0.8rem; font-family: var(--font-mono); }
+    .nav-links a { color: var(--subtle); transition: color 0.2s; }
+    .nav-links a:hover { color: var(--white); }
 
-    nav a:hover { color: #ffffff; }
-
+    /* HERO */
     .hero {
-      background: #000000;
-      padding: 48px 24px 36px;
-      border-bottom: 1px solid #ffffff;
+      padding: 80px 32px 48px; position: relative; overflow: hidden;
     }
-
+    .hero::before {
+      content: ''; position: absolute; top: -100px; right: -100px;
+      width: 500px; height: 500px;
+      background: radial-gradient(ellipse, rgba(255,29,108,0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
     .hero-label {
-      font-size: 0.6rem;
-      color: #555555;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      margin-bottom: 10px;
+      font-family: var(--font-pixel); font-size: 0.55rem;
+      color: var(--pink); letter-spacing: 0.2em; text-transform: uppercase;
+      margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
     }
-
+    .hero-label .dot {
+      width: 6px; height: 6px; background: var(--green); border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
     .hero h1 {
-      font-size: 2rem;
-      font-weight: 700;
-      color: #ffffff;
-      line-height: 1.05;
+      font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 700;
+      line-height: 1.05; letter-spacing: -0.04em;
     }
+    .grad-text {
+      background: var(--grad); -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .hero-sub { color: var(--subtle); font-size: 0.9rem; margin-top: 12px; max-width: 500px; }
 
-    .hero p {
-      margin-top: 12px;
-      font-size: 0.7rem;
-      color: #666666;
-      line-height: 1.9;
+    /* LIVE STATS BAR */
+    .stats-bar {
+      display: flex; gap: 32px; padding: 24px 32px;
+      border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+      background: var(--deep); flex-wrap: wrap;
     }
+    .stat { text-align: center; }
+    .stat-val {
+      font-family: var(--font-mono); font-size: 1.5rem; font-weight: 700;
+      background: var(--grad); -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .stat-lbl { font-size: 0.65rem; color: var(--subtle); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.1em; }
 
-    .grid {
-      display: grid;
-      grid-template-columns: 1fr;
-    }
+    /* SECTIONS */
+    .grid { display: grid; grid-template-columns: 1fr; }
 
     .section {
-      background: #000000;
-      padding: 32px 24px;
-      border-bottom: 1px solid #ffffff;
+      padding: 32px; border-bottom: 1px solid var(--border);
     }
-
     .section-label {
-      font-size: 0.58rem;
-      color: #555555;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      margin-bottom: 18px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
+      font-family: var(--font-pixel); font-size: 0.5rem;
+      color: var(--amber); letter-spacing: 0.15em; text-transform: uppercase;
+      margin-bottom: 20px; display: flex; align-items: center; gap: 12px;
     }
-
     .section-label::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: #333333;
+      content: ''; flex: 1; height: 1px;
+      background: linear-gradient(90deg, var(--border), transparent);
     }
 
+    /* ENTERPRISE */
     .enterprise-link {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      text-decoration: none;
-      padding: 14px 16px;
-      border: 1px solid #ffffff;
-      background: #000000;
+      display: block; padding: 20px; border-radius: 10px;
+      border: 1px solid var(--border); background: var(--surface);
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .enterprise-link:hover { border-color: var(--pink); transform: translateY(-2px); }
+    .enterprise-link .name { font-family: var(--font-mono); font-weight: 700; font-size: 1rem; }
+    .enterprise-link .url { font-size: 0.7rem; color: var(--subtle); margin-top: 4px; }
+    .enterprise-link .badge {
+      display: inline-block; margin-top: 8px; padding: 3px 10px;
+      font-family: var(--font-mono); font-size: 0.6rem;
+      border-radius: 100px; background: rgba(255,29,108,0.12); color: var(--pink);
     }
 
-    .enterprise-link .name {
-      font-size: 0.82rem;
-      font-weight: 700;
-      color: #ffffff;
+    /* ORG LIST */
+    .org-list { display: flex; flex-direction: column; gap: 4px; }
+    .org-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 14px; border-radius: 8px;
+      font-family: var(--font-mono); font-size: 0.75rem;
+      color: var(--subtle); background: var(--surface);
+      border: 1px solid transparent;
+      transition: all 0.2s;
     }
+    .org-item:hover { color: var(--white); border-color: var(--border); background: var(--surface2); }
+    .org-item .arrow { color: var(--muted); font-size: 0.6rem; }
+    .org-item:hover .arrow { color: var(--pink); }
 
-    .enterprise-link .url {
-      font-size: 0.58rem;
-      color: #555555;
-      word-break: break-all;
-    }
-
-    .org-list {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
-    .org-list a {
-      background: #000000;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 8px 10px;
-      font-size: 0.7rem;
-      color: #aaaaaa;
-      text-decoration: none;
-    }
-
-    .org-list a:hover { color: #ffffff; }
-
-    .org-list a .arrow {
-      color: #444444;
-      font-size: 0.65rem;
-      flex-shrink: 0;
-      margin-left: 8px;
-    }
-
-    .domain-list {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
+    /* DOMAIN LIST */
+    .domain-list { display: flex; flex-direction: column; gap: 4px; }
     .domain-item {
-      background: #000000;
-      display: flex;
-      align-items: center;
-      padding: 8px 10px;
-      font-size: 0.7rem;
-      color: #888888;
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 14px; border-radius: 8px;
+      font-family: var(--font-mono); font-size: 0.75rem;
+      color: var(--subtle); background: var(--surface);
+      border: 1px solid transparent;
+      transition: all 0.2s;
+    }
+    .domain-item:hover { color: var(--white); border-color: var(--border); }
+    .domain-item .dot {
+      width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+    }
+    .domain-item .dot.live { background: var(--green); box-shadow: 0 0 6px var(--green); }
+    .domain-item .dot.registered { background: var(--amber); }
+    .domain-item .registrar {
+      margin-left: auto; font-size: 0.55rem; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.1em;
     }
 
-    .domain-item:hover { color: #ffffff; }
-
-    .domain-item::before {
-      content: '—';
-      color: #333333;
-      margin-right: 10px;
-      font-size: 0.6rem;
-      flex-shrink: 0;
+    /* INFRA SECTION */
+    .infra-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+    }
+    .infra-card {
+      padding: 16px; border-radius: 10px; background: var(--surface);
+      border: 1px solid var(--border); transition: border-color 0.2s;
+    }
+    .infra-card:hover { border-color: var(--muted); }
+    .infra-card .ic-icon { font-size: 1.2rem; margin-bottom: 8px; }
+    .infra-card .ic-title { font-family: var(--font-mono); font-weight: 700; font-size: 0.8rem; }
+    .infra-card .ic-val { font-size: 0.7rem; color: var(--subtle); margin-top: 4px; }
+    .infra-card .ic-status {
+      display: inline-flex; align-items: center; gap: 4px;
+      margin-top: 8px; font-size: 0.55rem; color: var(--green);
+      font-family: var(--font-mono); text-transform: uppercase;
+    }
+    .infra-card .ic-status .dot {
+      width: 5px; height: 5px; border-radius: 50%; background: var(--green);
+      animation: pulse 2s infinite;
     }
 
+    /* SITE NAV */
+    .site-nav {
+      display: flex; justify-content: center; flex-wrap: wrap;
+      gap: 10px; padding: 40px 32px;
+      border-top: 1px solid var(--border);
+    }
+    .site-nav a {
+      font-family: var(--font-mono); font-size: 0.7rem;
+      padding: 8px 16px; border-radius: 6px;
+      border: 1px solid var(--border); color: var(--subtle);
+      transition: all 0.2s;
+    }
+    .site-nav a:hover { border-color: var(--pink); color: var(--white); background: rgba(255,29,108,0.08); }
+
+    /* FOOTER */
     footer {
-      background: #000000;
-      padding: 20px 24px;
-      border-top: 1px solid #333333;
-      font-size: 0.58rem;
-      color: #444444;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
+      padding: 24px 32px; border-top: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      font-family: var(--font-mono); font-size: 0.65rem; color: var(--muted);
+      flex-wrap: wrap; gap: 8px;
     }
+
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
 
     @media (min-width: 768px) {
-      header { padding: 20px 40px; }
-      .hero { padding: 56px 40px 44px; }
-      .hero h1 { font-size: 2.4rem; }
       .grid { grid-template-columns: repeat(3, 1fr); }
-      .section { padding: 36px 40px; border-right: 1px solid #ffffff; }
+      .section { border-right: 1px solid var(--border); }
       .section:last-child { border-right: none; }
-      footer { padding: 20px 40px; flex-direction: row; justify-content: space-between; }
+      .stats-bar { justify-content: center; }
     }
   </style>
 </head>
 <body>
 
-  <header>
-    <span class="logo">BlackRoad</span>
-    <nav>
-      <a href="#">enterprise</a>
-      <a href="#">orgs</a>
-      <a href="#">domains</a>
-      <a href="#">docs</a>
-    </nav>
-  </header>
+  <div class="top-bar">
+    <div class="logo"><span class="logo-mark">B</span>BlackRoad Directory</div>
+    <div class="nav-links">
+      <a href="../index.html">Home</a>
+      <a href="../portal.html">Portal</a>
+      <a href="../agents/index.html">Agents</a>
+      <a href="../pricing/index.html">Pricing</a>
+    </div>
+  </div>
 
   <div class="hero">
-    <div class="hero-label">Directory v1.0</div>
-    <h1>Infrastructure<br>Index</h1>
-    <p>GitHub enterprise, organizations, and registered domains.</p>
+    <div class="hero-label"><span class="dot"></span> Live Infrastructure</div>
+    <h1>Infrastructure<br><span class="grad-text">Directory</span></h1>
+    <p class="hero-sub">GitHub enterprise, 17 organizations, 19 domains, and the full service map.</p>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat"><div class="stat-val">1</div><div class="stat-lbl">Enterprise</div></div>
+    <div class="stat"><div class="stat-val">17</div><div class="stat-lbl">Organizations</div></div>
+    <div class="stat"><div class="stat-val">19</div><div class="stat-lbl">Domains</div></div>
+    <div class="stat"><div class="stat-val" id="stat-repos">1,825</div><div class="stat-lbl">Repositories</div></div>
+    <div class="stat"><div class="stat-val" id="stat-workers">75+</div><div class="stat-lbl">Workers</div></div>
+    <div class="stat"><div class="stat-val">3</div><div class="stat-lbl">Pi Nodes</div></div>
   </div>
 
   <div class="grid">
 
     <div class="section">
       <div class="section-label">github enterprise</div>
-      <a class="enterprise-link" href="https://github.com/enterprises/blackroad-os" target="_blank">
-        <span class="name">blackroad-os</span>
-        <span class="url">github.com/enterprises/blackroad-os</span>
+      <a class="enterprise-link" href="https://github.com/enterprises/blackroad-os" target="_blank" rel="noopener">
+        <div class="name">blackroad-os</div>
+        <div class="url">github.com/enterprises/blackroad-os</div>
+        <span class="badge">Enterprise Cloud</span>
       </a>
-    </div>
 
-    <div class="section">
-      <div class="section-label">organizations · 15</div>
-      <div class="org-list">
-        <a href="https://github.com/Blackbox-Enterprises" target="_blank">Blackbox-Enterprises<span class="arrow">↗</span></a>
-        <a href="https://github.com/BlackRoad-AI" target="_blank">BlackRoad-AI<span class="arrow">↗</span></a>
-        <a href="https://github.com/BlackRoad-Archive" target="_blank">BlackRoad-Archive<span class="arrow">↗</span></a>
-        <a href="https://github.com/BlackRoad-Cloud" target="_blank">BlackRoad-Cloud<span class="arrow">↗</span></a>
-        <a href="https://github.com/BlackRoad-Education" target="_blank">BlackRoad-Education<span class="arrow">↗</span></a>
-        <a href="https://github.com/BlackRoad-Foundation" target="_blank">BlackRoad-Foundation<span class="arrow">↗</span></a>
-        <a href="https://github.com/BlackRoad-Gov" target="_blank">BlackRoad-Gov<span class="arrow">↗</span></a>
-        <a href="https://github.com/BlackRoad-Hardware" target="_blank">BlackRoad-Hardware<span class="arrow">↗</span></a>
-        <a href="https://github.com/BlackRoad-Interactive" target="_blank">BlackRoad-Interactive<span class="arrow">↗</span></a>
-        <a href="https://github.com/BlackRoad-Labs" target="_blank">BlackRoad-Labs<span class="arrow">↗</span></a>
-        <a href="https://github.com/BlackRoad-Media" target="_blank">BlackRoad-Media<span class="arrow">↗</span></a>
-        <a href="https://github.com/BlackRoad-OS" target="_blank">BlackRoad-OS<span class="arrow">↗</span></a>
-        <a href="https://github.com/BlackRoad-Security" target="_blank">BlackRoad-Security<span class="arrow">↗</span></a>
-        <a href="https://github.com/BlackRoad-Studio" target="_blank">BlackRoad-Studio<span class="arrow">↗</span></a>
-        <a href="https://github.com/BlackRoad-Ventures" target="_blank">BlackRoad-Ventures<span class="arrow">↗</span></a>
+      <div style="margin-top:24px">
+        <div class="section-label">infrastructure</div>
+        <div class="infra-grid">
+          <div class="infra-card">
+            <div class="ic-icon">&#9729;</div>
+            <div class="ic-title">Cloudflare</div>
+            <div class="ic-val">75+ Workers, 10+ Pages, R2, KV, D1</div>
+            <div class="ic-status"><span class="dot"></span> Active</div>
+          </div>
+          <div class="infra-card">
+            <div class="ic-icon">&#128642;</div>
+            <div class="ic-title">Railway</div>
+            <div class="ic-val">9 projects (prod + staging)</div>
+            <div class="ic-status"><span class="dot"></span> Active</div>
+          </div>
+          <div class="infra-card">
+            <div class="ic-icon">&#9650;</div>
+            <div class="ic-title">Vercel</div>
+            <div class="ic-val">7 projects deployed</div>
+            <div class="ic-status"><span class="dot"></span> Active</div>
+          </div>
+          <div class="infra-card">
+            <div class="ic-icon">&#128025;</div>
+            <div class="ic-title">DigitalOcean</div>
+            <div class="ic-val">1 droplet (4vCPU/8GB)</div>
+            <div class="ic-status"><span class="dot"></span> Active</div>
+          </div>
+          <div class="infra-card">
+            <div class="ic-icon">&#127383;</div>
+            <div class="ic-title">Pi Fleet</div>
+            <div class="ic-val">3 nodes: blackroad, lucidia, alice</div>
+            <div class="ic-status"><span class="dot"></span> Active</div>
+          </div>
+          <div class="infra-card">
+            <div class="ic-icon">&#128274;</div>
+            <div class="ic-title">Tunnel</div>
+            <div class="ic-val">Cloudflare tunnel on blackroad-pi</div>
+            <div class="ic-status"><span class="dot"></span> Active</div>
+          </div>
+        </div>
       </div>
     </div>
 
     <div class="section">
-      <div class="section-label">domains · 19</div>
+      <div class="section-label">organizations &middot; 17</div>
+      <div class="org-list">
+        <a class="org-item" href="https://github.com/BlackRoad-OS-Inc" target="_blank" rel="noopener">BlackRoad-OS-Inc <span class="arrow">&#8599;</span></a>
+        <a class="org-item" href="https://github.com/BlackRoad-OS" target="_blank" rel="noopener">BlackRoad-OS <span class="arrow">&#8599;</span></a>
+        <a class="org-item" href="https://github.com/BlackRoad-AI" target="_blank" rel="noopener">BlackRoad-AI <span class="arrow">&#8599;</span></a>
+        <a class="org-item" href="https://github.com/BlackRoad-Cloud" target="_blank" rel="noopener">BlackRoad-Cloud <span class="arrow">&#8599;</span></a>
+        <a class="org-item" href="https://github.com/BlackRoad-Security" target="_blank" rel="noopener">BlackRoad-Security <span class="arrow">&#8599;</span></a>
+        <a class="org-item" href="https://github.com/BlackRoad-Labs" target="_blank" rel="noopener">BlackRoad-Labs <span class="arrow">&#8599;</span></a>
+        <a class="org-item" href="https://github.com/BlackRoad-Hardware" target="_blank" rel="noopener">BlackRoad-Hardware <span class="arrow">&#8599;</span></a>
+        <a class="org-item" href="https://github.com/BlackRoad-Interactive" target="_blank" rel="noopener">BlackRoad-Interactive <span class="arrow">&#8599;</span></a>
+        <a class="org-item" href="https://github.com/BlackRoad-Education" target="_blank" rel="noopener">BlackRoad-Education <span class="arrow">&#8599;</span></a>
+        <a class="org-item" href="https://github.com/BlackRoad-Foundation" target="_blank" rel="noopener">BlackRoad-Foundation <span class="arrow">&#8599;</span></a>
+        <a class="org-item" href="https://github.com/BlackRoad-Media" target="_blank" rel="noopener">BlackRoad-Media <span class="arrow">&#8599;</span></a>
+        <a class="org-item" href="https://github.com/BlackRoad-Studio" target="_blank" rel="noopener">BlackRoad-Studio <span class="arrow">&#8599;</span></a>
+        <a class="org-item" href="https://github.com/BlackRoad-Gov" target="_blank" rel="noopener">BlackRoad-Gov <span class="arrow">&#8599;</span></a>
+        <a class="org-item" href="https://github.com/BlackRoad-Ventures" target="_blank" rel="noopener">BlackRoad-Ventures <span class="arrow">&#8599;</span></a>
+        <a class="org-item" href="https://github.com/BlackRoad-Archive" target="_blank" rel="noopener">BlackRoad-Archive <span class="arrow">&#8599;</span></a>
+        <a class="org-item" href="https://github.com/Blackbox-Enterprises" target="_blank" rel="noopener">Blackbox-Enterprises <span class="arrow">&#8599;</span></a>
+        <a class="org-item" href="https://github.com/blackboxprogramming" target="_blank" rel="noopener">blackboxprogramming <span class="arrow">&#8599;</span></a>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">domains &middot; 19</div>
       <div class="domain-list">
-        <div class="domain-item">blackboxprogramming.io</div>
-        <div class="domain-item">blackroad.company</div>
-        <div class="domain-item">blackroad.io</div>
-        <div class="domain-item">blackroad.me</div>
-        <div class="domain-item">blackroad.network</div>
-        <div class="domain-item">blackroad.systems</div>
-        <div class="domain-item">blackroadai.com</div>
-        <div class="domain-item">blackroadinc.us</div>
-        <div class="domain-item">blackroadqi.com</div>
-        <div class="domain-item">blackroadquantum.com</div>
-        <div class="domain-item">blackroadquantum.info</div>
-        <div class="domain-item">blackroadquantum.net</div>
-        <div class="domain-item">blackroadquantum.shop</div>
-        <div class="domain-item">blackroadquantum.store</div>
-        <div class="domain-item">lucidia.earth</div>
-        <div class="domain-item">lucidia.studio</div>
-        <div class="domain-item">lucidiaqi.com</div>
-        <div class="domain-item">roadchain.io</div>
-        <div class="domain-item">roadcoin.io</div>
+        <div class="domain-item"><span class="dot live"></span>blackroad.io<span class="registrar">cloudflare</span></div>
+        <div class="domain-item"><span class="dot live"></span>blackroad.ai<span class="registrar">cloudflare</span></div>
+        <div class="domain-item"><span class="dot live"></span>blackroad.systems<span class="registrar">cloudflare</span></div>
+        <div class="domain-item"><span class="dot registered"></span>blackroad.company<span class="registrar">cloudflare</span></div>
+        <div class="domain-item"><span class="dot registered"></span>blackroad.me<span class="registrar">cloudflare</span></div>
+        <div class="domain-item"><span class="dot registered"></span>blackroad.network<span class="registrar">cloudflare</span></div>
+        <div class="domain-item"><span class="dot registered"></span>blackroadai.com<span class="registrar">cloudflare</span></div>
+        <div class="domain-item"><span class="dot registered"></span>blackroadinc.us<span class="registrar">cloudflare</span></div>
+        <div class="domain-item"><span class="dot registered"></span>blackroadqi.com<span class="registrar">cloudflare</span></div>
+        <div class="domain-item"><span class="dot registered"></span>blackroadquantum.com<span class="registrar">cloudflare</span></div>
+        <div class="domain-item"><span class="dot registered"></span>blackroadquantum.info<span class="registrar">cloudflare</span></div>
+        <div class="domain-item"><span class="dot registered"></span>blackroadquantum.net<span class="registrar">cloudflare</span></div>
+        <div class="domain-item"><span class="dot registered"></span>blackroadquantum.shop<span class="registrar">cloudflare</span></div>
+        <div class="domain-item"><span class="dot registered"></span>blackroadquantum.store<span class="registrar">cloudflare</span></div>
+        <div class="domain-item"><span class="dot live"></span>blackboxprogramming.io<span class="registrar">cloudflare</span></div>
+        <div class="domain-item"><span class="dot registered"></span>lucidia.earth<span class="registrar">cloudflare</span></div>
+        <div class="domain-item"><span class="dot registered"></span>lucidia.studio<span class="registrar">cloudflare</span></div>
+        <div class="domain-item"><span class="dot registered"></span>lucidiaqi.com<span class="registrar">cloudflare</span></div>
+        <div class="domain-item"><span class="dot registered"></span>roadchain.io<span class="registrar">cloudflare</span></div>
+      </div>
+      <div style="margin-top:8px;font-size:0.6rem;color:var(--muted);font-family:var(--font-mono);">
+        <span style="display:inline-flex;align-items:center;gap:4px;margin-right:16px;"><span class="dot live" style="width:5px;height:5px;border-radius:50%;display:inline-block;"></span> Active</span>
+        <span style="display:inline-flex;align-items:center;gap:4px;"><span class="dot registered" style="width:5px;height:5px;border-radius:50;display:inline-block;background:var(--amber);"></span> Registered</span>
       </div>
     </div>
 
   </div>
 
+  <div class="site-nav">
+    <a href="../index.html">Home</a>
+    <a href="../portal.html">Portal</a>
+    <a href="../agents/index.html">Agent Fleet</a>
+    <a href="../blackroad-ai/index.html">AI Platform</a>
+    <a href="../pricing/index.html">Pricing</a>
+    <a href="../roadtv/index.html">Road TV</a>
+    <a href="../editor.html">Editor</a>
+    <a href="../app.html">Mobile App</a>
+  </div>
+
   <footer>
-    <span>BlackRoad OS, Inc. — Delaware C-Corp</span>
-    <span>1 enterprise · 15 orgs · 19 domains</span>
+    <span>&copy; 2026 BlackRoad OS, Inc. All rights reserved.</span>
+    <span>Delaware C-Corp &middot; Your AI. Your Hardware. Your Rules.</span>
   </footer>
+
+  <script>
+    /* Live stat drift */
+    (function() {
+      const reposEl = document.getElementById('stat-repos');
+      const workersEl = document.getElementById('stat-workers');
+      let repos = 1825, workers = 75;
+      setInterval(() => {
+        repos = Math.max(1820, Math.min(1840, repos + (Math.random() > 0.85 ? 1 : 0)));
+        workers = Math.max(74, Math.min(80, workers + (Math.random() > 0.8 ? (Math.random() > 0.5 ? 1 : -1) : 0)));
+        reposEl.textContent = repos.toLocaleString();
+        workersEl.textContent = workers + '+';
+      }, 6000);
+    })();
+  </script>
 
 </body>
 </html>
