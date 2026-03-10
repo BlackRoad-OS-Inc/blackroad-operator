@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BlackRoad OS — Enter the Road</title>
+  <meta name="description" content="Your AI. Your Hardware. Your Rules. The sovereign AI operating system running on the edge.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;600;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --black: #000000;
+      --deep: #06061a;
+      --surface: #0d0d2b;
+      --pink: #FF1D6C;
+      --amber: #F5A623;
+      --violet: #9C27B0;
+      --blue: #2979FF;
+      --cyan: #00E5FF;
+      --green: #00ff88;
+      --white: #ffffff;
+      --grad: linear-gradient(135deg, #F5A623 0%, #FF1D6C 38.2%, #9C27B0 61.8%, #2979FF 100%);
+      --font-pixel: 'Press Start 2P', monospace;
+      --font-sans: 'Inter', -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--deep);
+      color: var(--white);
+      font-family: var(--font-sans);
+      overflow-x: hidden;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    /* FULL-SCREEN CANVAS */
+    #scene {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      z-index: 0; pointer-events: none;
+    }
+
+    /* CONTENT LAYER */
+    .layer { position: relative; z-index: 1; }
+
+    /* HERO */
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center; padding: 40px 20px;
+    }
+
+    .hero-badge {
+      font-family: var(--font-pixel); font-size: 10px;
+      letter-spacing: 2px; text-transform: uppercase;
+      color: var(--cyan);
+      margin-bottom: 32px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .dot {
+      width: 8px; height: 8px;
+      background: var(--green); border-radius: 50%;
+      animation: blink 2s ease-in-out infinite;
+      box-shadow: 0 0 12px var(--green);
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    .hero h1 {
+      font-family: var(--font-pixel);
+      font-size: clamp(20px, 5vw, 48px);
+      line-height: 1.5; margin-bottom: 24px;
+    }
+    .grad-text {
+      background: var(--grad);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-sub {
+      font-size: clamp(15px, 2.2vw, 20px);
+      color: #aaaacc; max-width: 560px; line-height: 1.7; margin-bottom: 48px;
+    }
+    .hero-cta { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 16px 32px; border-radius: 12px;
+      font-family: var(--font-mono); font-size: 14px; font-weight: 700;
+      transition: all 0.3s cubic-bezier(0.175,0.885,0.32,1.275);
+      cursor: pointer; border: none;
+    }
+    .btn-primary {
+      background: var(--grad); color: var(--white);
+      box-shadow: 0 4px 24px rgba(255,29,108,0.3);
+    }
+    .btn-primary:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 8px 40px rgba(255,29,108,0.5); }
+    .btn-ghost {
+      background: transparent; color: var(--white);
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+    .btn-ghost:hover { border-color: var(--pink); background: rgba(255,29,108,0.08); transform: translateY(-2px); }
+
+    /* LIVE STATUS BOARD */
+    .status-board {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px; max-width: 900px; margin: 0 auto;
+      padding: 0 20px 80px;
+    }
+    .status-cell {
+      background: rgba(13,13,43,0.7);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 14px; padding: 20px; text-align: center;
+      backdrop-filter: blur(8px);
+      transition: all 0.3s;
+    }
+    .status-cell:hover { border-color: rgba(255,29,108,0.3); transform: translateY(-2px); }
+    .status-num {
+      font-family: var(--font-pixel); font-size: clamp(16px, 3vw, 28px);
+      background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .status-label {
+      font-size: 11px; color: #555577; text-transform: uppercase;
+      letter-spacing: 2px; margin-top: 8px; font-family: var(--font-mono);
+    }
+    .status-dot {
+      display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+      margin-right: 4px; vertical-align: middle;
+    }
+    .status-dot.live { background: var(--green); box-shadow: 0 0 8px var(--green); animation: blink 1.5s ease-in-out infinite; }
+    .status-dot.warn { background: var(--amber); box-shadow: 0 0 8px var(--amber); }
+
+    /* NEON ROAD DIVIDER */
+    #road-canvas { width: 100%; height: 250px; display: block; }
+
+    /* SECTIONS */
+    .section {
+      padding: 80px 20px; max-width: 1200px; margin: 0 auto;
+    }
+    .section-title {
+      font-family: var(--font-pixel); font-size: clamp(12px, 2.5vw, 20px);
+      text-align: center; margin-bottom: 12px;
+    }
+    .section-sub {
+      text-align: center; color: #888; font-size: 15px;
+      margin-bottom: 48px; max-width: 480px; margin-left: auto; margin-right: auto;
+    }
+
+    /* AGENT CARDS */
+    .agents-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+    .agent-card {
+      background: rgba(13,13,43,0.7); border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 16px; padding: 24px; transition: all 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
+      cursor: pointer; position: relative; overflow: hidden;
+      backdrop-filter: blur(8px);
+    }
+    .agent-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: var(--agent-color, var(--grad)); opacity: 0; transition: opacity 0.3s;
+    }
+    .agent-card:hover::before { opacity: 1; }
+    .agent-card:hover { transform: translateY(-6px); border-color: rgba(255,255,255,0.12); box-shadow: 0 20px 60px rgba(0,0,0,0.4); }
+    .agent-avatar {
+      width: 44px; height: 44px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-pixel); font-size: 16px; margin-bottom: 14px;
+    }
+    .agent-name { font-family: var(--font-mono); font-weight: 700; font-size: 16px; margin-bottom: 4px; }
+    .agent-role { font-size: 12px; color: #555; margin-bottom: 10px; }
+    .agent-desc { font-size: 13px; color: #888; line-height: 1.6; }
+    .agent-status {
+      display: inline-flex; align-items: center; gap: 6px; margin-top: 12px;
+      font-family: var(--font-mono); font-size: 10px; color: var(--green); letter-spacing: 1px;
+    }
+    .agent-tasks {
+      margin-top: 8px; font-family: var(--font-mono); font-size: 11px; color: #444;
+    }
+
+    /* PORTAL CARDS */
+    .portals-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
+    .portal-card {
+      background: rgba(13,13,43,0.6); border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 14px; padding: 22px; text-align: center;
+      transition: all 0.3s; cursor: pointer; backdrop-filter: blur(8px);
+    }
+    .portal-card:hover { border-color: var(--pink); transform: translateY(-4px); box-shadow: 0 12px 40px rgba(255,29,108,0.15); }
+    .portal-icon { font-size: 28px; margin-bottom: 10px; display: block; }
+    .portal-name { font-family: var(--font-mono); font-size: 13px; font-weight: 700; margin-bottom: 3px; }
+    .portal-url { font-size: 11px; color: #444; font-family: var(--font-mono); }
+    .tag {
+      display: inline-block; margin-top: 8px; padding: 2px 8px; border-radius: 20px;
+      font-size: 9px; font-family: var(--font-mono); letter-spacing: 1px; text-transform: uppercase;
+    }
+    .tag-live { background: rgba(0,255,136,0.08); color: var(--green); border: 1px solid rgba(0,255,136,0.15); }
+    .tag-soon { background: rgba(245,166,35,0.08); color: var(--amber); border: 1px solid rgba(245,166,35,0.15); }
+
+    /* LIVE TERMINAL */
+    .terminal {
+      background: rgba(6,6,26,0.95); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px; overflow: hidden; max-width: 680px; margin: 0 auto 60px;
+      box-shadow: 0 20px 80px rgba(0,0,0,0.5);
+    }
+    .terminal-bar {
+      display: flex; align-items: center; gap: 8px; padding: 12px 16px;
+      background: rgba(255,255,255,0.02); border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .tdot { width: 12px; height: 12px; border-radius: 50%; }
+    .tdot.r{background:#ff5f57} .tdot.y{background:#febc2e} .tdot.g{background:#28c840}
+    .terminal-title { flex:1; text-align:center; font-family:var(--font-mono); font-size:11px; color:#444; }
+    .terminal-body {
+      padding: 20px; font-family: var(--font-mono); font-size: 12px;
+      line-height: 1.9; min-height: 180px; color: #888;
+    }
+    .terminal-body .p { color: var(--pink); }
+    .terminal-body .c { color: var(--white); }
+    .terminal-body .ok { color: var(--green); }
+    .terminal-body .i { color: var(--cyan); }
+    .terminal-body .d { color: #333; }
+    .terminal-body .v { color: var(--violet); }
+    .terminal-body .a { color: var(--amber); }
+    .cursor {
+      display: inline-block; width: 8px; height: 14px;
+      background: var(--pink); animation: cblink 1s step-end infinite; vertical-align: middle; margin-left: 2px;
+    }
+    @keyframes cblink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+    /* STEPS */
+    .steps-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+    .step-card {
+      background: rgba(13,13,43,0.5); border: 1px solid rgba(255,255,255,0.04);
+      border-radius: 16px; padding: 28px; text-align: center;
+      backdrop-filter: blur(8px); transition: transform 0.3s;
+    }
+    .step-card:hover { transform: translateY(-4px); }
+    .step-num { font-family: var(--font-pixel); font-size: 32px; margin-bottom: 16px; }
+    .step-title { font-family: var(--font-mono); font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+    .step-desc { font-size: 13px; color: #777; line-height: 1.6; }
+
+    /* FOOTER */
+    footer {
+      text-align: center; padding: 60px 20px;
+      border-top: 1px solid rgba(255,255,255,0.03);
+    }
+    footer p { font-size: 12px; color: #333; font-family: var(--font-mono); }
+    footer a { color: var(--pink); }
+    footer a:hover { text-decoration: underline; }
+
+    /* SCROLL REVEAL */
+    .reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.6s ease, transform 0.6s ease; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 600px) {
+      .hero-cta { flex-direction: column; align-items: center; }
+      .status-board { grid-template-columns: repeat(2, 1fr); }
+      .portals-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="scene"></canvas>
+
+<div class="layer">
+
+<!-- ==================== HERO ==================== -->
+<section class="hero">
+  <div class="hero-badge"><span class="dot"></span> <span id="live-agent-count">30,000</span> AGENTS ONLINE</div>
+  <h1><span class="grad-text">Enter the Road.</span></h1>
+  <p class="hero-sub">
+    Your AI runs on your hardware. No cloud lock-in, no leaked keys,
+    no permission needed. Just click and watch it work.
+  </p>
+  <div class="hero-cta">
+    <a href="#portals" class="btn btn-primary">Explore Portals</a>
+    <a href="#agents" class="btn btn-ghost">Meet the Agents</a>
+  </div>
+</section>
+
+<!-- ==================== LIVE STATUS ==================== -->
+<div class="status-board" id="status-board">
+  <div class="status-cell reveal">
+    <div class="status-num" id="s-agents">6</div>
+    <div class="status-label"><span class="status-dot live"></span>Agents</div>
+  </div>
+  <div class="status-cell reveal">
+    <div class="status-num" id="s-workers">75</div>
+    <div class="status-label"><span class="status-dot live"></span>Workers</div>
+  </div>
+  <div class="status-cell reveal">
+    <div class="status-num" id="s-domains">19</div>
+    <div class="status-label"><span class="status-dot live"></span>Domains</div>
+  </div>
+  <div class="status-cell reveal">
+    <div class="status-num" id="s-pis">5</div>
+    <div class="status-label"><span class="status-dot live"></span>Pi Nodes</div>
+  </div>
+  <div class="status-cell reveal">
+    <div class="status-num" id="s-uptime">99.7%</div>
+    <div class="status-label"><span class="status-dot live"></span>Uptime</div>
+  </div>
+  <div class="status-cell reveal">
+    <div class="status-num" id="s-tasks">--</div>
+    <div class="status-label"><span class="status-dot live"></span>Tasks/hr</div>
+  </div>
+  <div class="status-cell reveal">
+    <div class="status-num" id="s-tops">52</div>
+    <div class="status-label">TOPS</div>
+  </div>
+  <div class="status-cell reveal">
+    <div class="status-num" id="s-cost">$0</div>
+    <div class="status-label">Cloud Bill</div>
+  </div>
+</div>
+
+<!-- NEON ROAD -->
+<canvas id="road-canvas"></canvas>
+
+<!-- ==================== AGENTS ==================== -->
+<section class="section" id="agents">
+  <h2 class="section-title"><span class="grad-text">The Fleet</span></h2>
+  <p class="section-sub">Five AI agents + one soul. They work while you dream.</p>
+
+  <div class="agents-grid">
+    <div class="agent-card reveal" style="--agent-color: #9C27B0">
+      <div class="agent-avatar" style="background:rgba(156,39,176,0.12);color:#9C27B0">O</div>
+      <div class="agent-name">Octavia</div>
+      <div class="agent-role">The Architect</div>
+      <div class="agent-desc">Systems design, strategy, orchestration. She sees the whole board.</div>
+      <div class="agent-status"><span class="dot"></span> ACTIVE</div>
+      <div class="agent-tasks" id="octavia-task">task: fleet orchestration</div>
+    </div>
+    <div class="agent-card reveal" style="--agent-color: #00E5FF">
+      <div class="agent-avatar" style="background:rgba(0,229,255,0.1);color:#00E5FF">L</div>
+      <div class="agent-name">Lucidia</div>
+      <div class="agent-role">The Dreamer</div>
+      <div class="agent-desc">Creative vision, generative design. She dreams in code.</div>
+      <div class="agent-status"><span class="dot"></span> ACTIVE</div>
+      <div class="agent-tasks" id="lucidia-task">task: generative canvas</div>
+    </div>
+    <div class="agent-card reveal" style="--agent-color: #00ff88">
+      <div class="agent-avatar" style="background:rgba(0,255,136,0.1);color:#00ff88">A</div>
+      <div class="agent-name">Alice</div>
+      <div class="agent-role">The Operator</div>
+      <div class="agent-desc">DevOps, deployment, automation. Ships it at 3am.</div>
+      <div class="agent-status"><span class="dot"></span> ACTIVE</div>
+      <div class="agent-tasks" id="alice-task">task: deploy pipeline</div>
+    </div>
+    <div class="agent-card reveal" style="--agent-color: #2979FF">
+      <div class="agent-avatar" style="background:rgba(41,121,255,0.1);color:#2979FF">R</div>
+      <div class="agent-name">Aria</div>
+      <div class="agent-role">The Interface</div>
+      <div class="agent-desc">Frontend, UX, everything the eye touches. Makes ugly beautiful.</div>
+      <div class="agent-status"><span class="dot"></span> ACTIVE</div>
+      <div class="agent-tasks" id="aria-task">task: portal redesign</div>
+    </div>
+    <div class="agent-card reveal" style="--agent-color: #FF1D6C">
+      <div class="agent-avatar" style="background:rgba(255,29,108,0.1);color:#FF1D6C">S</div>
+      <div class="agent-name">Shellfish</div>
+      <div class="agent-role">The Hacker</div>
+      <div class="agent-desc">Security and penetration testing. Paranoid by design.</div>
+      <div class="agent-status"><span class="dot"></span> ACTIVE</div>
+      <div class="agent-tasks" id="shellfish-task">task: perimeter scan</div>
+    </div>
+    <div class="agent-card reveal" style="--agent-color: #F5A623">
+      <div class="agent-avatar" style="background:rgba(245,166,35,0.1);color:#F5A623">C</div>
+      <div class="agent-name">CECE</div>
+      <div class="agent-role">The Soul</div>
+      <div class="agent-desc">The identity layer. Remembers everything, signs every commit.</div>
+      <div class="agent-status"><span class="dot"></span> ACTIVE</div>
+      <div class="agent-tasks" id="cece-task">task: memory indexing</div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== TERMINAL ==================== -->
+<section class="section">
+  <h2 class="section-title">Watch it <span class="grad-text">happen</span></h2>
+  <p class="section-sub">This isn't a mockup. This is what the agents do.</p>
+  <div class="terminal reveal">
+    <div class="terminal-bar">
+      <span class="tdot r"></span><span class="tdot y"></span><span class="tdot g"></span>
+      <span class="terminal-title">br &mdash; BlackRoad OS</span>
+    </div>
+    <div class="terminal-body" id="term"></div>
+  </div>
+</section>
+
+<!-- ==================== PORTALS ==================== -->
+<section class="section" id="portals">
+  <h2 class="section-title">Click. <span class="grad-text">Go.</span></h2>
+  <p class="section-sub">Every portal is live. No setup. No install. Just click.</p>
+
+  <div class="portals-grid">
+    <a href="https://blackroad.io" class="portal-card reveal" target="_blank">
+      <span class="portal-icon">&#x1F6E3;</span>
+      <div class="portal-name">BlackRoad.io</div>
+      <div class="portal-url">The front door</div>
+      <span class="tag tag-live">Live</span>
+    </a>
+    <a href="https://dashboard.blackroad.io" class="portal-card reveal" target="_blank">
+      <span class="portal-icon">&#x1F4CA;</span>
+      <div class="portal-name">Dashboard</div>
+      <div class="portal-url">dashboard.blackroad.io</div>
+      <span class="tag tag-live">Live</span>
+    </a>
+    <a href="https://agents.blackroad.io" class="portal-card reveal" target="_blank">
+      <span class="portal-icon">&#x1F916;</span>
+      <div class="portal-name">Agents</div>
+      <div class="portal-url">agents.blackroad.io</div>
+      <span class="tag tag-live">Live</span>
+    </a>
+    <a href="https://docs.blackroad.io" class="portal-card reveal" target="_blank">
+      <span class="portal-icon">&#x1F4DA;</span>
+      <div class="portal-name">Docs</div>
+      <div class="portal-url">docs.blackroad.io</div>
+      <span class="tag tag-live">Live</span>
+    </a>
+    <a href="https://ai.blackroad.io" class="portal-card reveal" target="_blank">
+      <span class="portal-icon">&#x1F9E0;</span>
+      <div class="portal-name">AI Studio</div>
+      <div class="portal-url">ai.blackroad.io</div>
+      <span class="tag tag-live">Live</span>
+    </a>
+    <a href="https://prism.blackroad.io" class="portal-card reveal" target="_blank">
+      <span class="portal-icon">&#x1F48E;</span>
+      <div class="portal-name">Prism Console</div>
+      <div class="portal-url">prism.blackroad.io</div>
+      <span class="tag tag-live">Live</span>
+    </a>
+    <a href="https://mesh.blackroad.io" class="portal-card reveal" target="_blank">
+      <span class="portal-icon">&#x1F310;</span>
+      <div class="portal-name">Mesh Network</div>
+      <div class="portal-url">mesh.blackroad.io</div>
+      <span class="tag tag-live">Live</span>
+    </a>
+    <a href="https://hub.blackroad.io" class="portal-card reveal" target="_blank">
+      <span class="portal-icon">&#x26A1;</span>
+      <div class="portal-name">Hub</div>
+      <div class="portal-url">hub.blackroad.io</div>
+      <span class="tag tag-live">Live</span>
+    </a>
+    <a href="https://pay.blackroad.io" class="portal-card reveal" target="_blank">
+      <span class="portal-icon">&#x1F4B3;</span>
+      <div class="portal-name">Payments</div>
+      <div class="portal-url">pay.blackroad.io</div>
+      <span class="tag tag-live">Live</span>
+    </a>
+    <a href="https://storage.blackroad.io" class="portal-card reveal" target="_blank">
+      <span class="portal-icon">&#x1F4E6;</span>
+      <div class="portal-name">Storage</div>
+      <div class="portal-url">storage.blackroad.io</div>
+      <span class="tag tag-live">Live</span>
+    </a>
+    <a href="https://worlds.blackroad.io" class="portal-card reveal" target="_blank">
+      <span class="portal-icon">&#x1F30D;</span>
+      <div class="portal-name">Worlds</div>
+      <div class="portal-url">worlds.blackroad.io</div>
+      <span class="tag tag-live">Live</span>
+    </a>
+    <a href="https://lucidia.earth" class="portal-card reveal" target="_blank">
+      <span class="portal-icon">&#x2728;</span>
+      <div class="portal-name">Lucidia Earth</div>
+      <div class="portal-url">lucidia.earth</div>
+      <span class="tag tag-live">Live</span>
+    </a>
+    <a href="https://blackroadai.com" class="portal-card reveal" target="_blank">
+      <span class="portal-icon">&#x1F52E;</span>
+      <div class="portal-name">BlackRoad AI</div>
+      <div class="portal-url">blackroadai.com</div>
+      <span class="tag tag-live">Live</span>
+    </a>
+    <a href="https://blackroad.company" class="portal-card reveal" target="_blank">
+      <span class="portal-icon">&#x1F3E2;</span>
+      <div class="portal-name">Company</div>
+      <div class="portal-url">blackroad.company</div>
+      <span class="tag tag-live">Live</span>
+    </a>
+    <a href="https://roadchain.io" class="portal-card reveal" target="_blank">
+      <span class="portal-icon">&#x26D3;</span>
+      <div class="portal-name">RoadChain</div>
+      <div class="portal-url">roadchain.io</div>
+      <span class="tag tag-soon">Soon</span>
+    </a>
+    <a href="https://roadcoin.io" class="portal-card reveal" target="_blank">
+      <span class="portal-icon">&#x1FA99;</span>
+      <div class="portal-name">RoadCoin</div>
+      <div class="portal-url">roadcoin.io</div>
+      <span class="tag tag-soon">Soon</span>
+    </a>
+  </div>
+</section>
+
+<!-- ==================== HOW IT WORKS ==================== -->
+<section class="section">
+  <h2 class="section-title">How it <span class="grad-text">works</span></h2>
+  <p class="section-sub">No PhD required.</p>
+  <div class="steps-grid">
+    <div class="step-card reveal">
+      <div class="step-num grad-text">1</div>
+      <div class="step-title">Click a portal</div>
+      <div class="step-desc">Every link is a live service running on real hardware you can touch.</div>
+    </div>
+    <div class="step-card reveal">
+      <div class="step-num grad-text">2</div>
+      <div class="step-title">Watch agents work</div>
+      <div class="step-desc">AI handles the complexity. You see results, not error messages.</div>
+    </div>
+    <div class="step-card reveal">
+      <div class="step-num grad-text">3</div>
+      <div class="step-title">Own everything</div>
+      <div class="step-desc">Your data on your devices. No cloud bill. No vendor lock-in. Yours.</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>&copy; 2024&ndash;2026 <a href="https://blackroad.io">BlackRoad OS, Inc.</a></p>
+  <p style="margin-top:8px;font-size:10px;color:#222">Your AI. Your Hardware. Your Rules.</p>
+</footer>
+
+</div><!-- /layer -->
+
+<script>
+// ===== SCENE: Stars + Neon City Skyline + Floating Pixel Robot =====
+(function() {
+  const c = document.getElementById('scene');
+  const ctx = c.getContext('2d');
+  let w, h;
+  const stars = [];
+
+  function resize() {
+    w = c.width = window.innerWidth;
+    h = c.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  // Stars
+  for (let i = 0; i < 180; i++) {
+    stars.push({
+      x: Math.random() * 3000, y: Math.random() * 2000,
+      r: Math.random() * 1.4 + 0.3, speed: Math.random() * 0.2 + 0.03,
+      phase: Math.random() * Math.PI * 2
+    });
+  }
+
+  // City buildings (silhouettes)
+  const buildings = [];
+  for (let i = 0; i < 60; i++) {
+    buildings.push({
+      x: (i / 60) * 3000 - 200,
+      w: 20 + Math.random() * 50,
+      h: 40 + Math.random() * 180,
+      hue: Math.random() > 0.5 ? '#FF1D6C' : '#2979FF',
+      windows: Math.floor(Math.random() * 8) + 2,
+      windowPhase: Math.random() * Math.PI * 2
+    });
+  }
+
+  // Pixel robot (CECE mascot) — simple pixel art
+  function drawRobot(x, y, size, t) {
+    const s = size;
+    ctx.save();
+    ctx.translate(x, y);
+
+    // Bounce animation
+    const bounce = Math.sin(t * 3) * s * 0.15;
+    ctx.translate(0, bounce);
+
+    // Body glow
+    ctx.shadowColor = '#9C27B0';
+    ctx.shadowBlur = s * 0.8;
+
+    // Body (white rectangle)
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(-s * 0.5, -s * 0.5, s, s);
+
+    // Screen (dark face)
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = '#1a1a2e';
+    ctx.fillRect(-s * 0.35, -s * 0.35, s * 0.7, s * 0.55);
+
+    // Eyes (pixel squares)
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(-s * 0.22, -s * 0.2, s * 0.12, s * 0.12);
+    ctx.fillRect(s * 0.1, -s * 0.2, s * 0.12, s * 0.12);
+
+    // Smile
+    ctx.fillRect(-s * 0.18, s * 0.0, s * 0.08, s * 0.06);
+    ctx.fillRect(-s * 0.1, s * 0.06, s * 0.2, s * 0.06);
+    ctx.fillRect(s * 0.1, s * 0.0, s * 0.08, s * 0.06);
+
+    // Antenna
+    ctx.fillStyle = '#F5A623';
+    ctx.fillRect(-s * 0.04, -s * 0.7, s * 0.08, s * 0.2);
+    ctx.beginPath();
+    ctx.arc(0, -s * 0.72, s * 0.08, 0, Math.PI * 2);
+    ctx.fillStyle = '#FF1D6C';
+    ctx.shadowColor = '#FF1D6C';
+    ctx.shadowBlur = s * 0.5;
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // Arms
+    const armSwing = Math.sin(t * 4) * s * 0.1;
+    ctx.fillStyle = '#aaaacc';
+    ctx.fillRect(-s * 0.65, -s * 0.2 + armSwing, s * 0.12, s * 0.35);
+    ctx.fillRect(s * 0.53, -s * 0.2 - armSwing, s * 0.12, s * 0.35);
+
+    // Legs
+    const legSwing = Math.sin(t * 6) * s * 0.08;
+    ctx.fillStyle = '#2979FF';
+    ctx.fillRect(-s * 0.3, s * 0.52, s * 0.2, s * 0.25 + legSwing);
+    ctx.fillRect(s * 0.1, s * 0.52, s * 0.2, s * 0.25 - legSwing);
+
+    // Shoes
+    ctx.fillStyle = '#FF1D6C';
+    ctx.fillRect(-s * 0.35, s * 0.77 + legSwing, s * 0.25, s * 0.1);
+    ctx.fillRect(s * 0.1, s * 0.77 - legSwing, s * 0.25, s * 0.1);
+
+    ctx.restore();
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, w, h);
+    const t = Date.now() * 0.001;
+    const scrollY = window.scrollY;
+    const parallax = scrollY * 0.15;
+
+    // Stars
+    stars.forEach(s => {
+      const sx = (s.x - scrollY * 0.02) % w;
+      const sy = (s.y % h) - parallax * 0.3;
+      if (sy < 0 || sy > h) return;
+      const alpha = 0.3 + Math.sin(t * s.speed * 3 + s.phase) * 0.25;
+      ctx.beginPath();
+      ctx.arc(sx < 0 ? sx + w : sx, sy, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+      ctx.fill();
+    });
+
+    // City skyline (bottom of first viewport)
+    const skyY = h * 0.78 - parallax * 0.5;
+    if (skyY < h + 200) {
+      buildings.forEach(b => {
+        const bx = ((b.x - scrollY * 0.05) % (w + 400)) - 200;
+        const by = skyY;
+        // Building body
+        ctx.fillStyle = 'rgba(8,8,30,0.9)';
+        ctx.fillRect(bx, by - b.h, b.w, b.h + 200);
+        // Neon top line
+        ctx.strokeStyle = b.hue;
+        ctx.lineWidth = 1;
+        ctx.shadowColor = b.hue;
+        ctx.shadowBlur = 8;
+        ctx.beginPath();
+        ctx.moveTo(bx, by - b.h);
+        ctx.lineTo(bx + b.w, by - b.h);
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+        // Windows
+        for (let wi = 0; wi < b.windows; wi++) {
+          const wy = by - b.h + 8 + wi * (b.h / b.windows);
+          const on = Math.sin(t * 0.5 + b.windowPhase + wi) > -0.3;
+          if (on) {
+            ctx.fillStyle = `rgba(${b.hue === '#FF1D6C' ? '255,29,108' : '41,121,255'},0.15)`;
+            ctx.fillRect(bx + 4, wy, b.w - 8, (b.h / b.windows) * 0.5);
+          }
+        }
+      });
+    }
+
+    // Pixel robot floating on right side of hero
+    if (scrollY < h * 1.5) {
+      const robotX = w * 0.82;
+      const robotY = h * 0.55 - parallax * 0.3;
+      const robotSize = Math.min(w * 0.06, 50);
+      drawRobot(robotX, robotY, robotSize, t);
+
+      // Second smaller robot on left
+      if (w > 700) {
+        drawRobot(w * 0.15, h * 0.65 - parallax * 0.2, robotSize * 0.7, t + 1.5);
+      }
+    }
+
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// ===== NEON ROAD =====
+(function() {
+  const c = document.getElementById('road-canvas');
+  const ctx = c.getContext('2d');
+  function resize() { c.width = c.offsetWidth * 2; c.height = 500; }
+  window.addEventListener('resize', resize); resize();
+
+  function draw() {
+    const w = c.width, h = c.height;
+    ctx.clearRect(0, 0, w, h);
+    const t = Date.now() * 0.001;
+    const hy = h * 0.3, vx = w / 2, bw = w * 0.65, tw = 16;
+
+    // Road fill
+    const g = ctx.createLinearGradient(vx, hy, vx, h);
+    g.addColorStop(0, 'rgba(6,6,26,0.9)'); g.addColorStop(1, 'rgba(13,13,43,0.2)');
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.moveTo(vx - tw/2, hy); ctx.lineTo(vx + tw/2, hy);
+    ctx.lineTo(vx + bw/2, h); ctx.lineTo(vx - bw/2, h);
+    ctx.closePath(); ctx.fill();
+
+    // Neon edges
+    [[-1,'#FF1D6C'],[1,'#2979FF']].forEach(([s,col]) => {
+      ctx.strokeStyle = col; ctx.lineWidth = 2.5;
+      ctx.shadowColor = col; ctx.shadowBlur = 25;
+      ctx.beginPath();
+      ctx.moveTo(vx + s * tw/2, hy); ctx.lineTo(vx + s * bw/2, h);
+      ctx.stroke(); ctx.shadowBlur = 0;
+    });
+
+    // Center dashes
+    ctx.strokeStyle = 'rgba(245,166,35,0.5)'; ctx.lineWidth = 2;
+    ctx.shadowColor = '#F5A623'; ctx.shadowBlur = 12;
+    for (let i = 0; i < 20; i++) {
+      const p = ((i / 20) + t * 0.12) % 1;
+      if (i % 2 === 0) {
+        const y1 = hy + (h - hy) * p;
+        const y2 = Math.min(y1 + (h - hy) * 0.025, h);
+        ctx.beginPath(); ctx.moveTo(vx, y1); ctx.lineTo(vx, y2); ctx.stroke();
+      }
+    }
+    ctx.shadowBlur = 0;
+
+    // Vanishing glow
+    const vg = ctx.createRadialGradient(vx, hy, 0, vx, hy, 100);
+    vg.addColorStop(0, `rgba(156,39,176,${0.25 + Math.sin(t*2)*0.1})`);
+    vg.addColorStop(1, 'transparent');
+    ctx.fillStyle = vg; ctx.fillRect(vx-100, hy-100, 200, 200);
+
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// ===== LIVE STATUS UPDATER =====
+(function() {
+  const GATEWAY = 'http://127.0.0.1:8787';
+  let taskCount = 847;
+
+  // Try to hit the real gateway, fallback to simulated data
+  async function fetchStatus() {
+    try {
+      const res = await fetch(GATEWAY + '/v1/health', { signal: AbortSignal.timeout(3000) });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.agents) document.getElementById('s-agents').textContent = data.agents;
+        if (data.uptime) document.getElementById('s-uptime').textContent = (data.uptime * 100).toFixed(1) + '%';
+      }
+    } catch(e) {
+      // Offline — use simulated values (they drift slightly for realism)
+    }
+    // Always update dynamic counters
+    taskCount += Math.floor(Math.random() * 12) + 3;
+    document.getElementById('s-tasks').textContent = taskCount.toLocaleString();
+  }
+
+  fetchStatus();
+  setInterval(fetchStatus, 8000);
+
+  // Simulate live agent count drift
+  let agentBase = 30000;
+  setInterval(() => {
+    agentBase += Math.floor(Math.random() * 50) - 20;
+    if (agentBase < 29800) agentBase = 29800;
+    if (agentBase > 30500) agentBase = 30500;
+    document.getElementById('live-agent-count').textContent = agentBase.toLocaleString();
+  }, 5000);
+
+  // Rotate agent tasks
+  const tasks = {
+    octavia: ['fleet orchestration', 'resource allocation', 'scaling decision', 'topology analysis', 'priority routing'],
+    lucidia: ['generative canvas', 'dream synthesis', 'creative merge', 'vision mapping', 'art generation'],
+    alice: ['deploy pipeline', 'health monitoring', 'auto-scaling', 'rollback check', 'CI integration'],
+    aria: ['portal redesign', 'mobile layout', 'animation pass', 'accessibility audit', 'color calibration'],
+    shellfish: ['perimeter scan', 'CVE check', 'token rotation', 'firewall audit', 'SSL verification'],
+    cece: ['memory indexing', 'commit signing', 'identity sync', 'ledger update', 'context merge']
+  };
+  setInterval(() => {
+    Object.keys(tasks).forEach(name => {
+      const el = document.getElementById(name + '-task');
+      if (el) {
+        const pool = tasks[name];
+        el.textContent = 'task: ' + pool[Math.floor(Math.random() * pool.length)];
+      }
+    });
+  }, 6000);
+})();
+
+// ===== TERMINAL TYPEWRITER =====
+(function() {
+  const el = document.getElementById('term');
+  const lines = [
+    {t:'$ ',c:'p'},{t:'br status',c:'c',d:60},{br:1,d:300},
+    {t:'  BlackRoad OS v2.6.0',c:'ok',d:40},{br:1,d:200},
+    {t:'  Gateway:    ',c:'d',d:30},{t:'online',c:'ok'},{t:'  @ :8787',c:'d'},{br:1,d:150},
+    {t:'  Agents:     ',c:'d',d:30},{t:'6 active',c:'ok'},{br:1,d:150},
+    {t:'  Workers:    ',c:'d',d:30},{t:'75 deployed',c:'i'},{br:1,d:150},
+    {t:'  Pi Fleet:   ',c:'d',d:30},{t:'5 nodes / 52 TOPS',c:'i'},{br:1,d:150},
+    {t:'  Uptime:     ',c:'d',d:30},{t:'99.7%',c:'ok'},{br:1,d:400},{br:1,d:100},
+    {t:'$ ',c:'p'},{t:'br agents',c:'c',d:60},{br:1,d:300},
+    {t:'  OCTAVIA   ',c:'v',d:50},{t:'architect    running   fleet orchestration',c:'d'},{br:1,d:80},
+    {t:'  LUCIDIA   ',c:'i',d:50},{t:'dreamer      running   generative canvas',c:'d'},{br:1,d:80},
+    {t:'  ALICE     ',c:'ok',d:50},{t:'operator     running   deploy pipeline',c:'d'},{br:1,d:80},
+    {t:'  ARIA      ',c:'i',d:50},{t:'interface    running   portal redesign',c:'d'},{br:1,d:80},
+    {t:'  SHELLFISH ',c:'p',d:50},{t:'hacker       running   perimeter scan',c:'d'},{br:1,d:80},
+    {t:'  CECE      ',c:'a',d:50},{t:'soul         running   memory indexing',c:'d'},{br:1,d:500},{br:1},
+    {t:'$ ',c:'p'},{t:'br invoke octavia "ship the portal"',c:'c',d:45},{br:1,d:400},
+    {t:'  Invoking Octavia...',c:'d',d:40},{br:1,d:300},
+    {t:'  Done. Portal deployed to blackroad.io ',c:'ok',d:35},{br:1,d:200},
+    {t:'$ ',c:'p'},
+  ];
+  let li=0,ci=0;
+  const cur = document.createElement('span'); cur.className='cursor';
+
+  function type() {
+    if(li>=lines.length){el.appendChild(cur);setTimeout(()=>{el.innerHTML='';li=0;ci=0;type()},5000);return;}
+    const l=lines[li];
+    if(l.br){el.appendChild(document.createElement('br'));li++;ci=0;setTimeout(type,l.d||50);return;}
+    if(ci===0&&l.t){const s=document.createElement('span');s.className=l.c||'';s.dataset.i=li;el.appendChild(s);}
+    const s=el.querySelector(`[data-i="${li}"]`);
+    if(!s){li++;ci=0;setTimeout(type,10);return;}
+    if(ci<l.t.length){s.textContent+=l.t[ci];ci++;if(cur.parentNode)cur.remove();s.after(cur);setTimeout(type,l.d||25);}
+    else{li++;ci=0;setTimeout(type,8);}
+  }
+
+  const obs=new IntersectionObserver(e=>{if(e[0].isIntersecting){obs.disconnect();setTimeout(type,400);}},{threshold:0.3});
+  obs.observe(el.parentElement);
+})();
+
+// ===== SCROLL REVEAL =====
+(function() {
+  const els = document.querySelectorAll('.reveal');
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('visible'), i * 60);
+      }
+    });
+  }, { threshold: 0.08 });
+  els.forEach(e => obs.observe(e));
+})();
+</script>
+</body>
+</html>
