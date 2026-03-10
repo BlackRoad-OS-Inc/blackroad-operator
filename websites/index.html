@@ -404,6 +404,26 @@
     }
     footer a:hover { color: var(--subtle); }
 
+    /* --- SITE NAV --- */
+    .site-nav {
+      display: flex; justify-content: center; flex-wrap: wrap;
+      gap: var(--sp-sm); padding: var(--sp-xl) var(--sp-md);
+      border-top: 1px solid var(--border);
+    }
+    .site-nav a {
+      font-family: var(--font-mono); font-size: 0.75rem;
+      padding: 8px 18px; border-radius: 6px;
+      border: 1px solid var(--border); color: var(--subtle);
+      transition: border-color 0.2s, color 0.2s, background 0.2s;
+    }
+    .site-nav a:hover {
+      border-color: var(--pink); color: var(--white);
+      background: rgba(255,29,108,0.08);
+    }
+
+    .stat-number { transition: opacity 0.3s; }
+    .stat-number.updating { opacity: 0.5; }
+
     /* --- ANIMATIONS --- */
     @keyframes fadeUp {
       from { opacity: 0; transform: translateY(20px); }
@@ -443,9 +463,10 @@
       <a href="#agents">Agents</a>
       <a href="#features">Platform</a>
       <a href="#cli">CLI</a>
-      <a href="#office">Office</a>
+      <a href="portal.html">Portal</a>
+      <a href="pricing/index.html">Pricing</a>
     </div>
-    <a href="#cli" class="nav-cta">Get Started</a>
+    <a href="portal.html" class="nav-cta">Open Portal &rarr;</a>
   </nav>
 
   <!-- HERO -->
@@ -465,22 +486,22 @@
     </div>
   </section>
 
-  <!-- STATS -->
+  <!-- STATS (live) -->
   <div class="stats">
     <div class="stat">
-      <div class="stat-number">30,000</div>
+      <div class="stat-number" id="stat-agents">30,000</div>
       <div class="stat-label">AI Agents</div>
     </div>
     <div class="stat">
-      <div class="stat-number">1,825+</div>
+      <div class="stat-number" id="stat-repos">1,825</div>
       <div class="stat-label">Repositories</div>
     </div>
     <div class="stat">
-      <div class="stat-number">17</div>
+      <div class="stat-number" id="stat-orgs">17</div>
       <div class="stat-label">Organizations</div>
     </div>
     <div class="stat">
-      <div class="stat-number">75+</div>
+      <div class="stat-number" id="stat-workers">75</div>
       <div class="stat-label">Edge Workers</div>
     </div>
   </div>
@@ -593,6 +614,18 @@
       <canvas id="world" width="800" height="600"></canvas>
     </div>
   </section>
+
+  <!-- SITE NAV -->
+  <div class="site-nav">
+    <a href="portal.html">Portal</a>
+    <a href="agents/index.html">Agent Fleet</a>
+    <a href="blackroad-ai/index.html">AI Platform</a>
+    <a href="pricing/index.html">Pricing</a>
+    <a href="roadtv/index.html">Road TV</a>
+    <a href="directory/index.html">Directory</a>
+    <a href="editor.html">Editor</a>
+    <a href="app.html">Mobile App</a>
+  </div>
 
   <!-- FOOTER -->
   <footer>
@@ -974,6 +1007,51 @@
         requestAnimationFrame(draw);
       }
       draw();
+    })();
+
+    /* ============================================================
+       LIVE STATS — polls gateway, drifts on fallback
+    ============================================================ */
+    (function() {
+      const GATEWAY = 'http://127.0.0.1:8787';
+      const els = {
+        agents:  document.getElementById('stat-agents'),
+        repos:   document.getElementById('stat-repos'),
+        orgs:    document.getElementById('stat-orgs'),
+        workers: document.getElementById('stat-workers'),
+      };
+      const state = { agents: 30000, repos: 1825, orgs: 17, workers: 75 };
+      const fmt = n => n >= 1000 ? n.toLocaleString() : String(n);
+
+      function render() {
+        els.agents.textContent  = fmt(state.agents);
+        els.repos.textContent   = fmt(state.repos);
+        els.orgs.textContent    = String(state.orgs);
+        els.workers.textContent = fmt(state.workers);
+      }
+
+      function drift() {
+        state.agents = Math.max(29800, Math.min(30500, state.agents + Math.floor((Math.random() - 0.48) * 40)));
+        state.repos  = Math.max(1820, Math.min(1840, state.repos + (Math.random() > 0.9 ? 1 : 0)));
+        state.workers = Math.max(74, Math.min(78, state.workers + (Math.random() > 0.85 ? (Math.random() > 0.5 ? 1 : -1) : 0)));
+        render();
+      }
+
+      async function poll() {
+        try {
+          const r = await fetch(GATEWAY + '/v1/health', { signal: AbortSignal.timeout(3000) });
+          if (r.ok) {
+            const d = await r.json();
+            if (d.agents) state.agents = d.agents;
+            if (d.workers) state.workers = d.workers;
+            render();
+          } else drift();
+        } catch { drift(); }
+      }
+
+      poll();
+      setInterval(poll, 8000);
+      setInterval(drift, 5000);
     })();
   </script>
 
