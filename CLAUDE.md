@@ -80,7 +80,8 @@ blackroad-operator/
 ├── mcp-bridge/             # FastAPI MCP bridge server (localhost:8420)
 ├── agents/                 # Agent manifests, registry, active/idle/processing dirs
 ├── coordination/           # Multi-agent coordination scripts
-├── cli-scripts/            # Additional CLI utilities
+├── config/                 # Configuration files (topology, devices, deployments)
+├── integrations/           # Service integrations (33+ services)
 ├── templates/              # Project & integration templates
 ├── orgs/                   # Organization monorepos (core/, ai/, enterprise/, personal/)
 ├── shared/                 # Inter-agent messaging (inbox, outbox, signals, mesh)
