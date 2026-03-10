@@ -22,10 +22,8 @@ jobs:
       - name: ShellCheck all scripts
         run: |
           find . -name "*.sh" -not -path "./.git/*" -not -path "./node_modules/*" | \
-            xargs shellcheck --severity=warning 2>&1 | head -50 || echo "⚠️ shellcheck warnings above"
+            xargs shellcheck --severity=warning 2>&1 | head -50 || echo "shellcheck warnings above"
         continue-on-error: true
-      - name: ✅ ShellCheck complete
-        run: echo "ShellCheck finished"
 
   test:
     name: CLI Tests
@@ -34,15 +32,9 @@ jobs:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
         with:
-          node-version: '20'
-      - name: Install deps
-        run: npm install --if-present --quiet 2>/dev/null || true
-      - name: Run tests
-        run: npm test --if-present 2>/dev/null || echo "✓ no tests yet"
-        continue-on-error: true
-      - name: Check br script
-        run: |
-          [ -f br ] && bash -n br && echo "✓ br script syntax OK" || echo "⚠️ br not found"
-        continue-on-error: true
-      - name: ✅ CLI Tests complete
-        run: echo "CLI tests finished"
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
