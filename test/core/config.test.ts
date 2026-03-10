@@ -1,10 +1,17 @@
 // Copyright (c) 2025-2026 BlackRoad OS, Inc. All Rights Reserved.
-import { describe, it, expect, afterEach } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { loadConfig } from '../../src/core/config.js'
 
 describe('loadConfig', () => {
+  beforeEach(() => {
+    // Reset to defaults before each test (config persists to disk)
+    const config = loadConfig()
+    config.set('gatewayUrl', 'http://127.0.0.1:8787')
+    config.set('defaultAgent', 'octavia')
+    config.set('logLevel', 'info')
+  })
+
   afterEach(() => {
-    // Clean up any test-set values
     const config = loadConfig()
     config.set('gatewayUrl', 'http://127.0.0.1:8787')
     config.set('defaultAgent', 'octavia')

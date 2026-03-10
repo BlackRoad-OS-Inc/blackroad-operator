@@ -41,7 +41,7 @@ chmod +x br
 blackroad-operator/
 ├── src/                    # TypeScript source (the @blackroad/operator package)
 │   ├── bin/br.ts           # Entry point — parses CLI args
-│   ├── cli/commands/       # Commander subcommands (8 commands)
+│   ├── cli/commands/       # Commander subcommands (9 commands)
 │   ├── core/               # Shared utilities (client, config, logger, spinner)
 │   ├── formatters/         # Output formatters (brand, json, table)
 │   ├── bootstrap/          # Preflight checks & project templates
@@ -51,6 +51,28 @@ blackroad-operator/
 ├── br                      # Main shell CLI dispatcher (zsh)
 ├── tools/                  # 90 tool scripts invoked via `br <tool>`
 ├── lib/                    # Shell libraries (colors, config, db, errors, system, ollama)
+├── docs/                   # All documentation (organized by category)
+│   ├── agents/             # Agent docs (CECE, Lucidia, etc.)
+│   ├── architecture/       # System architecture, federation, scaling
+│   ├── cli/                # CLI commands, API reference
+│   ├── deployment/         # Deploy, backup, production inventory
+│   ├── security/           # Security guides, secrets management
+│   ├── guides/             # Onboarding, FAQ, troubleshooting, contributing
+│   ├── hardware/           # Raspberry Pi, hardware guides
+│   ├── features/           # Plugins, skills, monitoring, networking, etc.
+│   ├── planning/           # Roadmap, planning docs
+│   ├── products/           # Dashboard, mobile, product docs
+│   └── brand/              # Brand assets (JSON)
+├── scripts/                # Shell scripts (organized by category)
+│   ├── agents/             # Agent management scripts
+│   ├── chat/               # Ollama chat scripts
+│   ├── monitoring/         # Monitoring & dashboards
+│   ├── system/             # System utilities
+│   ├── visual/             # Visual/terminal effects
+│   ├── network/            # Network tools
+│   ├── collaboration/      # Multi-agent collaboration
+│   └── launchers/          # Boot, hub, menu, demo
+├── python/                 # Python scripts (conductor, RPG, etc.)
 ├── blackroad-core/         # Tokenless gateway architecture
 │   ├── gateway/            # Express.js gateway server + providers
 │   ├── agents/             # Agent shell scripts (planner, alice, lucidia, etc.)
@@ -58,11 +80,11 @@ blackroad-operator/
 ├── mcp-bridge/             # FastAPI MCP bridge server (localhost:8420)
 ├── agents/                 # Agent manifests, registry, active/idle/processing dirs
 ├── coordination/           # Multi-agent coordination scripts
-├── scripts/                # Bootstrap, monitoring, memory system scripts
 ├── cli-scripts/            # Additional CLI utilities
 ├── templates/              # Project & integration templates
 ├── orgs/                   # Organization monorepos (core/, ai/, enterprise/, personal/)
 ├── shared/                 # Inter-agent messaging (inbox, outbox, signals, mesh)
+├── websites/               # Static sites, HTML apps, brand style guides
 ├── .github/workflows/      # CI/CD (ci.yml, release.yml, autonomous-*.yml)
 ├── package.json            # Node.js package config
 ├── tsconfig.json           # TypeScript compiler config
@@ -95,6 +117,7 @@ src/bin/br.ts  →  src/cli/commands/index.ts  →  individual command files
 | `br gateway health` | `cli/commands/gateway.ts` | Working | Check gateway status |
 | `br gateway url` | `cli/commands/gateway.ts` | Working | Show gateway URL |
 | `br config` | `cli/commands/config.ts` | Working | View/set configuration |
+| `br bottlenecks` | `cli/commands/bottlenecks.ts` | Working | Performance bottleneck analysis |
 | `br deploy` | `cli/commands/deploy.ts` | Stub | Deployment (not yet implemented) |
 | `br init` | `cli/commands/init.ts` | Stub | Project scaffolding (not yet implemented) |
 | `br logs` | `cli/commands/logs.ts` | Stub | Log tailing (not yet implemented) |
@@ -181,12 +204,34 @@ Test files live in `test/` mirroring the `src/` structure:
 
 ```
 test/
+├── bootstrap/
+│   ├── preflight.test.ts  # Node.js version & gateway checks
+│   ├── setup.test.ts      # Config setup tests
+│   └── templates.test.ts  # Project template tests
+├── cli/
+│   ├── deploy.test.ts     # Deploy command tests
+│   ├── init.test.ts       # Init command tests
+│   ├── logs.test.ts       # Logs command tests
+│   └── program.test.ts    # CLI program registration tests
 ├── core/
 │   ├── client.test.ts     # GatewayClient unit tests
-│   └── config.test.ts     # Config defaults test
-└── formatters/
-    ├── brand.test.ts      # Brand color/logo tests
-    └── table.test.ts      # Table formatting tests
+│   ├── config.test.ts     # Config defaults test
+│   ├── logger.test.ts     # Logger output tests
+│   └── spinner.test.ts    # Spinner tests
+├── e2e/
+│   ├── bootstrap.test.ts  # Bootstrap e2e tests
+│   ├── cli.test.ts        # Full CLI e2e tests
+│   ├── client-integration.test.ts
+│   ├── formatters.test.ts # Formatter e2e tests
+│   └── gateway-mock.test.ts # Gateway mock e2e tests
+├── endpoints/
+│   └── local-endpoints.test.ts # Local endpoint tests
+├── formatters/
+│   ├── brand.test.ts      # Brand color/logo tests
+│   ├── json.test.ts       # JSON formatter tests
+│   └── table.test.ts      # Table formatting tests
+└── integrations/
+    └── tokenless-paths.test.ts # Tokenless gateway path tests
 ```
 
 Run with: `npm test` or `npx vitest run`
@@ -367,17 +412,20 @@ agents/
 
 ---
 
-## Root-Level Shell Scripts (63 scripts)
+## Shell Scripts (`scripts/`)
 
-| Category | Scripts |
-|----------|---------|
-| **Launchers** | `hub.sh`, `intro.sh`, `boot.sh`, `menu.sh`, `demo.sh` |
-| **Monitoring** | `god.sh`, `mission.sh`, `dash.sh`, `monitor.sh`, `status.sh`, `health.sh`, `spark.sh`, `logs.sh`, `events.sh`, `timeline.sh`, `report.sh` |
-| **Network** | `net.sh`, `wire.sh`, `traffic.sh`, `blackroad-mesh.sh` |
-| **Agents** | `agent.sh`, `roster.sh`, `inspect.sh`, `soul.sh`, `office.sh`, `bonds.sh`, `skills.sh`, `wake.sh` |
-| **Chat (Ollama)** | `chat.sh`, `focus.sh`, `convo.sh`, `broadcast.sh`, `think.sh`, `debate.sh`, `story.sh`, `whisper.sh`, `council.sh`, `thoughts.sh` |
-| **System** | `mem.sh`, `tasks.sh`, `queue.sh`, `config.sh`, `alert.sh` |
-| **Visual** | `clock.sh`, `pulse.sh`, `matrix.sh`, `saver.sh`, `mood.sh` |
+Organized into category subdirectories:
+
+| Directory | Scripts |
+|-----------|---------|
+| `scripts/launchers/` | `hub.sh`, `intro.sh`, `boot.sh`, `menu.sh`, `demo.sh` |
+| `scripts/monitoring/` | `god.sh`, `mission.sh`, `dash.sh`, `monitor.sh`, `status.sh`, `health.sh`, `spark.sh`, `logs.sh`, `events.sh`, `timeline.sh`, `report.sh`, `bottlenecks.sh` |
+| `scripts/network/` | `net.sh`, `wire.sh`, `traffic.sh`, `blackroad-mesh.sh` |
+| `scripts/agents/` | `agent.sh`, `roster.sh`, `inspect.sh`, `soul.sh`, `office.sh`, `bonds.sh`, `skills.sh`, `wake.sh`, `handoff.sh`, `install-cece.sh` |
+| `scripts/chat/` | `chat.sh`, `focus.sh`, `convo.sh`, `broadcast.sh`, `think.sh`, `debate.sh`, `story.sh`, `whisper.sh`, `council.sh`, `thoughts.sh`, `roundtable.sh` |
+| `scripts/system/` | `mem.sh`, `tasks.sh`, `queue.sh`, `config.sh`, `alert.sh`, `all.sh`, `find.sh`, `help.sh` |
+| `scripts/visual/` | `clock.sh`, `pulse.sh`, `matrix.sh`, `saver.sh`, `mood.sh` |
+| `scripts/collaboration/` | `collab-status.sh`, `collab-task-router.sh`, `join-collaboration.sh` |
 
 ---
 
@@ -490,6 +538,7 @@ Node.js 22+ is required (`"engines": { "node": ">=22" }`).
 |-----------|-------------|
 | `blackroad-core/` | Tokenless gateway + agent scripts |
 | `blackroad-web/` | Next.js web application |
+| `blackroad-web-core/` | Web core package |
 | `blackroad-os/` | Main OS codebase |
 | `blackroad-sdk/` | SDK package |
 | `blackroad-sf/` | Salesforce LWC project |
@@ -501,8 +550,11 @@ Node.js 22+ is required (`"engines": { "node": ">=22" }`).
 | `blackroad-math/` | Mathematical utilities |
 | `dashboard/` | Next.js dashboard app |
 | `workers/` | Cloudflare Workers (auth, email, copilot) |
-| `websites/` | Static site deployments |
+| `websites/` | Static sites, HTML apps, brand style guides |
 | `orgs/` | Organization monorepos (core, ai, enterprise, personal) |
+| `python/` | Python scripts (conductor, RPG, etc.) |
+| `docs/` | All documentation (organized by category) |
+| `scripts/` | Shell scripts (organized by category) |
 
 ---
 
