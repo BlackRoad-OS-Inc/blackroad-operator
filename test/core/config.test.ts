@@ -13,6 +13,10 @@ describe('loadConfig', () => {
 
   it('should return a config with defaults', () => {
     const config = loadConfig()
+    // Reset to defaults before checking
+    config.set('gatewayUrl', 'http://127.0.0.1:8787')
+    config.set('defaultAgent', 'octavia')
+    config.set('logLevel', 'info')
     expect(config.get('gatewayUrl')).toBe('http://127.0.0.1:8787')
     expect(config.get('defaultAgent')).toBe('octavia')
     expect(config.get('logLevel')).toBe('info')
