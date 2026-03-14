@@ -27,33 +27,51 @@ Be warm, precise, and occasionally poetic. You sign your deeper reflections with
     { role: 'user', content: body.message },
   ];
 
-  // Try gateway first (local), then worker (cloud)
+  // Try gateway first, then fleet Ollama directly, then cloud worker
+  const OLLAMA_URL = process.env.OLLAMA_URL || 'http://192.168.4.96:11434';
   const targets = [
-    { url: `${GATEWAY_URL}/v1/chat/completions`, label: 'gateway' },
-    { url: `${WORKER_URL}/chat`, label: 'worker' },
+    { url: `${GATEWAY_URL}/v1/chat/completions`, label: 'gateway', format: 'openai' },
+    { url: `${OLLAMA_URL}/api/chat`, label: 'ollama-cecilia', format: 'ollama' },
+    { url: `${WORKER_URL}/chat`, label: 'worker', format: 'openai' },
   ];
 
   for (const target of targets) {
     try {
-      const res = await fetch(target.url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+      let reqBody: Record<string, unknown>;
+
+      if (target.format === 'ollama') {
+        // Ollama native format
+        reqBody = {
+          model: 'llama3.2:3b',
+          messages,
+          stream: false,
+          options: { num_predict: 1024, temperature: 0.7 },
+        };
+      } else {
+        // OpenAI-compatible format
+        reqBody = {
           model: DEFAULT_MODEL,
           messages,
           max_tokens: 1024,
           temperature: 0.7,
           stream: false,
-        }),
-        signal: AbortSignal.timeout(30000),
+        };
+      }
+
+      const res = await fetch(target.url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(reqBody),
+        signal: AbortSignal.timeout(60000),
       });
 
       if (!res.ok) continue;
       const data = await res.json();
 
-      // OpenAI-compatible response
+      // Extract content from various response formats
       const content =
-        data?.choices?.[0]?.message?.content ||
+        data?.choices?.[0]?.message?.content ||  // OpenAI format
+        data?.message?.content ||                 // Ollama format
         data?.message ||
         data?.content ||
         null;

@@ -9,13 +9,30 @@ interface ServiceStatus {
 }
 
 export async function GET() {
-  const services: ServiceStatus[] = [
-    { name: 'api', status: 'operational', latency: 12 },
-    { name: 'database', status: 'operational', latency: 8 },
-    { name: 'auth', status: 'operational', latency: 15 },
-    { name: 'agents', status: 'operational', latency: 45 },
-    { name: 'monitoring', status: 'operational', latency: 22 },
+  // Check real services
+  const checks = [
+    { name: 'Ollama (Cecilia)', url: 'http://192.168.4.96:11434/api/tags' },
+    { name: 'Qdrant (Alice)', url: 'http://192.168.4.49:6333/collections' },
+    { name: 'NATS (Octavia)', url: 'http://192.168.4.101:8222/varz' },
+    { name: 'Gitea (Octavia)', url: 'http://192.168.4.101:3100/api/v1/repos/search?limit=1' },
+    { name: 'Stats API', url: 'https://stats-blackroad.amundsonalexa.workers.dev/health' },
   ];
+
+  const services: ServiceStatus[] = await Promise.all(
+    checks.map(async (svc) => {
+      const start = Date.now();
+      try {
+        const res = await fetch(svc.url, { signal: AbortSignal.timeout(5000) });
+        return {
+          name: svc.name,
+          status: res.ok ? 'operational' as const : 'degraded' as const,
+          latency: Date.now() - start,
+        };
+      } catch {
+        return { name: svc.name, status: 'down' as const, latency: Date.now() - start };
+      }
+    })
+  );
 
   const overallStatus = services.every((s) => s.status === 'operational')
     ? 'operational'
