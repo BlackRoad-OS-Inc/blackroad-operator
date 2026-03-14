@@ -322,30 +322,128 @@ class KnowledgeGraph:
 # 29. Sentiment Analysis
 # ---------------------------------------------------------------------------
 
+# BlackRoad Emoji Dictionary — visual language system
+# From Master Infrastructure Plan v4.0, section 13
+EMOJI_DICTIONARY = {
+    # Core
+    "🛣️": {"meaning": "road / platform", "context": "apps, portals, the BlackRoad itself"},
+    "🌀": {"meaning": "Lucidia / AI", "context": "AI features, consciousness, reasoning"},
+    "⛓️": {"meaning": "RoadChain / blockchain", "context": "crypto, governance, hash chains"},
+    "💎": {"meaning": "RoadCoin / value", "context": "tokens, payments, credits"},
+    "🧠": {"meaning": "intelligence / AI", "context": "smart features, reasoning, skills"},
+    # Infrastructure
+    "⚡": {"meaning": "fast / active / power", "context": "performance, speed, energy"},
+    "🔒": {"meaning": "security / locked", "context": "auth, encryption, protection"},
+    "🌐": {"meaning": "network / global", "context": "mesh, domains, connectivity"},
+    "📡": {"meaning": "signal / broadcast", "context": "NATS, pub/sub, fleet status"},
+    "🖥️": {"meaning": "compute / node", "context": "Pi, server, device"},
+    # Status
+    "✅": {"meaning": "complete / active / healthy", "context": "done, working, green"},
+    "🚧": {"meaning": "in development / WIP", "context": "building, not ready"},
+    "⚠️": {"meaning": "warning / attention", "context": "degraded, needs action"},
+    "❌": {"meaning": "failed / error / down", "context": "broken, offline, red"},
+    "🔄": {"meaning": "syncing / processing", "context": "loading, updating, in progress"},
+    # Brand
+    "🖤": {"meaning": "BlackRoad / sovereign", "context": "brand, identity, ownership"},
+    "🚀": {"meaning": "launch / deploy / ship", "context": "releases, deployments"},
+    "💫": {"meaning": "Lucidia / magic", "context": "AI companion, wonder"},
+    "🎵": {"meaning": "Cadence / music", "context": "audio, creative"},
+    "🎮": {"meaning": "RoadWorld / games", "context": "interactive, gaming"},
+    "📚": {"meaning": "RoadBook / learning", "context": "education, knowledge"},
+    "📺": {"meaning": "TV Road / media", "context": "streaming, video"},
+    "🎢": {"meaning": "organization", "context": "GitHub orgs, structure"},
+    # People
+    "👤": {"meaning": "user / identity", "context": "RoadID, profile, account"},
+    "👥": {"meaning": "community / team", "context": "collaboration, group"},
+    "🤖": {"meaning": "agent / bot", "context": "AI agent, automation"},
+    # Devices
+    "📱": {"meaning": "phone / mobile", "context": "mobile node, app"},
+    "💻": {"meaning": "laptop / desktop", "context": "workstation, dev"},
+    "🍇": {"meaning": "Raspberry Pi", "context": "Pi fleet, edge node"},
+}
+
+# Emoji sentiment markers
+EMOJI_SENTIMENT = {
+    "positive": {"✅", "🚀", "💎", "⚡", "🎵", "💫", "🖤", "🧠", "🌐", "🔒", "😊", "🎉", "💪", "🙌", "❤️", "🔥", "💯", "👏", "🌟", "✨"},
+    "negative": {"❌", "⚠️", "🚧", "💀", "😢", "😡", "👎", "🛑", "💔", "😤"},
+    "neutral": {"🔄", "📡", "🖥️", "👤", "📱", "💻", "📚", "🎮"},
+}
+
+
+def emoji_sentiment(text: str) -> Dict[str, int]:
+    """Count emoji sentiment in text."""
+    pos = sum(1 for c in text if c in EMOJI_SENTIMENT["positive"])
+    neg = sum(1 for c in text if c in EMOJI_SENTIMENT["negative"])
+    neu = sum(1 for c in text if c in EMOJI_SENTIMENT["neutral"])
+    return {"positive": pos, "negative": neg, "neutral": neu, "total": pos + neg + neu}
+
+
+def emoji_translate(text: str) -> str:
+    """Add emoji visual markers to text based on keywords."""
+    replacements = {
+        "blackroad": "🛣️ BlackRoad",
+        "lucidia": "💫 Lucidia",
+        "roadchain": "⛓️ RoadChain",
+        "roadcoin": "💎 RoadCoin",
+        "deploy": "🚀 deploy",
+        "security": "🔒 security",
+        "mesh": "🌐 mesh",
+        "agent": "🤖 agent",
+        "node": "🖥️ node",
+        "online": "✅ online",
+        "offline": "❌ offline",
+        "warning": "⚠️ warning",
+        "error": "❌ error",
+        "success": "✅ success",
+        "pi": "🍇 Pi",
+    }
+    result = text
+    for word, replacement in replacements.items():
+        # Only replace whole words, case-insensitive, preserve original case
+        import re as _re
+        result = _re.sub(rf'\b{word}\b', replacement, result, flags=_re.IGNORECASE)
+    return result
+
+
 SENTIMENT_WORDS = {
     "positive": {
         "great", "good", "excellent", "awesome", "love", "perfect", "amazing",
         "wonderful", "fantastic", "brilliant", "outstanding", "beautiful",
         "working", "fixed", "solved", "success", "clean", "fast", "easy",
+        "works", "perfectly", "incredible", "impressive", "solid", "smooth",
+        "reliable", "powerful", "elegant", "delightful", "flawless", "superb",
+        "happy", "excited", "thrilled", "proud", "grateful", "thankful",
+        "efficient", "effective", "stable", "secure", "robust", "healthy",
+        "ready", "done", "shipped", "deployed", "live", "online", "connected",
     },
     "negative": {
         "bad", "terrible", "horrible", "awful", "hate", "broken", "failed",
         "error", "bug", "crash", "slow", "ugly", "wrong", "issue", "problem",
-        "stuck", "impossible", "frustrating", "annoying", "worse",
+        "stuck", "impossible", "frustrating", "annoying", "worse", "worst",
+        "down", "offline", "unreachable", "timeout", "degraded", "unstable",
+        "insecure", "vulnerable", "leaked", "corrupt", "missing", "lost",
+        "confused", "disappointed", "angry", "furious", "useless", "garbage",
     },
 }
 
 
 def analyze_sentiment(text: str) -> Dict[str, Any]:
-    """Analyze sentiment of text (rule-based for speed)."""
+    """Analyze sentiment of text (rule-based + emoji-aware)."""
     words = set(text.lower().split())
 
+    # Word-based sentiment
     pos = len(words & SENTIMENT_WORDS["positive"])
     neg = len(words & SENTIMENT_WORDS["negative"])
+
+    # Emoji-based sentiment
+    emoji_sent = emoji_sentiment(text)
+    pos += emoji_sent["positive"] * 2  # Emojis are strong signals
+    neg += emoji_sent["negative"] * 2
+
     total = pos + neg
 
     if total == 0:
-        return {"sentiment": "neutral", "score": 0.0, "positive": 0, "negative": 0}
+        return {"sentiment": "neutral", "score": 0.0, "positive": 0, "negative": 0, "emoji_signals": emoji_sent["total"]}
 
     score = (pos - neg) / total
     if score > 0.2:
@@ -360,6 +458,7 @@ def analyze_sentiment(text: str) -> Dict[str, Any]:
         "score": round(score, 3),
         "positive": pos,
         "negative": neg,
+        "emoji_signals": emoji_sent["total"],
         "confidence": round(abs(score), 3),
     }
 
