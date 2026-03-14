@@ -66,6 +66,9 @@ for path, info in sorted(data.items()):
     repo = info['dir']
     github = info['github']
     files = info['files']
+    status = info.get('status', 'active')
+    if status != 'active':
+        continue
     if '$ORG_FILTER' and org != '$ORG_FILTER':
         continue
     if '$REPO_FILTER' and repo != '$REPO_FILTER':
