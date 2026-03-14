@@ -3,7 +3,7 @@
 **How one person built a distributed AI operating system on $500 of hardware**
 
 **Author:** Alexa Louise Amundson
-**Affiliation:** BlackRoad OS, Inc., Delaware C-Corp, founded November 2024
+**Affiliation:** BlackRoad OS, Inc., Delaware C-Corp, founded 2025
 **Date:** March 14, 2026
 **Location:** Minnesota
 
@@ -15,7 +15,7 @@ One person. Alexa Louise Amundson. Started in sales, moved to finance, got every
 
 No CS degree. No VC money. No team of 50. Just a Mac, five Raspberry Pis, a Cloudflare account, and the refusal to ask permission.
 
-BlackRoad OS, Inc. was incorporated in Delaware in November 2024. One founder. One shareholder. One director. Filed through Stripe Atlas. EIN on file. 83(b) election filed. The corporate formation documents sit in a Google Drive folder under `01 - Company & Legal`.
+BlackRoad OS, Inc. was incorporated in Delaware in 2025. One founder. One shareholder. One director. Filed through Stripe Atlas. EIN on file. 83(b) election filed. The corporate formation documents sit in a Google Drive folder under `01 - Company & Legal`.
 
 ## 2. The Hardware
 
