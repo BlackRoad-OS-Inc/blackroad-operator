@@ -49,15 +49,15 @@ export default function LandingPage() {
           </div>
 
           <h1 className="text-5xl md:text-7xl font-bold leading-tight mb-8">
-            Build the Future with{' '}
+            Sovereign AI on{' '}
             <span className="bg-gradient-to-r from-amber-500 via-hot-pink to-electric-blue bg-clip-text text-transparent">
-              AI Agents
+              Your Metal
             </span>
           </h1>
 
           <p className="text-xl text-gray-400 mb-12 max-w-2xl mx-auto leading-relaxed">
-            Deploy autonomous AI agents at scale. BlackRoad OS provides the infrastructure
-            to orchestrate, govern, and monitor thousands of intelligent agents.
+            50 AI skills running on your own hardware. Phone, Pi, laptop, browser tab —
+            if it can think, it's enough. Zero cloud required.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -81,10 +81,10 @@ export default function LandingPage() {
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-24 pt-12 border-t border-white/10">
           {[
-            { value: '30K+', label: 'Active Agents' },
-            { value: '15', label: 'Organizations' },
-            { value: '99.9%', label: 'Uptime' },
-            { value: '< 50ms', label: 'Latency' },
+            { value: '50', label: 'AI Skills' },
+            { value: '5', label: 'Edge Nodes' },
+            { value: '52', label: 'TOPS' },
+            { value: '100%', label: 'Local-First' },
           ].map((stat) => (
             <div key={stat.label} className="text-center">
               <div className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-amber-500 to-hot-pink bg-clip-text text-transparent">
@@ -107,7 +107,7 @@ export default function LandingPage() {
               </span>
             </h2>
             <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-              Enterprise-grade infrastructure for deploying and managing AI agent fleets.
+              Sovereign AI infrastructure that runs on your own hardware. No cloud dependency.
             </p>
           </div>
 
@@ -115,38 +115,38 @@ export default function LandingPage() {
             {[
               {
                 icon: Cpu,
-                title: 'Agent Orchestration',
-                description: 'Deploy and manage thousands of AI agents with automated scaling and load balancing.',
+                title: 'AI Orchestration',
+                description: '50 skills — Chain-of-Thought, ReAct, Tree-of-Thought, federated inference, autonomous coding, and more. All running on your hardware.',
                 gradient: 'from-amber-500 to-orange-600',
               },
               {
                 icon: Shield,
-                title: 'Governance & Safety',
-                description: 'Built-in guardrails, audit logging, and policy enforcement for responsible AI deployment.',
+                title: 'Guardrails & Safety',
+                description: 'PII detection, prompt injection defense, content filtering, and a full sovereign audit log. Your data never leaves your devices.',
                 gradient: 'from-hot-pink to-violet-600',
               },
               {
                 icon: Zap,
-                title: 'Real-time Monitoring',
-                description: 'Live dashboards, performance metrics, and alerting for complete observability.',
+                title: 'Semantic RAG',
+                description: 'Vector search across 275+ repos. Qdrant + nomic-embed-text embeddings with academic-grade citations and git provenance.',
                 gradient: 'from-electric-blue to-cyan-500',
               },
               {
                 icon: Globe,
-                title: 'Global Edge Network',
-                description: 'Deploy agents across 200+ edge locations for minimal latency worldwide.',
+                title: 'Mesh Network',
+                description: 'Every device is a node. 5 Raspberry Pis as backbone, phones and browser tabs as elastic compute. WebGPU + WASM + WebRTC.',
                 gradient: 'from-violet-500 to-purple-600',
               },
               {
                 icon: Sparkles,
-                title: 'Multi-Model Support',
-                description: 'Seamlessly integrate with Claude, GPT, Llama, and custom models.',
+                title: 'Multi-Model Routing',
+                description: 'Intelligent routing across Ollama models on your fleet. Cost, quality, and latency optimization with automatic fallback chains.',
                 gradient: 'from-amber-500 to-hot-pink',
               },
               {
                 icon: ArrowRight,
-                title: 'API-First Design',
-                description: 'RESTful APIs and SDKs for TypeScript, Python, Go, and Rust.',
+                title: 'Equality by Default',
+                description: 'Accessible to everyone. Inclusive language checks, a11y audits, i18n readiness. Short, tall, fat, small — we love all.',
                 gradient: 'from-electric-blue to-violet-600',
               },
             ].map((feature) => (
@@ -197,6 +197,7 @@ export default function LandingPage() {
             <p className="text-gray-500 text-sm">
               © 2026 BlackRoad OS, Inc. All rights reserved.
             </p>
+            <p className="text-gray-600 text-xs mt-2 md:mt-0">Pave Tomorrow.</p>
           </div>
         </div>
       </footer>

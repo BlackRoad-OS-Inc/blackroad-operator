@@ -46,7 +46,7 @@ export default function Footer() {
         <FadeIn delay={0.4}>
           <div className="text-center">
             <p className="font-inter text-sm text-warm-white/50">
-              © {currentYear} BlackRoad OS, Inc. | Made with care in Minnesota
+              © {currentYear} BlackRoad OS, Inc. — Pave Tomorrow.
             </p>
           </div>
         </FadeIn>

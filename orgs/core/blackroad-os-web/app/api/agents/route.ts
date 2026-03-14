@@ -22,7 +22,7 @@ export async function GET() {
           { id: 'octavia', name: 'Octavia', role: 'Architect', status: 'active', node: 'aria64', color: '#9C27B0' },
           { id: 'alice', name: 'Alice', role: 'Operator', status: 'active', node: 'alice', color: '#2979FF' },
         ],
-        fleet: { total_capacity: 30000, online_nodes: 2 },
+        fleet: { total_capacity: 95, online_nodes: 5 },
         fallback: true,
         error: String(e),
       },

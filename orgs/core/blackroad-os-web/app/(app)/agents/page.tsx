@@ -105,7 +105,7 @@ export default function AgentsPage() {
         <div>
           <h1 className="text-2xl font-bold text-white">Agents</h1>
           <p className="text-gray-400 text-sm mt-1">
-            {(data?.fleet?.total_capacity ?? 30000).toLocaleString()} total capacity ·{' '}
+            {(data?.fleet?.total_capacity ?? 95).toLocaleString()} total capacity ·{' '}
             {data?.fleet?.online_nodes ?? 2} nodes online
             {data?.fallback && <span className="ml-2 text-yellow-400 text-xs">(offline mode)</span>}
           </p>
@@ -128,7 +128,7 @@ export default function AgentsPage() {
       {/* Stats */}
       <div className="grid grid-cols-4 gap-4">
         {[
-          { label: 'Total Capacity', value: '30,000', sub: 'agent slots' },
+          { label: 'Total Agents', value: '95', sub: 'across fleet' },
           { label: 'Tasks / Day', value: Object.values(TASKS_PER_DAY).reduce((a,b) => a+b, 0).toLocaleString(), sub: 'combined' },
           { label: 'Avg Uptime', value: '99.96%', sub: 'last 30 days' },
           { label: 'Worlds Generated', value: data?.worlds_count ? `${data.worlds_count}+` : '60+', sub: 'artifacts' },
