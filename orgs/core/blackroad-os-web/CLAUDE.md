@@ -1,6 +1,6 @@
 # BlackRoad OS Web
 
-> Main web application for BlackRoad OS - the 30,000 agent orchestration platform
+> Main web application for BlackRoad OS — sovereign AI orchestration platform
 
 ## Quick Reference
 
@@ -63,7 +63,7 @@ src/
 
 ## Key Features
 
-- **Agent Dashboard**: Real-time monitoring of 30,000 agents
+- **Agent Dashboard**: Real-time monitoring of fleet agents
 - **Control Center**: Mission coordination and task management
 - **Memory Viewer**: PS-SHA∞ hash-chain journal explorer
 - **Trinity System**: Greenlight/Yellowlight/Redlight status

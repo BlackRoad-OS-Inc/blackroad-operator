@@ -45,13 +45,13 @@ export default function WorkspacePage() {
         <h1 className="text-3xl font-bold text-white">
           {greeting}, <span className="bg-gradient-to-r from-amber-500 via-[#FF1D6C] to-violet-500 bg-clip-text text-transparent">{firstName}</span> 👋
         </h1>
-        <p className="text-gray-500 mt-1 text-sm">BlackRoad OS is running. {agentData?.fleet?.online_nodes ?? 2} nodes online · {(agentData?.fleet?.total_capacity ?? 30000).toLocaleString()} agents ready.</p>
+        <p className="text-gray-500 mt-1 text-sm">BlackRoad OS is running. {agentData?.fleet?.online_nodes ?? 2} nodes online · {(agentData?.fleet?.total_capacity ?? 95).toLocaleString()} agents ready.</p>
       </div>
 
       {/* Stats row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: 'Fleet Capacity', value: (agentData?.fleet?.total_capacity ?? 30000).toLocaleString(), icon: Bot, color: '#9C27B0' },
+          { label: 'Fleet Capacity', value: (agentData?.fleet?.total_capacity ?? 95).toLocaleString(), icon: Bot, color: '#9C27B0' },
           { label: 'Online Nodes', value: agentData?.fleet?.online_nodes ?? 2, icon: Activity, color: '#22c55e' },
           { label: 'Active Agents', value: agentData?.agents?.filter(a => a.status === 'active').length ?? 6, icon: Zap, color: '#F5A623' },
           { label: 'System Status', value: statusData?.status === 'operational' ? '✓ All Good' : '⚠ Check', icon: Globe, color: '#2979FF' },

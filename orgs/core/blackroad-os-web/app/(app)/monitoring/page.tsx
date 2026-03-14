@@ -168,7 +168,7 @@ export default function MonitoringPage() {
               <div className="mt-2 h-1 bg-white/5 rounded-full overflow-hidden">
                 <div
                   className="h-full rounded-full bg-gradient-to-r from-[#FF1D6C] to-violet-500"
-                  style={{ width: `${(node.capacity / 30000) * 100}%` }}
+                  style={{ width: `${Math.min((node.capacity / 100) * 100, 100)}%` }}
                 />
               </div>
             </div>

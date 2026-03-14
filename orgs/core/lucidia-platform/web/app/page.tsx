@@ -350,7 +350,7 @@ export default function LandingPage() {
             <a href="/contact" className="hover:text-white transition">Contact</a>
           </div>
           <div className="text-sm text-white/40">
-            © 2024 BlackRoad OS, Inc.
+            © {new Date().getFullYear()} BlackRoad OS, Inc. — Pave Tomorrow.
           </div>
         </div>
       </footer>

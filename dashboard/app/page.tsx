@@ -408,7 +408,7 @@ export default async function Home() {
           color: '#666',
           textAlign: 'center'
         }}>
-          BlackRoad Operator Infrastructure · {new Date().getFullYear()}
+          BlackRoad OS · {new Date().getFullYear()} — Pave Tomorrow.
         </footer>
       </div>
     </main>
