@@ -323,50 +323,123 @@ class KnowledgeGraph:
 # ---------------------------------------------------------------------------
 
 # BlackRoad Emoji Dictionary — visual language system
-# From Master Infrastructure Plan v4.0, section 13
+# From Master Infrastructure Plan v4.0, expanded for full coverage
 EMOJI_DICTIONARY = {
-    # Core
-    "🛣️": {"meaning": "road / platform", "context": "apps, portals, the BlackRoad itself"},
-    "🌀": {"meaning": "Lucidia / AI", "context": "AI features, consciousness, reasoning"},
-    "⛓️": {"meaning": "RoadChain / blockchain", "context": "crypto, governance, hash chains"},
-    "💎": {"meaning": "RoadCoin / value", "context": "tokens, payments, credits"},
-    "🧠": {"meaning": "intelligence / AI", "context": "smart features, reasoning, skills"},
-    # Infrastructure
-    "⚡": {"meaning": "fast / active / power", "context": "performance, speed, energy"},
-    "🔒": {"meaning": "security / locked", "context": "auth, encryption, protection"},
-    "🌐": {"meaning": "network / global", "context": "mesh, domains, connectivity"},
-    "📡": {"meaning": "signal / broadcast", "context": "NATS, pub/sub, fleet status"},
-    "🖥️": {"meaning": "compute / node", "context": "Pi, server, device"},
-    # Status
-    "✅": {"meaning": "complete / active / healthy", "context": "done, working, green"},
-    "🚧": {"meaning": "in development / WIP", "context": "building, not ready"},
-    "⚠️": {"meaning": "warning / attention", "context": "degraded, needs action"},
-    "❌": {"meaning": "failed / error / down", "context": "broken, offline, red"},
+    # ── Core Platform ──
+    "🛣️": {"meaning": "road / platform / BlackRoad", "context": "apps, portals, the BlackRoad itself"},
+    "🌀": {"meaning": "Lucidia / consciousness", "context": "AI reasoning, meta-cognition"},
+    "⛓️": {"meaning": "RoadChain / blockchain", "context": "hash chains, governance, crypto"},
+    "💎": {"meaning": "RoadCoin / value / premium", "context": "tokens, payments, credits"},
+    "🧠": {"meaning": "intelligence / reasoning", "context": "AI skills, thinking, cognition"},
+    "🖤": {"meaning": "BlackRoad / sovereign / brand", "context": "brand, identity, ownership"},
+    "💫": {"meaning": "Lucidia / magic / wonder", "context": "AI companion, discovery"},
+    "#️⃣": {"meaning": "shebang / root / code", "context": "#! = BlackRoad. The line that runs everything"},
+
+    # ── Infrastructure ──
+    "⚡": {"meaning": "fast / active / power", "context": "performance, speed, energy, TOPS"},
+    "🔒": {"meaning": "security / locked / private", "context": "auth, encryption, sovereign"},
+    "🌐": {"meaning": "network / mesh / global", "context": "mesh network, domains, WebRTC"},
+    "📡": {"meaning": "signal / broadcast / NATS", "context": "pub/sub, heartbeat, fleet comms"},
+    "🖥️": {"meaning": "compute node / server", "context": "Pi, server, device, edge node"},
+    "🔌": {"meaning": "connected / plugged in", "context": "online, wired, active connection"},
+    "🔧": {"meaning": "tools / config / fix", "context": "CLI, settings, repair"},
+    "🗄️": {"meaning": "database / storage", "context": "SQLite, Qdrant, PostgreSQL, MinIO"},
+    "📦": {"meaning": "package / container / deploy", "context": "Docker, npm, pip, bundle"},
+    "🔗": {"meaning": "link / connection / chain", "context": "URL, API endpoint, reference"},
+    "🌉": {"meaning": "bridge / gateway", "context": "API gateway, proxy, tunnel"},
+
+    # ── Status ──
+    "✅": {"meaning": "complete / healthy / pass", "context": "done, working, green, verified"},
+    "🚧": {"meaning": "in development / WIP", "context": "building, under construction"},
+    "⚠️": {"meaning": "warning / caution", "context": "degraded, needs attention, throttling"},
+    "❌": {"meaning": "failed / error / down", "context": "broken, offline, red, blocked"},
     "🔄": {"meaning": "syncing / processing", "context": "loading, updating, in progress"},
-    # Brand
-    "🖤": {"meaning": "BlackRoad / sovereign", "context": "brand, identity, ownership"},
-    "🚀": {"meaning": "launch / deploy / ship", "context": "releases, deployments"},
-    "💫": {"meaning": "Lucidia / magic", "context": "AI companion, wonder"},
-    "🎵": {"meaning": "Cadence / music", "context": "audio, creative"},
-    "🎮": {"meaning": "RoadWorld / games", "context": "interactive, gaming"},
-    "📚": {"meaning": "RoadBook / learning", "context": "education, knowledge"},
-    "📺": {"meaning": "TV Road / media", "context": "streaming, video"},
-    "🎢": {"meaning": "organization", "context": "GitHub orgs, structure"},
-    # People
-    "👤": {"meaning": "user / identity", "context": "RoadID, profile, account"},
-    "👥": {"meaning": "community / team", "context": "collaboration, group"},
-    "🤖": {"meaning": "agent / bot", "context": "AI agent, automation"},
-    # Devices
-    "📱": {"meaning": "phone / mobile", "context": "mobile node, app"},
-    "💻": {"meaning": "laptop / desktop", "context": "workstation, dev"},
-    "🍇": {"meaning": "Raspberry Pi", "context": "Pi fleet, edge node"},
+    "⏳": {"meaning": "waiting / pending", "context": "queued, scheduled, not started"},
+    "🔥": {"meaning": "hot / trending / critical", "context": "urgent, popular, overheating"},
+    "❄️": {"meaning": "cold / idle / frozen", "context": "inactive, sleeping, stopped"},
+    "💤": {"meaning": "sleeping / paused", "context": "standby, low power, idle"},
+    "🟢": {"meaning": "online / go / healthy", "context": "traffic light green, all good"},
+    "🟡": {"meaning": "degraded / slow / caution", "context": "traffic light yellow, warning"},
+    "🔴": {"meaning": "offline / stop / critical", "context": "traffic light red, down"},
+
+    # ── Agents ──
+    "🤖": {"meaning": "agent / bot / AI worker", "context": "AI agent, automation, CarPool"},
+    "👤": {"meaning": "user / identity / RoadID", "context": "profile, account, person"},
+    "👥": {"meaning": "community / team / fleet", "context": "collaboration, group, crew"},
+    "🧑‍💻": {"meaning": "developer / coder", "context": "engineering, programming"},
+    "🦾": {"meaning": "autonomous / strong AI", "context": "self-driving, powerful agent"},
+    "🎭": {"meaning": "persona / identity / role", "context": "agent personality, CECE identity"},
+    "💬": {"meaning": "chat / conversation", "context": "message, dialogue, comms"},
+    "📧": {"meaning": "email / notification", "context": "agent email, alert"},
+
+    # ── Creative ──
+    "🎵": {"meaning": "Cadence / music", "context": "audio, sound, remix studio"},
+    "🎮": {"meaning": "RoadWorld / games", "context": "gaming, interactive, 3D"},
+    "📚": {"meaning": "RoadBook / learning", "context": "education, knowledge, docs"},
+    "📺": {"meaning": "TV Road / media", "context": "streaming, video content"},
+    "🎨": {"meaning": "design / brand / art", "context": "visual, creative, style"},
+    "🎬": {"meaning": "video / production", "context": "RoadView, editing, motion"},
+    "✍️": {"meaning": "writing / content", "context": "Writing Studio, blog, docs"},
+    "📸": {"meaning": "image / photo / vision", "context": "camera, screenshot, visual AI"},
+    "🎤": {"meaning": "voice / audio / speech", "context": "TTS, STT, podcast"},
+
+    # ── Devices ──
+    "📱": {"meaning": "phone / mobile node", "context": "mobile compute, mesh participant"},
+    "💻": {"meaning": "laptop / workstation", "context": "dev machine, compute node"},
+    "🍇": {"meaning": "Raspberry Pi", "context": "Pi fleet, edge node, sovereign hardware"},
+    "🖲️": {"meaning": "hardware / peripheral", "context": "sensor, display, Hailo-8"},
+    "🔋": {"meaning": "battery / power", "context": "charge level, power management"},
+    "🌡️": {"meaning": "temperature / thermal", "context": "CPU temp, throttling, cooling"},
+    "📡": {"meaning": "antenna / wireless", "context": "WiFi, RoadNet AP, mesh radio"},
+
+    # ── Organization ──
+    "🎢": {"meaning": "organization / org", "context": "GitHub org, enterprise"},
+    "📋": {"meaning": "plan / task / todo", "context": "project, issue, backlog"},
+    "📊": {"meaning": "metrics / analytics", "context": "KPI, stats, dashboard"},
+    "🗺️": {"meaning": "roadmap / plan / map", "context": "strategy, direction, topology"},
+    "🏢": {"meaning": "company / enterprise", "context": "BlackRoad OS, Inc., corporate"},
+    "🏗️": {"meaning": "building / architecture", "context": "system design, infrastructure"},
+    "📁": {"meaning": "directory / folder / repo", "context": "file system, repository"},
+
+    # ── Values ──
+    "❤️": {"meaning": "love / care / wellbeing", "context": "we love all, equality, belonging"},
+    "🤝": {"meaning": "consent / agreement", "context": "consent is continuous, partnership"},
+    "🌍": {"meaning": "earth / everyone / global", "context": "accessible to all, worldwide"},
+    "🛡️": {"meaning": "protect / defend / safe", "context": "privacy, sovereignty, rights"},
+    "🌱": {"meaning": "grow / learn / evolve", "context": "self-improvement, development"},
+    "♿": {"meaning": "accessibility / a11y", "context": "inclusive design, screen readers"},
+    "🌈": {"meaning": "diversity / inclusion", "context": "equality, all welcome"},
+    "💪": {"meaning": "strong / capable / empowered", "context": "self-worth, capability"},
+
+    # ── Actions ──
+    "🚀": {"meaning": "launch / deploy / ship", "context": "releases, go live, push"},
+    "🔍": {"meaning": "search / investigate / RAG", "context": "find, discover, query"},
+    "📥": {"meaning": "download / ingest / pull", "context": "receive, import, fetch"},
+    "📤": {"meaning": "upload / push / export", "context": "send, deploy, publish"},
+    "🔀": {"meaning": "merge / branch / fork", "context": "git, split, combine"},
+    "🧪": {"meaning": "test / experiment / lab", "context": "QA, trial, research"},
+    "🗑️": {"meaning": "delete / clean / archive", "context": "remove, purge, prune"},
+    "📌": {"meaning": "pin / bookmark / important", "context": "save, remember, priority"},
 }
 
-# Emoji sentiment markers
+# Emoji sentiment markers — expanded to match the full dictionary
 EMOJI_SENTIMENT = {
-    "positive": {"✅", "🚀", "💎", "⚡", "🎵", "💫", "🖤", "🧠", "🌐", "🔒", "😊", "🎉", "💪", "🙌", "❤️", "🔥", "💯", "👏", "🌟", "✨"},
-    "negative": {"❌", "⚠️", "🚧", "💀", "😢", "😡", "👎", "🛑", "💔", "😤"},
-    "neutral": {"🔄", "📡", "🖥️", "👤", "📱", "💻", "📚", "🎮"},
+    "positive": {
+        "✅", "🚀", "💎", "⚡", "🎵", "💫", "🖤", "🧠", "🌐", "🔒",
+        "😊", "🎉", "💪", "🙌", "❤️", "🔥", "💯", "👏", "🌟", "✨",
+        "🟢", "🔌", "🦾", "🌱", "🤝", "🌈", "🛡️", "🎨", "🎬", "♿",
+        "📌", "🌍", "😍", "🥳", "👍", "💖", "🏆", "⭐", "🎯", "💡",
+    },
+    "negative": {
+        "❌", "⚠️", "🚧", "💀", "😢", "😡", "👎", "🛑", "💔", "😤",
+        "🔴", "❄️", "🗑️", "😞", "😫", "😰", "🤮", "💩", "🚫", "⛔",
+    },
+    "neutral": {
+        "🔄", "📡", "🖥️", "👤", "📱", "💻", "📚", "🎮", "📦", "🔗",
+        "🌉", "⏳", "💤", "🟡", "🤖", "👥", "💬", "📧", "📸", "🎤",
+        "📋", "📊", "🗺️", "🏢", "🏗️", "📁", "🔍", "📥", "📤", "🔀",
+        "🧪", "🍇", "🖲️", "🔋", "🌡️", "🎢", "✍️", "🧑‍💻", "🎭",
+    },
 }
 
 
@@ -381,26 +454,66 @@ def emoji_sentiment(text: str) -> Dict[str, int]:
 def emoji_translate(text: str) -> str:
     """Add emoji visual markers to text based on keywords."""
     replacements = {
+        # Platform
         "blackroad": "🛣️ BlackRoad",
         "lucidia": "💫 Lucidia",
         "roadchain": "⛓️ RoadChain",
         "roadcoin": "💎 RoadCoin",
+        "cadence": "🎵 Cadence",
+        "roadworld": "🎮 RoadWorld",
+        "roadtube": "📺 RoadTube",
+        # Infrastructure
         "deploy": "🚀 deploy",
+        "launch": "🚀 launch",
+        "ship": "🚀 ship",
         "security": "🔒 security",
         "mesh": "🌐 mesh",
+        "gateway": "🌉 gateway",
+        "database": "🗄️ database",
+        "container": "📦 container",
+        "docker": "📦 Docker",
+        # Agents
         "agent": "🤖 agent",
+        "bot": "🤖 bot",
+        # Devices
         "node": "🖥️ node",
+        "server": "🖥️ server",
+        "pi": "🍇 Pi",
+        "raspberry": "🍇 Raspberry",
+        "phone": "📱 phone",
+        "laptop": "💻 laptop",
+        "browser": "🌐 browser",
+        "hailo": "⚡ Hailo",
+        # Status
         "online": "✅ online",
         "offline": "❌ offline",
+        "healthy": "🟢 healthy",
+        "degraded": "🟡 degraded",
+        "down": "🔴 down",
         "warning": "⚠️ warning",
         "error": "❌ error",
         "success": "✅ success",
-        "pi": "🍇 Pi",
+        "failed": "❌ failed",
+        "fixed": "✅ fixed",
+        "ready": "✅ ready",
+        # Actions
+        "search": "🔍 search",
+        "test": "🧪 test",
+        "build": "🏗️ build",
+        "merge": "🔀 merge",
+        "delete": "🗑️ delete",
+        "archive": "📁 archive",
+        # Named agents
+        "alice": "🟢 Alice",
+        "cecilia": "🧠 Cecilia",
+        "octavia": "⚡ Octavia",
+        "aria": "🎨 Aria",
+        "shellfish": "🔒 Shellfish",
+        "cece": "🌀 CECE",
     }
     result = text
+    import re as _re
     for word, replacement in replacements.items():
-        # Only replace whole words, case-insensitive, preserve original case
-        import re as _re
         result = _re.sub(rf'\b{word}\b', replacement, result, flags=_re.IGNORECASE)
     return result
 
