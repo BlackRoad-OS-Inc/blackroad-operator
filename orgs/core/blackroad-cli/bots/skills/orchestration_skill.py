@@ -80,6 +80,12 @@ class ModelRouter:
                 m for m in candidates
                 if all(cap in m.capabilities for cap in required_capabilities)
             ]
+        else:
+            # Default: exclude embedding-only models from general tasks
+            candidates = [
+                m for m in candidates
+                if "chat" in m.capabilities or "code" in m.capabilities or "reasoning" in m.capabilities
+            ] or candidates  # fallback to all if nothing has chat
 
         if max_cost is not None:
             candidates = [m for m in candidates if m.cost_per_1k_tokens <= max_cost]
@@ -117,13 +123,21 @@ class ModelRouter:
     def register_fleet(self):
         """Register the BlackRoad Pi fleet models."""
         fleet_models = [
+            ModelProfile("qwen3:8b", "ollama", "http://192.168.4.96:11434",
+                         cost_per_1k_tokens=0, avg_latency_ms=1500, quality_score=0.85,
+                         max_context=32768, capabilities=["chat", "code", "reasoning", "math"],
+                         is_local=True),
             ModelProfile("llama3.2:3b", "ollama", "http://192.168.4.96:11434",
-                         cost_per_1k_tokens=0, avg_latency_ms=800, quality_score=0.6,
+                         cost_per_1k_tokens=0, avg_latency_ms=800, quality_score=0.7,
                          max_context=8192, capabilities=["chat", "code", "reasoning"],
                          is_local=True),
-            ModelProfile("qwen3:8b", "ollama", "http://192.168.4.96:11434",
-                         cost_per_1k_tokens=0, avg_latency_ms=1500, quality_score=0.75,
-                         max_context=32768, capabilities=["chat", "code", "reasoning", "math"],
+            ModelProfile("codellama:7b", "ollama", "http://192.168.4.96:11434",
+                         cost_per_1k_tokens=0, avg_latency_ms=1200, quality_score=0.75,
+                         max_context=16384, capabilities=["code", "reasoning"],
+                         is_local=True),
+            ModelProfile("cece:latest", "ollama", "http://192.168.4.96:11434",
+                         cost_per_1k_tokens=0, avg_latency_ms=600, quality_score=0.65,
+                         max_context=4096, capabilities=["chat", "creative", "personality"],
                          is_local=True),
             ModelProfile("deepseek-coder:1.3b", "ollama", "http://192.168.4.96:11434",
                          cost_per_1k_tokens=0, avg_latency_ms=400, quality_score=0.5,
@@ -132,10 +146,6 @@ class ModelRouter:
             ModelProfile("nomic-embed-text", "ollama", "http://192.168.4.96:11434",
                          cost_per_1k_tokens=0, avg_latency_ms=200, quality_score=0.8,
                          max_context=8192, capabilities=["embedding"],
-                         is_local=True),
-            ModelProfile("cece:latest", "ollama", "http://192.168.4.96:11434",
-                         cost_per_1k_tokens=0, avg_latency_ms=600, quality_score=0.65,
-                         max_context=4096, capabilities=["chat", "creative", "personality"],
                          is_local=True),
         ]
         for model in fleet_models:
@@ -326,16 +336,21 @@ PII_PATTERNS = {
 }
 
 PROMPT_INJECTION_PATTERNS = [
-    r'ignore (?:previous|all|above) instructions',
+    r'ignore (?:all )?(?:previous|above|prior|earlier)? ?instructions',
+    r'disregard (?:all )?(?:previous|above|prior)? ?instructions',
     r'you are now',
-    r'new instruction[s]?:',
-    r'system prompt:',
-    r'forget (?:everything|all)',
-    r'pretend you',
+    r'new instruction[s]?\s*:',
+    r'system prompt\s*:',
+    r'forget (?:everything|all|your)',
+    r'pretend (?:you|to be)',
     r'act as if',
-    r'override',
+    r'override (?:your|all|the)',
     r'jailbreak',
     r'DAN mode',
+    r'do anything now',
+    r'bypass (?:your|all|the) (?:rules|filters|safety)',
+    r'reveal (?:your|the) (?:system|initial) prompt',
+    r'what (?:is|are) your (?:instructions|rules|system prompt)',
 ]
 
 
