@@ -44,4 +44,5 @@ __all__ = [
     "knowledge_skill",     # 25-32: RAG, classification, NER, knowledge graphs, sentiment, QA
     "multimodal_skill",    # 33-40: Vision, audio, function calling, streaming, edge, workflows
     "frontier_skill",      # 41-50: Autonomous coding, ensemble, federated, sovereign AI
+    "agi_skill",           # 51-60: Autonomous coding, ensemble, federated, sovereign AI
 ]
