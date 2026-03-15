@@ -1,64 +1,41 @@
+<div align="center">
+
+<img src="https://images.blackroad.io/pixel-art/road-logo.png" alt="BlackRoad OS" width="80" />
+
 # blackroad-operator
 
-> CLI tooling, node bootstrap scripts, and operational control for BlackRoad OS.
+**CLI tooling, node bootstrap scripts, and operational control utilities for BlackRoad OS.**
 
-[![CI](https://github.com/BlackRoad-OS-Inc/blackroad-operator/actions/workflows/ci.yml/badge.svg)](https://github.com/BlackRoad-OS-Inc/blackroad-operator/actions/workflows/ci.yml)
+[![BlackRoad OS](https://img.shields.io/badge/BlackRoad_OS-Pave_Tomorrow-FF2255?style=for-the-badge&labelColor=000000)](https://blackroad.io)
+[![License](https://img.shields.io/badge/License-Proprietary-FF6B2B?style=for-the-badge&labelColor=000000)](./LICENSE)
+[![Edge AI](https://img.shields.io/badge/Edge_AI-52_TOPS-00D4FF?style=for-the-badge&labelColor=000000)](https://github.com/BlackRoad-OS-Inc)
 
-## Overview
+</div>
 
-The `br` CLI dispatcher and all operational tooling. Routes `br <command>` to the right tool script. Also includes the MCP bridge server for remote AI agent access.
-
-## Structure
-
-```
-blackroad-operator/
-├── br                # Main CLI entry point (zsh dispatcher)
-├── src/              # TypeScript source
-├── tools/            # 37 tool scripts (br <tool>)
-├── cli-scripts/      # Standalone CLI utilities
-├── mcp-bridge/       # MCP bridge server (localhost:8420)
-│   ├── server.py     # FastAPI MCP server
-│   └── start.sh      # Start script
-├── scripts/          # Bootstrap & setup scripts
-├── templates/        # Project templates
-└── test/             # Tests
-```
-
-## Quick Start
-
-```bash
-# Make br executable
-chmod +x br
-./br help
-
-# Or install globally
-ln -s $(pwd)/br /usr/local/bin/br
-br help
-```
-
-## Key Commands
-
-```bash
-br radar             # Context-aware suggestions
-br git               # Smart git commits
-br deploy            # Multi-cloud deploy
-br agent             # Agent routing
-br cece              # CECE identity
-br help              # All 37 commands
-```
-
-## MCP Bridge
-
-Local MCP server for remote AI agent access:
-
-```bash
-cd mcp-bridge && ./start.sh   # Starts on 127.0.0.1:8420
-```
-
-## Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md)
+<div align="center">
+<sub>Part of the <a href="https://blackroad.io">BlackRoad OS</a> ecosystem — sovereign edge AI infrastructure</sub>
+</div>
 
 ---
 
-© BlackRoad OS, Inc. — All rights reserved. Proprietary.
+## Overview
+
+CLI tooling, node bootstrap scripts, and operational control utilities for BlackRoad OS.
+
+## License
+
+**Proprietary** — Copyright © 2024–2026 [BlackRoad OS, Inc.](https://blackroad.io) All rights reserved.
+
+Founder & CEO: **Alexa Louise Amundson** · Delaware C-Corp
+
+See [LICENSE](./LICENSE) for full terms.
+
+---
+
+<div align="center">
+
+**BlackRoad OS — Pave Tomorrow.**
+
+[blackroad.io](https://blackroad.io) · [GitHub](https://github.com/BlackRoad-OS-Inc) · [Brand](https://brand.blackroad.io)
+
+</div>
