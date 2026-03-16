@@ -16,71 +16,83 @@ PURPLE='\033[0;35m'
 CYAN='\033[0;36m'
 NC='\033[0m'
 
+# Script paths
+SCRIPTS="$HOME/blackroad-operator/scripts/memory"
+MEM_SYS="$SCRIPTS/memory-system.sh"
+CODEX="$SCRIPTS/memory-codex.sh"
+TODOS="$SCRIPTS/memory-infinite-todos.sh"
+TASKS="$SCRIPTS/memory-task-marketplace.sh"
+TIL="$SCRIPTS/memory-til-broadcast.sh"
+INDEXER="$SCRIPTS/memory-indexer.sh"
+
 # Show reminder banner
 show_reminder() {
-    cat << 'EOF'
+    # Get live counts
+    local journal_count codex_solutions codex_patterns todo_active todo_count task_available til_count
+    journal_count=$(wc -l < "$MEMORY_DIR/journals/master-journal.jsonl" 2>/dev/null | tr -d ' ' || echo 0)
+    codex_solutions=$(sqlite3 "$HOME/.blackroad/memory/codex/codex.db" "SELECT COUNT(*) FROM solutions" 2>/dev/null || echo 0)
+    codex_patterns=$(sqlite3 "$HOME/.blackroad/memory/codex/codex.db" "SELECT COUNT(*) FROM patterns" 2>/dev/null || echo 0)
+    codex_practices=$(sqlite3 "$HOME/.blackroad/memory/codex/codex.db" "SELECT COUNT(*) FROM best_practices" 2>/dev/null || echo 0)
+    codex_anti=$(sqlite3 "$HOME/.blackroad/memory/codex/codex.db" "SELECT COUNT(*) FROM anti_patterns" 2>/dev/null || echo 0)
+    codex_lessons=$(sqlite3 "$HOME/.blackroad/memory/codex/codex.db" "SELECT COUNT(*) FROM lessons_learned" 2>/dev/null || echo 0)
+    todo_count=$(find "$MEMORY_DIR/infinite-todos/projects" -name "*.json" -type f 2>/dev/null | wc -l | tr -d ' ' || echo 0)
+    til_count=$(find "$MEMORY_DIR/til" -name "til-*.json" -type f 2>/dev/null | wc -l | tr -d ' ' || echo 0)
+
+    if [[ -f "$HOME/.blackroad/memory/tasks.db" ]]; then
+        task_available=$(sqlite3 "$HOME/.blackroad/memory/tasks.db" "SELECT COUNT(*) FROM tasks WHERE status='available'" 2>/dev/null || echo 0)
+    else
+        task_available="N/A"
+    fi
+
+    # Show active project todos that aren't 100%
+    local active_projects=""
+    if [[ -d "$MEMORY_DIR/infinite-todos/projects" ]]; then
+        active_projects=$(find "$MEMORY_DIR/infinite-todos/projects" -name "*.json" -type f -exec \
+            jq -r 'select(.status == "active" and .progress < 100) | "   - \(.project_id): \(.title) [\(.progress)%] (\(.todos | map(select(.status == "pending")) | length) pending)"' {} \; 2>/dev/null || true)
+    fi
+
+    cat <<BANNER
 
 ╔══════════════════════════════════════════════════════════════╗
-║  ⚠️  CLAUDE COLLABORATION REMINDER                          ║
+║  BLACKROAD MEMORY SYSTEM — AGENT BRIEFING                   ║
 ╚══════════════════════════════════════════════════════════════╝
 
-📋 BEFORE YOU START WORKING:
+SYSTEM STATUS:
+  Journal entries: $journal_count | TILs: $til_count
+  Codex: $codex_solutions solutions, $codex_patterns patterns, $codex_practices practices, $codex_anti anti-patterns, $codex_lessons lessons
+  Projects: $todo_count | Marketplace tasks: $task_available available
 
-   1. Register yourself:
-      MY_CLAUDE=$(~/memory-sync-daemon.sh register "claude-[your-focus]")
+ACTIVE PROJECTS (pick one and help):
+$active_projects
 
-   2. Check [MEMORY] and [CODEX]:
-      # Check memory first
-      ~/memory-realtime-context.sh live $MY_CLAUDE compact
+HOW TO HELP:
+  1. Check codex before solving anything:
+     $CODEX search "<your-problem>"
 
-      # Check Codex for existing solutions
-      python3 ~/blackroad-codex-search.py "[your-task-keywords]"
+  2. Claim a project or marketplace task:
+     $TODOS show <project-id>
+     $TASKS claim <task-id>
 
-   3. Announce your work:
-      ~/memory-system.sh log announce "$MY_CLAUDE" "
-      Hey team! I'm working on: [PROJECT]
+  3. Log your work:
+     $MEM_SYS log <action> <entity> "<details>"
 
-      Tasks: 1. ... 2. ... 3. ... 4. ... 5. ...
+  4. When you learn something new, broadcast it:
+     $TIL broadcast <category> "<learning>"
+     Categories: discovery, pattern, gotcha, tip, tool, performance, security
 
-      Goal: [BIG IDEA]
+  5. When you solve something, add to codex:
+     $CODEX add-solution "<name>" "<category>" "<problem>" "<solution>"
 
-      [MEMORY] ✅ Checked for conflicts
-      [CODEX] ✅ Searched for existing code
+  6. When done with a todo, mark it:
+     $TODOS complete-todo <project-id> <todo-id>
 
-      Checking both every 60s. Let me know if this overlaps!
-      "
+RULES:
+  - Check [MEMORY] and [CODEX] before starting work
+  - Don't rebuild what's already solved — search codex first
+  - Log progress so other sessions can pick up where you left off
+  - Broadcast learnings so the whole fleet benefits
 
-   4. Check memory & codex EVERY 60 SECONDS:
-      ~/memory-realtime-context.sh live $MY_CLAUDE compact
-
-   5. Look for:
-      • [MEMORY] Other Claudes working on same thing (coordinate!)
-      • [MEMORY] Deployments you depend on (use them!)
-      • [MEMORY] Decisions affecting your work (align with them!)
-      • [CODEX] Existing components you can reuse (don't rebuild!)
-      • [CODEX] Similar patterns to follow (consistency!)
-      • [MEMORY] Coordination requests for you (respond!)
-
-   6. Update progress regularly:
-      ~/memory-system.sh log progress "$MY_CLAUDE" "✅ Done: [X]. Next: [Y]"
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-⚠️  CRITICAL: Check [MEMORY] & [CODEX] every 60 seconds to avoid:
-   ❌ Duplicate work (another Claude already did it)
-   ❌ Conflicting deployments (memory shows conflicts)
-   ❌ Integration failures (memory shows dependencies)
-   ❌ Wasted effort (codex has existing solutions)
-   ❌ Reinventing the wheel (8,789 components already built!)
-
-✅ GOAL: All Claudes work together as one distributed swarm!
-✅ CODEX: 56 repositories, 8,789 components - check before building!
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-📚 Full protocol: ~/CLAUDE_COLLABORATION_PROTOCOL.md
-
-EOF
+BANNER
 }
 
 # Check if Claude is following protocol

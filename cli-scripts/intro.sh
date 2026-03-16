@@ -44,7 +44,7 @@ echo ""
 
 # Tagline typewriter
 printf "    "
-_tw "Your AI. Your Hardware. Your Rules." 0.03 "${AM}"
+_tw "BlackRoad OS — Pave Tomorrow." 0.03 "${AM}"
 echo ""
 
 # Agent dots
