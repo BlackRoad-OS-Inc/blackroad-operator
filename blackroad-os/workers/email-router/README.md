@@ -56,4 +56,4 @@ TXT     v=spf1 include:_spf.mx.cloudflare.net ~all
 | `GET /inbox/:agent` | Last 20 messages for agent |
 
 ---
-*◆ BlackRoad OS — Your AI. Your Hardware. Your Rules.*
+*◆ BlackRoad OS — Pave Tomorrow.*

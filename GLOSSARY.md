@@ -22,7 +22,7 @@ Long-term storage for historical data, full conversation logs, and large files. 
 ## B
 
 ### BlackRoad
-The overall platform and ecosystem for AI agent orchestration. "Your AI. Your Hardware. Your Rules."
+The overall platform and ecosystem for AI agent orchestration. "Ride the Road. Pave Tomorrow."
 
 ### Broadcast
 A messaging pattern where one agent sends a message to all other agents simultaneously.

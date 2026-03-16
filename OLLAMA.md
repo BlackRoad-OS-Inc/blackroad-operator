@@ -1,6 +1,6 @@
 # OLLAMA.md - Local AI Inference Guide
 
-> **BlackRoad OS** - Your AI. Your Hardware. Your Rules.
+> **BlackRoad OS** - Ride the Road. Pave Tomorrow.
 >
 > Run AI models locally with zero cloud dependencies.
 
@@ -1205,4 +1205,4 @@ OLLAMA_MAX_LOADED_MODELS=3  # Max loaded models
 
 ---
 
-*Your AI. Your Hardware. Your Rules.*
+*Ride the Road. Pave Tomorrow.*

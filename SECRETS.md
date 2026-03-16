@@ -1,6 +1,6 @@
 # SECRETS.md - Vault & Encryption Guide
 
-> **BlackRoad OS** - Your AI. Your Hardware. Your Rules.
+> **BlackRoad OS** - Ride the Road. Pave Tomorrow.
 >
 > Zero-trust secrets management for distributed AI agents.
 
@@ -1405,4 +1405,4 @@ VAULT_SKIP_VERIFY=false           # TLS verification
 
 ---
 
-*Your AI. Your Hardware. Your Rules.*
+*Ride the Road. Pave Tomorrow.*

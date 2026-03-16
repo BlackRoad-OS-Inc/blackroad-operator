@@ -1,6 +1,6 @@
 # BACKUP.md - Disaster Recovery Guide
 
-> **BlackRoad OS** - Your AI. Your Hardware. Your Rules.
+> **BlackRoad OS** - Ride the Road. Pave Tomorrow.
 >
 > Comprehensive backup and disaster recovery for 30K agent systems.
 
@@ -1207,4 +1207,4 @@ groups:
 
 ---
 
-*Your AI. Your Hardware. Your Rules.*
+*Ride the Road. Pave Tomorrow.*

@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-BlackRoad is a comprehensive developer CLI system with 30+ features spanning AI agents, developer tools, cloud infrastructure, IoT management, security, and DevOps automation. The core philosophy: "Your AI. Your Hardware. Your Rules."
+BlackRoad is a comprehensive developer CLI system with 30+ features spanning AI agents, developer tools, cloud infrastructure, IoT management, security, and DevOps automation. The core philosophy: "BlackRoad OS — Pave Tomorrow."
 
 **Key components:**
 - **br CLI**: Main command dispatcher (`/Users/alexa/blackroad/br`)

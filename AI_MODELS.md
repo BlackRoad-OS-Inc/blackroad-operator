@@ -1,6 +1,6 @@
 # AI_MODELS.md - Model Catalog & Guide
 
-> **BlackRoad OS** - Your AI. Your Hardware. Your Rules.
+> **BlackRoad OS** - Ride the Road. Pave Tomorrow.
 >
 > Comprehensive guide to AI models for local and cloud inference.
 
@@ -1134,4 +1134,4 @@ ollama show <model>
 
 ---
 
-*Your AI. Your Hardware. Your Rules.*
+*Ride the Road. Pave Tomorrow.*
