@@ -214,7 +214,7 @@ footer{position:fixed;bottom:0;left:0;right:0;text-align:center;padding:var(--sp
     <a href="https://status.blackroad.io">Status</a>
   </div>
 </div>
-<footer>&copy; ${new Date().getFullYear()} BlackRoad OS, Inc. Your AI. Your Hardware. Your Rules.</footer>
+<footer>&copy; ${new Date().getFullYear()} BlackRoad OS, Inc. BlackRoad OS — Pave Tomorrow.</footer>
 </body>
 </html>`;
 }
