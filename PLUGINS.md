@@ -1,6 +1,6 @@
 # PLUGINS.md - Plugin System Guide
 
-> **BlackRoad OS** - Your AI. Your Hardware. Your Rules.
+> **BlackRoad OS** - Ride the Road. Pave Tomorrow.
 >
 > Extend agent capabilities with a powerful plugin architecture.
 
@@ -1461,4 +1461,4 @@ blackroad plugin test <path>
 
 ---
 
-*Your AI. Your Hardware. Your Rules.*
+*Ride the Road. Pave Tomorrow.*

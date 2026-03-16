@@ -1,6 +1,6 @@
 # WEBHOOKS.md - Event System Guide
 
-> **BlackRoad OS** - Your AI. Your Hardware. Your Rules.
+> **BlackRoad OS** - Ride the Road. Pave Tomorrow.
 >
 > Event-driven architecture for real-time agent orchestration.
 
@@ -1342,4 +1342,4 @@ webhooks:
 
 ---
 
-*Your AI. Your Hardware. Your Rules.*
+*Ride the Road. Pave Tomorrow.*

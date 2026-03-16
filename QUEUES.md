@@ -1,6 +1,6 @@
 # QUEUES.md - Job Processing & Message Queues
 
-> **BlackRoad OS** - Your AI. Your Hardware. Your Rules.
+> **BlackRoad OS** - Ride the Road. Pave Tomorrow.
 >
 > Distributed task processing for 30K concurrent agents.
 
@@ -1389,4 +1389,4 @@ blackroad worker scale <queue> <n>      # Scale workers
 
 ---
 
-*Your AI. Your Hardware. Your Rules.*
+*Ride the Road. Pave Tomorrow.*

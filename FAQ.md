@@ -22,7 +22,7 @@
 
 ### What is BlackRoad OS?
 
-BlackRoad OS is a **30,000 agent orchestration platform** that enables sovereign AI infrastructure. It's designed around the philosophy "Your AI. Your Hardware. Your Rules."
+BlackRoad OS is a **30,000 agent orchestration platform** that enables sovereign AI infrastructure. It's designed around the philosophy "Ride the Road. Pave Tomorrow."
 
 Think of it as an operating system for AI agents - providing scheduling, memory, communication, and coordination across thousands of autonomous AI workers.
 

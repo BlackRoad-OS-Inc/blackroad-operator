@@ -1,7 +1,7 @@
 # BlackRoad OS — Product Plans
 
 > **All products are proprietary to BlackRoad OS, Inc.**
-> **"Your AI. Your Hardware. Your Rules."**
+> **"Ride the Road. Pave Tomorrow."**
 
 ---
 

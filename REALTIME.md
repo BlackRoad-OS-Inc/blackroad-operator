@@ -1,6 +1,6 @@
 # REALTIME.md - Real-Time Communication Guide
 
-> **BlackRoad OS** - Your AI. Your Hardware. Your Rules.
+> **BlackRoad OS** - Ride the Road. Pave Tomorrow.
 >
 > Sub-second agent communication with WebSockets, SSE, and streaming.
 
@@ -1367,4 +1367,4 @@ class ClusteredPubSub:
 
 ---
 
-*Your AI. Your Hardware. Your Rules.*
+*Ride the Road. Pave Tomorrow.*

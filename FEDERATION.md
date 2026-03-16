@@ -1,6 +1,6 @@
 # FEDERATION.md - Multi-Cluster Federation Guide
 
-> **BlackRoad OS** - Your AI. Your Hardware. Your Rules.
+> **BlackRoad OS** - Ride the Road. Pave Tomorrow.
 >
 > Unite distributed clusters into a unified AI mesh.
 
@@ -1560,4 +1560,4 @@ blackroad failover status
 
 ---
 
-*Your AI. Your Hardware. Your Rules.*
+*Ride the Road. Pave Tomorrow.*

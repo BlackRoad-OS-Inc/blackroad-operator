@@ -21,7 +21,7 @@
 
 ## Vision & Mission
 
-**Vision:** Build the world's most powerful sovereign AI infrastructure - "Your AI. Your Hardware. Your Rules."
+**Vision:** Build the world's most powerful sovereign AI infrastructure - "Ride the Road. Pave Tomorrow."
 
 **Mission:** Create a 30,000+ agent orchestration platform that enables true digital sovereignty.
 

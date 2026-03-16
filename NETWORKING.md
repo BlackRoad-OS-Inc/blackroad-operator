@@ -1,6 +1,6 @@
 # NETWORKING.md - Network Configuration Guide
 
-> **BlackRoad OS** - Your AI. Your Hardware. Your Rules.
+> **BlackRoad OS** - Ride the Road. Pave Tomorrow.
 >
 > Secure, scalable networking for distributed AI infrastructure.
 
@@ -892,4 +892,4 @@ tcpdump -i eth0 port 443
 
 ---
 
-*Your AI. Your Hardware. Your Rules.*
+*Ride the Road. Pave Tomorrow.*
