@@ -243,6 +243,88 @@ show_summary() {
     echo ""
 }
 
+# Show system status
+show_status() {
+    echo -e "${BLUE}╔════════════════════════════════════════╗${NC}"
+    echo -e "${BLUE}║  BlackRoad Memory System Status        ║${NC}"
+    echo -e "${BLUE}╚════════════════════════════════════════╝${NC}"
+    echo ""
+
+    # Check initialization
+    if [ -f "$MEMORY_DIR/config.json" ] && [ -f "$JOURNAL_DIR/master-journal.jsonl" ]; then
+        echo -e "  ${GREEN}Initialized:${NC} YES"
+        local init_time=$(jq -r '.initialized // "unknown"' "$MEMORY_DIR/config.json" 2>/dev/null)
+        echo -e "  ${GREEN}Since:${NC} $init_time"
+    else
+        echo -e "  ${RED}Initialized:${NC} NO"
+        echo ""
+        log_error "Memory system not initialized. Run: $0 init"
+        return 1
+    fi
+
+    # Current session
+    if [ -f "$SESSION_DIR/current-session.json" ]; then
+        local session_name=$(jq -r '.session_id' "$SESSION_DIR/current-session.json" 2>/dev/null || echo "unknown")
+        echo -e "  ${GREEN}Current session:${NC} $session_name"
+    else
+        echo -e "  ${YELLOW}Current session:${NC} none"
+    fi
+
+    echo ""
+
+    # Journal stats
+    if [ -f "$JOURNAL_DIR/master-journal.jsonl" ]; then
+        local total_entries=$(wc -l < "$JOURNAL_DIR/master-journal.jsonl" | tr -d ' ')
+        echo -e "  ${GREEN}Total journal entries:${NC} $total_entries"
+
+        local last_line=$(tail -1 "$JOURNAL_DIR/master-journal.jsonl")
+        local last_timestamp=$(echo "$last_line" | jq -r '.timestamp' 2>/dev/null || echo "unknown")
+        local last_action=$(echo "$last_line" | jq -r '.action' 2>/dev/null || echo "unknown")
+        local last_entity=$(echo "$last_line" | jq -r '.entity' 2>/dev/null || echo "unknown")
+        echo -e "  ${GREEN}Last entry:${NC} $last_timestamp"
+        echo -e "  ${GREEN}Last action:${NC} $last_action: $last_entity"
+    else
+        echo -e "  ${YELLOW}Total journal entries:${NC} 0"
+    fi
+
+    echo ""
+
+    # Ledger size
+    if [ -f "$LEDGER_DIR/memory-ledger.jsonl" ]; then
+        local ledger_size=$(ls -lh "$LEDGER_DIR/memory-ledger.jsonl" | awk '{print $5}')
+        echo -e "  ${GREEN}Ledger size:${NC} $ledger_size"
+    else
+        echo -e "  ${YELLOW}Ledger size:${NC} not found"
+    fi
+
+    echo ""
+
+    # Chain integrity (quick check: last 5 entries)
+    echo -e "  ${BLUE}Chain integrity (last 5 entries):${NC}"
+    if [ -f "$JOURNAL_DIR/master-journal.jsonl" ]; then
+        local total=$(wc -l < "$JOURNAL_DIR/master-journal.jsonl" | tr -d ' ')
+        local start=$((total > 5 ? total - 4 : 1))
+        local chain_valid=true
+        local checked=0
+
+        tail -5 "$JOURNAL_DIR/master-journal.jsonl" | while IFS= read -r line; do
+            local parent_hash=$(echo "$line" | jq -r 'if .parent_hash then .parent_hash elif .prev_hash then .prev_hash else "0000000000000000" end' 2>/dev/null)
+            local stored_hash=$(echo "$line" | jq -r 'if .sha256 then .sha256 elif .hash then .hash else "unknown" end' 2>/dev/null)
+            local action=$(echo "$line" | jq -r '.action' 2>/dev/null)
+
+            if [ "$parent_hash" = "0000000000000000" ] || [ "$parent_hash" = "null" ]; then
+                echo -e "    ${GREEN}OK${NC} ${stored_hash:0:12}... ($action) [genesis/root]"
+            elif grep -q "\"$parent_hash\"" "$JOURNAL_DIR/master-journal.jsonl" 2>/dev/null; then
+                echo -e "    ${GREEN}OK${NC} ${stored_hash:0:12}... ($action)"
+            else
+                echo -e "    ${RED}BROKEN${NC} ${stored_hash:0:12}... ($action) - parent not found"
+            fi
+        done
+    fi
+
+    echo ""
+}
+
 # Verify integrity
 verify_integrity() {
     log_info "Verifying memory integrity..."
@@ -360,6 +442,7 @@ COMMANDS:
     init                          Initialize memory system
     new [session-name]            Create new session
     log <action> <entity> [details]  Log action to journal
+    status                        Show system status and chain integrity
     summary                       Show current session summary
     synthesize                    Synthesize context from journals
     verify                        Verify memory integrity
@@ -414,6 +497,9 @@ case "${1:-help}" in
         ;;
     summary)
         show_summary
+        ;;
+    status)
+        show_status
         ;;
     verify)
         verify_integrity

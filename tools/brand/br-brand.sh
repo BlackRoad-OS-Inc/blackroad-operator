@@ -1122,11 +1122,11 @@ _cmd_init() {
   printf "${CYAN}Site / product name${NC} [BlackRoad OS]: "
   read name; [[ -z "$name" ]] && name="BlackRoad OS"
 
-  printf "${CYAN}One-line tagline${NC} [Your AI. Your Hardware. Your Rules.]: "
-  read tagline; [[ -z "$tagline" ]] && tagline="Your AI. Your Hardware. Your Rules."
+  printf "${CYAN}One-line tagline${NC} [BlackRoad OS — Pave Tomorrow.]: "
+  read tagline; [[ -z "$tagline" ]] && tagline="BlackRoad OS — Pave Tomorrow."
 
-  printf "${CYAN}Short description${NC} [The AI-native developer platform.]: "
-  read desc; [[ -z "$desc" ]] && desc="The AI-native developer platform."
+  printf "${CYAN}Short description${NC} [The The road to sovereign AI.]: "
+  read desc; [[ -z "$desc" ]] && desc="The The road to sovereign AI."
 
   printf "${CYAN}Primary CTA label${NC} [Get Started]: "
   read cta_text; [[ -z "$cta_text" ]] && cta_text="Get Started"
@@ -1918,8 +1918,8 @@ _cmd_site() {
   fi
 
   local name=$(_cfg_get "$config" "name" "BlackRoad OS")
-  local tagline=$(_cfg_get "$config" "tagline" "Your AI. Your Hardware. Your Rules.")
-  local desc=$(_cfg_get "$config" "description" "The AI-native developer platform.")
+  local tagline=$(_cfg_get "$config" "tagline" "BlackRoad OS — Pave Tomorrow.")
+  local desc=$(_cfg_get "$config" "description" "The The road to sovereign AI.")
   local cta_text=$(_cfg_get "$config" "cta_text" "Get Started")
   local cta_url=$(_cfg_get "$config" "cta_url" "/docs")
   local footer_text=$(_cfg_get "$config" "footer" "© 2026 BlackRoad OS, Inc.")

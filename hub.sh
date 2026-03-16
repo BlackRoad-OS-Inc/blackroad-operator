@@ -23,7 +23,7 @@ A="${AMBER}"  # amber accent
 _br_tagline() {
     local idx=$(( ($(date +%S) / 10) % 6 ))
     local tags=(
-        "Your AI. Your Hardware. Your Rules."
+        "BlackRoad OS — Pave Tomorrow."
         "Build without limits. Ship without compromise."
         "Tokenless. Trustless. Yours."
         "30,000 agents. One command."

@@ -53,7 +53,7 @@ $(case "$template" in
 esac)
 
 ---
-*Built with ◆ BlackRoad OS — Your AI. Your Hardware. Your Rules.*
+*Built with ◆ BlackRoad OS — Pave Tomorrow.*
 EOF
   echo -e "  ${DIM}✓ README.md${NC}"
 }

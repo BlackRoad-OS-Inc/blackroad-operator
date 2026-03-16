@@ -78,7 +78,7 @@ echo ""
 
 # Phase 3 — typewriter tagline
 printf "    "
-_tw "Your AI. Your Hardware. Your Rules." 0.04 "${AM}"
+_tw "BlackRoad OS — Pave Tomorrow." 0.04 "${AM}"
 echo ""
 printf "    "
 _tw "Build without limits. Ship without compromise." 0.025 "${D}"
