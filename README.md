@@ -1,41 +1,61 @@
 <div align="center">
-
 <img src="https://images.blackroad.io/pixel-art/road-logo.png" alt="BlackRoad OS" width="80" />
 
-# blackroad-operator
+# BlackRoad Operator
 
-**CLI tooling, node bootstrap scripts, and operational control utilities for BlackRoad OS.**
+**CLI tooling and operational control for the BlackRoad OS fleet.**
 
 [![BlackRoad OS](https://img.shields.io/badge/BlackRoad_OS-Pave_Tomorrow-FF2255?style=for-the-badge&labelColor=000000)](https://blackroad.io)
-[![License](https://img.shields.io/badge/License-Proprietary-FF6B2B?style=for-the-badge&labelColor=000000)](./LICENSE)
-[![Edge AI](https://img.shields.io/badge/Edge_AI-52_TOPS-00D4FF?style=for-the-badge&labelColor=000000)](https://github.com/BlackRoad-OS-Inc)
-
-</div>
-
-<div align="center">
-<sub>Part of the <a href="https://blackroad.io">BlackRoad OS</a> ecosystem — sovereign edge AI infrastructure</sub>
 </div>
 
 ---
 
 ## Overview
 
-CLI tooling, node bootstrap scripts, and operational control utilities for BlackRoad OS.
+The operator monorepo contains:
 
-## License
+- **TypeScript CLI** (`src/`) — `br` command with 8 subcommands
+- **Shell CLI** (`br` at root) — 90 tool scripts in `tools/`
+- **MCP Bridge** — FastAPI server for remote AI agent access
+- **Agent infrastructure** — manifests, coordination, shared messaging
+- **Memory system** — journal, codex, TILs, infinite todos, task marketplace
+- **Websites** — 30+ static sites deployed via Cloudflare Pages
 
-**Proprietary** — Copyright © 2024–2026 [BlackRoad OS, Inc.](https://blackroad.io) All rights reserved.
+## Quick Start
 
-Founder & CEO: **Alexa Louise Amundson** · Delaware C-Corp
+```bash
+# TypeScript CLI
+npm install && npm run build
+br status
+br agents
+br invoke octavia "check fleet health"
 
-See [LICENSE](./LICENSE) for full terms.
+# Shell CLI
+./br help
+./br nodes status
+./br deploy
+```
+
+## Memory System
+
+```bash
+# Search codex before solving
+~/blackroad-operator/scripts/memory/memory-codex.sh search "your problem"
+
+# Log your work
+~/blackroad-operator/scripts/memory/memory-system.sh log action entity "details"
+
+# Broadcast learnings
+~/blackroad-operator/scripts/memory/memory-til-broadcast.sh broadcast category "learning"
+```
+
+## Stack
+
+- TypeScript + Commander (CLI)
+- Zsh + SQLite (Shell tools)
+- FastAPI (MCP Bridge)
+- Cloudflare Workers/Pages (Websites)
 
 ---
 
-<div align="center">
-
-**BlackRoad OS — Pave Tomorrow.**
-
-[blackroad.io](https://blackroad.io) · [GitHub](https://github.com/BlackRoad-OS-Inc) · [Brand](https://brand.blackroad.io)
-
-</div>
+*Copyright (c) 2024-2026 BlackRoad OS, Inc. All rights reserved.*
