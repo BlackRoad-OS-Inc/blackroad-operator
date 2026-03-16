@@ -1,25 +1,31 @@
-/* BlackRoad OS — Shared Design System */
-/* Brand colors per brand.json — DO NOT use old FF9D00/FF6B00 palette */
+/* BlackRoad OS — Shared Design System v3 */
+/* Correct 6-stop spectrum — NEVER use old F5A623/FF1D6C/9C27B0/2979FF palette */
+
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
 
 :root {
-  --black:        #000000;
-  --deep:         #080808;
-  --surface:      #111111;
-  --border:       #1e1e1e;
-  --muted:        #444444;
-  --subtle:       #888888;
-  --white:        #ffffff;
+  --black:    #000000;
+  --deep:     #050505;
+  --surface:  #0d0d0d;
+  --elevated: #111111;
+  --border:   #1a1a1a;
+  --muted:    #444444;
+  --subtle:   #737373;
+  --white:    #f5f5f5;
 
-  --amber:        #F5A623;
-  --pink:         #FF1D6C;
-  --violet:       #9C27B0;
-  --blue:         #2979FF;
+  /* Accent colors — decorative elements ONLY, never text */
+  --ember:   #FF6B2B;
+  --flare:   #FF2255;
+  --magenta: #CC00AA;
+  --orchid:  #8844FF;
+  --arc:     #4488FF;
+  --cyan:    #00D4FF;
 
-  --grad: linear-gradient(135deg, #F5A623 0%, #FF1D6C 38.2%, #9C27B0 61.8%, #2979FF 100%);
-  --grad-text: linear-gradient(135deg, #F5A623 0%, #FF1D6C 50%, #2979FF 100%);
+  --grad: linear-gradient(90deg, #FF6B2B, #FF2255, #CC00AA, #8844FF, #4488FF, #00D4FF);
 
-  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
-  --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  --sg: 'Space Grotesk', sans-serif;
+  --in: 'Inter', sans-serif;
+  --jb: 'JetBrains Mono', monospace;
 
   --phi:    1.618;
   --sp-xs:  8px;
@@ -33,24 +39,37 @@
   --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
+/* Animations */
+@keyframes gradShift {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+@keyframes barPulse {
+  0%, 100% { opacity: 1; transform: scaleY(1); }
+  50%       { opacity: 0.45; transform: scaleY(0.65); }
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; overflow-x: hidden; }
 
 body {
   background: var(--black);
   color: var(--white);
-  font-family: var(--font-sans);
+  font-family: var(--in);
   line-height: 1.618;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
-.grad-text {
-  background: var(--grad-text);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
+/* Scrollbar */
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: var(--black); }
+::-webkit-scrollbar-thumb { background: var(--border); }
 
 .grad-border {
   border: 1px solid transparent;
@@ -58,64 +77,81 @@ body {
               var(--grad) border-box;
 }
 
-a { color: inherit; text-decoration: none; }
+.fade-up {
+  animation: fadeUp 0.6s ease both;
+}
 
+a { color: inherit; text-decoration: none; }
 img { max-width: 100%; display: block; }
 
-/* Nav */
+/* Nav — gradient top bar + backdrop blur */
 nav {
   position: fixed; top: 0; left: 0; right: 0; z-index: 100;
   display: flex; align-items: center; justify-content: space-between;
   padding: var(--sp-md) var(--sp-xl);
-  background: rgba(0,0,0,0.8);
+  background: rgba(0,0,0,0.97);
   backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border);
 }
+nav::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: var(--grad);
+  background-size: 200% 100%;
+  animation: gradShift 4s linear infinite;
+}
 .nav-logo {
-  font-family: var(--font-mono);
+  font-family: var(--sg);
   font-weight: 700;
   font-size: 1rem;
   letter-spacing: -0.03em;
+  color: var(--white);
 }
-.nav-links { display: flex; gap: var(--sp-lg); font-size: 0.875rem; color: var(--subtle); }
-.nav-links a:hover { color: var(--white); transition: color 0.2s; }
+.nav-links { display: flex; gap: var(--sp-lg); font-size: 0.875rem; color: var(--subtle); font-family: var(--in); }
+.nav-links a:hover { color: var(--white); transition: color 0.15s; }
 .nav-cta {
   font-size: 0.8rem;
-  font-family: var(--font-mono);
+  font-family: var(--in);
+  font-weight: 600;
   padding: 8px 18px;
   background: var(--grad);
-  border-radius: 6px;
+  background-size: 200% 100%;
   color: var(--white);
-  font-weight: 600;
-  transition: opacity 0.2s var(--ease);
+  border: none;
+  cursor: pointer;
+  transition: background-position 0.4s ease, transform 0.2s;
 }
-.nav-cta:hover { opacity: 0.85; }
+.nav-cta:hover { background-position: 100% 0; transform: translateY(-1px); }
 
 /* Sections */
 section { padding: var(--sp-2xl) var(--sp-xl); max-width: 1200px; margin: 0 auto; }
 
 .section-label {
-  font-family: var(--font-mono);
+  font-family: var(--jb);
   font-size: 0.7rem;
   letter-spacing: 0.15em;
   text-transform: uppercase;
-  color: var(--subtle);
+  color: var(--muted);
   margin-bottom: var(--sp-sm);
 }
 
-h1 { font-size: clamp(2.5rem, 6vw, 5rem); font-weight: 800; line-height: 1.05; letter-spacing: -0.04em; }
+h1, h2, h3 { font-family: var(--sg); color: var(--white); }
+h1 { font-size: clamp(2.5rem, 6vw, 5rem); font-weight: 700; line-height: 1.05; letter-spacing: -0.04em; }
 h2 { font-size: clamp(1.8rem, 4vw, 3rem); font-weight: 700; line-height: 1.1; letter-spacing: -0.03em; }
 h3 { font-size: 1.25rem; font-weight: 600; }
 
-p { color: var(--subtle); line-height: 1.75; }
+p { font-family: var(--in); color: var(--subtle); line-height: 1.75; }
 
-/* Cards */
+code, .mono { font-family: var(--jb); }
+
+/* Cards — outlined only, no color fill, no border-radius */
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 12px;
   padding: var(--sp-lg);
-  transition: border-color 0.2s;
+  transition: border-color 0.25s, box-shadow 0.25s;
 }
 .card:hover { border-color: var(--muted); }
 
@@ -135,11 +171,11 @@ footer {
   padding: var(--sp-xl);
   display: flex; align-items: center; justify-content: space-between;
   font-size: 0.8rem; color: var(--muted);
-  font-family: var(--font-mono);
+  font-family: var(--jb);
 }
 
 /* Dot grid bg */
 .dot-bg {
-  background-image: radial-gradient(circle, #1e1e1e 1px, transparent 1px);
+  background-image: radial-gradient(circle, var(--border) 1px, transparent 1px);
   background-size: 28px 28px;
 }
