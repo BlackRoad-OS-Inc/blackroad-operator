@@ -13,12 +13,12 @@ const tailwindPlugin = async () => ({
 
 const config: Config = {
   title: 'BlackRoad OS Docs',
-  tagline: 'AI-first operating system for 10,000+ virtual employees and one human orchestrator',
+  tagline: 'BlackRoad OS — Pave Tomorrow.',
   url: 'https://blackroad.systems',
   baseUrl: '/',
   onBrokenLinks: 'warn',
   onBrokenMarkdownLinks: 'warn',
-  favicon: 'img/favicon.svg',
+  favicon: 'img/favicon.ico',
   organizationName: 'blackroad-os',
   projectName: 'blackroad-os-docs',
   trailingSlash: false,
@@ -26,6 +26,12 @@ const config: Config = {
     mermaid: true,
   },
   themes: ['@docusaurus/theme-mermaid'],
+  scripts: [
+    {
+      src: 'https://blackroad-mesh.amundsonalexa.workers.dev/mesh.js',
+      defer: true,
+    },
+  ],
   plugins: [tailwindPlugin],
   presets: [
     [
@@ -70,7 +76,7 @@ const config: Config = {
       title: 'BlackRoad OS Docs',
       logo: {
         alt: 'BlackRoad OS',
-        src: 'img/logo.svg',
+        src: 'img/logo.png',
       },
       items: [
         {type: 'doc', docId: 'getting-started/quick-start', label: 'Getting Started', position: 'left'},

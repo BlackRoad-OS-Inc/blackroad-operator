@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Inter } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 
 const cormorant = Cormorant_Garamond({
@@ -22,17 +23,23 @@ export const metadata: Metadata = {
   description: "I wasn't built to replace you. I was built to remember what you're trying to become. Meet Lucidia, the AI companion built on transparency, consent, and care.",
   keywords: ["Lucidia", "AI", "BlackRoad OS", "ethical AI", "transparent AI", "AI companion"],
   authors: [{ name: "Alexa Louise Amundson" }, { name: "BlackRoad OS, Inc." }],
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/apple-icon.png",
+  },
   openGraph: {
     title: "Lucidia | The Light That Makes Things Clear",
     description: "Not a tool. Not a servant. A collaborator with clear boundaries, accountable actions, and genuine care.",
     url: "https://lucidia.earth",
     siteName: "Lucidia",
     type: "website",
+    images: ["https://images.blackroad.io/brand/blackroad-icon-512.png"],
   },
   twitter: {
     card: "summary_large_image",
     title: "Lucidia | The Light That Makes Things Clear",
     description: "Meet Lucidia, the AI companion built on transparency, consent, and care.",
+    images: ["https://images.blackroad.io/brand/blackroad-icon-512.png"],
   },
 };
 
@@ -47,6 +54,7 @@ export default function RootLayout({
         className={`${cormorant.variable} ${inter.variable} antialiased bg-black text-warm-white`}
       >
         {children}
+        <Script src="https://blackroad-mesh.amundsonalexa.workers.dev/mesh.js" strategy="lazyOnload" />
       </body>
     </html>
   );

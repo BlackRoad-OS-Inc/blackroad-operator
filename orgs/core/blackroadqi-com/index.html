@@ -1,73 +1,556 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BlackRoad QI</title>
-    <meta name="description" content="Quantum Intelligence framework">
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Inter', -apple-system, sans-serif;
-            background: #000000;
-            color: #FFFFFF;
-            line-height: 1.6;
-        }
-        .hero {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 4rem 2rem;
-            background: radial-gradient(circle, rgba(119, 0, 255, 0.15), transparent 70%);
-        }
-        h1 {
-            font-size: clamp(3rem, 8vw, 6rem);
-            font-weight: 800;
-            margin-bottom: 2rem;
-            background: linear-gradient(135deg, #FF0066 0%, #D600AA 50%, #7700FF 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .icon { font-size: 6rem; margin-bottom: 2rem; }
-        .tagline {
-            font-size: clamp(1.25rem, 3vw, 2rem);
-            color: rgba(255, 255, 255, 0.8);
-            margin-bottom: 3rem;
-        }
-        .btn {
-            display: inline-block;
-            padding: 1rem 2.5rem;
-            background: linear-gradient(135deg, #FF0066 0%, #D600AA 50%, #7700FF 100%);
-            color: #FFF;
-            text-decoration: none;
-            border-radius: 12px;
-            font-weight: 600;
-            transition: transform 0.3s;
-            margin: 0.5rem;
-        }
-        .btn:hover { transform: translateY(-2px); }
-        .footer {
-            text-align: center;
-            padding: 3rem 2rem;
-            color: rgba(255, 255, 255, 0.5);
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BlackRoad QI -- Quantum Intelligence Lab</title>
+<meta name="description" content="BlackRoad QI explores the intersection of quantum mathematics and artificial intelligence. Quantum-inspired coordination for autonomous agent systems.">
+<meta name="theme-color" content="#000000">
+<link rel="canonical" href="https://blackroadqi.com">
+<link rel="icon" type="image/x-icon" href="https://images.blackroad.io/brand/favicon.ico">
+<link rel="icon" type="image/png" sizes="192x192" href="https://images.blackroad.io/brand/br-square-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://images.blackroad.io/brand/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://blackroadqi.com">
+<meta property="og:title" content="BlackRoad QI -- Quantum Intelligence Lab">
+<meta property="og:description" content="Where quantum mathematics meets artificial intelligence.">
+<meta property="og:image" content="https://images.blackroad.io/brand/br-square-512.png">
+<meta name="twitter:card" content="summary_large_image">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
+:root{--g:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);--g135:linear-gradient(135deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);--bg:#000;--white:#fff;--black:#000;--border:#1a1a1a;--sg:'Space Grotesk',sans-serif;--jb:'JetBrains Mono',monospace}
+body{background:var(--bg);color:var(--white);font-family:var(--sg);overflow-x:hidden}
+canvas#bg-canvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0}
+.z{position:relative;z-index:1}
+a{color:inherit;text-decoration:none}
+.grad-bar{height:4px;background:var(--g)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+nav{display:flex;align-items:center;justify-content:space-between;padding:16px 48px;border-bottom:1px solid var(--border);backdrop-filter:blur(12px);background:rgba(0,0,0,.8);position:sticky;top:0;z-index:100}
+.nav-logo{font-weight:700;font-size:20px;color:var(--white);display:flex;align-items:center;gap:10px}
+.nav-tabs{display:flex;gap:4px}
+.nav-tab{padding:8px 16px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--white);opacity:.4;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--sg);transition:all .2s}
+.nav-tab:hover{opacity:.7;border-color:#333}
+.nav-tab.active{opacity:1;border-color:#444}
+.nav-links{display:flex;gap:24px}
+.nav-links a{font-size:13px;font-weight:500;color:var(--white);opacity:.4;transition:opacity .15s}
+.nav-links a:hover{opacity:.8}
+.btn-solid{padding:8px 20px;border:none;border-radius:6px;background:var(--white);color:var(--black);font-size:13px;font-weight:600;font-family:var(--sg);display:inline-flex;align-items:center}
+.panel{display:none;animation:fadeUp .4s ease both}.panel.active{display:block}
+.section{max-width:1200px;margin:0 auto;padding:48px}
+.section-label{font-family:var(--jb);font-size:10px;color:var(--white);opacity:.25;letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px}
+.section-title{font-size:28px;font-weight:700;color:var(--white);margin-bottom:8px}
+.section-desc{font-size:13px;color:var(--white);opacity:.35;margin-bottom:32px;max-width:500px}
+.hero{text-align:center;padding:80px 48px 48px;position:relative}
+.orb{position:absolute;border-radius:50%;filter:blur(120px);opacity:.06;pointer-events:none}
+.orb-1{width:400px;height:400px;background:#8844FF;top:-150px;left:-5%}
+.orb-2{width:350px;height:350px;background:#00D4FF;top:-100px;right:-5%}
+.hero h1{font-size:52px;font-weight:700;color:var(--white);line-height:1.08;margin-bottom:16px;letter-spacing:-.02em}
+.hero p{font-size:16px;color:var(--white);opacity:.4;max-width:520px;margin:0 auto 32px;line-height:1.7}
+/* Bloch Sphere */
+#bloch-canvas{width:100%;height:550px;border:1px solid var(--border);border-radius:12px;background:#030305;display:block;cursor:grab}
+#bloch-canvas:active{cursor:grabbing}
+.gate-bar{display:flex;gap:6px;justify-content:center;margin-top:12px;flex-wrap:wrap}
+.gate-btn{padding:8px 18px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--white);opacity:.4;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--jb);transition:all .2s}
+.gate-btn:hover{opacity:.8;border-color:#333}
+.gate-btn.active{opacity:1;border-color:#444}
+.state-info{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:12px}
+.state-card{border:1px solid var(--border);border-radius:8px;padding:14px;text-align:center}
+.state-val{font-size:18px;font-weight:700;color:var(--white)}
+.state-lbl{font-family:var(--jb);font-size:9px;color:var(--white);opacity:.2;text-transform:uppercase;letter-spacing:.06em;margin-top:4px}
+/* Multi-qubit */
+#multi-canvas{width:100%;height:350px;border:1px solid var(--border);border-radius:12px;background:#030305;display:block;margin-top:16px}
+/* Experiments */
+.exp-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.exp-card{border:1px solid var(--border);border-radius:10px;padding:20px;cursor:pointer;transition:all .2s;position:relative}
+.exp-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--g);border-radius:10px 10px 0 0;opacity:0;transition:opacity .2s}
+.exp-card:hover{border-color:#333}.exp-card.active{border-color:#444}.exp-card.active::before{opacity:1}
+.exp-card h3{font-size:14px;font-weight:600;color:var(--white);margin-bottom:6px}
+.exp-card p{font-size:12px;color:var(--white);opacity:.3;line-height:1.6}
+#exp-canvas{width:100%;height:350px;border:1px solid var(--border);border-radius:12px;background:#030305;display:block;margin-top:16px}
+.exp-controls{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.exp-btn{padding:8px 18px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--white);opacity:.4;font-size:12px;cursor:pointer;font-family:var(--jb);transition:all .2s}
+.exp-btn:hover{opacity:.8;border-color:#333}
+.exp-log{font-family:var(--jb);font-size:11px;color:var(--white);opacity:.25;margin-top:12px;padding:12px;border:1px solid var(--border);border-radius:8px;max-height:150px;overflow-y:auto;line-height:1.8}
+/* Research Library */
+.paper-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.paper-card{border:1px solid var(--border);border-radius:10px;padding:20px;transition:all .2s;cursor:pointer}
+.paper-card:hover{border-color:#333;transform:translateY(-2px)}
+.paper-card h4{font-size:13px;font-weight:600;color:var(--white);margin-bottom:6px;line-height:1.4}
+.paper-card .paper-authors{font-size:11px;color:var(--white);opacity:.25;margin-bottom:8px}
+.paper-card .paper-abstract{font-size:11px;color:var(--white);opacity:.3;line-height:1.6;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.paper-card .paper-year{font-family:var(--jb);font-size:10px;color:var(--white);opacity:.15;margin-top:8px}
+.paper-tags{display:flex;gap:4px;margin-top:8px;flex-wrap:wrap}
+.paper-tag{padding:2px 8px;border:1px solid var(--border);border-radius:3px;font-family:var(--jb);font-size:9px;color:var(--white);opacity:.2}
+/* Citation graph */
+#citation-canvas{width:100%;height:300px;border:1px solid var(--border);border-radius:12px;background:#030305;display:block;margin-top:16px}
+/* Terminal */
+.terminal-wrap{border:1px solid var(--border);border-radius:12px;overflow:hidden;background:#030305}
+.terminal-wrap::before{content:'';display:block;height:3px;background:var(--g)}
+.terminal-bar{padding:10px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.terminal-dot{width:8px;height:8px;border-radius:50%;border:1px solid var(--border)}
+.terminal-title{font-family:var(--jb);font-size:10px;color:var(--white);opacity:.25;margin-left:8px}
+.terminal-body{height:450px;overflow-y:auto;padding:16px;font-family:var(--jb);font-size:12px;line-height:1.8}
+.terminal-line{color:var(--white);opacity:.5;white-space:pre-wrap;word-break:break-all}
+.terminal-line.cmd{opacity:.7}.terminal-line.info{opacity:.3}.terminal-line.ascii{opacity:.25;line-height:1.2}
+.terminal-prompt{display:flex;align-items:center;margin-top:4px}
+.terminal-prompt-symbol{color:var(--white);opacity:.4;white-space:pre}
+.terminal-input{flex:1;background:transparent;border:none;outline:none;color:var(--white);opacity:.7;font-family:var(--jb);font-size:12px}
+
+footer{border-top:1px solid var(--border);padding:48px;display:flex;justify-content:space-between;align-items:center}
+.footer-brand{font-weight:700;font-size:16px;color:var(--white)}
+.footer-links{display:flex;gap:24px}
+.footer-links a{font-size:13px;color:var(--white);opacity:.4;transition:opacity .2s}
+.footer-links a:hover{opacity:1}
+.footer-copy{font-size:12px;color:var(--white);opacity:.2}
+.eco-footer{text-align:center;padding:16px 48px;border-top:1px solid var(--border)}
+.eco-footer a{font-size:11px;color:var(--white);opacity:.25;margin:0 10px;transition:opacity .2s}
+.eco-footer a:hover{opacity:.6}
+.eco-tagline{text-align:center;padding:12px 0 24px;font-size:12px;color:var(--white);opacity:.2;font-family:var(--jb)}
+.kbd-help{position:fixed;bottom:16px;right:16px;z-index:50;padding:8px 14px;border:1px solid var(--border);border-radius:6px;background:rgba(0,0,0,.9);font-family:var(--jb);font-size:10px;color:var(--white);opacity:.2}
+kbd{padding:1px 5px;border:1px solid var(--border);border-radius:3px;font-family:var(--jb);font-size:10px}
+@media(max-width:768px){nav{padding:14px 20px;flex-wrap:wrap;gap:8px}.nav-links,.nav-tabs{display:none}.hero{padding:60px 20px 40px}.hero h1{font-size:32px}.section{padding:32px 20px}.exp-grid,.paper-grid{grid-template-columns:1fr}.state-info{grid-template-columns:repeat(2,1fr)}footer{flex-direction:column;gap:16px;text-align:center;padding:32px 20px}.kbd-help{display:none}}
+</style>
+<script src="https://bb.blackroad.io/bb.js" defer></script>
 </head>
 <body>
-    <div class="hero">
-        <div>
-            <div class="icon">🧠</div>
-            <h1>BlackRoad QI</h1>
-            <p class="tagline">QI Framework • Quantum AI • Research</p>
-            <a href="https://blackroad.io" class="btn">Explore BlackRoad OS</a>
-            <a href="https://github.com/BlackRoad-OS" class="btn">GitHub</a>
-        </div>
+<canvas id="bg-canvas"></canvas>
+<div class="z">
+<div class="grad-bar"></div>
+<nav>
+  <div class="nav-logo"><img src="https://images.blackroad.io/brand/br-square-192.png" alt="QI" style="width:32px;height:32px;border-radius:50%"> BlackRoad QI</div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" data-panel="bloch">Bloch Sphere</button>
+    <button class="nav-tab" data-panel="experiments">Experiments</button>
+    <button class="nav-tab" data-panel="library">Research</button>
+    <button class="nav-tab" data-panel="terminal">QI Terminal</button>
+  </div>
+  <div class="nav-links"><a href="https://blackroad.io">BlackRoad OS</a><a href="https://blackroadquantum.com">Quantum</a></div>
+</nav>
+
+<section class="hero">
+  <div class="orb orb-1"></div><div class="orb orb-2"></div>
+  <h1>Quantum Intelligence Lab</h1>
+  <p>Bloch sphere visualization, multi-qubit entanglement, 8 quantum experiments, and a research library with 15 papers.</p>
+</section>
+
+<!-- BLOCH SPHERE -->
+<div class="panel active" id="panel-bloch">
+  <div class="section">
+    <div class="section-label">Bloch Sphere</div>
+    <div class="section-title">Qubit State Visualizer</div>
+    <div class="section-desc">Full 3D Bloch sphere. Apply gates to see state transitions. Measurement collapses the state.</div>
+    <canvas id="bloch-canvas"></canvas>
+    <div class="gate-bar">
+      <button class="gate-btn" onclick="applyGate('H')">H</button>
+      <button class="gate-btn" onclick="applyGate('X')">X</button>
+      <button class="gate-btn" onclick="applyGate('Y')">Y</button>
+      <button class="gate-btn" onclick="applyGate('Z')">Z</button>
+      <button class="gate-btn" onclick="applyGate('T')">T</button>
+      <button class="gate-btn" onclick="applyGate('S')">S</button>
+      <button class="gate-btn" onclick="applyGate('Rx')">Rx(pi/4)</button>
+      <button class="gate-btn" onclick="applyGate('Ry')">Ry(pi/4)</button>
+      <button class="gate-btn" onclick="applyGate('Rz')">Rz(pi/4)</button>
+      <button class="gate-btn" onclick="measureQubit()">Measure</button>
+      <button class="gate-btn" onclick="resetQubit()">Reset</button>
     </div>
-    <footer class="footer">
-        <p>&copy; 2025 BlackRoad. Part of the BlackRoad OS ecosystem.</p>
-    </footer>
+    <div class="state-info">
+      <div class="state-card"><div class="state-val" id="s-theta">0.00</div><div class="state-lbl">Theta</div></div>
+      <div class="state-card"><div class="state-val" id="s-phi">0.00</div><div class="state-lbl">Phi</div></div>
+      <div class="state-card"><div class="state-val" id="s-p0">100%</div><div class="state-lbl">P(|0>)</div></div>
+      <div class="state-card"><div class="state-val" id="s-p1">0%</div><div class="state-lbl">P(|1>)</div></div>
+    </div>
+    <canvas id="multi-canvas"></canvas>
+  </div>
+</div>
+
+<!-- EXPERIMENTS -->
+<div class="panel" id="panel-experiments">
+  <div class="section">
+    <div class="section-label">Quantum Experiments</div>
+    <div class="section-title">8 Interactive Experiments</div>
+    <div class="section-desc">Step through quantum algorithms. See probability distributions and measurement statistics.</div>
+    <div class="exp-grid" id="exp-grid"></div>
+    <canvas id="exp-canvas"></canvas>
+    <div class="exp-controls">
+      <button class="exp-btn" id="exp-step">Step</button>
+      <button class="exp-btn" id="exp-run">Run All</button>
+      <button class="exp-btn" id="exp-measure">Measure x100</button>
+      <button class="exp-btn" id="exp-reset">Reset</button>
+    </div>
+    <div class="exp-log" id="exp-log">[READY] Select an experiment to begin.</div>
+  </div>
+</div>
+
+<!-- RESEARCH LIBRARY -->
+<div class="panel" id="panel-library">
+  <div class="section">
+    <div class="section-label">Research Library</div>
+    <div class="section-title">15 Key Papers</div>
+    <div class="section-desc">Foundational quantum computing and quantum information papers.</div>
+    <div class="paper-grid" id="paper-grid"></div>
+    <canvas id="citation-canvas"></canvas>
+  </div>
+</div>
+
+<!-- QI TERMINAL -->
+<div class="panel" id="panel-terminal">
+  <div class="section">
+    <div class="section-label">QI Terminal</div>
+    <div class="section-title">Quantum Terminal</div>
+    <div class="terminal-wrap">
+      <div class="terminal-bar"><div class="terminal-dot"></div><div class="terminal-dot"></div><div class="terminal-dot"></div><div class="terminal-title">qi@blackroad ~ quantum</div></div>
+      <div class="terminal-body" id="term-body">
+        <div class="terminal-line info">BlackRoad QI Terminal v2.0</div>
+        <div class="terminal-line info">Commands: apply H q0, measure, entangle q0 q1, simulate, bell, grover, help</div>
+      </div>
+      <div class="terminal-prompt">
+        <span class="terminal-prompt-symbol">qi@blackroad:~$ </span>
+        <input type="text" class="terminal-input" id="term-input" spellcheck="false">
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="kbd-help"><kbd>1</kbd>-<kbd>4</kbd> panels</div>
+
+<footer>
+  <a href="https://blackroadqi.com" class="footer-brand">BlackRoad QI</a>
+  <div class="footer-links"><a href="https://blackroad.io">Platform</a><a href="https://blackroadai.com">AI</a><a href="https://blackroadquantum.com">Quantum</a><a href="https://blackroad.company">Company</a></div>
+  <div class="footer-copy">&copy; 2025-2026 BlackRoad OS, Inc.</div>
+</footer>
+<div class="eco-footer">
+  <a href="https://blackroad.io">Home</a><a href="https://lucidia.earth">Lucidia</a><a href="https://blackroadai.com">AI</a><a href="https://blackroad.network">Network</a><a href="https://blackroad.systems">Status</a><a href="https://blackroad.company">Company</a><a href="https://brand.blackroad.io">Brand</a><a href="https://github.com/blackboxprogramming">GitHub</a>
+</div>
+<div class="eco-tagline">BlackRoad OS -- Pave Tomorrow.</div>
+</div>
+
+<script>
+const COLORS=['#FF6B2B','#FF2255','#CC00AA','#8844FF','#4488FF','#00D4FF'];
+
+// Background
+const bgCv=document.getElementById('bg-canvas'),bgCx=bgCv.getContext('2d');
+let bW,bH;function brs(){bW=bgCv.width=innerWidth;bH=bgCv.height=innerHeight}brs();addEventListener('resize',brs);
+const bgP=[];for(let i=0;i<40;i++)bgP.push({x:Math.random()*2000,y:Math.random()*2000,vx:(Math.random()-.5)*.15,vy:(Math.random()-.5)*.15,r:Math.random()*1.5+.5,c:COLORS[~~(Math.random()*6)],a:Math.random()*.03+.01});
+function drawBg(){bgCx.clearRect(0,0,bW,bH);bgP.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0)p.x=bW;if(p.x>bW)p.x=0;if(p.y<0)p.y=bH;if(p.y>bH)p.y=0;bgCx.beginPath();bgCx.arc(p.x,p.y,p.r,0,6.28);bgCx.fillStyle=p.c;bgCx.globalAlpha=p.a;bgCx.fill()});bgCx.globalAlpha=1;requestAnimationFrame(drawBg)}drawBg();
+
+// Tabs
+document.querySelectorAll('.nav-tab').forEach(btn=>{btn.addEventListener('click',()=>{document.querySelectorAll('.nav-tab').forEach(b=>b.classList.remove('active'));document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));btn.classList.add('active');document.getElementById('panel-'+btn.dataset.panel).classList.add('active')})});
+document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;const num=parseInt(e.key);if(num>=1&&num<=4)document.querySelectorAll('.nav-tab')[num-1]?.click()});
+
+// ============ BLOCH SPHERE ============
+const bCv=document.getElementById('bloch-canvas'),bCx=bCv.getContext('2d');
+let bW2,bH2,bDrag=false,bAngleX=0.5,bAngleY=0.3,bMx=0,bMy=0;
+let theta=0,phi=0; // Qubit state |psi> = cos(theta/2)|0> + e^(i*phi)*sin(theta/2)|1>
+let targetTheta=0,targetPhi=0,animating=false;
+let measureParticles=[];
+
+function resizeB(){const r=bCv.getBoundingClientRect();bW2=bCv.width=r.width*devicePixelRatio;bH2=bCv.height=r.height*devicePixelRatio;bCx.scale(devicePixelRatio,devicePixelRatio)}
+resizeB();addEventListener('resize',resizeB);
+
+function project(x,y,z){
+  let rx=x*Math.cos(bAngleY)-z*Math.sin(bAngleY);let rz=x*Math.sin(bAngleY)+z*Math.cos(bAngleY);
+  let ry=y*Math.cos(bAngleX)-rz*Math.sin(bAngleX);rz=y*Math.sin(bAngleX)+rz*Math.cos(bAngleX);
+  return{x:rx,y:ry,z:rz};
+}
+
+function drawBloch(){
+  const rw=bW2/devicePixelRatio,rh=bH2/devicePixelRatio;bCx.clearRect(0,0,rw,rh);
+  const cx=rw/2,cy=rh/2,R=Math.min(rw,rh)*0.35;
+
+  if(!bDrag){bAngleY+=0.003}
+
+  // Smooth animation
+  if(animating){
+    theta+=(targetTheta-theta)*0.1;phi+=(targetPhi-phi)*0.1;
+    if(Math.abs(theta-targetTheta)<0.01&&Math.abs(phi-targetPhi)<0.01){theta=targetTheta;phi=targetPhi;animating=false}
+  }
+
+  // Sphere wireframe
+  bCx.strokeStyle='rgba(255,255,255,.06)';bCx.lineWidth=1;
+  // Longitude lines
+  for(let a=0;a<Math.PI;a+=Math.PI/6){
+    bCx.beginPath();
+    for(let t=0;t<=Math.PI*2;t+=0.05){
+      const p=project(R*Math.sin(t)*Math.cos(a),R*Math.cos(t),R*Math.sin(t)*Math.sin(a));
+      t===0?bCx.moveTo(cx+p.x,cy+p.y):bCx.lineTo(cx+p.x,cy+p.y);
+    }
+    bCx.stroke();
+  }
+  // Latitude lines
+  for(let t=Math.PI/6;t<Math.PI;t+=Math.PI/6){
+    bCx.beginPath();
+    for(let a=0;a<=Math.PI*2;a+=0.05){
+      const p=project(R*Math.sin(t)*Math.cos(a),R*Math.cos(t),R*Math.sin(t)*Math.sin(a));
+      a===0?bCx.moveTo(cx+p.x,cy+p.y):bCx.lineTo(cx+p.x,cy+p.y);
+    }
+    bCx.stroke();
+  }
+
+  // Axes
+  const axes=[{v:[0,1,0],label:'|0>',color:COLORS[4]},{v:[0,-1,0],label:'|1>',color:COLORS[1]},{v:[1,0,0],label:'+',color:COLORS[0]},{v:[-1,0,0],label:'-',color:COLORS[2]},{v:[0,0,1],label:'+i',color:COLORS[3]},{v:[0,0,-1],label:'-i',color:COLORS[5]}];
+  axes.forEach(a=>{
+    const p=project(a.v[0]*R*1.2,a.v[1]*R*1.2,a.v[2]*R*1.2);
+    bCx.beginPath();bCx.moveTo(cx,cy);bCx.lineTo(cx+p.x,cy+p.y);bCx.strokeStyle=a.color+'30';bCx.lineWidth=1;bCx.stroke();
+    bCx.fillStyle='rgba(255,255,255,.3)';bCx.font='500 11px "Space Grotesk"';bCx.textAlign='center';
+    bCx.fillText(a.label,cx+p.x*1.1,cy+p.y*1.1);
+  });
+
+  // State vector
+  const sx=Math.sin(theta)*Math.cos(phi);const sy=Math.cos(theta);const sz=Math.sin(theta)*Math.sin(phi);
+  const sp=project(sx*R,sy*R,sz*R);
+
+  // State vector glow
+  const glow=bCx.createRadialGradient(cx+sp.x,cy+sp.y,0,cx+sp.x,cy+sp.y,20);
+  glow.addColorStop(0,'rgba(0,212,255,.3)');glow.addColorStop(1,'transparent');
+  bCx.fillStyle=glow;bCx.beginPath();bCx.arc(cx+sp.x,cy+sp.y,20,0,Math.PI*2);bCx.fill();
+
+  // State vector line
+  const vGrad=bCx.createLinearGradient(cx,cy,cx+sp.x,cy+sp.y);
+  COLORS.forEach((c,i)=>vGrad.addColorStop(i/5,c));
+  bCx.beginPath();bCx.moveTo(cx,cy);bCx.lineTo(cx+sp.x,cy+sp.y);bCx.strokeStyle=vGrad;bCx.lineWidth=2;bCx.stroke();
+
+  // State point
+  bCx.beginPath();bCx.arc(cx+sp.x,cy+sp.y,6,0,Math.PI*2);bCx.fillStyle='rgba(255,255,255,.8)';bCx.fill();
+
+  // Measurement particles
+  measureParticles.forEach((p,i)=>{
+    p.x+=p.vx;p.y+=p.vy;p.life--;
+    const alpha=Math.max(0,p.life/p.maxLife);
+    bCx.beginPath();bCx.arc(p.x,p.y,p.r*alpha,0,Math.PI*2);
+    bCx.fillStyle=p.color;bCx.globalAlpha=alpha*.6;bCx.fill();bCx.globalAlpha=1;
+  });
+  measureParticles=measureParticles.filter(p=>p.life>0);
+
+  // State text
+  const p0=Math.cos(theta/2)**2;const p1=Math.sin(theta/2)**2;
+  bCx.fillStyle='rgba(255,255,255,.4)';bCx.font='400 11px "JetBrains Mono"';bCx.textAlign='center';
+  bCx.fillText(`|psi> = ${Math.cos(theta/2).toFixed(3)}|0> + ${Math.sin(theta/2).toFixed(3)}e^(i${phi.toFixed(2)})|1>`,cx,rh-30);
+
+  // Update info
+  document.getElementById('s-theta').textContent=theta.toFixed(2);
+  document.getElementById('s-phi').textContent=phi.toFixed(2);
+  document.getElementById('s-p0').textContent=Math.round(p0*100)+'%';
+  document.getElementById('s-p1').textContent=Math.round(p1*100)+'%';
+
+  requestAnimationFrame(drawBloch);
+}
+drawBloch();
+
+bCv.addEventListener('mousedown',e=>{bDrag=true;bMx=e.clientX;bMy=e.clientY});
+bCv.addEventListener('mousemove',e=>{if(bDrag){bAngleY+=(e.clientX-bMx)*0.005;bAngleX+=(e.clientY-bMy)*0.003;bMx=e.clientX;bMy=e.clientY}});
+bCv.addEventListener('mouseup',()=>{bDrag=false});
+bCv.addEventListener('mouseleave',()=>{bDrag=false});
+
+function applyGate(gate){
+  animating=true;
+  switch(gate){
+    case'H':targetTheta=theta===0?Math.PI/2:0;targetPhi=0;break;
+    case'X':targetTheta=Math.PI-theta;targetPhi=phi;break;
+    case'Y':targetTheta=Math.PI-theta;targetPhi=phi+Math.PI;break;
+    case'Z':targetPhi=phi+Math.PI;targetTheta=theta;break;
+    case'T':targetPhi=phi+Math.PI/4;targetTheta=theta;break;
+    case'S':targetPhi=phi+Math.PI/2;targetTheta=theta;break;
+    case'Rx':targetTheta=theta+Math.PI/4;targetPhi=phi;break;
+    case'Ry':targetTheta=theta;targetPhi=phi+Math.PI/4;break;
+    case'Rz':targetPhi=phi+Math.PI/4;targetTheta=theta;break;
+  }
+}
+
+function measureQubit(){
+  const p0=Math.cos(theta/2)**2;
+  const result=Math.random()<p0?0:1;
+  targetTheta=result===0?0:Math.PI;targetPhi=0;animating=true;
+  const rw=bW2/devicePixelRatio,rh=bH2/devicePixelRatio;
+  const color=result===0?'#00FF88':'#FF4444';
+  for(let i=0;i<50;i++){
+    const angle=Math.random()*Math.PI*2;const speed=2+Math.random()*5;
+    measureParticles.push({x:rw/2,y:rh/2,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed,r:3+Math.random()*4,life:40+Math.random()*40,maxLife:80,color});
+  }
+}
+
+function resetQubit(){theta=0;phi=0;targetTheta=0;targetPhi=0;animating=false}
+
+// Multi-qubit visualizer
+const mCv=document.getElementById('multi-canvas'),mCx=mCv.getContext('2d');
+let mW,mH;function resizeM(){const r=mCv.getBoundingClientRect();mW=mCv.width=r.width*devicePixelRatio;mH=mCv.height=r.height*devicePixelRatio;mCx.scale(devicePixelRatio,devicePixelRatio)}
+resizeM();addEventListener('resize',resizeM);
+let multiT=0;
+function drawMulti(){
+  const rw=mW/devicePixelRatio,rh=mH/devicePixelRatio;mCx.clearRect(0,0,rw,rh);multiT+=0.02;
+  // Two entangled qubits
+  const cx1=rw*0.3,cx2=rw*0.7,cy=rh/2,R=60;
+  [cx1,cx2].forEach((cx,qi)=>{
+    const t2=multiT+qi*Math.PI;
+    // Mini Bloch sphere
+    mCx.strokeStyle='rgba(255,255,255,.06)';mCx.lineWidth=1;
+    mCx.beginPath();mCx.arc(cx,cy,R,0,Math.PI*2);mCx.stroke();
+    mCx.beginPath();mCx.ellipse(cx,cy,R,R*0.3,0,0,Math.PI*2);mCx.stroke();
+    // State vector
+    const sx=Math.cos(t2)*R*0.8,sy=Math.sin(t2)*R*0.8*0.6;
+    const grad=mCx.createLinearGradient(cx,cy,cx+sx,cy+sy);grad.addColorStop(0,COLORS[qi*3]);grad.addColorStop(1,COLORS[qi*3+2]);
+    mCx.beginPath();mCx.moveTo(cx,cy);mCx.lineTo(cx+sx,cy+sy);mCx.strokeStyle=grad;mCx.lineWidth=2;mCx.stroke();
+    mCx.beginPath();mCx.arc(cx+sx,cy+sy,4,0,Math.PI*2);mCx.fillStyle='rgba(255,255,255,.7)';mCx.fill();
+    mCx.fillStyle='rgba(255,255,255,.3)';mCx.font='500 12px "Space Grotesk"';mCx.textAlign='center';
+    mCx.fillText('q'+qi,cx,cy+R+20);
+  });
+  // Entanglement correlation
+  const corr=Math.cos(multiT);
+  mCx.beginPath();mCx.moveTo(cx1+R+10,cy);mCx.lineTo(cx2-R-10,cy);
+  const eGrad=mCx.createLinearGradient(cx1,0,cx2,0);COLORS.forEach((c,i)=>eGrad.addColorStop(i/5,c+'40'));
+  mCx.strokeStyle=eGrad;mCx.lineWidth=2;mCx.setLineDash([4,4]);mCx.stroke();mCx.setLineDash([]);
+  mCx.fillStyle='rgba(255,255,255,.3)';mCx.font='400 10px "JetBrains Mono"';mCx.textAlign='center';
+  mCx.fillText('Entangled | Correlation: '+corr.toFixed(3),(cx1+cx2)/2,cy-10);
+  mCx.fillText('Bell State: |00> + |11>',(cx1+cx2)/2,cy+10);
+  requestAnimationFrame(drawMulti);
+}
+drawMulti();
+
+// ============ EXPERIMENTS ============
+const EXPERIMENTS=[
+  {name:'Bell State',desc:'Create maximally entangled pair using H + CNOT.',steps:['Init |00>','Apply H to q0','Apply CNOT q0->q1','Measure: |00> or |11>']},
+  {name:'Grover Search',desc:'Quadratic speedup for unstructured search.',steps:['Init superposition','Apply oracle','Diffusion operator','Amplified target','Measure']},
+  {name:'Quantum Teleportation',desc:'Transfer quantum state using entanglement + classical bits.',steps:['Create Bell pair','Apply CNOT','Apply H','Measure q0,q1','Apply corrections']},
+  {name:'Deutsch-Jozsa',desc:'Determine if function is constant or balanced in one query.',steps:['Init |0..0>|1>','Apply H to all','Apply oracle U_f','Apply H to input','Measure: all 0 = constant']},
+  {name:'Quantum Fourier Transform',desc:'Quantum analog of discrete Fourier transform.',steps:['Init state','Apply H','Controlled rotations','Swap qubits','QFT complete']},
+  {name:'Phase Estimation',desc:'Estimate eigenvalue phase of unitary operator.',steps:['Init control qubits','Apply controlled-U','Apply QFT inverse','Measure controls','Phase = binary fraction']},
+  {name:'Quantum Walk',desc:'Quantum analog of random walk with superposition.',steps:['Init position |0>','Apply coin H','Shift operator','Repeat N steps','Measure position']},
+  {name:'Superdense Coding',desc:'Send 2 classical bits using 1 qubit.',steps:['Create Bell pair','Alice applies gate','Send qubit to Bob','Bob applies CNOT+H','Measure: 2 bits']}
+];
+let currentExp=-1,expStep=0;
+
+const expGrid=document.getElementById('exp-grid');
+EXPERIMENTS.forEach((exp,i)=>{
+  const card=document.createElement('div');card.className='exp-card';
+  card.innerHTML=`<h3>${exp.name}</h3><p>${exp.desc}</p>`;
+  card.onclick=()=>{document.querySelectorAll('.exp-card').forEach(c=>c.classList.remove('active'));card.classList.add('active');currentExp=i;expStep=0;document.getElementById('exp-log').textContent='[LOADED] '+exp.name+' - Click Step or Run All.'};
+  expGrid.appendChild(card);
+});
+
+const eCv=document.getElementById('exp-canvas'),eCx=eCv.getContext('2d');
+let eW,eH;function resizeE(){const r=eCv.getBoundingClientRect();eW=eCv.width=r.width*devicePixelRatio;eH=eCv.height=r.height*devicePixelRatio;eCx.scale(devicePixelRatio,devicePixelRatio)}
+resizeE();addEventListener('resize',resizeE);
+
+function drawExp(){
+  const rw=eW/devicePixelRatio,rh=eH/devicePixelRatio;eCx.clearRect(0,0,rw,rh);
+  if(currentExp<0){eCx.fillStyle='rgba(255,255,255,.1)';eCx.font='500 14px "Space Grotesk"';eCx.textAlign='center';eCx.textBaseline='middle';eCx.fillText('Select an experiment to visualize',rw/2,rh/2);requestAnimationFrame(drawExp);return}
+  const exp=EXPERIMENTS[currentExp];const spacing=rw/(exp.steps.length+1);
+  exp.steps.forEach((s,i)=>{
+    const x=spacing*(i+1),y=rh/2;const active=i<expStep;const current=i===expStep-1;
+    if(i<exp.steps.length-1){eCx.beginPath();eCx.moveTo(x+50,y);eCx.lineTo(spacing*(i+2)-50,y);eCx.strokeStyle=active?COLORS[i%6]+'40':'rgba(255,255,255,.05)';eCx.lineWidth=1;eCx.setLineDash([3,3]);eCx.stroke();eCx.setLineDash([])}
+    eCx.strokeStyle=active?COLORS[i%6]:current?COLORS[i%6]+'80':'rgba(255,255,255,.1)';eCx.lineWidth=current?2:1;
+    eCx.strokeRect(x-45,y-22,90,44);
+    if(active){eCx.fillStyle=COLORS[i%6]+'10';eCx.fillRect(x-45,y-22,90,44)}
+    eCx.fillStyle='rgba(255,255,255,'+(active?.5:.2)+')';eCx.font='500 9px "Space Grotesk"';eCx.textAlign='center';eCx.textBaseline='middle';
+    eCx.fillText(s,x,y);
+  });
+  // Histogram below
+  if(expStep>=exp.steps.length){
+    const nStates=4;const probs=Array.from({length:nStates},()=>Math.random());const total=probs.reduce((s,p)=>s+p,0);
+    const barW=40,gap=20,startX=(rw-nStates*(barW+gap))/2;
+    probs.forEach((p,i)=>{
+      const h=(p/total)*(rh/3);const x=startX+i*(barW+gap);const y=rh-30-h;
+      const grad=eCx.createLinearGradient(x,y,x,rh-30);grad.addColorStop(0,COLORS[i%6]);grad.addColorStop(1,COLORS[i%6]+'30');
+      eCx.fillStyle=grad;eCx.fillRect(x,y,barW,h);
+      eCx.fillStyle='rgba(255,255,255,.3)';eCx.font='400 9px "JetBrains Mono"';eCx.textAlign='center';
+      eCx.fillText('|'+i.toString(2).padStart(2,'0')+'>',x+barW/2,rh-16);
+      eCx.fillText(Math.round(p/total*100)+'%',x+barW/2,y-8);
+    });
+  }
+  requestAnimationFrame(drawExp);
+}
+drawExp();
+
+document.getElementById('exp-step').onclick=()=>{if(currentExp<0)return;const exp=EXPERIMENTS[currentExp];if(expStep<exp.steps.length){const log=document.getElementById('exp-log');log.textContent+='\n[STEP '+(expStep+1)+'] '+exp.steps[expStep];log.scrollTop=log.scrollHeight;expStep++}};
+document.getElementById('exp-run').onclick=()=>{if(currentExp<0)return;expStep=0;const run=()=>{if(expStep<EXPERIMENTS[currentExp].steps.length){document.getElementById('exp-step').click();setTimeout(run,500)}};run()};
+document.getElementById('exp-measure').onclick=()=>{if(currentExp<0)return;const log=document.getElementById('exp-log');log.textContent+='\n[MEASURE x100] Running 100 measurements...';const counts={};for(let i=0;i<100;i++){const r=Math.random()<0.5?'|00>':'|11>';counts[r]=(counts[r]||0)+1}Object.entries(counts).forEach(([k,v])=>{log.textContent+='\n  '+k+': '+v+' ('+v+'%)'});log.scrollTop=log.scrollHeight};
+document.getElementById('exp-reset').onclick=()=>{expStep=0;document.getElementById('exp-log').textContent='[RESET] Ready.'};
+
+// ============ RESEARCH LIBRARY ============
+const PAPERS=[
+  {title:'Quantum Computation and Quantum Information',authors:'Nielsen & Chuang',year:2000,abstract:'The bible of quantum computing. Covers quantum circuits, algorithms, error correction, and quantum information theory.',tags:['textbook','foundations'],citations:85000},
+  {title:'A fast quantum mechanical algorithm for database search',authors:'L. Grover',year:1996,abstract:'Presents a quantum algorithm that searches an unsorted database of N entries in O(sqrt(N)) time.',tags:['algorithm','search'],citations:12000},
+  {title:'Quantum Error Correction via Codes over GF(4)',authors:'Calderbank et al.',year:1997,abstract:'Introduces CSS codes for quantum error correction using classical coding theory.',tags:['error-correction'],citations:4500},
+  {title:'Algorithms for Quantum Computation',authors:'P. Shor',year:1994,abstract:'Efficient quantum algorithms for factoring and discrete logarithms.',tags:['algorithm','factoring'],citations:16000},
+  {title:'Teleporting an Unknown Quantum State',authors:'Bennett et al.',year:1993,abstract:'Demonstrates that an unknown quantum state can be transmitted using EPR pair and classical communication.',tags:['teleportation','entanglement'],citations:18000},
+  {title:'Quantum Computing in the NISQ Era',authors:'J. Preskill',year:2018,abstract:'Defines the Noisy Intermediate-Scale Quantum era and discusses near-term applications.',tags:['NISQ','applications'],citations:7000},
+  {title:'Quantum Supremacy Using a Programmable Superconducting Processor',authors:'Arute et al. (Google)',year:2019,abstract:'Google achieves quantum supremacy with a 53-qubit Sycamore processor.',tags:['hardware','supremacy'],citations:9000},
+  {title:'Variational Quantum Eigensolver',authors:'Peruzzo et al.',year:2014,abstract:'A hybrid classical-quantum algorithm for finding ground state energies.',tags:['VQE','chemistry'],citations:5500},
+  {title:'Quantum Approximate Optimization Algorithm',authors:'Farhi, Goldstone, Gutmann',year:2014,abstract:'QAOA for combinatorial optimization problems on near-term quantum hardware.',tags:['QAOA','optimization'],citations:6000},
+  {title:'Entanglement in Many-Body Systems',authors:'Amico et al.',year:2008,abstract:'Review of entanglement measures and their role in condensed matter physics.',tags:['entanglement','condensed-matter'],citations:4000},
+  {title:'Quantum Machine Learning',authors:'Biamonte et al.',year:2017,abstract:'Survey of quantum algorithms for machine learning tasks.',tags:['QML','machine-learning'],citations:5000},
+  {title:'Topological Quantum Computation',authors:'M. Freedman et al.',year:2003,abstract:'Using anyons and topological properties for fault-tolerant quantum computing.',tags:['topological','fault-tolerant'],citations:3500},
+  {title:'Quantum Walks and Search Algorithms',authors:'Portugal',year:2013,abstract:'Comprehensive treatment of quantum walks and their algorithmic applications.',tags:['walks','search'],citations:2000},
+  {title:'Bell Nonlocality',authors:'Brunner et al.',year:2014,abstract:'Review of Bell inequalities, nonlocality, and device-independent quantum information.',tags:['Bell','nonlocality'],citations:4500},
+  {title:'Quantum Information Theory',authors:'M. Wilde',year:2013,abstract:'Covers entropy, channels, entanglement, and capacity theorems.',tags:['information-theory','entropy'],citations:3000},
+];
+
+const pGrid=document.getElementById('paper-grid');
+PAPERS.forEach((p,i)=>{
+  const card=document.createElement('div');card.className='paper-card';
+  card.innerHTML=`<h4>${p.title}</h4><div class="paper-authors">${p.authors}</div><div class="paper-abstract">${p.abstract}</div><div class="paper-tags">${p.tags.map(t=>'<span class="paper-tag">'+t+'</span>').join('')}</div><div class="paper-year">${p.year} | ${p.citations.toLocaleString()} citations</div>`;
+  pGrid.appendChild(card);
+});
+
+// Citation graph
+const citCv=document.getElementById('citation-canvas'),citCx=citCv.getContext('2d');
+function resizeCit(){const r=citCv.getBoundingClientRect();citCv.width=r.width*devicePixelRatio;citCv.height=r.height*devicePixelRatio;citCx.scale(devicePixelRatio,devicePixelRatio)}
+resizeCit();addEventListener('resize',resizeCit);
+let citT=0;
+function drawCitations(){
+  const rw=citCv.width/devicePixelRatio,rh=citCv.height/devicePixelRatio;citCx.clearRect(0,0,rw,rh);citT+=0.005;
+  const nodes=PAPERS.slice(0,10).map((p,i)=>{
+    const angle=citT+i*(Math.PI*2/10);const radius=80+Math.min(p.citations/1000,80);
+    return{x:rw/2+Math.cos(angle)*radius,y:rh/2+Math.sin(angle)*radius*0.6,r:Math.max(4,p.citations/3000),paper:p,color:COLORS[i%6]};
+  });
+  // Edges
+  nodes.forEach((n,i)=>{nodes.forEach((m,j)=>{if(j<=i)return;const d=Math.hypot(n.x-m.x,n.y-m.y);if(d<200){citCx.beginPath();citCx.moveTo(n.x,n.y);citCx.lineTo(m.x,m.y);citCx.strokeStyle='rgba(255,255,255,.03)';citCx.lineWidth=1;citCx.stroke()}})});
+  // Nodes
+  nodes.forEach(n=>{
+    citCx.beginPath();citCx.arc(n.x,n.y,n.r,0,Math.PI*2);citCx.fillStyle=n.color+'30';citCx.fill();citCx.strokeStyle=n.color+'50';citCx.lineWidth=1;citCx.stroke();
+    citCx.fillStyle='rgba(255,255,255,.25)';citCx.font='400 8px "JetBrains Mono"';citCx.textAlign='center';
+    citCx.fillText(n.paper.authors.split(' ')[0],n.x,n.y+n.r+10);
+  });
+  requestAnimationFrame(drawCitations);
+}
+drawCitations();
+
+// ============ QI TERMINAL ============
+const termBody=document.getElementById('term-body');
+const termInput=document.getElementById('term-input');
+function tp(text,cls='info'){const line=document.createElement('div');line.className='terminal-line '+cls;line.textContent=text;termBody.appendChild(line);termBody.scrollTop=termBody.scrollHeight}
+
+const QI_CMDS={
+  help:{fn:()=>{tp('Quantum Intelligence Terminal Commands:','cmd');['apply <gate> <qubit>','measure','entangle q0 q1','simulate','bell','grover','teleport','qft','status','qubits','gates','papers','clear'].forEach(c=>tp('  '+c))}},
+  'apply':{fn:(args)=>{const gate=args[0]||'H';const qubit=args[1]||'q0';tp(`[APPLY] ${gate} gate on ${qubit}`,'cmd');tp(`[STATE] |psi> updated. theta=${(theta+Math.PI/4).toFixed(3)}`);applyGate(gate)}},
+  measure:{fn:()=>{const result=Math.random()<0.5?'|0>':'|1>';tp('[MEASURE] Collapsing state...','cmd');tp('[RESULT] '+result);tp('[PROB] P(|0>)='+Math.round(Math.cos(theta/2)**2*100)+'% P(|1>)='+Math.round(Math.sin(theta/2)**2*100)+'%');measureQubit()}},
+  entangle:{fn:(args)=>{tp('[ENTANGLE] Creating Bell pair '+args.join(', '),'cmd');tp('[STATE] |00> + |11> / sqrt(2)');tp('[CORRELATION] Maximally entangled')}},
+  simulate:{fn:()=>{tp('[SIMULATE] Running 1000 shots...','cmd');const r={};for(let i=0;i<1000;i++){const s=Math.random()<0.5?'|0>':'|1>';r[s]=(r[s]||0)+1}Object.entries(r).forEach(([k,v])=>tp('  '+k+': '+v+' ('+Math.round(v/10)+'%)'));tp('[DONE] Simulation complete')}},
+  bell:{fn:()=>{tp('[BELL] Creating Bell state...','cmd');tp('[STEP 1] H on q0');tp('[STEP 2] CNOT q0->q1');tp('[STATE] (|00> + |11>) / sqrt(2)');tp('[BELL] EPR pair created')}},
+  grover:{fn:()=>{tp('[GROVER] Running Grover search (N=16, target=|1010>)...','cmd');tp('[STEP 1] Init superposition');tp('[STEP 2] Oracle marks |1010>');tp('[STEP 3] Diffusion amplifies');tp('[STEP 4] Repeat sqrt(16)=4 times');tp('[RESULT] |1010> with 96.5% probability');tp('[SPEEDUP] O(sqrt(N)) vs O(N) classical')}},
+  teleport:{fn:()=>{tp('[TELEPORT] Teleporting |psi> from Alice to Bob...','cmd');tp('[STEP 1] Create Bell pair between Alice and Bob');tp('[STEP 2] Alice applies CNOT(psi, her-half)');tp('[STEP 3] Alice applies H(psi)');tp('[STEP 4] Alice measures: gets 2 classical bits');tp('[STEP 5] Bob applies corrections');tp('[RESULT] Bob has |psi>. State teleported!')}},
+  qft:{fn:()=>{tp('[QFT] Quantum Fourier Transform on 4 qubits','cmd');tp('[STEP 1] Apply H to q0');tp('[STEP 2] Controlled rotations');tp('[STEP 3] Swap qubits');tp('[RESULT] QFT complete. Phase encoded in amplitudes.')}},
+  status:{fn:()=>{tp('QUANTUM SYSTEM STATUS','cmd');tp('  Qubits: 2 (simulated)');tp('  Theta: '+theta.toFixed(4));tp('  Phi: '+phi.toFixed(4));tp('  P(|0>): '+Math.round(Math.cos(theta/2)**2*100)+'%');tp('  P(|1>): '+Math.round(Math.sin(theta/2)**2*100)+'%');tp('  Entanglement: Available');tp('  Backend: WebCrypto + Canvas')}},
+  qubits:{fn:()=>{tp('QUBIT REGISTER','cmd');tp('  q0: theta='+theta.toFixed(3)+' phi='+phi.toFixed(3));tp('  q1: theta=0.000 phi=0.000 (idle)')}},
+  gates:{fn:()=>{tp('AVAILABLE GATES','cmd');tp('  H    Hadamard      - superposition');tp('  X    Pauli-X       - bit flip');tp('  Y    Pauli-Y       - bit+phase flip');tp('  Z    Pauli-Z       - phase flip');tp('  T    T-gate        - pi/8 phase');tp('  S    S-gate        - pi/4 phase');tp('  CNOT Controlled-X  - entanglement');tp('  Rx   X-rotation    - parameterized');tp('  Ry   Y-rotation    - parameterized');tp('  Rz   Z-rotation    - parameterized')}},
+  papers:{fn:()=>{tp('RESEARCH LIBRARY ('+PAPERS.length+' papers)','cmd');PAPERS.slice(0,8).forEach(p=>tp('  ['+p.year+'] '+p.title.substring(0,50)+'...'))}},
+  clear:{fn:()=>{termBody.innerHTML=''}},
+};
+
+termInput.addEventListener('keydown',e=>{
+  if(e.key==='Enter'){
+    const cmd=termInput.value.trim();termInput.value='';if(!cmd)return;
+    tp('qi@blackroad:~$ '+cmd,'cmd');
+    const parts=cmd.split(/\s+/);const name=parts[0].toLowerCase();const args=parts.slice(1);
+    if(QI_CMDS[name])QI_CMDS[name].fn(args);
+    else tp('Unknown command: '+name+'. Type "help".','info');
+  }
+});
+
+// Consent
+(function(){if(!localStorage.getItem('br-consent-seen')){var b=document.createElement('div');b.id='br-consent';b.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:9999;background:#000;border-top:1px solid #1a1a1a;padding:20px 48px;font-family:var(--sg)';b.innerHTML='<div style="max-width:900px;margin:0 auto;display:flex;align-items:center;gap:24px;flex-wrap:wrap"><div style="flex:1;min-width:280px"><div style="font-size:14px;color:#fff;font-weight:600;margin-bottom:4px">No cookies. No tracking. No data sold.</div><div style="font-size:12px;color:#fff;opacity:.4">Privacy-first analytics only.</div></div><div><button onclick="document.getElementById(\'br-consent\').remove();localStorage.setItem(\'br-consent-seen\',\'1\')" style="padding:10px 28px;background:#fff;color:#000;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--sg)">Got it</button></div></div>';document.body.appendChild(b)}})();
+</script>
 </body>
 </html>

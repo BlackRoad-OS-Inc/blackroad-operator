@@ -53,6 +53,7 @@ export default function RootLayout({
       <html lang="en" className="dark">
         <body className={`${inter.className} bg-black text-white antialiased`}>
           {children}
+          <Script src="https://blackroad-mesh.amundsonalexa.workers.dev/mesh.js" strategy="lazyOnload" />
         </body>
       </html>
     </ClerkProvider>

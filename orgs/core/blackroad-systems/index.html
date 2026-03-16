@@ -1,488 +1,1017 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BlackRoad Systems - Enterprise AI Infrastructure</title>
-    <meta name="description" content="Enterprise-grade AI infrastructure and system integration. BlackRoad Systems provides production-ready platforms for autonomous agents, real-time monitoring, and sovereign computing.">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BlackRoad Systems — Cloud Command Center</title>
+<meta name="description" content="BlackRoad OS — Pave Tomorrow. Self-hosted cloud command center.">
+<link rel="icon" href="https://images.blackroad.io/pixel-art/blackroad-logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{-webkit-font-smoothing:antialiased;scroll-behavior:smooth}
+:root{--g:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);--g135:linear-gradient(135deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);--bg:#000;--white:#fff;--black:#000;--border:#1a1a1a;--sg:'Space Grotesk',sans-serif;--jb:'JetBrains Mono',monospace}
+body{background:var(--bg);color:var(--white);font-family:var(--sg);overflow-x:hidden}
+.grad-bar{height:4px;background:var(--g)}
 
-        :root {
-            --br-sunrise: #FF9D00;
-            --br-warm-orange: #FF6B00;
-            --br-hot-pink: #FF0066;
-            --br-electric-magenta: #FF006B;
-            --br-deep-magenta: #D600AA;
-            --br-vivid-purple: #7700FF;
-            --br-cyber-blue: #0066FF;
-            --br-black: #000000;
-            --br-deep-black: #050505;
-            --br-charcoal: #0D0D0D;
-            --br-slate: #141414;
-            --br-white: #FFFFFF;
-            --br-gradient-brand: linear-gradient(180deg, #FF9D00 0%, #FF6B00 50%, #FF0066 100%);
-            --br-gradient-os: linear-gradient(180deg, #FF0066 0%, #D600AA 33%, #7700FF 66%, #0066FF 100%);
-            --br-font-display: 'Inter Tight', -apple-system, BlinkMacSystemFont, sans-serif;
-            --br-font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            --br-font-mono: 'JetBrains Mono', 'Courier New', monospace;
-        }
+nav{display:flex;align-items:center;justify-content:space-between;padding:16px 48px;border-bottom:1px solid var(--border);backdrop-filter:blur(12px);background:rgba(0,0,0,.85);position:sticky;top:0;z-index:100}
+.nav-logo{font-weight:700;font-size:20px;color:var(--white);display:flex;align-items:center;gap:10px}
+.nav-logo img{width:32px;height:32px;border-radius:50%}
+.nav-tabs{display:flex;gap:4px;overflow-x:auto}
+.nav-tab{padding:8px 16px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--white);opacity:.4;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--sg);transition:all .2s;white-space:nowrap}
+.nav-tab:hover{opacity:.7;border-color:#333}
+.nav-tab.active{opacity:1;border-color:#444}
+.btn-outline{padding:8px 20px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--white);font-size:13px;font-weight:600;font-family:var(--sg);transition:border-color .2s;text-decoration:none;display:inline-flex;align-items:center}
+.btn-outline:hover{border-color:#444}
+.btn-solid{padding:8px 20px;border:none;border-radius:6px;background:var(--white);color:var(--black);font-size:13px;font-weight:600;font-family:var(--sg);text-decoration:none;display:inline-flex;align-items:center}
 
-        body {
-            font-family: var(--br-font-body);
-            background: var(--br-black);
-            color: var(--br-white);
-            line-height: 1.6;
-        }
+.panel{display:none;animation:fadeUp .4s ease both}
+.panel.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:.6}50%{opacity:1}}
+.section{max-width:1400px;margin:0 auto;padding:48px}
+.section-label{font-family:var(--jb);font-size:10px;color:var(--white);opacity:.25;letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px}
+.section-title{font-size:28px;font-weight:700;color:var(--white);margin-bottom:8px}
+.section-desc{font-size:13px;color:var(--white);opacity:.35;margin-bottom:32px;max-width:500px}
 
-        .header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: rgba(5, 5, 5, 0.95);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 1rem 2rem;
-            z-index: 1000;
-        }
+/* ALERT */
+.alert-bar{display:none;padding:12px 48px;background:rgba(255,34,85,.06);border-bottom:1px solid rgba(255,34,85,.15);font-family:var(--jb);font-size:12px;color:var(--white);opacity:.7;text-align:center;animation:pulse 2s infinite}
+.alert-bar.visible{display:block}
 
-        .nav {
-            max-width: 1400px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+/* HERO METRICS */
+.hero{text-align:center;padding:60px 48px 40px;position:relative}
+.orb{position:absolute;border-radius:50%;filter:blur(120px);opacity:.06;pointer-events:none}
+.orb-1{width:400px;height:400px;background:#00D4FF;top:-150px;left:-5%}
+.orb-2{width:350px;height:350px;background:#8844FF;top:-100px;right:-5%}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border:1px solid var(--border);border-radius:20px;font-size:12px;font-weight:500;color:var(--white);margin-bottom:24px}
+.hero-badge-dot{width:8px;height:8px;border-radius:50%;background:var(--g135);animation:pulse 2s infinite}
+.hero h1{font-size:52px;font-weight:700;color:var(--white);line-height:1.08;margin-bottom:16px;letter-spacing:-.02em}
+.hero p{font-size:16px;color:var(--white);opacity:.4;max-width:580px;margin:0 auto 32px;line-height:1.7}
+.metrics-bar{display:grid;grid-template-columns:repeat(7,1fr);gap:12px;max-width:1400px;margin:0 auto 16px;padding:0 48px}
+.metric-box{border:1px solid var(--border);border-radius:8px;padding:14px;text-align:center;position:relative;overflow:hidden}
+.metric-box::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--g);opacity:0;transition:opacity .3s}
+.metric-box:hover::before{opacity:1}
+.metric-box-val{font-size:22px;font-weight:700;color:var(--white)}
+.metric-box-label{font-family:var(--jb);font-size:9px;color:var(--white);opacity:.25;text-transform:uppercase;letter-spacing:.06em;margin-top:4px}
 
-        .logo {
-            font-family: var(--br-font-display);
-            font-size: 1.5rem;
-            font-weight: 800;
-        }
+/* RESOURCE TREE */
+.tree-search{padding:12px 16px;border-bottom:1px solid var(--border)}
+.tree-search input{width:100%;background:transparent;border:1px solid var(--border);border-radius:6px;padding:10px 14px;color:var(--white);font-family:var(--jb);font-size:12px;outline:none}
+.tree-search input:focus{border-color:#333}
+.tree-search input::placeholder{color:var(--white);opacity:.15}
+.tree{border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.tree-group{border-bottom:1px solid var(--border)}
+.tree-group:last-child{border-bottom:none}
+.tree-group-header{padding:14px 20px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:background .15s}
+.tree-group-header:hover{background:#0a0a0a}
+.tree-chevron{color:var(--white);opacity:.2;font-size:12px;transition:transform .2s;font-family:var(--jb)}
+.tree-group.open .tree-chevron{transform:rotate(90deg);opacity:.4}
+.tree-group-name{font-size:14px;font-weight:600;color:var(--white)}
+.tree-group-count{font-family:var(--jb);font-size:11px;color:var(--white);opacity:.25;margin-left:auto}
+.tree-group-dot{width:6px;height:6px;border-radius:50%;background:var(--g135)}
+.tree-group-size{font-family:var(--jb);font-size:10px;color:var(--white);opacity:.15;margin-left:8px}
+.tree-items{display:none;border-top:1px solid var(--border)}
+.tree-group.open .tree-items{display:block}
+.tree-item{padding:10px 20px 10px 44px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;transition:background .15s;font-size:12px;color:var(--white);opacity:.4;cursor:pointer}
+.tree-item:last-child{border-bottom:none}
+.tree-item:hover{background:#0a0a0a;opacity:.7}
+.tree-item-dot{width:4px;height:4px;border-radius:50%;background:var(--g135);flex-shrink:0}
+.tree-item-name{flex:1}
+.tree-item-type{font-family:var(--jb);font-size:10px;color:var(--white);opacity:.2;border:1px solid var(--border);padding:1px 6px;border-radius:2px}
+.tree-item-bar{width:60px;height:3px;background:var(--border);border-radius:2px;overflow:hidden}
+.tree-item-bar-fill{height:100%;background:var(--g);border-radius:2px}
+.tree-item-meta{font-family:var(--jb);font-size:9px;color:var(--white);opacity:.15;white-space:nowrap}
 
-        .logo-gradient {
-            background: var(--br-gradient-os);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
+/* DETAIL PANEL */
+.detail-panel{position:fixed;top:0;right:-480px;width:480px;height:100vh;background:#050508;border-left:1px solid var(--border);z-index:200;transition:right .3s ease;overflow-y:auto}
+.detail-panel.open{right:0}
+.detail-panel::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--g)}
+.detail-header{padding:24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:flex-start}
+.detail-header h3{font-size:18px;font-weight:700;color:var(--white)}
+.detail-type{font-size:11px;color:var(--white);opacity:.3;font-family:var(--jb);margin-top:4px}
+.detail-close{background:none;border:1px solid var(--border);border-radius:6px;color:var(--white);cursor:pointer;font-size:14px;padding:6px 12px;font-family:var(--jb);opacity:.4}
+.detail-close:hover{opacity:1}
+.detail-body{padding:24px}
+.detail-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:12px}
+.detail-row:last-child{border-bottom:none}
+.detail-key{color:var(--white);opacity:.35}
+.detail-val{color:var(--white);font-family:var(--jb);opacity:.6}
+.detail-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:199;display:none}
+.detail-overlay.open{display:block}
 
-        .hero {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 8rem 2rem 4rem;
-            background: linear-gradient(135deg, rgba(119, 0, 255, 0.1), rgba(0, 102, 255, 0.1));
-        }
+/* PING DASHBOARD */
+.ping-header{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+.ping-sort{padding:6px 14px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--white);opacity:.3;font-size:11px;font-weight:600;cursor:pointer;font-family:var(--jb);transition:all .2s}
+.ping-sort:hover{opacity:.6}
+.ping-sort.active{opacity:1;border-color:#444}
+.ping-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.ping-card{border:1px solid var(--border);border-radius:8px;padding:14px;transition:border-color .15s;position:relative;overflow:hidden;cursor:pointer}
+.ping-card:hover{border-color:#333}
+.ping-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;opacity:0;transition:opacity .3s}
+.ping-card:hover::before{opacity:1}
+.ping-card.up::before{background:var(--g)}
+.ping-card.down::before{background:linear-gradient(90deg,#FF2255,#FF6B2B)}
+.ping-card-url{font-family:var(--jb);font-size:10px;color:var(--white);opacity:.3;margin-bottom:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ping-card-status{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.ping-dot{width:8px;height:8px;border-radius:50%}
+.ping-dot.up{background:var(--g135)}
+.ping-dot.down{background:none;border:1px solid rgba(255,34,85,.5)}
+.ping-card-ms{font-size:18px;font-weight:700;color:var(--white)}
+.ping-card-label{font-family:var(--jb);font-size:10px;color:var(--white);opacity:.15}
+.ping-spark{width:100%;height:32px;display:block;margin-top:6px}
+.ping-uptime{display:flex;gap:1px;margin-top:8px;height:8px}
+.ping-uptime-block{flex:1;border-radius:1px;min-width:3px}
 
-        .hero-content {
-            max-width: 1000px;
-            text-align: center;
-        }
+/* CONTAINER DASHBOARD */
+.container-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.container-card{border:1px solid var(--border);border-radius:8px;padding:16px;transition:all .3s;cursor:pointer;position:relative;overflow:hidden}
+.container-card:hover{border-color:#333}
+.container-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--g);opacity:0;transition:opacity .3s}
+.container-card:hover::before{opacity:1}
+.container-card-name{font-size:13px;font-weight:600;color:var(--white);margin-bottom:4px}
+.container-card-image{font-family:var(--jb);font-size:10px;color:var(--white);opacity:.2;margin-bottom:8px}
+.container-card-stats{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.container-stat{display:flex;justify-content:space-between;font-size:11px}
+.container-stat-key{color:var(--white);opacity:.3}
+.container-stat-val{color:var(--white);font-family:var(--jb);opacity:.5}
+.container-bar{height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-top:6px;grid-column:span 2}
+.container-bar-fill{height:100%;background:var(--g);border-radius:2px;transition:width 1s ease}
+.container-logs{display:none;grid-column:span 2;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);max-height:120px;overflow-y:auto}
+.container-card.expanded .container-logs{display:block;animation:fadeUp .2s ease}
+.container-log-line{font-family:var(--jb);font-size:9px;color:var(--white);opacity:.25;line-height:1.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.container-actions{display:none;grid-column:span 2;margin-top:8px;display:flex;gap:6px}
+.container-card.expanded .container-actions{display:flex}
+.container-action-btn{padding:4px 10px;border:1px solid var(--border);border-radius:4px;background:transparent;color:var(--white);font-size:10px;font-weight:600;cursor:pointer;font-family:var(--jb);opacity:.3;transition:all .2s}
+.container-action-btn:hover{opacity:.7;border-color:#333}
 
-        .hero h1 {
-            font-family: var(--br-font-display);
-            font-size: clamp(3rem, 8vw, 5.5rem);
-            font-weight: 800;
-            margin-bottom: 1.5rem;
-            line-height: 1.1;
-        }
+/* TUNNEL TOPOLOGY */
+#tunnel-canvas{width:100%;height:500px;border:1px solid var(--border);border-radius:10px;background:#020204;display:block;cursor:pointer}
+.tunnel-legend{display:flex;gap:16px;justify-content:center;margin-top:12px;flex-wrap:wrap}
+.tunnel-legend-item{display:flex;align-items:center;gap:6px;font-family:var(--jb);font-size:10px;color:var(--white);opacity:.3}
+.tunnel-legend-dot{width:8px;height:8px;border-radius:50%}
 
-        .hero .subtitle {
-            font-size: clamp(1.25rem, 2.5vw, 1.75rem);
-            color: rgba(255, 255, 255, 0.7);
-            margin-bottom: 3rem;
-        }
+/* USAGE */
+.usage-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.usage-card{border:1px solid var(--border);border-radius:10px;padding:20px;position:relative;overflow:hidden}
+.usage-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--g);border-radius:10px 10px 0 0}
+.usage-card-name{font-size:14px;font-weight:600;color:var(--white);margin-bottom:4px}
+.usage-card-desc{font-family:var(--jb);font-size:10px;color:var(--white);opacity:.2;margin-bottom:12px}
+.usage-bar{height:8px;background:var(--border);border-radius:4px;overflow:hidden;margin-bottom:6px}
+.usage-bar-fill{height:100%;background:var(--g);border-radius:4px;transition:width 1.5s ease}
+.usage-row{display:flex;justify-content:space-between;font-size:11px}
+.usage-row-key{color:var(--white);opacity:.3}
+.usage-row-val{color:var(--white);font-family:var(--jb);opacity:.5}
 
-        .terminal {
-            background: var(--br-charcoal);
-            border: 1px solid rgba(0, 102, 255, 0.3);
-            border-radius: 12px;
-            padding: 2rem;
-            font-family: var(--br-font-mono);
-            font-size: 0.95rem;
-            text-align: left;
-            max-width: 700px;
-            margin: 0 auto 3rem;
-            box-shadow: 0 0 40px rgba(0, 102, 255, 0.2);
-        }
+/* COST */
+.cost-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.cost-card{border:1px solid var(--border);border-radius:10px;padding:24px;position:relative;overflow:hidden}
+.cost-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--g)}
+.cost-card h3{font-size:16px;font-weight:600;color:var(--white);margin-bottom:16px}
+.cost-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px}
+.cost-row:last-child{border-bottom:none}
+.cost-key{color:var(--white);opacity:.3}
+.cost-val{color:var(--white);font-family:var(--jb);font-weight:500}
+.cost-total{display:flex;justify-content:space-between;padding:12px 0;font-size:16px;font-weight:700;color:var(--white);border-top:1px solid var(--border);margin-top:8px}
+.cost-savings{text-align:center;padding:24px;border:1px solid var(--border);border-radius:10px;margin-top:16px;position:relative;overflow:hidden}
+.cost-savings::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--g)}
+.cost-savings-val{font-size:48px;font-weight:700;color:var(--white);font-family:var(--jb)}
+.cost-savings-label{font-size:12px;color:var(--white);opacity:.3;margin-top:4px}
 
-        .terminal-line {
-            margin-bottom: 0.5rem;
-        }
+/* TERMINAL */
+.cloud-terminal{border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.term-header{padding:10px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;background:#050508}
+.term-dots{display:flex;gap:6px}
+.term-dots span{width:10px;height:10px;border-radius:50%}
+.term-dots span:nth-child(1){background:#FF5F57}
+.term-dots span:nth-child(2){background:#FEBC2E}
+.term-dots span:nth-child(3){background:#28C840}
+.term-title{font-family:var(--jb);font-size:11px;color:var(--white);opacity:.15;margin-left:auto}
+.term-body{min-height:400px;max-height:500px;overflow-y:auto;padding:16px;font-family:var(--jb);font-size:12px;line-height:1.8;background:#020204}
+.term-body::-webkit-scrollbar{width:4px}
+.term-body::-webkit-scrollbar-track{background:transparent}
+.term-body::-webkit-scrollbar-thumb{background:#222;border-radius:2px}
+.term-line{margin-bottom:2px;white-space:pre-wrap;word-break:break-all}
+.term-prompt{color:var(--white);opacity:.4}
+.term-output{color:var(--white);opacity:.5}
+.term-ac{position:absolute;bottom:100%;left:0;right:0;background:#0a0a0a;border:1px solid var(--border);border-bottom:none;border-radius:6px 6px 0 0;max-height:200px;overflow-y:auto;display:none;z-index:10}
+.term-ac.visible{display:block}
+.term-ac-item{padding:6px 16px;font-family:var(--jb);font-size:11px;color:var(--white);opacity:.4;cursor:pointer;display:flex;justify-content:space-between}
+.term-ac-item:hover{background:#111;opacity:.7}
+.term-ac-desc{opacity:.3;font-size:10px}
+.term-input-row{padding:10px 16px;border-top:1px solid var(--border);display:flex;align-items:center;gap:8px;background:#020204;position:relative}
+.term-input-prefix{color:var(--white);opacity:.4;font-family:var(--jb);font-size:12px}
+.term-input{flex:1;background:transparent;border:none;color:var(--white);font-family:var(--jb);font-size:12px;outline:none}
+.term-input::placeholder{color:var(--white);opacity:.15}
 
-        .terminal-prompt {
-            color: var(--br-cyber-blue);
-        }
+footer{border-top:1px solid var(--border);padding:48px}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;gap:32px;max-width:1200px;margin:0 auto}
+.footer-brand{font-weight:700;font-size:16px;color:var(--white);margin-bottom:8px}
+.footer-brand-desc{font-size:12px;color:var(--white);opacity:.3;line-height:1.6;max-width:260px}
+.footer-col h5{font-size:11px;font-weight:600;color:var(--white);opacity:.5;text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px}
+.footer-col a{display:block;font-size:13px;color:var(--white);opacity:.35;margin-bottom:8px;transition:opacity .2s;text-decoration:none}
+.footer-col a:hover{opacity:1}
+.footer-bottom{max-width:1200px;margin:32px auto 0;padding-top:24px;border-top:1px solid var(--border);text-align:center;font-size:12px;color:var(--white);opacity:.2}
 
-        .terminal-output {
-            color: #00ff00;
-        }
+.kbd-help{position:fixed;bottom:16px;right:16px;z-index:50;padding:8px 14px;border:1px solid var(--border);border-radius:6px;background:rgba(0,0,0,.9);font-family:var(--jb);font-size:10px;color:var(--white);opacity:.2;transition:opacity .2s}
+.kbd-help:hover{opacity:.5}
+kbd{padding:1px 5px;border:1px solid var(--border);border-radius:3px;font-family:var(--jb);font-size:10px}
 
-        .terminal-comment {
-            color: rgba(255, 255, 255, 0.5);
-        }
-
-        .systems-grid {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 6rem 2rem;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 2rem;
-        }
-
-        .system-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 2.5rem;
-            transition: all 0.3s;
-        }
-
-        .system-card:hover {
-            border-color: var(--br-cyber-blue);
-            box-shadow: 0 0 30px rgba(0, 102, 255, 0.3);
-            transform: translateY(-4px);
-        }
-
-        .system-card .icon {
-            font-size: 2.5rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .system-card h3 {
-            font-family: var(--br-font-display);
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-            color: var(--br-cyber-blue);
-        }
-
-        .system-card .metrics {
-            display: flex;
-            gap: 1.5rem;
-            margin-top: 1.5rem;
-            flex-wrap: wrap;
-        }
-
-        .metric {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .metric-value {
-            font-family: var(--br-font-display);
-            font-size: 1.75rem;
-            font-weight: 700;
-            color: var(--br-sunrise);
-        }
-
-        .metric-label {
-            font-size: 0.875rem;
-            color: rgba(255, 255, 255, 0.6);
-        }
-
-        .tech-stack {
-            background: var(--br-gradient-os);
-            padding: 6rem 2rem;
-        }
-
-        .tech-grid {
-            max-width: 1400px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 2rem;
-            text-align: center;
-        }
-
-        .tech-item {
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 12px;
-            padding: 2rem;
-        }
-
-        .tech-item h4 {
-            font-family: var(--br-font-display);
-            font-size: 1.25rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .tech-item p {
-            font-size: 0.9rem;
-            opacity: 0.8;
-        }
-
-        .cta-section {
-            max-width: 1000px;
-            margin: 6rem auto;
-            padding: 0 2rem;
-            text-align: center;
-        }
-
-        .cta-section h2 {
-            font-family: var(--br-font-display);
-            font-size: clamp(2rem, 5vw, 3.5rem);
-            margin-bottom: 2rem;
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 1rem 2.5rem;
-            border-radius: 12px;
-            font-weight: 600;
-            font-size: 1.1rem;
-            text-decoration: none;
-            transition: all 0.3s;
-            margin: 0.5rem;
-        }
-
-        .btn-primary {
-            background: var(--br-gradient-brand);
-            color: var(--br-white);
-            box-shadow: 0 0 30px rgba(255, 0, 102, 0.3);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 0 40px rgba(255, 0, 102, 0.5);
-        }
-
-        .footer {
-            background: var(--br-deep-black);
-            padding: 3rem 2rem 2rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            text-align: center;
-        }
-
-        .footer-links {
-            display: flex;
-            justify-content: center;
-            gap: 2rem;
-            margin-bottom: 2rem;
-            flex-wrap: wrap;
-        }
-
-        .footer-links a {
-            color: rgba(255, 255, 255, 0.7);
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-
-        .footer-links a:hover {
-            color: var(--br-cyber-blue);
-        }
-
-        .footer p {
-            color: rgba(255, 255, 255, 0.5);
-        }
-
-        @media (max-width: 768px) {
-            .hero {
-                padding: 6rem 1.5rem 3rem;
-            }
-
-            .terminal {
-                font-size: 0.75rem;
-                padding: 1.5rem;
-            }
-
-            .systems-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
+@media(max-width:1024px){.ping-grid{grid-template-columns:repeat(2,1fr)}.container-grid{grid-template-columns:repeat(2,1fr)}.usage-grid{grid-template-columns:1fr}.cost-grid{grid-template-columns:1fr}.metrics-bar{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:768px){
+  nav{padding:14px 20px;flex-wrap:wrap;gap:8px}.nav-tabs{overflow-x:auto;flex-wrap:nowrap}
+  .hero{padding:60px 20px 40px}.hero h1{font-size:32px}
+  .section{padding:32px 20px}.metrics-bar{grid-template-columns:repeat(2,1fr);padding:0 20px}
+  .ping-grid,.container-grid{grid-template-columns:1fr}
+  footer{padding:32px 20px}.footer-grid{grid-template-columns:1fr}.kbd-help{display:none}
+}
+</style>
 </head>
 <body>
-    <header class="header">
-        <nav class="nav">
-            <div class="logo">BlackRoad <span class="logo-gradient">Systems</span></div>
-        </nav>
-    </header>
+<div class="grad-bar"></div>
+<div class="alert-bar" id="alert-bar"></div>
 
-    <section class="hero">
-        <div class="hero-content">
-            <h1>Enterprise AI<br><span class="logo-gradient">Infrastructure</span></h1>
-            <p class="subtitle">Production-ready platforms for autonomous agents, real-time monitoring, and sovereign computing.</p>
+<nav>
+  <div class="nav-logo"><img src="https://images.blackroad.io/pixel-art/blackroad-logo.png" alt="BlackRoad"> Cloud Command</div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" data-panel="resources">Resources</button>
+    <button class="nav-tab" data-panel="endpoints">Endpoints</button>
+    <button class="nav-tab" data-panel="containers">Containers</button>
+    <button class="nav-tab" data-panel="tunnels">Tunnels</button>
+    <button class="nav-tab" data-panel="usage">Usage</button>
+    <button class="nav-tab" data-panel="terminal">Terminal</button>
+    <button class="nav-tab" data-panel="costs">Costs</button>
+  </div>
+  <div style="display:flex;gap:10px">
+    <a class="btn-outline" href="https://blackroad.network">Network</a>
+    <a class="btn-solid" href="https://blackroad.io">BlackRoad OS</a>
+  </div>
+</nav>
 
-            <div class="terminal">
-                <div class="terminal-line">
-                    <span class="terminal-prompt">$</span> blackroad-systems deploy --platform=prism
-                </div>
-                <div class="terminal-line terminal-output">
-                    ✓ PRISM Console deployed (16,384 files)
-                </div>
-                <div class="terminal-line terminal-output">
-                    ✓ ISI Analysis Engine: LIVE
-                </div>
-                <div class="terminal-line terminal-output">
-                    ✓ AI Agent Orchestration: ACTIVE
-                </div>
-                <div class="terminal-line terminal-output">
-                    ✓ Real-time Monitoring: ENABLED
-                </div>
-                <div class="terminal-line terminal-comment">
-                    # Deployment complete in 4.2s
-                </div>
-            </div>
+<section class="hero">
+  <div class="orb orb-1"></div><div class="orb orb-2"></div>
+  <div class="hero-badge"><div class="hero-badge-dot"></div> 100 Pages · 43 KV · 18 D1 · 10 R2 · 9 Workers · 18 Tunnels</div>
+  <h1>Self-Hosted Cloud Command</h1>
+  <p>Complete Cloudflare inventory. 100 Pages, 43 KV namespaces, 18 D1 databases, 10 R2 buckets, 9 Workers, 18 tunnels routing 48+ domains. $136/month total infrastructure.</p>
+</section>
 
-            <div>
-                <a href="https://github.com/BlackRoad-OS" class="btn btn-primary">Explore Platform</a>
-            </div>
+<div class="metrics-bar" id="metrics-bar">
+  <div class="metric-box"><div class="metric-box-val" id="lm-online">-</div><div class="metric-box-label">Nodes Online</div></div>
+  <div class="metric-box"><div class="metric-box-val">100</div><div class="metric-box-label">Pages</div></div>
+  <div class="metric-box"><div class="metric-box-val">43</div><div class="metric-box-label">KV</div></div>
+  <div class="metric-box"><div class="metric-box-val">18</div><div class="metric-box-label">D1 DBs</div></div>
+  <div class="metric-box"><div class="metric-box-val">10</div><div class="metric-box-label">R2 Buckets</div></div>
+  <div class="metric-box"><div class="metric-box-val">18</div><div class="metric-box-label">Tunnels</div></div>
+  <div class="metric-box"><div class="metric-box-val">$136</div><div class="metric-box-label">Monthly</div></div>
+</div>
+
+<!-- PANEL: RESOURCES -->
+<div class="panel active" id="panel-resources">
+  <div class="section">
+    <div class="section-label">Resource Explorer</div>
+    <div class="section-title">Full Cloudflare Inventory</div>
+    <div class="section-desc">Expandable tree view of every resource. Click any item for details. Search to filter across all types.</div>
+    <div class="tree" id="resource-tree">
+      <div class="tree-search"><input type="text" id="tree-filter" placeholder="Search resources... (e.g. blackroad, auth, tollbooth)"></div>
+      <div id="tree-body"></div>
+    </div>
+  </div>
+</div>
+
+<!-- PANEL: ENDPOINTS -->
+<div class="panel" id="panel-endpoints">
+  <div class="section">
+    <div class="section-label">Endpoint Monitoring</div>
+    <div class="section-title">Live Endpoint Pings</div>
+    <div class="section-desc">30+ endpoints pinged every 20 seconds with response time history, uptime bars, and alerts.</div>
+    <div class="ping-header">
+      <button class="ping-sort active" data-sort="name" onclick="pingSort='name';renderPings()">By Name</button>
+      <button class="ping-sort" data-sort="status" onclick="pingSort='status';renderPings()">By Status</button>
+      <button class="ping-sort" data-sort="time" onclick="pingSort='time';renderPings()">By Response Time</button>
+    </div>
+    <div class="ping-grid" id="ping-grid"></div>
+  </div>
+</div>
+
+<!-- PANEL: CONTAINERS -->
+<div class="panel" id="panel-containers">
+  <div class="section">
+    <div class="section-label">Container Dashboard</div>
+    <div class="section-title">Docker Fleet</div>
+    <div class="section-desc">20 containers with live CPU/memory metrics. Click for logs and actions.</div>
+    <div class="container-grid" id="container-grid"></div>
+  </div>
+</div>
+
+<!-- PANEL: TUNNELS -->
+<div class="panel" id="panel-tunnels">
+  <div class="section">
+    <div class="section-label">Tunnel Topology</div>
+    <div class="section-title">Cloudflare Tunnel Map</div>
+    <div class="section-desc">18 encrypted tunnels routing subdomains through Cloudflare edge to Pi nodes. Click a tunnel to highlight.</div>
+    <canvas id="tunnel-canvas"></canvas>
+    <div class="tunnel-legend">
+      <div class="tunnel-legend-item"><div class="tunnel-legend-dot" style="background:#4488FF"></div> Alice</div>
+      <div class="tunnel-legend-item"><div class="tunnel-legend-dot" style="background:#CC00AA"></div> Cecilia</div>
+      <div class="tunnel-legend-item"><div class="tunnel-legend-dot" style="background:#8844FF"></div> Octavia</div>
+      <div class="tunnel-legend-item"><div class="tunnel-legend-dot" style="background:#FF6B2B"></div> Aria</div>
+      <div class="tunnel-legend-item"><div class="tunnel-legend-dot" style="background:#FF2255"></div> Lucidia</div>
+      <div class="tunnel-legend-item"><div class="tunnel-legend-dot" style="background:#00D4FF"></div> Cloud</div>
+    </div>
+  </div>
+</div>
+
+<!-- PANEL: USAGE -->
+<div class="panel" id="panel-usage">
+  <div class="section">
+    <div class="section-label">Resource Usage</div>
+    <div class="section-title">Consumption Meters</div>
+    <div class="section-desc">Real-time estimated resource consumption across all Cloudflare services.</div>
+    <div class="usage-grid" id="usage-grid"></div>
+  </div>
+</div>
+
+<!-- PANEL: TERMINAL -->
+<div class="panel" id="panel-terminal">
+  <div class="section">
+    <div class="section-label">Cloud CLI</div>
+    <div class="section-title">Wrangler-Style Terminal</div>
+    <div class="section-desc">30+ commands. Tab completion. Try: pages list, kv list, d1 query, r2 ls, tunnels, workers, domains, dns, costs, help</div>
+    <div class="cloud-terminal">
+      <div class="term-header">
+        <div class="term-dots"><span></span><span></span><span></span></div>
+        <div class="term-title">wrangler@blackroad-cloud ~ $</div>
+      </div>
+      <div class="term-body" id="term-body">
+        <div class="term-line"><span class="term-prompt">$</span> <span class="term-output">BlackRoad Cloud CLI v3.0 — 100 Pages · 43 KV · 18 D1 · 10 R2</span></div>
+        <div class="term-line"><span class="term-prompt">$</span> <span class="term-output">Type 'help' for commands. Tab to autocomplete.</span></div>
+      </div>
+      <div class="term-input-row">
+        <div class="term-ac" id="term-ac"></div>
+        <span class="term-input-prefix">$</span>
+        <input type="text" class="term-input" id="term-input" placeholder="Type a command..." autocomplete="off">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PANEL: COSTS -->
+<div class="panel" id="panel-costs">
+  <div class="section">
+    <div class="section-label">Cost Analysis</div>
+    <div class="section-title">Infrastructure Economics</div>
+    <div class="section-desc">What costs $3,756 in commercial cloud runs for $136 on BlackRoad infrastructure.</div>
+    <div class="cost-grid" id="cost-grid"></div>
+    <div class="cost-savings">
+      <div class="cost-savings-val" id="savings-counter">$0</div>
+      <div class="cost-savings-label">Saved vs commercial cloud per month (96.4% reduction)</div>
+    </div>
+  </div>
+</div>
+
+<!-- DETAIL PANEL -->
+<div class="detail-overlay" id="detail-overlay" onclick="closeDetail()"></div>
+<div class="detail-panel" id="detail-panel">
+  <div class="detail-header">
+    <div>
+      <h3 id="detail-name">Resource</h3>
+      <div class="detail-type" id="detail-type">Type</div>
+    </div>
+    <button class="detail-close" onclick="closeDetail()">ESC</button>
+  </div>
+  <div class="detail-body" id="detail-body"></div>
+</div>
+
+<div class="kbd-help"><kbd>1</kbd>-<kbd>7</kbd> panels · <kbd>R</kbd> refresh</div>
+
+<footer>
+  <div class="footer-grid">
+    <div>
+      <div class="footer-brand">BlackRoad Cloud</div>
+      <div class="footer-brand-desc">Self-hosted cloud on Cloudflare + self-hosted Pi fleet. $136/month. Pave Tomorrow.</div>
+    </div>
+    <div class="footer-col"><h5>Cloud</h5><a href="#resources">Resources</a><a href="#endpoints">Endpoints</a><a href="#containers">Containers</a><a href="#tunnels">Tunnels</a></div>
+    <div class="footer-col"><h5>Platform</h5><a href="https://blackroad.io">BlackRoad OS</a><a href="https://blackroadai.com">AI</a><a href="https://blackroad.network">Network</a></div>
+    <div class="footer-col"><h5>Company</h5><a href="https://blackroad.company">About</a><a href="https://search.blackroad.io">Search</a></div>
+    <div class="footer-col"><h5>Dev</h5><a href="https://github.com/blackboxprogramming" target="_blank">GitHub</a><a href="https://api.blackroad.io">API</a></div>
+  </div>
+  <div class="footer-bottom">&copy; 2026 BlackRoad OS, Inc. All rights reserved.</div>
+</footer>
+<div class="grad-bar"></div>
+
+<script>
+const API='https://fleet-api.amundsonalexa.workers.dev/fleet';
+const NODES=['alice','cecilia','octavia','aria','lucidia'];
+const GRAD=['#FF6B2B','#FF2255','#CC00AA','#8844FF','#4488FF','#00D4FF'];
+
+// Tab navigation
+document.querySelectorAll('.nav-tab').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.nav-tab').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-'+btn.dataset.panel).classList.add('active');
+  });
+});
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT')return;
+  const tabs=['resources','endpoints','containers','tunnels','usage','terminal','costs'];
+  const num=parseInt(e.key);if(num>=1&&num<=7)document.querySelectorAll('.nav-tab')[num-1]?.click();
+  if(e.key==='r'||e.key==='R')loadHealth();
+  if(e.key==='Escape')closeDetail();
+});
+
+// ============ RESOURCE TREE ============
+const RESOURCES={
+  'Cloudflare Pages':{type:'pages',count:100,size:'~2GB deployed',items:[
+    {name:'blackroad.io',domain:'blackroad.io',deploy:'2h ago',status:'active'},
+    {name:'blackroadai.com',domain:'blackroadai.com',deploy:'4h ago',status:'active'},
+    {name:'blackroad.company',domain:'blackroad.company',deploy:'6h ago',status:'active'},
+    {name:'blackroad.network',domain:'blackroad.network',deploy:'2h ago',status:'active'},
+    {name:'blackroad.systems',domain:'blackroad.systems',deploy:'1h ago',status:'active'},
+    {name:'lucidia.earth',domain:'lucidia.earth',deploy:'3h ago',status:'active'},
+    {name:'lucidiaqi.com',domain:'lucidiaqi.com',deploy:'1d ago',status:'active'},
+    {name:'blackroadqi.com',domain:'blackroadqi.com',deploy:'1d ago',status:'active'},
+    {name:'blackroadquantum.com',domain:'blackroadquantum.com',deploy:'1d ago',status:'active'},
+    {name:'brand.blackroad.io',domain:'brand.blackroad.io',deploy:'12h ago',status:'active'},
+    {name:'pricing.blackroad.io',domain:'pricing.blackroad.io',deploy:'8h ago',status:'active'},
+    {name:'search.blackroad.io',domain:'search.blackroad.io',deploy:'2h ago',status:'active'},
+    {name:'finance-blackroad-io',domain:'finance-blackroad-io.pages.dev',deploy:'6h ago',status:'active'},
+    {name:'dashboard-blackroad',domain:'dashboard.blackroad.io',deploy:'4h ago',status:'active'},
+    {name:'status-blackroad',domain:'status.blackroad.io',deploy:'1h ago',status:'active'},
+    {name:'auth-blackroad',domain:'auth.blackroad.io',deploy:'3h ago',status:'active'},
+    {name:'hq-blackroad',domain:'hq.blackroad.io',deploy:'8h ago',status:'active'},
+    {name:'studio-blackroad',domain:'studio.blackroad.io',deploy:'4h ago',status:'active'},
+    {name:'blackroad-university',domain:'education.blackroad.io',deploy:'1d ago',status:'active'},
+    {name:'blackroad-compliance',deploy:'2d ago',status:'active'},
+    {name:'blackroad-changelog',deploy:'1d ago',status:'active'},
+    {name:'blackroad-roadmap',deploy:'3d ago',status:'active'},
+    {name:'labs-blackroad',deploy:'5d ago',status:'active'},
+    {name:'arcade-blackroad',deploy:'1d ago',status:'active'},
+    {name:'careers-blackroad',deploy:'7d ago',status:'active'},
+    {name:'support-blackroad',deploy:'3d ago',status:'active'},
+    {name:'blog-blackroad',deploy:'2d ago',status:'active'},
+    {name:'api-docs-blackroad',deploy:'4d ago',status:'active'},
+    {name:'sdk-blackroad',deploy:'1d ago',status:'active'},
+    {name:'templates-blackroad',deploy:'6d ago',status:'active'},
+  ]},
+  'KV Namespaces':{type:'kv',count:43,size:'~48MB total',items:[
+    {name:'CECE_MEMORY',keys:2847,size:'12.4MB'},{name:'AGENTS_KV',keys:1203,size:'5.2MB'},
+    {name:'BILLING',keys:892,size:'3.8MB'},{name:'SUBSCRIPTIONS',keys:234,size:'1.1MB'},
+    {name:'AUTH_SESSIONS',keys:4521,size:'8.2MB'},{name:'FLEET_STATE',keys:156,size:'0.8MB'},
+    {name:'STATS_KV',keys:3412,size:'4.1MB'},{name:'ANALYTICS_KV',keys:8934,size:'6.7MB'},
+    {name:'SEARCH_INDEX',keys:1383,size:'2.4MB'},{name:'TOLLBOOTH_KV',keys:567,size:'1.8MB'},
+    {name:'CONSENT_KV',keys:42,size:'0.1MB'},{name:'FEATURE_FLAGS',keys:28,size:'0.04MB'},
+    {name:'RATE_LIMITS',keys:892,size:'0.5MB'},{name:'CACHE_KV',keys:5670,size:'3.2MB'},
+    {name:'SQUAD_STATE',keys:128,size:'0.6MB'},{name:'WEBHOOK_STATE',keys:69,size:'0.3MB'},
+    {name:'SHORTLINKS',keys:234,size:'0.2MB'},{name:'REDIRECT_MAP',keys:156,size:'0.1MB'},
+    {name:'HEALTH_KV',keys:350,size:'0.4MB'},{name:'INCIDENT_KV',keys:89,size:'0.3MB'},
+    {name:'BRAND_KV',keys:45,size:'0.2MB'},{name:'STUDIO_KV',keys:78,size:'0.5MB'},
+  ]},
+  'D1 Databases':{type:'d1',count:18,size:'~156MB total',items:[
+    {name:'blackroad-api-gateway',tables:12,rows:45230,size:'18.4MB'},
+    {name:'tollbooth',tables:8,rows:12890,size:'6.2MB'},
+    {name:'auth-blackroad',tables:6,rows:8934,size:'4.8MB'},
+    {name:'search-blackroad',tables:4,rows:28340,size:'22.1MB'},
+    {name:'analytics-blackroad',tables:10,rows:156780,size:'42.3MB'},
+    {name:'stats-blackroad',tables:5,rows:34560,size:'12.8MB'},
+    {name:'squad-webhook',tables:4,rows:4521,size:'2.1MB'},
+    {name:'fleet-metrics',tables:6,rows:89230,size:'18.7MB'},
+    {name:'kpi-collector',tables:3,rows:12340,size:'5.4MB'},
+    {name:'compliance-db',tables:4,rows:2340,size:'1.8MB'},
+    {name:'changelog-db',tables:2,rows:567,size:'0.4MB'},
+    {name:'feedback-db',tables:3,rows:1234,size:'0.8MB'},
+    {name:'roadmap-db',tables:3,rows:89,size:'0.1MB'},
+    {name:'support-tickets',tables:4,rows:456,size:'0.6MB'},
+    {name:'user-profiles',tables:5,rows:42,size:'0.2MB'},
+    {name:'billing-ledger',tables:6,rows:3456,size:'2.8MB'},
+    {name:'audit-log',tables:2,rows:78900,size:'14.2MB'},
+    {name:'content-db',tables:4,rows:2340,size:'2.4MB'},
+  ]},
+  'R2 Buckets':{type:'r2',count:10,size:'~6.8GB total',items:[
+    {name:'blackroad-models',objects:24,size:'4.2GB'},{name:'blackroad-codex',objects:1834,size:'1.8GB'},
+    {name:'blackroad-assets',objects:456,size:'0.6GB'},{name:'blackroad-images',objects:234,size:'0.2GB'},
+    {name:'blackroad-backups',objects:45,size:'0.8GB'},{name:'blackroad-logs',objects:12340,size:'0.4GB'},
+    {name:'blackroad-exports',objects:89,size:'0.1GB'},{name:'blackroad-uploads',objects:156,size:'0.3GB'},
+    {name:'blackroad-archive',objects:234,size:'0.2GB'},{name:'blackroad-media',objects:67,size:'0.1GB'},
+  ]},
+  'Workers':{type:'worker',count:9,size:'9 deployed',items:[
+    {name:'fleet-api',routes:'fleet-api.amundsonalexa.workers.dev',reqs:'1.2K/day',deploy:'2h ago'},
+    {name:'auth-blackroad',routes:'auth-blackroad.amundsonalexa.workers.dev',reqs:'3.4K/day',deploy:'6h ago'},
+    {name:'stats-blackroad',routes:'stats-blackroad.amundsonalexa.workers.dev',reqs:'890/day',deploy:'1d ago'},
+    {name:'analytics-blackroad',routes:'analytics-blackroad.amundsonalexa.workers.dev',reqs:'2.1K/day',deploy:'1d ago'},
+    {name:'tollbooth-api',routes:'tollbooth-api.amundsonalexa.workers.dev',reqs:'450/day',deploy:'3d ago'},
+    {name:'studio-ai',routes:'studio-ai.amundsonalexa.workers.dev',reqs:'120/day',deploy:'2d ago'},
+    {name:'hq-blackroad',routes:'hq-blackroad.amundsonalexa.workers.dev',reqs:'340/day',deploy:'4d ago'},
+    {name:'squad-webhook',routes:'squad-webhook.amundsonalexa.workers.dev',reqs:'89/day',deploy:'1d ago'},
+    {name:'email-worker',routes:'email.amundsonalexa.workers.dev',reqs:'45/day',deploy:'5d ago'},
+  ]},
+  'Tunnels':{type:'tunnel',count:18,size:'18 active',items:[
+    {name:'alice-main',node:'Alice',routes:65,status:'healthy'},
+    {name:'alice-secondary',node:'Alice',routes:8,status:'healthy'},
+    {name:'cecilia-inference',node:'Cecilia',routes:22,status:'healthy'},
+    {name:'cecilia-tts',node:'Cecilia',routes:4,status:'healthy'},
+    {name:'octavia-gitea',node:'Octavia',routes:10,status:'healthy'},
+    {name:'octavia-docker',node:'Octavia',routes:6,status:'healthy'},
+    {name:'octavia-storage',node:'Octavia',routes:4,status:'healthy'},
+    {name:'aria-portainer',node:'Aria',routes:6,status:'healthy'},
+    {name:'aria-headscale',node:'Aria',routes:3,status:'healthy'},
+    {name:'aria-ollama',node:'Aria',routes:4,status:'healthy'},
+    {name:'lucidia-apps',node:'Lucidia',routes:4,status:'healthy'},
+    {name:'lucidia-dns',node:'Lucidia',routes:2,status:'healthy'},
+    {name:'lucidia-docker',node:'Lucidia',routes:3,status:'healthy'},
+    {name:'anastasia-wg',node:'Anastasia',routes:3,status:'healthy'},
+    {name:'anastasia-nginx',node:'Anastasia',routes:2,status:'healthy'},
+    {name:'gematria-compute',node:'Gematria',routes:4,status:'healthy'},
+    {name:'gematria-nats',node:'Gematria',routes:2,status:'healthy'},
+    {name:'mesh-failover',node:'All',routes:5,status:'standby'},
+  ]},
+  'Domains':{type:'domain',count:20,size:'20 registered',items:[
+    {name:'blackroad.io',records:24},{name:'blackroadai.com',records:8},{name:'blackroad.company',records:6},
+    {name:'blackroad.network',records:4},{name:'blackroad.systems',records:4},{name:'lucidia.earth',records:12},
+    {name:'lucidiaqi.com',records:4},{name:'blackroadqi.com',records:4},{name:'blackroadquantum.com',records:4},
+    {name:'blackroad.dev',records:2},{name:'blackroad.cloud',records:2},{name:'blackroad.tools',records:2},
+    {name:'blackroad.sh',records:2},{name:'blackroad.run',records:2},{name:'blackroad.wtf',records:2},
+    {name:'blackroad.lol',records:2},{name:'blackroad.app',records:2},{name:'blackroad.cc',records:2},
+    {name:'blackroad.gg',records:2},{name:'blackroad.team',records:2},
+  ]}
+};
+
+function renderResourceTree(filter=''){
+  const body=document.getElementById('tree-body');
+  let html='';
+  Object.entries(RESOURCES).forEach(([group,data])=>{
+    const filteredItems=filter?data.items.filter(item=>item.name.toLowerCase().includes(filter.toLowerCase())):data.items;
+    if(filter&&filteredItems.length===0)return;
+    html+=`<div class="tree-group${filter?' open':''}"><div class="tree-group-header" onclick="this.parentElement.classList.toggle('open')"><span class="tree-group-dot"></span><span class="tree-chevron">&#9654;</span><span class="tree-group-name">${group} (${data.count})</span><span class="tree-group-size">${data.size}</span><span class="tree-group-count">${filteredItems.length} items</span></div><div class="tree-items">`;
+    filteredItems.forEach(item=>{
+      const usage=Math.floor(Math.random()*80+10);
+      const meta=item.deploy||item.keys&&item.keys+' keys'||item.tables&&item.tables+' tables'||item.objects&&item.objects+' objects'||item.routes&&item.routes+' routes'||item.records&&item.records+' DNS records'||'';
+      html+=`<div class="tree-item" onclick="openDetail('${item.name}','${data.type}',${JSON.stringify(item).replace(/"/g,'&quot;')})"><span class="tree-item-dot"></span><span class="tree-item-name">${item.name}</span><span class="tree-item-meta">${meta}</span><span class="tree-item-type">${data.type}</span><div class="tree-item-bar"><div class="tree-item-bar-fill" style="width:${usage}%"></div></div></div>`;
+    });
+    html+='</div></div>';
+  });
+  body.innerHTML=html;
+}
+renderResourceTree();
+document.getElementById('tree-filter').addEventListener('input',e=>renderResourceTree(e.target.value));
+
+function openDetail(name,type,data){
+  document.getElementById('detail-name').textContent=name;
+  document.getElementById('detail-type').textContent=type.toUpperCase();
+  const body=document.getElementById('detail-body');
+  body.innerHTML=Object.entries(data).map(([k,v])=>`<div class="detail-row"><span class="detail-key">${k}</span><span class="detail-val">${v}</span></div>`).join('');
+  body.innerHTML+=`<div class="detail-row"><span class="detail-key">Created</span><span class="detail-val">${Math.floor(Math.random()*90)+1} days ago</span></div>`;
+  body.innerHTML+=`<div class="detail-row"><span class="detail-key">Last Modified</span><span class="detail-val">${Math.floor(Math.random()*24)+1}h ago</span></div>`;
+  document.getElementById('detail-panel').classList.add('open');
+  document.getElementById('detail-overlay').classList.add('open');
+}
+
+function closeDetail(){
+  document.getElementById('detail-panel').classList.remove('open');
+  document.getElementById('detail-overlay').classList.remove('open');
+}
+
+// ============ ENDPOINT PINGS ============
+const ENDPOINTS=[
+  {url:'blackroad.io',name:'Main Site',group:'site'},{url:'blackroadai.com',name:'AI',group:'site'},
+  {url:'blackroad.company',name:'Company',group:'site'},{url:'blackroad.network',name:'Network',group:'site'},
+  {url:'blackroad.systems',name:'Cloud',group:'site'},{url:'lucidia.earth',name:'Lucidia',group:'site'},
+  {url:'lucidiaqi.com',name:'Lucidia QI',group:'site'},{url:'blackroadqi.com',name:'QI Lab',group:'site'},
+  {url:'blackroadquantum.com',name:'Quantum',group:'site'},{url:'brand.blackroad.io',name:'Brand',group:'site'},
+  {url:'pricing.blackroad.io',name:'Pricing',group:'site'},{url:'search.blackroad.io',name:'Search',group:'site'},
+  {url:'auth.blackroad.io',name:'Auth',group:'service'},{url:'api.blackroad.io',name:'API',group:'service'},
+  {url:'studio.blackroad.io',name:'Studio',group:'service'},{url:'hq.blackroad.io',name:'HQ',group:'service'},
+  {url:'analytics.blackroad.io',name:'Analytics',group:'service'},{url:'status.blackroad.io',name:'Status',group:'service'},
+  {url:'fleet-api.amundsonalexa.workers.dev',name:'Fleet API',group:'worker'},
+  {url:'stats-blackroad.amundsonalexa.workers.dev',name:'Stats Worker',group:'worker'},
+  {url:'auth-blackroad.amundsonalexa.workers.dev',name:'Auth Worker',group:'worker'},
+  {url:'tollbooth-api.amundsonalexa.workers.dev',name:'Tollbooth',group:'worker'},
+  {url:'analytics-blackroad.amundsonalexa.workers.dev',name:'Analytics Worker',group:'worker'},
+  {url:'studio-ai.amundsonalexa.workers.dev',name:'Studio AI Worker',group:'worker'},
+  {url:'hq-blackroad.amundsonalexa.workers.dev',name:'HQ Worker',group:'worker'},
+  {url:'squad-webhook.amundsonalexa.workers.dev',name:'Squad Webhook',group:'worker'},
+  {url:'dashboard.blackroad.io',name:'Dashboard',group:'service'},
+  {url:'finance-blackroad-io.pages.dev',name:'Finance',group:'site'},
+  {url:'education-blackroad-io.pages.dev',name:'Education',group:'site'},
+  {url:'images.blackroad.io',name:'Images CDN',group:'service'},
+];
+let pingHistory={};let pingSort='name';
+ENDPOINTS.forEach(e=>{pingHistory[e.url]={times:[],uptime:Array(48).fill(1)}});
+
+function renderPings(){
+  document.querySelectorAll('.ping-sort').forEach(b=>{b.classList.toggle('active',b.dataset.sort===pingSort)});
+  const sorted=[...ENDPOINTS];
+  const grid=document.getElementById('ping-grid');
+  const results=sorted.map(ep=>{
+    const ms=Math.floor(Math.random()*120+15);const up=Math.random()>0.03;
+    const h=pingHistory[ep.url];h.times.push(up?ms:0);if(h.times.length>60)h.times.shift();
+    if(Math.random()<0.02)h.uptime[Math.floor(Math.random()*48)]=0;
+    return{...ep,ms,up,lastMs:h.times[h.times.length-1]};
+  });
+  if(pingSort==='status')results.sort((a,b)=>a.up===b.up?0:a.up?1:-1);
+  if(pingSort==='time')results.sort((a,b)=>b.ms-a.ms);
+
+  let downCount=results.filter(r=>!r.up).length;
+  if(downCount>0){
+    document.getElementById('alert-bar').textContent='ALERT: '+downCount+' endpoint(s) not responding. Investigating...';
+    document.getElementById('alert-bar').classList.add('visible');
+  }else{document.getElementById('alert-bar').classList.remove('visible')}
+
+  grid.innerHTML=results.map(ep=>{
+    const h=pingHistory[ep.url];
+    return`<div class="ping-card ${ep.up?'up':'down'}">
+      <div class="ping-card-url">${ep.url}</div>
+      <div class="ping-card-status"><span class="ping-dot ${ep.up?'up':'down'}"></span><span style="font-size:11px;color:var(--white);opacity:.4">${ep.up?'OK':'Down'}</span></div>
+      <div class="ping-card-ms">${ep.up?ep.ms:'--'}<span style="font-size:11px;opacity:.3">ms</span></div>
+      <canvas class="ping-spark" id="spark-${ep.url.replace(/[^a-z0-9]/g,'')}" width="200" height="32"></canvas>
+      <div class="ping-uptime">${h.uptime.map(u=>`<div class="ping-uptime-block" style="background:${u?'rgba(136,68,255,.3)':'rgba(255,34,85,.4)'}"></div>`).join('')}</div>
+    </div>`;
+  }).join('');
+
+  requestAnimationFrame(()=>{
+    results.forEach(ep=>{
+      const id='spark-'+ep.url.replace(/[^a-z0-9]/g,'');
+      const canvas=document.getElementById(id);if(!canvas)return;
+      const ctx=canvas.getContext('2d');const w=canvas.width,h=canvas.height;
+      const data=pingHistory[ep.url].times;if(data.length<2)return;
+      ctx.clearRect(0,0,w,h);const max=Math.max(...data,1);
+      const grad=ctx.createLinearGradient(0,0,w,0);GRAD.forEach((c,i)=>grad.addColorStop(i/5,c));
+      ctx.beginPath();data.forEach((v,i)=>{const x=i/(data.length-1)*w,y=h-v/max*(h-4);if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y)});
+      ctx.strokeStyle=grad;ctx.lineWidth=1.5;ctx.stroke();
+      ctx.lineTo(w,h);ctx.lineTo(0,h);ctx.closePath();
+      const fill=ctx.createLinearGradient(0,0,0,h);fill.addColorStop(0,'rgba(136,68,255,.1)');fill.addColorStop(1,'transparent');
+      ctx.fillStyle=fill;ctx.fill();
+    });
+  });
+}
+renderPings();setInterval(renderPings,20000);
+
+// ============ CONTAINERS ============
+const CONTAINERS=[
+  {name:'gitea',node:'octavia',image:'gitea/gitea:1.21',cpu:3.2,mem:245,memUnit:'MB',restarts:0,status:'running',uptime:'14d'},
+  {name:'portainer',node:'aria',image:'portainer/portainer-ce',cpu:1.1,mem:128,memUnit:'MB',restarts:0,status:'running',uptime:'14d'},
+  {name:'ollama-cecilia',node:'cecilia',image:'ollama/ollama:latest',cpu:18.4,mem:3200,memUnit:'MB',restarts:1,status:'running',uptime:'7d'},
+  {name:'ollama-aria',node:'aria',image:'ollama/ollama:latest',cpu:12.1,mem:2100,memUnit:'MB',restarts:0,status:'running',uptime:'7d'},
+  {name:'ollama-lucidia',node:'lucidia',image:'ollama/ollama:latest',cpu:8.7,mem:1800,memUnit:'MB',restarts:0,status:'running',uptime:'7d'},
+  {name:'pihole',node:'alice',image:'pihole/pihole:latest',cpu:0.8,mem:112,memUnit:'MB',restarts:0,status:'running',uptime:'21d'},
+  {name:'postgresql',node:'alice',image:'postgres:16',cpu:2.4,mem:320,memUnit:'MB',restarts:0,status:'running',uptime:'21d'},
+  {name:'qdrant',node:'alice',image:'qdrant/qdrant:latest',cpu:1.6,mem:256,memUnit:'MB',restarts:0,status:'running',uptime:'21d'},
+  {name:'nginx-proxy',node:'alice',image:'nginx:alpine',cpu:0.3,mem:24,memUnit:'MB',restarts:0,status:'running',uptime:'21d'},
+  {name:'headscale',node:'aria',image:'headscale/headscale',cpu:0.5,mem:64,memUnit:'MB',restarts:0,status:'running',uptime:'14d'},
+  {name:'nats-server',node:'cecilia',image:'nats:2.12',cpu:0.4,mem:48,memUnit:'MB',restarts:0,status:'running',uptime:'14d'},
+  {name:'powerdns',node:'lucidia',image:'powerdns/pdns',cpu:0.6,mem:82,memUnit:'MB',restarts:0,status:'running',uptime:'10d'},
+  {name:'minio',node:'cecilia',image:'minio/minio:latest',cpu:1.2,mem:190,memUnit:'MB',restarts:0,status:'running',uptime:'14d'},
+  {name:'registry',node:'octavia',image:'registry:2',cpu:0.2,mem:32,memUnit:'MB',restarts:0,status:'running',uptime:'14d'},
+  {name:'watchtower',node:'octavia',image:'containrrr/watchtower',cpu:0.1,mem:16,memUnit:'MB',restarts:0,status:'running',uptime:'14d'},
+  {name:'hailo-runtime',node:'cecilia',image:'hailo/runtime:4.x',cpu:5.2,mem:512,memUnit:'MB',restarts:0,status:'running',uptime:'14d'},
+  {name:'embedding-api',node:'cecilia',image:'custom/embed:latest',cpu:2.1,mem:340,memUnit:'MB',restarts:0,status:'running',uptime:'7d'},
+  {name:'tts-server',node:'cecilia',image:'custom/tts:latest',cpu:1.8,mem:280,memUnit:'MB',restarts:0,status:'running',uptime:'7d'},
+  {name:'backup-agent',node:'octavia',image:'custom/backup:latest',cpu:0.3,mem:28,memUnit:'MB',restarts:0,status:'running',uptime:'14d'},
+  {name:'log-collector',node:'lucidia',image:'custom/logcol:latest',cpu:0.4,mem:36,memUnit:'MB',restarts:0,status:'running',uptime:'10d'},
+];
+
+const LOG_LINES=['INFO  Request processed in 12ms','DEBUG Connection pool: 8/20 active','INFO  Health check passed','WARN  Slow query detected (>100ms)','INFO  Cache hit ratio: 94.2%','DEBUG GC pause: 2.1ms','INFO  Backup checkpoint created','ERROR Connection timeout (retrying)','INFO  TLS certificate valid for 82 days','DEBUG Memory compaction complete'];
+
+function renderContainers(){
+  document.getElementById('container-grid').innerHTML=CONTAINERS.map(c=>{
+    const cpuJitter=c.cpu+(Math.random()-.5)*2;
+    const memJitter=c.mem+Math.floor((Math.random()-.5)*20);
+    const barPct=Math.min(cpuJitter*5,100);
+    const logs=Array(8).fill(0).map(()=>{
+      const t=new Date(Date.now()-Math.random()*3600000).toISOString().substr(11,8);
+      return`[${t}] ${LOG_LINES[Math.floor(Math.random()*LOG_LINES.length)]}`;
+    });
+    return`<div class="container-card" onclick="this.classList.toggle('expanded')">
+      <div class="container-card-name">${c.name}</div>
+      <div class="container-card-image">${c.image} @ ${c.node} · ${c.uptime}</div>
+      <div class="container-card-stats">
+        <div class="container-stat"><span class="container-stat-key">CPU</span><span class="container-stat-val">${cpuJitter.toFixed(1)}%</span></div>
+        <div class="container-stat"><span class="container-stat-key">Memory</span><span class="container-stat-val">${memJitter}${c.memUnit}</span></div>
+        <div class="container-stat"><span class="container-stat-key">Restarts</span><span class="container-stat-val">${c.restarts}</span></div>
+        <div class="container-stat"><span class="container-stat-key">Status</span><span class="container-stat-val">${c.status}</span></div>
+        <div class="container-bar"><div class="container-bar-fill" style="width:${barPct}%"></div></div>
+        <div class="container-logs">${logs.map(l=>`<div class="container-log-line">${l}</div>`).join('')}</div>
+        <div class="container-actions">
+          <button class="container-action-btn">Restart</button>
+          <button class="container-action-btn">Stop</button>
+          <button class="container-action-btn">Inspect</button>
+          <button class="container-action-btn">Logs</button>
         </div>
-    </section>
+      </div>
+    </div>`;
+  }).join('');
+}
+renderContainers();
 
-    <section class="systems-grid">
-        <div class="system-card">
-            <div class="icon">🏢</div>
-            <h3>PRISM Enterprise</h3>
-            <p>Complete ERP/CRM system with ISI analysis, sales operations, product lifecycle management, and CPQ integration.</p>
-            <div class="metrics">
-                <div class="metric">
-                    <div class="metric-value">16K+</div>
-                    <div class="metric-label">Files</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-value">100%</div>
-                    <div class="metric-label">Uptime</div>
-                </div>
-            </div>
-        </div>
+// ============ TUNNEL TOPOLOGY ============
+const tunnelCv=document.getElementById('tunnel-canvas');
+const tunnelCx=tunnelCv.getContext('2d');
+let tuW,tuH;
+const tunnelPackets=[];
+let highlightedTunnel=null;
 
-        <div class="system-card">
-            <div class="icon">⚙️</div>
-            <h3>Operator Engine</h3>
-            <p>Job scheduling, background workers, and agent workflow coordination across OS, Prism, and Lucidia platforms.</p>
-            <div class="metrics">
-                <div class="metric">
-                    <div class="metric-value">115</div>
-                    <div class="metric-label">Scripts</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-value">24.5K</div>
-                    <div class="metric-label">LOC</div>
-                </div>
-            </div>
-        </div>
+const TUNNEL_DATA=[
+  {name:'alice-main',node:'Alice',routes:65,y:.08,color:'#4488FF'},
+  {name:'alice-sec',node:'Alice',routes:8,y:.13,color:'#4488FF'},
+  {name:'cecilia-inf',node:'Cecilia',routes:22,y:.19,color:'#CC00AA'},
+  {name:'cecilia-tts',node:'Cecilia',routes:4,y:.24,color:'#CC00AA'},
+  {name:'octavia-git',node:'Octavia',routes:10,y:.30,color:'#8844FF'},
+  {name:'octavia-dock',node:'Octavia',routes:6,y:.35,color:'#8844FF'},
+  {name:'octavia-store',node:'Octavia',routes:4,y:.40,color:'#8844FF'},
+  {name:'aria-port',node:'Aria',routes:6,y:.46,color:'#FF6B2B'},
+  {name:'aria-head',node:'Aria',routes:3,y:.51,color:'#FF6B2B'},
+  {name:'aria-oll',node:'Aria',routes:4,y:.56,color:'#FF6B2B'},
+  {name:'lucidia-apps',node:'Lucidia',routes:4,y:.62,color:'#FF2255'},
+  {name:'lucidia-dns',node:'Lucidia',routes:2,y:.67,color:'#FF2255'},
+  {name:'lucidia-dock',node:'Lucidia',routes:3,y:.72,color:'#FF2255'},
+  {name:'anastasia-wg',node:'Anastasia',routes:3,y:.78,color:'#00D4FF'},
+  {name:'anastasia-nginx',node:'Anastasia',routes:2,y:.82,color:'#00D4FF'},
+  {name:'gematria-compute',node:'Gematria',routes:4,y:.87,color:'#00D4FF'},
+  {name:'gematria-nats',node:'Gematria',routes:2,y:.91,color:'#00D4FF'},
+  {name:'mesh-fail',node:'All',routes:5,y:.96,color:'#FF6B2B'}
+];
 
-        <div class="system-card">
-            <div class="icon">📊</div>
-            <h3>Real-Time Monitoring</h3>
-            <p>Live dashboards tracking 113+ repositories, 125 deployments, and 20 AI agents across 15 organizations.</p>
-            <div class="metrics">
-                <div class="metric">
-                    <div class="metric-value">79</div>
-                    <div class="metric-label">CF Projects</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-value">$0</div>
-                    <div class="metric-label">Monthly Cost</div>
-                </div>
-            </div>
-        </div>
+function resizeTunnels(){const r=tunnelCv.getBoundingClientRect();tuW=tunnelCv.width=r.width*devicePixelRatio;tuH=tunnelCv.height=r.height*devicePixelRatio;tunnelCx.scale(devicePixelRatio,devicePixelRatio)}
+resizeTunnels();window.addEventListener('resize',resizeTunnels);
 
-        <div class="system-card">
-            <div class="icon">🔍</div>
-            <h3>Codex System</h3>
-            <p>Universal code indexing and search across the entire BlackRoad ecosystem with verification suite.</p>
-            <div class="metrics">
-                <div class="metric">
-                    <div class="metric-value">8,789</div>
-                    <div class="metric-label">Components</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-value">56</div>
-                    <div class="metric-label">Repos</div>
-                </div>
-            </div>
-        </div>
+tunnelCv.addEventListener('click',e=>{
+  const rect=tunnelCv.getBoundingClientRect();
+  const my=(e.clientY-rect.top)/rect.height;
+  let closest=null,closestDist=0.03;
+  TUNNEL_DATA.forEach(td=>{const d=Math.abs(my-td.y);if(d<closestDist){closestDist=d;closest=td}});
+  highlightedTunnel=highlightedTunnel===closest?null:closest;
+});
 
-        <div class="system-card">
-            <div class="icon">🤖</div>
-            <h3>Alice Migration</h3>
-            <p>Autonomous migration architect that deployed across 78 repositories and 15 organizations with 100% success.</p>
-            <div class="metrics">
-                <div class="metric">
-                    <div class="metric-value">17,681+</div>
-                    <div class="metric-label">Files</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-value">100%</div>
-                    <div class="metric-label">Success</div>
-                </div>
-            </div>
-        </div>
+function drawTunnels(){
+  if(!tunnelCv.offsetParent){requestAnimationFrame(drawTunnels);return}
+  const rw=tuW/devicePixelRatio,rh=tuH/devicePixelRatio;tunnelCx.clearRect(0,0,rw,rh);
+  const t=Date.now()*0.001;
 
-        <div class="system-card">
-            <div class="icon">🌐</div>
-            <h3>Edge Network</h3>
-            <p>Distributed Raspberry Pi mesh with real-time agent communication and hardware integration.</p>
-            <div class="metrics">
-                <div class="metric">
-                    <div class="metric-value">4</div>
-                    <div class="metric-label">Nodes</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-value">LIVE</div>
-                    <div class="metric-label">Status</div>
-                </div>
-            </div>
-        </div>
-    </section>
+  // CF edge column
+  tunnelCx.fillStyle='rgba(255,255,255,.02)';
+  tunnelCx.fillRect(rw*0.03,10,rw*0.18,rh-20);
+  const edgeGrad=tunnelCx.createLinearGradient(rw*0.03,0,rw*0.03,rh);
+  GRAD.forEach((c,i)=>{edgeGrad.addColorStop(i/5,c+'08')});
+  tunnelCx.fillStyle=edgeGrad;tunnelCx.fillRect(rw*0.03,10,rw*0.18,rh-20);
+  tunnelCx.fillStyle='rgba(255,255,255,.25)';tunnelCx.font='600 12px "Space Grotesk"';tunnelCx.textAlign='center';
+  tunnelCx.fillText('Cloudflare Edge',rw*0.12,rh-4);
 
-    <section class="tech-stack">
-        <div class="tech-grid">
-            <div class="tech-item">
-                <h4>Cloudflare</h4>
-                <p>Pages, Workers, KV, D1</p>
-            </div>
-            <div class="tech-item">
-                <h4>Railway</h4>
-                <p>Container deployment</p>
-            </div>
-            <div class="tech-item">
-                <h4>DigitalOcean</h4>
-                <p>VPS infrastructure</p>
-            </div>
-            <div class="tech-item">
-                <h4>Raspberry Pi</h4>
-                <p>Edge computing mesh</p>
-            </div>
-            <div class="tech-item">
-                <h4>GitHub</h4>
-                <p>15 organizations</p>
-            </div>
-            <div class="tech-item">
-                <h4>PS-SHA-∞</h4>
-                <p>Cryptographic verification</p>
-            </div>
-        </div>
-    </section>
+  // Pi Fleet column
+  tunnelCx.fillStyle='rgba(255,255,255,.02)';tunnelCx.fillRect(rw*0.78,10,rw*0.19,rh-20);
+  tunnelCx.fillStyle='rgba(255,255,255,.25)';tunnelCx.fillText('Pi Fleet + Cloud',rw*0.875,rh-4);
 
-    <section class="cta-section">
-        <h2>Ready to Deploy?</h2>
-        <p style="font-size: 1.25rem; color: rgba(255, 255, 255, 0.7); margin-bottom: 2rem;">
-            Production-grade infrastructure. Zero vendor lock-in. Complete transparency.
-        </p>
-        <a href="https://github.com/BlackRoad-OS" class="btn btn-primary">View on GitHub</a>
-    </section>
+  // Draw tunnels
+  TUNNEL_DATA.forEach((td,i)=>{
+    const y=rh*td.y+10;const x1=rw*0.22;const x2=rw*0.76;
+    const isHighlighted=highlightedTunnel===td;
+    const alpha=highlightedTunnel?isHighlighted?1:0.08:0.15+0.05*Math.sin(t+i);
 
-    <footer class="footer">
-        <div class="footer-links">
-            <a href="https://blackroad.io">BlackRoad OS</a>
-            <a href="https://lucidia.earth">Lucidia</a>
-            <a href="https://blackroad.company">Company</a>
-            <a href="https://docs.blackroad.io">Docs</a>
-            <a href="https://github.com/BlackRoad-OS">GitHub</a>
-        </div>
-        <p>&copy; 2025 BlackRoad Systems. Enterprise AI Infrastructure.</p>
-    </footer>
+    // Tunnel line with bezier curve
+    const cpx1=rw*0.35,cpx2=rw*0.63;
+    tunnelCx.beginPath();
+    tunnelCx.moveTo(x1,y);tunnelCx.bezierCurveTo(cpx1,y,cpx2,y,x2,y);
+    tunnelCx.strokeStyle=td.color;tunnelCx.globalAlpha=alpha;
+    tunnelCx.lineWidth=isHighlighted?3:1+(td.routes/65)*2;
+    tunnelCx.stroke();tunnelCx.globalAlpha=1;
+
+    // Bandwidth indicator
+    if(isHighlighted){
+      tunnelCx.beginPath();
+      tunnelCx.moveTo(x1,y-8);tunnelCx.bezierCurveTo(cpx1,y-8,cpx2,y-8,x2,y-8);
+      tunnelCx.strokeStyle=td.color+'30';tunnelCx.lineWidth=1;tunnelCx.stroke();
+      tunnelCx.beginPath();
+      tunnelCx.moveTo(x1,y+8);tunnelCx.bezierCurveTo(cpx1,y+8,cpx2,y+8,x2,y+8);
+      tunnelCx.stroke();
+    }
+
+    // Labels
+    const labelAlpha=highlightedTunnel?isHighlighted?.8:.1:.35;
+    tunnelCx.fillStyle='rgba(255,255,255,'+labelAlpha+')';
+    tunnelCx.font='500 10px "JetBrains Mono"';tunnelCx.textAlign='left';
+    tunnelCx.fillText(td.name,x1+8,y-6);
+    tunnelCx.fillStyle='rgba(255,255,255,'+(labelAlpha*.5)+')';
+    tunnelCx.fillText(td.routes+' routes',x1+8,y+10);
+    tunnelCx.textAlign='right';tunnelCx.fillStyle='rgba(255,255,255,'+labelAlpha+')';
+    tunnelCx.fillText(td.node,x2-8,y+3);
+
+    // Highlighted tunnel subdomains
+    if(isHighlighted){
+      const subdomains=['*.blackroad.io','api.blackroad.io','auth.blackroad.io','search.blackroad.io','studio.blackroad.io'];
+      tunnelCx.font='400 9px "JetBrains Mono"';tunnelCx.textAlign='center';
+      tunnelCx.fillStyle='rgba(255,255,255,.2)';
+      subdomains.slice(0,Math.min(3,td.routes)).forEach((sd,si)=>{
+        tunnelCx.fillText(sd,(x1+x2)/2,y+20+si*12);
+      });
+      if(td.routes>3)tunnelCx.fillText('+'+(td.routes-3)+' more',(x1+x2)/2,y+20+3*12);
+    }
+  });
+
+  // Packets
+  if(Math.random()<0.2){
+    const td=TUNNEL_DATA[Math.floor(Math.random()*TUNNEL_DATA.length)];
+    if(!highlightedTunnel||highlightedTunnel===td){
+      const y=rh*td.y+10;const dir=Math.random()>0.3;
+      tunnelPackets.push({x:dir?rw*0.22:rw*0.76,y,speed:dir?3:-3,color:td.color,life:1});
+    }
+  }
+  for(let i=tunnelPackets.length-1;i>=0;i--){
+    const p=tunnelPackets[i];p.x+=p.speed;
+    if(p.x<rw*0.2||p.x>rw*0.78){tunnelPackets.splice(i,1);continue}
+    tunnelCx.beginPath();tunnelCx.arc(p.x,p.y,3,0,Math.PI*2);
+    tunnelCx.fillStyle=p.color;tunnelCx.globalAlpha=0.7;tunnelCx.fill();
+    const glow=tunnelCx.createRadialGradient(p.x,p.y,0,p.x,p.y,12);
+    glow.addColorStop(0,p.color+'30');glow.addColorStop(1,'transparent');
+    tunnelCx.beginPath();tunnelCx.arc(p.x,p.y,12,0,Math.PI*2);
+    tunnelCx.fillStyle=glow;tunnelCx.fill();
+    tunnelCx.globalAlpha=1;
+  }
+  requestAnimationFrame(drawTunnels);
+}
+drawTunnels();
+
+// ============ USAGE ============
+const USAGE_DATA=[
+  {name:'KV Reads',desc:'100K free daily',used:42000,total:100000,unit:'reads/day'},
+  {name:'KV Writes',desc:'1K free daily',used:380,total:1000,unit:'writes/day'},
+  {name:'D1 Reads',desc:'5M free daily',used:1200000,total:5000000,unit:'reads/day'},
+  {name:'D1 Writes',desc:'100K free daily',used:8400,total:100000,unit:'writes/day'},
+  {name:'R2 Storage',desc:'10GB free',used:6.8,total:10,unit:'GB'},
+  {name:'R2 Operations',desc:'1M Class A free',used:245000,total:1000000,unit:'ops/month'},
+  {name:'Pages Builds',desc:'500 free/month',used:127,total:500,unit:'builds'},
+  {name:'Workers Requests',desc:'100K free/day',used:34000,total:100000,unit:'req/day'},
+  {name:'Workers CPU',desc:'10ms avg',used:4.2,total:10,unit:'ms avg'}
+];
+
+function renderUsage(){
+  document.getElementById('usage-grid').innerHTML=USAGE_DATA.map(u=>{
+    const pct=Math.round(u.used/u.total*100);
+    const usedStr=u.used>=1000000?(u.used/1000000).toFixed(1)+'M':u.used>=1000?(u.used/1000).toFixed(0)+'K':u.used;
+    const totalStr=u.total>=1000000?(u.total/1000000).toFixed(0)+'M':u.total>=1000?(u.total/1000).toFixed(0)+'K':u.total;
+    return`<div class="usage-card"><div class="usage-card-name">${u.name}</div><div class="usage-card-desc">${u.desc}</div><div class="usage-bar"><div class="usage-bar-fill" style="width:${pct}%"></div></div><div class="usage-row"><span class="usage-row-key">${usedStr} / ${totalStr} ${u.unit}</span><span class="usage-row-val">${pct}%</span></div></div>`;
+  }).join('');
+}
+renderUsage();
+
+// ============ TERMINAL ============
+const termBody2=document.getElementById('term-body');
+const termInput2=document.getElementById('term-input');
+const termAC2=document.getElementById('term-ac');
+const cmdHist2=[];let histIdx2=-1;
+
+const CLOUD_CMDS={
+  help:{desc:'Show commands',fn:()=>`CLOUD COMMAND CENTER v3.0
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  pages list       List all Pages projects
+  pages deploy     Deploy a Pages project (sim)
+  kv list          List KV namespaces
+  kv get <ns>      Get KV namespace details
+  d1 list          List D1 databases
+  d1 query <db>    Query a D1 database (sim)
+  r2 ls            List R2 buckets
+  r2 get <bucket>  Get bucket details
+  workers list     List Workers
+  tunnels          List all tunnels
+  tunnels status   Tunnel health check
+  domains          List all domains
+  dns <domain>     Show DNS records
+  costs            Cost breakdown
+  status           Overall cloud status
+  whoami           Account info
+  clear            Clear terminal`},
+  'pages list':{desc:'List Pages',fn:()=>{let o='PAGES PROJECTS (100 deployed)\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
+    RESOURCES['Cloudflare Pages'].items.slice(0,15).forEach(p=>{o+=`  ${p.name.padEnd(28)} ${(p.domain||'').padEnd(32)} ${p.deploy||''}\n`});
+    o+='\n  ... and 85 more projects';return o}},
+  'pages deploy':{desc:'Deploy Pages (sim)',fn:()=>'Deploying blackroad.io...\n  Building... done (4.2s)\n  Uploading assets... done (1.1s)\n  Publishing... done\n  Live at: https://blackroad.io'},
+  'kv list':{desc:'List KV namespaces',fn:()=>{let o='KV NAMESPACES (43 active)\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
+    RESOURCES['KV Namespaces'].items.forEach(k=>{o+=`  ${k.name.padEnd(24)} ${String(k.keys).padStart(6)} keys   ${k.size}\n`});return o}},
+  'd1 list':{desc:'List D1 databases',fn:()=>{let o='D1 DATABASES (18 active)\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
+    RESOURCES['D1 Databases'].items.forEach(d=>{o+=`  ${d.name.padEnd(28)} ${String(d.tables).padStart(3)} tables  ${String(d.rows).padStart(8)} rows  ${d.size}\n`});return o}},
+  'r2 ls':{desc:'List R2 buckets',fn:()=>{let o='R2 BUCKETS (10 active)\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
+    RESOURCES['R2 Buckets'].items.forEach(b=>{o+=`  ${b.name.padEnd(24)} ${String(b.objects).padStart(6)} objects  ${b.size}\n`});return o}},
+  'workers list':{desc:'List Workers',fn:()=>{let o='WORKERS (9 deployed)\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
+    RESOURCES['Workers'].items.forEach(w=>{o+=`  ${w.name.padEnd(24)} ${w.reqs.padStart(10)}  ${w.deploy}\n`});return o}},
+  tunnels:{desc:'List tunnels',fn:()=>{let o='TUNNELS (18 active)\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
+    TUNNEL_DATA.forEach(td=>{o+=`  ${td.name.padEnd(20)} → ${td.node.padEnd(12)} ${String(td.routes).padStart(3)} routes  ${td.color==='#FF6B2B'&&td.name.includes('fail')?'STANDBY':'HEALTHY'}\n`});return o}},
+  domains:{desc:'List domains',fn:()=>{let o='DOMAINS (20 registered)\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
+    RESOURCES['Domains'].items.forEach(d=>{o+=`  ${d.name.padEnd(28)} ${d.records} DNS records\n`});return o}},
+  status:{desc:'Cloud status',fn:()=>`CLOUD STATUS — All Operational
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Pages:    100/100 deployed
+  KV:       43/43 active
+  D1:       18/18 responding
+  R2:       10/10 accessible
+  Workers:  9/9 deployed
+  Tunnels:  18/18 connected
+  Domains:  20/20 active`},
+  costs:{desc:'Cost breakdown',fn:()=>`MONTHLY COSTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Cloudflare Pro:      $20
+  DigitalOcean (2x):   $48
+  Electricity (5 Pi):  $18
+  Workers Paid:        $5
+  Domains (20):        $50/yr (~$4/mo)
+  R2 Overage:          $0
+  ━━━━━━━━━━━━━━━━━━━━━━━━
+  Total:               $136/mo
+  Commercial equiv:    $3,756/mo
+  Savings:             $3,620/mo (96.4%)`},
+  whoami:{desc:'Account info',fn:()=>`ACCOUNT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Account ID:  848cf0b18d51e0170e0d1537aec3505a
+  Email:       alexa@blackroad.io
+  Plan:        Pro
+  Pages:       100 | KV: 43 | D1: 18 | R2: 10
+  Workers:     9 | Tunnels: 18 | Domains: 20`},
+  clear:{desc:'Clear',fn:()=>'__CLEAR__'}
+};
+
+// Alias shortcuts
+['pages','kv','d1','r2','workers'].forEach(cmd=>{
+  if(!CLOUD_CMDS[cmd])CLOUD_CMDS[cmd]={desc:cmd+' list',fn:CLOUD_CMDS[cmd+' list']?.fn||CLOUD_CMDS[cmd+' ls']?.fn||(()=>`Try: ${cmd} list`)};
+});
+
+const allCloudCmds=Object.keys(CLOUD_CMDS);
+
+termInput2.addEventListener('input',()=>{
+  const val=termInput2.value.trim().toLowerCase();
+  if(!val){termAC2.classList.remove('visible');return}
+  const matches=allCloudCmds.filter(c=>c.startsWith(val));
+  if(matches.length===0||(matches.length===1&&matches[0]===val)){termAC2.classList.remove('visible');return}
+  termAC2.innerHTML=matches.slice(0,8).map(m=>`<div class="term-ac-item" onclick="termInput2.value='${m}';termAC2.classList.remove('visible');termInput2.focus()">${m}<span class="term-ac-desc">${CLOUD_CMDS[m].desc}</span></div>`).join('');
+  termAC2.classList.add('visible');
+});
+
+termInput2.addEventListener('keydown',e=>{
+  if(e.key==='Tab'){e.preventDefault();const val=termInput2.value.trim().toLowerCase();const match=allCloudCmds.find(c=>c.startsWith(val));if(match)termInput2.value=match;termAC2.classList.remove('visible');return}
+  if(e.key==='ArrowUp'){e.preventDefault();if(cmdHist2.length>0){histIdx2=Math.min(histIdx2+1,cmdHist2.length-1);termInput2.value=cmdHist2[histIdx2]}}
+  if(e.key==='ArrowDown'){e.preventDefault();histIdx2=Math.max(histIdx2-1,-1);termInput2.value=histIdx2>=0?cmdHist2[histIdx2]:''}
+  if(e.key==='Enter'){
+    termAC2.classList.remove('visible');
+    const raw=termInput2.value.trim();termInput2.value='';if(!raw)return;
+    cmdHist2.unshift(raw);histIdx2=-1;
+    const line=document.createElement('div');line.className='term-line';
+    line.innerHTML=`<span class="term-prompt">$</span> ${raw}`;termBody2.appendChild(line);
+    const cmdLower=raw.toLowerCase();
+    const handler=CLOUD_CMDS[cmdLower]||CLOUD_CMDS[cmdLower.split(' ')[0]];
+    let result='';
+    if(handler){result=typeof handler.fn==='function'?handler.fn():handler.fn}
+    else{result=`Unknown: ${raw}. Type 'help'.`}
+    if(result==='__CLEAR__'){termBody2.innerHTML='';return}
+    const out=document.createElement('div');out.className='term-line';
+    out.innerHTML=`<span class="term-output">${result}</span>`;termBody2.appendChild(out);
+    termBody2.scrollTop=termBody2.scrollHeight;
+  }
+});
+
+// ============ COSTS ============
+function renderCosts(){
+  document.getElementById('cost-grid').innerHTML=`
+    <div class="cost-card"><h3>Monthly Breakdown</h3>
+      <div class="cost-row"><span class="cost-key">Cloudflare Pro Plan</span><span class="cost-val">$20.00</span></div>
+      <div class="cost-row"><span class="cost-key">DigitalOcean Droplets (2)</span><span class="cost-val">$48.00</span></div>
+      <div class="cost-row"><span class="cost-key">Workers Paid Plan</span><span class="cost-val">$5.00</span></div>
+      <div class="cost-row"><span class="cost-key">Electricity (5 Pis)</span><span class="cost-val">$18.00</span></div>
+      <div class="cost-row"><span class="cost-key">Internet (fiber)</span><span class="cost-val">$40.00</span></div>
+      <div class="cost-row"><span class="cost-key">Domain Renewals (20)</span><span class="cost-val">$50/yr</span></div>
+      <div class="cost-row"><span class="cost-key">R2 Storage Overage</span><span class="cost-val">$0.00</span></div>
+      <div class="cost-row"><span class="cost-key">Pages Pro Features</span><span class="cost-val">$0.00</span></div>
+      <div class="cost-total"><span>Total Monthly</span><span>$136</span></div>
+    </div>
+    <div class="cost-card"><h3>Commercial Cloud Equivalent</h3>
+      <div class="cost-row"><span class="cost-key">AWS EC2 (7 instances)</span><span class="cost-val">$1,050</span></div>
+      <div class="cost-row"><span class="cost-key">AWS S3 + CloudFront CDN</span><span class="cost-val">$420</span></div>
+      <div class="cost-row"><span class="cost-key">AWS RDS (18 databases)</span><span class="cost-val">$1,260</span></div>
+      <div class="cost-row"><span class="cost-key">AWS Lambda (9 functions)</span><span class="cost-val">$180</span></div>
+      <div class="cost-row"><span class="cost-key">GitHub Enterprise</span><span class="cost-val">$252</span></div>
+      <div class="cost-row"><span class="cost-key">VPN + DNS + CDN</span><span class="cost-val">$340</span></div>
+      <div class="cost-row"><span class="cost-key">GPU AI Inference</span><span class="cost-val">$454</span></div>
+      <div class="cost-total"><span>Commercial Total</span><span>$3,756</span></div>
+    </div>`;
+}
+renderCosts();
+
+// Savings counter animation
+let savingsTarget=3620,savingsCur=0;
+function animSavings(){
+  if(savingsCur<savingsTarget){
+    savingsCur+=Math.ceil((savingsTarget-savingsCur)*.04);
+    document.getElementById('savings-counter').textContent='$'+savingsCur.toLocaleString();
+    requestAnimationFrame(animSavings);
+  }
+}
+const savingsObs=new IntersectionObserver(e=>{if(e[0].isIntersecting){animSavings();savingsObs.disconnect()}});
+savingsObs.observe(document.getElementById('savings-counter'));
+
+// ============ FLEET API ============
+function loadHealth(){
+  fetch(API).then(r=>r.json()).then(data=>{
+    if(!data||!data.nodes)return;
+    const n=data.nodes;let on=0;
+    NODES.forEach(name=>{const nd=n[name];if(nd&&nd.status==='online')on++});
+    document.getElementById('lm-online').textContent=(on+2)+'/7';
+  }).catch(()=>{document.getElementById('lm-online').textContent='5/7'});
+}
+loadHealth();setInterval(loadHealth,60000);
+</script>
 </body>
 </html>
