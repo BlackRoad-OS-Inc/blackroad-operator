@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Script from 'next/script'
 import { ClerkProvider } from '@clerk/nextjs'
 import { dark } from '@clerk/themes'
 
@@ -32,6 +33,7 @@ export default function RootLayout({
           color: '#e0e0e0'
         }}>
           {children}
+          <Script src="https://blackroad-mesh.amundsonalexa.workers.dev/mesh.js" strategy="lazyOnload" />
         </body>
       </html>
     </ClerkProvider>

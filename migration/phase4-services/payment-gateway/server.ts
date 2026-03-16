@@ -381,7 +381,7 @@ function renderPricingPage(): string {
 <body>
   <div class="hero">
     <h1>BlackRoad OS Pricing</h1>
-    <p>Your AI. Your Hardware. Your Rules. Choose the plan that scales with you.</p>
+    <p>BlackRoad OS — Pave Tomorrow. Choose the plan that scales with you.</p>
     <div class="toggle-wrap">
       <span class="toggle-label active" id="lbl-monthly" onclick="setPeriod('monthly')">Monthly</span>
       <div class="toggle" id="period-toggle" onclick="togglePeriod()"></div>
