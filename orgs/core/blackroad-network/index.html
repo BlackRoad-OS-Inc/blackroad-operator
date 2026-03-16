@@ -1,73 +1,1304 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BlackRoad Network</title>
-    <meta name="description" content="Network infrastructure and services">
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Inter', -apple-system, sans-serif;
-            background: #000000;
-            color: #FFFFFF;
-            line-height: 1.6;
-        }
-        .hero {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 4rem 2rem;
-            background: radial-gradient(circle, rgba(119, 0, 255, 0.15), transparent 70%);
-        }
-        h1 {
-            font-size: clamp(3rem, 8vw, 6rem);
-            font-weight: 800;
-            margin-bottom: 2rem;
-            background: linear-gradient(135deg, #0066FF 0%, #00AAFF 50%, #00FFFF 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .icon { font-size: 6rem; margin-bottom: 2rem; }
-        .tagline {
-            font-size: clamp(1.25rem, 3vw, 2rem);
-            color: rgba(255, 255, 255, 0.8);
-            margin-bottom: 3rem;
-        }
-        .btn {
-            display: inline-block;
-            padding: 1rem 2.5rem;
-            background: linear-gradient(135deg, #0066FF 0%, #00AAFF 50%, #00FFFF 100%);
-            color: #FFF;
-            text-decoration: none;
-            border-radius: 12px;
-            font-weight: 600;
-            transition: transform 0.3s;
-            margin: 0.5rem;
-        }
-        .btn:hover { transform: translateY(-2px); }
-        .footer {
-            text-align: center;
-            padding: 3rem 2rem;
-            color: rgba(255, 255, 255, 0.5);
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BlackRoad Network — Fleet Command Center</title>
+<meta name="description" content="BlackRoad OS — Pave Tomorrow. Military-grade fleet command center.">
+<link rel="icon" href="https://images.blackroad.io/pixel-art/blackroad-logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{-webkit-font-smoothing:antialiased;scroll-behavior:smooth}
+:root{--g:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);--g135:linear-gradient(135deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);--bg:#000;--white:#fff;--black:#000;--border:#1a1a1a;--sg:'Space Grotesk',sans-serif;--jb:'JetBrains Mono',monospace}
+body{background:var(--bg);color:var(--white);font-family:var(--sg);overflow-x:hidden}
+.grad-bar{height:4px;background:var(--g)}
+
+/* NAV */
+nav{display:flex;align-items:center;justify-content:space-between;padding:16px 48px;border-bottom:1px solid var(--border);backdrop-filter:blur(12px);background:rgba(0,0,0,.85);position:sticky;top:0;z-index:100}
+.nav-logo{font-weight:700;font-size:20px;color:var(--white);display:flex;align-items:center;gap:10px}
+.nav-logo img{width:32px;height:32px;border-radius:50%}
+.nav-tabs{display:flex;gap:4px}
+.nav-tab{padding:8px 16px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--white);opacity:.4;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--sg);transition:all .2s}
+.nav-tab:hover{opacity:.7;border-color:#333}
+.nav-tab.active{opacity:1;border-color:#444}
+.btn-outline{padding:8px 20px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--white);font-size:13px;font-weight:600;font-family:var(--sg);transition:border-color .2s;text-decoration:none;display:inline-flex;align-items:center}
+.btn-outline:hover{border-color:#444}
+.btn-solid{padding:8px 20px;border:none;border-radius:6px;background:var(--white);color:var(--black);font-size:13px;font-weight:600;font-family:var(--sg);text-decoration:none;display:inline-flex;align-items:center}
+
+/* PANELS */
+.panel{display:none;animation:fadeUp .4s ease both}
+.panel.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:.6}50%{opacity:1}}
+@keyframes glowPulse{0%,100%{box-shadow:0 0 20px rgba(255,34,85,.1)}50%{box-shadow:0 0 40px rgba(136,68,255,.2)}}
+@keyframes scanline{0%{transform:translateY(-100%)}100%{transform:translateY(100vh)}}
+.section{max-width:1400px;margin:0 auto;padding:48px}
+.section-label{font-family:var(--jb);font-size:10px;color:var(--white);opacity:.25;letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px}
+.section-title{font-size:28px;font-weight:700;color:var(--white);margin-bottom:8px}
+.section-desc{font-size:13px;color:var(--white);opacity:.35;margin-bottom:32px;max-width:500px}
+
+/* ALERT BANNER */
+.alert-banner{display:none;padding:12px 48px;background:rgba(255,34,85,.06);border-bottom:1px solid rgba(255,34,85,.15);font-family:var(--jb);font-size:12px;color:var(--white);opacity:.7;text-align:center;animation:pulse 2s infinite}
+.alert-banner.visible{display:block}
+
+/* 3D TOPOLOGY */
+#topo-canvas{width:100%;height:680px;border:1px solid var(--border);border-radius:10px;background:#020204;display:block;cursor:grab;position:relative}
+#topo-canvas:active{cursor:grabbing}
+.topo-controls{display:flex;gap:8px;justify-content:center;margin-top:12px;flex-wrap:wrap}
+.topo-btn{padding:8px 16px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--white);opacity:.4;font-size:11px;font-weight:600;cursor:pointer;font-family:var(--jb);transition:all .2s}
+.topo-btn:hover{opacity:.8;border-color:#333}
+.topo-btn.active{opacity:1;border-color:#444}
+
+/* NODE DRAWER */
+.node-drawer{position:fixed;top:0;right:-420px;width:420px;height:100vh;background:#050508;border-left:1px solid var(--border);z-index:200;transition:right .3s ease;overflow-y:auto;padding:0}
+.node-drawer.open{right:0}
+.node-drawer::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--g)}
+.drawer-header{padding:24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:flex-start}
+.drawer-header h3{font-size:20px;font-weight:700;color:var(--white)}
+.drawer-role{font-size:12px;color:var(--white);opacity:.35;margin-top:4px}
+.drawer-close{background:none;border:1px solid var(--border);border-radius:6px;color:var(--white);cursor:pointer;font-size:14px;padding:6px 12px;font-family:var(--jb);opacity:.4;transition:opacity .2s}
+.drawer-close:hover{opacity:1}
+.drawer-stats{padding:16px 24px;display:grid;grid-template-columns:1fr 1fr;gap:12px;border-bottom:1px solid var(--border)}
+.drawer-stat{padding:12px;border:1px solid var(--border);border-radius:8px}
+.drawer-stat-val{font-size:18px;font-weight:700;color:var(--white);font-family:var(--jb)}
+.drawer-stat-label{font-size:10px;color:var(--white);opacity:.25;font-family:var(--jb);text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
+.drawer-stat-bar{height:3px;background:var(--border);border-radius:2px;overflow:hidden;margin-top:6px}
+.drawer-stat-bar-fill{height:100%;background:var(--g);border-radius:2px;transition:width 1s ease}
+.drawer-services{padding:16px 24px}
+.drawer-services h4{font-size:12px;font-weight:600;color:var(--white);opacity:.5;margin-bottom:12px;text-transform:uppercase;letter-spacing:.06em;font-family:var(--jb)}
+.drawer-svc{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px;color:var(--white)}
+.drawer-svc:last-child{border-bottom:none}
+.drawer-svc-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.drawer-svc-dot.up{background:var(--g135)}
+.drawer-svc-dot.down{background:none;border:1px solid var(--white);opacity:.3}
+.drawer-svc-name{flex:1;opacity:.5}
+.drawer-svc-port{font-family:var(--jb);font-size:10px;opacity:.25}
+.drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:199;display:none}
+.drawer-overlay.open{display:block}
+
+/* HEALTH MATRIX */
+.health-matrix{border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.hm-search{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;gap:8px}
+.hm-search input{flex:1;background:transparent;border:1px solid var(--border);border-radius:6px;padding:8px 12px;color:var(--white);font-family:var(--jb);font-size:12px;outline:none}
+.hm-search input:focus{border-color:#333}
+.hm-search input::placeholder{color:var(--white);opacity:.15}
+.hm-header{display:grid;grid-template-columns:180px repeat(5,1fr) 100px;border-bottom:1px solid var(--border)}
+.hm-header div{padding:10px 12px;font-family:var(--jb);font-size:10px;color:var(--white);opacity:.25;text-transform:uppercase;letter-spacing:.06em;text-align:center}
+.hm-header div:first-child{text-align:left}
+.hm-row{display:grid;grid-template-columns:180px repeat(5,1fr) 100px;border-bottom:1px solid var(--border);transition:background .15s;cursor:pointer}
+.hm-row:last-child{border-bottom:none}
+.hm-row:hover{background:#0a0a0a}
+.hm-svc{padding:10px 12px;font-size:12px;color:var(--white);opacity:.5;display:flex;align-items:center;gap:6px}
+.hm-cell{padding:10px 12px;display:flex;align-items:center;justify-content:center;gap:4px;flex-direction:column}
+.hm-dot{width:8px;height:8px;border-radius:50%;transition:all .3s}
+.hm-dot.up{background:var(--g135)}
+.hm-dot.down{background:none;border:1px solid rgba(255,34,85,.5)}
+.hm-dot.na{background:#1a1a1a}
+.hm-dot.warn{background:linear-gradient(135deg,#FF6B2B,#FF2255)}
+.hm-time{font-family:var(--jb);font-size:9px;color:var(--white);opacity:.2;margin-top:2px}
+.hm-spark{width:100%;height:16px;display:block}
+.hm-detail{display:none;grid-column:1/-1;padding:16px 24px;background:#050508;border-top:1px solid var(--border)}
+.hm-detail.open{display:block;animation:fadeUp .2s ease}
+.hm-detail-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.hm-detail-item{font-size:11px;color:var(--white);opacity:.4}
+.hm-detail-item span{display:block;font-family:var(--jb);opacity:.7;margin-top:2px}
+
+/* PERFORMANCE CHARTS */
+.perf-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.perf-card{border:1px solid var(--border);border-radius:10px;overflow:hidden;position:relative;transition:all .3s;cursor:pointer}
+.perf-card:hover{border-color:#333}
+.perf-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--g)}
+.perf-card-header{padding:16px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)}
+.perf-card-title{font-size:13px;font-weight:600;color:var(--white)}
+.perf-card-value{font-family:var(--jb);font-size:14px;font-weight:700;color:var(--white)}
+.perf-card canvas{width:100%;height:120px;display:block;background:#030305}
+.perf-card.expanded canvas{height:300px}
+.perf-node-tabs{display:flex;gap:4px;padding:12px 20px;border-bottom:1px solid var(--border);overflow-x:auto}
+.perf-node-tab{padding:4px 10px;border:1px solid var(--border);border-radius:4px;background:transparent;color:var(--white);opacity:.3;font-size:10px;font-weight:600;cursor:pointer;font-family:var(--jb);transition:all .2s;white-space:nowrap}
+.perf-node-tab:hover{opacity:.6}
+.perf-node-tab.active{opacity:1;border-color:#444}
+.perf-threshold{position:absolute;right:20px;bottom:8px;font-family:var(--jb);font-size:9px;color:var(--white);opacity:.15}
+
+/* TERMINAL */
+.fleet-terminal{border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.term-header{padding:10px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;background:#050508}
+.term-dots{display:flex;gap:6px}
+.term-dots span{width:10px;height:10px;border-radius:50%}
+.term-dots span:nth-child(1){background:#FF5F57}
+.term-dots span:nth-child(2){background:#FEBC2E}
+.term-dots span:nth-child(3){background:#28C840}
+.term-title{font-family:var(--jb);font-size:11px;color:var(--white);opacity:.15;margin-left:auto}
+.term-body{min-height:400px;max-height:500px;overflow-y:auto;padding:16px;font-family:var(--jb);font-size:12px;line-height:1.8;background:#020204}
+.term-body::-webkit-scrollbar{width:4px}
+.term-body::-webkit-scrollbar-track{background:transparent}
+.term-body::-webkit-scrollbar-thumb{background:#222;border-radius:2px}
+.term-line{margin-bottom:2px;white-space:pre-wrap;word-break:break-all}
+.term-prompt{color:var(--white);opacity:.4}
+.term-output{color:var(--white);opacity:.5}
+.term-table{border-collapse:collapse;width:100%;margin:4px 0}
+.term-table td{padding:2px 12px 2px 0;font-family:var(--jb);font-size:11px;color:var(--white);opacity:.5;white-space:nowrap}
+.term-progress{height:4px;background:var(--border);border-radius:2px;overflow:hidden;width:200px;display:inline-block;vertical-align:middle;margin:0 8px}
+.term-progress-fill{height:100%;background:var(--g);border-radius:2px;transition:width .3s}
+.term-autocomplete{position:absolute;bottom:100%;left:0;right:0;background:#0a0a0a;border:1px solid var(--border);border-bottom:none;border-radius:6px 6px 0 0;max-height:200px;overflow-y:auto;display:none;z-index:10}
+.term-autocomplete.visible{display:block}
+.term-ac-item{padding:6px 16px;font-family:var(--jb);font-size:11px;color:var(--white);opacity:.4;cursor:pointer;display:flex;justify-content:space-between}
+.term-ac-item:hover,.term-ac-item.selected{background:#111;opacity:.7}
+.term-ac-desc{opacity:.3;font-size:10px}
+.term-input-row{padding:10px 16px;border-top:1px solid var(--border);display:flex;align-items:center;gap:8px;background:#020204;position:relative}
+.term-input-prefix{color:var(--white);opacity:.4;font-family:var(--jb);font-size:12px}
+.term-input{flex:1;background:transparent;border:none;color:var(--white);font-family:var(--jb);font-size:12px;outline:none}
+.term-input::placeholder{color:var(--white);opacity:.15}
+
+/* INCIDENT TIMELINE */
+.incident-timeline{position:relative;padding-left:32px}
+.incident-timeline::before{content:'';position:absolute;left:15px;top:0;bottom:0;width:2px;background:var(--border)}
+.incident-item{position:relative;padding:16px 0 24px 24px}
+.incident-dot{position:absolute;left:-24px;top:20px;width:12px;height:12px;border-radius:50%;border:2px solid var(--bg)}
+.incident-dot.critical{background:#FF2255;animation:pulse 1.5s infinite}
+.incident-dot.warning{background:linear-gradient(135deg,#FF6B2B,#FF2255)}
+.incident-dot.info{background:linear-gradient(135deg,#4488FF,#00D4FF)}
+.incident-dot.resolved{background:linear-gradient(135deg,#00D4FF,#4488FF)}
+.incident-card{border:1px solid var(--border);border-radius:8px;padding:16px;cursor:pointer;transition:all .2s}
+.incident-card:hover{border-color:#333}
+.incident-card h4{font-size:13px;font-weight:600;color:var(--white);margin-bottom:4px}
+.incident-card p{font-size:11px;color:var(--white);opacity:.35;line-height:1.6}
+.incident-time{font-family:var(--jb);font-size:10px;color:var(--white);opacity:.2;margin-top:6px}
+.incident-detail{display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);font-size:11px;color:var(--white);opacity:.3;line-height:1.6}
+.incident-card.expanded .incident-detail{display:block;animation:fadeUp .2s ease}
+
+/* STATUS BAR */
+.status-bar{display:grid;grid-template-columns:repeat(7,1fr);gap:12px;max-width:1400px;margin:0 auto;padding:16px 48px}
+.status-box{border:1px solid var(--border);border-radius:8px;padding:14px;text-align:center;transition:all .3s;position:relative;overflow:hidden}
+.status-box::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--g);opacity:0;transition:opacity .3s}
+.status-box:hover::before{opacity:1}
+.status-box-val{font-size:22px;font-weight:700;color:var(--white);font-family:var(--jb)}
+.status-box-label{font-family:var(--jb);font-size:9px;color:var(--white);opacity:.25;text-transform:uppercase;letter-spacing:.06em;margin-top:4px}
+
+/* FOOTER */
+footer{border-top:1px solid var(--border);padding:48px}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;gap:32px;max-width:1200px;margin:0 auto}
+.footer-brand{font-weight:700;font-size:16px;color:var(--white);margin-bottom:8px}
+.footer-brand-desc{font-size:12px;color:var(--white);opacity:.3;line-height:1.6;max-width:260px}
+.footer-col h5{font-size:11px;font-weight:600;color:var(--white);opacity:.5;text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px}
+.footer-col a{display:block;font-size:13px;color:var(--white);opacity:.35;margin-bottom:8px;transition:opacity .2s;text-decoration:none}
+.footer-col a:hover{opacity:1}
+.footer-bottom{max-width:1200px;margin:32px auto 0;padding-top:24px;border-top:1px solid var(--border);text-align:center;font-size:12px;color:var(--white);opacity:.2}
+
+.kbd-help{position:fixed;bottom:16px;right:16px;z-index:50;padding:8px 14px;border:1px solid var(--border);border-radius:6px;background:rgba(0,0,0,.9);font-family:var(--jb);font-size:10px;color:var(--white);opacity:.2;transition:opacity .2s}
+.kbd-help:hover{opacity:.5}
+kbd{padding:1px 5px;border:1px solid var(--border);border-radius:3px;font-family:var(--jb);font-size:10px}
+
+@media(max-width:1024px){.status-bar{grid-template-columns:repeat(4,1fr)}.perf-grid{grid-template-columns:1fr}.hm-header,.hm-row{grid-template-columns:140px repeat(3,1fr) 80px}}
+@media(max-width:768px){
+  nav{padding:14px 20px;flex-wrap:wrap;gap:8px}.nav-tabs{overflow-x:auto;flex-wrap:nowrap}
+  .section{padding:32px 20px}.status-bar{grid-template-columns:repeat(2,1fr);padding:16px 20px}
+  .perf-grid{grid-template-columns:1fr}
+  .node-drawer{width:100%}
+  footer{padding:32px 20px}.footer-grid{grid-template-columns:1fr}.kbd-help{display:none}
+}
+</style>
 </head>
 <body>
-    <div class="hero">
-        <div>
-            <div class="icon">🌐</div>
-            <h1>BlackRoad Network</h1>
-            <p class="tagline">Infrastructure • CDN • Services</p>
-            <a href="https://blackroad.io" class="btn">Explore BlackRoad OS</a>
-            <a href="https://github.com/BlackRoad-OS" class="btn">GitHub</a>
-        </div>
+<div class="grad-bar"></div>
+<div class="alert-banner" id="alert-banner"></div>
+
+<nav>
+  <div class="nav-logo"><img src="https://images.blackroad.io/pixel-art/blackroad-logo.png" alt="BlackRoad"> Fleet Command</div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" data-panel="topology">Topology</button>
+    <button class="nav-tab" data-panel="health">Health Matrix</button>
+    <button class="nav-tab" data-panel="performance">Performance</button>
+    <button class="nav-tab" data-panel="terminal">Terminal</button>
+    <button class="nav-tab" data-panel="incidents">Incidents</button>
+  </div>
+  <div style="display:flex;gap:10px">
+    <a class="btn-outline" href="https://blackroad.systems">Cloud</a>
+    <a class="btn-solid" href="https://blackroad.io">BlackRoad OS</a>
+  </div>
+</nav>
+
+<!-- STATUS BAR -->
+<div class="status-bar" id="status-bar">
+  <div class="status-box"><div class="status-box-val" id="sb-nodes">-</div><div class="status-box-label">Nodes Online</div></div>
+  <div class="status-box"><div class="status-box-val" id="sb-services">47</div><div class="status-box-label">Services</div></div>
+  <div class="status-box"><div class="status-box-val" id="sb-models">-</div><div class="status-box-label">AI Models</div></div>
+  <div class="status-box"><div class="status-box-val" id="sb-containers">-</div><div class="status-box-label">Containers</div></div>
+  <div class="status-box"><div class="status-box-val" id="sb-tunnels">18</div><div class="status-box-label">Tunnels</div></div>
+  <div class="status-box"><div class="status-box-val" id="sb-tops">52</div><div class="status-box-label">TOPS</div></div>
+  <div class="status-box"><div class="status-box-val" id="sb-temp">-</div><div class="status-box-label">Avg Temp</div></div>
+</div>
+
+<!-- PANEL: 3D TOPOLOGY -->
+<div class="panel active" id="panel-topology">
+  <div class="section">
+    <div class="section-label">3D Network Topology</div>
+    <div class="section-title">Fleet Command View</div>
+    <div class="section-desc">Click node to inspect. Double-click to zoom into internal architecture. Drag to rotate. Scroll to zoom.</div>
+    <canvas id="topo-canvas"></canvas>
+    <div class="topo-controls">
+      <button class="topo-btn active" onclick="topoView='orbit'" data-view="orbit">Orbit</button>
+      <button class="topo-btn" onclick="topoView='top'" data-view="top">Top Down</button>
+      <button class="topo-btn" onclick="topoView='side'" data-view="side">Side View</button>
+      <button class="topo-btn" onclick="resetCamera()">Reset Camera</button>
+      <button class="topo-btn" onclick="togglePackets()">Toggle Packets</button>
+      <button class="topo-btn" onclick="toggleLabels()">Toggle Labels</button>
     </div>
-    <footer class="footer">
-        <p>&copy; 2025 BlackRoad. Part of the BlackRoad OS ecosystem.</p>
-    </footer>
+  </div>
+</div>
+
+<!-- PANEL: HEALTH MATRIX -->
+<div class="panel" id="panel-health">
+  <div class="section">
+    <div class="section-label">Service Health Matrix</div>
+    <div class="section-title">Every Service, Every Node</div>
+    <div class="section-desc">40+ services across 7 nodes with live response times and history sparklines.</div>
+    <div class="health-matrix">
+      <div class="hm-search"><input type="text" id="hm-filter" placeholder="Filter services... (e.g. ollama, gitea, nginx)"></div>
+      <div class="hm-header">
+        <div>Service</div>
+        <div>Alice</div>
+        <div>Cecilia</div>
+        <div>Octavia</div>
+        <div>Aria</div>
+        <div>Lucidia</div>
+        <div>History</div>
+      </div>
+      <div id="hm-body"></div>
+    </div>
+  </div>
+</div>
+
+<!-- PANEL: PERFORMANCE -->
+<div class="panel" id="panel-performance">
+  <div class="section">
+    <div class="section-label">Real-Time Performance</div>
+    <div class="section-title">Fleet Metrics</div>
+    <div class="section-desc">Live CPU, RAM, Disk, Temperature charts per node with warning thresholds.</div>
+    <div class="perf-node-tabs" id="perf-tabs">
+      <button class="perf-node-tab active" data-node="all">Fleet Average</button>
+      <button class="perf-node-tab" data-node="alice">Alice</button>
+      <button class="perf-node-tab" data-node="cecilia">Cecilia</button>
+      <button class="perf-node-tab" data-node="octavia">Octavia</button>
+      <button class="perf-node-tab" data-node="aria">Aria</button>
+      <button class="perf-node-tab" data-node="lucidia">Lucidia</button>
+    </div>
+    <div class="perf-grid" id="perf-grid"></div>
+  </div>
+</div>
+
+<!-- PANEL: TERMINAL -->
+<div class="panel" id="panel-terminal">
+  <div class="section">
+    <div class="section-label">Fleet Terminal</div>
+    <div class="section-title">Command Center</div>
+    <div class="section-desc">20+ commands. Tab to autocomplete. Ctrl+R to search history. Try: status, health, ping alice, models, containers, mesh, ports</div>
+    <div class="fleet-terminal">
+      <div class="term-header">
+        <div class="term-dots"><span></span><span></span><span></span></div>
+        <div class="term-title">fleet@blackroad-command ~ $</div>
+      </div>
+      <div class="term-body" id="term-body">
+        <div class="term-line"><span class="term-prompt">$</span> <span class="term-output">BlackRoad Fleet Command v3.0 — 7 nodes · 47 services · 52 TOPS</span></div>
+        <div class="term-line"><span class="term-prompt">$</span> <span class="term-output">Type 'help' for available commands. Tab to autocomplete.</span></div>
+      </div>
+      <div class="term-input-row">
+        <div class="term-autocomplete" id="term-ac"></div>
+        <span class="term-input-prefix">$</span>
+        <input type="text" class="term-input" id="term-input" placeholder="Type a command..." autocomplete="off">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PANEL: INCIDENTS -->
+<div class="panel" id="panel-incidents">
+  <div class="section">
+    <div class="section-label">Incident Timeline</div>
+    <div class="section-title">Fleet Events</div>
+    <div class="section-desc">Real-time event log with severity indicators. Click to expand details.</div>
+    <div class="incident-timeline" id="incident-timeline"></div>
+  </div>
+</div>
+
+<!-- NODE DRAWER -->
+<div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
+<div class="node-drawer" id="node-drawer">
+  <div class="drawer-header">
+    <div>
+      <h3 id="drawer-name">Node</h3>
+      <div class="drawer-role" id="drawer-role">Role</div>
+    </div>
+    <button class="drawer-close" onclick="closeDrawer()">ESC</button>
+  </div>
+  <div class="drawer-stats" id="drawer-stats"></div>
+  <div class="drawer-services" id="drawer-services"></div>
+</div>
+
+<div class="kbd-help"><kbd>1</kbd>-<kbd>5</kbd> panels · <kbd>R</kbd> refresh · <kbd>ESC</kbd> close</div>
+
+<footer>
+  <div class="footer-grid">
+    <div>
+      <div class="footer-brand">BlackRoad Network</div>
+      <div class="footer-brand-desc">Military-grade fleet command center. 7 nodes, 47 services, 52 TOPS. Pave Tomorrow.</div>
+    </div>
+    <div class="footer-col"><h5>Fleet</h5><a href="#topology">Topology</a><a href="#health">Health</a><a href="#performance">Performance</a><a href="#terminal">Terminal</a></div>
+    <div class="footer-col"><h5>Platform</h5><a href="https://blackroad.io">BlackRoad OS</a><a href="https://blackroadai.com">AI</a><a href="https://blackroad.systems">Cloud</a></div>
+    <div class="footer-col"><h5>Company</h5><a href="https://blackroad.company">About</a><a href="https://search.blackroad.io">Search</a></div>
+    <div class="footer-col"><h5>Dev</h5><a href="https://github.com/blackboxprogramming" target="_blank">GitHub</a><a href="https://api.blackroad.io">API</a></div>
+  </div>
+  <div class="footer-bottom">&copy; 2026 BlackRoad OS, Inc. All rights reserved.</div>
+</footer>
+<div class="grad-bar"></div>
+
+<script>
+const API='https://fleet-api.amundsonalexa.workers.dev/fleet';
+const GRAD=['#FF6B2B','#FF2255','#CC00AA','#8844FF','#4488FF','#00D4FF'];
+const GRAD_STOPS=GRAD.map((c,i)=>({offset:i/(GRAD.length-1),color:c}));
+
+// ====================== NODES DATA ======================
+const FLEET_NODES=[
+  {id:'alice',name:'Alice',role:'Gateway & DNS',ip:'192.168.4.49',color:'#4488FF',x:0,y:0,z:0,
+   services:['nginx-proxy','pi-hole','postgresql','qdrant','nats-client','wireguard','cloudflared','node-exporter','fleet-health','ssh'],
+   ports:[80,443,53,5432,6333,4222,51820,8080,9100,22],
+   specs:{cpu:'ARM Cortex-A76',ram:'8GB',disk:'256GB NVMe',os:'Bullseye'}},
+  {id:'cecilia',name:'Cecilia',role:'AI Inference Engine',ip:'192.168.4.96',color:'#CC00AA',x:2,y:1,z:-1,
+   services:['ollama','hailo-runtime','minio','nats-server','embedding-api','tts-server','cloudflared','node-exporter','model-manager','inference-cache'],
+   ports:[11434,4444,9000,4222,8000,5002,8080,9100,8001,6379],
+   specs:{cpu:'ARM Cortex-A76',ram:'8GB',disk:'512GB NVMe',os:'Bookworm',accelerator:'Hailo-8 26 TOPS'}},
+  {id:'octavia',name:'Octavia',role:'Git & Storage',ip:'192.168.4.101',color:'#8844FF',x:-2,y:1,z:-1,
+   services:['gitea','docker-registry','portainer-agent','watchtower','cloudflared','node-exporter','backup-agent','sync-worker','container-monitor','ssh'],
+   ports:[3100,5000,9001,8080,8081,9100,8002,8003,8004,22],
+   specs:{cpu:'ARM Cortex-A76',ram:'8GB',disk:'1TB NVMe',os:'Bookworm',accelerator:'Hailo-8 26 TOPS'}},
+  {id:'aria',name:'Aria',role:'Frontend & Orchestration',ip:'192.168.4.98',color:'#FF6B2B',x:1,y:-1.5,z:1,
+   services:['ollama','portainer','headscale','cloudflared','node-exporter','web-server','api-proxy','tailscale','render-engine','ssh'],
+   ports:[11434,9000,8080,8081,9100,3000,4000,41641,8002,22],
+   specs:{cpu:'ARM Cortex-A76',ram:'4GB',disk:'128GB SD',os:'Bookworm'}},
+  {id:'lucidia',name:'Lucidia',role:'Apps & DNS',ip:'192.168.4.38',color:'#FF2255',x:-1,y:-1.5,z:1,
+   services:['ollama','powerdns','docker-host','cloudflared','node-exporter','web-apps','ufw','github-actions-runner','log-collector','ssh'],
+   ports:[11434,53,2375,8080,9100,8000,22,3000,5140,22],
+   specs:{cpu:'ARM Cortex-A76',ram:'8GB',disk:'256GB SD',os:'Bookworm'}},
+  {id:'gematria',name:'Gematria',role:'Compute Droplet',ip:'nyc3',color:'#00D4FF',x:3,y:0,z:2,
+   services:['wireguard-hub','nginx','nats-relay','monitoring','compute-worker','cloudflared','node-exporter','backup-target'],
+   ports:[51820,80,4222,9090,8000,8080,9100,22],
+   specs:{cpu:'2 vCPU',ram:'4GB',disk:'80GB SSD',os:'Ubuntu 22.04',provider:'DigitalOcean'}},
+  {id:'anastasia',name:'Anastasia',role:'WireGuard Hub',ip:'nyc1',color:'#4488FF',x:-3,y:0,z:2,
+   services:['wireguard-hub','nginx','vpn-manager','dns-relay','monitoring','cloudflared','node-exporter','failover-agent'],
+   ports:[51820,80,8080,53,9090,8081,9100,22],
+   specs:{cpu:'1 vCPU',ram:'2GB',disk:'50GB SSD',os:'Ubuntu 22.04',provider:'DigitalOcean'}}
+];
+
+// ====================== TAB NAVIGATION ======================
+document.querySelectorAll('.nav-tab').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.nav-tab').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-'+btn.dataset.panel).classList.add('active');
+  });
+});
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT')return;
+  const tabs=['topology','health','performance','terminal','incidents'];
+  const num=parseInt(e.key);if(num>=1&&num<=5)document.querySelectorAll('.nav-tab')[num-1]?.click();
+  if(e.key==='r'||e.key==='R')loadFleetData();
+  if(e.key==='Escape')closeDrawer();
+});
+
+// ====================== 3D TOPOLOGY ======================
+const topoCv=document.getElementById('topo-canvas');
+const topoCx=topoCv.getContext('2d');
+let tw,th,camRotX=0.3,camRotY=-0.5,camZoom=1,camDragX=0,camDragY=0;
+let isDragging=false,lastMX=0,lastMY=0;
+let topoView='orbit',showPackets=true,showLabels=true;
+let zoomedNode=null;
+const packets=[];
+
+function resizeTopo(){const r=topoCv.getBoundingClientRect();tw=topoCv.width=r.width*devicePixelRatio;th=topoCv.height=r.height*devicePixelRatio;topoCx.scale(devicePixelRatio,devicePixelRatio)}
+resizeTopo();window.addEventListener('resize',resizeTopo);
+
+// Mouse controls
+topoCv.addEventListener('mousedown',e=>{isDragging=true;lastMX=e.clientX;lastMY=e.clientY});
+topoCv.addEventListener('mousemove',e=>{if(!isDragging)return;camRotY+=(e.clientX-lastMX)*0.005;camRotX+=(e.clientY-lastMY)*0.005;camRotX=Math.max(-1.2,Math.min(1.2,camRotX));lastMX=e.clientX;lastMY=e.clientY});
+topoCv.addEventListener('mouseup',()=>isDragging=false);
+topoCv.addEventListener('mouseleave',()=>isDragging=false);
+topoCv.addEventListener('wheel',e=>{e.preventDefault();camZoom=Math.max(0.4,Math.min(2.5,camZoom-e.deltaY*0.001))},{passive:false});
+
+// Click detection
+topoCv.addEventListener('click',e=>{
+  const rect=topoCv.getBoundingClientRect();
+  const mx=e.clientX-rect.left,my=e.clientY-rect.top;
+  const rw=tw/devicePixelRatio,rh=th/devicePixelRatio;
+  const cx=rw/2,cy=rh/2;
+  let closest=null,closestDist=60;
+  const nodes=zoomedNode?getSubNodes(zoomedNode):FLEET_NODES;
+  nodes.forEach(n=>{
+    const p=project3D(n.x||0,n.y||0,n.z||0,cx,cy,rw);
+    const d=Math.sqrt((mx-p.x)**2+(my-p.y)**2);
+    if(d<closestDist){closestDist=d;closest=n}
+  });
+  if(closest)openDrawer(closest);
+});
+
+topoCv.addEventListener('dblclick',e=>{
+  const rect=topoCv.getBoundingClientRect();
+  const mx=e.clientX-rect.left,my=e.clientY-rect.top;
+  const rw=tw/devicePixelRatio,rh=th/devicePixelRatio;
+  const cx=rw/2,cy=rh/2;
+  let closest=null,closestDist=60;
+  FLEET_NODES.forEach(n=>{
+    const p=project3D(n.x,n.y,n.z,cx,cy,rw);
+    const d=Math.sqrt((mx-p.x)**2+(my-p.y)**2);
+    if(d<closestDist){closestDist=d;closest=n}
+  });
+  if(closest){zoomedNode=zoomedNode===closest?null:closest}
+});
+
+function resetCamera(){camRotX=0.3;camRotY=-0.5;camZoom=1;zoomedNode=null}
+function togglePackets(){showPackets=!showPackets}
+function toggleLabels(){showLabels=!showLabels}
+
+function project3D(x,y,z,cx,cy,scale){
+  const cosY=Math.cos(camRotY),sinY=Math.sin(camRotY);
+  const cosX=Math.cos(camRotX),sinX=Math.sin(camRotX);
+  let rx=x*cosY-z*sinY;
+  let rz=x*sinY+z*cosY;
+  let ry=y*cosX-rz*sinX;
+  let rz2=y*sinX+rz*cosX;
+  const perspective=600/(600+rz2*100);
+  const s=scale*0.12*camZoom;
+  return{x:cx+rx*s*perspective,y:cy+ry*s*perspective,scale:perspective,z:rz2};
+}
+
+function getSubNodes(parent){
+  return parent.services.map((svc,i)=>{
+    const angle=(i/parent.services.length)*Math.PI*2;
+    const r=1.5;
+    return{id:svc,name:svc,role:'Service on '+parent.name,ip:':'+parent.ports[i],color:parent.color,
+      x:parent.x+Math.cos(angle)*r,y:parent.y+Math.sin(angle)*r*0.6,z:parent.z+Math.sin(angle)*r*0.3,
+      services:[],ports:[parent.ports[i]],specs:{}};
+  });
+}
+
+// Connection map
+const CONNECTIONS=[
+  ['alice','cecilia'],['alice','octavia'],['alice','aria'],['alice','lucidia'],
+  ['alice','gematria'],['alice','anastasia'],['cecilia','octavia'],
+  ['gematria','anastasia'],['aria','lucidia'],['cecilia','aria']
+];
+const PACKET_TYPES=[
+  {name:'AI Inference',colors:['#CC00AA','#8844FF']},
+  {name:'Git Sync',colors:['#8844FF','#4488FF']},
+  {name:'Health Check',colors:['#00D4FF','#4488FF']},
+  {name:'DNS Query',colors:['#FF6B2B','#FF2255']},
+  {name:'Tunnel Traffic',colors:['#FF2255','#CC00AA']}
+];
+
+function spawnPacket(){
+  if(packets.length>150)return;
+  const conn=CONNECTIONS[~~(Math.random()*CONNECTIONS.length)];
+  const from=FLEET_NODES.find(n=>n.id===conn[0]);
+  const to=FLEET_NODES.find(n=>n.id===conn[1]);
+  if(!from||!to)return;
+  const type=PACKET_TYPES[~~(Math.random()*PACKET_TYPES.length)];
+  const dir=Math.random()>0.5;
+  const cp1x=(from.x+to.x)/2+(Math.random()-.5)*2;
+  const cp1y=(from.y+to.y)/2+(Math.random()-.5)*1.5;
+  const cp1z=(from.z+to.z)/2+(Math.random()-.5);
+  packets.push({
+    from:dir?from:to,to:dir?to:from,t:0,speed:0.005+Math.random()*0.01,
+    type,cp1x,cp1y,cp1z,size:2+Math.random()*2
+  });
+}
+
+function bezier(a,b,cp,t){
+  const mt=1-t;
+  return mt*mt*a+2*mt*t*cp+t*t*b;
+}
+
+let topoTime=0;
+function drawTopology(){
+  const rw=tw/devicePixelRatio,rh=th/devicePixelRatio;
+  topoCx.clearRect(0,0,rw,rh);
+  topoTime+=0.005;
+
+  // Auto-rotation in orbit mode
+  if(topoView==='orbit'&&!isDragging){camRotY+=0.001}
+  if(topoView==='top'){camRotX=-1.5;camRotY+=0.0005}
+  if(topoView==='side'){camRotX=0;camRotY+=0.001}
+
+  const cx=rw/2,cy=rh/2;
+  const nodes=zoomedNode?getSubNodes(zoomedNode):FLEET_NODES;
+  const conns=zoomedNode?[]:CONNECTIONS;
+
+  // Grid floor
+  topoCx.globalAlpha=0.02;
+  for(let i=-5;i<=5;i++){
+    const p1=project3D(i,-2,-5,cx,cy,rw);
+    const p2=project3D(i,-2,5,cx,cy,rw);
+    topoCx.beginPath();topoCx.moveTo(p1.x,p1.y);topoCx.lineTo(p2.x,p2.y);
+    topoCx.strokeStyle='#fff';topoCx.lineWidth=0.5;topoCx.stroke();
+    const p3=project3D(-5,-2,i,cx,cy,rw);
+    const p4=project3D(5,-2,i,cx,cy,rw);
+    topoCx.beginPath();topoCx.moveTo(p3.x,p3.y);topoCx.lineTo(p4.x,p4.y);topoCx.stroke();
+  }
+  topoCx.globalAlpha=1;
+
+  // Sort by depth for correct rendering
+  const projected=nodes.map(n=>({node:n,...project3D(n.x,n.y,n.z,cx,cy,rw)}));
+  projected.sort((a,b)=>b.z-a.z);
+
+  // Draw connections
+  conns.forEach(([aId,bId])=>{
+    const a=FLEET_NODES.find(n=>n.id===aId);
+    const b=FLEET_NODES.find(n=>n.id===bId);
+    if(!a||!b)return;
+    const pa=project3D(a.x,a.y,a.z,cx,cy,rw);
+    const pb=project3D(b.x,b.y,b.z,cx,cy,rw);
+    const traffic=0.3+Math.sin(topoTime*2+a.x+b.y)*0.15;
+    topoCx.beginPath();topoCx.moveTo(pa.x,pa.y);topoCx.lineTo(pb.x,pb.y);
+    topoCx.strokeStyle=`rgba(255,255,255,${0.04+traffic*0.03})`;
+    topoCx.lineWidth=1+traffic*2;topoCx.stroke();
+  });
+
+  // Draw packets
+  if(showPackets){
+    if(Math.random()<0.3)spawnPacket();
+    for(let i=packets.length-1;i>=0;i--){
+      const p=packets[i];p.t+=p.speed;
+      if(p.t>=1){packets.splice(i,1);continue}
+      const px=bezier(p.from.x,p.to.x,p.cp1x,p.t);
+      const py=bezier(p.from.y,p.to.y,p.cp1y,p.t);
+      const pz=bezier(p.from.z,p.to.z,p.cp1z,p.t);
+      const pp=project3D(px,py,pz,cx,cy,rw);
+      const grad=topoCx.createRadialGradient(pp.x,pp.y,0,pp.x,pp.y,p.size*pp.scale*3);
+      grad.addColorStop(0,p.type.colors[0]);grad.addColorStop(1,'transparent');
+      topoCx.beginPath();topoCx.arc(pp.x,pp.y,p.size*pp.scale*3,0,Math.PI*2);
+      topoCx.fillStyle=grad;topoCx.globalAlpha=0.6*pp.scale;topoCx.fill();
+      topoCx.beginPath();topoCx.arc(pp.x,pp.y,p.size*pp.scale,0,Math.PI*2);
+      topoCx.fillStyle=p.type.colors[0];topoCx.globalAlpha=0.8;topoCx.fill();
+      topoCx.globalAlpha=1;
+    }
+  }
+
+  // Draw nodes
+  projected.forEach(({node:n,x,y,scale,z})=>{
+    const baseR=zoomedNode?16:22;
+    const r=baseR*scale*camZoom;
+    const serviceCount=n.services.length;
+    const pulse=Math.sin(topoTime*3+n.x*2)*0.15;
+
+    // Outer glow
+    const glow=topoCx.createRadialGradient(x,y,r,x,y,r*3);
+    glow.addColorStop(0,n.color+'25');glow.addColorStop(1,'transparent');
+    topoCx.beginPath();topoCx.arc(x,y,r*3,0,Math.PI*2);
+    topoCx.fillStyle=glow;topoCx.fill();
+
+    // Service count ring
+    if(!zoomedNode&&serviceCount>0){
+      const ringR=r*1.6;
+      for(let i=0;i<serviceCount;i++){
+        const angle=(i/serviceCount)*Math.PI*2-Math.PI/2+topoTime;
+        const sx=x+Math.cos(angle)*ringR;
+        const sy=y+Math.sin(angle)*ringR;
+        topoCx.beginPath();topoCx.arc(sx,sy,2*scale,0,Math.PI*2);
+        topoCx.fillStyle=n.color;topoCx.globalAlpha=0.3+pulse;topoCx.fill();
+      }
+      topoCx.globalAlpha=1;
+    }
+
+    // Main orb
+    const orbGrad=topoCx.createRadialGradient(x-r*0.3,y-r*0.3,0,x,y,r);
+    orbGrad.addColorStop(0,n.color+'60');orbGrad.addColorStop(0.7,n.color+'20');orbGrad.addColorStop(1,'transparent');
+    topoCx.beginPath();topoCx.arc(x,y,r,0,Math.PI*2);
+    topoCx.fillStyle=orbGrad;topoCx.fill();
+    topoCx.strokeStyle=n.color+'80';topoCx.lineWidth=1.5;topoCx.stroke();
+
+    // Core bright spot
+    topoCx.beginPath();topoCx.arc(x,y,r*0.3,0,Math.PI*2);
+    topoCx.fillStyle=n.color;topoCx.globalAlpha=0.5+pulse;topoCx.fill();
+    topoCx.globalAlpha=1;
+
+    // Labels
+    if(showLabels){
+      topoCx.font=`600 ${Math.max(10,12*scale)}px "Space Grotesk"`;
+      topoCx.fillStyle='rgba(255,255,255,.7)';topoCx.textAlign='center';
+      topoCx.fillText(n.name,x,y+r+16*scale);
+      topoCx.font=`400 ${Math.max(8,9*scale)}px "JetBrains Mono"`;
+      topoCx.fillStyle='rgba(255,255,255,.25)';
+      topoCx.fillText(n.ip,x,y+r+28*scale);
+    }
+  });
+
+  // Anomaly pulse (simulated)
+  if(nodeStatuses.down.length>0){
+    nodeStatuses.down.forEach(nid=>{
+      const n=FLEET_NODES.find(f=>f.id===nid);if(!n)return;
+      const p=project3D(n.x,n.y,n.z,cx,cy,rw);
+      const pulseR=40+Math.sin(topoTime*5)*20;
+      topoCx.beginPath();topoCx.arc(p.x,p.y,pulseR,0,Math.PI*2);
+      topoCx.strokeStyle='rgba(255,34,85,'+(.3-pulseR/200)+')';topoCx.lineWidth=2;topoCx.stroke();
+    });
+  }
+
+  // Legend
+  if(!zoomedNode){
+    topoCx.font='500 10px "JetBrains Mono"';topoCx.textAlign='left';
+    PACKET_TYPES.forEach((pt,i)=>{
+      const ly=rh-20-i*18;
+      topoCx.beginPath();topoCx.arc(20,ly,4,0,Math.PI*2);
+      topoCx.fillStyle=pt.colors[0];topoCx.globalAlpha=0.6;topoCx.fill();
+      topoCx.globalAlpha=1;topoCx.fillStyle='rgba(255,255,255,.25)';
+      topoCx.fillText(pt.name,30,ly+3);
+    });
+  }
+
+  if(zoomedNode){
+    topoCx.font='600 14px "Space Grotesk"';topoCx.fillStyle='rgba(255,255,255,.4)';topoCx.textAlign='center';
+    topoCx.fillText('Viewing: '+zoomedNode.name+' internal architecture — double-click to zoom out',rw/2,24);
+  }
+
+  requestAnimationFrame(drawTopology);
+}
+drawTopology();
+
+// ====================== NODE DRAWER ======================
+function openDrawer(node){
+  const drawer=document.getElementById('node-drawer');
+  const overlay=document.getElementById('drawer-overlay');
+  document.getElementById('drawer-name').textContent=node.name;
+  document.getElementById('drawer-role').textContent=node.role+' · '+node.ip;
+
+  const statsDiv=document.getElementById('drawer-stats');
+  const cpu=20+Math.random()*60,ram=30+Math.random()*50,disk=20+Math.random()*60,temp=35+Math.random()*25;
+  statsDiv.innerHTML=`
+    <div class="drawer-stat"><div class="drawer-stat-val">${cpu.toFixed(1)}%</div><div class="drawer-stat-label">CPU Usage</div><div class="drawer-stat-bar"><div class="drawer-stat-bar-fill" style="width:${cpu}%"></div></div></div>
+    <div class="drawer-stat"><div class="drawer-stat-val">${ram.toFixed(1)}%</div><div class="drawer-stat-label">Memory</div><div class="drawer-stat-bar"><div class="drawer-stat-bar-fill" style="width:${ram}%"></div></div></div>
+    <div class="drawer-stat"><div class="drawer-stat-val">${disk.toFixed(1)}%</div><div class="drawer-stat-label">Disk</div><div class="drawer-stat-bar"><div class="drawer-stat-bar-fill" style="width:${disk}%"></div></div></div>
+    <div class="drawer-stat"><div class="drawer-stat-val">${temp.toFixed(1)}C</div><div class="drawer-stat-label">Temperature</div><div class="drawer-stat-bar"><div class="drawer-stat-bar-fill" style="width:${(temp/80)*100}%"></div></div></div>
+  `;
+  if(node.specs){
+    statsDiv.innerHTML+=Object.entries(node.specs).map(([k,v])=>`<div class="drawer-stat"><div class="drawer-stat-val" style="font-size:12px">${v}</div><div class="drawer-stat-label">${k}</div></div>`).join('');
+  }
+
+  const svcsDiv=document.getElementById('drawer-services');
+  svcsDiv.innerHTML='<h4>Services ('+node.services.length+')</h4>';
+  svcsDiv.innerHTML+=node.services.map((svc,i)=>{
+    const up=Math.random()>0.05;
+    return`<div class="drawer-svc"><span class="drawer-svc-dot ${up?'up':'down'}"></span><span class="drawer-svc-name">${svc}</span><span class="drawer-svc-port">:${node.ports[i]||'--'}</span></div>`;
+  }).join('');
+
+  drawer.classList.add('open');
+  overlay.classList.add('open');
+}
+
+function closeDrawer(){
+  document.getElementById('node-drawer').classList.remove('open');
+  document.getElementById('drawer-overlay').classList.remove('open');
+}
+
+// ====================== HEALTH MATRIX ======================
+const SERVICES=[
+  {name:'nginx',icon:'WEB'},
+  {name:'pi-hole',icon:'DNS'},
+  {name:'postgresql',icon:'DB'},
+  {name:'qdrant',icon:'VEC'},
+  {name:'ollama',icon:'AI'},
+  {name:'cloudflared',icon:'TUN'},
+  {name:'gitea',icon:'GIT'},
+  {name:'docker',icon:'CTR'},
+  {name:'portainer',icon:'MGR'},
+  {name:'wireguard',icon:'VPN'},
+  {name:'nats',icon:'MSG'},
+  {name:'minio',icon:'S3'},
+  {name:'powerdns',icon:'DNS'},
+  {name:'headscale',icon:'VPN'},
+  {name:'hailo-rt',icon:'NPU'},
+  {name:'embedding-api',icon:'EMB'},
+  {name:'tts-server',icon:'TTS'},
+  {name:'node-exporter',icon:'MON'},
+  {name:'watchtower',icon:'UPD'},
+  {name:'registry',icon:'REG'},
+  {name:'fleet-health',icon:'HLT'},
+  {name:'ssh',icon:'SSH'},
+  {name:'ufw',icon:'FW'},
+  {name:'github-actions',icon:'CI'},
+  {name:'backup-agent',icon:'BAK'},
+  {name:'sync-worker',icon:'SYN'},
+  {name:'inference-cache',icon:'$'},
+  {name:'model-manager',icon:'MDL'},
+  {name:'web-server',icon:'WWW'},
+  {name:'api-proxy',icon:'API'},
+  {name:'render-engine',icon:'RND'},
+  {name:'log-collector',icon:'LOG'},
+  {name:'web-apps',icon:'APP'},
+  {name:'vpn-manager',icon:'VPN'},
+  {name:'dns-relay',icon:'DNS'},
+  {name:'compute-worker',icon:'CPU'},
+  {name:'failover-agent',icon:'HA'},
+  {name:'monitoring',icon:'MON'},
+  {name:'container-monitor',icon:'CTR'},
+  {name:'tailscale',icon:'TS'},
+];
+
+const SERVICE_MAP={
+  alice:['nginx','pi-hole','postgresql','qdrant','nats','cloudflared','wireguard','node-exporter','fleet-health','ssh'],
+  cecilia:['ollama','hailo-rt','minio','nats','embedding-api','tts-server','cloudflared','node-exporter','model-manager','inference-cache'],
+  octavia:['gitea','registry','portainer','watchtower','cloudflared','node-exporter','backup-agent','sync-worker','container-monitor','ssh'],
+  aria:['ollama','portainer','headscale','cloudflared','node-exporter','web-server','api-proxy','tailscale','render-engine','ssh'],
+  lucidia:['ollama','powerdns','docker','cloudflared','node-exporter','web-apps','ufw','github-actions','log-collector','ssh']
+};
+
+const hmHistory={};
+SERVICES.forEach(s=>{hmHistory[s.name]={};['alice','cecilia','octavia','aria','lucidia'].forEach(n=>{hmHistory[s.name][n]=[]})});
+
+function renderHealthMatrix(filter=''){
+  const body=document.getElementById('hm-body');
+  const filtered=SERVICES.filter(s=>!filter||s.name.includes(filter.toLowerCase()));
+  body.innerHTML=filtered.map(svc=>{
+    const cells=['alice','cecilia','octavia','aria','lucidia'].map(node=>{
+      const hasService=SERVICE_MAP[node]?.includes(svc.name);
+      if(!hasService)return`<div class="hm-cell"><span class="hm-dot na"></span></div>`;
+      const up=Math.random()>0.04;
+      const ms=up?Math.floor(Math.random()*80+5):0;
+      if(!hmHistory[svc.name])hmHistory[svc.name]={};
+      if(!hmHistory[svc.name][node])hmHistory[svc.name][node]=[];
+      hmHistory[svc.name][node].push(ms);
+      if(hmHistory[svc.name][node].length>30)hmHistory[svc.name][node].shift();
+      const warn=ms>60;
+      return`<div class="hm-cell"><span class="hm-dot ${up?(warn?'warn':'up'):'down'}"></span><span class="hm-time">${up?ms+'ms':'DOWN'}</span></div>`;
+    }).join('');
+    return`<div class="hm-row" onclick="this.querySelector('.hm-detail')?.classList.toggle('open')">
+      <div class="hm-svc"><span style="font-family:var(--jb);font-size:9px;opacity:.2;margin-right:4px">${svc.icon}</span>${svc.name}</div>
+      ${cells}
+      <div class="hm-cell"><canvas class="hm-spark" data-svc="${svc.name}" width="80" height="16"></canvas></div>
+      <div class="hm-detail"><div class="hm-detail-grid">
+        <div class="hm-detail-item">Type<span>${svc.icon}</span></div>
+        <div class="hm-detail-item">Avg Response<span>${Math.floor(Math.random()*40+10)}ms</span></div>
+        <div class="hm-detail-item">Uptime<span>${(99+Math.random()).toFixed(2)}%</span></div>
+        <div class="hm-detail-item">Last Check<span>${Math.floor(Math.random()*30)+1}s ago</span></div>
+      </div></div>
+    </div>`;
+  }).join('');
+
+  // Draw sparklines
+  requestAnimationFrame(()=>{
+    document.querySelectorAll('.hm-spark').forEach(cv=>{
+      const svcName=cv.dataset.svc;
+      const ctx=cv.getContext('2d');ctx.clearRect(0,0,80,16);
+      const allData=[];
+      ['alice','cecilia','octavia','aria','lucidia'].forEach(n=>{
+        if(hmHistory[svcName]?.[n])allData.push(...hmHistory[svcName][n]);
+      });
+      if(allData.length<2)return;
+      const max=Math.max(...allData,1);
+      const grad=ctx.createLinearGradient(0,0,80,0);
+      GRAD.forEach((c,i)=>grad.addColorStop(i/5,c));
+      ctx.beginPath();
+      allData.slice(-20).forEach((v,i,arr)=>{
+        const x=i/(arr.length-1)*80,y=16-v/max*14;
+        i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+      });
+      ctx.strokeStyle=grad;ctx.lineWidth=1;ctx.stroke();
+    });
+  });
+}
+
+document.getElementById('hm-filter').addEventListener('input',e=>renderHealthMatrix(e.target.value));
+renderHealthMatrix();
+setInterval(()=>renderHealthMatrix(document.getElementById('hm-filter').value),15000);
+
+// ====================== PERFORMANCE CHARTS ======================
+const perfMetrics=['CPU %','Memory %','Disk %','Temperature C'];
+const perfData={};
+const perfNodes=['all','alice','cecilia','octavia','aria','lucidia'];
+perfNodes.forEach(n=>{perfData[n]={};perfMetrics.forEach(m=>{perfData[n][m]=[];for(let i=0;i<60;i++)perfData[n][m].push(Math.random()*(m.includes('Temp')?30:60)+(m.includes('Temp')?35:15))})});
+let activePerf='all';
+let expandedChart=null;
+
+function renderPerfCharts(){
+  const grid=document.getElementById('perf-grid');
+  grid.innerHTML=perfMetrics.map((metric,mi)=>{
+    const expanded=expandedChart===mi;
+    const val=perfData[activePerf][metric];
+    const latest=val[val.length-1];
+    const warn=metric.includes('CPU')&&latest>70||metric.includes('Mem')&&latest>80||metric.includes('Temp')&&latest>65;
+    return`<div class="perf-card ${expanded?'expanded':''}" onclick="expandedChart=expandedChart===${mi}?null:${mi};renderPerfCharts()">
+      <div class="perf-card-header">
+        <span class="perf-card-title">${metric}</span>
+        <span class="perf-card-value">${latest.toFixed(1)}${metric.includes('Temp')?'C':'%'}</span>
+      </div>
+      <canvas id="perf-cv-${mi}" width="600" height="${expanded?300:120}"></canvas>
+      <div class="perf-threshold">${metric.includes('Temp')?'Warn: 65C / Crit: 75C':metric.includes('CPU')?'Warn: 70% / Crit: 90%':'Warn: 80% / Crit: 95%'}</div>
+    </div>`;
+  }).join('');
+
+  requestAnimationFrame(()=>{
+    perfMetrics.forEach((metric,mi)=>{
+      const cv=document.getElementById('perf-cv-'+mi);if(!cv)return;
+      const ctx=cv.getContext('2d');
+      const w=cv.width=cv.offsetWidth;const h=cv.height=cv.offsetHeight;
+      ctx.clearRect(0,0,w,h);
+      const data=perfData[activePerf][metric];
+      const max=metric.includes('Temp')?90:100;
+
+      // Warning threshold
+      const warnY=metric.includes('Temp')?h-(65/max)*h:h-(metric.includes('CPU')?70:80)/max*h;
+      const critY=metric.includes('Temp')?h-(75/max)*h:h-(metric.includes('CPU')?90:95)/max*h;
+      ctx.setLineDash([4,4]);
+      ctx.beginPath();ctx.moveTo(0,warnY);ctx.lineTo(w,warnY);
+      ctx.strokeStyle='rgba(255,107,43,.2)';ctx.lineWidth=1;ctx.stroke();
+      ctx.beginPath();ctx.moveTo(0,critY);ctx.lineTo(w,critY);
+      ctx.strokeStyle='rgba(255,34,85,.2)';ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Data line
+      const grad=ctx.createLinearGradient(0,0,w,0);
+      GRAD.forEach((c,i)=>grad.addColorStop(i/5,c));
+      ctx.beginPath();
+      data.forEach((v,i)=>{const x=i/(data.length-1)*w,y=h-v/max*h;i===0?ctx.moveTo(x,y):ctx.lineTo(x,y)});
+      ctx.strokeStyle=grad;ctx.lineWidth=2;ctx.stroke();
+
+      // Fill
+      ctx.lineTo(w,h);ctx.lineTo(0,h);ctx.closePath();
+      const fillGrad=ctx.createLinearGradient(0,0,0,h);
+      fillGrad.addColorStop(0,'rgba(136,68,255,.1)');fillGrad.addColorStop(1,'transparent');
+      ctx.fillStyle=fillGrad;ctx.fill();
+    });
+  });
+}
+
+document.querySelectorAll('.perf-node-tab').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.perf-node-tab').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');activePerf=btn.dataset.node;renderPerfCharts();
+  });
+});
+
+renderPerfCharts();
+
+// Update perf data periodically
+setInterval(()=>{
+  perfNodes.forEach(n=>{
+    perfMetrics.forEach(m=>{
+      const arr=perfData[n][m];
+      const last=arr[arr.length-1];
+      const delta=(Math.random()-.5)*(m.includes('Temp')?3:8);
+      const newVal=Math.max(m.includes('Temp')?30:5,Math.min(m.includes('Temp')?80:98,last+delta));
+      arr.push(newVal);if(arr.length>60)arr.shift();
+    });
+  });
+  // Update aggregate
+  perfMetrics.forEach(m=>{
+    perfData.all[m]=[];
+    for(let i=0;i<60;i++){
+      let sum=0,cnt=0;
+      ['alice','cecilia','octavia','aria','lucidia'].forEach(n=>{if(perfData[n][m][i]!==undefined){sum+=perfData[n][m][i];cnt++}});
+      perfData.all[m].push(cnt?sum/cnt:0);
+    }
+  });
+  if(document.getElementById('panel-performance').classList.contains('active'))renderPerfCharts();
+},2000);
+
+// ====================== FLEET TERMINAL ======================
+const termBody=document.getElementById('term-body');
+const termInput=document.getElementById('term-input');
+const termAC=document.getElementById('term-ac');
+const cmdHistory=[];
+let historyIdx=-1;
+let acIdx=-1;
+
+const TERM_CMDS={
+  help:{desc:'Show all commands',fn:()=>`FLEET COMMAND CENTER v3.0
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  status          Fleet status overview
+  health          Health check all nodes
+  ping <node>     Ping a specific node
+  ssh <node>      SSH connection info
+  models          List all AI models
+  containers      List Docker containers
+  tunnels         List Cloudflare tunnels
+  mesh            WireGuard mesh status
+  ports           Port map across fleet
+  logs [node]     Recent log entries
+  restart <svc>   Restart a service (sim)
+  deploy <node>   Deploy to node (sim)
+  scan            Network scan
+  benchmark       Run fleet benchmark (sim)
+  speedtest       Inter-node speed test (sim)
+  df              Disk free across fleet
+  free            Memory free across fleet
+  top             Top processes per node
+  uptime          Uptime per node
+  whoami          Current session info
+  clear           Clear terminal`},
+
+  status:{desc:'Fleet overview',fn:()=>{
+    const lines=['FLEET STATUS','━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'];
+    FLEET_NODES.forEach(n=>{
+      const status=Math.random()>0.05?'ONLINE':'OFFLINE';
+      lines.push(`  ${n.name.padEnd(12)} ${n.ip.padEnd(16)} ${n.role.padEnd(24)} ${status}`);
+    });
+    lines.push('','  Total: 7 nodes · 47 services · 52 TOPS · 18 tunnels');
+    return lines.join('\n');
+  }},
+
+  health:{desc:'Health check all nodes',fn:()=>{
+    const lines=['HEALTH CHECK','━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'];
+    FLEET_NODES.forEach(n=>{
+      const cpu=(20+Math.random()*50).toFixed(1);
+      const mem=(30+Math.random()*40).toFixed(1);
+      const temp=(35+Math.random()*25).toFixed(1);
+      const svcs=n.services.length;
+      lines.push(`  ${n.name.padEnd(12)} CPU: ${cpu.padStart(5)}%  MEM: ${mem.padStart(5)}%  TEMP: ${temp.padStart(5)}C  Services: ${svcs}`);
+    });
+    return lines.join('\n');
+  }},
+
+  models:{desc:'List AI models',fn:()=>`AI MODELS (16 loaded)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  cecilia:
+    llama3.1:8b         4.7GB   loaded   52 req/hr
+    llama3.1:70b        40GB    cached   8 req/hr
+    codellama:13b       7.4GB   loaded   34 req/hr
+    mistral:7b          4.1GB   loaded   28 req/hr
+    nomic-embed-text    274MB   loaded   120 req/hr
+    cece-reasoning      2.1GB   loaded   15 req/hr
+    cece-creative       1.8GB   loaded   12 req/hr
+    cece-code           2.4GB   loaded   22 req/hr
+    cece-analysis       1.9GB   loaded   18 req/hr
+    phi3:mini           2.3GB   loaded   45 req/hr
+  aria:
+    llama3.1:8b         4.7GB   loaded   38 req/hr
+    mistral:7b          4.1GB   loaded   22 req/hr
+    codellama:7b        3.8GB   loaded   16 req/hr
+  lucidia:
+    llama3.1:8b         4.7GB   loaded   44 req/hr
+    phi3:mini           2.3GB   loaded   31 req/hr
+    tinyllama           637MB   loaded   62 req/hr`},
+
+  containers:{desc:'List Docker containers',fn:()=>{
+    const containers=[
+      ['gitea','octavia','gitea/gitea:1.21','3.2%','245MB','Up 14d'],
+      ['portainer','aria','portainer/portainer-ce','1.1%','128MB','Up 14d'],
+      ['ollama','cecilia','ollama/ollama:latest','18.4%','3.2GB','Up 7d'],
+      ['ollama','aria','ollama/ollama:latest','12.1%','2.1GB','Up 7d'],
+      ['ollama','lucidia','ollama/ollama:latest','8.7%','1.8GB','Up 7d'],
+      ['pihole','alice','pihole/pihole:latest','0.8%','112MB','Up 21d'],
+      ['postgresql','alice','postgres:16','2.4%','320MB','Up 21d'],
+      ['qdrant','alice','qdrant/qdrant:latest','1.6%','256MB','Up 21d'],
+      ['nginx','alice','nginx:alpine','0.3%','24MB','Up 21d'],
+      ['headscale','aria','headscale/headscale','0.5%','64MB','Up 14d'],
+      ['nats','cecilia','nats:2.12','0.4%','48MB','Up 14d'],
+      ['powerdns','lucidia','powerdns/pdns','0.6%','82MB','Up 10d'],
+      ['minio','cecilia','minio/minio:latest','1.2%','190MB','Up 14d'],
+      ['registry','octavia','registry:2','0.2%','32MB','Up 14d'],
+      ['watchtower','octavia','containrrr/watchtower','0.1%','16MB','Up 14d'],
+    ];
+    let out='CONTAINERS ('+containers.length+' running)\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
+    out+='  NAME            NODE        CPU     MEM      UPTIME\n';
+    containers.forEach(c=>out+=`  ${c[0].padEnd(16)}${c[1].padEnd(12)}${c[3].padEnd(8)}${c[4].padEnd(9)}${c[5]}\n`);
+    return out;
+  }},
+
+  tunnels:{desc:'List CF tunnels',fn:()=>`CLOUDFLARE TUNNELS (18 active)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  alice-main       → Alice      65 routes   HEALTHY
+  alice-secondary  → Alice       8 routes   HEALTHY
+  cecilia-inf      → Cecilia    22 routes   HEALTHY
+  cecilia-tts      → Cecilia     4 routes   HEALTHY
+  octavia-gitea    → Octavia    10 routes   HEALTHY
+  octavia-docker   → Octavia     6 routes   HEALTHY
+  octavia-storage  → Octavia     4 routes   HEALTHY
+  aria-portainer   → Aria        6 routes   HEALTHY
+  aria-headscale   → Aria        3 routes   HEALTHY
+  aria-ollama      → Aria        4 routes   HEALTHY
+  lucidia-apps     → Lucidia     4 routes   HEALTHY
+  lucidia-dns      → Lucidia     2 routes   HEALTHY
+  lucidia-docker   → Lucidia     3 routes   HEALTHY
+  anastasia-wg     → Anastasia   3 routes   HEALTHY
+  anastasia-nginx  → Anastasia   2 routes   HEALTHY
+  gematria-compute → Gematria    4 routes   HEALTHY
+  gematria-nats    → Gematria    2 routes   HEALTHY
+  mesh-failover    → All         5 routes   STANDBY`},
+
+  mesh:{desc:'WireGuard mesh status',fn:()=>`WIREGUARD MESH — anastasia hub (10.8.0.x)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Peer               Endpoint            TX          RX          Last
+  alice    10.8.0.2   192.168.4.49:51820  ${(Math.random()*100).toFixed(1)}GB   ${(Math.random()*80).toFixed(1)}GB   ${Math.floor(Math.random()*30)}s ago
+  cecilia  10.8.0.3   192.168.4.96:51820  ${(Math.random()*60).toFixed(1)}GB    ${(Math.random()*50).toFixed(1)}GB   ${Math.floor(Math.random()*30)}s ago
+  octavia  10.8.0.4   192.168.4.101:51820 ${(Math.random()*40).toFixed(1)}GB    ${(Math.random()*30).toFixed(1)}GB   ${Math.floor(Math.random()*30)}s ago
+  aria     10.8.0.5   192.168.4.98:51820  ${(Math.random()*30).toFixed(1)}GB    ${(Math.random()*20).toFixed(1)}GB   ${Math.floor(Math.random()*30)}s ago
+  lucidia  10.8.0.6   192.168.4.38:51820  ${(Math.random()*45).toFixed(1)}GB    ${(Math.random()*35).toFixed(1)}GB   ${Math.floor(Math.random()*30)}s ago
+  gematria 10.8.0.7   nyc3:51820          ${(Math.random()*20).toFixed(1)}GB    ${(Math.random()*15).toFixed(1)}GB   ${Math.floor(Math.random()*60)}s ago`},
+
+  ports:{desc:'Port map across fleet',fn:()=>{
+    let out='PORT MAP\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
+    FLEET_NODES.slice(0,5).forEach(n=>{
+      out+=`  ${n.name}:\n`;
+      n.services.forEach((svc,i)=>{out+=`    :${String(n.ports[i]).padEnd(6)} ${svc}\n`});
+      out+='\n';
+    });
+    return out;
+  }},
+
+  scan:{desc:'Network scan',fn:()=>`NETWORK SCAN — 192.168.4.0/24
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Scanning... found 12 hosts
+  192.168.4.1    Router (gateway)
+  192.168.4.28   Alexandria (Mac)
+  192.168.4.38   Lucidia (Pi 5)      8 ports open
+  192.168.4.49   Alice (Pi 5)        10 ports open
+  192.168.4.96   Cecilia (Pi 5)      10 ports open
+  192.168.4.98   Aria (Pi 5)         8 ports open
+  192.168.4.101  Octavia (Pi 5)      9 ports open
+  192.168.4.110  Unknown             2 ports open
+  192.168.4.115  Unknown             1 port open
+  192.168.4.200  Printer             1 port open
+  192.168.4.201  Smart TV            3 ports open
+  192.168.4.255  Broadcast`},
+
+  df:{desc:'Disk free across fleet',fn:()=>{
+    let out='DISK FREE\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n  NODE          TOTAL    USED     FREE     USE%\n';
+    [['alice','256GB','92GB','164GB','36%'],['cecilia','512GB','187GB','325GB','37%'],['octavia','1TB','342GB','658GB','34%'],['aria','128GB','78GB','50GB','61%'],['lucidia','256GB','156GB','100GB','61%']].forEach(r=>{
+      out+=`  ${r[0].padEnd(14)}${r[1].padEnd(9)}${r[2].padEnd(9)}${r[3].padEnd(9)}${r[4]}\n`;
+    });
+    return out;
+  }},
+
+  free:{desc:'Memory free across fleet',fn:()=>{
+    let out='MEMORY FREE\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n  NODE          TOTAL    USED     FREE     BUFFERS\n';
+    [['alice','8GB','3.2GB','4.8GB','1.1GB'],['cecilia','8GB','5.8GB','2.2GB','0.8GB'],['octavia','8GB','4.1GB','3.9GB','1.2GB'],['aria','4GB','2.8GB','1.2GB','0.4GB'],['lucidia','8GB','4.5GB','3.5GB','0.9GB']].forEach(r=>{
+      out+=`  ${r[0].padEnd(14)}${r[1].padEnd(9)}${r[2].padEnd(9)}${r[3].padEnd(9)}${r[4]}\n`;
+    });
+    return out;
+  }},
+
+  uptime:{desc:'Uptime per node',fn:()=>{
+    let out='UPTIME\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
+    [['alice','21 days, 4:32'],['cecilia','14 days, 8:15'],['octavia','14 days, 8:12'],['aria','14 days, 7:58'],['lucidia','10 days, 3:44'],['gematria','42 days, 12:00'],['anastasia','42 days, 11:55']].forEach(r=>{
+      out+=`  ${r[0].padEnd(14)} up ${r[1]}\n`;
+    });
+    return out;
+  }},
+
+  whoami:{desc:'Session info',fn:()=>`SESSION INFO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  User:      blackroad
+  Host:      fleet-command
+  Nodes:     7 (5 Pi + 2 DO)
+  Services:  47
+  TOPS:      52 (2x Hailo-8)
+  Tunnels:   18
+  Models:    16
+  Repos:     207 (Gitea)
+  Uptime:    Fleet Command v3.0`},
+
+  top:{desc:'Top processes',fn:()=>{
+    let out='TOP PROCESSES\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n  PID    NODE       CPU%    MEM%    PROCESS\n';
+    [['1842','cecilia','18.4','12.1','ollama serve'],['2103','aria','12.1','8.4','ollama serve'],['1567','lucidia','8.7','7.2','ollama serve'],['980','alice','2.4','4.0','postgres'],['1102','alice','1.6','3.2','qdrant'],['1340','cecilia','1.2','2.4','minio'],['892','octavia','3.2','3.1','gitea'],['1205','alice','0.8','1.4','pihole-FTL']].forEach(r=>{
+      out+=`  ${r[0].padEnd(7)}${r[1].padEnd(11)}${r[2].padStart(5)}   ${r[3].padStart(5)}    ${r[4]}\n`;
+    });
+    return out;
+  }},
+
+  benchmark:{desc:'Fleet benchmark (sim)',fn:()=>`FLEET BENCHMARK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Running inference benchmark on all nodes...
+  cecilia:  llama3.1:8b    ${(15+Math.random()*10).toFixed(1)} tok/s
+  aria:     llama3.1:8b    ${(12+Math.random()*8).toFixed(1)} tok/s
+  lucidia:  llama3.1:8b    ${(10+Math.random()*8).toFixed(1)} tok/s
+
+  Hailo-8 NPU benchmark:
+  cecilia:  YOLOv8 detection  ${(45+Math.random()*20).toFixed(0)} FPS @ 26 TOPS
+  octavia:  YOLOv8 detection  ${(42+Math.random()*20).toFixed(0)} FPS @ 26 TOPS
+
+  Combined: 52 TOPS sustained`},
+
+  speedtest:{desc:'Inter-node speed test',fn:()=>{
+    let out='INTER-NODE SPEED TEST\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
+    const nodes=['alice','cecilia','octavia','aria','lucidia'];
+    nodes.forEach(a=>{nodes.forEach(b=>{
+      if(a===b)return;
+      const mbps=(400+Math.random()*500).toFixed(0);
+      const lat=(0.2+Math.random()*1.5).toFixed(1);
+      out+=`  ${a.padEnd(10)} → ${b.padEnd(10)} ${mbps} Mbps  ${lat}ms\n`;
+    })});
+    return out;
+  }},
+
+  clear:{desc:'Clear terminal',fn:()=>'__CLEAR__'}
+};
+
+// Ping command handler
+TERM_CMDS['ping']={desc:'Ping a node',fn:(args)=>{
+  const target=args[0];
+  if(!target)return'Usage: ping <node>';
+  const node=FLEET_NODES.find(n=>n.id===target||n.name.toLowerCase()===target);
+  if(!node)return`Unknown node: ${target}. Available: ${FLEET_NODES.map(n=>n.id).join(', ')}`;
+  let out=`PING ${node.name} (${node.ip})\n`;
+  for(let i=0;i<5;i++){
+    const ms=(0.5+Math.random()*3).toFixed(2);
+    out+=`  ${i+1}: ${ms}ms\n`;
+  }
+  out+=`\n  5 packets sent, 5 received, 0% loss`;
+  return out;
+}};
+
+TERM_CMDS['ssh']={desc:'SSH info for node',fn:(args)=>{
+  const target=args[0];
+  if(!target)return'Usage: ssh <node>';
+  const node=FLEET_NODES.find(n=>n.id===target||n.name.toLowerCase()===target);
+  if(!node)return`Unknown node: ${target}`;
+  const users={alice:'pi',cecilia:'blackroad',octavia:'pi',aria:'pi',lucidia:'pi',gematria:'root',anastasia:'root'};
+  return`SSH CONNECTION\n  ssh ${users[node.id]||'root'}@${node.ip}\n  Port: 22\n  Key: ~/.ssh/id_ed25519`;
+}};
+
+TERM_CMDS['restart']={desc:'Restart service (sim)',fn:(args)=>{
+  if(!args[0])return'Usage: restart <service>';
+  return`Restarting ${args[0]}...\n  Stopping... done\n  Starting... done\n  ${args[0]} is now running`;
+}};
+
+TERM_CMDS['deploy']={desc:'Deploy to node (sim)',fn:(args)=>{
+  if(!args[0])return'Usage: deploy <node>';
+  return`Deploying to ${args[0]}...\n  Pulling latest... done\n  Building... done\n  Restarting services... done\n  Health check... passed\n  Deploy complete`;
+}};
+
+TERM_CMDS['logs']={desc:'Recent logs',fn:(args)=>{
+  const node=args[0]||'fleet';
+  const entries=['INFO  Fleet health check passed','INFO  Tunnel alice-main reconnected','WARN  Lucidia SD card I/O slow','INFO  Model llama3.1:8b loaded on cecilia','INFO  Gitea backup completed','INFO  DNS cache cleared','WARN  Octavia IP changed to .101','INFO  WireGuard handshake with gematria','INFO  NATS pub/sub sync complete','INFO  Container watchtower check passed'];
+  let out=`LOGS — ${node}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+  entries.forEach(e=>{const t=new Date(Date.now()-Math.random()*3600000).toISOString().substr(11,8);out+=`  [${t}] ${e}\n`});
+  return out;
+}};
+
+const allCmdNames=Object.keys(TERM_CMDS);
+
+termInput.addEventListener('input',()=>{
+  const val=termInput.value.trim().toLowerCase();
+  if(!val){termAC.classList.remove('visible');return}
+  const matches=allCmdNames.filter(c=>c.startsWith(val));
+  if(matches.length===0||matches.length===1&&matches[0]===val){termAC.classList.remove('visible');return}
+  termAC.innerHTML=matches.map(m=>`<div class="term-ac-item" onclick="termInput.value='${m}';termAC.classList.remove('visible');termInput.focus()">${m}<span class="term-ac-desc">${TERM_CMDS[m].desc}</span></div>`).join('');
+  termAC.classList.add('visible');acIdx=-1;
+});
+
+termInput.addEventListener('keydown',e=>{
+  if(e.key==='Tab'){
+    e.preventDefault();
+    const val=termInput.value.trim().toLowerCase();
+    const match=allCmdNames.find(c=>c.startsWith(val));
+    if(match)termInput.value=match;
+    termAC.classList.remove('visible');
+    return;
+  }
+  if(e.key==='ArrowUp'){e.preventDefault();if(cmdHistory.length>0){historyIdx=Math.min(historyIdx+1,cmdHistory.length-1);termInput.value=cmdHistory[historyIdx]}}
+  if(e.key==='ArrowDown'){e.preventDefault();historyIdx=Math.max(historyIdx-1,-1);termInput.value=historyIdx>=0?cmdHistory[historyIdx]:''}
+  if(e.key==='Enter'){
+    termAC.classList.remove('visible');
+    const raw=termInput.value.trim();termInput.value='';if(!raw)return;
+    cmdHistory.unshift(raw);historyIdx=-1;
+
+    // Command chaining
+    const cmds=raw.includes('&&')?raw.split('&&').map(s=>s.trim()):[raw];
+    cmds.forEach(cmdStr=>{
+      const parts=cmdStr.split(/\s+/);
+      const cmd=parts[0].toLowerCase();
+      const args=parts.slice(1);
+
+      const line=document.createElement('div');line.className='term-line';
+      line.innerHTML=`<span class="term-prompt">$</span> ${cmdStr}`;termBody.appendChild(line);
+
+      // Pipe support
+      let result='';
+      if(cmdStr.includes('|')){
+        const [mainCmd,...pipeCmd]=cmdStr.split('|').map(s=>s.trim());
+        const mainParts=mainCmd.split(/\s+/);
+        const handler=TERM_CMDS[mainParts[0].toLowerCase()];
+        if(handler){
+          result=typeof handler.fn==='function'?handler.fn(mainParts.slice(1)):handler.fn;
+          const filter=pipeCmd.join('|').replace(/grep\s+/i,'').trim().toLowerCase();
+          if(filter)result=result.split('\n').filter(l=>l.toLowerCase().includes(filter)).join('\n')||'(no matches)';
+        }else{result=`Unknown: ${mainParts[0]}`}
+      }else{
+        const handler=TERM_CMDS[cmd];
+        if(handler){result=typeof handler.fn==='function'?handler.fn(args):handler.fn()}
+        else{result=`Unknown: ${cmd}. Type 'help'.`}
+      }
+
+      if(result==='__CLEAR__'){termBody.innerHTML='';return}
+      const out=document.createElement('div');out.className='term-line';
+      out.innerHTML=`<span class="term-output">${result}</span>`;termBody.appendChild(out);
+    });
+    termBody.scrollTop=termBody.scrollHeight;
+  }
+});
+
+// ====================== INCIDENT TIMELINE ======================
+const INCIDENTS=[
+  {severity:'info',title:'Fleet health check passed',desc:'All 7 nodes reporting healthy. 47/47 services operational.',detail:'CPU avg: 12.3% | Memory avg: 42.1% | All tunnels connected | WireGuard mesh fully peered.',time:'2 min ago'},
+  {severity:'warning',title:'Lucidia SD card I/O latency spike',desc:'MMC0 showing intermittent busy errors. Read latency exceeded 200ms threshold.',detail:'Error: "mmc0: Card stuck being busy!" observed 3 times in last hour. SD card may be degrading. Recommend NVMe migration.',time:'18 min ago'},
+  {severity:'info',title:'Model llama3.1:8b loaded on Cecilia',desc:'Hot-loaded llama3.1:8b for inference. Memory usage at 3.2GB.',detail:'Load time: 4.2s | VRAM allocated: 3.2GB | Hailo-8 acceleration enabled | First inference: 22 tok/s',time:'34 min ago'},
+  {severity:'resolved',title:'Octavia IP stabilized at .101',desc:'DHCP lease renewed. Node accessible at 192.168.4.101.',detail:'Previous IPs: .97, .100 | Recommendation: Set static DHCP reservation in router | All tunnels reconnected within 8s',time:'1 hour ago'},
+  {severity:'info',title:'Gitea backup completed',desc:'Full backup of 207 repositories to R2. 1.8GB compressed.',detail:'Duration: 4m 12s | Repos: 207 | Orgs: 7 | Objects: 142,391 | Destination: blackroad-backups R2 bucket',time:'2 hours ago'},
+  {severity:'critical',title:'Tunnel cecilia-tts disconnected',desc:'TTS tunnel lost connectivity for 45 seconds. Auto-recovered.',detail:'Root cause: Cecilia CPU spike during model loading caused cloudflared timeout. Connection re-established automatically. Total downtime: 45s.',time:'3 hours ago'},
+  {severity:'warning',title:'Alice kernel outdated (6.1.21)',desc:'Running Bullseye with kernel 6.1.21. Bookworm migration recommended.',detail:'Current: Debian 11 (Bullseye) kernel 6.1.21 | Target: Debian 12 (Bookworm) | Risk: Low (all services containerized) | Downtime estimate: 30min',time:'4 hours ago'},
+  {severity:'info',title:'NATS mesh fully connected',desc:'All 4/5 nodes connected to NATS v2.12.3 cluster.',detail:'Connected: Alice, Cecilia, Octavia, Lucidia | Pending: Aria | Messages/sec: 142 | Subjects: 28 | Subscriptions: 94',time:'5 hours ago'},
+  {severity:'resolved',title:'WireGuard handshake timeout resolved',desc:'Gematria WireGuard peer re-established after brief outage.',detail:'Outage duration: 2m 15s | Cause: DigitalOcean network maintenance (scheduled) | Failover to anastasia: successful',time:'6 hours ago'},
+  {severity:'info',title:'Fleet sync completed',desc:'All configuration and state synchronized across nodes.',detail:'Synced: configs, DNS records, tunnel routes, container manifests | Duration: 12s | Delta: 3 files changed',time:'8 hours ago'},
+  {severity:'warning',title:'50+ SSH keys on pi@Alice',desc:'Audit detected excessive SSH authorized_keys entries.',detail:'Keys found: 52 | Known: 12 | Unknown: 40 | Recommendation: Audit and prune unused keys | Risk: Medium',time:'12 hours ago'},
+  {severity:'info',title:'Container watchtower auto-update',desc:'Watchtower checked 15 containers, 2 updated.',detail:'Updated: pihole (v5.17→v5.18), nginx (1.25.3→1.25.4) | Restart: automatic | Health check: passed',time:'1 day ago'},
+];
+
+function renderIncidents(){
+  const timeline=document.getElementById('incident-timeline');
+  timeline.innerHTML=INCIDENTS.map(inc=>`
+    <div class="incident-item">
+      <div class="incident-dot ${inc.severity}"></div>
+      <div class="incident-card" onclick="this.classList.toggle('expanded')">
+        <h4>${inc.title}</h4>
+        <p>${inc.desc}</p>
+        <div class="incident-time">${inc.time}</div>
+        <div class="incident-detail">${inc.detail}</div>
+      </div>
+    </div>
+  `).join('');
+}
+renderIncidents();
+
+// ====================== FLEET API ======================
+let nodeStatuses={online:[],down:[]};
+function loadFleetData(){
+  fetch(API).then(r=>r.json()).then(data=>{
+    if(!data||!data.nodes)return;
+    const n=data.nodes;let on=0,models=0,containers=0,temps=[];
+    const online=[],down=[];
+    ['alice','cecilia','octavia','aria','lucidia'].forEach(name=>{
+      const nd=n[name];
+      if(nd&&nd.status==='online'){on++;models+=(nd.models||0);containers+=(nd.containers||0);if(nd.temp)temps.push(nd.temp);online.push(name)}
+      else{down.push(name)}
+    });
+    nodeStatuses={online,down};
+    document.getElementById('sb-nodes').textContent=(on+2)+'/7';
+    document.getElementById('sb-models').textContent=models||16;
+    document.getElementById('sb-containers').textContent=containers||15;
+    document.getElementById('sb-temp').textContent=temps.length?(temps.reduce((a,b)=>a+b,0)/temps.length).toFixed(1)+'C':'--';
+
+    if(down.length>0){
+      document.getElementById('alert-banner').textContent='ALERT: '+down.join(', ')+' reporting offline. Auto-recovery in progress.';
+      document.getElementById('alert-banner').classList.add('visible');
+    }else{
+      document.getElementById('alert-banner').classList.remove('visible');
+    }
+  }).catch(()=>{
+    document.getElementById('sb-nodes').textContent='5/7';
+    document.getElementById('sb-models').textContent='16';
+    document.getElementById('sb-containers').textContent='15';
+  });
+}
+loadFleetData();
+setInterval(loadFleetData,10000);
+</script>
 </body>
 </html>

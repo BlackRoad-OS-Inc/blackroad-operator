@@ -1,73 +1,2126 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RoadChain</title>
-    <meta name="description" content="Blockchain platform for the road">
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Inter', -apple-system, sans-serif;
-            background: #000000;
-            color: #FFFFFF;
-            line-height: 1.6;
-        }
-        .hero {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 4rem 2rem;
-            background: radial-gradient(circle, rgba(119, 0, 255, 0.15), transparent 70%);
-        }
-        h1 {
-            font-size: clamp(3rem, 8vw, 6rem);
-            font-weight: 800;
-            margin-bottom: 2rem;
-            background: linear-gradient(135deg, #FF9D00 0%, #FF6B00 50%, #FF0066 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .icon { font-size: 6rem; margin-bottom: 2rem; }
-        .tagline {
-            font-size: clamp(1.25rem, 3vw, 2rem);
-            color: rgba(255, 255, 255, 0.8);
-            margin-bottom: 3rem;
-        }
-        .btn {
-            display: inline-block;
-            padding: 1rem 2.5rem;
-            background: linear-gradient(135deg, #FF9D00 0%, #FF6B00 50%, #FF0066 100%);
-            color: #FFF;
-            text-decoration: none;
-            border-radius: 12px;
-            font-weight: 600;
-            transition: transform 0.3s;
-            margin: 0.5rem;
-        }
-        .btn:hover { transform: translateY(-2px); }
-        .footer {
-            text-align: center;
-            padding: 3rem 2rem;
-            color: rgba(255, 255, 255, 0.5);
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RoadChain -- Distributed Witnessing Ledger</title>
+<meta name="description" content="RoadChain -- Cryptographic proof without blockchain overhead. Explore the live chain, verify integrity, and monitor agent witnesses.">
+<link rel="canonical" href="https://roadchain.io">
+<link rel="icon" type="image/png" sizes="32x32" href="https://images.blackroad.io/brand/br-square-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="https://images.blackroad.io/brand/br-square-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://images.blackroad.io/brand/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://roadchain.io">
+<meta property="og:title" content="RoadChain -- Distributed Witnessing Ledger">
+<meta property="og:description" content="Cryptographic proof without blockchain overhead.">
+<meta property="og:image" content="https://images.blackroad.io/brand/br-square-512.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="RoadChain -- Distributed Witnessing Ledger">
+<meta name="twitter:image" content="https://images.blackroad.io/brand/br-square-512.png">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;shape-rendering:geometricPrecision}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}
+:root{--g:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);--g135:linear-gradient(135deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);--bg:#000;--white:#fff;--black:#000;--border:#1a1a1a;--sg:'Space Grotesk',sans-serif;--jb:'JetBrains Mono',monospace}
+body{background:var(--bg);color:var(--white);font-family:var(--sg);overflow-x:hidden}
+.grad-bar{height:4px;background:var(--g)}
+nav{display:flex;align-items:center;justify-content:space-between;padding:16px 48px;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(0,0,0,.95);backdrop-filter:blur(12px);z-index:200}
+.nav-logo{font-weight:700;font-size:20px;color:var(--white);display:flex;align-items:center;gap:10px;text-decoration:none}
+.nav-logo-mark{width:28px;height:4px;border-radius:2px;background:var(--g)}
+.nav-links{display:flex;gap:32px}
+.nav-links a{font-size:14px;font-weight:500;color:var(--white);opacity:.5;text-decoration:none;transition:opacity .2s}
+.nav-links a:hover{opacity:1}
+a.btn-outline,a.btn-solid{text-decoration:none;display:inline-flex;align-items:center}
+.btn-outline{padding:8px 20px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--white);font-size:13px;font-weight:600;font-family:var(--sg);transition:border-color .2s}
+.btn-outline:hover{border-color:#444}
+.btn-solid{padding:8px 20px;border:none;border-radius:6px;background:var(--white);color:var(--black);font-size:13px;font-weight:600;font-family:var(--sg)}
+.hero{text-align:center;padding:120px 48px 80px;position:relative}
+.orb{position:absolute;border-radius:50%;filter:blur(120px);opacity:.06;pointer-events:none;animation:orbFloat 12s ease-in-out infinite}
+.orb-1{width:400px;height:500px;background:#8844FF;top:-150px;left:-5%}
+.orb-2{width:350px;height:350px;background:#CC00AA;top:-100px;right:-5%;animation-delay:-4s}
+.orb-3{width:250px;height:250px;background:#00D4FF;bottom:-150px;left:40%;animation-delay:-8s}
+@keyframes orbFloat{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(20px,-10px) scale(1.03)}66%{transform:translate(-15px,15px) scale(.97)}}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border:1px solid var(--border);border-radius:20px;font-size:12px;font-weight:500;color:var(--white);margin-bottom:32px}
+.hero-badge-dot{width:8px;height:8px;border-radius:50%;background:var(--g135);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.hero h1{font-size:64px;font-weight:700;color:var(--white);line-height:1.08;margin-bottom:24px;max-width:780px;margin-left:auto;margin-right:auto;letter-spacing:-.02em}
+.hero p{font-size:18px;color:var(--white);opacity:.45;max-width:520px;margin:0 auto 48px;line-height:1.7}
+.hero-cta{display:flex;gap:16px;justify-content:center}
+.btn-lg{padding:14px 36px;border-radius:8px;font-size:15px;font-weight:600;font-family:var(--sg);text-decoration:none;display:inline-flex;align-items:center;cursor:pointer}
+.btn-lg-solid{background:var(--white);color:var(--black);border:none}
+.btn-lg-outline{background:transparent;color:var(--white);border:1px solid var(--border);transition:border-color .2s}
+.section{max-width:1200px;margin:0 auto;padding:80px 48px}
+.section-label{font-family:var(--jb);font-size:10px;color:var(--white);opacity:.25;letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px}
+.section-title{font-size:32px;font-weight:700;color:var(--white);margin-bottom:12px;letter-spacing:-.015em}
+.section-desc{font-size:14px;color:var(--white);opacity:.4;max-width:460px;margin-bottom:48px}
+
+/* Tabs */
+.tab-nav{display:flex;justify-content:center;gap:4px;padding:16px 48px;border-bottom:1px solid var(--border);position:sticky;top:61px;background:rgba(0,0,0,.95);backdrop-filter:blur(12px);z-index:100}
+.tab-btn{padding:10px 24px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--white);opacity:.5;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--sg);transition:all .2s}
+.tab-btn:hover{border-color:#333;opacity:.8}
+.tab-btn.active{border-color:#333;opacity:1}
+.tab-content{display:none;animation:fadeUp .4s ease}
+.tab-content.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+/* Metrics */
+.metrics-strip{display:grid;grid-template-columns:repeat(5,1fr);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.metric-cell{padding:28px 24px;border-right:1px solid var(--border);text-align:center}
+.metric-cell:last-child{border-right:none}
+.metric-value{font-size:32px;font-weight:700;color:var(--white);margin-bottom:4px;letter-spacing:-.02em}
+.metric-label{font-family:var(--jb);font-size:10px;color:var(--white);opacity:.25;letter-spacing:.06em;text-transform:uppercase}
+.metric-spark{height:20px;margin-top:8px;display:flex;align-items:flex-end;gap:2px;justify-content:center}
+.metric-spark-bar{width:4px;border-radius:1px;background:var(--g135);opacity:.3;transition:height .3s}
+
+/* 3D Chain Visualization */
+.chain-viz{border:1px solid var(--border);border-radius:12px;overflow:hidden;position:relative;margin-bottom:32px}
+.chain-viz::before{content:'';display:block;height:3px;background:var(--g)}
+#chain-canvas{width:100%;height:500px;display:block;background:#050508;cursor:grab}
+#chain-canvas:active{cursor:grabbing}
+.chain-controls{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);display:flex;gap:4px}
+.chain-ctrl-btn{padding:6px 14px;border:1px solid var(--border);border-radius:4px;background:rgba(0,0,0,.8);color:var(--white);opacity:.4;font-family:var(--jb);font-size:10px;cursor:pointer;transition:all .2s}
+.chain-ctrl-btn:hover{opacity:.8;border-color:#444}
+.chain-ctrl-btn.active{opacity:.9;border-color:#444}
+.chain-epm{position:absolute;top:12px;right:12px;font-family:var(--jb);font-size:10px;color:var(--white);opacity:.2}
+.chain-block-count{position:absolute;top:12px;left:12px;font-family:var(--jb);font-size:10px;color:var(--white);opacity:.2}
+
+/* Block detail tooltip */
+.block-tooltip{position:absolute;pointer-events:none;border:1px solid var(--border);border-radius:8px;background:rgba(0,0,0,.95);padding:16px;display:none;z-index:10;min-width:280px;font-family:var(--jb);font-size:11px}
+.block-tooltip.visible{display:block}
+.block-tooltip h4{font-size:13px;font-weight:600;color:var(--white);margin-bottom:8px;font-family:var(--sg)}
+.block-tooltip-row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.block-tooltip-label{color:var(--white);opacity:.3}
+.block-tooltip-value{color:var(--white);opacity:.6;text-align:right;max-width:160px;overflow:hidden;text-overflow:ellipsis}
+
+/* Block detail modal */
+.block-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:1000;align-items:center;justify-content:center;padding:24px}
+.block-modal.open{display:flex}
+.block-modal-inner{background:var(--bg);border:1px solid var(--border);border-radius:12px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto}
+.block-modal-header{display:flex;justify-content:space-between;align-items:center;padding:20px 24px;border-bottom:1px solid var(--border)}
+.block-modal-header h3{font-size:16px;font-weight:600;color:var(--white)}
+.block-modal-close{width:32px;height:32px;border-radius:6px;border:1px solid var(--border);background:none;color:var(--white);opacity:.5;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center}
+.block-modal-body{padding:24px}
+.block-detail-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)}
+.block-detail-label{font-family:var(--jb);font-size:11px;color:var(--white);opacity:.3}
+.block-detail-value{font-family:var(--jb);font-size:11px;color:var(--white);opacity:.6;text-align:right;max-width:400px;word-break:break-all}
+.block-payload{margin-top:16px;padding:16px;border:1px solid var(--border);border-radius:6px;font-family:var(--jb);font-size:12px;color:var(--white);opacity:.5;line-height:1.8;white-space:pre-wrap}
+
+/* Tamper Lab */
+.tamper-card{border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.tamper-card::before{content:'';display:block;height:3px;background:var(--g)}
+.tamper-body{padding:24px}
+.tamper-controls{display:flex;gap:12px;margin-bottom:24px;align-items:center;flex-wrap:wrap}
+.tamper-select{padding:10px 16px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--white);font-family:var(--jb);font-size:12px;outline:none;appearance:none;min-width:180px}
+.tamper-btn{padding:10px 24px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--white);font-family:var(--sg);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s}
+.tamper-btn:hover{border-color:#444}
+.tamper-btn-danger{border-color:rgba(255,34,85,.3)}
+.tamper-btn-danger:hover{border-color:rgba(255,34,85,.6)}
+.tamper-btn-heal{border-color:rgba(0,212,255,.3)}
+.tamper-btn-heal:hover{border-color:rgba(0,212,255,.6)}
+.tamper-edit{width:100%;min-height:60px;padding:12px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--white);font-family:var(--jb);font-size:12px;outline:none;resize:vertical;margin-bottom:16px;display:none}
+.tamper-edit.visible{display:block}
+
+/* Tamper chain viz */
+.tamper-chain{display:flex;gap:4px;overflow-x:auto;padding:16px 0;align-items:center}
+.tamper-chain::-webkit-scrollbar{height:4px}
+.tamper-chain::-webkit-scrollbar-thumb{background:#222;border-radius:2px}
+.tamper-block{min-width:80px;height:60px;border:1px solid var(--border);border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:var(--jb);font-size:10px;color:var(--white);opacity:.4;cursor:pointer;transition:all .3s;position:relative;flex-shrink:0}
+.tamper-block.selected{border-color:#444;opacity:.8}
+.tamper-block.valid{border-color:rgba(0,212,255,.2)}
+.tamper-block.invalid{border-color:rgba(255,34,85,.4);opacity:.8}
+.tamper-block.invalid::after{content:'INVALID';position:absolute;top:-8px;right:-4px;font-size:7px;padding:1px 4px;border:1px solid rgba(255,34,85,.3);border-radius:2px;color:var(--white);opacity:.6;letter-spacing:.04em}
+.tamper-block.cracking{animation:crack .5s ease}
+@keyframes crack{0%{transform:scale(1)}25%{transform:scale(1.05) rotate(1deg)}50%{transform:scale(.95) rotate(-1deg)}75%{transform:scale(1.02)}100%{transform:scale(1)}}
+.tamper-block.healing{animation:heal .5s ease;border-color:rgba(0,212,255,.4)}
+@keyframes heal{0%{opacity:.3}50%{opacity:.8}100%{opacity:.5}}
+.tamper-arrow{color:var(--white);opacity:.15;font-size:12px;flex-shrink:0}
+.tamper-comparison{display:none;margin-top:24px;border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.tamper-comparison.visible{display:block}
+.tamper-comparison-header{padding:12px 16px;border-bottom:1px solid var(--border);font-family:var(--jb);font-size:10px;color:var(--white);opacity:.3;text-transform:uppercase;letter-spacing:.06em}
+.tamper-comparison-body{display:grid;grid-template-columns:1fr 1fr;gap:0}
+.tamper-comparison-col{padding:16px}
+.tamper-comparison-col:first-child{border-right:1px solid var(--border)}
+.tamper-comparison-label{font-family:var(--jb);font-size:9px;color:var(--white);opacity:.25;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.tamper-comparison-hash{font-family:var(--jb);font-size:11px;color:var(--white);opacity:.4;word-break:break-all}
+
+/* Merkle Tree */
+.merkle-card{border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.merkle-card::before{content:'';display:block;height:3px;background:var(--g)}
+.merkle-body{padding:24px}
+.merkle-controls{display:flex;gap:12px;margin-bottom:16px;align-items:center}
+.merkle-input{flex:1;padding:10px 16px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--white);font-family:var(--jb);font-size:12px;outline:none}
+.merkle-input::placeholder{color:var(--white);opacity:.2}
+.merkle-add-btn{padding:10px 20px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--white);font-family:var(--sg);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s}
+.merkle-add-btn:hover{border-color:#444}
+#merkle-canvas{width:100%;height:350px;display:block;background:#050508;border-radius:0 0 10px 10px}
+.merkle-proof{margin-top:16px;padding:16px;border:1px solid var(--border);border-radius:8px;display:none;font-family:var(--jb);font-size:11px;color:var(--white);opacity:.4;line-height:1.8}
+.merkle-proof.visible{display:block}
+.merkle-proof-step{padding:6px 0;border-bottom:1px solid rgba(255,255,255,.03)}
+
+/* Agent Witnesses */
+.agents-ring{border:1px solid var(--border);border-radius:12px;overflow:hidden;position:relative}
+.agents-ring::before{content:'';display:block;height:3px;background:var(--g)}
+#agents-canvas{width:100%;height:450px;display:block;background:#050508}
+.agent-filter{position:absolute;top:12px;right:12px;display:flex;gap:4px;z-index:2}
+.agent-filter-btn{padding:4px 10px;border:1px solid var(--border);border-radius:4px;background:rgba(0,0,0,.8);color:var(--white);opacity:.3;font-family:var(--jb);font-size:9px;cursor:pointer;transition:all .2s}
+.agent-filter-btn:hover{opacity:.7;border-color:#444}
+.agent-filter-btn.active{opacity:.9;border-color:#444}
+.agent-stats-panel{display:none;position:absolute;top:12px;left:12px;width:220px;border:1px solid var(--border);border-radius:8px;background:rgba(0,0,0,.9);padding:16px;z-index:2}
+.agent-stats-panel.visible{display:block}
+.agent-stats-name{font-size:14px;font-weight:600;color:var(--white);margin-bottom:8px}
+.agent-stats-row{display:flex;justify-content:space-between;padding:4px 0;font-family:var(--jb);font-size:10px}
+.agent-stats-label{color:var(--white);opacity:.3}
+.agent-stats-value{color:var(--white);opacity:.6}
+
+/* Agent Chat */
+.agent-chat{border:1px solid var(--border);border-radius:10px;margin-top:16px;overflow:hidden}
+.agent-chat::before{content:'';display:block;height:2px;background:var(--g)}
+.agent-chat-messages{max-height:200px;overflow-y:auto;padding:16px;font-family:var(--jb);font-size:12px;color:var(--white);opacity:.5;line-height:1.8}
+.agent-chat-input-row{display:flex;border-top:1px solid var(--border)}
+.agent-chat-input{flex:1;padding:10px 16px;border:none;background:transparent;color:var(--white);font-family:var(--jb);font-size:12px;outline:none}
+.agent-chat-input::placeholder{color:var(--white);opacity:.2}
+.agent-chat-send{padding:10px 16px;border:none;border-left:1px solid var(--border);background:transparent;color:var(--white);opacity:.4;cursor:pointer;font-family:var(--sg);font-size:12px;font-weight:600}
+
+/* Analytics */
+.analytics-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:24px}
+.analytics-card{border:1px solid var(--border);border-radius:10px;padding:28px;text-align:center}
+.analytics-val{font-size:36px;font-weight:700;color:var(--white);margin-bottom:4px}
+.analytics-label{font-family:var(--jb);font-size:10px;color:var(--white);opacity:.25;text-transform:uppercase;letter-spacing:.08em}
+.analytics-sparkline{height:30px;margin-top:12px;display:flex;align-items:flex-end;gap:1px;justify-content:center}
+.analytics-sparkline-bar{width:3px;border-radius:1px;background:var(--g135);opacity:.3;transition:height .5s}
+
+/* Charts */
+.chart-card{border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:20px}
+.chart-card::before{content:'';display:block;height:3px;background:var(--g)}
+.chart-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.chart-title{font-size:14px;font-weight:600;color:var(--white)}
+.chart-live{font-family:var(--jb);font-size:10px;color:var(--white);opacity:.2;display:flex;align-items:center;gap:6px}
+.chart-live-dot{width:6px;height:6px;border-radius:50%;background:var(--g135);animation:pulse 2s infinite}
+.chart-canvas{width:100%;height:200px;display:block;background:#050508}
+
+/* Odometer */
+.odometer{display:flex;gap:2px;justify-content:center;margin-bottom:24px}
+.odo-digit{width:40px;height:56px;border:1px solid var(--border);border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:var(--jb);font-size:28px;font-weight:700;color:var(--white);overflow:hidden;position:relative}
+.odo-digit-inner{transition:transform .5s ease}
+
+/* Hash distribution */
+.hash-dist{border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-top:20px}
+.hash-dist::before{content:'';display:block;height:3px;background:var(--g)}
+.hash-dist-header{padding:16px 20px;border-bottom:1px solid var(--border);font-size:14px;font-weight:600;color:var(--white)}
+.hash-scatter{width:100%;height:200px;display:block;background:#050508}
+
+/* Integrity */
+.integrity-card{border:1px solid var(--border);border-radius:10px;padding:32px;text-align:center;position:relative;overflow:hidden}
+.integrity-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--g)}
+.integrity-score{font-size:72px;font-weight:700;color:var(--white);line-height:1}
+.integrity-label{font-family:var(--jb);font-size:10px;color:var(--white);opacity:.25;text-transform:uppercase;letter-spacing:.08em;margin-top:8px}
+
+/* Footer */
+.footer{border-top:1px solid var(--border);padding:32px 48px;display:flex;justify-content:space-between;align-items:center}
+.footer-left{font-size:12px;color:var(--white);opacity:.2;font-family:var(--jb)}
+.footer-links{display:flex;gap:24px}
+.footer-links a{font-size:12px;color:var(--white);opacity:.3;text-decoration:none;transition:opacity .2s}
+.footer-links a:hover{opacity:.6}
+
+/* Toast */
+.toast{position:fixed;bottom:24px;right:24px;padding:12px 20px;border:1px solid var(--border);border-radius:8px;background:rgba(0,0,0,.95);color:var(--white);font-size:13px;z-index:3000;opacity:0;transform:translateY(16px);transition:all .3s;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}
+</style>
 </head>
 <body>
-    <div class="hero">
-        <div>
-            <div class="icon">⛓️</div>
-            <h1>RoadChain</h1>
-            <p class="tagline">Decentralized • Transparent • Verified</p>
-            <a href="https://blackroad.io" class="btn">Explore BlackRoad OS</a>
-            <a href="https://github.com/BlackRoad-OS" class="btn">GitHub</a>
-        </div>
+<div class="grad-bar"></div>
+<nav>
+  <a href="/" class="nav-logo"><div class="nav-logo-mark"></div>RoadChain</a>
+  <div class="nav-links">
+    <a href="#" onclick="switchTab('chain')">Chain</a>
+    <a href="#" onclick="switchTab('tamper')">Tamper Lab</a>
+    <a href="#" onclick="switchTab('merkle')">Merkle</a>
+    <a href="#" onclick="switchTab('witnesses')">Witnesses</a>
+    <a href="#" onclick="switchTab('analytics')">Analytics</a>
+  </div>
+  <div style="display:flex;gap:10px">
+    <a href="https://blackroadai.com" class="btn-outline">AI</a>
+    <a href="https://blackroad.io" class="btn-solid">Pave Tomorrow</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div>
+  <div class="hero-badge"><span class="hero-badge-dot"></span>Chain Integrity: 100%</div>
+  <h1>Every Action Witnessed. Every Hash Immutable.</h1>
+  <p>Cryptographic proof without blockchain overhead. Distributed witnessing by autonomous agents. Tamper-evident by design.</p>
+  <div class="hero-cta">
+    <button class="btn-lg btn-lg-solid" onclick="switchTab('chain')">Explore Chain</button>
+    <button class="btn-lg btn-lg-outline" onclick="switchTab('tamper')">Tamper Lab</button>
+  </div>
+</div>
+
+<div class="tab-nav">
+  <button class="tab-btn active" onclick="switchTab('chain')">3D Chain</button>
+  <button class="tab-btn" onclick="switchTab('tamper')">Tamper Lab</button>
+  <button class="tab-btn" onclick="switchTab('merkle')">Merkle Tree</button>
+  <button class="tab-btn" onclick="switchTab('witnesses')">Witnesses</button>
+  <button class="tab-btn" onclick="switchTab('analytics')">Analytics</button>
+</div>
+
+<!-- ======== 3D CHAIN TAB ======== -->
+<div id="tab-chain" class="tab-content active">
+<div class="section">
+  <div class="metrics-strip">
+    <div class="metric-cell"><div class="metric-value" id="mc-blocks">0</div><div class="metric-label">Blocks</div><div class="metric-spark" id="spark-blocks"></div></div>
+    <div class="metric-cell"><div class="metric-value" id="mc-agents">5</div><div class="metric-label">Witnesses</div><div class="metric-spark" id="spark-agents"></div></div>
+    <div class="metric-cell"><div class="metric-value" id="mc-integrity">100%</div><div class="metric-label">Integrity</div></div>
+    <div class="metric-cell"><div class="metric-value" id="mc-epm">0.0</div><div class="metric-label">Events/Min</div><div class="metric-spark" id="spark-epm"></div></div>
+    <div class="metric-cell"><div class="metric-value" id="mc-uptime">99.97%</div><div class="metric-label">Uptime</div></div>
+  </div>
+  <div style="height:32px"></div>
+  <div class="section-label">3D Chain Explorer</div>
+  <div class="section-title">Perspective Block Visualization</div>
+  <div class="section-desc">Blocks stretch into the distance. New blocks emerge from the horizon. Hover to inspect. Click to zoom in. Color-coded by agent.</div>
+  <div class="chain-viz">
+    <div class="chain-block-count" id="chain-block-count">0 blocks</div>
+    <div class="chain-epm" id="chain-epm">0.0 events/min</div>
+    <canvas id="chain-canvas"></canvas>
+    <div class="block-tooltip" id="block-tooltip">
+      <h4 id="tt-title">Block #0</h4>
+      <div class="block-tooltip-row"><span class="block-tooltip-label">Hash</span><span class="block-tooltip-value" id="tt-hash">--</span></div>
+      <div class="block-tooltip-row"><span class="block-tooltip-label">Agent</span><span class="block-tooltip-value" id="tt-agent">--</span></div>
+      <div class="block-tooltip-row"><span class="block-tooltip-label">Time</span><span class="block-tooltip-value" id="tt-time">--</span></div>
+      <div class="block-tooltip-row"><span class="block-tooltip-label">Type</span><span class="block-tooltip-value" id="tt-type">--</span></div>
+      <div class="block-tooltip-row"><span class="block-tooltip-label">Size</span><span class="block-tooltip-value" id="tt-size">--</span></div>
     </div>
-    <footer class="footer">
-        <p>&copy; 2025 BlackRoad. Part of the BlackRoad OS ecosystem.</p>
-    </footer>
+    <div class="chain-controls">
+      <button class="chain-ctrl-btn" onclick="setChainSpeed(0)">Pause</button>
+      <button class="chain-ctrl-btn" onclick="setChainSpeed(0.5)">Slow</button>
+      <button class="chain-ctrl-btn active" onclick="setChainSpeed(1)">Normal</button>
+      <button class="chain-ctrl-btn" onclick="setChainSpeed(3)">Fast</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ======== TAMPER LAB TAB ======== -->
+<div id="tab-tamper" class="tab-content">
+<div class="section">
+  <div class="section-label">Tamper Lab</div>
+  <div class="section-title">Break the Chain. Watch It Shatter.</div>
+  <div class="section-desc">Select any block. Modify its payload. Watch the destruction cascade through every subsequent block. Then heal it.</div>
+  <div class="tamper-card">
+    <div class="tamper-body">
+      <div class="tamper-controls">
+        <select class="tamper-select" id="tamper-select" onchange="selectTamperBlock(this.value)">
+          <option value="">Select a block to tamper...</option>
+        </select>
+        <button class="tamper-btn tamper-btn-danger" onclick="tamperBlock()">Tamper</button>
+        <button class="tamper-btn tamper-btn-heal" onclick="repairChain()">Repair Chain</button>
+        <button class="tamper-btn" onclick="resetTamperLab()">Reset</button>
+      </div>
+      <textarea class="tamper-edit" id="tamper-edit" placeholder="Modified payload will appear here..."></textarea>
+      <div class="tamper-chain" id="tamper-chain"></div>
+      <div class="tamper-comparison" id="tamper-comparison">
+        <div class="tamper-comparison-header">Comparison: Original vs Tampered</div>
+        <div class="tamper-comparison-body">
+          <div class="tamper-comparison-col"><div class="tamper-comparison-label">Original Hash</div><div class="tamper-comparison-hash" id="comp-original">--</div></div>
+          <div class="tamper-comparison-col"><div class="tamper-comparison-label">Tampered Hash</div><div class="tamper-comparison-hash" id="comp-tampered">--</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ======== MERKLE TREE TAB ======== -->
+<div id="tab-merkle" class="tab-content">
+<div class="section">
+  <div class="section-label">Merkle Tree</div>
+  <div class="section-title">Binary Hash Tree Visualizer</div>
+  <div class="section-desc">Watch the tree restructure as you add data. Hover nodes to highlight the path to root. Click a leaf to extract its verification proof.</div>
+  <div class="merkle-card">
+    <div class="merkle-body">
+      <div class="merkle-controls">
+        <input class="merkle-input" id="merkle-input" placeholder="Enter data to add as a leaf..." onkeydown="if(event.key==='Enter')addMerkleLeaf()">
+        <button class="merkle-add-btn" onclick="addMerkleLeaf()">Add Leaf</button>
+      </div>
+    </div>
+    <canvas id="merkle-canvas"></canvas>
+  </div>
+  <div class="merkle-proof" id="merkle-proof">
+    <div style="font-weight:600;margin-bottom:8px;opacity:.6">Verification Proof</div>
+    <div id="merkle-proof-steps"></div>
+  </div>
+</div>
+</div>
+
+<!-- ======== WITNESSES TAB ======== -->
+<div id="tab-witnesses" class="tab-content">
+<div class="section">
+  <div class="section-label">Agent Witnesses</div>
+  <div class="section-title">Distributed Witnessing Network</div>
+  <div class="section-desc">5 autonomous agents in a witnessing ring. Each co-signs events with their identity. Click an agent for details.</div>
+  <div class="agents-ring">
+    <div class="agent-filter">
+      <button class="agent-filter-btn active" onclick="filterAgent(null,this)">All</button>
+      <button class="agent-filter-btn" onclick="filterAgent('Octavia',this)">Octavia</button>
+      <button class="agent-filter-btn" onclick="filterAgent('Lucidia',this)">Lucidia</button>
+      <button class="agent-filter-btn" onclick="filterAgent('Alice',this)">Alice</button>
+      <button class="agent-filter-btn" onclick="filterAgent('Aria',this)">Aria</button>
+      <button class="agent-filter-btn" onclick="filterAgent('Shellfish',this)">Shellfish</button>
+    </div>
+    <div class="agent-stats-panel" id="agent-stats">
+      <div class="agent-stats-name" id="as-name">--</div>
+      <div class="agent-stats-row"><span class="agent-stats-label">Blocks Witnessed</span><span class="agent-stats-value" id="as-blocks">0</span></div>
+      <div class="agent-stats-row"><span class="agent-stats-label">Last Active</span><span class="agent-stats-value" id="as-last">--</span></div>
+      <div class="agent-stats-row"><span class="agent-stats-label">Reliability</span><span class="agent-stats-value" id="as-reliability">--</span></div>
+      <div class="agent-stats-row"><span class="agent-stats-label">Co-Witnesses</span><span class="agent-stats-value" id="as-cowit">--</span></div>
+    </div>
+    <canvas id="agents-canvas"></canvas>
+  </div>
+  <div class="agent-chat">
+    <div class="agent-chat-messages" id="agent-chat-messages">
+      <div style="opacity:.3;font-style:italic">Select an agent and ask about their witnessing activity...</div>
+    </div>
+    <div class="agent-chat-input-row">
+      <input class="agent-chat-input" id="agent-chat-input" placeholder="Ask an agent about their witnessing..." onkeydown="if(event.key==='Enter')sendAgentChat()">
+      <button class="agent-chat-send" onclick="sendAgentChat()">Ask</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ======== ANALYTICS TAB ======== -->
+<div id="tab-analytics" class="tab-content">
+<div class="section">
+  <div class="section-label">Chain Analytics</div>
+  <div class="section-title">Real-Time Ledger Intelligence</div>
+  <div class="section-desc">Block rate, agent distribution, type breakdown, hash entropy, and chain growth -- all live.</div>
+
+  <div style="text-align:center;margin-bottom:32px">
+    <div style="font-family:var(--jb);font-size:10px;color:var(--white);opacity:.25;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Total Chain Events</div>
+    <div class="odometer" id="odometer"></div>
+  </div>
+
+  <div class="analytics-grid">
+    <div class="analytics-card"><div class="analytics-val" id="an-rate">0.0</div><div class="analytics-label">Blocks/Min</div><div class="analytics-sparkline" id="an-spark-rate"></div></div>
+    <div class="analytics-card"><div class="analytics-val" id="an-agents">5</div><div class="analytics-label">Active Agents</div><div class="analytics-sparkline" id="an-spark-agents"></div></div>
+    <div class="analytics-card"><div class="analytics-val" id="an-types">8</div><div class="analytics-label">Event Types</div><div class="analytics-sparkline" id="an-spark-types"></div></div>
+  </div>
+
+  <!-- Block Rate Chart -->
+  <div class="chart-card">
+    <div class="chart-header"><span class="chart-title">Block Rate Over Time</span><span class="chart-live"><span class="chart-live-dot"></span>LIVE</span></div>
+    <canvas class="chart-canvas" id="rate-chart"></canvas>
+  </div>
+
+  <!-- Agent Distribution (Donut) -->
+  <div class="chart-card">
+    <div class="chart-header"><span class="chart-title">Agent Distribution</span><span class="chart-live"><span class="chart-live-dot"></span>LIVE</span></div>
+    <canvas class="chart-canvas" id="donut-chart"></canvas>
+  </div>
+
+  <!-- Type Breakdown (Stacked Bar) -->
+  <div class="chart-card">
+    <div class="chart-header"><span class="chart-title">Event Type Breakdown</span><span class="chart-live"><span class="chart-live-dot"></span>LIVE</span></div>
+    <canvas class="chart-canvas" id="type-chart"></canvas>
+  </div>
+
+  <!-- Hash Entropy Scatter -->
+  <div class="hash-dist">
+    <div class="hash-dist-header">Hash Entropy Distribution</div>
+    <canvas class="hash-scatter" id="hash-scatter"></canvas>
+  </div>
+
+  <div class="integrity-card">
+    <div class="integrity-score" id="integrity-score">100%</div>
+    <div class="integrity-label">Chain Integrity Score</div>
+  </div>
+</div>
+</div>
+
+<!-- Block detail modal -->
+<div class="block-modal" id="block-modal" onclick="if(event.target===this)closeBlockModal()">
+  <div class="block-modal-inner">
+    <div class="block-modal-header">
+      <h3 id="bm-title">Block Detail</h3>
+      <button class="block-modal-close" onclick="closeBlockModal()">&times;</button>
+    </div>
+    <div class="block-modal-body" id="bm-body"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="footer">
+  <div class="footer-left">RoadChain -- Distributed Witnessing Ledger -- BlackRoad OS, Inc.</div>
+  <div class="footer-links">
+    <a href="https://blackroad.io">Home</a>
+    <a href="https://blackroadai.com">AI</a>
+    <a href="https://lucidia.earth">Lucidia</a>
+    <a href="https://network.blackroad.io">Network</a>
+    <a href="https://status.blackroad.io">Status</a>
+    <a href="https://github.com/blackboxprogramming">GitHub</a>
+  </div>
+</div>
+
+<script>
+const GRADIENT_COLORS=['#FF6B2B','#FF2255','#CC00AA','#8844FF','#4488FF','#00D4FF'];
+const AGENTS=[
+  {name:'Octavia',role:'The Architect',color:'#8844FF',blocks:0,reliability:99.8},
+  {name:'Lucidia',role:'The Dreamer',color:'#00D4FF',blocks:0,reliability:99.9},
+  {name:'Alice',role:'The Operator',color:'#28c840',blocks:0,reliability:99.7},
+  {name:'Aria',role:'The Interface',color:'#4488FF',blocks:0,reliability:99.5},
+  {name:'Shellfish',role:'The Hacker',color:'#FF2255',blocks:0,reliability:99.6}
+];
+const EVENT_TYPES=['inference','deploy','commit','config','health','alert','sync','audit'];
+let chain=[];
+let chainSpeed=1;
+let selectedAgent=null;
+let tamperChain=[];
+let merkleLeaves=[];
+let rateHistory=[];
+let odometerVal=0;
+
+function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+function switchTab(n){document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));document.getElementById('tab-'+n).classList.add('active');document.querySelectorAll('.tab-btn').forEach(b=>{if(b.textContent.toLowerCase().includes(n.slice(0,4)))b.classList.add('active');});if(n==='analytics')renderAnalytics();if(n==='merkle')drawMerkleTree();if(n==='witnesses')drawWitnessRing();}
+
+// ============================================================
+// SHA-256 (simplified for demo)
+// ============================================================
+async function sha256(str){
+  const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+function quickHash(str){
+  let h=0;for(let i=0;i<str.length;i++){h=((h<<5)-h)+str.charCodeAt(i);h|=0;}
+  return Math.abs(h).toString(16).padStart(16,'0').slice(0,16);
+}
+
+// ============================================================
+// CHAIN GENERATION
+// ============================================================
+async function generateBlock(){
+  const idx=chain.length;
+  const agent=AGENTS[Math.floor(Math.random()*AGENTS.length)];
+  const type=EVENT_TYPES[Math.floor(Math.random()*EVENT_TYPES.length)];
+  const payloads={
+    inference:'Model '+['deepseek-r1','llama3.1','qwen2.5','mixtral'][Math.floor(Math.random()*4)]+' completed inference task #'+Math.floor(Math.random()*9999),
+    deploy:'Deployed '+['auth-service','api-gateway','worker-'+Math.floor(Math.random()*99)][Math.floor(Math.random()*3)]+' to production',
+    commit:'Committed '+Math.floor(Math.random()*12+1)+' files to '+['blackroad-operator','lucidia-earth','roadchain'][Math.floor(Math.random()*3)],
+    config:'Updated configuration for '+agent.name+' node',
+    health:'Health check passed: all '+AGENTS.length+' nodes responding',
+    alert:'Performance threshold exceeded on '+agent.name,
+    sync:'Synced '+Math.floor(Math.random()*50+10)+' records across fleet',
+    audit:'Security audit completed: 0 vulnerabilities found'
+  };
+  const payload=payloads[type];
+  const prevHash=idx>0?chain[idx-1].hash:'0'.repeat(64);
+  const timestamp=new Date().toISOString();
+  const hashInput=idx+prevHash+timestamp+agent.name+type+payload;
+  const hash=await sha256(hashInput);
+
+  const block={idx,hash,prevHash,timestamp,agent:agent.name,agentColor:agent.color,type,payload,size:payload.length};
+  chain.push(block);
+  agent.blocks++;
+
+  // Update metrics
+  document.getElementById('mc-blocks').textContent=chain.length;
+  document.getElementById('chain-block-count').textContent=chain.length+' blocks';
+  odometerVal=chain.length;
+  updateOdometer();
+
+  return block;
+}
+
+// Generate initial chain
+async function initChain(){
+  for(let i=0;i<30;i++)await generateBlock();
+  renderTamperChain();
+  updateTamperSelect();
+  updateSparklines();
+
+  // Keep generating
+  setInterval(async()=>{
+    if(chainSpeed>0){
+      await generateBlock();
+      renderTamperChain();
+      rateHistory.push(chainSpeed);
+      if(rateHistory.length>60)rateHistory.shift();
+    }
+  },2000/Math.max(chainSpeed,.1));
+}
+
+function setChainSpeed(s){
+  chainSpeed=s;
+  document.querySelectorAll('.chain-ctrl-btn').forEach(b=>b.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('mc-epm').textContent=(s*30).toFixed(1);
+  document.getElementById('chain-epm').textContent=(s*30).toFixed(1)+' events/min';
+}
+
+// ============================================================
+// 3D CHAIN VISUALIZATION
+// ============================================================
+(function(){
+  const c=document.getElementById('chain-canvas');
+  const ctx=c.getContext('2d');
+  let W,H;
+  let hoverBlock=null;
+  let mouseX=-1,mouseY=-1;
+
+  function resize(){W=c.width=c.offsetWidth;H=c.height=500;}
+
+  function draw(){
+    if(!c.offsetWidth){requestAnimationFrame(draw);return;}
+    ctx.clearRect(0,0,W,H);
+
+    const vanishY=H*.3;
+    const vanishX=W*.5;
+    const totalBlocks=Math.min(chain.length,40);
+    const startIdx=Math.max(0,chain.length-totalBlocks);
+    hoverBlock=null;
+
+    for(let i=0;i<totalBlocks;i++){
+      const block=chain[startIdx+i];
+      const t=i/totalBlocks; // 0=far, 1=near
+      const perspective=.2+t*.8;
+      const bw=40+t*50;
+      const bh=25+t*25+(block.size/50)*10;
+      const x=vanishX+(t-.5)*W*.8*(1-t*.3);
+      const y=vanishY+(t)*H*.5;
+
+      // Draw block
+      ctx.globalAlpha=0.6+t*.3;
+      // Gradient stroke based on agent color
+      ctx.strokeStyle=block.agentColor;
+      ctx.lineWidth=1+t;
+      ctx.beginPath();
+      // 3D perspective box
+      const depth=bh*.3*perspective;
+      // Front face
+      ctx.rect(x-bw/2,y-bh/2,bw,bh);
+      ctx.stroke();
+      // Top face
+      ctx.beginPath();
+      ctx.moveTo(x-bw/2,y-bh/2);
+      ctx.lineTo(x-bw/2+depth*.5,y-bh/2-depth);
+      ctx.lineTo(x+bw/2+depth*.5,y-bh/2-depth);
+      ctx.lineTo(x+bw/2,y-bh/2);
+      ctx.closePath();ctx.stroke();
+      // Side face
+      ctx.beginPath();
+      ctx.moveTo(x+bw/2,y-bh/2);
+      ctx.lineTo(x+bw/2+depth*.5,y-bh/2-depth);
+      ctx.lineTo(x+bw/2+depth*.5,y+bh/2-depth);
+      ctx.lineTo(x+bw/2,y+bh/2);
+      ctx.closePath();ctx.stroke();
+
+      // Connection line to next
+      if(i<totalBlocks-1){
+        const nt=(i+1)/totalBlocks;
+        const nx=vanishX+(nt-.5)*W*.8*(1-nt*.3);
+        const ny=vanishY+(nt)*H*.5;
+        ctx.globalAlpha=0.4+t*.1;
+        ctx.strokeStyle='#fff';ctx.lineWidth=.5;
+        ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(nx,ny);ctx.stroke();
+      }
+
+      // Block index label
+      if(t>.3){
+        ctx.globalAlpha=t*.3;
+        ctx.fillStyle='#fff';ctx.font=Math.floor(8+t*4)+'px "JetBrains Mono"';
+        ctx.textAlign='center';ctx.fillText('#'+block.idx,x,y+4);
+      }
+
+      // Hover detection
+      if(mouseX>x-bw/2&&mouseX<x+bw/2&&mouseY>y-bh/2&&mouseY<y+bh/2){
+        hoverBlock=block;
+        // Highlight
+        ctx.globalAlpha=.15;ctx.strokeStyle=block.agentColor;ctx.lineWidth=2;
+        ctx.strokeRect(x-bw/2-2,y-bh/2-2,bw+4,bh+4);
+      }
+    }
+
+    // Update tooltip
+    const tt=document.getElementById('block-tooltip');
+    if(hoverBlock){
+      tt.classList.add('visible');
+      tt.style.left=Math.min(mouseX+16,W-300)+'px';
+      tt.style.top=Math.min(mouseY+16,H-180)+'px';
+      document.getElementById('tt-title').textContent='Block #'+hoverBlock.idx;
+      document.getElementById('tt-hash').textContent=hoverBlock.hash.slice(0,20)+'...';
+      document.getElementById('tt-agent').textContent=hoverBlock.agent;
+      document.getElementById('tt-time').textContent=new Date(hoverBlock.timestamp).toLocaleTimeString();
+      document.getElementById('tt-type').textContent=hoverBlock.type;
+      document.getElementById('tt-size').textContent=hoverBlock.size+' bytes';
+    } else {
+      tt.classList.remove('visible');
+    }
+
+    ctx.globalAlpha=1;
+    requestAnimationFrame(draw);
+  }
+
+  c.addEventListener('mousemove',e=>{const r=c.getBoundingClientRect();mouseX=e.clientX-r.left;mouseY=e.clientY-r.top;});
+  c.addEventListener('mouseleave',()=>{mouseX=-1;mouseY=-1;});
+  c.addEventListener('click',()=>{if(hoverBlock)openBlockModal(hoverBlock);});
+
+  addEventListener('resize',resize);
+  resize();draw();
+})();
+
+function openBlockModal(block){
+  document.getElementById('bm-title').textContent='Block #'+block.idx;
+  document.getElementById('bm-body').innerHTML=`
+    <div class="block-detail-row"><span class="block-detail-label">Index</span><span class="block-detail-value">${block.idx}</span></div>
+    <div class="block-detail-row"><span class="block-detail-label">Hash</span><span class="block-detail-value">${block.hash}</span></div>
+    <div class="block-detail-row"><span class="block-detail-label">Previous Hash</span><span class="block-detail-value">${block.prevHash}</span></div>
+    <div class="block-detail-row"><span class="block-detail-label">Timestamp</span><span class="block-detail-value">${block.timestamp}</span></div>
+    <div class="block-detail-row"><span class="block-detail-label">Agent</span><span class="block-detail-value">${block.agent}</span></div>
+    <div class="block-detail-row"><span class="block-detail-label">Type</span><span class="block-detail-value">${block.type}</span></div>
+    <div class="block-detail-row"><span class="block-detail-label">Size</span><span class="block-detail-value">${block.size} bytes</span></div>
+    <div class="block-payload">${block.payload}</div>
+  `;
+  document.getElementById('block-modal').classList.add('open');
+}
+function closeBlockModal(){document.getElementById('block-modal').classList.remove('open');}
+
+// ============================================================
+// TAMPER LAB
+// ============================================================
+function updateTamperSelect(){
+  const sel=document.getElementById('tamper-select');
+  sel.innerHTML='<option value="">Select a block to tamper...</option>'+chain.slice(1,20).map(b=>`<option value="${b.idx}">Block #${b.idx} (${b.agent} - ${b.type})</option>`).join('');
+}
+
+function renderTamperChain(){
+  tamperChain=chain.slice(0,20).map(b=>({...b,valid:true,originalHash:b.hash,originalPayload:b.payload}));
+  const el=document.getElementById('tamper-chain');
+  el.innerHTML=tamperChain.map((b,i)=>`<div class="tamper-block ${b.valid?'valid':'invalid'}" data-idx="${b.idx}" onclick="selectTamperBlockViz(${b.idx})">#${b.idx}<div style="font-size:7px;opacity:.3;margin-top:2px">${b.hash.slice(0,8)}</div></div>${i<tamperChain.length-1?'<span class="tamper-arrow">&#8594;</span>':''}`).join('');
+}
+
+function selectTamperBlock(idx){
+  if(!idx)return;
+  const block=tamperChain.find(b=>b.idx===parseInt(idx));
+  if(block){
+    document.getElementById('tamper-edit').classList.add('visible');
+    document.getElementById('tamper-edit').value=block.payload;
+    document.querySelectorAll('.tamper-block').forEach(b=>b.classList.remove('selected'));
+    document.querySelector(`.tamper-block[data-idx="${idx}"]`)?.classList.add('selected');
+  }
+}
+
+function selectTamperBlockViz(idx){
+  document.getElementById('tamper-select').value=idx;
+  selectTamperBlock(idx);
+}
+
+async function tamperBlock(){
+  const idx=parseInt(document.getElementById('tamper-select').value);
+  if(!idx){showToast('Select a block first');return;}
+  const newPayload=document.getElementById('tamper-edit').value;
+  const blockIdx=tamperChain.findIndex(b=>b.idx===idx);
+  if(blockIdx<0)return;
+
+  // Tamper the payload
+  tamperChain[blockIdx].payload=newPayload;
+  tamperChain[blockIdx].hash=quickHash(newPayload+Date.now());
+  tamperChain[blockIdx].valid=false;
+
+  // Cascade invalidation with animation
+  for(let i=blockIdx+1;i<tamperChain.length;i++){
+    await new Promise(r=>setTimeout(r,200));
+    tamperChain[i].valid=false;
+    tamperChain[i].hash=quickHash(tamperChain[i-1].hash+tamperChain[i].payload);
+    const el=document.querySelector(`.tamper-block[data-idx="${tamperChain[i].idx}"]`);
+    if(el){
+      el.classList.add('invalid','cracking');
+      el.querySelector('div').textContent=tamperChain[i].hash.slice(0,8);
+      setTimeout(()=>el.classList.remove('cracking'),500);
+    }
+  }
+
+  // Update first tampered block
+  const firstEl=document.querySelector(`.tamper-block[data-idx="${idx}"]`);
+  if(firstEl){firstEl.classList.add('invalid','cracking');firstEl.querySelector('div').textContent=tamperChain[blockIdx].hash.slice(0,8);}
+
+  // Show comparison
+  document.getElementById('tamper-comparison').classList.add('visible');
+  document.getElementById('comp-original').textContent=tamperChain[blockIdx].originalHash;
+  document.getElementById('comp-tampered').textContent=tamperChain[blockIdx].hash;
+
+  showToast('Chain tampered! '+(tamperChain.length-blockIdx)+' blocks invalidated.');
+}
+
+async function repairChain(){
+  for(let i=0;i<tamperChain.length;i++){
+    await new Promise(r=>setTimeout(r,150));
+    tamperChain[i].valid=true;
+    tamperChain[i].hash=tamperChain[i].originalHash;
+    tamperChain[i].payload=tamperChain[i].originalPayload;
+    const el=document.querySelector(`.tamper-block[data-idx="${tamperChain[i].idx}"]`);
+    if(el){
+      el.classList.remove('invalid');
+      el.classList.add('valid','healing');
+      el.querySelector('div').textContent=tamperChain[i].hash.slice(0,8);
+      setTimeout(()=>el.classList.remove('healing'),500);
+    }
+  }
+  document.getElementById('tamper-comparison').classList.remove('visible');
+  showToast('Chain repaired! All blocks valid.');
+}
+
+function resetTamperLab(){
+  renderTamperChain();
+  document.getElementById('tamper-edit').classList.remove('visible');
+  document.getElementById('tamper-comparison').classList.remove('visible');
+  document.getElementById('tamper-select').value='';
+  showToast('Tamper lab reset');
+}
+
+// ============================================================
+// MERKLE TREE
+// ============================================================
+merkleLeaves=['Block #0','Block #1','Block #2','Block #3','Block #4','Block #5','Block #6','Block #7'];
+let merkleHoverNode=null;
+let merkleSelectedLeaf=null;
+
+function addMerkleLeaf(){
+  const input=document.getElementById('merkle-input');
+  const val=input.value.trim();
+  if(!val)return;
+  merkleLeaves.push(val);
+  input.value='';
+  drawMerkleTree();
+  showToast('Leaf "'+val+'" added. Tree restructured.');
+}
+
+function buildMerkleTree(){
+  let level=merkleLeaves.map(l=>({label:l,hash:quickHash(l),isLeaf:true,children:[]}));
+  const tree=[level];
+  while(level.length>1){
+    const next=[];
+    for(let i=0;i<level.length;i+=2){
+      if(i+1<level.length){
+        const combined=level[i].hash+level[i+1].hash;
+        next.push({label:'H('+level[i].hash.slice(0,4)+'..+'+level[i+1].hash.slice(0,4)+'..)',hash:quickHash(combined),isLeaf:false,children:[level[i],level[i+1]]});
+      } else {
+        next.push(level[i]);
+      }
+    }
+    tree.push(next);
+    level=next;
+  }
+  return tree;
+}
+
+function drawMerkleTree(){
+  const c=document.getElementById('merkle-canvas');
+  const ctx=c.getContext('2d');
+  c.width=c.offsetWidth;c.height=350;
+  ctx.clearRect(0,0,c.width,c.height);
+
+  const tree=buildMerkleTree();
+  const levels=tree.length;
+  const levelH=c.height/(levels+1);
+
+  // Draw from root (top) to leaves (bottom)
+  for(let li=levels-1;li>=0;li--){
+    const nodes=tree[li];
+    const y=(levels-li)*levelH-levelH/2;
+    const nodeW=c.width/(nodes.length+1);
+
+    nodes.forEach((node,ni)=>{
+      const x=nodeW*(ni+1);
+      node._x=x;node._y=y;
+
+      // Draw connections to children
+      if(node.children.length>0){
+        node.children.forEach(child=>{
+          if(child._x!==undefined){
+            ctx.strokeStyle='#fff';ctx.globalAlpha=.06;ctx.lineWidth=1;
+            ctx.beginPath();ctx.moveTo(x,y+10);ctx.lineTo(child._x,child._y-10);ctx.stroke();
+          }
+        });
+      }
+
+      // Node circle/rect
+      const isHighlighted=merkleSelectedLeaf&&isInProofPath(node,merkleSelectedLeaf);
+      const grd=ctx.createLinearGradient(x-12,y,x+12,y);
+      GRADIENT_COLORS.forEach((col,i)=>grd.addColorStop(i/(GRADIENT_COLORS.length-1),col));
+      ctx.globalAlpha=isHighlighted?.5:.12;
+      ctx.strokeStyle=grd;ctx.lineWidth=isHighlighted?2.5:1.5;
+
+      if(node.isLeaf){
+        ctx.strokeRect(x-14,y-10,28,20);
+      } else {
+        ctx.beginPath();ctx.arc(x,y,12,0,Math.PI*2);ctx.stroke();
+      }
+
+      // Label
+      ctx.fillStyle='#fff';
+      ctx.globalAlpha=isHighlighted?.6:.25;
+      ctx.font='9px "JetBrains Mono"';ctx.textAlign='center';
+      ctx.fillText(node.hash.slice(0,8),x,y+26);
+      if(node.isLeaf){
+        ctx.globalAlpha=isHighlighted?.5:.2;
+        ctx.font='10px "Space Grotesk"';
+        ctx.fillText(node.label.length>12?node.label.slice(0,12)+'..':node.label,x,y+38);
+      }
+      if(li===levels-1){
+        ctx.globalAlpha=.4;ctx.font='600 10px "Space Grotesk"';
+        ctx.fillText('ROOT',x,y-18);
+      }
+    });
+  }
+  ctx.globalAlpha=1;
+
+  // Click handler for leaves
+  c.onclick=function(e){
+    const rect=c.getBoundingClientRect();
+    const mx=e.clientX-rect.left,my=e.clientY-rect.top;
+    const leaves=tree[0];
+    for(const leaf of leaves){
+      if(leaf._x&&Math.abs(leaf._x-mx)<20&&Math.abs(leaf._y-my)<20){
+        merkleSelectedLeaf=leaf;
+        drawMerkleTree();
+        showProof(leaf);
+        return;
+      }
+    }
+  };
+}
+
+function isInProofPath(node,leaf){
+  if(node===leaf)return true;
+  if(node.children.length===0)return false;
+  return node.children.some(c=>isInProofPath(c,leaf));
+}
+
+function showProof(leaf){
+  const proof=document.getElementById('merkle-proof');
+  proof.classList.add('visible');
+  document.getElementById('merkle-proof-steps').innerHTML=`
+    <div class="merkle-proof-step">1. Leaf data: "${leaf.label}"</div>
+    <div class="merkle-proof-step">2. Leaf hash: ${leaf.hash}</div>
+    <div class="merkle-proof-step">3. Sibling hash provided by prover</div>
+    <div class="merkle-proof-step">4. Compute parent hash: H(leaf || sibling)</div>
+    <div class="merkle-proof-step">5. Repeat until root is reached</div>
+    <div class="merkle-proof-step">6. Compare computed root with known root hash</div>
+    <div class="merkle-proof-step" style="opacity:.6;font-weight:600">Verification: PASS</div>
+  `;
+}
+
+// ============================================================
+// AGENT WITNESS RING
+// ============================================================
+function drawWitnessRing(){
+  const c=document.getElementById('agents-canvas');
+  const ctx=c.getContext('2d');
+  c.width=c.offsetWidth;c.height=450;
+  const cx=c.width/2,cy=c.height/2,r=150;
+
+  function draw(){
+    ctx.clearRect(0,0,c.width,c.height);
+
+    // Ring
+    ctx.strokeStyle='#fff';ctx.globalAlpha=0.4;ctx.lineWidth=1;
+    ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.stroke();
+
+    // Agents
+    AGENTS.forEach((agent,i)=>{
+      const angle=(i/AGENTS.length)*Math.PI*2-Math.PI/2;
+      const ax=cx+Math.cos(angle)*r;
+      const ay=cy+Math.sin(angle)*r;
+      agent._x=ax;agent._y=ay;
+
+      // Activity glow
+      const activity=agent.blocks/Math.max(1,...AGENTS.map(a=>a.blocks));
+      ctx.globalAlpha=0.6+activity*.15;
+      ctx.fillStyle=agent.color;
+      ctx.beginPath();ctx.arc(ax,ay,20+activity*15,0,Math.PI*2);ctx.fill();
+
+      // Agent node
+      ctx.globalAlpha=(selectedAgent===agent.name)?.8:.3+activity*.3;
+      ctx.strokeStyle=agent.color;ctx.lineWidth=2;
+      ctx.beginPath();ctx.arc(ax,ay,16,0,Math.PI*2);ctx.stroke();
+
+      // Name
+      ctx.fillStyle='#fff';ctx.globalAlpha=(selectedAgent===agent.name)?.8:.5;
+      ctx.font='600 12px "Space Grotesk"';ctx.textAlign='center';
+      ctx.fillText(agent.name,ax,ay+32);
+      ctx.globalAlpha=.25;ctx.font='10px "JetBrains Mono"';
+      ctx.fillText(agent.blocks+' blocks',ax,ay+44);
+    });
+
+    // Co-witness arcs
+    const time=Date.now()/1000;
+    for(let i=0;i<AGENTS.length;i++){
+      for(let j=i+1;j<AGENTS.length;j++){
+        if(selectedAgent&&selectedAgent!==AGENTS[i].name&&selectedAgent!==AGENTS[j].name)continue;
+        const coWitness=chain.filter(b=>b.agent===AGENTS[i].name||b.agent===AGENTS[j].name).length;
+        if(coWitness>0){
+          const a=AGENTS[i],b=AGENTS[j];
+          ctx.globalAlpha=0.4+Math.sin(time+i+j)*.02;
+          const grd=ctx.createLinearGradient(a._x,a._y,b._x,b._y);
+          grd.addColorStop(0,a.color);grd.addColorStop(1,b.color);
+          ctx.strokeStyle=grd;ctx.lineWidth=1;
+          // Curved arc
+          const midX=(a._x+b._x)/2+(cy-a._y)*.2;
+          const midY=(a._y+b._y)/2+(a._x-cx)*.2;
+          ctx.beginPath();ctx.moveTo(a._x,a._y);ctx.quadraticCurveTo(midX,midY,b._x,b._y);ctx.stroke();
+        }
+      }
+    }
+
+    ctx.globalAlpha=1;
+    requestAnimationFrame(draw);
+  }
+
+  // Click handler
+  c.onclick=function(e){
+    const rect=c.getBoundingClientRect();
+    const mx=e.clientX-rect.left,my=e.clientY-rect.top;
+    for(const agent of AGENTS){
+      if(agent._x&&Math.hypot(agent._x-mx,agent._y-my)<25){
+        selectedAgent=agent.name;
+        showAgentStats(agent);
+        return;
+      }
+    }
+    selectedAgent=null;
+    document.getElementById('agent-stats').classList.remove('visible');
+  };
+
+  draw();
+}
+
+function filterAgent(name,el){
+  document.querySelectorAll('.agent-filter-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  selectedAgent=name;
+  if(name){
+    const agent=AGENTS.find(a=>a.name===name);
+    if(agent)showAgentStats(agent);
+  } else {
+    document.getElementById('agent-stats').classList.remove('visible');
+  }
+}
+
+function showAgentStats(agent){
+  const panel=document.getElementById('agent-stats');
+  panel.classList.add('visible');
+  document.getElementById('as-name').textContent=agent.name+' -- '+agent.role;
+  document.getElementById('as-blocks').textContent=agent.blocks;
+  document.getElementById('as-last').textContent='Just now';
+  document.getElementById('as-reliability').textContent=agent.reliability+'%';
+  const coWitnesses=AGENTS.filter(a=>a.name!==agent.name).map(a=>a.name).join(', ');
+  document.getElementById('as-cowit').textContent=coWitnesses;
+}
+
+function sendAgentChat(){
+  const input=document.getElementById('agent-chat-input');
+  const text=input.value.trim();
+  if(!text)return;
+  input.value='';
+  const messages=document.getElementById('agent-chat-messages');
+  const agent=selectedAgent||'Octavia';
+  messages.innerHTML+=`<div style="opacity:.6;margin-bottom:4px">You: ${text}</div>`;
+  setTimeout(()=>{
+    const agentData=AGENTS.find(a=>a.name===agent)||AGENTS[0];
+    const responses=[
+      `I have witnessed ${agentData.blocks} blocks so far. Each one cryptographically linked to the previous. The chain integrity is at 100%.`,
+      `My witnessing activity has been steady. I co-sign events with the other 4 agents to ensure no single point of trust.`,
+      `As ${agentData.role}, I focus on events related to my domain. Every event I witness gets my cryptographic signature.`,
+      `The last block I witnessed was type "${EVENT_TYPES[Math.floor(Math.random()*EVENT_TYPES.length)]}". Verification proof is available in the chain explorer.`
+    ];
+    messages.innerHTML+=`<div style="opacity:.5;margin-bottom:4px">${agent}: ${responses[Math.floor(Math.random()*responses.length)]}</div>`;
+    messages.scrollTop=messages.scrollHeight;
+  },500);
+}
+
+// ============================================================
+// ANALYTICS
+// ============================================================
+function updateOdometer(){
+  const el=document.getElementById('odometer');
+  const str=String(odometerVal).padStart(6,'0');
+  el.innerHTML=str.split('').map(d=>`<div class="odo-digit"><div class="odo-digit-inner">${d}</div></div>`).join('');
+}
+
+function updateSparklines(){
+  ['spark-blocks','spark-agents','spark-epm'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(!el)return;
+    el.innerHTML='';
+    for(let i=0;i<20;i++){
+      const bar=document.createElement('div');
+      bar.className='metric-spark-bar';
+      bar.style.height=Math.floor(Math.random()*18+2)+'px';
+      el.appendChild(bar);
+    }
+  });
+}
+
+function renderAnalytics(){
+  document.getElementById('an-rate').textContent=(chainSpeed*30).toFixed(1);
+  updateOdometer();
+
+  // Rate chart
+  const rc=document.getElementById('rate-chart');
+  const rctx=rc.getContext('2d');
+  rc.width=rc.offsetWidth;rc.height=200;
+  rctx.clearRect(0,0,rc.width,rc.height);
+  const data=[];for(let i=0;i<60;i++)data.push(Math.random()*40+10);
+  rctx.strokeStyle='#fff';rctx.globalAlpha=.15;rctx.lineWidth=1.5;
+  rctx.beginPath();
+  data.forEach((v,i)=>{
+    const x=(i/data.length)*rc.width;
+    const y=rc.height-v/50*rc.height*.8-10;
+    if(i===0)rctx.moveTo(x,y);else rctx.lineTo(x,y);
+  });
+  rctx.stroke();
+  // Fill gradient
+  const grd=rctx.createLinearGradient(0,0,rc.width,0);
+  GRADIENT_COLORS.forEach((c,i)=>grd.addColorStop(i/(GRADIENT_COLORS.length-1),c));
+  rctx.strokeStyle=grd;rctx.globalAlpha=.3;rctx.stroke();
+  rctx.globalAlpha=1;
+
+  // Donut chart
+  const dc=document.getElementById('donut-chart');
+  const dctx=dc.getContext('2d');
+  dc.width=dc.offsetWidth;dc.height=200;
+  dctx.clearRect(0,0,dc.width,dc.height);
+  const total=AGENTS.reduce((s,a)=>s+a.blocks,0)||1;
+  let startAngle=-Math.PI/2;
+  AGENTS.forEach((agent,i)=>{
+    const slice=(agent.blocks/total)*Math.PI*2||Math.PI*2/AGENTS.length;
+    dctx.beginPath();
+    dctx.arc(dc.width/2,dc.height/2,70,startAngle,startAngle+slice);
+    dctx.strokeStyle=agent.color;dctx.globalAlpha=.4;dctx.lineWidth=20;
+    dctx.stroke();
+    // Label
+    const mid=startAngle+slice/2;
+    const lx=dc.width/2+Math.cos(mid)*100;
+    const ly=dc.height/2+Math.sin(mid)*100;
+    dctx.fillStyle='#fff';dctx.globalAlpha=.4;dctx.font='10px "JetBrains Mono"';dctx.textAlign='center';
+    dctx.fillText(agent.name,lx,ly);
+    startAngle+=slice;
+  });
+  dctx.globalAlpha=1;
+
+  // Type stacked bar chart
+  const tc=document.getElementById('type-chart');
+  const tctx=tc.getContext('2d');
+  tc.width=tc.offsetWidth;tc.height=200;
+  tctx.clearRect(0,0,tc.width,tc.height);
+  const barW=tc.width/EVENT_TYPES.length-8;
+  EVENT_TYPES.forEach((type,i)=>{
+    const count=chain.filter(b=>b.type===type).length;
+    const h=Math.max(count/chain.length*tc.height*.8,5);
+    const x=i*(barW+8)+16;
+    const ci=i%GRADIENT_COLORS.length;
+    tctx.fillStyle=GRADIENT_COLORS[ci];tctx.globalAlpha=.25;
+    tctx.fillRect(x,tc.height-h-20,barW,h);
+    // Border
+    tctx.strokeStyle=GRADIENT_COLORS[ci];tctx.globalAlpha=.4;tctx.lineWidth=1;
+    tctx.strokeRect(x,tc.height-h-20,barW,h);
+    // Label
+    tctx.fillStyle='#fff';tctx.globalAlpha=.25;tctx.font='9px "JetBrains Mono"';tctx.textAlign='center';
+    tctx.fillText(type,x+barW/2,tc.height-4);
+    tctx.fillText(count,x+barW/2,tc.height-h-26);
+  });
+  tctx.globalAlpha=1;
+
+  // Hash scatter
+  const hs=document.getElementById('hash-scatter');
+  const hctx=hs.getContext('2d');
+  hs.width=hs.offsetWidth;hs.height=200;
+  hctx.clearRect(0,0,hs.width,hs.height);
+  chain.forEach((block,i)=>{
+    const x=(parseInt(block.hash.slice(0,4),16)/65535)*hs.width;
+    const y=(parseInt(block.hash.slice(4,8),16)/65535)*hs.height;
+    const ci=AGENTS.findIndex(a=>a.name===block.agent);
+    hctx.fillStyle=AGENTS[ci>=0?ci:0].color;
+    hctx.globalAlpha=.2;
+    hctx.beginPath();hctx.arc(x,y,2,0,Math.PI*2);hctx.fill();
+  });
+  hctx.globalAlpha=1;
+
+  // Sparklines in analytics cards
+  ['an-spark-rate','an-spark-agents','an-spark-types'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(!el)return;
+    el.innerHTML='';
+    for(let i=0;i<30;i++){
+      const bar=document.createElement('div');
+      bar.className='analytics-sparkline-bar';
+      bar.style.height=Math.floor(Math.random()*25+5)+'px';
+      el.appendChild(bar);
+    }
+  });
+}
+
+// ============================================================
+// INIT
+// ============================================================
+initChain();
+updateSparklines();
+updateOdometer();
+
+// Auto-refresh analytics
+setInterval(()=>{
+  if(document.getElementById('tab-analytics').classList.contains('active'))renderAnalytics();
+},3000);
+
+// ============================================================
+// CHAIN SPEED AUTO-ADJUSTMENT
+// ============================================================
+let chainEventsThisMinute=0;
+setInterval(()=>{
+  document.getElementById('mc-epm').textContent=chainEventsThisMinute.toFixed(1);
+  document.getElementById('chain-epm').textContent=chainEventsThisMinute.toFixed(1)+' events/min';
+  chainEventsThisMinute=0;
+},60000);
+
+// ============================================================
+// ANIMATED ODOMETER ROLLING EFFECT
+// ============================================================
+function updateOdometerAnimated(){
+  const el=document.getElementById('odometer');
+  const str=String(odometerVal).padStart(7,'0');
+  el.innerHTML=str.split('').map((d,i)=>{
+    const offset=parseInt(d)*-56;
+    return`<div class="odo-digit"><div class="odo-digit-inner" style="transform:translateY(${offset}px);transition:transform .5s cubic-bezier(.4,0,.2,1)">${Array.from({length:10},(v,j)=>`<div style="height:56px;display:flex;align-items:center;justify-content:center">${j}</div>`).join('')}</div></div>`;
+  }).join('');
+}
+
+// ============================================================
+// BLOCK GENERATION PARTICLE BURST
+// ============================================================
+class ParticleBurst{
+  constructor(canvas,x,y,color){
+    this.canvas=canvas;this.ctx=canvas.getContext('2d');
+    this.particles=[];this.alive=true;
+    for(let i=0;i<12;i++){
+      const angle=Math.random()*Math.PI*2;
+      const speed=Math.random()*3+1;
+      this.particles.push({
+        x,y,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed,
+        life:1,color,size:Math.random()*2+1
+      });
+    }
+  }
+  update(){
+    let alive=false;
+    this.particles.forEach(p=>{
+      p.x+=p.vx;p.y+=p.vy;p.life-=.02;p.vy+=.05;
+      if(p.life>0){
+        alive=true;
+        this.ctx.globalAlpha=p.life*.3;
+        this.ctx.fillStyle=p.color;
+        this.ctx.beginPath();this.ctx.arc(p.x,p.y,p.size,0,Math.PI*2);this.ctx.fill();
+      }
+    });
+    this.ctx.globalAlpha=1;
+    this.alive=alive;
+  }
+}
+
+// ============================================================
+// TAMPER LAB: COMPARISON VIEW
+// ============================================================
+function showSideBySideComparison(){
+  const comp=document.getElementById('tamper-comparison');
+  comp.classList.add('visible');
+  const origBlocks=chain.slice(0,20);
+  const tampBlocks=tamperChain;
+  // Count differences
+  let diffs=0;
+  for(let i=0;i<Math.min(origBlocks.length,tampBlocks.length);i++){
+    if(!tampBlocks[i].valid)diffs++;
+  }
+  showToast(diffs+' blocks differ between original and tampered chain');
+}
+
+// ============================================================
+// MERKLE TREE: Hover Path Highlighting
+// ============================================================
+let merkleHoverPath=[];
+document.getElementById('merkle-canvas')?.addEventListener('mousemove',function(e){
+  const rect=this.getBoundingClientRect();
+  const mx=e.clientX-rect.left;
+  const my=e.clientY-rect.top;
+  // Find nearest node and highlight path to root
+  const tree=buildMerkleTree();
+  merkleHoverPath=[];
+  for(const level of tree){
+    for(const node of level){
+      if(node._x&&Math.abs(node._x-mx)<15&&Math.abs(node._y-my)<15){
+        merkleHoverPath.push(node);
+        // Trace to root
+        for(let li=tree.indexOf(level)+1;li<tree.length;li++){
+          for(const parent of tree[li]){
+            if(parent.children.includes(merkleHoverPath[merkleHoverPath.length-1])){
+              merkleHoverPath.push(parent);
+            }
+          }
+        }
+        drawMerkleTree();
+        return;
+      }
+    }
+  }
+});
+
+// ============================================================
+// AGENT WITNESS NETWORK: ARC ANIMATION
+// ============================================================
+let arcAnimPhase=0;
+setInterval(()=>{arcAnimPhase+=0.05;},50);
+
+// ============================================================
+// CHAIN INTEGRITY PULSE ANIMATION
+// ============================================================
+function pulseIntegrity(){
+  const el=document.getElementById('integrity-score');
+  if(!el)return;
+  el.style.transform='scale(1.05)';el.style.transition='transform .3s ease';
+  setTimeout(()=>{el.style.transform='scale(1)';},300);
+}
+setInterval(pulseIntegrity,10000);
+
+// ============================================================
+// CHAIN GROWTH COUNTER WITH ANIMATION
+// ============================================================
+function animateChainGrowth(){
+  const el=document.getElementById('mc-blocks');
+  if(!el)return;
+  const target=chain.length;
+  const current=parseInt(el.textContent)||0;
+  if(current<target){
+    el.textContent=current+1;
+    requestAnimationFrame(animateChainGrowth);
+  }
+}
+
+// ============================================================
+// HASH ENTROPY VISUALIZATION
+// ============================================================
+function renderHashEntropy(){
+  const canvas=document.getElementById('hash-scatter');
+  if(!canvas||!canvas.getContext)return;
+  const ctx=canvas.getContext('2d');
+  canvas.width=canvas.offsetWidth;canvas.height=200;
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  // Grid lines
+  for(let i=0;i<10;i++){
+    ctx.strokeStyle='#fff';ctx.globalAlpha=.02;ctx.lineWidth=.5;
+    ctx.beginPath();ctx.moveTo(0,i*20);ctx.lineTo(canvas.width,i*20);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(i*canvas.width/10,0);ctx.lineTo(i*canvas.width/10,canvas.height);ctx.stroke();
+  }
+
+  // Plot hash distributions
+  chain.forEach((block,i)=>{
+    const x=(parseInt(block.hash.slice(0,4),16)/65535)*canvas.width;
+    const y=(parseInt(block.hash.slice(4,8),16)/65535)*canvas.height;
+    const ci=AGENTS.findIndex(a=>a.name===block.agent);
+    const color=AGENTS[ci>=0?ci:0].color;
+    ctx.globalAlpha=.25;ctx.fillStyle=color;
+    ctx.beginPath();ctx.arc(x,y,2.5,0,Math.PI*2);ctx.fill();
+    // Glow
+    ctx.globalAlpha=0.6;
+    ctx.beginPath();ctx.arc(x,y,8,0,Math.PI*2);ctx.fill();
+  });
+
+  // Density heatmap overlay
+  const resolution=20;
+  const grid=Array.from({length:resolution},()=>new Array(resolution).fill(0));
+  chain.forEach(block=>{
+    const x=Math.floor((parseInt(block.hash.slice(0,4),16)/65535)*resolution);
+    const y=Math.floor((parseInt(block.hash.slice(4,8),16)/65535)*resolution);
+    if(x>=0&&x<resolution&&y>=0&&y<resolution)grid[x][y]++;
+  });
+  const maxDensity=Math.max(...grid.flat());
+  for(let x=0;x<resolution;x++){
+    for(let y=0;y<resolution;y++){
+      if(grid[x][y]>0){
+        const density=grid[x][y]/maxDensity;
+        ctx.globalAlpha=density*.1;
+        ctx.fillStyle=GRADIENT_COLORS[Math.floor(density*(GRADIENT_COLORS.length-1))];
+        ctx.fillRect(x*canvas.width/resolution,y*canvas.height/resolution,canvas.width/resolution,canvas.height/resolution);
+      }
+    }
+  }
+  ctx.globalAlpha=1;
+}
+
+// ============================================================
+// ANIMATED DONUT CHART
+// ============================================================
+let donutAnimPhase=0;
+function animateDonut(){
+  const dc=document.getElementById('donut-chart');
+  if(!dc||!dc.getContext||!document.getElementById('tab-analytics').classList.contains('active'))return;
+  const dctx=dc.getContext('2d');
+  dc.width=dc.offsetWidth;dc.height=200;
+  dctx.clearRect(0,0,dc.width,dc.height);
+
+  const total=AGENTS.reduce((s,a)=>s+Math.max(a.blocks,1),0);
+  let startAngle=-Math.PI/2+donutAnimPhase*.01;
+
+  AGENTS.forEach((agent,i)=>{
+    const slice=(Math.max(agent.blocks,1)/total)*Math.PI*2;
+    // Outer ring
+    dctx.beginPath();
+    dctx.arc(dc.width/2,dc.height/2,75,startAngle,startAngle+slice-.02);
+    dctx.strokeStyle=agent.color;dctx.globalAlpha=.35+Math.sin(donutAnimPhase+i)*.1;dctx.lineWidth=18;
+    dctx.stroke();
+    // Inner glow
+    dctx.beginPath();
+    dctx.arc(dc.width/2,dc.height/2,75,startAngle,startAngle+slice-.02);
+    dctx.strokeStyle=agent.color;dctx.globalAlpha=0.7;dctx.lineWidth=30;
+    dctx.stroke();
+    // Label
+    const mid=startAngle+slice/2;
+    const lx=dc.width/2+Math.cos(mid)*105;
+    const ly=dc.height/2+Math.sin(mid)*105;
+    dctx.fillStyle='#fff';dctx.globalAlpha=.4;dctx.font='10px "JetBrains Mono"';dctx.textAlign='center';
+    dctx.fillText(agent.name,lx,ly);
+    dctx.globalAlpha=.25;dctx.font='9px "JetBrains Mono"';
+    dctx.fillText(agent.blocks+' blocks',lx,ly+12);
+    startAngle+=slice;
+  });
+
+  // Center text
+  dctx.fillStyle='#fff';dctx.globalAlpha=.6;dctx.font='600 20px "Space Grotesk"';dctx.textAlign='center';
+  dctx.fillText(total,dc.width/2,dc.height/2+4);
+  dctx.globalAlpha=.25;dctx.font='9px "JetBrains Mono"';
+  dctx.fillText('TOTAL BLOCKS',dc.width/2,dc.height/2+18);
+  dctx.globalAlpha=1;
+  donutAnimPhase++;
+}
+setInterval(animateDonut,100);
+
+// ============================================================
+// LIVE RATE CHART WITH SCROLLING
+// ============================================================
+let rateChartData=[];
+function updateRateChart(){
+  rateChartData.push(chain.length);
+  if(rateChartData.length>120)rateChartData.shift();
+  if(!document.getElementById('tab-analytics').classList.contains('active'))return;
+
+  const rc=document.getElementById('rate-chart');
+  if(!rc||!rc.getContext)return;
+  const rctx=rc.getContext('2d');
+  rc.width=rc.offsetWidth;rc.height=200;
+  rctx.clearRect(0,0,rc.width,rc.height);
+
+  if(rateChartData.length<2)return;
+  const rates=[];
+  for(let i=1;i<rateChartData.length;i++){
+    rates.push(rateChartData[i]-rateChartData[i-1]);
+  }
+  const maxRate=Math.max(...rates,1);
+
+  // Grid
+  for(let i=0;i<5;i++){
+    rctx.strokeStyle='#fff';rctx.globalAlpha=.02;rctx.lineWidth=.5;
+    rctx.beginPath();rctx.moveTo(0,i*rc.height/5);rctx.lineTo(rc.width,i*rc.height/5);rctx.stroke();
+  }
+
+  // Area fill
+  const grd=rctx.createLinearGradient(0,0,0,rc.height);
+  grd.addColorStop(0,'rgba(136,68,255,.1)');grd.addColorStop(1,'rgba(136,68,255,0)');
+  rctx.fillStyle=grd;
+  rctx.beginPath();
+  rctx.moveTo(0,rc.height);
+  rates.forEach((v,i)=>{
+    const x=(i/rates.length)*rc.width;
+    const y=rc.height-(v/maxRate)*rc.height*.8-10;
+    rctx.lineTo(x,y);
+  });
+  rctx.lineTo(rc.width,rc.height);rctx.closePath();rctx.fill();
+
+  // Line
+  const lineGrd=rctx.createLinearGradient(0,0,rc.width,0);
+  GRADIENT_COLORS.forEach((c,i)=>lineGrd.addColorStop(i/(GRADIENT_COLORS.length-1),c));
+  rctx.strokeStyle=lineGrd;rctx.globalAlpha=.5;rctx.lineWidth=2;
+  rctx.beginPath();
+  rates.forEach((v,i)=>{
+    const x=(i/rates.length)*rc.width;
+    const y=rc.height-(v/maxRate)*rc.height*.8-10;
+    if(i===0)rctx.moveTo(x,y);else rctx.lineTo(x,y);
+  });
+  rctx.stroke();
+  rctx.globalAlpha=1;
+}
+setInterval(updateRateChart,1000);
+
+// ============================================================
+// SPARKLINE ANIMATIONS
+// ============================================================
+function animateSparklines(){
+  ['spark-blocks','spark-agents','spark-epm','an-spark-rate','an-spark-agents','an-spark-types'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(!el)return;
+    const bars=el.querySelectorAll('.metric-spark-bar,.analytics-sparkline-bar');
+    bars.forEach(bar=>{
+      const h=Math.floor(Math.random()*18+2);
+      bar.style.height=h+'px';
+      bar.style.transition='height .5s ease';
+    });
+  });
+}
+setInterval(animateSparklines,3000);
+
+// ============================================================
+// AGENT ACTIVITY PULSE
+// ============================================================
+function pulseAgentActivity(){
+  AGENTS.forEach(agent=>{
+    if(Math.random()<.3){
+      agent.blocks+=Math.floor(Math.random()*3);
+    }
+  });
+}
+setInterval(pulseAgentActivity,5000);
+
+// ============================================================
+// BLOCK EXPLORER: KEYBOARD NAVIGATION
+// ============================================================
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){closeBlockModal();}
+  if(e.ctrlKey&&e.key==='1'){e.preventDefault();switchTab('chain');}
+  if(e.ctrlKey&&e.key==='2'){e.preventDefault();switchTab('tamper');}
+  if(e.ctrlKey&&e.key==='3'){e.preventDefault();switchTab('merkle');}
+  if(e.ctrlKey&&e.key==='4'){e.preventDefault();switchTab('witnesses');}
+  if(e.ctrlKey&&e.key==='5'){e.preventDefault();switchTab('analytics');}
+});
+
+// ============================================================
+// RESPONSIVE HANDLING
+// ============================================================
+function handleResize(){
+  if(window.innerWidth<768){
+    document.querySelectorAll('.metrics-strip').forEach(g=>g.style.gridTemplateColumns='repeat(2,1fr)');
+    document.querySelectorAll('.analytics-grid').forEach(g=>g.style.gridTemplateColumns='1fr');
+  }
+}
+window.addEventListener('resize',handleResize);
+handleResize();
+
+// ============================================================
+// HERO FLOATING PARTICLES
+// ============================================================
+(function(){
+  const hero=document.querySelector('.hero');
+  if(!hero)return;
+  for(let i=0;i<25;i++){
+    const dot=document.createElement('div');
+    const color=GRADIENT_COLORS[Math.floor(Math.random()*GRADIENT_COLORS.length)];
+    dot.style.cssText=`position:absolute;width:${Math.random()*3+1}px;height:${Math.random()*3+1}px;border-radius:50%;background:${color};opacity:${Math.random()*.08+.02};left:${Math.random()*100}%;top:${Math.random()*100}%;pointer-events:none;animation:heroFloat ${15+Math.random()*20}s linear infinite`;
+    hero.appendChild(dot);
+  }
+  const style=document.createElement('style');
+  style.textContent='@keyframes heroFloat{0%{transform:translateY(0) translateX(0)}25%{transform:translateY(-20px) translateX(10px)}50%{transform:translateY(-40px) translateX(-5px)}75%{transform:translateY(-20px) translateX(15px)}100%{transform:translateY(0) translateX(0)}}';
+  document.head.appendChild(style);
+})();
+
+// ============================================================
+// CONNECTION STATUS
+// ============================================================
+function updateConnectionStatus(){
+  const badge=document.querySelector('.hero-badge-dot');
+  if(badge)badge.style.background=navigator.onLine?'var(--g135)':'#ff5f57';
+}
+setInterval(updateConnectionStatus,5000);
+window.addEventListener('online',()=>showToast('Connection restored'));
+window.addEventListener('offline',()=>showToast('Offline -- using cached chain data'));
+
+// ============================================================
+// ANIMATED METRICS COUNTER ON SCROLL
+// ============================================================
+function animateNumber(el,target,duration=1000){
+  const start=parseInt(el.textContent)||0;
+  const startTime=Date.now();
+  function update(){
+    const elapsed=Date.now()-startTime;
+    const progress=Math.min(elapsed/duration,1);
+    const eased=1-Math.pow(1-progress,3);
+    const val=Math.floor(start+(target-start)*eased);
+    el.textContent=target.toString().includes('%')?val+'%':val;
+    if(progress<1)requestAnimationFrame(update);
+  }
+  update();
+}
+
+const metricsObserver=new IntersectionObserver(entries=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){
+      const val=entry.target.querySelector('.metric-value,.analytics-val');
+      if(val){
+        const num=parseInt(val.textContent);
+        if(!isNaN(num)&&num>0){
+          val.textContent='0';
+          animateNumber(val,num,1500);
+        }
+      }
+      metricsObserver.unobserve(entry.target);
+    }
+  });
+},{threshold:0.5});
+document.querySelectorAll('.metric-cell,.analytics-card').forEach(el=>metricsObserver.observe(el));
+
+// ============================================================
+// HOVER EFFECT: Cards glow on mouse proximity
+// ============================================================
+document.addEventListener('mousemove',e=>{
+  document.querySelectorAll('.tamper-block,.analytics-card,.chart-card,.merkle-card,.tamper-card,.agents-ring').forEach(card=>{
+    const rect=card.getBoundingClientRect();
+    const x=(e.clientX-rect.left)/rect.width;
+    const y=(e.clientY-rect.top)/rect.height;
+    if(x>=0&&x<=1&&y>=0&&y<=1){
+      card.style.background=`radial-gradient(circle at ${x*100}% ${y*100}%,rgba(255,255,255,.015),transparent 60%)`;
+    } else {
+      card.style.background='';
+    }
+  });
+});
+
+// ============================================================
+// EXPORT CHAIN DATA
+// ============================================================
+function exportChainData(){
+  const data=JSON.stringify(chain,null,2);
+  const blob=new Blob([data],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download='roadchain-export-'+Date.now()+'.json';
+  a.click();URL.revokeObjectURL(url);
+  showToast('Chain data exported ('+chain.length+' blocks)');
+}
+
+// ============================================================
+// CHAIN SOUND EFFECTS (visual representation)
+// ============================================================
+function blockAddedVisualFeedback(){
+  const el=document.getElementById('mc-blocks');
+  if(!el)return;
+  el.style.transform='scale(1.1)';el.style.transition='transform .2s';
+  setTimeout(()=>{el.style.transform='scale(1)';},200);
+}
+
+// ============================================================
+// MERKLE PROOF VERIFICATION ANIMATION
+// ============================================================
+function animateProofVerification(){
+  const steps=document.querySelectorAll('.merkle-proof-step');
+  steps.forEach((step,i)=>{
+    step.style.opacity='0';step.style.transform='translateX(-10px)';
+    setTimeout(()=>{
+      step.style.transition='all .3s ease';
+      step.style.opacity='1';step.style.transform='translateX(0)';
+    },i*200);
+  });
+}
+
+// ============================================================
+// AGENT CHAT: Smart Responses
+// ============================================================
+function generateAgentResponse(agentName,question){
+  const agent=AGENTS.find(a=>a.name===agentName)||AGENTS[0];
+  const q=question.toLowerCase();
+  if(q.includes('block')||q.includes('witness')){
+    return`I have witnessed ${agent.blocks} blocks in this chain. Each block carries my cryptographic signature, ensuring tamper-evidence. My reliability score is ${agent.reliability}%.`;
+  }
+  if(q.includes('integrity')||q.includes('tamper')){
+    return`The chain integrity is currently at 100%. I verify each block by checking the previous hash linkage and payload hash. Any tampering would cascade through all subsequent blocks.`;
+  }
+  if(q.includes('co-witness')||q.includes('other agent')){
+    const others=AGENTS.filter(a=>a.name!==agent.name).map(a=>a.name).join(', ');
+    return`I co-witness events with ${others}. Multi-agent witnessing ensures no single point of trust. Each agent independently verifies and signs.`;
+  }
+  return`As ${agent.role}, I focus on ${agent.name==='Octavia'?'system architecture events':agent.name==='Lucidia'?'creative and reasoning events':agent.name==='Alice'?'operational and deployment events':agent.name==='Aria'?'interface and communication events':'security and audit events'}. Ask me about my blocks, integrity checks, or co-witnesses.`;
+}
+
+// ============================================================
+// PERFORMANCE MONITOR
+// ============================================================
+let frameCount=0;let lastFps=Date.now();let fps=60;
+function fpsCounter(){
+  frameCount++;
+  if(Date.now()-lastFps>=1000){fps=frameCount;frameCount=0;lastFps=Date.now();}
+  requestAnimationFrame(fpsCounter);
+}
+fpsCounter();
+
+// ============================================================
+// TAMPER CHAIN FULL RESET WITH GENESIS
+// ============================================================
+function fullChainReset(){
+  chain=[];
+  initChain();
+  showToast('Full chain reset -- genesis block created');
+}
+
+// ============================================================
+// BLOCK TYPE STACKED BAR CHART ANIMATION
+// ============================================================
+function animateTypeChart(){
+  if(!document.getElementById('tab-analytics').classList.contains('active'))return;
+  const tc=document.getElementById('type-chart');
+  if(!tc||!tc.getContext)return;
+  const tctx=tc.getContext('2d');
+  tc.width=tc.offsetWidth;tc.height=200;
+  tctx.clearRect(0,0,tc.width,tc.height);
+
+  const barW=tc.width/EVENT_TYPES.length-12;
+  const maxCount=Math.max(...EVENT_TYPES.map(t=>chain.filter(b=>b.type===t).length),1);
+
+  EVENT_TYPES.forEach((type,i)=>{
+    const count=chain.filter(b=>b.type===type).length;
+    const targetH=Math.max((count/maxCount)*tc.height*.7,5);
+    const x=i*(barW+12)+20;
+
+    // Background bar
+    const ci=i%GRADIENT_COLORS.length;
+    tctx.fillStyle=GRADIENT_COLORS[ci];tctx.globalAlpha=0.7;
+    tctx.fillRect(x,20,barW,tc.height-40);
+
+    // Value bar
+    tctx.fillStyle=GRADIENT_COLORS[ci];tctx.globalAlpha=.25;
+    tctx.fillRect(x,tc.height-20-targetH,barW,targetH);
+    // Border
+    tctx.strokeStyle=GRADIENT_COLORS[ci];tctx.globalAlpha=.4;tctx.lineWidth=1;
+    tctx.strokeRect(x,tc.height-20-targetH,barW,targetH);
+
+    // Label
+    tctx.fillStyle='#fff';tctx.globalAlpha=.3;tctx.font='9px "JetBrains Mono"';tctx.textAlign='center';
+    tctx.fillText(type,x+barW/2,tc.height-4);
+    tctx.globalAlpha=.5;tctx.font='600 11px "JetBrains Mono"';
+    tctx.fillText(count,x+barW/2,tc.height-26-targetH);
+  });
+  tctx.globalAlpha=1;
+}
+setInterval(animateTypeChart,5000);
+
+// ============================================================
+// ADVANCED CHAIN ANALYTICS ENGINE
+// ============================================================
+class ChainAnalytics{
+  constructor(){this.snapshots=[];this.eventLog=[];}
+  snapshot(){
+    this.snapshots.push({
+      timestamp:Date.now(),
+      blockCount:chain.length,
+      agentDistribution:AGENTS.map(a=>({name:a.name,blocks:a.blocks})),
+      typeDistribution:EVENT_TYPES.map(t=>({type:t,count:chain.filter(b=>b.type===t).length}))
+    });
+    if(this.snapshots.length>360)this.snapshots.shift(); // Keep 1 hour at 10s intervals
+  }
+  getBlockRate(windowSeconds=60){
+    const now=Date.now();
+    const windowStart=now-windowSeconds*1000;
+    const inWindow=this.snapshots.filter(s=>s.timestamp>windowStart);
+    if(inWindow.length<2)return 0;
+    const first=inWindow[0];const last=inWindow[inWindow.length-1];
+    const elapsed=(last.timestamp-first.timestamp)/1000;
+    return((last.blockCount-first.blockCount)/elapsed*60).toFixed(1);
+  }
+  getTopAgent(){
+    return AGENTS.reduce((top,a)=>a.blocks>top.blocks?a:top,AGENTS[0]);
+  }
+  getMostCommonType(){
+    const counts={};
+    chain.forEach(b=>{counts[b.type]=(counts[b.type]||0)+1;});
+    return Object.entries(counts).sort((a,b)=>b[1]-a[1])[0];
+  }
+  getHashUniformity(){
+    // Check if hash distribution is uniform
+    const buckets=new Array(16).fill(0);
+    chain.forEach(b=>{
+      const firstChar=parseInt(b.hash[0],16);
+      buckets[firstChar]++;
+    });
+    const expected=chain.length/16;
+    const chiSquared=buckets.reduce((sum,obs)=>sum+Math.pow(obs-expected,2)/expected,0);
+    return{chiSquared:chiSquared.toFixed(2),uniform:chiSquared<25};
+  }
+  getChainGrowthRate(){
+    if(this.snapshots.length<10)return'Calculating...';
+    const recent=this.snapshots.slice(-10);
+    const growth=recent[recent.length-1].blockCount-recent[0].blockCount;
+    const time=(recent[recent.length-1].timestamp-recent[0].timestamp)/1000;
+    return(growth/time*3600).toFixed(0)+' blocks/hour';
+  }
+}
+const chainAnalytics=new ChainAnalytics();
+setInterval(()=>chainAnalytics.snapshot(),10000);
+
+// ============================================================
+// BLOCK INTEGRITY VERIFIER
+// ============================================================
+class IntegrityVerifier{
+  constructor(chain){this.chain=chain;}
+  async verifyBlock(idx){
+    if(idx<=0||idx>=this.chain.length)return{valid:false,reason:'Index out of range'};
+    const block=this.chain[idx];
+    const prevBlock=this.chain[idx-1];
+    if(block.prevHash!==prevBlock.hash)return{valid:false,reason:'Previous hash mismatch'};
+    const hashInput=block.idx+block.prevHash+block.timestamp+block.agent+block.type+block.payload;
+    const computed=await sha256(hashInput);
+    if(computed!==block.hash)return{valid:false,reason:'Hash mismatch'};
+    return{valid:true,reason:'Block verified'};
+  }
+  async verifyChain(){
+    const results=[];
+    for(let i=1;i<this.chain.length;i++){
+      const result=await this.verifyBlock(i);
+      results.push({block:i,...result});
+    }
+    return results;
+  }
+  getIntegrityScore(){
+    // Quick check without async
+    let valid=0;
+    for(let i=1;i<this.chain.length;i++){
+      if(this.chain[i].prevHash===this.chain[i-1].hash)valid++;
+    }
+    return Math.round((valid/(this.chain.length-1))*100);
+  }
+}
+
+// ============================================================
+// MERKLE TREE: Advanced Operations
+// ============================================================
+class MerkleTreeEngine{
+  constructor(){this.leaves=[];this.root=null;}
+  addLeaf(data){
+    this.leaves.push(data);
+    this.rebuild();
+  }
+  removeLeaf(idx){
+    this.leaves.splice(idx,1);
+    this.rebuild();
+  }
+  rebuild(){
+    let level=this.leaves.map(l=>({data:l,hash:quickHash(l),isLeaf:true,children:[]}));
+    while(level.length>1){
+      const next=[];
+      for(let i=0;i<level.length;i+=2){
+        if(i+1<level.length){
+          const combined=level[i].hash+level[i+1].hash;
+          next.push({data:null,hash:quickHash(combined),isLeaf:false,children:[level[i],level[i+1]]});
+        } else {
+          next.push(level[i]);
+        }
+      }
+      level=next;
+    }
+    this.root=level[0]||null;
+  }
+  getProof(leafIdx){
+    if(leafIdx>=this.leaves.length)return[];
+    const proof=[];
+    let currentIdx=leafIdx;
+    let level=this.leaves.map(l=>({hash:quickHash(l)}));
+    while(level.length>1){
+      const siblingIdx=currentIdx%2===0?currentIdx+1:currentIdx-1;
+      if(siblingIdx<level.length){
+        proof.push({
+          hash:level[siblingIdx].hash,
+          position:currentIdx%2===0?'right':'left'
+        });
+      }
+      const next=[];
+      for(let i=0;i<level.length;i+=2){
+        if(i+1<level.length)next.push({hash:quickHash(level[i].hash+level[i+1].hash)});
+        else next.push(level[i]);
+      }
+      level=next;
+      currentIdx=Math.floor(currentIdx/2);
+    }
+    return proof;
+  }
+  verifyProof(leafData,proof,rootHash){
+    let hash=quickHash(leafData);
+    for(const step of proof){
+      if(step.position==='right')hash=quickHash(hash+step.hash);
+      else hash=quickHash(step.hash+hash);
+    }
+    return hash===rootHash;
+  }
+  getStats(){
+    return{
+      leaves:this.leaves.length,
+      depth:Math.ceil(Math.log2(Math.max(this.leaves.length,1))),
+      totalNodes:this.leaves.length*2-1,
+      rootHash:this.root?this.root.hash:'N/A'
+    };
+  }
+}
+const merkleEngine=new MerkleTreeEngine();
+merkleLeaves.forEach(l=>merkleEngine.addLeaf(l));
+
+// ============================================================
+// AGENT WITNESS: Reputation System
+// ============================================================
+class ReputationSystem{
+  constructor(agents){
+    this.agents=agents;
+    this.scores=new Map();
+    agents.forEach(a=>this.scores.set(a.name,{
+      reliability:a.reliability,
+      responsiveness:95+Math.random()*5,
+      accuracy:98+Math.random()*2,
+      uptime:99+Math.random()*1,
+      history:[]
+    }));
+  }
+  getScore(agentName){return this.scores.get(agentName);}
+  getOverallScore(agentName){
+    const s=this.scores.get(agentName);
+    if(!s)return 0;
+    return((s.reliability+s.responsiveness+s.accuracy+s.uptime)/4).toFixed(1);
+  }
+  getRanking(){
+    return[...this.scores.entries()]
+      .map(([name,s])=>({name,score:this.getOverallScore(name)}))
+      .sort((a,b)=>b.score-a.score);
+  }
+  recordEvent(agentName,success){
+    const s=this.scores.get(agentName);
+    if(!s)return;
+    s.history.push({timestamp:Date.now(),success});
+    if(s.history.length>100)s.history.shift();
+    // Recalculate
+    const successRate=s.history.filter(h=>h.success).length/s.history.length*100;
+    s.reliability=successRate;
+  }
+}
+const reputation=new ReputationSystem(AGENTS);
+
+// ============================================================
+// CHAIN: Block Difficulty Simulation
+// ============================================================
+class DifficultyAdjuster{
+  constructor(){this.targetTime=2000;this.difficulty=1;this.blockTimes=[];}
+  recordBlock(timestamp){
+    if(this.blockTimes.length>0){
+      const elapsed=timestamp-this.blockTimes[this.blockTimes.length-1];
+      this.blockTimes.push(timestamp);
+      if(this.blockTimes.length>10){
+        const avgTime=this.blockTimes.slice(-10).reduce((s,t,i,arr)=>i>0?s+(t-arr[i-1]):s,0)/9;
+        if(avgTime<this.targetTime*.8)this.difficulty*=1.1;
+        else if(avgTime>this.targetTime*1.2)this.difficulty*=.9;
+        this.difficulty=Math.max(.1,Math.min(10,this.difficulty));
+      }
+    } else {
+      this.blockTimes.push(timestamp);
+    }
+  }
+  getDifficulty(){return this.difficulty.toFixed(2);}
+  getAvgBlockTime(){
+    if(this.blockTimes.length<2)return'N/A';
+    const times=[];
+    for(let i=1;i<this.blockTimes.length;i++){
+      times.push(this.blockTimes[i]-this.blockTimes[i-1]);
+    }
+    return(times.reduce((s,t)=>s+t,0)/times.length/1000).toFixed(1)+'s';
+  }
+}
+const difficultyAdjuster=new DifficultyAdjuster();
+
+// ============================================================
+// CHAIN EXPORT FORMATS
+// ============================================================
+function exportChain(format){
+  let data;
+  if(format==='json'){
+    data=JSON.stringify(chain,null,2);
+  } else if(format==='csv'){
+    data='index,hash,prevHash,timestamp,agent,type,payload\n'+
+      chain.map(b=>`${b.idx},"${b.hash}","${b.prevHash}","${b.timestamp}","${b.agent}","${b.type}","${b.payload}"`).join('\n');
+  } else {
+    data=chain.map(b=>`[${b.idx}] ${b.timestamp} | ${b.agent} | ${b.type} | ${b.hash.slice(0,16)}...`).join('\n');
+  }
+  const blob=new Blob([data],{type:'text/plain'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download='roadchain-'+Date.now()+'.'+format;
+  a.click();URL.revokeObjectURL(url);
+  showToast('Chain exported as '+format.toUpperCase()+' ('+chain.length+' blocks)');
+}
+
+// ============================================================
+// BLOCK SEARCH ENGINE
+// ============================================================
+class BlockSearch{
+  constructor(chain){this.chain=chain;}
+  byAgent(name){return this.chain.filter(b=>b.agent===name);}
+  byType(type){return this.chain.filter(b=>b.type===type);}
+  byTimeRange(start,end){
+    return this.chain.filter(b=>{
+      const t=new Date(b.timestamp).getTime();
+      return t>=start&&t<=end;
+    });
+  }
+  byHash(partial){return this.chain.filter(b=>b.hash.includes(partial));}
+  byPayload(query){
+    const q=query.toLowerCase();
+    return this.chain.filter(b=>b.payload.toLowerCase().includes(q));
+  }
+  fullSearch(query){
+    const q=query.toLowerCase();
+    return this.chain.filter(b=>
+      b.hash.includes(q)||
+      b.agent.toLowerCase().includes(q)||
+      b.type.includes(q)||
+      b.payload.toLowerCase().includes(q)
+    );
+  }
+}
+
+// ============================================================
+// REAL-TIME CHAIN STATISTICS
+// ============================================================
+function getChainStats(){
+  const agentCounts={};const typeCounts={};
+  chain.forEach(b=>{
+    agentCounts[b.agent]=(agentCounts[b.agent]||0)+1;
+    typeCounts[b.type]=(typeCounts[b.type]||0)+1;
+  });
+  const avgPayloadSize=chain.reduce((s,b)=>s+b.size,0)/Math.max(chain.length,1);
+  return{
+    totalBlocks:chain.length,
+    uniqueAgents:Object.keys(agentCounts).length,
+    uniqueTypes:Object.keys(typeCounts).length,
+    avgPayloadSize:avgPayloadSize.toFixed(0)+' bytes',
+    topAgent:Object.entries(agentCounts).sort((a,b)=>b[1]-a[1])[0],
+    topType:Object.entries(typeCounts).sort((a,b)=>b[1]-a[1])[0],
+    chainAge:chain.length>0?Math.round((Date.now()-new Date(chain[0].timestamp).getTime())/60000)+'m':'0m',
+    hashUniformity:chainAnalytics.getHashUniformity()
+  };
+}
+
+// ============================================================
+// TAMPER LAB: Hash Cascade Visualizer
+// ============================================================
+function visualizeHashCascade(startIdx){
+  const container=document.getElementById('tamper-chain');
+  const blocks=container.querySelectorAll('.tamper-block');
+  let delay=0;
+  for(let i=startIdx;i<blocks.length;i++){
+    setTimeout(()=>{
+      blocks[i].style.transform='scale(1.1)';
+      blocks[i].style.transition='all .15s';
+      setTimeout(()=>{
+        blocks[i].style.transform='scale(1)';
+        blocks[i].classList.add('invalid');
+      },150);
+    },delay);
+    delay+=100;
+  }
+}
+
+// ============================================================
+// WITNESS NETWORK: Communication Graph
+// ============================================================
+class WitnessNetwork{
+  constructor(agents){
+    this.agents=agents;
+    this.communications=[];
+  }
+  recordCommunication(from,to,type){
+    this.communications.push({from,to,type,timestamp:Date.now()});
+    if(this.communications.length>500)this.communications.shift();
+  }
+  getRecentCommunications(windowMs=60000){
+    const cutoff=Date.now()-windowMs;
+    return this.communications.filter(c=>c.timestamp>cutoff);
+  }
+  getCommunicationMatrix(){
+    const matrix={};
+    this.agents.forEach(a=>{
+      matrix[a.name]={};
+      this.agents.forEach(b=>{
+        matrix[a.name][b.name]=this.communications.filter(
+          c=>(c.from===a.name&&c.to===b.name)||(c.from===b.name&&c.to===a.name)
+        ).length;
+      });
+    });
+    return matrix;
+  }
+}
+const witnessNet=new WitnessNetwork(AGENTS);
+
+// Simulate communications
+setInterval(()=>{
+  const a=AGENTS[Math.floor(Math.random()*AGENTS.length)];
+  const b=AGENTS[Math.floor(Math.random()*AGENTS.length)];
+  if(a.name!==b.name){
+    witnessNet.recordCommunication(a.name,b.name,'co-witness');
+  }
+},8000);
+
+// ============================================================
+// PERSISTENCE
+// ============================================================
+function saveChainState(){
+  try{
+    localStorage.setItem('roadchain-block-count',chain.length.toString());
+    localStorage.setItem('roadchain-agents',JSON.stringify(AGENTS.map(a=>({name:a.name,blocks:a.blocks}))));
+  }catch(e){}
+}
+function loadChainState(){
+  try{
+    const agents=JSON.parse(localStorage.getItem('roadchain-agents'));
+    if(agents){
+      agents.forEach(saved=>{
+        const agent=AGENTS.find(a=>a.name===saved.name);
+        if(agent)agent.blocks=Math.max(agent.blocks,saved.blocks);
+      });
+    }
+  }catch(e){}
+}
+loadChainState();
+setInterval(saveChainState,15000);
+
+// ============================================================
+// CHAIN VISUALIZATION: Color Legend
+// ============================================================
+function renderChainLegend(){
+  const legend=document.createElement('div');
+  legend.style.cssText='position:absolute;bottom:12px;left:12px;display:flex;gap:12px;z-index:2';
+  AGENTS.forEach(a=>{
+    const item=document.createElement('div');
+    item.style.cssText='display:flex;align-items:center;gap:4px;font-family:var(--jb);font-size:9px;color:var(--white);opacity:.3';
+    item.innerHTML=`<div style="width:8px;height:8px;border-radius:2px;border:1px solid ${a.color}"></div>${a.name}`;
+    legend.appendChild(item);
+  });
+  document.querySelector('.chain-viz')?.appendChild(legend);
+}
+renderChainLegend();
+
+// ============================================================
+// INITIAL MERKLE DRAW
+// ============================================================
+setTimeout(()=>{if(document.getElementById('tab-merkle').classList.contains('active'))drawMerkleTree();},500);
+
+// ============================================================
+// AUTO-GENERATE BLOCKS ON INTERVAL
+// ============================================================
+setInterval(async()=>{
+  if(chainSpeed>0){
+    await generateBlock();
+    chainEventsThisMinute++;
+    difficultyAdjuster.recordBlock(Date.now());
+    blockAddedVisualFeedback();
+  }
+},3000);
+
+</script>
 </body>
 </html>
