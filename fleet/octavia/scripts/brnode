@@ -1,0 +1,188 @@
+#!/bin/bash
+# brnode - BlackRoad OS Node Agent
+# Runs on each cluster node
+# Usage: brnode <command>
+
+set -e
+
+BLACKROAD_DIR="/opt/blackroad"
+HOSTNAME=$(hostname)
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m'
+
+usage() {
+    cat << 'EOF'
+brnode - BlackRoad OS Node Agent
+
+USAGE:
+    brnode <command>
+
+COMMANDS:
+    status          Show node status
+    health          Health check
+    services        List running services
+    info            Node information
+    register        Register with cluster
+    heartbeat       Send heartbeat to controller
+EOF
+}
+
+cmd_status() {
+    echo "================================================================================"
+    echo "  NODE: $HOSTNAME"
+    echo "  $(date '+%Y-%m-%d %H:%M:%S')"
+    echo "================================================================================"
+    echo ""
+    echo "Uptime:    $(uptime -p 2>/dev/null || uptime | awk '{print $3,$4}')"
+    echo "Load:      $(cat /proc/loadavg | awk '{print $1, $2, $3}')"
+    echo "Memory:    $(free -h | awk '/^Mem:/ {print $3"/"$2}')"
+    echo "Disk:      $(df -h / | awk 'NR==2 {print $3"/"$2" ("$5")"}')"
+    echo ""
+    echo "Services:"
+    for svc in docker ollama tailscaled cloudflared; do
+        status=$(systemctl is-active $svc 2>/dev/null || echo "not installed")
+        if [ "$status" = "active" ]; then
+            echo -e "  $svc: ${GREEN}active${NC}"
+        elif [ "$status" = "inactive" ]; then
+            echo -e "  $svc: ${YELLOW}inactive${NC}"
+        else
+            echo -e "  $svc: ${RED}$status${NC}"
+        fi
+    done
+    echo ""
+    echo "Containers: $(docker ps -q 2>/dev/null | wc -l)"
+    echo "Tailscale:  $(tailscale status >/dev/null 2>&1 && echo 'connected' || echo 'disconnected')"
+}
+
+cmd_health() {
+    local errors=0
+
+    echo "Health Check: $HOSTNAME"
+    echo ""
+
+    # Check disk space
+    disk_pct=$(df / | awk 'NR==2 {print $5}' | tr -d '%')
+    if [ "$disk_pct" -gt 90 ]; then
+        echo -e "${RED}[CRITICAL] Disk usage: ${disk_pct}%${NC}"
+        errors=$((errors + 1))
+    elif [ "$disk_pct" -gt 80 ]; then
+        echo -e "${YELLOW}[WARNING] Disk usage: ${disk_pct}%${NC}"
+    else
+        echo -e "${GREEN}[OK] Disk usage: ${disk_pct}%${NC}"
+    fi
+
+    # Check memory
+    mem_pct=$(free | awk '/^Mem:/ {printf "%.0f", $3/$2*100}')
+    if [ "$mem_pct" -gt 90 ]; then
+        echo -e "${RED}[CRITICAL] Memory usage: ${mem_pct}%${NC}"
+        errors=$((errors + 1))
+    elif [ "$mem_pct" -gt 80 ]; then
+        echo -e "${YELLOW}[WARNING] Memory usage: ${mem_pct}%${NC}"
+    else
+        echo -e "${GREEN}[OK] Memory usage: ${mem_pct}%${NC}"
+    fi
+
+    # Check load
+    load=$(cat /proc/loadavg | awk '{print $1}')
+    cores=$(nproc)
+    load_int=${load%.*}
+    if [ "$load_int" -gt "$cores" ]; then
+        echo -e "${YELLOW}[WARNING] Load: $load (cores: $cores)${NC}"
+    else
+        echo -e "${GREEN}[OK] Load: $load (cores: $cores)${NC}"
+    fi
+
+    # Check Tailscale
+    if tailscale status >/dev/null 2>&1; then
+        echo -e "${GREEN}[OK] Tailscale: connected${NC}"
+    else
+        echo -e "${RED}[CRITICAL] Tailscale: disconnected${NC}"
+        errors=$((errors + 1))
+    fi
+
+    echo ""
+    if [ "$errors" -gt 0 ]; then
+        echo -e "${RED}Health check: $errors issues found${NC}"
+        return 1
+    else
+        echo -e "${GREEN}Health check: OK${NC}"
+        return 0
+    fi
+}
+
+cmd_services() {
+    echo "Running services on $HOSTNAME:"
+    echo ""
+    systemctl list-units --type=service --state=running | grep -E '(docker|ollama|tailscale|cloudflare|ssh|node_exporter|nats)' || echo "(none)"
+    echo ""
+    echo "Docker containers:"
+    docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" 2>/dev/null || echo "(docker not running)"
+}
+
+cmd_info() {
+    echo "Node Information: $HOSTNAME"
+    echo ""
+    echo "OS:        $(cat /etc/os-release | grep PRETTY_NAME | cut -d'"' -f2)"
+    echo "Kernel:    $(uname -r)"
+    echo "Arch:      $(uname -m)"
+    echo "CPUs:      $(nproc)"
+    echo "Memory:    $(free -h | awk '/^Mem:/ {print $2}')"
+    echo "Disk:      $(df -h / | awk 'NR==2 {print $2}')"
+    echo ""
+    echo "IP (local):     $(hostname -I | awk '{print $1}')"
+    echo "IP (Tailscale): $(tailscale ip -4 2>/dev/null || echo 'N/A')"
+    echo ""
+    echo "Roles:     $(cat $BLACKROAD_DIR/etc/roles 2>/dev/null || echo 'not set')"
+    echo "Provisioned: $(cat $BLACKROAD_DIR/etc/provisioned 2>/dev/null || echo 'not set')"
+}
+
+cmd_register() {
+    echo "Registering node with cluster..."
+    mkdir -p "$BLACKROAD_DIR/etc"
+    hostname > "$BLACKROAD_DIR/etc/hostname"
+    date -Iseconds > "$BLACKROAD_DIR/etc/registered"
+    echo "Registered: $HOSTNAME"
+}
+
+cmd_heartbeat() {
+    # Simple heartbeat - could be extended to send to controller
+    local ts=$(date -Iseconds)
+    local load=$(cat /proc/loadavg | awk '{print $1}')
+    local mem=$(free | awk '/^Mem:/ {printf "%.0f", $3/$2*100}')
+    local disk=$(df / | awk 'NR==2 {print $5}' | tr -d '%')
+
+    echo "{\"node\":\"$HOSTNAME\",\"ts\":\"$ts\",\"load\":$load,\"mem\":$mem,\"disk\":$disk}"
+}
+
+case "${1:-}" in
+    status)
+        cmd_status
+        ;;
+    health)
+        cmd_health
+        ;;
+    services)
+        cmd_services
+        ;;
+    info)
+        cmd_info
+        ;;
+    register)
+        cmd_register
+        ;;
+    heartbeat)
+        cmd_heartbeat
+        ;;
+    -h|--help|help|"")
+        usage
+        ;;
+    *)
+        echo "Unknown command: $1"
+        usage
+        exit 1
+        ;;
+esac

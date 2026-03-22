@@ -1,0 +1,1112 @@
+{
+	email amundsonalexa@gmail.com
+	acme_ca https://acme.zerossl.com/v2/DV90
+}
+
+# =============================================================================
+# BLACKROAD EDGE — All domains served from our own metal
+# Gematria (159.65.43.12) is the edge. Caddy handles TLS via Let's Encrypt.
+# Traffic routes through WireGuard to Pi fleet.
+#
+# WireGuard IPs:
+#   10.8.0.3 = Cecilia (AI, Ollama, MinIO)
+#   10.8.0.4 = Octavia (Gitea, Docker)
+#   10.8.0.6 = Alice   (nginx, Pi-hole, PostgreSQL, Qdrant)
+#   10.8.0.5 = Lucidia (web apps)
+#   10.8.0.8 = Gematria (local, this server)
+# =============================================================================
+
+# --- APP (the front door) ---
+app.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	reverse_proxy 10.8.0.4:9025
+	header Access-Control-Allow-Origin *
+	header Access-Control-Allow-Methods "GET, POST, OPTIONS"
+	header Access-Control-Allow-Headers "Content-Type, Authorization"
+	header X-Served-By "BlackRoad Edge → Octavia (app)"
+}
+
+# --- EDUCATION (RoadWork / Homework) ---
+roadwork.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	reverse_proxy 10.8.0.4:9026
+	header Access-Control-Allow-Origin *
+	header X-Served-By "BlackRoad Edge → Octavia (roadwork)"
+}
+
+homework.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/roadwork
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+edu.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/roadwork
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+# --- MAIN SITE ---
+blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/blackroad.io
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+www.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	redir https://blackroad.io{uri} permanent
+}
+
+# --- GIT (Gitea on Octavia) ---
+git.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	reverse_proxy 10.8.0.4:3100
+	header X-Served-By "BlackRoad Edge → Octavia"
+}
+
+gitea.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	redir https://git.blackroad.io{uri} permanent
+}
+
+roadcode.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	redir https://git.blackroad.io{uri} permanent
+}
+
+# --- ROUNDTRIP (self-hosted on Octavia :9016) ---
+roundtrip.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	reverse_proxy 10.8.0.6:8094 {
+		flush_interval -1
+	}
+	header Access-Control-Allow-Origin *
+	header Access-Control-Allow-Methods "GET, POST, OPTIONS"
+	header Access-Control-Allow-Headers "Content-Type, X-Mesh-Signature, X-Mesh-Timestamp, X-Mesh-Service"
+	header X-Served-By "BlackRoad Edge → Alice (RoundTrip)"
+}
+
+roadtrip.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	tls /etc/caddy/certs/roadtrip/roadtrip.blackroad.io.crt /etc/caddy/certs/roadtrip/roadtrip.blackroad.io.key
+	reverse_proxy 10.8.0.6:8094 {
+		flush_interval -1
+	}
+	header Access-Control-Allow-Origin *
+	header Access-Control-Allow-Methods "GET, POST, OPTIONS"
+	header Access-Control-Allow-Headers "Content-Type, X-Mesh-Signature, X-Mesh-Timestamp, X-Mesh-Service"
+	header X-Served-By "BlackRoad Edge → Octavia (RoadTrip)"
+}
+
+# --- AI / OLLAMA ---
+ai.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/ai
+	file_server
+	header Access-Control-Allow-Origin *
+	header X-Served-By "BlackRoad Edge → Cecilia"
+	handle /api/* {
+		reverse_proxy 127.0.0.1:11434
+		header Access-Control-Allow-Origin *
+		header Access-Control-Allow-Methods "GET, POST, OPTIONS"
+		header Access-Control-Allow-Headers "Content-Type"
+	}
+}
+
+ollama.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/ai
+	file_server
+	header Access-Control-Allow-Origin *
+	header Access-Control-Allow-Methods "GET, POST, OPTIONS"
+	header Access-Control-Allow-Headers "Content-Type"
+	header X-Served-By "BlackRoad Edge → Cecilia"
+}
+
+ollama.gematria.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	reverse_proxy 127.0.0.1:11434
+	header Access-Control-Allow-Origin *
+	header X-Served-By "BlackRoad Edge → Gematria (local)"
+}
+
+# --- CHAT (self-hosted on Gematria) ---
+chat.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/chat
+	file_server
+
+	handle /api/health {
+		reverse_proxy 10.8.0.3:8092
+		header Access-Control-Allow-Origin *
+	}
+
+	handle /api/chat {
+	reverse_proxy 10.8.0.3:8092
+	header Access-Control-Allow-Origin *
+	header Access-Control-Allow-Methods "GET, POST, OPTIONS"
+	header Access-Control-Allow-Headers "Content-Type"
+}
+
+	handle /api/generate {
+	reverse_proxy 10.8.0.3:8092
+	header Access-Control-Allow-Origin *
+}
+
+	handle /api/tags {
+	reverse_proxy 10.8.0.3:8092
+	header Access-Control-Allow-Origin *
+}
+
+	@cors method OPTIONS
+	handle @cors {
+		header Access-Control-Allow-Origin *
+		header Access-Control-Allow-Methods "GET, POST, OPTIONS"
+		header Access-Control-Allow-Headers "Content-Type"
+		respond 204
+	}
+
+	header X-Served-By "BlackRoad Edge → Gematria"
+}
+
+# --- API / AGENTS ---
+api.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	reverse_proxy 127.0.0.1:8787
+	header Access-Control-Allow-Origin *
+	header X-Served-By "BlackRoad Edge → Gematria"
+}
+
+agents.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	reverse_proxy 127.0.0.1:8787
+	header Access-Control-Allow-Origin *
+	header X-Served-By "BlackRoad Edge → Gematria"
+}
+
+# --- OPS (SSH tunnel) ---
+ops.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/ops
+	file_server
+	header X-Served-By "BlackRoad Edge → Gematria"
+}
+
+# --- STORAGE (MinIO on Cecilia) ---
+s3.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	reverse_proxy 10.8.0.3:9000
+	header X-Served-By "BlackRoad Edge → Cecilia"
+}
+
+images.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	reverse_proxy 10.8.0.3:9000
+	header X-Served-By "BlackRoad Edge → Cecilia"
+}
+
+minio.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	reverse_proxy 10.8.0.3:9001
+	header X-Served-By "BlackRoad Edge → Cecilia"
+}
+
+# --- FLEET / MONITORING ---
+fleet.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/fleet
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+status.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	reverse_proxy 10.8.0.4:9021
+	header X-Served-By "BlackRoad Edge → Octavia (status)"
+}
+
+# --- CLOUD (the living city) ---
+cloud.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/cloud
+	file_server
+
+	handle /api/fleet {
+		reverse_proxy 127.0.0.1:8787
+		header Access-Control-Allow-Origin *
+	}
+
+	header X-Served-By "BlackRoad Edge"
+}
+
+# --- STATIC SITES (all served from /var/www/<subdomain>) ---
+about.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/about
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+admin.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/admin
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+alice.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/alice
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+analytics.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/analytics
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+apps.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	tls /etc/caddy/certs/blackroad-worker-batch-1.fullchain.pem /etc/caddy/certs/blackroad-worker-batch-1.privkey.pem
+	root * /var/www/apps
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+auth.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	reverse_proxy 10.8.0.4:9003
+	header Access-Control-Allow-Origin *
+	header Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+	header Access-Control-Allow-Headers "Content-Type, Authorization"
+	header X-Served-By "BlackRoad Edge → Octavia (auth)"
+}
+
+blog.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/blog
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+brand.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/brand
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+chain.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/chain
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+console.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/console
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+dashboard.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/dashboard
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+demo.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/demo
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+design.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/design
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+dev.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/dev
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+docs.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/docs
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+earth.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/earth
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+edge.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	tls /etc/caddy/certs/blackroad-worker-batch-1.fullchain.pem /etc/caddy/certs/blackroad-worker-batch-1.privkey.pem
+	root * /var/www/edge
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+education.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/education
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+finance.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/finance
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+guide.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/guide
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+hardware.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/hardware
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+help.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/help
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+home.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/home
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+hq.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/hq
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+legal.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/legal
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+lucidia.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/lucidia
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+network.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/network
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+pay.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/pay
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+platform.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	tls /etc/caddy/certs/blackroad-worker-batch-1.fullchain.pem /etc/caddy/certs/blackroad-worker-batch-1.privkey.pem
+	root * /var/www/platform
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+portal.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/portal
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+pricing.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/pricing
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+research.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/research
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+search.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	reverse_proxy 10.8.0.4:9002
+	header Access-Control-Allow-Origin *
+	header Access-Control-Allow-Methods "GET, POST, OPTIONS"
+	header Access-Control-Allow-Headers "Content-Type"
+	header X-Served-By "BlackRoad Edge → Octavia (search)"
+}
+
+stats.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	tls /etc/caddy/certs/stats.blackroad.io.fullchain.pem /etc/caddy/certs/stats.blackroad.io.privkey.pem
+	reverse_proxy 10.8.0.4:9008
+	header Access-Control-Allow-Origin *
+	header X-Served-By "BlackRoad Edge → Octavia (stats)"
+}
+
+stripe.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	tls /etc/caddy/certs/blackroad-worker-batch-1.fullchain.pem /etc/caddy/certs/blackroad-worker-batch-1.privkey.pem
+	reverse_proxy 10.8.0.4:9012
+	header Access-Control-Allow-Origin *
+	header X-Served-By "BlackRoad Edge → Octavia (stripe)"
+}
+
+tools.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	tls /etc/caddy/certs/blackroad-worker-batch-1.fullchain.pem /etc/caddy/certs/blackroad-worker-batch-1.privkey.pem
+	root * /var/www/tools
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+wiki.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/wiki
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+# --- NEW WORKERS (Octavia 9017-9024) ---
+dispatch.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	reverse_proxy 10.8.0.6:8096
+	header X-Served-By "BlackRoad Edge → Alice (dispatch)"
+}
+
+mesh.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/mesh
+	file_server
+	header X-Served-By "BlackRoad Edge → Octavia (mesh)"
+}
+
+prism.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	reverse_proxy 10.8.0.4:9023
+	header X-Served-By "BlackRoad Edge → Octavia (prism)"
+}
+
+# --- HEALTH ---
+:80 {
+	respond /health "OK" 200
+}
+
+iot.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/iot
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+translate.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/translate
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+cdn.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	tls /etc/caddy/certs/blackroad-worker-batch-1.fullchain.pem /etc/caddy/certs/blackroad-worker-batch-1.privkey.pem
+	root * /var/www/cdn
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+pitstop.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/pitstop
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+portfolio.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/portfolio
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+support.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/support
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+start.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/start
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+enterprise.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/enterprise
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+autopilot.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/autopilot
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+connect.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/connect
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+ci.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/ci
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+data.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	tls /etc/caddy/certs/blackroad-worker-batch-1.fullchain.pem /etc/caddy/certs/blackroad-worker-batch-1.privkey.pem
+	root * /var/www/data
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+automate.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/automate
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+approve.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/approve
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+firewall.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/firewall
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+sync.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/sync
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+experiment.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/experiment
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+review.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/review
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+progress.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/progress
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+decide.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/decide
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+workspace.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/workspace
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+deploy.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/deploy
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+perf.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/perf
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+debug.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/debug
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+micropay.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/micropay
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+plan.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/plan
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+moderate.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/moderate
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+integrate.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/integrate
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+open.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/open
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+blocks.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/blocks
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+circuits.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/circuits
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+cli.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/cli
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+compliance.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/compliance
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+control.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/control
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+engineering.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/engineering
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+events.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/events
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+features.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/features
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+global.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/global
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+ide.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/ide
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+resume.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	root * /var/www/alexa
+	file_server
+	header X-Served-By "BlackRoad Edge"
+}
+
+bb.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	tls /etc/caddy/certs/bb.blackroad.io.fullchain.pem /etc/caddy/certs/bb.blackroad.io.privkey.pem
+	reverse_proxy 127.0.0.1:9030
+	header X-Served-By "BlackRoad Edge → Gematria (bb)"
+}
+
+db.blackroad.io {
+	header Cache-Control "no-cache, no-store, must-revalidate"
+	header Pragma "no-cache"
+	reverse_proxy 127.0.0.1:9031
+	header X-Served-By "BlackRoad Edge → Gematria (db)"
+}
+
+# ═══ Previously missing domains ═══
+blackroadai.com {
+    root * /var/www/blackroadai.com
+    file_server
+    try_files {path} /index.html
+}
+
+blackroad.me {
+    root * /var/www/blackroad.me
+    file_server
+    try_files {path} /index.html
+}
+
+lucidia.earth {
+    root * /var/www/lucidia.earth
+    file_server
+    try_files {path} /index.html
+}
+
+lucidia.studio {
+    root * /var/www/lucidia.studio
+    file_server
+    try_files {path} /index.html
+}
+
+# ═══ BLACKROAD BACKEND API (Octavia :9040) ═══
+backend.blackroad.io {
+    reverse_proxy 10.8.0.4:9040
+    header Access-Control-Allow-Origin *
+    header Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+    header Access-Control-Allow-Headers "Content-Type, Authorization"
+    header X-Served-By "BlackRoad Edge → Octavia (backend)"
+}
+
+# ═══ CUSTOM DOMAINS — API routes to backend ═══
+blackroad.company {
+    root * /var/www/blackroad.company
+    file_server
+    try_files {path} /index.html
+    handle /api/* {
+        reverse_proxy 10.8.0.4:9040
+        header Access-Control-Allow-Origin *
+    }
+    header X-Served-By "BlackRoad Edge → Octavia (backend)"
+}
+
+blackroad.network {
+    root * /var/www/blackroad.network
+    file_server
+    try_files {path} /index.html
+    handle /api/* {
+        reverse_proxy 10.8.0.4:9040
+        header Access-Control-Allow-Origin *
+    }
+}
+
+blackroad.systems {
+    root * /var/www/blackroad.systems
+    file_server
+    try_files {path} /index.html
+    handle /api/* {
+        reverse_proxy 10.8.0.4:9040
+        header Access-Control-Allow-Origin *
+    }
+}
+
+blackroadinc.us {
+    root * /var/www/blackroadinc.us
+    file_server
+    try_files {path} /index.html
+    handle /api/* {
+        reverse_proxy 10.8.0.4:9040
+        header Access-Control-Allow-Origin *
+    }
+}
+
+blackroadqi.com {
+    root * /var/www/blackroadqi.com
+    file_server
+    try_files {path} /index.html
+    handle /api/* {
+        reverse_proxy 10.8.0.4:9040
+        header Access-Control-Allow-Origin *
+    }
+}
+
+blackroadquantum.com {
+    root * /var/www/blackroadquantum.com
+    file_server
+    try_files {path} /index.html
+    handle /api/* {
+        reverse_proxy 10.8.0.4:9040
+        header Access-Control-Allow-Origin *
+    }
+}
+
+blackroadquantum.info {
+    root * /var/www/blackroadquantum.info
+    file_server
+    try_files {path} /index.html
+    handle /api/* {
+        reverse_proxy 10.8.0.4:9040
+        header Access-Control-Allow-Origin *
+    }
+}
+
+blackroadquantum.net {
+    root * /var/www/blackroadquantum.net
+    file_server
+    try_files {path} /index.html
+    handle /api/* {
+        reverse_proxy 10.8.0.4:9040
+        header Access-Control-Allow-Origin *
+    }
+}
+
+blackroadquantum.shop {
+    root * /var/www/blackroadquantum.shop
+    file_server
+    try_files {path} /index.html
+    handle /api/* {
+        reverse_proxy 10.8.0.4:9040
+        header Access-Control-Allow-Origin *
+    }
+}
+
+blackroadquantum.store {
+    root * /var/www/blackroadquantum.store
+    file_server
+    try_files {path} /index.html
+    handle /api/* {
+        reverse_proxy 10.8.0.4:9040
+        header Access-Control-Allow-Origin *
+    }
+}
+
+lucidiaqi.com {
+    root * /var/www/lucidiaqi.com
+    file_server
+    try_files {path} /index.html
+    handle /api/* {
+        reverse_proxy 10.8.0.4:9040
+        header Access-Control-Allow-Origin *
+    }
+}
+
+roadchain.io {
+    root * /var/www/roadchain.io
+    file_server
+    try_files {path} /index.html
+    handle /api/* {
+        reverse_proxy 10.8.0.4:9040
+        header Access-Control-Allow-Origin *
+    }
+}
+
+roadcoin.io {
+    root * /var/www/roadcoin.io
+    file_server
+    try_files {path} /index.html
+    handle /api/* {
+        reverse_proxy 10.8.0.4:9040
+        header Access-Control-Allow-Origin *
+    }
+}
+
+blackboxprogramming.io {
+    root * /var/www/blackboxprogramming.io
+    file_server
+    try_files {path} /index.html
+    handle /api/* {
+        reverse_proxy 10.8.0.4:9040
+        header Access-Control-Allow-Origin *
+    }
+}

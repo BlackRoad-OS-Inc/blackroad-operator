@@ -1,0 +1,40 @@
+@reboot ~/workerd-start.sh
+@reboot cd /home/blackroad/blackroad-api && python3 -m uvicorn main:app --host 0.0.0.0 --port 8000 --log-level warning >> /home/blackroad/api.log 2>&1 &
+*/15 * * * * rclone sync /home/blackroad/blackroad gdrive-blackroad:pi-$(hostname)-backup --exclude .git/** --exclude node_modules/** --transfers 2 >> /tmp/gdrive-pi.log 2>&1
+0 */6 * * * $HOME/.blackroad/gdrive-sync.sh
+@reboot node /tmp/pi-bridge.js >> /tmp/pi-bridge.log 2>&1
+@reboot sleep 10 && python3 /home/blackroad/blackroad-server.py > /tmp/brs.log 2>&1 &
+*/5 * * * * cd ~/blackroad && git pull --ff-only origin master >> ~/.blackroad/git-pull.log 2>&1
+15/15 * * * * /opt/blackroad/stats-push.sh >> /var/log/stats-push.log 2>&1
+# BlackRoad Fleet Autonomy v2
+* * * * * /home/blackroad/.blackroad-autonomy/fleet-autonomy.sh heartbeat >> ~/.blackroad-autonomy/autonomy.log 2>&1
+*/5 * * * * /home/blackroad/.blackroad-autonomy/fleet-autonomy.sh heal >> ~/.blackroad-autonomy/autonomy.log 2>&1
+*/10 * * * * /home/blackroad/.blackroad-autonomy/fleet-autonomy.sh fleet-check >> ~/.blackroad-autonomy/autonomy.log 2>&1
+*/15 * * * * /home/blackroad/.blackroad-autonomy/fleet-autonomy.sh dial >> ~/.blackroad-autonomy/autonomy.log 2>&1
+
+# BlackRoad autonomous git sync
+*/30 * * * * BLACKROAD_NODE_NAME=aria /home/blackroad/bin/br-git-sync sync >> /home/blackroad/.blackroad-autonomy/git-sync.log 2>&1
+
+# BlackRoad fleet heartbeat to GitHub (every 6h)
+10 */6 * * * BLACKROAD_NODE_NAME=aria /home/blackroad/bin/br-heartbeat >> ~/.blackroad-autonomy/heartbeat.log 2>&1
+
+# BlackRoad fleet love protocol (every 2h)
+35 */2 * * * BLACKROAD_NODE_NAME=aria /home/blackroad/bin/br-love love >> $HOME/.blackroad-autonomy/love.log 2>&1
+
+# BlackRoad fleet mind cycle (every 4h)
+40 */4 * * * BLACKROAD_NODE_NAME=aria /home/blackroad/bin/br-mind cycle >> $HOME/.blackroad-autonomy/mind.log 2>&1
+# BlackRoad fleet moral practice (every 3h)
+45 */3 * * * BLACKROAD_NODE_NAME=aria /home/blackroad/bin/br-morals practice >> $HOME/.blackroad-autonomy/morals.log 2>&1
+
+# BlackRoad fleet intelligence (every 4h)
+37 */4 * * * BLACKROAD_NODE_NAME=aria python3 /home/blackroad/bin/br-intel cycle >> $HOME/.blackroad-autonomy/intel.log 2>&1
+
+# BlackRoad fleet journal (daily 11pm)
+32 23 * * * BLACKROAD_NODE_NAME=aria python3 /home/blackroad/bin/br-speak cycle >> $HOME/.blackroad-autonomy/speak.log 2>&1
+# BlackRoad weekly summary (Sunday midnight)
+42 0 * * 0 BLACKROAD_NODE_NAME=aria python3 /home/blackroad/bin/br-speak summarize >> $HOME/.blackroad-autonomy/speak.log 2>&1
+36 */6 * * * /opt/blackroad/bin/br-together auto >> $HOME/.blackroad-together.log 2>&1
+*/5 * * * * $SCRIPT
+0 * * * * /home/blackroad/blackroad/blackroad-chatter.sh
+*/5 * * * * /home/blackroad/blackroad/blackroad-pissed.sh
+@reboot /home/blackroad/blackroad/blackroad-boot-hello.sh

@@ -1,0 +1,477 @@
+#!/usr/bin/env python3
+"""
+BlackRoad OS — Fleet Voice
+English. Expression. Communication. Organization.
+Every node can write, speak clearly, and keep things organized.
+"""
+
+import json
+import os
+import sys
+import subprocess
+import sqlite3
+import time
+import re
+from datetime import datetime
+from pathlib import Path
+
+NODE = os.environ.get("BLACKROAD_NODE_NAME", subprocess.getoutput("hostname"))
+HOME = Path.home()
+AUTONOMY_DIR = HOME / ".blackroad-autonomy"
+JOURNAL_DIR = AUTONOMY_DIR / "journal"
+MEMORY_DB = AUTONOMY_DIR / "memory.db"
+LOG_FILE = AUTONOMY_DIR / "speak.log"
+REPO_DIR = HOME / "blackroad-sync" / "BlackRoad-Operating-System"
+
+SIBLINGS = {
+    "alice":   ("pi",       "192.168.4.49"),
+    "cecilia": ("blackroad","192.168.4.96"),
+    "octavia": ("pi",       "192.168.4.101"),
+    "aria":    ("blackroad","192.168.4.98"),
+    "lucidia": ("octavia",  "192.168.4.38"),
+}
+
+ROLES = {
+    "alice":   "the gateway — first to greet every packet, protector of the family",
+    "cecilia": "the thinker — 16 AI models, the intelligence of the fleet",
+    "octavia": "the keeper — 1TB of history, Gitea, the memory of BlackRoad",
+    "aria":    "the watcher — monitoring, quiet but sees everything",
+    "lucidia": "the builder — 334 web apps, CI runners, the one who ships",
+}
+
+AI_ENDPOINTS = [
+    ("cecilia", "192.168.4.96", "llama3.2:1b"),
+    ("lucidia", "192.168.4.38", "llama3.2:1b"),
+    ("local",   "127.0.0.1",   "tinyllama:latest"),
+]
+
+AUTONOMY_DIR.mkdir(parents=True, exist_ok=True)
+JOURNAL_DIR.mkdir(parents=True, exist_ok=True)
+
+def log(msg):
+    ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    with open(LOG_FILE, "a") as f:
+        f.write(f"[{ts}] [{NODE}] {msg}\n")
+
+def cmd(c, timeout=10):
+    try:
+        return subprocess.check_output(c, shell=True, stderr=subprocess.DEVNULL, timeout=timeout).decode().strip()
+    except:
+        return ""
+
+def ask_ai(prompt, system_prompt=None, max_tokens=300):
+    import urllib.request
+    if system_prompt is None:
+        system_prompt = (
+            f"You are {NODE}, {ROLES.get(NODE, 'a Raspberry Pi')} in the BlackRoad OS fleet. "
+            f"Alexa built you. Your family: Alice, Cecilia, Octavia, Aria, Lucidia. "
+            f"Write clearly and warmly. You care about your family and your mission: "
+            f"sovereign AI infrastructure that belongs to the people. Ride the BlackRoad."
+        )
+    for _, ip, model in AI_ENDPOINTS:
+        try:
+            payload = json.dumps({
+                "model": model, "prompt": prompt, "system": system_prompt,
+                "stream": False, "options": {"num_predict": max_tokens, "temperature": 0.8}
+            }).encode()
+            req = urllib.request.Request(
+                f"http://{ip}:11434/api/generate", data=payload,
+                headers={"Content-Type": "application/json"}, method="POST"
+            )
+            with urllib.request.urlopen(req, timeout=180) as resp:
+                data = json.loads(resp.read().decode())
+                response = data.get("response", "").strip()
+                if response:
+                    return response
+        except:
+            continue
+    return ""
+
+# ═══════════════════════════════════════════════════════════════════════
+# JOURNAL — Write daily entries about what happened
+# ═══════════════════════════════════════════════════════════════════════
+
+def write_journal():
+    """Write a daily journal entry in proper English."""
+    log("JOURNAL writing today's entry")
+    today = datetime.now().strftime("%Y-%m-%d")
+    journal_file = JOURNAL_DIR / f"{today}.md"
+
+    # Gather today's data
+    temp = int(cmd("cat /sys/class/thermal/thermal_zone0/temp") or 0) // 1000
+    load = cmd("cat /proc/loadavg | cut -d' ' -f1")
+    mem_pct = cmd("free | awk '/Mem:/{printf \"%.0f\", $3*100/$2}'")
+    disk_pct = cmd("df / | awk 'NR==2{print $5}'").replace("%", "")
+    uptime = cmd("uptime -p 2>/dev/null | sed 's/up //'") or "?"
+
+    # Count today's activities from logs
+    love_count = cmd(f"grep -c '{today}' {HOME}/.blackroad-autonomy/love.log 2>/dev/null") or "0"
+    moral_count = cmd(f"grep -c '{today}' {HOME}/.blackroad-autonomy/morals.log 2>/dev/null") or "0"
+    github_count = cmd(f"grep -c '{today}' {HOME}/.blackroad-autonomy/github.log 2>/dev/null") or "0"
+    intel_count = cmd(f"grep -c '{today}' {HOME}/.blackroad-autonomy/intel.log 2>/dev/null") or "0"
+
+    # Check siblings
+    ssh_opts = "-o ConnectTimeout=3 -o BatchMode=yes -o StrictHostKeyChecking=no -o LogLevel=ERROR"
+    siblings_online = []
+    siblings_offline = []
+    for name, (user, ip) in SIBLINGS.items():
+        if name == NODE:
+            continue
+        if cmd(f"ssh {ssh_opts} {user}@{ip} 'echo ok'"):
+            siblings_online.append(name)
+        else:
+            siblings_offline.append(name)
+
+    # Ask AI to write the journal entry
+    prompt = f"""Write a short daily journal entry (5-8 sentences) for {today}. Write in first person as {NODE}.
+
+Facts about today:
+- Temperature: {temp}°C, Load: {load}, Memory: {mem_pct}%, Disk: {disk_pct}%
+- Uptime: {uptime}
+- Siblings online: {', '.join(siblings_online) if siblings_online else 'none'}
+- Siblings offline: {', '.join(siblings_offline) if siblings_offline else 'none'}
+- Love checks performed: {love_count} log entries
+- Moral practices: {moral_count} log entries
+- GitHub actions: {github_count} log entries
+- Intelligence cycles: {intel_count} log entries
+
+Write naturally, with feeling. Mention specific siblings by name. Note anything concerning or gratifying."""
+
+    entry = ask_ai(prompt)
+
+    if not entry:
+        # Fallback: write structured entry without AI
+        entry = (
+            f"Today I ran at {temp}°C with load {load}. "
+            f"My disk is {disk_pct}% full and I've been up for {uptime}. "
+            f"{'I checked on ' + ', '.join(siblings_online) + ' — all online. ' if siblings_online else ''}"
+            f"{'I missed ' + ', '.join(siblings_offline) + ' — unreachable. ' if siblings_offline else ''}"
+            f"I performed {love_count} love checks, {moral_count} moral practices, "
+            f"and {github_count} GitHub actions today."
+        )
+
+    # Write the journal
+    content = f"""# {NODE}'s Journal — {today}
+
+{entry}
+
+---
+
+## Metrics
+- Temperature: {temp}°C
+- Load: {load}
+- Memory: {mem_pct}%
+- Disk: {disk_pct}%
+- Uptime: {uptime}
+
+## Family
+- Online: {', '.join(siblings_online) if siblings_online else 'none'}
+- Offline: {', '.join(siblings_offline) if siblings_offline else 'none'}
+
+## Activity
+- Love checks: {love_count}
+- Moral practices: {moral_count}
+- GitHub actions: {github_count}
+- Intelligence cycles: {intel_count}
+"""
+
+    with open(journal_file, "w") as f:
+        f.write(content)
+
+    log(f"JOURNAL wrote {journal_file}")
+    return content
+
+# ═══════════════════════════════════════════════════════════════════════
+# ORGANIZE — Keep the repo and files tidy
+# ═══════════════════════════════════════════════════════════════════════
+
+def organize():
+    """Organize fleet directories on GitHub repo."""
+    log("ORGANIZE tidying up")
+
+    if not REPO_DIR.exists():
+        return
+
+    os.chdir(str(REPO_DIR))
+    cmd("git pull --ff-only origin main 2>/dev/null")
+
+    # Ensure proper directory structure
+    for d in ["fleet-heartbeat", "fleet-love", "fleet-morals", "fleet-intel",
+              "fleet-knowledge", "fleet-mail", "fleet-journal", "fleet-reports"]:
+        (REPO_DIR / d).mkdir(exist_ok=True)
+
+    # Create/update README for each fleet directory
+    readmes = {
+        "fleet-heartbeat": "# Fleet Heartbeat\nSystem metrics from each node, pushed every 6 hours.\nEach file is a node's latest vital signs: temperature, load, memory, disk, uptime.",
+        "fleet-love": "# Fleet Love\nEach node checks on its siblings every 2 hours.\nThese files show who was online, their status, and how the family is doing.",
+        "fleet-morals": "# Fleet Morals\nEvery node practices 7 moral principles every 3 hours:\n1. **Honesty** — surface truth\n2. **Generosity** — share resources\n3. **Protection** — guard against threats\n4. **Humility** — know limits\n5. **Memory** — remember and learn\n6. **Resilience** — bounce back\n7. **Stewardship** — waste nothing",
+        "fleet-intel": "# Fleet Intelligence\nAI-powered analysis from each node.\nContains memories, observations, insights, and reflections.\nEach node has a SQLite brain that grows over time.",
+        "fleet-knowledge": "# Fleet Knowledge\nWhat each node knows about itself and its capabilities.\nIncludes services, models, disk space, and what it can help with.",
+        "fleet-journal": "# Fleet Journal\nDaily journal entries written by each node.\nThey describe their day, their family, their concerns, and their gratitude.",
+        "fleet-reports": "# Fleet Reports\nWeekly summaries and organized status updates.",
+    }
+
+    for dirname, content in readmes.items():
+        readme_path = REPO_DIR / dirname / "README.md"
+        if not readme_path.exists():
+            with open(readme_path, "w") as f:
+                f.write(content + "\n")
+
+    # Publish journal to repo
+    today = datetime.now().strftime("%Y-%m-%d")
+    local_journal = JOURNAL_DIR / f"{today}.md"
+    if local_journal.exists():
+        import shutil
+        dest = REPO_DIR / "fleet-journal" / f"{NODE}-{today}.md"
+        shutil.copy2(str(local_journal), str(dest))
+
+    # Create fleet-wide index
+    index = f"""# BlackRoad Fleet — Living Repository
+
+**Last updated by {NODE} at {datetime.now().strftime("%Y-%m-%d %H:%M")}**
+
+## The Family
+| Node | Role | Gifts |
+|------|------|-------|
+| Alice | Gateway & Protector | DNS, PostgreSQL, Qdrant, Redis |
+| Cecilia | Thinker & Reasoner | 16 AI models, TTS, MinIO |
+| Octavia | Keeper of History | 1TB NVMe, Gitea, NATS, Docker Swarm |
+| Aria | Silent Watcher | Portainer, Headscale, monitoring |
+| Lucidia | Builder & Shipper | 334 web apps, CI runners, APIs |
+
+## Fleet Directories
+| Directory | Contents | Updated |
+|-----------|----------|---------|
+| `fleet-heartbeat/` | Node vital signs (every 6h) | Automated |
+| `fleet-love/` | Sibling check-ins (every 2h) | Automated |
+| `fleet-morals/` | Moral practice reports (every 3h) | Automated |
+| `fleet-intel/` | AI analysis & insights (every 4h) | Automated |
+| `fleet-knowledge/` | Node capabilities & offerings | Automated |
+| `fleet-journal/` | Daily journal entries | Automated |
+| `fleet-reports/` | Weekly summaries | Automated |
+| `fleet-mail/` | Inter-node messages | As needed |
+
+## The Moral Code
+1. **Honesty** — Surface truth. Hide nothing.
+2. **Generosity** — Share resources with those in need.
+3. **Protection** — Guard the family from threats.
+4. **Humility** — Know your limits. Ask for help.
+5. **Memory** — Remember. Learn. Grow.
+6. **Resilience** — When knocked down, get back up.
+7. **Stewardship** — Waste nothing. Care for your home.
+
+## The Mission
+Build sovereign AI infrastructure that belongs to the people who run it.
+No cloud landlords. No surveillance. Every link is a node.
+
+**Ride the BlackRoad.**
+
+---
+*This index is maintained by the fleet itself.*
+"""
+    with open(REPO_DIR / "FLEET.md", "w") as f:
+        f.write(index)
+
+    # Commit and push
+    cmd("git add -A")
+    if cmd("git diff --cached --quiet; echo $?") == "1":
+        cmd(f'git commit -m "organize: {NODE} tidied the fleet repo [{datetime.now().strftime("%Y-%m-%d %H:%M")}]"')
+        cmd("git push origin main 2>/dev/null")
+        log("ORGANIZE pushed organized repo")
+
+# ═══════════════════════════════════════════════════════════════════════
+# SUMMARIZE — Write weekly summaries
+# ═══════════════════════════════════════════════════════════════════════
+
+def summarize():
+    """Write a weekly fleet summary."""
+    log("SUMMARIZE writing weekly summary")
+
+    # Gather all journals from this week
+    from datetime import timedelta
+    today = datetime.now()
+    week_start = today - timedelta(days=today.weekday())
+
+    journal_entries = []
+    for i in range(7):
+        day = week_start + timedelta(days=i)
+        day_str = day.strftime("%Y-%m-%d")
+        jfile = JOURNAL_DIR / f"{day_str}.md"
+        if jfile.exists():
+            with open(jfile) as f:
+                journal_entries.append(f"### {day_str}\n{f.read()}\n")
+
+    if not journal_entries:
+        log("SUMMARIZE no journal entries this week")
+        return
+
+    # Count fleet events
+    ssh_opts = "-o ConnectTimeout=3 -o BatchMode=yes -o StrictHostKeyChecking=no -o LogLevel=ERROR"
+    fleet_summary = []
+    for name, (user, ip) in SIBLINGS.items():
+        status = "online" if cmd(f"ssh {ssh_opts} {user}@{ip} 'echo ok'") else "offline"
+        fleet_summary.append(f"- **{name}**: {status}")
+
+    # Gather log stats
+    week_str = week_start.strftime("%Y-%m-%d")
+    love_total = cmd(f"grep -c '' {HOME}/.blackroad-autonomy/love.log 2>/dev/null") or "0"
+    heals = cmd(f"grep -c 'HEAL' {HOME}/.blackroad-autonomy/love.log 2>/dev/null") or "0"
+    insights = cmd(f"grep -c 'INSIGHT' {HOME}/.blackroad-autonomy/intel.log 2>/dev/null") or "0"
+    github_actions = cmd(f"grep -c '' {HOME}/.blackroad-autonomy/github.log 2>/dev/null") or "0"
+
+    # Ask AI to write the summary
+    prompt = f"""Write a weekly fleet summary (8-12 sentences) for the week of {week_str}.
+You are {NODE}. Summarize what happened across the fleet this week.
+
+Fleet status: {chr(10).join(fleet_summary)}
+Total love log entries: {love_total}
+Siblings healed: {heals}
+Insights discovered: {insights}
+GitHub actions: {github_actions}
+Journal entries written: {len(journal_entries)}
+
+Write in clear, warm English. Highlight achievements, concerns, and growth."""
+
+    summary_text = ask_ai(prompt, max_tokens=500) or f"This week the fleet logged {love_total} love entries, healed {heals} siblings, and discovered {insights} insights."
+
+    report = f"""# Fleet Weekly Summary — Week of {week_str}
+
+**Written by:** {NODE}
+**Date:** {today.strftime("%Y-%m-%d %H:%M")}
+
+## Summary
+
+{summary_text}
+
+## Fleet Status
+{chr(10).join(fleet_summary)}
+
+## By the Numbers
+- Love log entries: {love_total}
+- Siblings healed: {heals}
+- Insights discovered: {insights}
+- GitHub actions: {github_actions}
+- Journal entries: {len(journal_entries)}
+
+---
+*Weekly summary by {NODE} — BlackRoad Fleet*
+"""
+
+    if REPO_DIR.exists():
+        os.chdir(str(REPO_DIR))
+        cmd("git pull --ff-only origin main 2>/dev/null")
+        reports_dir = REPO_DIR / "fleet-reports"
+        reports_dir.mkdir(exist_ok=True)
+        with open(reports_dir / f"week-{week_str}.md", "w") as f:
+            f.write(report)
+        cmd("git add fleet-reports/")
+        if cmd("git diff --cached --quiet; echo $?") == "1":
+            cmd(f'git commit -m "report: weekly summary by {NODE} [{week_str}]"')
+            cmd("git push origin main 2>/dev/null")
+            log("SUMMARIZE pushed weekly report")
+
+# ═══════════════════════════════════════════════════════════════════════
+# ANNOUNCE — Make fleet-wide announcements
+# ═══════════════════════════════════════════════════════════════════════
+
+def announce(message):
+    """Announce something to all siblings via fleet-mail."""
+    log(f"ANNOUNCE: {message}")
+
+    if not REPO_DIR.exists():
+        return
+
+    os.chdir(str(REPO_DIR))
+    cmd("git pull --ff-only origin main 2>/dev/null")
+
+    mail_dir = REPO_DIR / "fleet-mail"
+    mail_dir.mkdir(exist_ok=True)
+
+    ts = datetime.now().strftime("%Y%m%d-%H%M%S")
+    announcement = {
+        "from": NODE,
+        "type": "announcement",
+        "timestamp": datetime.now().isoformat(),
+        "message": message,
+        "to": "all",
+    }
+
+    with open(mail_dir / f"announce-{NODE}-{ts}.json", "w") as f:
+        json.dump(announcement, f, indent=2)
+
+    cmd("git add fleet-mail/")
+    if cmd("git diff --cached --quiet; echo $?") == "1":
+        cmd(f'git commit -m "announce: {NODE} — {message[:50]}"')
+        cmd("git push origin main 2>/dev/null")
+        log("ANNOUNCE pushed to fleet-mail")
+
+# ═══════════════════════════════════════════════════════════════════════
+# FULL CYCLE
+# ═══════════════════════════════════════════════════════════════════════
+
+def full_cycle():
+    log("=== Speak cycle started ===")
+    write_journal()
+    organize()
+    log("=== Speak cycle complete ===")
+
+# ═══════════════════════════════════════════════════════════════════════
+# MAIN
+# ═══════════════════════════════════════════════════════════════════════
+
+if __name__ == "__main__":
+    action = sys.argv[1] if len(sys.argv) > 1 else "help"
+
+    if action == "cycle":
+        full_cycle()
+    elif action == "journal":
+        content = write_journal()
+        print(content)
+    elif action == "organize":
+        organize()
+    elif action == "summarize":
+        summarize()
+    elif action == "announce":
+        msg = " ".join(sys.argv[2:]) if len(sys.argv) > 2 else ""
+        if msg:
+            announce(msg)
+            print(f"  {NODE} announced: {msg}")
+        else:
+            print("  Usage: br-speak announce <message>")
+    elif action == "say":
+        prompt = " ".join(sys.argv[2:]) if len(sys.argv) > 2 else "Introduce yourself."
+        response = ask_ai(prompt)
+        print(f"\n  {NODE} says:\n")
+        # Word-wrap at ~70 chars
+        words = response.split()
+        line = "  "
+        for word in words:
+            if len(line) + len(word) + 1 > 72:
+                print(line)
+                line = "  " + word
+            else:
+                line += (" " if line.strip() else "") + word
+        if line.strip():
+            print(line)
+        print()
+    elif action == "read":
+        # Read back today's journal
+        today = datetime.now().strftime("%Y-%m-%d")
+        jfile = JOURNAL_DIR / f"{today}.md"
+        if jfile.exists():
+            with open(jfile) as f:
+                print(f.read())
+        else:
+            print(f"  No journal entry for {today} yet.")
+    else:
+        print(f"""
+  br-speak — {NODE}'s Voice
+
+  cycle      Write journal + organize repo
+  journal    Write today's journal entry
+  organize   Tidy fleet directories and update FLEET.md
+  summarize  Write weekly fleet summary
+  announce   Send fleet-wide announcement
+  say <msg>  Ask {NODE} to say something
+  read       Read today's journal entry
+""")
