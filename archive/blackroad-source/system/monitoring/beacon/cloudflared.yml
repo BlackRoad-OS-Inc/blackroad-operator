@@ -1,0 +1,80 @@
+# Cloudflare Tunnel Configuration
+# https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/configuration/
+
+tunnel: blackroad-beacon
+credentials-file: /etc/cloudflared/credentials.json
+
+# Ingress rules define how traffic is routed
+ingress:
+  # Beacon service
+  - hostname: beacon.blackroad.io
+    service: http://localhost:8080
+    originRequest:
+      noTLSVerify: true
+      connectTimeout: 30s
+      tcpKeepAlive: 30s
+
+  # API Gateway
+  - hostname: api.blackroad.io
+    service: http://localhost:3000
+    originRequest:
+      noTLSVerify: true
+
+  # Prism Console
+  - hostname: prism.blackroad.io
+    service: http://localhost:3001
+    originRequest:
+      noTLSVerify: true
+
+  # WebSocket server
+  - hostname: ws.blackroad.io
+    service: http://localhost:8081
+    originRequest:
+      noTLSVerify: true
+      httpHostHeader: ws.blackroad.io
+
+  # Grafana monitoring
+  - hostname: monitoring.blackroad.io
+    service: http://localhost:3000
+    originRequest:
+      noTLSVerify: true
+
+  # Prometheus metrics (internal)
+  - hostname: metrics.blackroad.io
+    service: http://localhost:9090
+    originRequest:
+      noTLSVerify: true
+      noHappyEyeballs: true
+
+  # Development environment
+  - hostname: dev.blackroad.io
+    service: http://localhost:8080
+    originRequest:
+      noTLSVerify: true
+
+  # Catch-all rule (required)
+  - service: http_status:404
+
+# Logging configuration
+logDirectory: /var/log/cloudflared
+logFile: cloudflared.log
+loglevel: info
+
+# Metrics server
+metrics: 0.0.0.0:2000
+
+# Retries and timeouts
+retries: 5
+grace-period: 30s
+
+# Protocol settings
+protocol: quic
+edge-ip-version: auto
+
+# Proxy settings
+proxy-keepalive-connections: 100
+proxy-keepalive-timeout: 90s
+proxy-connect-timeout: 30s
+
+# TLS configuration
+origin-server-name: blackroad.io

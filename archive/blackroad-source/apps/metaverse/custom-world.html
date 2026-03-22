@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html><head>
+<title>Custom World — BlackRoad Metaverse</title>
+<style>body{margin:0;background:#000;display:flex;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;color:#fff}</style>
+</head><body>
+<div id="game"></div>
+<script src="../sdk/create-world.js"></script>
+<script>
+// Build your own world
+const world = new BlackRoadWorld({
+  name: 'My Custom World',
+  width: 30,
+  height: 20,
+  onClick: (x, y, w) => {
+    // Click to place walls
+    const current = w.getTile(x, y);
+    w.setTile(x, y, current === 1 ? 0 : 1);
+  }
+});
+
+// Add some agents
+world.addAgent({ name: 'Explorer', x: 5, y: 5, behavior: 'wander', dialogue: ['Looking around...', 'Nice world!'] });
+world.addAgent({ name: 'Builder', x: 15, y: 10, behavior: 'wander', dialogue: ['Building...', 'Click to place walls!'] });
+
+world.mount('#game').start();
+</script>
+</body></html>

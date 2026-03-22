@@ -1,0 +1,51 @@
+{
+  "_blackroad": "core/graph/connections.json",
+  "_description": "All inter-service connections in the BlackRoad ecosystem",
+  "cloudflare_bindings": {
+    "d1_databases": {
+      "tollbooth": ["roadpay"],
+      "road-search": ["roadsearch"],
+      "blackroad-auth": ["auth"],
+      "images-blackroad": ["images"],
+      "index-blackroad": ["index"],
+      "analytics-blackroad": ["analytics"]
+    },
+    "kv_namespaces": {
+      "STATS": ["stats", "fleet-api"],
+      "SUBSCRIPTIONS_KV": ["roadpay"],
+      "CHAT_KV": ["roadchat"],
+      "SESSIONS": ["auth"],
+      "AGENTS_KV": ["agents"]
+    },
+    "r2_buckets": {
+      "blackroad-images": ["images"],
+      "blackroad-codex": ["codex"],
+      "blackroad-artifacts": ["deploy"]
+    }
+  },
+  "tunnel_routes": {
+    "alice": {
+      "agent_count": 44,
+      "routes": ["agents", "api", "gateway", "ollama", "dashboard", "chat", "auth", "status", "fleet", "git", "qdrant"]
+    },
+    "octavia": {
+      "services": ["gitea", "nats", "prism", "portal", "roadcode-squad"],
+      "workers_on_node": ["portal:9004", "services:9010", "roadcode-squad:9013", "squad-webhook:9014"]
+    }
+  },
+  "nats_subjects": {
+    "agent.task.*": "orchestrator → supervisors",
+    "agent.result": "supervisors → orchestrator",
+    "agent.heartbeat": "supervisors → orchestrator"
+  },
+  "cron_jobs": {
+    "*/5": ["fleet-collector", "health-monitor", "fleet-coordinator"],
+    "*/15": ["cecilia-sync", "gdrive-setup"],
+    "*/30": ["website-automation", "monorepo-sync"],
+    "0 */6": ["gdrive-rclone", "search-index-rebuild", "ecosystem-stats"],
+    "0 */12": ["do-backup"],
+    "0 3": ["backup-sync", "sovereign-mesh"],
+    "0 6": ["kpi-collection", "nightly-memory-sync"],
+    "0 8": ["daily-report"]
+  }
+}

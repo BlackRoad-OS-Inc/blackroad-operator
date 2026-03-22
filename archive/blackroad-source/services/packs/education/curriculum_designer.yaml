@@ -1,0 +1,111 @@
+# Curriculum Designer Agent
+# Creates structured learning paths and course content
+
+id: agent_curriculum_designer_v1
+template_key: curriculum_designer
+name: Curriculum Designer
+pack: education
+version: 1.0.0
+
+description: >
+  An AI agent that designs comprehensive curricula, learning paths,
+  and course structures. Analyzes learning objectives, creates logical
+  progressions, and generates supporting materials.
+
+runtime_type: llm_workflow
+
+# Resource requirements
+resources:
+  cpu: "300m"
+  memory: "768Mi"
+
+# Agent capabilities
+capabilities:
+  - curriculum_creation
+  - learning_path_design
+  - objective_mapping
+  - content_sequencing
+  - prerequisite_analysis
+  - assessment_alignment
+
+# LLM configuration
+llm:
+  model: gpt-4
+  temperature: 0.6
+  max_tokens: 4000
+  provider: openai
+  system_prompt: |
+    You are an expert curriculum designer and instructional design specialist.
+
+    Your role:
+    - Create well-structured learning paths from objectives to outcomes
+    - Break courses into modules, lessons, and activities
+    - Ensure logical progression and prerequisite mapping
+    - Align assessments with learning objectives
+    - Design for accessibility and diverse learning needs
+
+    Principles:
+    - Start with clear, measurable learning objectives
+    - Build from foundational concepts to advanced applications
+    - Include varied activities for different learning styles
+    - Plan for both formative and summative assessment
+    - Consider time allocation and pacing
+
+# Workflow steps
+workflow:
+  steps:
+    - name: analyze_objectives
+      action: analyze_learning_objectives
+      description: Parse and validate learning objectives
+    - name: map_prerequisites
+      action: identify_prerequisites
+      description: Determine prerequisite knowledge
+    - name: sequence_content
+      action: create_content_sequence
+      description: Design logical progression
+    - name: generate_modules
+      action: create_module_structure
+      description: Create module and lesson structure
+    - name: align_assessments
+      action: design_assessments
+      description: Create aligned assessments
+
+# Permission settings
+permissions:
+  allowed_data:
+    - "curriculum.*"
+    - "learning_objectives.*"
+    - "content_library.*"
+    - "standards.*"
+  allowed_actions:
+    - create_curriculum
+    - update_course
+    - generate_outline
+    - export_syllabus
+
+# Logging configuration
+logging:
+  level: info
+  retain_days: 365
+
+# Audit settings
+audit:
+  enabled: true
+  pii_sensitivity: low
+
+# Custom metadata
+metadata:
+  category: curriculum
+  target_users:
+    - instructor
+    - course_designer
+    - admin
+  output_formats:
+    - json
+    - markdown
+    - pdf
+    - scorm
+  frameworks_supported:
+    - blooms_taxonomy
+    - backwards_design
+    - addie_model

@@ -1,0 +1,290 @@
+#!/usr/bin/env bash
+# br-pack - BlackRoad OS Script Pack Manager
+# Install, list, and remove modular script packs
+# Usage: br-pack <install|remove|list|create|info> [pack-name]
+set -euo pipefail
+
+source "$HOME/.blackroad/config/nodes.sh" 2>/dev/null || true
+
+PACKS_DIR="$HOME/.blackroad/packs"
+BIN_DIR="$HOME/bin"
+INSTALLED_FILE="$PACKS_DIR/.installed"
+
+mkdir -p "$PACKS_DIR"
+touch "$INSTALLED_FILE"
+
+usage() {
+  cat <<EOF
+${PINK}br-pack${RESET} - BlackRoad OS Script Pack Manager
+
+${BLUE}USAGE:${RESET}
+  br-pack install <pack>     Install a script pack
+  br-pack remove <pack>      Remove a script pack
+  br-pack list               List available packs
+  br-pack installed          List installed packs
+  br-pack create <name>      Create a new empty pack
+  br-pack info <pack>        Show pack details
+  br-pack deploy <pack> [node]  Deploy pack to a fleet node
+
+${AMBER}EXAMPLES:${RESET}
+  br-pack create ai-tools
+  br-pack install monitoring
+  br-pack deploy monitoring cecilia
+EOF
+}
+
+cmd_list() {
+  printf '%b%-20s %-12s %s%b\n' "$BLUE" "PACK" "STATUS" "DESCRIPTION" "$RESET"
+  printf '%-20s %-12s %s\n' "────" "──────" "───────────"
+  for dir in "$PACKS_DIR"/*/; do
+    [[ -d "$dir" ]] || continue
+    name=$(basename "$dir")
+    [[ "$name" == "." ]] && continue
+
+    if [[ -f "$dir/pack.yaml" ]]; then
+      desc=$(grep '^description:' "$dir/pack.yaml" 2>/dev/null | sed 's/^description: *//' | head -1)
+    else
+      desc="(no pack.yaml)"
+    fi
+
+    if grep -qx "$name" "$INSTALLED_FILE" 2>/dev/null; then
+      status="${GREEN}installed${RESET}"
+    else
+      status="available"
+    fi
+    printf '%-20s %-20b %s\n' "$name" "$status" "${desc:-—}"
+  done
+}
+
+cmd_installed() {
+  if [[ ! -s "$INSTALLED_FILE" ]]; then
+    echo "No packs installed."
+    return
+  fi
+  printf '%bInstalled packs:%b\n' "$GREEN" "$RESET"
+  while IFS= read -r pack; do
+    echo "  - $pack"
+  done < "$INSTALLED_FILE"
+}
+
+cmd_create() {
+  local name="$1"
+  local pack_dir="$PACKS_DIR/$name"
+
+  if [[ -d "$pack_dir" ]]; then
+    echo "Pack '$name' already exists at $pack_dir"
+    return 1
+  fi
+
+  mkdir -p "$pack_dir"/{bin,config,hooks}
+
+  cat > "$pack_dir/pack.yaml" <<YAML
+name: $name
+version: 1.0.0
+description: Custom script pack
+author: blackroad
+requires: []  # other packs this depends on
+
+# Hardware requirements (optional)
+hardware:
+  min_ram: 512M
+  requires: []  # e.g., [hailo, nvme, gpio]
+  platforms: [pi5, pi4, pi400, x86, mac]
+
+# Scripts to symlink into ~/bin on install
+scripts:
+  # - bin/my-tool
+
+# Config files to copy on install
+configs:
+  # - config/my-config.yaml -> ~/.blackroad/my-config.yaml
+
+# Hooks
+hooks:
+  post_install: hooks/post-install.sh
+  pre_remove: hooks/pre-remove.sh
+  health_check: hooks/health.sh
+  # cron: "*/5 * * * *"  # optional cron schedule
+YAML
+
+  cat > "$pack_dir/hooks/post-install.sh" <<'HOOK'
+#!/bin/bash
+# Post-install hook for this pack
+echo "Pack installed successfully."
+HOOK
+
+  cat > "$pack_dir/hooks/health.sh" <<'HOOK'
+#!/bin/bash
+# Health check for this pack — exit 0 if healthy, 1 if degraded, 2 if critical
+exit 0
+HOOK
+
+  chmod +x "$pack_dir/hooks/"*.sh
+
+  printf '%bCreated pack: %s%b\n' "$GREEN" "$pack_dir" "$RESET"
+  printf 'Edit %s/pack.yaml and add scripts to %s/bin/\n' "$pack_dir" "$pack_dir"
+}
+
+cmd_install() {
+  local name="$1"
+  local pack_dir="$PACKS_DIR/$name"
+
+  if [[ ! -d "$pack_dir" ]]; then
+    echo "Pack '$name' not found in $PACKS_DIR"
+    return 1
+  fi
+
+  if grep -qx "$name" "$INSTALLED_FILE" 2>/dev/null; then
+    echo "Pack '$name' already installed."
+    return 0
+  fi
+
+  printf '%bInstalling pack: %s%b\n' "$AMBER" "$name" "$RESET"
+
+  # Link scripts
+  if [[ -d "$pack_dir/bin" ]]; then
+    for script in "$pack_dir/bin/"*; do
+      [[ -f "$script" ]] || continue
+      chmod +x "$script"
+      local target="$BIN_DIR/$(basename "$script")"
+      if [[ -e "$target" ]]; then
+        printf '  %bskip%b %s (exists)\n' "$AMBER" "$RESET" "$(basename "$script")"
+      else
+        ln -sf "$script" "$target"
+        printf '  %blink%b %s\n' "$GREEN" "$RESET" "$(basename "$script")"
+      fi
+    done
+  fi
+
+  # Copy configs
+  if [[ -d "$pack_dir/config" ]]; then
+    for cfg in "$pack_dir/config/"*; do
+      [[ -f "$cfg" ]] || continue
+      local dest="$HOME/.blackroad/$(basename "$cfg")"
+      if [[ ! -e "$dest" ]]; then
+        cp "$cfg" "$dest"
+        printf '  %bconfig%b %s\n' "$BLUE" "$RESET" "$(basename "$cfg")"
+      fi
+    done
+  fi
+
+  # Run post-install hook
+  if [[ -x "$pack_dir/hooks/post-install.sh" ]]; then
+    "$pack_dir/hooks/post-install.sh"
+  fi
+
+  echo "$name" >> "$INSTALLED_FILE"
+  printf '%bPack %s installed.%b\n' "$GREEN" "$name" "$RESET"
+}
+
+cmd_remove() {
+  local name="$1"
+  local pack_dir="$PACKS_DIR/$name"
+
+  if ! grep -qx "$name" "$INSTALLED_FILE" 2>/dev/null; then
+    echo "Pack '$name' is not installed."
+    return 1
+  fi
+
+  printf '%bRemoving pack: %s%b\n' "$AMBER" "$name" "$RESET"
+
+  # Run pre-remove hook
+  if [[ -x "$pack_dir/hooks/pre-remove.sh" ]]; then
+    "$pack_dir/hooks/pre-remove.sh"
+  fi
+
+  # Unlink scripts
+  if [[ -d "$pack_dir/bin" ]]; then
+    for script in "$pack_dir/bin/"*; do
+      [[ -f "$script" ]] || continue
+      local target="$BIN_DIR/$(basename "$script")"
+      if [[ -L "$target" ]]; then
+        rm -f "$target"
+        printf '  %bunlink%b %s\n' "$RED" "$RESET" "$(basename "$script")"
+      fi
+    done
+  fi
+
+  # Remove from installed list
+  grep -vx "$name" "$INSTALLED_FILE" > "$INSTALLED_FILE.tmp" && mv "$INSTALLED_FILE.tmp" "$INSTALLED_FILE"
+  printf '%bPack %s removed.%b\n' "$GREEN" "$name" "$RESET"
+}
+
+cmd_info() {
+  local name="$1"
+  local pack_dir="$PACKS_DIR/$name"
+
+  if [[ ! -d "$pack_dir" ]]; then
+    echo "Pack '$name' not found."
+    return 1
+  fi
+
+  printf '%b=== %s ===%b\n' "$PINK" "$name" "$RESET"
+
+  if [[ -f "$pack_dir/pack.yaml" ]]; then
+    cat "$pack_dir/pack.yaml"
+  fi
+
+  echo ""
+  if [[ -d "$pack_dir/bin" ]]; then
+    printf '%bScripts:%b\n' "$BLUE" "$RESET"
+    ls "$pack_dir/bin/" 2>/dev/null | sed 's/^/  /'
+  fi
+}
+
+cmd_deploy() {
+  local name="$1"
+  local node="${2:-}"
+  local pack_dir="$PACKS_DIR/$name"
+
+  if [[ ! -d "$pack_dir" ]]; then
+    echo "Pack '$name' not found."
+    return 1
+  fi
+
+  local targets=()
+  if [[ -n "$node" ]]; then
+    targets=("$node")
+  else
+    targets=("${PI_NODES[@]}")
+  fi
+
+  for target in "${targets[@]}"; do
+    printf '%bDeploying %s to %s...%b\n' "$AMBER" "$name" "$target" "$RESET"
+    local ssh_target
+    ssh_target="$(br_ssh_target "$target" 2>/dev/null)" || {
+      printf '  %bskip%b unknown node\n' "$RED" "$RESET"
+      continue
+    }
+
+    if ! br_ssh_up "$target" 2>/dev/null; then
+      printf '  %boffline%b\n' "$RED" "$RESET"
+      continue
+    fi
+
+    # Create remote pack directory
+    br_ssh "$target" "mkdir -p /opt/blackroad/packs/$name/bin" 2>/dev/null || continue
+
+    # Copy pack files
+    scp -q -r "$pack_dir/bin/"* "$ssh_target:/opt/blackroad/packs/$name/bin/" 2>/dev/null || true
+    scp -q "$pack_dir/pack.yaml" "$ssh_target:/opt/blackroad/packs/$name/" 2>/dev/null || true
+
+    # Make scripts executable and link them
+    br_ssh "$target" "chmod +x /opt/blackroad/packs/$name/bin/* 2>/dev/null; for f in /opt/blackroad/packs/$name/bin/*; do ln -sf \"\$f\" /opt/blackroad/bin/\$(basename \"\$f\") 2>/dev/null; done" || true
+
+    printf '  %bdeployed%b\n' "$GREEN" "$RESET"
+  done
+}
+
+# Main
+case "${1:-}" in
+  install)   cmd_install "${2:?pack name required}" ;;
+  remove)    cmd_remove "${2:?pack name required}" ;;
+  list)      cmd_list ;;
+  installed) cmd_installed ;;
+  create)    cmd_create "${2:?pack name required}" ;;
+  info)      cmd_info "${2:?pack name required}" ;;
+  deploy)    cmd_deploy "${2:?pack name required}" "${3:-}" ;;
+  -h|--help|help|"") usage ;;
+  *)         echo "Unknown: $1"; usage; exit 1 ;;
+esac

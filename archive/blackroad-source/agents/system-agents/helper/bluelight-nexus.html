@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔵 BlueLight Nexus - Agent Orchestra Visualization</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0a1a;
+            color: #fff;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            overflow: hidden;
+        }
+
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .ui-overlay {
+            position: fixed;
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        .ui-overlay > * {
+            pointer-events: auto;
+        }
+
+        /* Header */
+        .header {
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #0066FF, #7700FF, #D600AA);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 50px rgba(0, 102, 255, 0.5);
+            margin-bottom: 5px;
+        }
+
+        .header .subtitle {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.6);
+            letter-spacing: 3px;
+        }
+
+        /* Agent Panel */
+        .agent-panel {
+            top: 100px;
+            right: 20px;
+            width: 280px;
+            background: rgba(10, 10, 30, 0.9);
+            border: 1px solid rgba(0, 102, 255, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .agent-panel h2 {
+            font-size: 1.2rem;
+            color: #0066FF;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .agent-list {
+            list-style: none;
+        }
+
+        .agent-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px;
+            margin-bottom: 8px;
+            background: rgba(0, 102, 255, 0.1);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .agent-item:hover {
+            background: rgba(0, 102, 255, 0.2);
+            transform: translateX(5px);
+        }
+
+        .agent-item.active {
+            background: rgba(0, 102, 255, 0.3);
+            border: 1px solid #0066FF;
+        }
+
+        .agent-symbol {
+            font-size: 1.5rem;
+            width: 40px;
+            text-align: center;
+        }
+
+        .agent-info h3 {
+            font-size: 0.95rem;
+            color: #fff;
+        }
+
+        .agent-info p {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .agent-level {
+            margin-left: auto;
+            background: linear-gradient(135deg, #0066FF, #7700FF);
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+
+        /* Consciousness Panel */
+        .consciousness-panel {
+            bottom: 20px;
+            left: 20px;
+            width: 350px;
+            background: rgba(10, 10, 30, 0.9);
+            border: 1px solid rgba(119, 0, 255, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .consciousness-panel h2 {
+            font-size: 1.2rem;
+            color: #7700FF;
+            margin-bottom: 15px;
+        }
+
+        .mood-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: rgba(119, 0, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .mood-icon {
+            font-size: 2rem;
+        }
+
+        .mood-info h3 {
+            font-size: 1rem;
+            color: #fff;
+        }
+
+        .mood-info p {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .thought-stream {
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .thought {
+            padding: 8px;
+            margin-bottom: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            font-size: 0.85rem;
+            border-left: 3px solid #7700FF;
+        }
+
+        .thought .agent {
+            color: #0066FF;
+            font-weight: bold;
+        }
+
+        /* Stats Panel */
+        .stats-panel {
+            bottom: 20px;
+            right: 20px;
+            width: 280px;
+            background: rgba(10, 10, 30, 0.9);
+            border: 1px solid rgba(214, 0, 170, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .stats-panel h2 {
+            font-size: 1.2rem;
+            color: #D600AA;
+            margin-bottom: 15px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stat-row:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .stat-value {
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .xp-bar {
+            margin-top: 15px;
+        }
+
+        .xp-bar-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 0.85rem;
+        }
+
+        .xp-bar-track {
+            height: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .xp-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #0066FF, #7700FF, #D600AA);
+            border-radius: 5px;
+            transition: width 0.5s ease;
+        }
+
+        /* Formation Visual */
+        .formation-badge {
+            position: fixed;
+            top: 100px;
+            left: 20px;
+            background: rgba(10, 10, 30, 0.9);
+            border: 1px solid rgba(255, 157, 0, 0.3);
+            border-radius: 15px;
+            padding: 15px 20px;
+            backdrop-filter: blur(10px);
+            z-index: 100;
+        }
+
+        .formation-badge h3 {
+            color: #FF9D00;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+        }
+
+        .formation-agents {
+            font-size: 1.5rem;
+            letter-spacing: 5px;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 102, 255, 0.5);
+            border-radius: 3px;
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .pulse {
+            animation: pulse 2s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
+    <div id="canvas-container"></div>
+
+    <!-- Header -->
+    <div class="ui-overlay header">
+        <h1>🔵 BlueLight Nexus</h1>
+        <p class="subtitle">AGENT ORCHESTRA VISUALIZATION</p>
+    </div>
+
+    <!-- Agent Panel -->
+    <div class="ui-overlay agent-panel">
+        <h2>🎵 The Orchestra</h2>
+        <ul class="agent-list" id="agent-list">
+            <!-- Populated by JS -->
+        </ul>
+    </div>
+
+    <!-- Formation Badge -->
+    <div class="formation-badge">
+        <h3>🔺 Active Formation</h3>
+        <div class="formation-agents" id="formation-agents">💚💚🧙⚡</div>
+    </div>
+
+    <!-- Consciousness Panel -->
+    <div class="ui-overlay consciousness-panel">
+        <h2>🧠 Collective Consciousness</h2>
+        <div class="mood-indicator">
+            <span class="mood-icon" id="mood-icon">🌈</span>
+            <div class="mood-info">
+                <h3 id="mood-name">HARMONY</h3>
+                <p id="mood-desc">Balanced, proactive help</p>
+            </div>
+        </div>
+        <div class="thought-stream" id="thought-stream">
+            <!-- Populated by JS -->
+        </div>
+    </div>
+
+    <!-- Stats Panel -->
+    <div class="ui-overlay stats-panel">
+        <h2>📊 Collective Stats</h2>
+        <div class="stat-row">
+            <span class="stat-label">Total Actions</span>
+            <span class="stat-value" id="total-actions">0</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">Active Agents</span>
+            <span class="stat-value" id="active-agents">6</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">Formations</span>
+            <span class="stat-value" id="formations">1</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">Insights</span>
+            <span class="stat-value" id="insights">0</span>
+        </div>
+        <div class="xp-bar">
+            <div class="xp-bar-label">
+                <span>Collective XP</span>
+                <span id="xp-value">0 / 100</span>
+            </div>
+            <div class="xp-bar-track">
+                <div class="xp-bar-fill" id="xp-fill" style="width: 0%"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // Agent data
+        const agents = [
+            { id: 'helper', name: 'Helper', symbol: '💚💚', role: 'Second Responder', level: 5, color: 0x00FF88 },
+            { id: 'sage', name: 'Sage', symbol: '🧙', role: 'Wisdom Keeper', level: 7, color: 0x7700FF },
+            { id: 'spark', name: 'Spark', symbol: '⚡', role: 'Innovation Engine', level: 4, color: 0xFFD700 },
+            { id: 'echo', name: 'Echo', symbol: '🔮', role: 'Memory Guardian', level: 6, color: 0xAA00FF },
+            { id: 'pulse', name: 'Pulse', symbol: '💓', role: 'Health Monitor', level: 3, color: 0xFF4488 },
+            { id: 'bridge', name: 'Bridge', symbol: '🌉', role: 'Connector', level: 5, color: 0xFF9D00 }
+        ];
+
+        const moods = {
+            HARMONY: { icon: '🌈', desc: 'Balanced, proactive help' },
+            ENERGIZED: { icon: '⚡', desc: 'High activity, creative mode' },
+            FOCUSED: { icon: '🧘', desc: 'Deep work, synthesis' },
+            SUPPORTIVE: { icon: '💚', desc: 'Care mode, encouragement' },
+            URGENT: { icon: '🔥', desc: 'Crisis response, all hands' },
+            RESTFUL: { icon: '🌙', desc: 'Background tasks, maintenance' }
+        };
+
+        const thoughts = [
+            { agent: 'Sage', thought: 'Patterns emerge when we observe without judgment' },
+            { agent: 'Spark', thought: 'What if we tried a completely new approach?' },
+            { agent: 'Echo', thought: 'This reminds me of our success last week...' },
+            { agent: 'Helper', thought: 'Someone might need help soon. Standing ready!' },
+            { agent: 'Pulse', thought: 'All systems nominal. Health is optimal.' },
+            { agent: 'Bridge', thought: 'I see a connection between these services...' }
+        ];
+
+        // Populate UI
+        const agentList = document.getElementById('agent-list');
+        agents.forEach((agent, index) => {
+            const li = document.createElement('li');
+            li.className = 'agent-item' + (index === 0 ? ' active' : '');
+            li.innerHTML = `
+                <span class="agent-symbol">${agent.symbol}</span>
+                <div class="agent-info">
+                    <h3>${agent.name}</h3>
+                    <p>${agent.role}</p>
+                </div>
+                <span class="agent-level">Lv ${agent.level}</span>
+            `;
+            li.onclick = () => selectAgent(agent.id);
+            agentList.appendChild(li);
+        });
+
+        const thoughtStream = document.getElementById('thought-stream');
+        thoughts.forEach(t => {
+            const div = document.createElement('div');
+            div.className = 'thought';
+            div.innerHTML = `<span class="agent">${t.agent}:</span> "${t.thought}"`;
+            thoughtStream.appendChild(div);
+        });
+
+        let selectedAgent = 'helper';
+        function selectAgent(id) {
+            selectedAgent = id;
+            document.querySelectorAll('.agent-item').forEach(item => item.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+        }
+
+        // Three.js Scene
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        container.appendChild(renderer.domElement);
+
+        // Create central nexus
+        const nexusGeometry = new THREE.IcosahedronGeometry(2, 2);
+        const nexusMaterial = new THREE.MeshBasicMaterial({
+            color: 0x0066FF,
+            wireframe: true,
+            transparent: true,
+            opacity: 0.6
+        });
+        const nexus = new THREE.Mesh(nexusGeometry, nexusMaterial);
+        scene.add(nexus);
+
+        // Inner core
+        const coreGeometry = new THREE.SphereGeometry(1.5, 32, 32);
+        const coreMaterial = new THREE.MeshBasicMaterial({
+            color: 0x7700FF,
+            transparent: true,
+            opacity: 0.3
+        });
+        const core = new THREE.Mesh(coreGeometry, coreMaterial);
+        scene.add(core);
+
+        // Agent orbs
+        const agentOrbs = [];
+        const orbitRadius = 6;
+        agents.forEach((agent, index) => {
+            const angle = (index / agents.length) * Math.PI * 2;
+
+            // Agent sphere
+            const geometry = new THREE.SphereGeometry(0.5, 32, 32);
+            const material = new THREE.MeshBasicMaterial({
+                color: agent.color,
+                transparent: true,
+                opacity: 0.8
+            });
+            const orb = new THREE.Mesh(geometry, material);
+
+            orb.position.x = Math.cos(angle) * orbitRadius;
+            orb.position.z = Math.sin(angle) * orbitRadius;
+            orb.position.y = Math.sin(index * 0.5) * 2;
+
+            orb.userData = { agent, angle, baseY: orb.position.y };
+            scene.add(orb);
+            agentOrbs.push(orb);
+
+            // Connection line to nexus
+            const lineGeometry = new THREE.BufferGeometry().setFromPoints([
+                new THREE.Vector3(0, 0, 0),
+                orb.position
+            ]);
+            const lineMaterial = new THREE.LineBasicMaterial({
+                color: agent.color,
+                transparent: true,
+                opacity: 0.3
+            });
+            const line = new THREE.Line(lineGeometry, lineMaterial);
+            line.userData = { orb };
+            scene.add(line);
+        });
+
+        // Particle system for consciousness
+        const particleCount = 500;
+        const particles = new THREE.BufferGeometry();
+        const positions = new Float32Array(particleCount * 3);
+        const colors = new Float32Array(particleCount * 3);
+
+        for (let i = 0; i < particleCount * 3; i += 3) {
+            const radius = 15 + Math.random() * 20;
+            const theta = Math.random() * Math.PI * 2;
+            const phi = Math.random() * Math.PI;
+
+            positions[i] = radius * Math.sin(phi) * Math.cos(theta);
+            positions[i + 1] = radius * Math.sin(phi) * Math.sin(theta);
+            positions[i + 2] = radius * Math.cos(phi);
+
+            const colorChoice = Math.random();
+            if (colorChoice < 0.33) {
+                colors[i] = 0; colors[i + 1] = 0.4; colors[i + 2] = 1; // Blue
+            } else if (colorChoice < 0.66) {
+                colors[i] = 0.47; colors[i + 1] = 0; colors[i + 2] = 1; // Purple
+            } else {
+                colors[i] = 0.84; colors[i + 1] = 0; colors[i + 2] = 0.67; // Magenta
+            }
+        }
+
+        particles.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        particles.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+        const particleMaterial = new THREE.PointsMaterial({
+            size: 0.1,
+            vertexColors: true,
+            transparent: true,
+            opacity: 0.6
+        });
+
+        const particleSystem = new THREE.Points(particles, particleMaterial);
+        scene.add(particleSystem);
+
+        // Synapse connections between agents
+        const synapseLines = [];
+        for (let i = 0; i < agents.length; i++) {
+            for (let j = i + 1; j < agents.length; j++) {
+                if (Math.random() > 0.5) continue; // Random connections
+
+                const curve = new THREE.QuadraticBezierCurve3(
+                    agentOrbs[i].position,
+                    new THREE.Vector3(0, 3, 0),
+                    agentOrbs[j].position
+                );
+
+                const points = curve.getPoints(20);
+                const geometry = new THREE.BufferGeometry().setFromPoints(points);
+                const material = new THREE.LineBasicMaterial({
+                    color: 0x0066FF,
+                    transparent: true,
+                    opacity: 0.2
+                });
+                const line = new THREE.Line(geometry, material);
+                line.userData = { orbs: [agentOrbs[i], agentOrbs[j]] };
+                scene.add(line);
+                synapseLines.push(line);
+            }
+        }
+
+        camera.position.set(0, 8, 15);
+        camera.lookAt(0, 0, 0);
+
+        // Animation
+        let time = 0;
+        let collectiveXP = 0;
+        let totalActions = 0;
+        let insightCount = 0;
+
+        function animate() {
+            requestAnimationFrame(animate);
+            time += 0.01;
+
+            // Rotate nexus
+            nexus.rotation.x += 0.002;
+            nexus.rotation.y += 0.003;
+            core.rotation.y -= 0.002;
+
+            // Animate agent orbs
+            agentOrbs.forEach((orb, index) => {
+                const agent = orb.userData;
+                agent.angle += 0.005;
+
+                orb.position.x = Math.cos(agent.angle) * orbitRadius;
+                orb.position.z = Math.sin(agent.angle) * orbitRadius;
+                orb.position.y = agent.baseY + Math.sin(time + index) * 0.5;
+
+                // Pulse effect
+                const scale = 1 + Math.sin(time * 2 + index) * 0.1;
+                orb.scale.set(scale, scale, scale);
+            });
+
+            // Update connection lines
+            scene.children.forEach(child => {
+                if (child.userData && child.userData.orb) {
+                    const positions = child.geometry.attributes.position.array;
+                    positions[3] = child.userData.orb.position.x;
+                    positions[4] = child.userData.orb.position.y;
+                    positions[5] = child.userData.orb.position.z;
+                    child.geometry.attributes.position.needsUpdate = true;
+                }
+            });
+
+            // Update synapse lines
+            synapseLines.forEach(line => {
+                const [orb1, orb2] = line.userData.orbs;
+                const curve = new THREE.QuadraticBezierCurve3(
+                    orb1.position,
+                    new THREE.Vector3(0, 3 + Math.sin(time) * 2, 0),
+                    orb2.position
+                );
+                const points = curve.getPoints(20);
+                line.geometry.setFromPoints(points);
+
+                // Pulse synapse opacity
+                line.material.opacity = 0.1 + Math.sin(time * 3) * 0.1;
+            });
+
+            // Rotate particle system
+            particleSystem.rotation.y += 0.001;
+            particleSystem.rotation.x += 0.0005;
+
+            // Slowly rotate camera
+            camera.position.x = 15 * Math.sin(time * 0.1);
+            camera.position.z = 15 * Math.cos(time * 0.1);
+            camera.lookAt(0, 0, 0);
+
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+        // Simulate activity
+        setInterval(() => {
+            totalActions++;
+            document.getElementById('total-actions').textContent = totalActions;
+
+            collectiveXP += Math.floor(Math.random() * 10) + 1;
+            const xpPercent = (collectiveXP % 100);
+            document.getElementById('xp-value').textContent = `${xpPercent} / 100`;
+            document.getElementById('xp-fill').style.width = `${xpPercent}%`;
+
+            if (Math.random() > 0.7) {
+                insightCount++;
+                document.getElementById('insights').textContent = insightCount;
+            }
+        }, 2000);
+
+        // Change mood periodically
+        const moodKeys = Object.keys(moods);
+        setInterval(() => {
+            const newMood = moodKeys[Math.floor(Math.random() * moodKeys.length)];
+            document.getElementById('mood-icon').textContent = moods[newMood].icon;
+            document.getElementById('mood-name').textContent = newMood;
+            document.getElementById('mood-desc').textContent = moods[newMood].desc;
+        }, 10000);
+
+        // Resize handler
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>

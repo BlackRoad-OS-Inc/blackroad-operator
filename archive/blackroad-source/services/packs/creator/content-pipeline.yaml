@@ -1,0 +1,159 @@
+# 🎬 Content Pipeline Workflow
+# Defines the standard flow for content creation: ideation → draft → review → approve → publish → measure
+
+name: content-pipeline
+description: |
+  Standard content creation workflow for all content types including
+  posts, threads, videos, emails, landing pages, and decks.
+version: "1.0.0"
+
+# 🧬 Supported content types
+content_types:
+  - post
+  - thread
+  - video
+  - email
+  - landing_page
+  - deck
+  - article
+  - newsletter
+
+# 🔁 Workflow states
+states:
+  - id: ideation
+    name: Ideation
+    description: Brainstorm, research, and outline the content concept
+    allowed_roles:
+      - creator
+      - strategist
+    allowed_agents:
+      - copy-helper
+    next_states:
+      - draft
+
+  - id: draft
+    name: Draft
+    description: Create the initial content draft
+    allowed_roles:
+      - creator
+      - writer
+    allowed_agents:
+      - copy-helper
+      - repurposer
+    next_states:
+      - review
+      - ideation  # Can go back for rework
+
+  - id: review
+    name: Review
+    description: Editorial and peer review of the draft
+    allowed_roles:
+      - editor
+      - reviewer
+      - peer
+    allowed_agents: []  # Human review only
+    next_states:
+      - approve
+      - draft  # Request revisions
+
+  - id: approve
+    name: Approve
+    description: Stakeholder sign-off before publishing
+    allowed_roles:
+      - approver
+      - manager
+      - legal  # Required for high-risk content
+      - brand  # Required for brand-sensitive content
+    allowed_agents: []  # Human approval only
+    next_states:
+      - publish
+      - review  # Request additional review
+
+  - id: publish
+    name: Publish
+    description: Deploy content to target channel(s)
+    allowed_roles:
+      - publisher
+      - ops
+    allowed_agents:
+      - calendar-bot
+    next_states:
+      - measure
+
+  - id: measure
+    name: Measure
+    description: Track content performance and metrics
+    allowed_roles:
+      - analyst
+      - strategist
+    allowed_agents:
+      - repurposer  # Suggest repurposing based on performance
+    next_states:
+      - archive
+      - ideation  # Create follow-up content
+
+  - id: archive
+    name: Archive
+    description: Store content for future reference and learning
+    allowed_roles:
+      - archivist
+      - ops
+    allowed_agents: []
+    next_states: []  # Terminal state
+
+# ⚠️ Required approvals by content risk level
+approval_requirements:
+  standard:
+    required_roles:
+      - editor
+      - approver
+    
+  high_risk:
+    # // HIGH-RISK CAMPAIGN FLOW – LEGAL/BRAND APPROVAL REQUIRED
+    required_roles:
+      - editor
+      - legal
+      - brand
+      - approver
+    triggers:
+      - contains_financial_claims
+      - contains_legal_statements
+      - contains_medical_info
+      - contains_policy_positions
+      - external_partnership
+
+# 📊 Metrics tracked
+metrics:
+  - views
+  - engagement_rate
+  - click_through_rate
+  - conversion_rate
+  - shares
+  - comments
+  - sentiment_score
+
+# 🔗 Integration hooks
+integrations:
+  brand:
+    source: blackroad-os-brand
+    fields:
+      - colors
+      - logos
+      - typography
+      - voice_and_tone
+  
+  archive:
+    target: blackroad-os-archive
+    on_state: archive
+    data:
+      - artifact_id
+      - performance_snapshot
+      - timestamps
+  
+  dashboard:
+    target: blackroad-os-prism-console
+    on_state: publish
+    data:
+      - artifact_metadata
+      - channel_assignments
+      - scheduled_dates

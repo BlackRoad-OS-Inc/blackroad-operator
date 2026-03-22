@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Team - BlackRoad</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --gray-950: #000000;
+            --gray-900: #0a0a0a;
+            --gray-800: #1a1a1a;
+            --gray-700: #404040;
+            --gray-600: #525252;
+            --gray-500: #737373;
+            --gray-400: #a3a3a3;
+            --gray-300: #d4d4d4;
+            --gray-100: #f5f5f5;
+            --accent-1: #ff8700;
+            --accent-3: #ff0087;
+            --accent-6: #1e90ff;
+            --success: #22c55e;
+            --radius-md: 6px;
+            --radius-lg: 8px;
+            --radius-xl: 12px;
+            --radius-2xl: 16px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--gray-950);
+            color: var(--gray-300);
+            line-height: 1.6;
+        }
+
+        /* Navigation */
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 1rem 2rem;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--gray-800);
+            z-index: 100;
+        }
+
+        .nav-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            font-size: 1.25rem;
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-3));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: var(--gray-400);
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover { color: var(--gray-100); }
+
+        /* Hero */
+        .hero {
+            padding: 10rem 2rem 6rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 40%, rgba(255,135,0,0.08) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 60%, rgba(255,0,135,0.06) 0%, transparent 50%);
+            animation: drift 30s ease-in-out infinite;
+        }
+
+        @keyframes drift {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(-3%, -3%); }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hero h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: var(--gray-100);
+            margin-bottom: 1rem;
+            letter-spacing: -1px;
+        }
+
+        .hero h1 span {
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-3));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--gray-400);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Stats */
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 4rem;
+            padding: 3rem 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-3));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--gray-500);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Section */
+        .section {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .section-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--gray-100);
+            margin-bottom: 0.5rem;
+        }
+
+        .section-subtitle {
+            color: var(--gray-500);
+        }
+
+        /* Team Grid */
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .team-card {
+            background: var(--gray-900);
+            border: 1px solid var(--gray-800);
+            border-radius: var(--radius-2xl);
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .team-card:hover {
+            border-color: var(--gray-700);
+            transform: translateY(-4px);
+        }
+
+        .avatar {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 1.5rem;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-3));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: white;
+            position: relative;
+        }
+
+        .avatar::after {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            border: 2px solid var(--gray-800);
+        }
+
+        .team-card:hover .avatar::after {
+            border-color: var(--accent-1);
+        }
+
+        .team-name {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--gray-100);
+            margin-bottom: 0.25rem;
+        }
+
+        .team-role {
+            color: var(--accent-1);
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+        }
+
+        .team-bio {
+            font-size: 0.875rem;
+            color: var(--gray-400);
+            margin-bottom: 1.5rem;
+        }
+
+        .team-socials {
+            display: flex;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+
+        .social-link {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--gray-800);
+            border-radius: var(--radius-md);
+            color: var(--gray-400);
+            transition: all 0.2s;
+        }
+
+        .social-link:hover {
+            background: var(--accent-1);
+            color: white;
+        }
+
+        .social-link svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* Leadership */
+        .leadership-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .leader-card {
+            background: var(--gray-900);
+            border: 1px solid var(--gray-800);
+            border-radius: var(--radius-2xl);
+            padding: 2rem;
+            display: flex;
+            gap: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .leader-card:hover {
+            border-color: var(--accent-1);
+        }
+
+        .leader-avatar {
+            width: 100px;
+            height: 100px;
+            flex-shrink: 0;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-3));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .leader-info {
+            flex: 1;
+        }
+
+        .leader-name {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--gray-100);
+            margin-bottom: 0.25rem;
+        }
+
+        .leader-title {
+            color: var(--accent-1);
+            font-size: 0.875rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .leader-bio {
+            font-size: 0.875rem;
+            color: var(--gray-400);
+        }
+
+        /* Values */
+        .values-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .value-card {
+            background: var(--gray-900);
+            border: 1px solid var(--gray-800);
+            border-radius: var(--radius-xl);
+            padding: 2rem;
+            transition: all 0.2s;
+        }
+
+        .value-card:hover {
+            border-color: var(--gray-700);
+        }
+
+        .value-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, rgba(255,135,0,0.1), rgba(255,0,135,0.1));
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .value-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--gray-100);
+            margin-bottom: 0.5rem;
+        }
+
+        .value-description {
+            font-size: 0.875rem;
+            color: var(--gray-400);
+        }
+
+        /* Join CTA */
+        .join-cta {
+            background: linear-gradient(135deg, rgba(255,135,0,0.1), rgba(255,0,135,0.1));
+            border: 1px solid rgba(255,135,0,0.2);
+            border-radius: var(--radius-2xl);
+            padding: 4rem;
+            text-align: center;
+            margin-top: 4rem;
+        }
+
+        .join-cta h2 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--gray-100);
+            margin-bottom: 0.5rem;
+        }
+
+        .join-cta p {
+            color: var(--gray-400);
+            margin-bottom: 2rem;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.875rem 2rem;
+            border-radius: var(--radius-md);
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-3));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(255,135,0,0.3);
+        }
+
+        .open-positions {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .position-tag {
+            padding: 0.5rem 1rem;
+            background: var(--gray-800);
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            color: var(--gray-300);
+        }
+
+        /* Footer */
+        .footer {
+            padding: 3rem 2rem;
+            border-top: 1px solid var(--gray-800);
+            text-align: center;
+        }
+
+        .footer-text {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--gray-600);
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.5rem; }
+            .stats { flex-direction: column; gap: 2rem; }
+            .leader-card { flex-direction: column; text-align: center; }
+            .leadership-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-content">
+            <a href="#" class="logo">BlackRoad</a>
+            <div class="nav-links">
+                <a href="#">Products</a>
+                <a href="#">Docs</a>
+                <a href="#">Pricing</a>
+                <a href="#">Blog</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Meet the <span>Team</span></h1>
+            <p>We're a distributed team of engineers, designers, and dreamers building the future of cloud infrastructure.</p>
+        </div>
+    </section>
+
+    <!-- Stats -->
+    <div class="stats">
+        <div class="stat">
+            <div class="stat-value">42</div>
+            <div class="stat-label">Team Members</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value">15</div>
+            <div class="stat-label">Countries</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value">8</div>
+            <div class="stat-label">Time Zones</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value">100%</div>
+            <div class="stat-label">Remote</div>
+        </div>
+    </div>
+
+    <!-- Leadership -->
+    <section class="section">
+        <div class="section-header">
+            <h2 class="section-title">Leadership</h2>
+            <p class="section-subtitle">The visionaries guiding our mission</p>
+        </div>
+
+        <div class="leadership-grid">
+            <div class="leader-card">
+                <div class="leader-avatar">AM</div>
+                <div class="leader-info">
+                    <h3 class="leader-name">Alexa Mundson</h3>
+                    <div class="leader-title">Founder & CEO</div>
+                    <p class="leader-bio">Previously built distributed systems at Cloudflare. Passionate about making infrastructure accessible to everyone.</p>
+                </div>
+            </div>
+            <div class="leader-card">
+                <div class="leader-avatar">SK</div>
+                <div class="leader-info">
+                    <h3 class="leader-name">Sarah Kim</h3>
+                    <div class="leader-title">CTO</div>
+                    <p class="leader-bio">15 years of engineering leadership. Former principal engineer at AWS, building the next generation of edge computing.</p>
+                </div>
+            </div>
+            <div class="leader-card">
+                <div class="leader-avatar">MR</div>
+                <div class="leader-info">
+                    <h3 class="leader-name">Marcus Rodriguez</h3>
+                    <div class="leader-title">VP Engineering</div>
+                    <p class="leader-bio">Scaled engineering teams from 5 to 500. Obsessed with developer experience and shipping fast.</p>
+                </div>
+            </div>
+            <div class="leader-card">
+                <div class="leader-avatar">JC</div>
+                <div class="leader-info">
+                    <h3 class="leader-name">Julia Chen</h3>
+                    <div class="leader-title">VP Design</div>
+                    <p class="leader-bio">Design leader with a background in fintech. Believes great design should be invisible.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Engineering Team -->
+    <section class="section">
+        <div class="section-header">
+            <h2 class="section-title">Engineering</h2>
+            <p class="section-subtitle">The builders making it all work</p>
+        </div>
+
+        <div class="team-grid">
+            <div class="team-card">
+                <div class="avatar">DL</div>
+                <h3 class="team-name">David Lee</h3>
+                <div class="team-role">Staff Engineer, Runtime</div>
+                <p class="team-bio">Building the core runtime that powers millions of requests per second.</p>
+                <div class="team-socials">
+                    <a href="#" class="social-link">
+                        <svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                    </a>
+                    <a href="#" class="social-link">
+                        <svg fill="currentColor" viewBox="0 0 24 24"><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/></svg>
+                    </a>
+                </div>
+            </div>
+
+            <div class="team-card">
+                <div class="avatar">EP</div>
+                <h3 class="team-name">Emma Patel</h3>
+                <div class="team-role">Senior Engineer, Edge</div>
+                <p class="team-bio">Optimizing latency at the edge. Previously at Fastly.</p>
+                <div class="team-socials">
+                    <a href="#" class="social-link">
+                        <svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                    </a>
+                </div>
+            </div>
+
+            <div class="team-card">
+                <div class="avatar">TW</div>
+                <h3 class="team-name">Tyler Wilson</h3>
+                <div class="team-role">Senior Engineer, Platform</div>
+                <p class="team-bio">Making deployments feel like magic. Kubernetes whisperer.</p>
+                <div class="team-socials">
+                    <a href="#" class="social-link">
+                        <svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                    </a>
+                </div>
+            </div>
+
+            <div class="team-card">
+                <div class="avatar">AN</div>
+                <h3 class="team-name">Aisha Nakamura</h3>
+                <div class="team-role">Engineer, Security</div>
+                <p class="team-bio">Keeping your data safe. Bug bounty hunter turned defender.</p>
+                <div class="team-socials">
+                    <a href="#" class="social-link">
+                        <svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Values -->
+    <section class="section">
+        <div class="section-header">
+            <h2 class="section-title">Our Values</h2>
+            <p class="section-subtitle">What drives us every day</p>
+        </div>
+
+        <div class="values-grid">
+            <div class="value-card">
+                <div class="value-icon">&#128640;</div>
+                <h3 class="value-title">Ship Fast</h3>
+                <p class="value-description">We believe in rapid iteration and learning from real users. Perfect is the enemy of shipped.</p>
+            </div>
+            <div class="value-card">
+                <div class="value-icon">&#127760;</div>
+                <h3 class="value-title">Think Global</h3>
+                <p class="value-description">Our infrastructure spans the globe. We build for users everywhere, not just one region.</p>
+            </div>
+            <div class="value-card">
+                <div class="value-icon">&#129309;</div>
+                <h3 class="value-title">Stay Humble</h3>
+                <p class="value-description">The best ideas can come from anywhere. We listen more than we speak.</p>
+            </div>
+            <div class="value-card">
+                <div class="value-icon">&#128274;</div>
+                <h3 class="value-title">Secure by Default</h3>
+                <p class="value-description">Security isn't a feature, it's a foundation. We bake it into everything we build.</p>
+            </div>
+        </div>
+
+        <!-- Join CTA -->
+        <div class="join-cta">
+            <h2>Join the Team</h2>
+            <p>We're always looking for talented people who want to build the future of infrastructure with us.</p>
+            <a href="#" class="btn btn-primary">
+                View Open Positions
+                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+            </a>
+            <div class="open-positions">
+                <span class="position-tag">Senior Engineer, Rust</span>
+                <span class="position-tag">Product Designer</span>
+                <span class="position-tag">DevRel Engineer</span>
+                <span class="position-tag">SRE Lead</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p class="footer-text">BlackRoad &middot; 2026</p>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="refresh" content="30">
+  <title>BlackRoad Pi Fleet Monitor</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #000;
+      color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", monospace;
+      padding: 2rem;
+    }
+    h1 { font-size: 1.5rem; margin-bottom: 0.25rem; }
+    .subtitle { color: #666; font-size: 0.85rem; margin-bottom: 2rem; }
+    .gradient-text {
+      background: linear-gradient(135deg, #F5A623 0%, #FF1D6C 38.2%, #9C27B0 61.8%, #2979FF 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; }
+    .card {
+      background: #111;
+      border: 1px solid #222;
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+    .card-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; }
+    .node-name { font-size: 1.1rem; font-weight: 700; }
+    .node-ip { color: #666; font-size: 0.8rem; }
+    .badge { padding: 0.2rem 0.6rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+    .online { background: #0a2e1a; color: #22c55e; }
+    .offline { background: #2e0a0a; color: #ef4444; }
+    .metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+    .metric { background: #1a1a1a; border-radius: 8px; padding: 0.75rem; }
+    .metric-label { color: #666; font-size: 0.7rem; text-transform: uppercase; margin-bottom: 0.25rem; }
+    .metric-value { font-size: 1.5rem; font-weight: 700; color: #F5A623; }
+    .bar-wrap { background: #222; border-radius: 4px; height: 6px; margin-top: 0.5rem; overflow: hidden; }
+    .bar { height: 100%; background: linear-gradient(90deg, #F5A623, #FF1D6C); border-radius: 4px; transition: width 0.5s; }
+    .footer { margin-top: 2rem; color: #333; font-size: 0.75rem; text-align: center; }
+  </style>
+</head>
+<body>
+  <h1>🍓 <span class="gradient-text">BlackRoad Pi Fleet Monitor</span></h1>
+  <p class="subtitle">Autonomous world-generating Raspberry Pi nodes · Auto-refreshes every 30s</p>
+
+  <div class="grid" id="fleet"></div>
+
+  <div class="footer">
+    BlackRoad OS, Inc. · Last update: <span id="ts"></span>
+  </div>
+
+  <script>
+    const NODES = [
+      { name: "aria64", ip: "192.168.4.38", role: "Primary (22500 agents)", statusPort: 8182 },
+      { name: "alice",  ip: "192.168.4.49", role: "Secondary",              statusPort: 8184 },
+    ];
+
+    const FLEET_API = "/api/fleet"; // Proxied through blackroad-web
+
+    async function fetchFleet() {
+      try {
+        const res = await fetch(FLEET_API);
+        return await res.json();
+      } catch {
+        return { nodes: NODES.map(n => ({ ...n, online: false })) };
+      }
+    }
+
+    function renderCard(node) {
+      const online = node.online !== false;
+      const cpu = parseInt(node.cpu) || 0;
+      const worlds = node.worlds || 0;
+      return `
+        <div class="card">
+          <div class="card-header">
+            <span style="font-size:2rem">🍓</span>
+            <div>
+              <div class="node-name">${node.name}</div>
+              <div class="node-ip">${node.ip || ""} · ${node.role || ""}</div>
+            </div>
+            <span class="badge ${online ? "online" : "offline"}" style="margin-left:auto">
+              ${online ? "ONLINE" : "OFFLINE"}
+            </span>
+          </div>
+          <div class="metrics">
+            <div class="metric">
+              <div class="metric-label">Worlds Generated</div>
+              <div class="metric-value" style="color:#F5A623">${worlds}</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">Model</div>
+              <div class="metric-value" style="font-size:0.8rem;color:#ccc;padding-top:0.5rem">${node.model || "—"}</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">CPU Usage</div>
+              <div class="metric-value" style="color:#FF1D6C">${node.cpu || "—"}</div>
+              <div class="bar-wrap"><div class="bar" style="width:${cpu}%"></div></div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">Disk Free</div>
+              <div class="metric-value" style="color:#9C27B0;font-size:1rem;padding-top:0.4rem">${node.disk || "—"}</div>
+            </div>
+          </div>
+        </div>`;
+    }
+
+    async function render() {
+      const data = await fetchFleet();
+      const nodes = data.nodes || NODES;
+      document.getElementById("fleet").innerHTML = nodes.map(renderCard).join("");
+      document.getElementById("ts").textContent = new Date().toLocaleString();
+    }
+
+    render();
+    setInterval(render, 30000);
+  </script>
+</body>
+</html>

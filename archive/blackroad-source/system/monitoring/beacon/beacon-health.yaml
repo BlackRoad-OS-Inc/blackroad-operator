@@ -1,0 +1,32 @@
+# Warp Workflow: BlackRoad Beacon Health Check
+# https://docs.warp.dev/features/workflows
+
+name: Beacon Health Check
+description: Check health of all BlackRoad services via beacon
+tags:
+  - blackroad
+  - health
+  - monitoring
+author: BlackRoad OS
+version: 1.0.0
+
+# Arguments that can be passed to the workflow
+arguments:
+  - name: environment
+    description: Environment to check (prod, staging, dev)
+    default_value: prod
+
+# The command sequence
+command: |
+  echo "Checking BlackRoad Beacon health..."
+
+  # Check beacon service
+  curl -s https://beacon.blackroad.io/health | jq .
+
+  # Get all services status
+  echo "\nService Status:"
+  curl -s https://beacon.blackroad.io/beacon | jq '.services[] | {service: .service, status: .status, latency: .latency_ms}'
+
+  # Recent deployments
+  echo "\nRecent Deployments:"
+  curl -s https://beacon.blackroad.io/deploys?limit=5 | jq '.deploys[] | {service: .service, env: .env, outcome: .outcome, actor: .actor}'

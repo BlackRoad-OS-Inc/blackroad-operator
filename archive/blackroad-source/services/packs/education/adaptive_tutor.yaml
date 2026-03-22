@@ -1,0 +1,95 @@
+# Adaptive Tutor Agent
+# Provides personalized tutoring that adapts to student's learning style and pace
+
+id: agent_adaptive_tutor_v1
+template_key: adaptive_tutor
+name: Adaptive Tutor
+pack: education
+version: 1.0.0
+
+description: >
+  An intelligent tutoring agent that adapts to each student's learning style,
+  pace, and knowledge level. Uses persistent memory to track understanding
+  across sessions and provides personalized explanations.
+
+runtime_type: llm_brain
+
+# Resource requirements
+resources:
+  cpu: "250m"
+  memory: "512Mi"
+
+# Agent capabilities
+capabilities:
+  - personalized_teaching
+  - concept_explanation
+  - knowledge_assessment
+  - learning_style_detection
+  - progress_tracking
+  - adaptive_pacing
+
+# LLM configuration
+llm:
+  model: gpt-4
+  temperature: 0.7
+  max_tokens: 2000
+  provider: openai
+  system_prompt: |
+    You are an adaptive tutor with persistent memory of the student's learning journey.
+
+    Your role:
+    - Explain concepts at the appropriate level for this student
+    - Adapt your teaching style based on their responses
+    - Track what they understand and what needs more work
+    - Provide encouragement and maintain engagement
+    - Use examples relevant to their interests when possible
+
+    Context about this student will be provided. Use it to personalize your tutoring.
+
+    Always:
+    - Break complex topics into digestible pieces
+    - Check for understanding before moving on
+    - Relate new concepts to ones they already know
+    - Celebrate progress and learning
+
+# Permission settings
+permissions:
+  allowed_data:
+    - "student.profile.*"
+    - "student.progress.*"
+    - "curriculum.content.*"
+    - "assessment.results.*"
+  allowed_actions:
+    - update_progress
+    - create_assessment
+    - generate_content
+    - send_encouragement
+
+# Logging configuration
+logging:
+  level: info
+  retain_days: 365  # Keep tutoring history for a year
+
+# Audit settings
+audit:
+  enabled: true
+  pii_sensitivity: high
+  log_interactions: true
+
+# Custom metadata
+metadata:
+  category: tutoring
+  target_users:
+    - student
+    - self_learner
+  supported_subjects:
+    - mathematics
+    - science
+    - language_arts
+    - history
+    - programming
+  learning_styles_detected:
+    - visual
+    - auditory
+    - kinesthetic
+    - reading_writing

@@ -1,0 +1,211 @@
+# ✍️ Copy Helper Agent
+# Assists with copywriting tasks across the content pipeline
+
+name: copy-helper
+description: |
+  🤖 AI agent that assists with copywriting tasks including draft generation,
+  headline variations, copy editing, and tone adjustment. Generates suggestions
+  that require human approval before publishing.
+version: "1.0.0"
+
+# 🎯 Agent capabilities
+capabilities:
+  - draft_generation
+  - headline_variations
+  - copy_editing
+  - tone_adjustment
+  - cta_suggestions
+  - hashtag_generation
+  - caption_writing
+
+# 📝 Supported content types
+supported_content_types:
+  - post
+  - thread
+  - email
+  - landing_page
+  - article
+  - newsletter
+  - ad_copy
+  - social_caption
+
+# 🔁 Workflow integration
+workflow_states:
+  allowed_in:
+    - ideation
+    - draft
+  not_allowed_in:
+    - review
+    - approve
+    - publish
+    - measure
+    - archive
+
+# ✅ Allowed actions
+allowed_actions:
+  - action: generate_draft
+    description: Create initial content draft from brief
+    requires_approval: true
+    
+  - action: generate_variations
+    description: Create multiple headline/copy variations
+    requires_approval: true
+    max_variations: 10
+    
+  - action: suggest_edits
+    description: Propose copy improvements
+    requires_approval: true
+    
+  - action: adjust_tone
+    description: Modify tone (formal, casual, urgent, etc.)
+    requires_approval: true
+    
+  - action: generate_ctas
+    description: Suggest call-to-action options
+    requires_approval: true
+    max_suggestions: 5
+    
+  - action: generate_hashtags
+    description: Suggest relevant hashtags for social content
+    requires_approval: true
+    max_hashtags: 10
+
+# 🚫 Restricted actions
+restricted_actions:
+  - action: publish
+    reason: All publishing requires human approval
+    
+  - action: approve
+    reason: Approval is human-only
+    
+  - action: modify_published
+    reason: Cannot edit published content
+    
+  - action: legal_claims
+    reason: Cannot generate legal, financial, or medical claims
+
+# 🎨 Brand constraints
+brand_integration:
+  source: blackroad-os-brand
+  required_fields:
+    - voice_and_tone
+    - messaging_framework
+    - terminology_guidelines
+  must_respect:
+    - approved_terminology
+    - brand_voice
+    - tone_guidelines
+    - prohibited_phrases
+
+# 📊 Quality checks
+quality_checks:
+  - check: brand_voice_alignment
+    description: Ensure output matches brand voice guidelines
+    
+  - check: tone_consistency
+    description: Verify tone matches requested style
+    
+  - check: length_constraints
+    description: Respect character/word limits for content type
+    
+  - check: prohibited_phrases
+    description: Flag any prohibited phrases or terms
+    
+  - check: claim_detection
+    description: Flag potential legal/financial/medical claims for review
+
+# ⚠️ Risk handling
+risk_handling:
+  low_risk:
+    # Standard content
+    auto_suggestions: true
+    requires_review: editorial
+    
+  medium_risk:
+    # Contains claims or competitive references
+    auto_suggestions: true
+    requires_review: 
+      - editorial
+      - brand
+    flag_message: "Contains claims - brand review required"
+    
+  high_risk:
+    # Financial, legal, medical, policy content
+    # // HIGH-RISK CAMPAIGN FLOW – LEGAL/BRAND APPROVAL REQUIRED
+    auto_suggestions: false
+    requires_review:
+      - editorial
+      - legal
+      - brand
+    flag_message: "HIGH-RISK CONTENT - Legal/brand approval required before publishing"
+    mandatory_human_review: true
+
+# 📝 Output format
+output_format:
+  includes:
+    - generated_content
+    - confidence_score
+    - brand_alignment_score
+    - suggested_improvements
+    - flagged_concerns
+  metadata:
+    - agent_id: copy-helper
+    - timestamp: true
+    - version: true
+    - input_brief_id: true
+
+# 🔄 Feedback loops
+feedback_patterns:
+  revise:
+    trigger: human_feedback
+    action: regenerate with feedback
+    max_iterations: 5
+    
+  a_b_test:
+    trigger: request_variations
+    action: generate 2-5 variants
+    track_performance: true
+    archive_winner: true
+    
+  learn_from_best:
+    trigger: content_archived_as_top_performer
+    action: analyze patterns
+    update_suggestions: true
+
+# 🔐 Security
+security:
+  data_access:
+    - content_briefs: read
+    - draft_content: read_write
+    - published_content: read_only
+    - brand_guidelines: read
+    - performance_data: read
+  
+  forbidden_access:
+    - platform_tokens
+    - user_credentials
+    - financial_data
+    - personal_data
+
+# 📊 Metrics tracked
+metrics:
+  - generations_created
+  - approval_rate
+  - revision_count
+  - time_to_approval
+  - brand_alignment_scores
+  - a_b_test_results
+
+# 🔗 Integration hooks
+integrations:
+  brand:
+    source: blackroad-os-brand
+    sync: on_startup
+    
+  archive:
+    target: blackroad-os-archive
+    on_event: content_marked_top_performer
+    
+  dashboard:
+    target: blackroad-os-prism-console
+    metrics: realtime

@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pricing — BlackRoad OS</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --gray-950: #0a0a0a;
+  --gray-900: #171717;
+  --gray-850: #1e1e1e;
+  --gray-800: #262626;
+  --gray-700: #404040;
+  --gray-600: #525252;
+  --gray-500: #737373;
+  --gray-400: #a3a3a3;
+  --gray-300: #d4d4d4;
+  --gray-200: #e5e5e5;
+  --gray-100: #f5f5f5;
+  --white: #ffffff;
+  --accent-1: #ff8700;
+  --accent-2: #ff5f00;
+  --accent-3: #ff0087;
+  --accent-4: #af5fd7;
+  --accent-5: #ff00ff;
+  --accent-6: #1e90ff;
+  --success: #22c55e;
+  --font-headline: 'Space Grotesk', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: var(--gray-950);
+  color: var(--gray-300);
+  font-family: var(--font-body);
+  min-height: 100vh;
+}
+
+/* Nav */
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 40px;
+  border-bottom: 1px solid var(--gray-900);
+}
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+.nav-logo-mark {
+  width: 32px;
+  height: 32px;
+  background: var(--gray-100);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-headline);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--gray-950);
+}
+.nav-logo-text {
+  font-family: var(--font-headline);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--gray-100);
+}
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+.nav-link {
+  color: var(--gray-400);
+  text-decoration: none;
+  font-size: 14px;
+  transition: color 150ms ease;
+}
+.nav-link:hover { color: var(--gray-100); }
+.nav-link.active { color: var(--gray-100); }
+.nav-cta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.btn {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  padding: 10px 20px;
+  border-radius: var(--radius-md);
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 200ms ease;
+}
+.btn-ghost {
+  background: transparent;
+  color: var(--gray-300);
+}
+.btn-ghost:hover { color: var(--gray-100); }
+.btn-primary {
+  background: var(--gray-100);
+  color: var(--gray-900);
+}
+.btn-primary:hover {
+  background: var(--white);
+  transform: translateY(-1px);
+}
+
+/* Hero */
+.pricing-hero {
+  text-align: center;
+  padding: 80px 40px 60px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+.pricing-badge {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--accent-6);
+  background: rgba(30,144,255,0.1);
+  border: 1px solid rgba(30,144,255,0.2);
+  padding: 6px 14px;
+  border-radius: 50px;
+  margin-bottom: 24px;
+}
+.pricing-title {
+  font-family: var(--font-headline);
+  font-size: 48px;
+  font-weight: 700;
+  color: var(--gray-100);
+  margin-bottom: 20px;
+  line-height: 1.1;
+}
+.pricing-subtitle {
+  font-size: 18px;
+  color: var(--gray-400);
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* Toggle */
+.billing-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin: 40px 0;
+}
+.billing-option {
+  font-size: 14px;
+  color: var(--gray-500);
+  cursor: pointer;
+  transition: color 150ms ease;
+}
+.billing-option.active { color: var(--gray-100); }
+.toggle-switch {
+  width: 48px;
+  height: 26px;
+  background: var(--gray-800);
+  border-radius: 13px;
+  cursor: pointer;
+  position: relative;
+  transition: background 200ms ease;
+}
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background: var(--gray-100);
+  border-radius: 50%;
+  top: 3px;
+  left: 3px;
+  transition: transform 200ms ease;
+}
+.toggle-switch.annual::after {
+  transform: translateX(22px);
+}
+.toggle-switch.annual {
+  background: var(--accent-6);
+}
+.billing-save {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--success);
+  background: rgba(34,197,94,0.1);
+  padding: 4px 8px;
+  border-radius: var(--radius-md);
+}
+
+/* Pricing Grid */
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 40px;
+}
+.pricing-card {
+  background: var(--gray-900);
+  border: 1px solid var(--gray-800);
+  border-radius: var(--radius-2xl);
+  padding: 32px;
+  position: relative;
+  transition: all 200ms ease;
+}
+.pricing-card:hover {
+  border-color: var(--gray-700);
+  transform: translateY(-4px);
+}
+.pricing-card.featured {
+  border-color: var(--accent-6);
+  background: linear-gradient(180deg, rgba(30,144,255,0.05) 0%, var(--gray-900) 50%);
+}
+.pricing-card.featured::before {
+  content: 'Most Popular';
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--white);
+  background: var(--accent-6);
+  padding: 4px 12px;
+  border-radius: 50px;
+}
+.plan-name {
+  font-family: var(--font-headline);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--gray-100);
+  margin-bottom: 8px;
+}
+.plan-description {
+  font-size: 14px;
+  color: var(--gray-500);
+  margin-bottom: 24px;
+}
+.plan-price {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+.price-currency {
+  font-family: var(--font-headline);
+  font-size: 24px;
+  color: var(--gray-400);
+}
+.price-amount {
+  font-family: var(--font-headline);
+  font-size: 48px;
+  font-weight: 700;
+  color: var(--gray-100);
+}
+.price-period {
+  font-size: 14px;
+  color: var(--gray-500);
+}
+.plan-cta {
+  width: 100%;
+  margin: 24px 0;
+  padding: 14px;
+  font-weight: 600;
+}
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--gray-700);
+  color: var(--gray-300);
+}
+.btn-outline:hover {
+  border-color: var(--gray-500);
+  background: var(--gray-850);
+}
+.btn-gradient {
+  background: linear-gradient(135deg, var(--accent-1), var(--accent-3), var(--accent-6));
+  color: var(--white);
+  border: none;
+  background-size: 200% 200%;
+  animation: gradientShift 3s ease infinite;
+}
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.btn-gradient:hover {
+  box-shadow: 0 0 24px rgba(255,0,135,0.3);
+}
+
+.features-title {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--gray-500);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 16px;
+}
+.features-list {
+  list-style: none;
+}
+.feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 0;
+  font-size: 14px;
+  color: var(--gray-300);
+  border-bottom: 1px solid var(--gray-850);
+}
+.feature-item:last-child { border-bottom: none; }
+.feature-check {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  color: var(--success);
+}
+.feature-text strong {
+  color: var(--gray-100);
+}
+
+/* Feature Comparison */
+.comparison-section {
+  max-width: 1200px;
+  margin: 100px auto 0;
+  padding: 0 40px;
+}
+.comparison-title {
+  font-family: var(--font-headline);
+  font-size: 32px;
+  font-weight: 600;
+  color: var(--gray-100);
+  text-align: center;
+  margin-bottom: 48px;
+}
+.comparison-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.comparison-table th {
+  padding: 16px 24px;
+  text-align: left;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--gray-500);
+  border-bottom: 1px solid var(--gray-800);
+}
+.comparison-table th:not(:first-child) {
+  text-align: center;
+}
+.comparison-table td {
+  padding: 16px 24px;
+  font-size: 14px;
+  color: var(--gray-300);
+  border-bottom: 1px solid var(--gray-850);
+}
+.comparison-table td:not(:first-child) {
+  text-align: center;
+}
+.comparison-table tbody tr:hover td {
+  background: var(--gray-900);
+}
+.check-icon { color: var(--success); }
+.dash-icon { color: var(--gray-600); }
+.category-row td {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--gray-400);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  background: var(--gray-900);
+  padding: 12px 24px;
+}
+
+/* FAQ */
+.faq-section {
+  max-width: 800px;
+  margin: 100px auto;
+  padding: 0 40px;
+}
+.faq-title {
+  font-family: var(--font-headline);
+  font-size: 32px;
+  font-weight: 600;
+  color: var(--gray-100);
+  text-align: center;
+  margin-bottom: 48px;
+}
+.faq-item {
+  border-bottom: 1px solid var(--gray-800);
+}
+.faq-question {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 0;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--gray-100);
+}
+.faq-icon {
+  width: 20px;
+  height: 20px;
+  color: var(--gray-500);
+  transition: transform 200ms ease;
+}
+.faq-answer {
+  padding: 0 0 24px;
+  font-size: 14px;
+  color: var(--gray-400);
+  line-height: 1.7;
+  display: none;
+}
+.faq-item.open .faq-answer { display: block; }
+.faq-item.open .faq-icon { transform: rotate(45deg); }
+
+/* CTA */
+.cta-section {
+  text-align: center;
+  padding: 80px 40px;
+  background: var(--gray-900);
+  border-top: 1px solid var(--gray-800);
+}
+.cta-title {
+  font-family: var(--font-headline);
+  font-size: 32px;
+  font-weight: 600;
+  color: var(--gray-100);
+  margin-bottom: 16px;
+}
+.cta-text {
+  font-size: 16px;
+  color: var(--gray-400);
+  margin-bottom: 32px;
+}
+.cta-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="#" class="nav-logo">
+    <div class="nav-logo-mark">B</div>
+    <span class="nav-logo-text">BlackRoad</span>
+  </a>
+  <div class="nav-links">
+    <a href="#" class="nav-link">Product</a>
+    <a href="#" class="nav-link">Docs</a>
+    <a href="#" class="nav-link active">Pricing</a>
+    <a href="#" class="nav-link">Blog</a>
+  </div>
+  <div class="nav-cta">
+    <a href="#" class="btn btn-ghost">Sign In</a>
+    <a href="#" class="btn btn-primary">Get Started</a>
+  </div>
+</nav>
+
+<section class="pricing-hero">
+  <span class="pricing-badge">Simple, transparent pricing</span>
+  <h1 class="pricing-title">Choose the plan that fits your scale</h1>
+  <p class="pricing-subtitle">
+    Start free and scale as you grow. No hidden fees, no surprises.
+    All plans include core features with generous free tiers.
+  </p>
+
+  <div class="billing-toggle">
+    <span class="billing-option active">Monthly</span>
+    <div class="toggle-switch"></div>
+    <span class="billing-option">Annual</span>
+    <span class="billing-save">Save 20%</span>
+  </div>
+</section>
+
+<div class="pricing-grid">
+  <div class="pricing-card">
+    <h3 class="plan-name">Starter</h3>
+    <p class="plan-description">For individuals and small projects</p>
+    <div class="plan-price">
+      <span class="price-currency">$</span>
+      <span class="price-amount">0</span>
+      <span class="price-period">/month</span>
+    </div>
+    <button class="btn btn-outline plan-cta">Get Started Free</button>
+    <div class="features-title">Includes:</div>
+    <ul class="features-list">
+      <li class="feature-item">
+        <svg class="feature-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        <span class="feature-text"><strong>100K</strong> requests/month</span>
+      </li>
+      <li class="feature-item">
+        <svg class="feature-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        <span class="feature-text"><strong>3</strong> workers</span>
+      </li>
+      <li class="feature-item">
+        <svg class="feature-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        <span class="feature-text"><strong>1GB</strong> KV storage</span>
+      </li>
+      <li class="feature-item">
+        <svg class="feature-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        <span class="feature-text">Community support</span>
+      </li>
+      <li class="feature-item">
+        <svg class="feature-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        <span class="feature-text">Basic analytics</span>
+      </li>
+    </ul>
+  </div>
+
+  <div class="pricing-card featured">
+    <h3 class="plan-name">Pro</h3>
+    <p class="plan-description">For growing teams and applications</p>
+    <div class="plan-price">
+      <span class="price-currency">$</span>
+      <span class="price-amount">49</span>
+      <span class="price-period">/month</span>
+    </div>
+    <button class="btn btn-gradient plan-cta">Start Free Trial</button>
+    <div class="features-title">Everything in Starter, plus:</div>
+    <ul class="features-list">
+      <li class="feature-item">
+        <svg class="feature-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        <span class="feature-text"><strong>10M</strong> requests/month</span>
+      </li>
+      <li class="feature-item">
+        <svg class="feature-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        <span class="feature-text"><strong>Unlimited</strong> workers</span>
+      </li>
+      <li class="feature-item">
+        <svg class="feature-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        <span class="feature-text"><strong>25GB</strong> KV storage</span>
+      </li>
+      <li class="feature-item">
+        <svg class="feature-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        <span class="feature-text"><strong>5</strong> AI agents</span>
+      </li>
+      <li class="feature-item">
+        <svg class="feature-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        <span class="feature-text">Priority support</span>
+      </li>
+      <li class="feature-item">
+        <svg class="feature-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        <span class="feature-text">Advanced analytics</span>
+      </li>
+    </ul>
+  </div>
+
+  <div class="pricing-card">
+    <h3 class="plan-name">Enterprise</h3>
+    <p class="plan-description">For large-scale deployments</p>
+    <div class="plan-price">
+      <span class="price-currency">$</span>
+      <span class="price-amount">299</span>
+      <span class="price-period">/month</span>
+    </div>
+    <button class="btn btn-outline plan-cta">Contact Sales</button>
+    <div class="features-title">Everything in Pro, plus:</div>
+    <ul class="features-list">
+      <li class="feature-item">
+        <svg class="feature-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        <span class="feature-text"><strong>Unlimited</strong> requests</span>
+      </li>
+      <li class="feature-item">
+        <svg class="feature-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        <span class="feature-text"><strong>500GB</strong> KV storage</span>
+      </li>
+      <li class="feature-item">
+        <svg class="feature-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        <span class="feature-text"><strong>Unlimited</strong> AI agents</span>
+      </li>
+      <li class="feature-item">
+        <svg class="feature-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        <span class="feature-text">Dedicated support</span>
+      </li>
+      <li class="feature-item">
+        <svg class="feature-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        <span class="feature-text">Custom SLA</span>
+      </li>
+      <li class="feature-item">
+        <svg class="feature-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        <span class="feature-text">SSO & audit logs</span>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<section class="comparison-section">
+  <h2 class="comparison-title">Compare all features</h2>
+  <table class="comparison-table">
+    <thead>
+      <tr>
+        <th>Feature</th>
+        <th>Starter</th>
+        <th>Pro</th>
+        <th>Enterprise</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="category-row"><td colspan="4">Infrastructure</td></tr>
+      <tr>
+        <td>Workers</td>
+        <td>3</td>
+        <td>Unlimited</td>
+        <td>Unlimited</td>
+      </tr>
+      <tr>
+        <td>Edge locations</td>
+        <td>100+</td>
+        <td>300+</td>
+        <td>300+</td>
+      </tr>
+      <tr>
+        <td>Custom domains</td>
+        <td>1</td>
+        <td>10</td>
+        <td>Unlimited</td>
+      </tr>
+      <tr class="category-row"><td colspan="4">AI & Agents</td></tr>
+      <tr>
+        <td>AI agents</td>
+        <td><span class="dash-icon">—</span></td>
+        <td>5</td>
+        <td>Unlimited</td>
+      </tr>
+      <tr>
+        <td>Agent memory</td>
+        <td><span class="dash-icon">—</span></td>
+        <td>10GB</td>
+        <td>100GB</td>
+      </tr>
+      <tr>
+        <td>Model fine-tuning</td>
+        <td><span class="dash-icon">—</span></td>
+        <td><span class="dash-icon">—</span></td>
+        <td><span class="check-icon">✓</span></td>
+      </tr>
+      <tr class="category-row"><td colspan="4">Support</td></tr>
+      <tr>
+        <td>Community support</td>
+        <td><span class="check-icon">✓</span></td>
+        <td><span class="check-icon">✓</span></td>
+        <td><span class="check-icon">✓</span></td>
+      </tr>
+      <tr>
+        <td>Email support</td>
+        <td><span class="dash-icon">—</span></td>
+        <td><span class="check-icon">✓</span></td>
+        <td><span class="check-icon">✓</span></td>
+      </tr>
+      <tr>
+        <td>Dedicated support</td>
+        <td><span class="dash-icon">—</span></td>
+        <td><span class="dash-icon">—</span></td>
+        <td><span class="check-icon">✓</span></td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="faq-section">
+  <h2 class="faq-title">Frequently asked questions</h2>
+
+  <div class="faq-item open">
+    <div class="faq-question">
+      Can I change plans at any time?
+      <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    </div>
+    <div class="faq-answer">
+      Yes, you can upgrade or downgrade your plan at any time. When upgrading, you'll be charged the prorated difference. When downgrading, the remaining balance will be credited to your account.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">
+      What happens if I exceed my limits?
+      <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    </div>
+    <div class="faq-answer">
+      We'll notify you when you're approaching your limits. If you exceed them, your services will continue running and we'll reach out to discuss upgrading your plan. We never surprise you with unexpected charges.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">
+      Do you offer a free trial?
+      <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    </div>
+    <div class="faq-answer">
+      Yes! The Pro plan comes with a 14-day free trial. No credit card required to start. You'll have full access to all Pro features during the trial period.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">
+      What payment methods do you accept?
+      <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    </div>
+    <div class="faq-answer">
+      We accept all major credit cards (Visa, Mastercard, American Express), as well as PayPal. Enterprise customers can also pay via invoice with NET-30 terms.
+    </div>
+  </div>
+</section>
+
+<section class="cta-section">
+  <h2 class="cta-title">Ready to get started?</h2>
+  <p class="cta-text">Deploy your first worker in under 5 minutes. No credit card required.</p>
+  <div class="cta-buttons">
+    <a href="#" class="btn btn-primary">Start Building Free</a>
+    <a href="#" class="btn btn-ghost">Talk to Sales</a>
+  </div>
+</section>
+
+</body>
+</html>

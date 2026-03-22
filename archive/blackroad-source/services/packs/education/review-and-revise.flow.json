@@ -1,0 +1,46 @@
+{
+  "flowId": "flow:education:review-and-revise",
+  "version": "1.0.0",
+  "description": "🔁 Review previous work and revise for mastery",
+  "steps": [
+    {
+      "stepId": "get-completed-items",
+      "action": "getProgressByState",
+      "params": {
+        "learnerId": "${input.learnerId}",
+        "courseId": "${input.courseId}",
+        "state": "completed"
+      },
+      "onSuccess": "identify-mastery-candidates",
+      "onFailure": "return-error"
+    },
+    {
+      "stepId": "identify-mastery-candidates",
+      "action": "filterByScore",
+      "params": {
+        "items": "${output.completedItems}",
+        "minScore": 90,
+        "description": "Items with high scores can be reviewed for mastery"
+      },
+      "onSuccess": "present-review-options",
+      "onFailure": "return-error"
+    },
+    {
+      "stepId": "present-review-options",
+      "action": "return",
+      "params": {
+        "status": "success",
+        "reviewableItems": "${output.candidates}",
+        "message": "Select items to review for mastery upgrade"
+      }
+    },
+    {
+      "stepId": "return-error",
+      "action": "return",
+      "params": {
+        "status": "error",
+        "message": "${error.message}"
+      }
+    }
+  ]
+}

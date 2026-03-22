@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — BlackRoad</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}
+:root{--g:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);--g135:linear-gradient(135deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);--bg:#000;--white:#fff;--black:#000;--border:#1a1a1a;--sg:'Space Grotesk',sans-serif;--jb:'JetBrains Mono',monospace}
+body{background:var(--bg);color:var(--white);font-family:var(--sg)}
+.grad-bar{height:3px;background:var(--g)}
+.dash-layout{display:grid;grid-template-columns:240px 1fr;min-height:100vh}
+.dash-sidebar{border-right:1px solid var(--border);padding:24px 16px;display:flex;flex-direction:column}
+.dash-logo{font-weight:700;font-size:18px;color:var(--white);display:flex;align-items:center;gap:10px;padding:0 8px;margin-bottom:32px;text-decoration:none}
+.dash-logo-mark{width:24px;height:3px;border-radius:2px;background:var(--g)}
+.dash-nav{list-style:none;flex:1}
+.dash-nav li{margin-bottom:2px}
+.dash-nav a{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:6px;font-size:13px;font-weight:500;color:var(--white);opacity:.4;text-decoration:none;transition:all .15s;cursor:pointer}
+.dash-nav a:hover{opacity:.7}
+.dash-nav a.active{opacity:1;border:1px solid var(--border)}
+.dash-nav-icon{font-size:16px;width:20px;text-align:center}
+.dash-nav-sep{height:1px;background:var(--border);margin:16px 8px}
+.dash-user{display:flex;align-items:center;gap:10px;padding:12px 8px;border-top:1px solid var(--border);margin-top:auto;cursor:pointer}
+.dash-avatar{width:32px;height:32px;border-radius:50%;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px;color:var(--white);overflow:hidden}
+.dash-avatar img{width:100%;height:100%;object-fit:cover}
+.dash-user-name{font-size:13px;font-weight:500;color:var(--white)}
+.dash-user-role{font-size:11px;color:var(--white);opacity:.3}
+.dash-main{padding:32px;overflow-y:auto;max-height:100vh}
+.dash-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:32px}
+.dash-header h1{font-size:24px;font-weight:700;color:var(--white)}
+.dash-header-actions{display:flex;gap:10px}
+.btn-dash{padding:8px 18px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--sg);transition:all .15s}
+.btn-dash-outline{background:transparent;border:1px solid var(--border);color:var(--white)}
+.btn-dash-outline:hover{border-color:#333}
+.btn-dash-solid{background:var(--white);border:none;color:var(--black)}
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+.stat-card{border:1px solid var(--border);border-radius:10px;padding:20px}
+.stat-label{font-family:var(--jb);font-size:10px;color:var(--white);opacity:.3;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px}
+.stat-value{font-size:28px;font-weight:700;color:var(--white)}
+.stat-change{font-family:var(--jb);font-size:11px;margin-top:4px;color:var(--white);opacity:.4}
+.stat-bar{height:3px;border-radius:2px;margin-top:12px;background:var(--border);overflow:hidden}
+.stat-bar-fill{height:100%;border-radius:2px;background:var(--g)}
+.chart-row{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:24px}
+.chart-card{border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.chart-header{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--border)}
+.chart-title{font-size:14px;font-weight:600;color:var(--white)}
+.activity-list{padding:0 20px 20px}
+.activity-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.activity-item:last-child{border-bottom:none}
+.activity-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;background:var(--g135)}
+.activity-dot.down{background:none;border:1px solid var(--white);opacity:.3}
+.activity-text{font-size:13px;color:var(--white);opacity:.6;flex:1}
+.activity-time{font-family:var(--jb);font-size:11px;color:var(--white);opacity:.3}
+.table-card{border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:24px}
+.table-header{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--border)}
+.table-title{font-size:14px;font-weight:600;color:var(--white)}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font-family:var(--jb);font-size:10px;color:var(--white);opacity:.3;letter-spacing:.06em;text-transform:uppercase;padding:10px 20px;border-bottom:1px solid var(--border)}
+td{font-size:13px;color:var(--white);opacity:.6;padding:12px 20px;border-bottom:1px solid var(--border)}
+tr:last-child td{border-bottom:none}
+.status-dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:6px}
+.status-dot.up{background:var(--g135)}
+.status-dot.down{background:none;border:1px solid var(--white);opacity:.3;width:5px;height:5px}
+td code{font-family:var(--jb);font-size:12px}
+.api-key-card{border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:24px}
+.api-key-card h3{font-size:14px;font-weight:600;margin-bottom:12px}
+.api-key-row{display:flex;gap:10px;align-items:center}
+.api-key-display{flex:1;font-family:var(--jb);font-size:12px;padding:10px 14px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--white);opacity:.5;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.btn-copy{padding:10px 16px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--white);font-size:12px;cursor:pointer;font-family:var(--jb);transition:border-color .15s}
+.btn-copy:hover{border-color:#333}
+.billing-card{border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:24px}
+.billing-card h3{font-size:14px;font-weight:600;margin-bottom:4px}
+.billing-card .plan-name{font-family:var(--jb);font-size:24px;font-weight:700;margin:8px 0}
+.billing-card .plan-desc{font-size:13px;opacity:.4;margin-bottom:16px}
+.billing-actions{display:flex;gap:10px}
+.page{display:none}
+.page.active{display:block}
+.loading-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999;flex-direction:column;gap:16px}
+.loading-screen .logo{font-weight:700;font-size:22px;color:var(--white);display:flex;align-items:center;gap:10px}
+.loading-screen .logo-mark{width:28px;height:4px;border-radius:2px;background:var(--g)}
+.loading-screen .msg{font-family:var(--jb);font-size:12px;color:var(--white);opacity:.3}
+.mobile-header{display:none;padding:12px 16px;border-bottom:1px solid var(--border);align-items:center;justify-content:space-between}
+.mobile-header .dash-logo{margin-bottom:0}
+.menu-btn{background:none;border:1px solid var(--border);border-radius:6px;color:var(--white);padding:6px 12px;font-size:14px;cursor:pointer}
+@media(max-width:1024px){
+  .dash-layout{grid-template-columns:1fr}
+  .dash-sidebar{display:none}
+  .dash-sidebar.open{display:flex;position:fixed;inset:0;z-index:100;background:var(--bg);width:260px}
+  .mobile-header{display:flex}
+  .stat-grid{grid-template-columns:repeat(2,1fr)}
+  .chart-row{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="loading-screen" id="loading">
+  <div class="logo"><div class="logo-mark"></div> BlackRoad</div>
+  <div class="msg">Authenticating...</div>
+</div>
+
+<div class="grad-bar"></div>
+<div class="mobile-header">
+  <a class="dash-logo" href="/"><div class="dash-logo-mark"></div> BlackRoad</a>
+  <button class="menu-btn" onclick="document.querySelector('.dash-sidebar').classList.toggle('open')">Menu</button>
+</div>
+
+<div class="dash-layout">
+  <aside class="dash-sidebar">
+    <a class="dash-logo" href="https://blackroad.io"><div class="dash-logo-mark"></div> BlackRoad</a>
+    <ul class="dash-nav">
+      <li><a onclick="showPage('overview')" class="active" data-page="overview"><span class="dash-nav-icon">&#9670;</span> Overview</a></li>
+      <li><a onclick="showPage('nodes')" data-page="nodes"><span class="dash-nav-icon">&#9671;</span> Nodes</a></li>
+      <li><a onclick="showPage('billing')" data-page="billing"><span class="dash-nav-icon">&#9651;</span> Billing</a></li>
+      <li><a onclick="showPage('apikeys')" data-page="apikeys"><span class="dash-nav-icon">&#9675;</span> API Keys</a></li>
+      <li><div class="dash-nav-sep"></div></li>
+      <li><a href="https://docs.blackroad.io"><span class="dash-nav-icon">&#9723;</span> Docs</a></li>
+      <li><a href="https://status.blackroad.io"><span class="dash-nav-icon">&#9717;</span> Status</a></li>
+      <li><div class="dash-nav-sep"></div></li>
+      <li><a onclick="signOut()"><span class="dash-nav-icon">&#8594;</span> Sign Out</a></li>
+    </ul>
+    <div class="dash-user" id="user-info">
+      <div class="dash-avatar" id="user-avatar">?</div>
+      <div><div class="dash-user-name" id="user-name">Loading...</div><div class="dash-user-role" id="user-plan">-</div></div>
+    </div>
+  </aside>
+
+  <main class="dash-main">
+    <!-- OVERVIEW -->
+    <div class="page active" id="page-overview">
+      <div class="dash-header">
+        <h1>Overview</h1>
+        <div class="dash-header-actions"><button class="btn-dash btn-dash-outline" onclick="refreshAll()">Refresh</button></div>
+      </div>
+      <div class="stat-grid">
+        <div class="stat-card"><div class="stat-label">Nodes Online</div><div class="stat-value" id="stat-nodes">-</div><div class="stat-change" id="stat-nodes-sub">Loading...</div><div class="stat-bar"><div class="stat-bar-fill" id="stat-nodes-bar" style="width:0%"></div></div></div>
+        <div class="stat-card"><div class="stat-label">Plan</div><div class="stat-value" id="stat-plan">-</div><div class="stat-change" id="stat-plan-sub">-</div><div class="stat-bar"><div class="stat-bar-fill" id="stat-plan-bar" style="width:0%"></div></div></div>
+        <div class="stat-card"><div class="stat-label">Droplets</div><div class="stat-value" id="stat-droplets">-</div><div class="stat-change" id="stat-droplets-sub">Loading...</div><div class="stat-bar"><div class="stat-bar-fill" id="stat-droplets-bar" style="width:0%"></div></div></div>
+        <div class="stat-card"><div class="stat-label">Gateway</div><div class="stat-value" id="stat-gw">-</div><div class="stat-change" id="stat-gw-sub">-</div><div class="stat-bar"><div class="stat-bar-fill" id="stat-gw-bar" style="width:0%"></div></div></div>
+      </div>
+      <div class="chart-row">
+        <div class="table-card" style="margin-bottom:0">
+          <div class="table-header"><span class="table-title">Fleet Status</span></div>
+          <table><thead><tr><th>Node</th><th>Status</th><th>Code</th></tr></thead><tbody id="fleet-table"><tr><td colspan="3" style="opacity:.3">Loading...</td></tr></tbody></table>
+        </div>
+        <div class="chart-card">
+          <div class="chart-header"><span class="chart-title">Activity</span></div>
+          <div class="activity-list" id="activity-list"><div class="activity-item"><div class="activity-dot"></div><div class="activity-text" style="opacity:.3">Loading...</div></div></div>
+        </div>
+      </div>
+      <div class="table-card">
+        <div class="table-header"><span class="table-title">Droplets</span></div>
+        <table><thead><tr><th>Name</th><th>Status</th><th>IP</th><th>Region</th><th>vCPUs</th><th>RAM</th></tr></thead><tbody id="droplets-table"><tr><td colspan="6" style="opacity:.3">Loading...</td></tr></tbody></table>
+      </div>
+    </div>
+
+    <!-- NODES -->
+    <div class="page" id="page-nodes">
+      <div class="dash-header"><h1>Nodes</h1><div class="dash-header-actions"><button class="btn-dash btn-dash-outline" onclick="loadFleet()">Refresh</button></div></div>
+      <div class="table-card">
+        <div class="table-header"><span class="table-title">Pi Fleet</span></div>
+        <table><thead><tr><th>Node</th><th>Status</th><th>IP</th><th>Role</th></tr></thead><tbody id="nodes-detail-table"><tr><td colspan="4" style="opacity:.3">Loading...</td></tr></tbody></table>
+      </div>
+      <div class="table-card">
+        <div class="table-header"><span class="table-title">DigitalOcean Droplets</span></div>
+        <table><thead><tr><th>Name</th><th>Status</th><th>IP</th><th>Region</th><th>vCPUs</th><th>RAM (MB)</th></tr></thead><tbody id="nodes-droplets-table"><tr><td colspan="6" style="opacity:.3">Loading...</td></tr></tbody></table>
+      </div>
+    </div>
+
+    <!-- BILLING -->
+    <div class="page" id="page-billing">
+      <div class="dash-header"><h1>Billing</h1></div>
+      <div class="billing-card">
+        <h3>Current Plan</h3>
+        <div class="plan-name" id="billing-plan">-</div>
+        <div class="plan-desc" id="billing-desc">Loading your subscription...</div>
+        <div class="billing-actions">
+          <button class="btn-dash btn-dash-solid" onclick="checkout('pro_monthly')">Upgrade Plan</button>
+          <button class="btn-dash btn-dash-outline" onclick="openPortal()">Manage Billing</button>
+        </div>
+      </div>
+      <div class="table-card">
+        <div class="table-header"><span class="table-title">Available Plans</span></div>
+        <table><thead><tr><th>Plan</th><th>Monthly</th><th>Annual</th><th></th></tr></thead>
+        <tbody id="pricing-table"><tr><td colspan="4" style="opacity:.3">Loading...</td></tr></tbody></table>
+      </div>
+    </div>
+
+    <!-- API KEYS -->
+    <div class="page" id="page-apikeys">
+      <div class="dash-header"><h1>API Keys</h1></div>
+      <div class="api-key-card">
+        <h3>Your API Key</h3>
+        <p style="font-size:13px;opacity:.4;margin-bottom:16px">Use this key in the <code style="font-family:var(--jb)">X-API-Key</code> header to authenticate requests.</p>
+        <div class="api-key-row">
+          <div class="api-key-display" id="api-key-value">Not generated yet</div>
+          <button class="btn-copy" onclick="copyKey()">Copy</button>
+        </div>
+        <p style="font-size:11px;opacity:.2;margin-top:12px;font-family:var(--jb)">Base URL: https://api.blackroad.io</p>
+      </div>
+      <div class="table-card">
+        <div class="table-header"><span class="table-title">API Reference</span></div>
+        <table><thead><tr><th>Method</th><th>Path</th><th>Auth</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>GET</td><td><code>/health</code></td><td>None</td><td>Gateway health</td></tr>
+          <tr><td>GET</td><td><code>/billing/prices</code></td><td>None</td><td>Pricing tiers</td></tr>
+          <tr><td>POST</td><td><code>/billing/checkout</code></td><td>Clerk</td><td>Create checkout session</td></tr>
+          <tr><td>POST</td><td><code>/billing/portal</code></td><td>Clerk</td><td>Billing portal</td></tr>
+          <tr><td>POST</td><td><code>/ai/generate</code></td><td>API Key</td><td>Run inference</td></tr>
+          <tr><td>GET</td><td><code>/ai/models</code></td><td>API Key</td><td>List models</td></tr>
+          <tr><td>GET</td><td><code>/infra/status</code></td><td>API Key</td><td>Fleet health</td></tr>
+          <tr><td>GET</td><td><code>/infra/droplets</code></td><td>API Key</td><td>DO droplets</td></tr>
+          <tr><td>GET</td><td><code>/data/me</code></td><td>Clerk</td><td>User profile</td></tr>
+          <tr><td>GET</td><td><code>/data/events</code></td><td>Clerk</td><td>Event log</td></tr>
+        </tbody></table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+const CLERK_PK = 'pk_test_ZmluZS13YWxsYWJ5LTk2LmNsZXJrLmFjY291bnRzLmRldiQ';
+const API = 'https://api.blackroad.io';
+const AUTH_URL = 'https://auth.blackroad.io';
+const API_KEY = 'br_live_f85e250d3967fce10e5d8e892f493c72f9f1ce19834c13adb065f39418bca09f';
+
+let clerk = null;
+
+const NODE_META = {
+  alice:   { ip: '192.168.4.49',  role: 'Gateway / DNS' },
+  cecilia: { ip: '192.168.4.96',  role: 'AI / TTS' },
+  octavia: { ip: '192.168.4.100', role: 'Storage / Git' },
+  aria:    { ip: '192.168.4.98',  role: 'Orchestration' },
+  lucidia: { ip: '192.168.4.38',  role: 'APIs / DNS' },
+};
+
+async function boot() {
+  const s = document.createElement('script');
+  s.src = 'https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest/dist/clerk.browser.js';
+  s.crossOrigin = 'anonymous';
+  document.head.appendChild(s);
+  await new Promise(r => s.onload = r);
+
+  clerk = new window.Clerk(CLERK_PK);
+  await clerk.load();
+
+  if (!clerk.user) {
+    window.location.href = AUTH_URL;
+    return;
+  }
+
+  const u = clerk.user;
+  document.getElementById('user-name').textContent = u.fullName || u.firstName || u.primaryEmailAddress?.emailAddress || 'User';
+  document.getElementById('user-avatar').innerHTML = u.imageUrl
+    ? '<img src="' + u.imageUrl + '" alt="">'
+    : (u.firstName || 'U')[0];
+
+  document.getElementById('loading').style.display = 'none';
+  refreshAll();
+}
+
+async function apiGet(path) {
+  try {
+    const token = await clerk.session.getToken();
+    const res = await fetch(API + path, {
+      headers: { 'Authorization': 'Bearer ' + token, 'X-API-Key': API_KEY }
+    });
+    return await res.json();
+  } catch { return null; }
+}
+
+async function loadFleet() {
+  const data = await apiGet('/infra/status');
+  if (!data?.nodes) return;
+  const nodes = data.nodes;
+  const up = Object.values(nodes).filter(n => n.status === 'up').length;
+  const total = Object.keys(nodes).length;
+
+  document.getElementById('stat-nodes').textContent = up + '/' + total;
+  document.getElementById('stat-nodes-sub').textContent = (total - up) + ' node' + (total-up !== 1 ? 's' : '') + ' offline';
+  document.getElementById('stat-nodes-bar').style.width = ((up/total)*100) + '%';
+
+  const fleetHtml = Object.entries(nodes).map(function(e) {
+    const name = e[0], info = e[1];
+    return '<tr><td style="text-transform:capitalize">' + name + '</td><td><span class="status-dot ' + (info.status === 'up' ? 'up' : 'down') + '"></span>' + (info.status === 'up' ? 'Online' : 'Offline') + '</td><td><code>' + (info.code || '-') + '</code></td></tr>';
+  }).join('');
+  document.getElementById('fleet-table').innerHTML = fleetHtml;
+
+  const detailHtml = Object.entries(nodes).map(function(e) {
+    const name = e[0], info = e[1], meta = NODE_META[name] || {};
+    return '<tr><td style="text-transform:capitalize">' + name + '</td><td><span class="status-dot ' + (info.status === 'up' ? 'up' : 'down') + '"></span>' + (info.status === 'up' ? 'Online' : 'Offline') + '</td><td><code>' + (meta.ip || '-') + '</code></td><td>' + (meta.role || '-') + '</td></tr>';
+  }).join('');
+  document.getElementById('nodes-detail-table').innerHTML = detailHtml;
+
+  const ts = new Date(data.timestamp).toLocaleTimeString();
+  document.getElementById('activity-list').innerHTML = Object.entries(nodes).map(function(e) {
+    var name = e[0], info = e[1];
+    return '<div class="activity-item"><div class="activity-dot ' + (info.status === 'up' ? '' : 'down') + '"></div><div class="activity-text" style="text-transform:capitalize">' + name + ' - ' + (info.status === 'up' ? 'responding' : 'unreachable') + '</div><div class="activity-time">' + ts + '</div></div>';
+  }).join('');
+}
+
+async function loadDroplets() {
+  var data = await apiGet('/infra/droplets');
+  if (!Array.isArray(data)) return;
+  var active = data.filter(function(d) { return d.status === 'active'; }).length;
+  document.getElementById('stat-droplets').textContent = active;
+  document.getElementById('stat-droplets-sub').textContent = data.length + ' total';
+  document.getElementById('stat-droplets-bar').style.width = ((active/Math.max(data.length,1))*100) + '%';
+
+  var html = data.map(function(d) {
+    return '<tr><td>' + d.name + '</td><td><span class="status-dot ' + (d.status === 'active' ? 'up' : 'down') + '"></span>' + d.status + '</td><td><code>' + (d.ip || '-') + '</code></td><td>' + (d.region || '-') + '</td><td>' + (d.vcpus || '-') + '</td><td>' + (d.memory || '-') + '</td></tr>';
+  }).join('');
+  document.getElementById('droplets-table').innerHTML = html;
+  document.getElementById('nodes-droplets-table').innerHTML = html;
+}
+
+async function loadGateway() {
+  try {
+    var res = await fetch(API + '/health');
+    var data = await res.json();
+    document.getElementById('stat-gw').textContent = data.status === 'ok' ? 'Live' : 'Down';
+    document.getElementById('stat-gw-sub').textContent = 'v' + data.version;
+    document.getElementById('stat-gw-bar').style.width = data.status === 'ok' ? '100%' : '0%';
+  } catch {
+    document.getElementById('stat-gw').textContent = 'Down';
+    document.getElementById('stat-gw-bar').style.width = '0%';
+  }
+}
+
+async function loadBilling() {
+  var me = await apiGet('/data/me');
+  var plan = (me && me.plan) ? me.plan : 'free';
+  var cap = plan.charAt(0).toUpperCase() + plan.slice(1);
+  document.getElementById('stat-plan').textContent = cap;
+  document.getElementById('user-plan').textContent = cap;
+  var levels = { free: 25, pro: 66, enterprise: 100 };
+  document.getElementById('stat-plan-sub').textContent = plan === 'free' ? 'Upgrade available' : 'Active';
+  document.getElementById('stat-plan-bar').style.width = (levels[plan] || 25) + '%';
+  document.getElementById('billing-plan').textContent = cap;
+  document.getElementById('billing-desc').textContent = plan === 'free'
+    ? 'Free tier. Upgrade to unlock more compute and API calls.'
+    : 'Your ' + plan + ' subscription is active.';
+
+  var prices = await apiGet('/billing/prices');
+  if (prices) {
+    document.getElementById('pricing-table').innerHTML =
+      '<tr><td>Free</td><td>$0</td><td>$0</td><td>' + (plan === 'free' ? '<span style="opacity:.3">Current</span>' : '') + '</td></tr>' +
+      '<tr><td>Pro</td><td>$29/mo</td><td>$290/yr</td><td>' + (plan === 'pro' ? '<span style="opacity:.3">Current</span>' : '<button class="btn-dash btn-dash-outline" onclick="checkout(\'pro_monthly\')">Select</button>') + '</td></tr>' +
+      '<tr><td>Enterprise</td><td>$99/mo</td><td>$990/yr</td><td>' + (plan === 'enterprise' ? '<span style="opacity:.3">Current</span>' : '<button class="btn-dash btn-dash-outline" onclick="checkout(\'enterprise_monthly\')">Select</button>') + '</td></tr>';
+  }
+}
+
+function loadApiKey() {
+  document.getElementById('api-key-value').textContent = API_KEY;
+}
+
+function refreshAll() {
+  loadFleet();
+  loadDroplets();
+  loadGateway();
+  loadBilling();
+  loadApiKey();
+}
+
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
+  document.getElementById('page-' + name).classList.add('active');
+  document.querySelectorAll('.dash-nav a').forEach(function(a) { a.classList.remove('active'); });
+  var el = document.querySelector('[data-page="' + name + '"]');
+  if (el) el.classList.add('active');
+  var sb = document.querySelector('.dash-sidebar');
+  if (sb) sb.classList.remove('open');
+}
+
+function copyKey() {
+  navigator.clipboard.writeText(API_KEY);
+  var btn = document.querySelector('.btn-copy');
+  btn.textContent = 'Copied!';
+  setTimeout(function() { btn.textContent = 'Copy'; }, 2000);
+}
+
+async function checkout(plan) {
+  var token = await clerk.session.getToken();
+  var res = await fetch(API + '/billing/checkout', {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ plan: plan }),
+  });
+  var data = await res.json();
+  if (data.url) window.location.href = data.url;
+}
+
+async function openPortal() {
+  var token = await clerk.session.getToken();
+  var res = await fetch(API + '/billing/portal', {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + token },
+  });
+  var data = await res.json();
+  if (data.url) window.location.href = data.url;
+}
+
+async function signOut() {
+  await clerk.signOut();
+  window.location.href = AUTH_URL;
+}
+
+boot();
+</script>
+</body>
+</html>

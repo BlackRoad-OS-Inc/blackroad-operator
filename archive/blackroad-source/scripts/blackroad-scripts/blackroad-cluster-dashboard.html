@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlackRoad Cluster Dashboard</title>
+    <style>
+        :root {
+            --hot-pink: #FF1D6C;
+            --amber: #F5A623;
+            --electric-blue: #2979FF;
+            --violet: #9C27B0;
+            --black: #000000;
+            --white: #FFFFFF;
+            --gradient: linear-gradient(135deg, var(--amber) 0%, var(--hot-pink) 38.2%, var(--violet) 61.8%, var(--electric-blue) 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--black);
+            color: var(--white);
+            min-height: 100vh;
+            padding: 21px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 34px;
+        }
+
+        .header h1 {
+            font-size: 34px;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: #888;
+            margin-top: 8px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 21px;
+            margin-bottom: 34px;
+        }
+
+        .card {
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 13px;
+            padding: 21px;
+        }
+
+        .card h2 {
+            font-size: 18px;
+            color: var(--hot-pink);
+            margin-bottom: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .node {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #222;
+        }
+
+        .node:last-child {
+            border-bottom: none;
+        }
+
+        .node-name {
+            font-weight: 600;
+        }
+
+        .status {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status.online {
+            background: rgba(0, 255, 0, 0.2);
+            color: #0f0;
+        }
+
+        .status.offline {
+            background: rgba(255, 0, 0, 0.2);
+            color: #f00;
+        }
+
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+        }
+
+        .metric-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--electric-blue);
+        }
+
+        .metric-label {
+            color: #888;
+            font-size: 12px;
+        }
+
+        .benchmark-bar {
+            height: 8px;
+            background: #222;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .benchmark-fill {
+            height: 100%;
+            background: var(--gradient);
+            transition: width 0.5s ease;
+        }
+
+        .chat-container {
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 13px;
+            padding: 21px;
+        }
+
+        .chat-messages {
+            height: 200px;
+            overflow-y: auto;
+            margin-bottom: 13px;
+            padding: 13px;
+            background: #0a0a0a;
+            border-radius: 8px;
+        }
+
+        .chat-input {
+            display: flex;
+            gap: 8px;
+        }
+
+        .chat-input input {
+            flex: 1;
+            background: #222;
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 13px;
+            color: var(--white);
+            font-size: 14px;
+        }
+
+        .chat-input button {
+            background: var(--hot-pink);
+            border: none;
+            border-radius: 8px;
+            padding: 13px 21px;
+            color: var(--white);
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .chat-input button:hover {
+            opacity: 0.9;
+        }
+
+        .message {
+            margin-bottom: 13px;
+        }
+
+        .message.user {
+            color: var(--amber);
+        }
+
+        .message.ai {
+            color: var(--electric-blue);
+        }
+
+        .stats-row {
+            display: flex;
+            gap: 21px;
+            flex-wrap: wrap;
+        }
+
+        .stat-box {
+            flex: 1;
+            min-width: 120px;
+            text-align: center;
+            padding: 13px;
+            background: #0a0a0a;
+            border-radius: 8px;
+        }
+
+        .stat-box .value {
+            font-size: 28px;
+            font-weight: 700;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-box .label {
+            color: #888;
+            font-size: 11px;
+            margin-top: 4px;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .live-indicator {
+            width: 8px;
+            height: 8px;
+            background: #0f0;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🖤 BlackRoad Cluster Dashboard</h1>
+        <p>Real-time monitoring • Hailo-8 AI + LLM Cluster</p>
+    </div>
+
+    <div class="stats-row">
+        <div class="stat-box">
+            <div class="value" id="total-nodes">4</div>
+            <div class="label">NODES ONLINE</div>
+        </div>
+        <div class="stat-box">
+            <div class="value" id="total-models">20</div>
+            <div class="label">LLM MODELS</div>
+        </div>
+        <div class="stat-box">
+            <div class="value" id="hailo-tops">52</div>
+            <div class="label">HAILO TOPS</div>
+        </div>
+        <div class="stat-box">
+            <div class="value" id="containers">160</div>
+            <div class="label">CONTAINERS</div>
+        </div>
+        <div class="stat-box">
+            <div class="value" id="fps">296</div>
+            <div class="label">YOLO FPS</div>
+        </div>
+    </div>
+
+    <div class="grid" style="margin-top: 21px;">
+        <div class="card">
+            <h2><span class="live-indicator"></span> LLM Cluster</h2>
+            <div class="node">
+                <span class="node-name">lucidia</span>
+                <span class="status online">ONLINE</span>
+            </div>
+            <div class="node">
+                <span class="node-name">cecilia</span>
+                <span class="status online">ONLINE</span>
+            </div>
+            <div class="node">
+                <span class="node-name">octavia</span>
+                <span class="status online">ONLINE</span>
+            </div>
+            <div class="node">
+                <span class="node-name">aria</span>
+                <span class="status online">ONLINE</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>⚡ Hailo-8 AI Accelerators</h2>
+            <div class="node">
+                <span class="node-name">cecilia (26 TOPS)</span>
+                <span class="status online">ACTIVE</span>
+            </div>
+            <div class="node">
+                <span class="node-name">lucidia (26 TOPS)</span>
+                <span class="status online">ACTIVE</span>
+            </div>
+            <div class="metric">
+                <div>
+                    <div class="metric-value">148</div>
+                    <div class="metric-label">FPS per node</div>
+                </div>
+                <div>
+                    <div class="metric-value">2.3W</div>
+                    <div class="metric-label">Power draw</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>📊 LLM Performance</h2>
+            <div class="metric">
+                <div>
+                    <div class="metric-value">5-7</div>
+                    <div class="metric-label">Tokens/sec</div>
+                </div>
+                <div>
+                    <div class="metric-value">3.33</div>
+                    <div class="metric-label">Requests/sec</div>
+                </div>
+            </div>
+            <div style="margin-top: 13px;">
+                <div style="color: #888; font-size: 12px; margin-bottom: 4px;">Throughput</div>
+                <div class="benchmark-bar">
+                    <div class="benchmark-fill" style="width: 65%;"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>🏆 vs NVIDIA</h2>
+            <div class="node">
+                <span>Power Efficiency</span>
+                <span style="color: #0f0;">16x better</span>
+            </div>
+            <div class="node">
+                <span>5-Year TCO</span>
+                <span style="color: #0f0;">31x cheaper</span>
+            </div>
+            <div class="node">
+                <span>Containers</span>
+                <span style="color: #0f0;">160 vs 0</span>
+            </div>
+            <div class="node">
+                <span>Raw Compute</span>
+                <span style="color: #f00;">NVIDIA 18x</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="chat-container">
+        <h2 style="color: var(--hot-pink); margin-bottom: 13px;">💬 Cluster Chat</h2>
+        <div class="chat-messages" id="chat-messages">
+            <div class="message ai">Welcome to BlackRoad Cluster! I'm running on 4 Pi nodes with 20 LLM models.</div>
+        </div>
+        <div class="chat-input">
+            <input type="text" id="chat-input" placeholder="Ask me anything..." onkeypress="if(event.key==='Enter')sendMessage()">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <div style="text-align: center; margin-top: 34px; color: #444; font-size: 12px;">
+        BlackRoad OS • Icarus (b3e01bd9) • 52 TOPS • 20 Models • 160 Containers
+    </div>
+
+    <script>
+        // Simulated chat (in production, connect to actual cluster)
+        const responses = [
+            "I'm running across 4 Raspberry Pi 5 nodes with Hailo-8 AI accelerators!",
+            "Our cluster achieves 296 FPS on YOLOv8s object detection at only 4.6W total.",
+            "We beat NVIDIA on power efficiency by 16x for edge AI inference.",
+            "The cluster has 20 LLM models available including LLaMA, CodeLLaMA, and TinyLLaMA.",
+            "Each query is load-balanced across healthy nodes for optimal throughput.",
+            "We can process 3.33 requests per second with parallel inference!"
+        ];
+
+        function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const messages = document.getElementById('chat-messages');
+            const text = input.value.trim();
+
+            if (!text) return;
+
+            // Add user message
+            messages.innerHTML += `<div class="message user">You: ${text}</div>`;
+
+            // Add AI response (simulated)
+            const response = responses[Math.floor(Math.random() * responses.length)];
+            setTimeout(() => {
+                messages.innerHTML += `<div class="message ai">AI: ${response}</div>`;
+                messages.scrollTop = messages.scrollHeight;
+            }, 500);
+
+            input.value = '';
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        // Simulate live updates
+        setInterval(() => {
+            const fps = 290 + Math.floor(Math.random() * 12);
+            document.getElementById('fps').textContent = fps;
+        }, 2000);
+    </script>
+</body>
+</html>

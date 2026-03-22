@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Pixel Memory Benchmark — Binary vs Trinary</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:#000; color:#f0f0f0; font-family:'JetBrains Mono',monospace; padding:24px; min-height:100vh; }
+h1 { font-size:18px; color:#8844FF; margin-bottom:4px; }
+.sub { font-size:11px; color:#333; margin-bottom:24px; }
+.grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px; }
+.card { background:#0a0a0a; border:1px solid #141414; padding:16px; }
+.card h2 { font-size:12px; color:#555; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:12px; }
+.metric { margin-bottom:8px; }
+.metric .label { font-size:10px; color:#444; }
+.metric .value { font-size:20px; font-weight:700; }
+.binary .value { color:#4488FF; }
+.trinary .value { color:#FF6B2B; }
+.bar-wrap { height:6px; background:#111; margin:4px 0 8px; border-radius:3px; overflow:hidden; }
+.bar { height:100%; border-radius:3px; transition:width 0.6s ease; }
+.bar.bin { background:linear-gradient(90deg,#4488FF,#8844FF); }
+.bar.tri { background:linear-gradient(90deg,#FF6B2B,#FF2255); }
+.bench { background:#050505; border:1px solid #1a1a1a; padding:16px; margin-bottom:12px; }
+.bench h2 { font-size:12px; color:#8844FF; margin-bottom:12px; }
+.row { display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px solid #0d0d0d; font-size:11px; }
+.row .k { color:#555; }
+.row .v { color:#f0f0f0; }
+.winner { color:#00FF88; font-weight:700; }
+.loser { color:#555; }
+button { background:linear-gradient(90deg,#FF6B2B,#FF2255,#8844FF); border:none; color:#fff; padding:10px 24px; font-family:inherit; font-size:12px; cursor:pointer; margin-bottom:16px; }
+button:hover { opacity:0.9; }
+#log { background:#050505; border:1px solid #141414; padding:12px; font-size:10px; color:#444; max-height:300px; overflow-y:auto; white-space:pre-wrap; }
+.highlight { color:#8844FF; }
+</style>
+</head>
+<body>
+
+<h1>Pixel Memory Benchmark</h1>
+<div class="sub">Binary (×4,096) vs Trinary (×531,441) — BlackRoad OS · Z:=yx−w</div>
+
+<div class="grid">
+  <div class="card binary">
+    <h2>Binary Pixel (2^12)</h2>
+    <div class="metric"><div class="label">Multiplier</div><div class="value">×4,096</div></div>
+    <div class="metric"><div class="label">3.3 TB Physical →</div><div class="value" id="bin-logical">13.5 PB</div></div>
+    <div class="metric"><div class="label">Address Width</div><div class="value">48-bit</div></div>
+    <div class="metric"><div class="label">Block Size</div><div class="value">4 KB</div></div>
+  </div>
+  <div class="card trinary">
+    <h2>Trinary Pixel (3^12)</h2>
+    <div class="metric"><div class="label">Multiplier</div><div class="value">×531,441</div></div>
+    <div class="metric"><div class="label">3.3 TB Physical →</div><div class="value" id="tri-logical">1,753.8 PB</div></div>
+    <div class="metric"><div class="label">Address Width</div><div class="value">24-trit</div></div>
+    <div class="metric"><div class="label">Block Size</div><div class="value">519 KB</div></div>
+  </div>
+</div>
+
+<button onclick="runBenchmark()">▸ Run Speed Benchmark (1M ops)</button>
+
+<div class="bench" id="results" style="display:none">
+  <h2>Speed Results</h2>
+  <div id="bench-rows"></div>
+</div>
+
+<div class="bench">
+  <h2>Address Space Comparison (per node)</h2>
+  <div id="space-rows"></div>
+</div>
+
+<div class="bench">
+  <h2>Trinary Tier Cascade (powers of 3)</h2>
+  <div id="tier-rows"></div>
+</div>
+
+<h2 style="font-size:12px; color:#555; margin:16px 0 8px">Live Output</h2>
+<div id="log"></div>
+
+<script type="module">
+// ─── Binary encoding ────────────────────────────────────────────
+function encodePixelAddress(tier, node, block) {
+  const t = (tier & 0xF).toString(16);
+  const n = (node & 0xF).toString(16);
+  const b = block.toString(16).padStart(10, '0');
+  return `px:${t}${n}${b}`;
+}
+
+function decodePixelAddress(addr) {
+  const hex = addr.slice(3);
+  return {
+    tier: parseInt(hex[0], 16),
+    node: parseInt(hex[1], 16),
+    block: parseInt(hex.slice(2), 16),
+  };
+}
+
+// ─── Trinary encoding ───────────────────────────────────────────
+function toTernary(n) {
+  if (n === 0) return '0';
+  const trits = [];
+  let v = n;
+  while (v > 0) { trits.push(v % 3); v = Math.floor(v / 3); }
+  return trits.reverse().join('');
+}
+
+function fromTernary(str) {
+  let v = 0;
+  for (const c of str) v = v * 3 + parseInt(c);
+  return v;
+}
+
+function encodeTriAddress(tier, node, block) {
+  const t = toTernary(tier).padStart(2, '0');
+  const n = toTernary(node).padStart(2, '0');
+  const b = toTernary(block).padStart(20, '0');
+  return `tx:${t}${n}${b}`;
+}
+
+function decodeTriAddress(addr) {
+  const tri = addr.slice(3);
+  return {
+    tier: fromTernary(tri.slice(0, 2)),
+    node: fromTernary(tri.slice(2, 4)),
+    block: fromTernary(tri.slice(4)),
+  };
+}
+
+// ─── Balanced ternary ───────────────────────────────────────────
+function toBalancedTernary(n) {
+  if (n === 0) return '0';
+  const trits = [];
+  let v = Math.abs(n);
+  while (v > 0) {
+    let r = v % 3; v = Math.floor(v / 3);
+    if (r === 2) { r = -1; v += 1; }
+    trits.push(r);
+  }
+  if (n < 0) trits.forEach((t, i) => trits[i] = -t);
+  return trits.reverse().map(t => t === -1 ? 'T' : t === 0 ? '0' : '1').join('');
+}
+
+// ─── Hashing ────────────────────────────────────────────────────
+async function binaryHash(data) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(data));
+  return Array.from(new Uint8Array(buf).slice(0, 6)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function trinaryHash(data) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(data));
+  const arr = new Uint8Array(buf);
+  let num = BigInt(0);
+  for (let i = 0; i < 8; i++) num = (num << BigInt(8)) | BigInt(arr[i]);
+  const trits = [];
+  for (let i = 0; i < 40; i++) { trits.push(Number(num % BigInt(3))); num = num / BigInt(3); }
+  return trits.reverse().join('');
+}
+
+// ─── Logging ────────────────────────────────────────────────────
+const log = document.getElementById('log');
+function emit(msg) { log.textContent += msg + '\n'; log.scrollTop = log.scrollHeight; }
+
+// ─── Populate static tables ─────────────────────────────────────
+const NODES = [
+  { name: 'Pico W ×2', gb: 0.004 },
+  { name: 'Alice', gb: 16 },
+  { name: 'Aria', gb: 32 },
+  { name: 'Anastasia', gb: 25 },
+  { name: 'Cecilia', gb: 128 },
+  { name: 'Gematria', gb: 80 },
+  { name: 'Octavia', gb: 1000 },
+  { name: 'Google Drive', gb: 2048 },
+];
+
+function fmt(gb) {
+  if (gb >= 1e9) return (gb/1e9).toFixed(1) + ' EB';
+  if (gb >= 1e6) return (gb/1e6).toFixed(1) + ' PB';
+  if (gb >= 1e3) return (gb/1e3).toFixed(1) + ' TB';
+  return gb.toFixed(0) + ' GB';
+}
+
+// Space comparison
+const spaceEl = document.getElementById('space-rows');
+NODES.forEach(n => {
+  const binL = n.gb * 4096;
+  const triL = n.gb * 531441;
+  spaceEl.innerHTML += `<div class="row"><span class="k">${n.name} (${n.gb}GB)</span><span class="v" style="color:#4488FF">${fmt(binL)}</span><span class="v" style="color:#FF6B2B">${fmt(triL)}</span></div>`;
+});
+const totalPhys = NODES.reduce((s,n) => s + n.gb, 0);
+spaceEl.innerHTML += `<div class="row" style="border-top:1px solid #222;margin-top:4px;padding-top:8px"><span class="k" style="color:#f0f0f0">TOTAL (${fmt(totalPhys)})</span><span class="v" style="color:#4488FF;font-weight:700">${fmt(totalPhys * 4096)}</span><span class="v" style="color:#FF6B2B;font-weight:700">${fmt(totalPhys * 531441)}</span></div>`;
+
+// Trinary tiers
+const tierEl = document.getElementById('tier-rows');
+for (let i = 0; i <= 12; i++) {
+  const binVal = Math.pow(2, i);
+  const triVal = Math.pow(3, i);
+  tierEl.innerHTML += `<div class="row"><span class="k">Level ${i}</span><span class="v" style="color:#4488FF">2^${i} = ${binVal.toLocaleString()}</span><span class="v" style="color:#FF6B2B">3^${i} = ${triVal.toLocaleString()}</span></div>`;
+}
+
+// ─── Benchmark ──────────────────────────────────────────────────
+const OPS = 1_000_000;
+
+window.runBenchmark = async function() {
+  const resultsEl = document.getElementById('results');
+  const rowsEl = document.getElementById('bench-rows');
+  resultsEl.style.display = 'block';
+  rowsEl.innerHTML = '<div style="color:#555">Running...</div>';
+  emit('═══════════════════════════════════════════');
+  emit('  PIXEL MEMORY BENCHMARK — 1M operations');
+  emit('═══════════════════════════════════════════');
+  emit('');
+
+  const results = [];
+
+  // 1. Address encode speed
+  emit('▸ Address encoding (1M ops)...');
+  let t0 = performance.now();
+  for (let i = 0; i < OPS; i++) encodePixelAddress(i % 12, i % 8, i);
+  const binEncode = performance.now() - t0;
+
+  t0 = performance.now();
+  for (let i = 0; i < OPS; i++) encodeTriAddress(i % 12, i % 8, i);
+  const triEncode = performance.now() - t0;
+
+  results.push({ name: 'Encode address', bin: binEncode, tri: triEncode });
+  emit(`  Binary:  ${binEncode.toFixed(1)}ms`);
+  emit(`  Trinary: ${triEncode.toFixed(1)}ms`);
+  emit('');
+
+  // 2. Address decode speed
+  emit('▸ Address decoding (1M ops)...');
+  const binAddrs = []; const triAddrs = [];
+  for (let i = 0; i < 1000; i++) {
+    binAddrs.push(encodePixelAddress(i % 12, i % 8, i * 1000));
+    triAddrs.push(encodeTriAddress(i % 12, i % 8, i * 1000));
+  }
+
+  t0 = performance.now();
+  for (let i = 0; i < OPS; i++) decodePixelAddress(binAddrs[i % 1000]);
+  const binDecode = performance.now() - t0;
+
+  t0 = performance.now();
+  for (let i = 0; i < OPS; i++) decodeTriAddress(triAddrs[i % 1000]);
+  const triDecode = performance.now() - t0;
+
+  results.push({ name: 'Decode address', bin: binDecode, tri: triDecode });
+  emit(`  Binary:  ${binDecode.toFixed(1)}ms`);
+  emit(`  Trinary: ${triDecode.toFixed(1)}ms`);
+  emit('');
+
+  // 3. Base conversion speed
+  emit('▸ Base conversion (1M ops)...');
+  t0 = performance.now();
+  for (let i = 0; i < OPS; i++) i.toString(16);
+  const binConv = performance.now() - t0;
+
+  t0 = performance.now();
+  for (let i = 0; i < OPS; i++) toTernary(i);
+  const triConv = performance.now() - t0;
+
+  results.push({ name: 'Base conversion', bin: binConv, tri: triConv });
+  emit(`  Binary (hex): ${binConv.toFixed(1)}ms`);
+  emit(`  Trinary:      ${triConv.toFixed(1)}ms`);
+  emit('');
+
+  // 4. Balanced ternary
+  emit('▸ Balanced ternary encode (1M ops)...');
+  t0 = performance.now();
+  for (let i = 0; i < OPS; i++) toBalancedTernary(i - 500000);
+  const balTri = performance.now() - t0;
+  results.push({ name: 'Balanced ternary', bin: binConv, tri: balTri });
+  emit(`  Balanced: ${balTri.toFixed(1)}ms`);
+  emit('');
+
+  // 5. Hash speed (10K ops — crypto is expensive)
+  const HASH_OPS = 10_000;
+  emit(`▸ Content hash (${HASH_OPS.toLocaleString()} ops)...`);
+  t0 = performance.now();
+  for (let i = 0; i < HASH_OPS; i++) await binaryHash(`block-${i}`);
+  const binHash = performance.now() - t0;
+
+  t0 = performance.now();
+  for (let i = 0; i < HASH_OPS; i++) await trinaryHash(`block-${i}`);
+  const triHash = performance.now() - t0;
+
+  results.push({ name: `Hash (${HASH_OPS/1000}K ops)`, bin: binHash, tri: triHash });
+  emit(`  Binary hash:  ${binHash.toFixed(1)}ms (${(HASH_OPS/(binHash/1000)).toFixed(0)} ops/s)`);
+  emit(`  Trinary hash: ${triHash.toFixed(1)}ms (${(HASH_OPS/(triHash/1000)).toFixed(0)} ops/s)`);
+  emit('');
+
+  // 6. Density metric
+  const densityRatio = 531441 / 4096;
+  emit('═══════════════════════════════════════════');
+  emit(`  DENSITY: Trinary is ${densityRatio.toFixed(1)}× denser`);
+  emit(`  Binary:  3.3 TB → ${fmt(3329.004 * 4096)}`);
+  emit(`  Trinary: 3.3 TB → ${fmt(3329.004 * 531441)}`);
+  emit('═══════════════════════════════════════════');
+
+  // Render results table
+  rowsEl.innerHTML = '';
+  results.forEach(r => {
+    const binWin = r.bin <= r.tri;
+    const speedup = binWin ? (r.tri / r.bin).toFixed(1) : (r.bin / r.tri).toFixed(1);
+    rowsEl.innerHTML += `<div class="row">
+      <span class="k">${r.name}</span>
+      <span class="${binWin ? 'winner' : 'loser'}">${r.bin.toFixed(1)}ms</span>
+      <span class="${!binWin ? 'winner' : 'loser'}">${r.tri.toFixed(1)}ms</span>
+      <span class="v">${binWin ? 'Binary' : 'Trinary'} ${speedup}× faster</span>
+    </div>`;
+  });
+  rowsEl.innerHTML += `<div class="row" style="border-top:1px solid #222;margin-top:8px;padding-top:8px">
+    <span class="k" style="color:#f0f0f0">Address density</span>
+    <span style="color:#4488FF">×4,096</span>
+    <span style="color:#FF6B2B;font-weight:700">×531,441</span>
+    <span class="winner">Trinary 129.7× denser</span>
+  </div>`;
+};
+
+emit('BlackRoad OS — Pixel Memory Benchmark loaded');
+emit('Binary (2^12 = 4,096) vs Trinary (3^12 = 531,441)');
+emit('');
+emit('Click "Run Speed Benchmark" to start...');
+</script>
+
+</body>
+</html>

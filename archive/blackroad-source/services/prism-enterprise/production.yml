@@ -1,0 +1,271 @@
+name: production
+slug: prod
+state: active
+description: >-
+  Customer-facing footprint serving blackroad.io. GitHub Pages delivers the
+  marketing site while container workloads deploy through the BlackRoad • Deploy
+  workflow and reusable ECS/Fly harnesses.
+branch: main
+contacts:
+  reviewers:
+    - blackboxprogramming
+  slack: "#eng"
+domains:
+  marketing: https://blackroad.io
+  canonical: https://www.blackroad.io
+  api: https://api.blackroad.io
+  status: https://status.blackroad.io
+infrastructure:
+  cloud: aws
+  region: us-west-2
+  availability_zones:
+    - us-west-2a
+    - us-west-2b
+  network:
+    vpc_cidr: 10.40.0.0/16
+  terraform:
+    root: br-infra-iac/envs/prod
+    backend:
+      bucket: br-tfstate-<unique>
+      key: prod/terraform.tfstate
+      region: us-west-2
+      lock_table: br-terraform-lock
+    modules:
+      - modules/network
+      - modules/ecs-cluster
+      - modules/ecr
+      - modules/rds-postgres
+automation:
+  required_checks:
+    push:
+      main:
+        - BlackRoad • Deploy
+        - change-approve (CAB gate)
+  workflows:
+    - name: BlackRoad • Deploy
+      file: .github/workflows/blackroad-deploy.yml
+      triggers:
+        - push (main)
+        - workflow_dispatch (target: modern | legacy-ssh)
+      summary: >-
+        Builds the SPA, triggers the deploy webhook, verifies health endpoints,
+        purges Cloudflare if necessary, and posts Slack notifications.
+      secrets_required:
+        - BR_DEPLOY_SECRET
+        - BR_DEPLOY_URL
+        - CF_ZONE_ID
+        - CF_API_TOKEN
+        - SLACK_WEBHOOK_URL
+    - name: Reusable Fly.io deploy
+      file: .github/workflows/reusable-fly-deploy.yml
+      triggers:
+        - workflow_call
+      summary: Shared Fly.io deploy harness for ancillary services.
+      secrets_required:
+        - FLY_API_TOKEN
+    - name: Reusable AWS ECS deploy
+      file: .github/workflows/reusable-aws-ecs-deploy.yml
+      triggers:
+        - workflow_call
+      summary: Registers a new task definition revision and rolls ECS services
+        in production.
+      secrets_required:
+        - AWS_PROD_DEPLOY_ROLE_ARN
+        - AWS_PROD_EXTERNAL_ID
+    - name: deploy-canary
+      file: .github/workflows/deploy-canary.yml
+      triggers:
+        - push (main)
+        - workflow_dispatch (canary percent input)
+      summary: Canary promotion that gradually shifts traffic while watching
+        CloudWatch metrics.
+      variables_required:
+        - AWS_REGION
+        - ECR_REPO
+        - ECS_CLUSTER
+        - ECS_SERVICE
+        - TG_BLUE_ARN
+        - TG_GREEN_ARN
+        - HTTPS_LISTENER_ARN
+        - APP_URL
+        - ALB_ARN_SUFFIX
+    - name: deploy-canary-ladder
+      file: .github/workflows/deploy-canary-ladder.yml
+      triggers:
+        - workflow_dispatch (steps + soak configuration)
+      summary: Multi-step promotion that increases canary traffic in stages with
+        automated rollback.
+      variables_required:
+        - AWS_REGION
+        - ECR_REPO
+        - ECS_CLUSTER
+        - ECS_SERVICE
+        - TG_BLUE_ARN
+        - TG_GREEN_ARN
+        - HTTPS_LISTENER_ARN
+        - APP_URL
+        - ALB_ARN_SUFFIX
+        - API_URL
+    - name: Deploy & Self-Heal
+      file: .github/workflows/deploy-self-heal.yml
+      triggers:
+        - push (main)
+      summary: Legacy SSH fallback that rsyncs artifacts to long-lived hosts and
+        rolls back automatically when health probes fail.
+      secrets_required:
+        - BR_HOST
+        - BR_USER
+        - BR_SSH_KEY
+    - name: BlackRoad API • ECS Deploy
+      file: .github/workflows/blackroad-api-ecs.yml
+      triggers:
+        - workflow_dispatch
+        - workflow_call
+      summary: >-
+        Uses the reusable ECS deployment workflow to roll out the API service on
+        Fargate and optionally waits for stability checks to pass.
+      secrets:
+        - PROD_AWS_DEPLOY_ROLE_ARN
+        - PROD_ECS_CLUSTER
+        - PROD_ECS_SERVICE
+        - PROD_ECS_CONTAINER
+deployments:
+  - service: marketing-site
+    type: static-site
+    provider: github-pages
+    workflow: .github/workflows/blackroad-deploy.yml
+    artifacts:
+      path: sites/blackroad
+    domain: https://blackroad.io
+    health_check: https://blackroad.io/healthz
+  - service: api-gateway
+    type: container-service
+    provider: aws-ecs-fargate
+    terraform_directory: br-infra-iac/envs/prod
+    terraform_backend:
+      bucket: br-tfstate-<unique>
+      key: prod/terraform.tfstate
+      region: us-west-2
+      lock_table: br-terraform-lock
+    module: modules/ecs-service-alb
+    state: planned
+    notes: Production wiring follows the dev module once traffic moves fully to
+      ECS.
+    health_check: https://api.blackroad.io/health
+    image_repository: br-api-gateway
+    scaling:
+      desired_count: 2
+      min_capacity: 2
+      max_capacity: 6
+    environment:
+      NODE_ENV: production
+    workflow: .github/workflows/blackroad-deploy.yml
+  - service: ollama-bridge
+    type: container-service
+    provider: fly-io
+    app: blackroad-ollama-bridge
+    workflow: .github/workflows/ollama-bridge-deploy.yml
+    domain: https://blackroad-ollama-bridge.fly.dev
+    health_check: https://blackroad-ollama-bridge.fly.dev/api/llm/health
+    environment:
+      MODEL_DEFAULT: qwen2:1.5b
+    secrets:
+      - FLY_API_TOKEN
+      - OLLAMA_BASE_URL
+    notes: >-
+      Runs the lightweight bridge between the Prism console and remote Ollama
+      instances. Deployed via Fly.io using the dedicated GitHub Actions workflow
+      with health verification.
+change_management:
+  approvals:
+    - .github/workflows/change-approve.yml
+  policy_gates:
+    - name: cab-approval
+      description: CAB approval must clear via change-approve.yml before
+        promoting builds.
+      workflow: .github/workflows/change-approve.yml
+    - name: release-runbook
+      description: Execute the infra release policy so rollback and comms stay
+        coordinated.
+      runbook: runbooks/examples/infra_release_policy.yaml
+  runbooks:
+    - README-DEPLOY.md
+    - README-OPS.md
+    - RUNBOOKS/01_ollama_bridge_rollforward.md
+    - runbooks/examples/release_rollback_forward.yaml
+observability:
+  health_checks:
+    - https://blackroad.io/healthz
+    - https://blackroad.io/api/version
+    - https://api.blackroad.io/health
+    - name: frontend
+      url: https://blackroad.io/healthz
+    - name: api
+      url: https://api.blackroad.io/health
+    - name: ollama-bridge
+      url: https://blackroad-ollama-bridge.fly.dev/api/llm/health
+  scripts:
+    - scripts/blackroad-autoheal.sh
+url: https://blackroad.io
+reviewers:
+  users:
+    - blackboxprogramming
+url: https://blackroad.io
+aliases:
+  - https://www.blackroad.io
+description: Primary customer-facing footprint.
+reviewers:
+  - blackboxprogramming
+status: active
+description: >-
+  Primary customer-facing footprint for the BlackRoad Prism Console.
+domains:
+  primary: https://blackroad.io
+deploy_targets:
+  - provider: docker-compose
+    status: active
+    config: docker-compose.prod.yml
+    image: ghcr.io/blackroad-prism/blackroad-prism-console:latest
+    notes:
+      - Reverse proxy and TLS termination handled by the bundled Caddy service.
+  - provider: fly.io
+    status: planned
+    app: blackroad-prism-console
+    region: ord
+    release_channel: main
+    notes:
+      - Wire up once Fly.io credentials are stored and validated in CI.
+  - provider: aws-ecs
+    status: planned
+    cluster: prism-console
+    service: production
+    region: us-east-2
+    release_channel: main
+    notes:
+      - Mirrors the Fly.io footprint for redundancy once provisioned.
+ci_cd:
+  branch: main
+  promotes_from: staging
+  workflows:
+    - deploy/ci/woodpecker.yml
+    - deploy/ci/semgrep.yml
+approvals:
+  required: true
+  reviewers:
+    - blackboxprogramming
+  change_window: Coordinate via README-OPS.md#hybrid-deploy
+  policy_gates:
+    - SECURITY_BASELINE.md
+runbooks:
+  deploy: RUNBOOK.md#blackroad-stack-runbook
+  rollback: RUNBOOK.md#restoring-from-backup
+observability:
+  dashboards:
+    grafana: ops/observability/grafana
+  alerts:
+    pagerduty: pending
+  logging:
+    primary: pending
+notes:
+  - Cloudflare cache procedures are documented in sites/blackroad/AGENTS.md.
+  - Update `deploy_targets` entries as new infrastructure comes online.

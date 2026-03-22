@@ -1,0 +1,409 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://blackroad-os.dev/schemas/content-asset.schema.json",
+  "title": "Content Asset",
+  "description": "🎬 Schema for individual content pieces in the Creator Studio",
+  "type": "object",
+  "required": [
+    "id",
+    "title",
+    "content_type",
+    "status",
+    "created_at",
+    "created_by"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for the asset",
+      "pattern": "^asset-[a-z0-9-]+$"
+    },
+    "title": {
+      "type": "string",
+      "description": "Asset title",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "content_type": {
+      "type": "string",
+      "description": "Type of content",
+      "enum": [
+        "post",
+        "thread",
+        "video",
+        "email",
+        "landing_page",
+        "deck",
+        "article",
+        "newsletter",
+        "ad",
+        "banner",
+        "infographic",
+        "podcast_episode",
+        "webinar",
+        "ebook",
+        "whitepaper",
+        "case_study",
+        "other"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "description": "Current workflow state (from content-pipeline)",
+      "enum": [
+        "ideation",
+        "draft",
+        "review",
+        "approve",
+        "publish",
+        "measure",
+        "archive"
+      ]
+    },
+    "brief_id": {
+      "type": "string",
+      "description": "Reference to the creative brief that initiated this asset"
+    },
+    "campaign_id": {
+      "type": "string",
+      "description": "Reference to parent campaign (if applicable)"
+    },
+    "content": {
+      "type": "object",
+      "description": "📝 The actual content",
+      "properties": {
+        "headline": {
+          "type": "string",
+          "maxLength": 150
+        },
+        "subheadline": {
+          "type": "string",
+          "maxLength": 300
+        },
+        "body": {
+          "type": "string",
+          "description": "Main content body (text, markdown, etc.)"
+        },
+        "cta": {
+          "type": "object",
+          "description": "Call to action",
+          "properties": {
+            "text": {
+              "type": "string"
+            },
+            "url": {
+              "type": "string",
+              "format": "uri"
+            }
+          }
+        },
+        "media": {
+          "type": "array",
+          "description": "Media attachments",
+          "items": {
+            "type": "object",
+            "required": ["type"],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["image", "video", "audio", "document"]
+              },
+              "url": {
+                "type": "string",
+                "format": "uri"
+              },
+              "alt_text": {
+                "type": "string"
+              },
+              "dimensions": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "hashtags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "mentions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "channels": {
+      "type": "array",
+      "description": "📡 Distribution channels",
+      "items": {
+        "type": "object",
+        "required": ["channel"],
+        "properties": {
+          "channel": {
+            "type": "string",
+            "enum": [
+              "twitter",
+              "linkedin",
+              "instagram",
+              "facebook",
+              "tiktok",
+              "youtube",
+              "email",
+              "blog",
+              "website",
+              "paid_ads",
+              "podcast",
+              "other"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": ["planned", "scheduled", "published", "failed"]
+          },
+          "publish_date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Published URL"
+          },
+          "format_variant": {
+            "type": "string",
+            "description": "Channel-specific format (e.g., 'square', 'story', 'reel')"
+          }
+        }
+      }
+    },
+    "brand_references": {
+      "type": "object",
+      "description": "🎨 References to brand assets from blackroad-os-brand",
+      "properties": {
+        "brand_kit_id": {
+          "type": "string"
+        },
+        "color_palette": {
+          "type": "string"
+        },
+        "typography": {
+          "type": "string"
+        },
+        "voice_and_tone": {
+          "type": "string"
+        },
+        "logo_variant": {
+          "type": "string"
+        }
+      }
+    },
+    "external_assets": {
+      "type": "array",
+      "description": "🧾 Links to external design assets (Canva, Figma, etc.)",
+      "items": {
+        "type": "object",
+        "required": ["url", "type"],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["canva", "figma", "google_drive", "dropbox", "notion", "other"]
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "workflow_history": {
+      "type": "array",
+      "description": "🔁 State transition history",
+      "items": {
+        "type": "object",
+        "required": ["from_state", "to_state", "timestamp", "actor"],
+        "properties": {
+          "from_state": {
+            "type": "string"
+          },
+          "to_state": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "actor": {
+            "type": "string",
+            "description": "User or agent that triggered the transition"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "approvals": {
+      "type": "array",
+      "description": "✅ Approval records",
+      "items": {
+        "type": "object",
+        "required": ["type", "status", "reviewer"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["editorial", "legal", "brand", "executive", "other"]
+          },
+          "status": {
+            "type": "string",
+            "enum": ["pending", "approved", "rejected", "changes_requested"]
+          },
+          "reviewer": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "risk_level": {
+      "type": "string",
+      "description": "⚠️ Content risk classification",
+      "enum": ["low", "medium", "high"],
+      "default": "low"
+    },
+    "requires_legal_review": {
+      "type": "boolean",
+      "description": "Whether legal review is required",
+      "default": false
+    },
+    "requires_brand_review": {
+      "type": "boolean",
+      "description": "Whether brand review is required",
+      "default": false
+    },
+    "performance": {
+      "type": "object",
+      "description": "📊 Performance metrics",
+      "properties": {
+        "views": {
+          "type": "integer"
+        },
+        "impressions": {
+          "type": "integer"
+        },
+        "engagement_rate": {
+          "type": "number"
+        },
+        "click_through_rate": {
+          "type": "number"
+        },
+        "shares": {
+          "type": "integer"
+        },
+        "comments": {
+          "type": "integer"
+        },
+        "likes": {
+          "type": "integer"
+        },
+        "conversion_rate": {
+          "type": "number"
+        },
+        "sentiment_score": {
+          "type": "number",
+          "minimum": -1,
+          "maximum": 1
+        }
+      }
+    },
+    "repurposed_from": {
+      "type": "string",
+      "description": "Asset ID this was repurposed from (if applicable)"
+    },
+    "repurposed_to": {
+      "type": "array",
+      "description": "Asset IDs this was repurposed into",
+      "items": {
+        "type": "string"
+      }
+    },
+    "agent_generated": {
+      "type": "boolean",
+      "description": "🤖 Whether this asset was generated by an agent",
+      "default": false
+    },
+    "agent_id": {
+      "type": "string",
+      "description": "ID of the agent that generated this asset"
+    },
+    "tags": {
+      "type": "array",
+      "description": "Content tags for organization",
+      "items": {
+        "type": "string"
+      }
+    },
+    "seo": {
+      "type": "object",
+      "description": "SEO metadata",
+      "properties": {
+        "meta_title": {
+          "type": "string",
+          "maxLength": 60
+        },
+        "meta_description": {
+          "type": "string",
+          "maxLength": 160
+        },
+        "keywords": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "canonical_url": {
+          "type": "string",
+          "format": "uri"
+        }
+      }
+    },
+    "archive_id": {
+      "type": "string",
+      "description": "🧾 Reference in blackroad-os-archive"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "created_by": {
+      "type": "string"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "published_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 1
+    }
+  }
+}

@@ -1,0 +1,19 @@
+id: continuous_improvement
+description: Continuously refine courses based on learner outcomes and feedback.
+steps:
+  - id: ingest_outcomes
+    agent: edu-student-success-bot-01
+    input: learner_outcomes
+    output: risk_profiles
+  - id: refresh_syllabus
+    agent: edu-syllabus-architect-01
+    input: { objectives: updated_objectives }
+    output: revised_syllabus
+  - id: refresh_assessments
+    agent: edu-assessment-designer-01
+    input: revised_syllabus.objectives
+    output: updated_assessments
+  - id: publish_updates
+    agent: edu-syllabus-architect-01
+    input: { syllabus: revised_syllabus, assessments: updated_assessments }
+    output: update_package

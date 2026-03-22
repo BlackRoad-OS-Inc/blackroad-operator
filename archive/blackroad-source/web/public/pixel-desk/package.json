@@ -1,0 +1,102 @@
+{
+  "name": "pixel-agent-desk",
+  "version": "2.0.0",
+  "description": "Visualize multi-agent Claude CLI sessions as pixel avatars in real time",
+  "main": "src/main.js",
+  "scripts": {
+    "postinstall": "node src/install.js",
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "test": "jest",
+    "test:coverage": "jest --coverage",
+    "test:watch": "jest --watch",
+    "dashboard": "node src/dashboard-server.js",
+    "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix",
+    "format": "prettier --write \"src/**/*.js\" \"__tests__/**/*.js\"",
+    "format:check": "prettier --check \"src/**/*.js\" \"__tests__/**/*.js\"",
+    "dist": "electron-builder",
+    "dist:win": "electron-builder --win",
+    "dist:mac": "electron-builder --mac",
+    "dist:linux": "electron-builder --linux"
+  },
+  "keywords": [
+    "electron",
+    "pixel-art",
+    "claude-cli",
+    "multi-agent",
+    "jsonl"
+  ],
+  "author": "Mgpixelart",
+  "homepage": "https://github.com/Mgpixelart/pixel-agent-desk",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Mgpixelart/pixel-agent-desk.git"
+  },
+  "license": "MIT",
+  "build": {
+    "appId": "com.mgpixelart.pixel-agent-desk",
+    "productName": "Pixel Agent Desk",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "src/**/*",
+      "public/**/*",
+      "styles.css",
+      "index.html",
+      "dashboard.html",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        },
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ]
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": ["x64", "arm64"]
+        }
+      ],
+      "category": "public.app-category.developer-tools"
+    },
+    "linux": {
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": ["x64"]
+        },
+        {
+          "target": "deb",
+          "arch": ["x64"]
+        }
+      ],
+      "category": "Development"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.0.0",
+    "@types/jest": "^30.0.0",
+    "electron": "^32.0.0",
+    "electron-builder": "^25.1.0",
+    "eslint": "^9.0.0",
+    "jest": "^30.2.0",
+    "prettier": "^3.0.0"
+  },
+  "dependencies": {
+    "ajv": "^8.18.0"
+  }
+}

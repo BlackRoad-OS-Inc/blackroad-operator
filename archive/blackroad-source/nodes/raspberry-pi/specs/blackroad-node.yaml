@@ -1,0 +1,109 @@
+# BlackRoad Pi Fleet Node — ESPHome Configuration
+# Monitors temperature, CPU, memory, and reports to MQTT broker
+
+esphome:
+  name: blackroad-node-01
+  comment: "BlackRoad Pi Fleet Sensor Node v1.0"
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+logger:
+  level: INFO
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  fast_connect: true
+  ap:
+    ssid: "BR-Node Fallback"
+    password: !secret fallback_password
+
+captive_portal:
+
+ota:
+  password: !secret ota_password
+
+mqtt:
+  broker: !secret mqtt_broker
+  port: 1883
+  username: !secret mqtt_user
+  password: !secret mqtt_password
+  topic_prefix: blackroad/fleet
+  keepalive: 30s
+  on_connect:
+    - logger.log: "Connected to BlackRoad MQTT broker"
+
+# ── Sensors ──────────────────────────────────────────────────────────────────
+
+sensor:
+  - platform: internal_temperature
+    name: "Node CPU Temperature"
+    update_interval: 30s
+    unit_of_measurement: "°C"
+    on_value:
+      - if:
+          condition:
+            sensor.in_range:
+              id: cpu_temp
+              above: 70.0
+          then:
+            - logger.log: "ALERT: CPU temp exceeded 70°C"
+            - mqtt.publish:
+                topic: "blackroad/fleet/alerts"
+                payload: !lambda |
+                  return "HIGH_TEMP:" + to_string(x);
+
+  - platform: wifi_signal
+    name: "WiFi Signal"
+    update_interval: 60s
+
+  - platform: uptime
+    name: "Node Uptime"
+    update_interval: 60s
+
+# ── Status light (optional RGB LED) ──────────────────────────────────────────
+
+light:
+  - platform: neopixelbus
+    type: GRB
+    variant: WS2812
+    pin: GPIO18
+    num_leds: 1
+    id: status_light
+    name: "Status LED"
+
+# ── Binary sensors ────────────────────────────────────────────────────────────
+
+binary_sensor:
+  - platform: status
+    name: "Node Status"
+    on_press:
+      - light.turn_on:
+          id: status_light
+          red: 0%
+          green: 100%
+          blue: 0%
+    on_release:
+      - light.turn_on:
+          id: status_light
+          red: 100%
+          green: 0%
+          blue: 0%
+
+# ── Custom heartbeat to MQTT ──────────────────────────────────────────────────
+
+interval:
+  - interval: 15s
+    then:
+      - mqtt.publish:
+          topic: "blackroad/fleet/heartbeat"
+          payload: !lambda |
+            return "{\"node\":\"" + App.get_name() + "\",\"ts\":" + to_string(millis()) + "}";
+
+# ── OTA updates via blackroad-hardware deploy ─────────────────────────────────
+
+# `br pi deploy-esphome <node-name>` triggers OTA update
+# See hardware-specs/deploy-fleet.sh for fleet rollout

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>BlackRoad — World Orb Demo</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0a0a0a; color: #e5e5e5; font-family: -apple-system, sans-serif; height: 100vh; display: flex; flex-direction: column; }
+  #header { padding: 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #1a1a1a; }
+  #header h1 { background: linear-gradient(135deg, #F5A623, #FF1D6C, #9C27B0, #2979FF); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 1.2rem; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: #FF1D6C; animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1}50%{opacity:.3} }
+  #world-orb { flex: 1; position: relative; }
+  #info { position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,.7); border: 1px solid #333; border-radius: 8px; padding: 12px 20px; text-align: center; backdrop-filter: blur(8px); }
+  #info .type { font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; color: #888; }
+  #info .title { font-size: .9rem; color: #e5e5e5; margin-top: 4px; }
+</style>
+</head>
+<body>
+<div id="header">
+  <div class="dot"></div>
+  <h1>🌌 BlackRoad OS — World Artifact</h1>
+</div>
+<div id="world-orb" style="position:relative;">
+  <canvas id="orb-canvas"></canvas>
+  <div id="info">
+    <div class="type" id="world-type">loading...</div>
+    <div class="title" id="world-title">Fetching latest world...</div>
+  </div>
+</div>
+<script type="module">
+  import { mountDemo } from './worlds-viewer.js';
+  mountDemo('world-orb').catch(console.error);
+</script>
+</body>
+</html>

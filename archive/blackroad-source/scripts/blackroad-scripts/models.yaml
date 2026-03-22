@@ -1,0 +1,52 @@
+# Model Routing Rules
+# Maps task types to appropriate models
+
+routing:
+  # Simple queries → Fast model
+  - pattern: "simple|quick|what is|explain briefly"
+    models: [fast]
+    parallel: false
+  
+  # Code generation → Code model + Review
+  - pattern: "create|generate|write|implement|build"
+    models: [code, review]
+    parallel: true
+  
+  # Refactoring → Multiple perspectives
+  - pattern: "refactor|improve|optimize|clean up"
+    models: [code, smart]
+    parallel: true
+  
+  # Debugging → Code + Smart reasoning
+  - pattern: "bug|error|fix|debug|not working|broken"
+    models: [code, smart]
+    parallel: true
+  
+  # Architecture → Smart model
+  - pattern: "architecture|design|structure|organize|plan"
+    models: [smart]
+    parallel: false
+  
+  # Review → Review + Smart
+  - pattern: "review|check|validate|security|audit"
+    models: [review, smart]
+    parallel: true
+  
+  # Testing → Code model
+  - pattern: "test|coverage|assert|spec"
+    models: [code]
+    parallel: false
+  
+  # Documentation → Smart model
+  - pattern: "document|readme|api doc|comments|explain"
+    models: [smart]
+    parallel: false
+
+# Performance tracking
+performance:
+  track: true
+  metrics:
+    - response_time
+    - token_usage
+    - user_preference
+  auto_optimize: true

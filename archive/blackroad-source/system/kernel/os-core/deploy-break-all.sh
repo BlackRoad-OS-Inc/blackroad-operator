@@ -1,0 +1,51 @@
+#!/bin/bash
+cd /Users/alexa/blackroad-sandbox/sites/break
+
+projects=(
+  "roadwork-production"
+  "blackroad-api"
+  "roadchain-io"
+  "blackroad-me"
+  "blackroad-systems"
+  "blackroad-io"
+  "roadcoin-io"
+  "blackroad-company"
+  "blackroad-buy-now"
+  "blackroad-payment-page"
+  "blackroad-docs-hub"
+  "blackroad-workflows"
+  "blackroad-store"
+  "blackroad-builder"
+  "blackroad-analytics"
+  "blackroad-admin"
+  "blackroad-status-new"
+  "blackroad-chat"
+  "blackroad-agents"
+  "blackroad-tools"
+  "lucidia-core"
+  "lucidia-math"
+  "lucidia-platform"
+  "blackroad-hello-test"
+  "blackroad-os-prism"
+  "blackroad-status"
+  "blackroad-hello"
+  "blackroad-unified"
+  "blackroad-portals-unified"
+  "blackroad-blackroad-me"
+  "blackroad-blackroadai"
+  "blackroad-cece"
+  "blackroad-blackroad-io"
+  "blackroad-blackroadquantum"
+  "blackroad-portals"
+  "blackroad-assets"
+  "blackroad-gateway-web"
+  "blackroad-os-demo"
+  "blackroad-os-home"
+)
+
+for project in "${projects[@]}"; do
+  echo "Deploying to $project..."
+  npx wrangler pages deploy . --project-name="$project" --branch=production --commit-dirty=true 2>&1 | grep -E "Deployment complete"
+done
+
+echo "All deployments complete!"

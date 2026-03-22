@@ -1,0 +1,223 @@
+#!/usr/bin/env bash
+# br-video — BlackRoad Video Production System
+# Usage: br-video [list|preview|record|serve] [video-name]
+
+set -e
+
+PINK='\033[38;5;205m'
+AMBER='\033[38;5;214m'
+GREEN='\033[38;5;82m'
+BLUE='\033[38;5;69m'
+VIOLET='\033[38;5;135m'
+RESET='\033[0m'
+
+VIDEOS_DIR="$HOME/blackroad-operator/videos"
+
+case "${1:-list}" in
+  list)
+    echo -e "${PINK}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RESET}"
+    echo -e "${PINK}  BlackRoad Video Library${RESET}"
+    echo -e "${PINK}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RESET}"
+    echo ""
+    for category in brand product social tutorials roadtv; do
+      if [[ -d "$VIDEOS_DIR/$category" ]]; then
+        echo -e "  ${VIOLET}▸ $category${RESET}"
+        for f in "$VIDEOS_DIR/$category"/*.html; do
+          [[ -f "$f" ]] || continue
+          name=$(basename "$f" .html)
+          title=$(grep -m1 '<title>' "$f" | sed 's/.*<title>\(.*\)<\/title>.*/\1/' 2>/dev/null || echo "$name")
+          # Detect aspect ratio
+          if grep -q 'width=1080.*height=1920\|width:1080.*height:1920' "$f" 2>/dev/null; then
+            ratio="9:16"
+          else
+            ratio="16:9"
+          fi
+          echo -e "    ${GREEN}${name}${RESET}  ${BLUE}[$ratio]${RESET}  $title"
+        done
+        echo ""
+      fi
+    done
+    ;;
+
+  preview|open)
+    video="${2:-}"
+    if [[ -z "$video" ]]; then
+      echo -e "${AMBER}Usage: br-video preview <category/name>${RESET}"
+      echo -e "  Example: br-video preview brand/01-manifesto"
+      exit 1
+    fi
+    file="$VIDEOS_DIR/${video}.html"
+    if [[ ! -f "$file" ]]; then
+      # Try finding it
+      file=$(find "$VIDEOS_DIR" -name "${video}*.html" 2>/dev/null | head -1)
+    fi
+    if [[ -f "$file" ]]; then
+      echo -e "${GREEN}Opening: $file${RESET}"
+      open "$file"
+    else
+      echo -e "${AMBER}Video not found: $video${RESET}"
+      exit 1
+    fi
+    ;;
+
+  serve)
+    port="${2:-8888}"
+    echo -e "${PINK}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RESET}"
+    echo -e "${PINK}  Video Preview Server${RESET}"
+    echo -e "${PINK}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RESET}"
+    echo ""
+    echo -e "  ${GREEN}Serving at: http://localhost:${port}${RESET}"
+    echo -e "  ${BLUE}Videos dir: $VIDEOS_DIR${RESET}"
+    echo ""
+    echo -e "  ${VIOLET}Brand:${RESET}"
+    for f in "$VIDEOS_DIR/brand"/*.html; do
+      [[ -f "$f" ]] && echo -e "    http://localhost:${port}/brand/$(basename "$f")"
+    done
+    echo -e "  ${VIOLET}Product:${RESET}"
+    for f in "$VIDEOS_DIR/product"/*.html; do
+      [[ -f "$f" ]] && echo -e "    http://localhost:${port}/product/$(basename "$f")"
+    done
+    echo -e "  ${VIOLET}Social:${RESET}"
+    for f in "$VIDEOS_DIR/social"/*.html; do
+      [[ -f "$f" ]] && echo -e "    http://localhost:${port}/social/$(basename "$f")"
+    done
+    echo -e "  ${VIOLET}Tutorials:${RESET}"
+    for f in "$VIDEOS_DIR/tutorials"/*.html; do
+      [[ -f "$f" ]] && echo -e "    http://localhost:${port}/tutorials/$(basename "$f")"
+    done
+    echo -e "  ${VIOLET}RoadTV:${RESET}"
+    for f in "$VIDEOS_DIR/roadtv"/*.html; do
+      [[ -f "$f" ]] && echo -e "    http://localhost:${port}/roadtv/$(basename "$f")"
+    done
+    echo ""
+    cd "$VIDEOS_DIR" && python3 -m http.server "$port"
+    ;;
+
+  record)
+    video="${2:-}"
+    if [[ -z "$video" ]]; then
+      echo -e "${AMBER}Usage: br-video record <category/name> [duration-seconds]${RESET}"
+      exit 1
+    fi
+    duration="${3:-30}"
+    file="$VIDEOS_DIR/${video}.html"
+    if [[ ! -f "$file" ]]; then
+      file=$(find "$VIDEOS_DIR" -name "${video}*.html" 2>/dev/null | head -1)
+    fi
+    if [[ ! -f "$file" ]]; then
+      echo -e "${AMBER}Video not found: $video${RESET}"
+      exit 1
+    fi
+
+    output_dir="$HOME/blackroad-operator/videos/output"
+    mkdir -p "$output_dir"
+    output_name=$(basename "$file" .html)
+    output_file="$output_dir/${output_name}-$(date +%Y%m%d).mp4"
+
+    # Detect dimensions
+    if grep -q 'width=1080.*height=1920\|width:1080.*height:1920' "$file" 2>/dev/null; then
+      width=1080; height=1920
+    else
+      width=1920; height=1080
+    fi
+
+    echo -e "${PINK}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RESET}"
+    echo -e "${PINK}  Recording: $(basename "$file")${RESET}"
+    echo -e "${PINK}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RESET}"
+    echo ""
+    echo -e "  ${BLUE}Resolution:${RESET}  ${width}x${height}"
+    echo -e "  ${BLUE}Duration:${RESET}    ${duration}s"
+    echo -e "  ${BLUE}Output:${RESET}      $output_file"
+    echo ""
+
+    # Check for puppeteer/playwright
+    if command -v npx &>/dev/null && npx playwright --version &>/dev/null 2>&1; then
+      echo -e "${GREEN}Using Playwright to record...${RESET}"
+      # Start local server
+      cd "$VIDEOS_DIR"
+      python3 -m http.server 9876 &
+      SERVER_PID=$!
+      sleep 1
+
+      # Record with playwright
+      node -e "
+        const { chromium } = require('playwright');
+        (async () => {
+          const browser = await chromium.launch();
+          const page = await browser.newPage({ viewport: { width: $width, height: $height } });
+          await page.goto('http://localhost:9876/$(dirname "$video")/$(basename "$file")');
+
+          // Screenshot sequence for ffmpeg
+          const frames = $duration * 30;
+          const outputDir = '$output_dir/frames-${output_name}';
+          require('fs').mkdirSync(outputDir, { recursive: true });
+
+          for (let i = 0; i < frames; i++) {
+            await page.screenshot({ path: outputDir + '/frame-' + String(i).padStart(5, '0') + '.png' });
+            await page.waitForTimeout(33);
+          }
+
+          await browser.close();
+          console.log('Frames captured. Converting to video...');
+        })();
+      " 2>/dev/null
+
+      kill $SERVER_PID 2>/dev/null
+
+      # Convert frames to video with ffmpeg
+      if command -v ffmpeg &>/dev/null; then
+        ffmpeg -framerate 30 -i "$output_dir/frames-${output_name}/frame-%05d.png" \
+          -c:v libx264 -pix_fmt yuv420p -crf 18 "$output_file" -y 2>/dev/null
+        rm -rf "$output_dir/frames-${output_name}"
+        echo -e "${GREEN}✓ Video saved: $output_file${RESET}"
+      else
+        echo -e "${AMBER}ffmpeg not found. Frames saved to: $output_dir/frames-${output_name}/${RESET}"
+      fi
+    else
+      echo -e "${AMBER}For automated recording, install playwright: npm i -g playwright${RESET}"
+      echo -e "${AMBER}Or use OBS/screen recording with: br-video preview $video${RESET}"
+      echo ""
+      echo -e "${GREEN}Opening in browser for manual recording...${RESET}"
+      open "$file"
+    fi
+    ;;
+
+  create)
+    shift
+    exec br-video-create "$@"
+    ;;
+
+  example)
+    echo -e "${GREEN}Generating example config...${RESET}"
+    br-video-create --example > "$VIDEOS_DIR/example-config.json"
+    echo -e "${GREEN}✓ Saved: $VIDEOS_DIR/example-config.json${RESET}"
+    echo -e "${BLUE}  Edit it, then: br-video create example-config.json output.html${RESET}"
+    ;;
+
+  types)
+    br-video-create --types
+    ;;
+
+  *)
+    echo -e "${PINK}br-video${RESET} — BlackRoad Video Production"
+    echo ""
+    echo -e "  ${GREEN}list${RESET}                    List all videos"
+    echo -e "  ${GREEN}preview${RESET} <name>          Open video in browser"
+    echo -e "  ${GREEN}serve${RESET} [port]            Start preview server (default: 8888)"
+    echo -e "  ${GREEN}record${RESET} <name> [seconds] Record video to MP4"
+    echo -e "  ${GREEN}create${RESET} <config> [output] Generate video from JSON config"
+    echo -e "  ${GREEN}example${RESET}                 Generate example config file"
+    echo -e "  ${GREEN}types${RESET}                   List available scene types"
+    echo ""
+    echo -e "  ${VIOLET}Scene Types:${RESET}"
+    echo -e "    title, subtitle, bigtext, quote, stats, bullets, cards,"
+    echo -e "    timeline, terminal, comparison, code, split, flow,"
+    echo -e "    metrics, image, logos, cta, countdown, reveal"
+    echo ""
+    echo -e "  Examples:"
+    echo -e "    br-video preview brand/01-manifesto"
+    echo -e "    br-video serve 8888"
+    echo -e "    br-video record social/01-30s-intro 30"
+    echo -e "    br-video create my-config.json videos/brand/03-new.html"
+    ;;
+esac

@@ -1,0 +1,227 @@
+# 📆 Campaign Flow Workflow
+# Defines the end-to-end lifecycle for creative campaigns
+
+name: campaign-flow
+description: |
+  Campaign lifecycle workflow from theme definition through launch,
+  analysis, and archival. Coordinates multiple content assets across channels.
+version: "1.0.0"
+
+# 🎯 Campaign types
+campaign_types:
+  - product_launch
+  - brand_awareness
+  - demand_generation
+  - event_promotion
+  - seasonal
+  - partnership
+  - thought_leadership
+
+# 📆 Campaign channels
+channels:
+  - social_media
+  - email
+  - blog
+  - paid_ads
+  - landing_page
+  - video
+  - podcast
+  - webinar
+  - press_release
+
+# 🔁 Workflow states
+states:
+  - id: theme
+    name: Theme Definition
+    description: Define campaign concept, goals, and target audience
+    allowed_roles:
+      - strategist
+      - creative_director
+      - marketing_lead
+    allowed_agents:
+      - copy-helper
+    required_outputs:
+      - campaign_brief
+      - target_audience
+      - key_messages
+      - success_metrics
+    next_states:
+      - assets
+
+  - id: assets
+    name: Asset Creation
+    description: Create or collect all content pieces for the campaign
+    allowed_roles:
+      - creator
+      - designer
+      - writer
+      - video_producer
+    allowed_agents:
+      - copy-helper
+      - thumbnail-suggester
+      - repurposer
+    required_outputs:
+      - asset_list
+      - asset_status_tracker
+    next_states:
+      - channels
+      - theme  # Revisit theme if needed
+
+  - id: channels
+    name: Channel Assignment
+    description: Assign content assets to distribution channels
+    allowed_roles:
+      - channel_manager
+      - marketing_ops
+    allowed_agents:
+      - calendar-bot
+    required_outputs:
+      - channel_mapping
+      - format_specifications
+    next_states:
+      - schedule
+      - assets  # Create channel-specific variants
+
+  - id: schedule
+    name: Scheduling
+    description: Set timing, cadence, and dependencies
+    allowed_roles:
+      - marketing_ops
+      - campaign_manager
+    allowed_agents:
+      - calendar-bot
+    required_outputs:
+      - content_calendar
+      - dependency_map
+      - go_live_checklist
+    next_states:
+      - launch
+      - channels  # Adjust channel assignments
+
+  - id: launch
+    name: Launch
+    description: Execute the campaign across all channels
+    allowed_roles:
+      - marketing_ops
+      - publisher
+      - campaign_manager
+    allowed_agents:
+      - calendar-bot
+    required_outputs:
+      - launch_confirmation
+      - monitoring_dashboard
+    next_states:
+      - analyze
+
+  - id: analyze
+    name: Analyze
+    description: Measure campaign results and performance
+    allowed_roles:
+      - analyst
+      - strategist
+      - marketing_lead
+    allowed_agents:
+      - repurposer  # Suggest content improvements
+    required_outputs:
+      - performance_report
+      - insights_summary
+      - recommendations
+    next_states:
+      - archive
+      - theme  # Plan follow-up campaign
+
+  - id: archive
+    name: Archive
+    description: Store campaign for future reference and learning
+    allowed_roles:
+      - archivist
+      - marketing_ops
+    allowed_agents: []
+    required_outputs:
+      - campaign_archive_record
+      - best_of_highlights
+    next_states: []  # Terminal state
+
+# ⚠️ Campaign risk classifications
+risk_levels:
+  low:
+    description: Standard marketing content
+    approval_flow: standard
+    
+  medium:
+    description: Contains claims or competitive positioning
+    approval_flow: enhanced
+    required_reviewers:
+      - legal
+    
+  high:
+    # // HIGH-RISK CAMPAIGN FLOW – LEGAL/BRAND APPROVAL REQUIRED
+    description: Financial, legal, medical, or policy content
+    approval_flow: full
+    required_reviewers:
+      - legal
+      - brand
+      - compliance
+    mandatory_human_review: true
+
+# 📊 Campaign metrics
+metrics:
+  reach:
+    - impressions
+    - unique_visitors
+    - audience_growth
+  
+  engagement:
+    - engagement_rate
+    - click_through_rate
+    - shares
+    - comments
+    - time_on_page
+  
+  conversion:
+    - conversion_rate
+    - leads_generated
+    - pipeline_influenced
+    - revenue_attributed
+  
+  brand:
+    - sentiment_score
+    - brand_mentions
+    - share_of_voice
+
+# 🔗 Integration hooks
+integrations:
+  brand:
+    source: blackroad-os-brand
+    sync_on: theme
+    fields:
+      - brand_kit
+      - messaging_framework
+      - visual_guidelines
+  
+  archive:
+    target: blackroad-os-archive
+    on_state: archive
+    data:
+      - campaign_id
+      - full_performance_report
+      - asset_inventory
+      - timestamps
+  
+  dashboard:
+    target: blackroad-os-prism-console
+    continuous: true
+    data:
+      - campaign_status
+      - asset_progress
+      - channel_performance
+      - milestone_tracking
+
+  cross_pack:
+    connections:
+      - pack: blackroad-os-pack-education
+        use_case: Course launch campaigns
+      - pack: blackroad-os-pack-finance
+        use_case: Financial product promotions
+      - pack: blackroad-os-pack-legal
+        use_case: Compliance review for claims

@@ -1,0 +1,62 @@
+{
+  "name": "BlackRoad OS - Stripe Payments",
+  "description": "Complete Stripe payment system with API + Web services",
+  "services": {
+    "api": {
+      "name": "blackroad-api",
+      "source": {
+        "repo": "BlackRoad-OS/REPO_NAME",
+        "branch": "main"
+      },
+      "rootDirectory": "services/api",
+      "buildCommand": "npm install && npm run build",
+      "startCommand": "npm start",
+      "envVars": {
+        "STRIPE_SECRET_KEY": {
+          "description": "Stripe secret key (sk_test_ or sk_live_)",
+          "required": true
+        },
+        "STRIPE_WEBHOOK_SECRET": {
+          "description": "Stripe webhook signing secret (whsec_)",
+          "required": true
+        },
+        "SERVICE_NAME": {
+          "value": "blackroad-os-api"
+        },
+        "SERVICE_ENV": {
+          "value": "production"
+        }
+      }
+    },
+    "web": {
+      "name": "blackroad-web",
+      "source": {
+        "repo": "BlackRoad-OS/REPO_NAME",
+        "branch": "main"
+      },
+      "rootDirectory": "services/web",
+      "buildCommand": "npm install && npm run build",
+      "startCommand": "npm start",
+      "envVars": {
+        "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY": {
+          "description": "Stripe publishable key (pk_test_ or pk_live_)",
+          "required": true
+        },
+        "NEXT_PUBLIC_STRIPE_PRICE_PROFESSIONAL": {
+          "description": "Stripe price ID for Professional plan (price_)",
+          "required": true
+        },
+        "NEXT_PUBLIC_API_URL": {
+          "description": "URL of deployed API service",
+          "required": true
+        },
+        "SERVICE_NAME": {
+          "value": "blackroad-os-web"
+        },
+        "SERVICE_ENV": {
+          "value": "production"
+        }
+      }
+    }
+  }
+}

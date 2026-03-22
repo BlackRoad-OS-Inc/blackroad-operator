@@ -1,0 +1,122 @@
+#!/usr/bin/env bash
+# ============================================================================
+# BLACKROAD OS, INC. - PROPRIETARY AND CONFIDENTIAL
+# Copyright (c) 2025-2026 BlackRoad OS, Inc. All Rights Reserved.
+# ============================================================================
+# ask-node - Universal fleet node query (symlink-aware)
+# Detects target node from argv[0]: ask-cecilia → query cecilia
+# Usage: ask-<node> "question" | ask-<node> --status
+set -eo pipefail
+
+source "$HOME/.blackroad/config/nodes.sh" 2>/dev/null || true
+
+# Detect target node from symlink name (ask-cecilia → cecilia)
+SCRIPT_NAME=$(basename "$0")
+if [[ "$SCRIPT_NAME" == ask-* ]]; then
+  TARGET_NODE="${SCRIPT_NAME#ask-}"
+else
+  TARGET_NODE="${1:-}"
+  shift 2>/dev/null || true
+fi
+
+# Model mapping per node
+declare -A NODE_MODELS=(
+  [cecilia]="llama3.2"
+  [lucidia]="llama3.2"
+  [alice]="tinyllama:latest"
+  [octavia]="llama3.2"
+  [aria]="tinyllama:latest"
+)
+
+MODEL="${NODE_MODELS[$TARGET_NODE]:-llama3.2}"
+
+show_status() {
+  local ip="${NODE_IP[$TARGET_NODE]:-}"
+  local user="${NODE_USER[$TARGET_NODE]:-}"
+  [[ -z "$ip" ]] && { echo "Unknown node: $TARGET_NODE"; return 1; }
+
+  printf '%b%s%b (%s)\n' "$PINK" "$TARGET_NODE" "$RESET" "$ip"
+
+  # Ping
+  if ping -c 1 -W 2 "$ip" &>/dev/null; then
+    printf '  Network:  %bONLINE%b\n' "$GREEN" "$RESET"
+  else
+    printf '  Network:  %bOFFLINE%b\n' "$RED" "$RESET"
+    return 1
+  fi
+
+  # Ollama
+  local tags
+  tags=$(curl -sf --connect-timeout 2 "http://${ip}:11434/api/tags" 2>/dev/null)
+  if [[ -n "$tags" ]]; then
+    local count
+    count=$(echo "$tags" | jq '.models | length' 2>/dev/null)
+    printf '  Ollama:   %bUP%b (%s models)\n' "$GREEN" "$RESET" "$count"
+    echo "$tags" | jq -r '.models[].name' 2>/dev/null | sed 's/^/    /'
+  else
+    printf '  Ollama:   %bDOWN%b\n' "$RED" "$RESET"
+  fi
+
+  # System
+  if br_ssh_up "$TARGET_NODE" 2>/dev/null; then
+    local info
+    info=$(br_ssh "$TARGET_NODE" "echo \$(vcgencmd measure_temp 2>/dev/null | grep -oP '[0-9.]+')°C, load \$(cat /proc/loadavg | awk '{print \$1}')" 2>/dev/null)
+    printf '  System:   %s\n' "${info:-—}"
+  fi
+}
+
+query_node() {
+  local prompt="$*"
+  local ip="${NODE_IP[$TARGET_NODE]:-}"
+
+  [[ -z "$ip" ]] && { echo "Unknown node: $TARGET_NODE"; return 1; }
+  [[ -z "$prompt" ]] && { echo "Usage: ask-$TARGET_NODE \"question\""; return 1; }
+
+  printf '%bask%b → %s (%s, model: %s)\n\n' "$PINK" "$RESET" "$TARGET_NODE" "$ip" "$MODEL" >&2
+
+  local response
+  response=$(curl -sf --max-time 120 "http://${ip}:11434/api/generate" \
+    -d "{\"model\":\"$MODEL\",\"prompt\":$(printf '%s' "$prompt" | jq -Rs .),\"stream\":false}" 2>/dev/null | \
+    jq -r '.response // empty' 2>/dev/null)
+
+  if [[ -n "$response" ]]; then
+    echo "$response"
+  else
+    printf '%bNo response from %s (model: %s)%b\n' "$RED" "$TARGET_NODE" "$MODEL" "$RESET" >&2
+
+    # Try SSH fallback
+    if br_ssh_up "$TARGET_NODE" 2>/dev/null; then
+      printf '%bTrying SSH fallback...%b\n' "$AMBER" "$RESET" >&2
+      br_ssh "$TARGET_NODE" "ollama run $MODEL <<< '$(_sql_escape "$prompt")'" 2>/dev/null
+    fi
+  fi
+}
+
+interactive() {
+  printf '%bask%b → %s (interactive, Ctrl+D to exit)\n\n' "$PINK" "$RESET" "$TARGET_NODE" >&2
+  while printf '%b> %b' "$AMBER" "$RESET" && IFS= read -r line; do
+    [[ -z "$line" ]] && continue
+    query_node "$line"
+    echo
+  done
+}
+
+# SQL escape for SSH fallback
+_sql_escape() { echo "$1" | sed "s/'/'\\''/g"; }
+
+# Parse args
+case "${1:-}" in
+  --status|-s|status) show_status ;;
+  --help|-h|help)
+    echo "ask-$TARGET_NODE - Query $TARGET_NODE's AI"
+    echo ""
+    echo "Usage:"
+    echo "  ask-$TARGET_NODE \"question\"    One-shot query"
+    echo "  ask-$TARGET_NODE               Interactive mode"
+    echo "  ask-$TARGET_NODE --status       Show node AI status"
+    ;;
+  "")
+    interactive ;;
+  *)
+    query_node "$@" ;;
+esac

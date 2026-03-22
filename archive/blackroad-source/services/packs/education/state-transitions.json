@@ -1,0 +1,98 @@
+{
+  "stateTransitions": {
+    "not-started": {
+      "allowedNext": ["in-progress"],
+      "description": "Can only start learning (transition to in-progress)"
+    },
+    "in-progress": {
+      "allowedNext": ["completed", "not-started"],
+      "description": "Can complete successfully or reset/abandon"
+    },
+    "completed": {
+      "allowedNext": ["mastered", "in-progress"],
+      "description": "Can achieve mastery or retry for improvement"
+    },
+    "mastered": {
+      "allowedNext": ["in-progress"],
+      "description": "Can review content (maintains mastery status in history)"
+    }
+  },
+  "transitionRules": {
+    "not-started->in-progress": {
+      "conditions": [],
+      "effects": [
+        "Set startedAt timestamp",
+        "Initialize attemptCount to 1"
+      ]
+    },
+    "in-progress->completed": {
+      "conditions": [
+        "All required activities completed",
+        "Passing score achieved (if applicable)",
+        "Minimum time requirement met (if specified)"
+      ],
+      "effects": [
+        "Set completedAt timestamp",
+        "Record final score",
+        "Trigger completion events",
+        "Archive if compliance-tagged"
+      ]
+    },
+    "completed->mastered": {
+      "conditions": [
+        "Score >= 90% (or course-specific threshold)",
+        "Demonstrated exceptional understanding",
+        "Optional: Completed mastery challenge"
+      ],
+      "effects": [
+        "Set masteredAt timestamp",
+        "Issue certificate if applicable",
+        "Archive mastery record",
+        "Trigger mastery events"
+      ]
+    },
+    "completed->in-progress": {
+      "conditions": [
+        "Retry is allowed",
+        "Max attempts not exceeded"
+      ],
+      "effects": [
+        "Increment attemptCount",
+        "Preserve previous attempt data",
+        "Update lastAccessedAt"
+      ]
+    },
+    "in-progress->not-started": {
+      "conditions": [
+        "Explicit learner reset action"
+      ],
+      "effects": [
+        "Clear attempt data",
+        "Preserve history for analytics"
+      ]
+    },
+    "mastered->in-progress": {
+      "conditions": [
+        "Learner chooses to review"
+      ],
+      "effects": [
+        "Update lastAccessedAt",
+        "Mastery status preserved in history"
+      ]
+    }
+  },
+  "validationRules": {
+    "noSkipping": {
+      "description": "Cannot skip states (e.g., not-started -> completed)",
+      "enforcement": "strict"
+    },
+    "masteryIsPermanent": {
+      "description": "Once mastered, always shows as mastered in history",
+      "enforcement": "strict"
+    },
+    "preserveHistory": {
+      "description": "All state transitions are logged",
+      "enforcement": "strict"
+    }
+  }
+}

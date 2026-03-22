@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Reference - BlackRoad</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --gray-950: #000000;
+            --gray-900: #0a0a0a;
+            --gray-800: #1a1a1a;
+            --gray-700: #404040;
+            --gray-600: #525252;
+            --gray-500: #737373;
+            --gray-400: #a3a3a3;
+            --gray-300: #d4d4d4;
+            --gray-100: #f5f5f5;
+            --accent-1: #ff8700;
+            --accent-3: #ff0087;
+            --accent-6: #1e90ff;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --radius-md: 6px;
+            --radius-lg: 8px;
+            --radius-xl: 12px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--gray-950);
+            color: var(--gray-300);
+            line-height: 1.6;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 280px 1fr 280px;
+            min-height: 100vh;
+        }
+
+        @media (max-width: 1200px) {
+            .layout { grid-template-columns: 280px 1fr; }
+            .right-sidebar { display: none; }
+        }
+
+        @media (max-width: 900px) {
+            .layout { grid-template-columns: 1fr; }
+            .left-sidebar { display: none; }
+        }
+
+        /* Left Sidebar */
+        .left-sidebar {
+            background: var(--gray-900);
+            border-right: 1px solid var(--gray-800);
+            padding: 1.5rem;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .logo {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            font-size: 1.25rem;
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-3));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .version-badge {
+            display: inline-block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.6875rem;
+            padding: 0.25rem 0.5rem;
+            background: var(--gray-800);
+            border-radius: var(--radius-md);
+            color: var(--gray-400);
+            margin-bottom: 2rem;
+        }
+
+        .nav-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .nav-title {
+            font-size: 0.6875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--gray-500);
+            margin-bottom: 0.75rem;
+            padding-left: 0.75rem;
+        }
+
+        .nav-list {
+            list-style: none;
+        }
+
+        .nav-item a {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            color: var(--gray-400);
+            text-decoration: none;
+            font-size: 0.875rem;
+            border-radius: var(--radius-md);
+            transition: all 0.15s;
+        }
+
+        .nav-item a:hover {
+            background: var(--gray-800);
+            color: var(--gray-100);
+        }
+
+        .nav-item a.active {
+            background: rgba(255, 135, 0, 0.1);
+            color: var(--accent-1);
+        }
+
+        .method-badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.625rem;
+            font-weight: 600;
+            padding: 0.125rem 0.375rem;
+            border-radius: 3px;
+            text-transform: uppercase;
+        }
+
+        .method-badge.get { background: rgba(34, 197, 94, 0.15); color: var(--success); }
+        .method-badge.post { background: rgba(30, 144, 255, 0.15); color: var(--accent-6); }
+        .method-badge.put { background: rgba(255, 135, 0, 0.15); color: var(--accent-1); }
+        .method-badge.delete { background: rgba(239, 68, 68, 0.15); color: var(--error); }
+
+        /* Main Content */
+        .main {
+            padding: 3rem;
+            max-width: 900px;
+        }
+
+        .page-header {
+            margin-bottom: 3rem;
+        }
+
+        .page-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--gray-100);
+            margin-bottom: 0.75rem;
+        }
+
+        .page-description {
+            font-size: 1.125rem;
+            color: var(--gray-400);
+            max-width: 600px;
+        }
+
+        /* Base URL */
+        .base-url {
+            background: var(--gray-900);
+            border: 1px solid var(--gray-800);
+            border-radius: var(--radius-lg);
+            padding: 1rem 1.25rem;
+            margin-bottom: 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .base-url-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--gray-500);
+            margin-bottom: 0.25rem;
+        }
+
+        .base-url-value {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--accent-1);
+        }
+
+        .copy-btn {
+            padding: 0.5rem 1rem;
+            background: var(--gray-800);
+            border: 1px solid var(--gray-700);
+            border-radius: var(--radius-md);
+            color: var(--gray-300);
+            font-size: 0.8125rem;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .copy-btn:hover {
+            background: var(--gray-700);
+        }
+
+        /* Endpoint Section */
+        .endpoint {
+            margin-bottom: 3rem;
+            padding-bottom: 3rem;
+            border-bottom: 1px solid var(--gray-800);
+        }
+
+        .endpoint:last-child {
+            border-bottom: none;
+        }
+
+        .endpoint-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .endpoint-method {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.375rem 0.75rem;
+            border-radius: var(--radius-md);
+            text-transform: uppercase;
+        }
+
+        .endpoint-method.get { background: var(--success); color: white; }
+        .endpoint-method.post { background: var(--accent-6); color: white; }
+        .endpoint-method.put { background: var(--accent-1); color: white; }
+        .endpoint-method.delete { background: var(--error); color: white; }
+
+        .endpoint-path {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1rem;
+            color: var(--gray-100);
+        }
+
+        .endpoint-path .param {
+            color: var(--accent-1);
+        }
+
+        .endpoint-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--gray-100);
+            margin-bottom: 0.5rem;
+        }
+
+        .endpoint-description {
+            color: var(--gray-400);
+            margin-bottom: 1.5rem;
+        }
+
+        /* Parameters Table */
+        .params-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .params-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--gray-100);
+            margin-bottom: 0.75rem;
+        }
+
+        .params-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .params-table th {
+            text-align: left;
+            font-size: 0.6875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--gray-500);
+            padding: 0.75rem 1rem;
+            background: var(--gray-900);
+            border: 1px solid var(--gray-800);
+        }
+
+        .params-table th:first-child { border-radius: var(--radius-md) 0 0 0; }
+        .params-table th:last-child { border-radius: 0 var(--radius-md) 0 0; }
+
+        .params-table td {
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--gray-800);
+            border-top: none;
+            font-size: 0.875rem;
+        }
+
+        .params-table tr:last-child td:first-child { border-radius: 0 0 0 var(--radius-md); }
+        .params-table tr:last-child td:last-child { border-radius: 0 0 var(--radius-md) 0; }
+
+        .param-name {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--gray-100);
+        }
+
+        .param-type {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--accent-6);
+        }
+
+        .param-required {
+            font-size: 0.6875rem;
+            padding: 0.125rem 0.375rem;
+            border-radius: 3px;
+            background: rgba(255, 135, 0, 0.1);
+            color: var(--accent-1);
+        }
+
+        .param-optional {
+            font-size: 0.6875rem;
+            color: var(--gray-500);
+        }
+
+        /* Code Block */
+        .code-tabs {
+            display: flex;
+            gap: 0.25rem;
+            margin-bottom: -1px;
+        }
+
+        .code-tab {
+            padding: 0.5rem 1rem;
+            background: var(--gray-900);
+            border: 1px solid var(--gray-800);
+            border-bottom: none;
+            border-radius: var(--radius-md) var(--radius-md) 0 0;
+            color: var(--gray-500);
+            font-size: 0.8125rem;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .code-tab:hover { color: var(--gray-300); }
+        .code-tab.active {
+            background: var(--gray-800);
+            color: var(--gray-100);
+            border-color: var(--gray-700);
+        }
+
+        .code-block {
+            background: var(--gray-900);
+            border: 1px solid var(--gray-800);
+            border-radius: 0 var(--radius-lg) var(--radius-lg) var(--radius-lg);
+            overflow: hidden;
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            background: var(--gray-800);
+            border-bottom: 1px solid var(--gray-700);
+        }
+
+        .code-label {
+            font-size: 0.75rem;
+            color: var(--gray-400);
+        }
+
+        pre {
+            margin: 0;
+            padding: 1rem;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8125rem;
+            line-height: 1.6;
+        }
+
+        .code-keyword { color: var(--accent-3); }
+        .code-string { color: var(--success); }
+        .code-number { color: var(--accent-1); }
+        .code-property { color: var(--accent-6); }
+        .code-comment { color: var(--gray-600); }
+
+        /* Response */
+        .response-section {
+            margin-top: 1.5rem;
+        }
+
+        .response-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .status-code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.25rem 0.5rem;
+            border-radius: var(--radius-md);
+        }
+
+        .status-code.success { background: var(--success); color: white; }
+        .status-code.error { background: var(--error); color: white; }
+
+        /* Right Sidebar */
+        .right-sidebar {
+            padding: 2rem 1.5rem;
+            border-left: 1px solid var(--gray-800);
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .toc-title {
+            font-size: 0.6875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--gray-500);
+            margin-bottom: 1rem;
+        }
+
+        .toc-list {
+            list-style: none;
+        }
+
+        .toc-item a {
+            display: block;
+            padding: 0.375rem 0;
+            color: var(--gray-500);
+            text-decoration: none;
+            font-size: 0.8125rem;
+            transition: color 0.15s;
+        }
+
+        .toc-item a:hover { color: var(--gray-300); }
+        .toc-item a.active { color: var(--accent-1); }
+
+        /* Try It */
+        .try-it {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: var(--gray-900);
+            border: 1px solid var(--gray-800);
+            border-radius: var(--radius-lg);
+        }
+
+        .try-it-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--gray-300);
+            margin-bottom: 0.75rem;
+        }
+
+        .try-it-btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-3));
+            border: none;
+            border-radius: var(--radius-md);
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .try-it-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(255, 135, 0, 0.3);
+        }
+
+        /* Auth Badge */
+        .auth-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            font-size: 0.75rem;
+            padding: 0.25rem 0.625rem;
+            background: rgba(175, 95, 215, 0.1);
+            border: 1px solid rgba(175, 95, 215, 0.3);
+            border-radius: var(--radius-md);
+            color: #af5fd7;
+        }
+
+        .auth-badge svg {
+            width: 12px;
+            height: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <!-- Left Sidebar -->
+        <aside class="left-sidebar">
+            <div class="logo">BlackRoad API</div>
+            <span class="version-badge">v2.4.0</span>
+
+            <nav>
+                <div class="nav-section">
+                    <h3 class="nav-title">Getting Started</h3>
+                    <ul class="nav-list">
+                        <li class="nav-item"><a href="#" class="active">Introduction</a></li>
+                        <li class="nav-item"><a href="#">Authentication</a></li>
+                        <li class="nav-item"><a href="#">Rate Limits</a></li>
+                        <li class="nav-item"><a href="#">Errors</a></li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3 class="nav-title">Users</h3>
+                    <ul class="nav-list">
+                        <li class="nav-item">
+                            <a href="#list-users">
+                                <span class="method-badge get">GET</span>
+                                List users
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#get-user">
+                                <span class="method-badge get">GET</span>
+                                Get user
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#create-user">
+                                <span class="method-badge post">POST</span>
+                                Create user
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#update-user">
+                                <span class="method-badge put">PUT</span>
+                                Update user
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#delete-user">
+                                <span class="method-badge delete">DEL</span>
+                                Delete user
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3 class="nav-title">Projects</h3>
+                    <ul class="nav-list">
+                        <li class="nav-item">
+                            <a href="#">
+                                <span class="method-badge get">GET</span>
+                                List projects
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#">
+                                <span class="method-badge post">POST</span>
+                                Create project
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3 class="nav-title">Deployments</h3>
+                    <ul class="nav-list">
+                        <li class="nav-item">
+                            <a href="#">
+                                <span class="method-badge get">GET</span>
+                                List deployments
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#">
+                                <span class="method-badge post">POST</span>
+                                Create deployment
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main">
+            <header class="page-header">
+                <h1 class="page-title">API Reference</h1>
+                <p class="page-description">Complete reference documentation for the BlackRoad REST API. Build powerful integrations with our platform.</p>
+            </header>
+
+            <div class="base-url">
+                <div>
+                    <div class="base-url-label">Base URL</div>
+                    <div class="base-url-value">https://api.blackroad.io/v2</div>
+                </div>
+                <button class="copy-btn" onclick="navigator.clipboard.writeText('https://api.blackroad.io/v2')">Copy</button>
+            </div>
+
+            <!-- List Users Endpoint -->
+            <section class="endpoint" id="list-users">
+                <div class="endpoint-header">
+                    <span class="endpoint-method get">GET</span>
+                    <code class="endpoint-path">/users</code>
+                    <span class="auth-badge">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                        Auth required
+                    </span>
+                </div>
+                <h2 class="endpoint-title">List all users</h2>
+                <p class="endpoint-description">Returns a paginated list of users in your organization. Results are sorted by creation date in descending order.</p>
+
+                <div class="params-section">
+                    <h3 class="params-title">Query Parameters</h3>
+                    <table class="params-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Type</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="param-name">limit</span></td>
+                                <td><span class="param-type">integer</span> <span class="param-optional">optional</span></td>
+                                <td>Number of results per page (1-100). Default: 20</td>
+                            </tr>
+                            <tr>
+                                <td><span class="param-name">cursor</span></td>
+                                <td><span class="param-type">string</span> <span class="param-optional">optional</span></td>
+                                <td>Pagination cursor from previous response</td>
+                            </tr>
+                            <tr>
+                                <td><span class="param-name">status</span></td>
+                                <td><span class="param-type">string</span> <span class="param-optional">optional</span></td>
+                                <td>Filter by status: active, inactive, pending</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="code-tabs">
+                    <button class="code-tab active">cURL</button>
+                    <button class="code-tab">JavaScript</button>
+                    <button class="code-tab">Python</button>
+                </div>
+                <div class="code-block">
+                    <div class="code-header">
+                        <span class="code-label">Request</span>
+                        <button class="copy-btn">Copy</button>
+                    </div>
+                    <pre><span class="code-keyword">curl</span> -X GET <span class="code-string">"https://api.blackroad.io/v2/users?limit=10"</span> \
+  -H <span class="code-string">"Authorization: Bearer YOUR_API_KEY"</span> \
+  -H <span class="code-string">"Content-Type: application/json"</span></pre>
+                </div>
+
+                <div class="response-section">
+                    <div class="response-header">
+                        <span class="status-code success">200</span>
+                        <span>Success</span>
+                    </div>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span class="code-label">Response</span>
+                            <button class="copy-btn">Copy</button>
+                        </div>
+                        <pre>{
+  <span class="code-property">"data"</span>: [
+    {
+      <span class="code-property">"id"</span>: <span class="code-string">"usr_1234567890"</span>,
+      <span class="code-property">"email"</span>: <span class="code-string">"alexa@blackroad.io"</span>,
+      <span class="code-property">"name"</span>: <span class="code-string">"Alexa Mundson"</span>,
+      <span class="code-property">"role"</span>: <span class="code-string">"admin"</span>,
+      <span class="code-property">"status"</span>: <span class="code-string">"active"</span>,
+      <span class="code-property">"created_at"</span>: <span class="code-string">"2026-01-15T10:30:00Z"</span>
+    }
+  ],
+  <span class="code-property">"meta"</span>: {
+    <span class="code-property">"total"</span>: <span class="code-number">156</span>,
+    <span class="code-property">"cursor"</span>: <span class="code-string">"eyJpZCI6MTU2fQ=="</span>
+  }
+}</pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Create User Endpoint -->
+            <section class="endpoint" id="create-user">
+                <div class="endpoint-header">
+                    <span class="endpoint-method post">POST</span>
+                    <code class="endpoint-path">/users</code>
+                    <span class="auth-badge">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                        Auth required
+                    </span>
+                </div>
+                <h2 class="endpoint-title">Create a user</h2>
+                <p class="endpoint-description">Creates a new user in your organization. An invitation email will be sent automatically.</p>
+
+                <div class="params-section">
+                    <h3 class="params-title">Request Body</h3>
+                    <table class="params-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Type</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="param-name">email</span></td>
+                                <td><span class="param-type">string</span> <span class="param-required">required</span></td>
+                                <td>User's email address</td>
+                            </tr>
+                            <tr>
+                                <td><span class="param-name">name</span></td>
+                                <td><span class="param-type">string</span> <span class="param-required">required</span></td>
+                                <td>User's full name</td>
+                            </tr>
+                            <tr>
+                                <td><span class="param-name">role</span></td>
+                                <td><span class="param-type">string</span> <span class="param-optional">optional</span></td>
+                                <td>User role: admin, developer, viewer. Default: developer</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="code-tabs">
+                    <button class="code-tab active">cURL</button>
+                    <button class="code-tab">JavaScript</button>
+                    <button class="code-tab">Python</button>
+                </div>
+                <div class="code-block">
+                    <div class="code-header">
+                        <span class="code-label">Request</span>
+                        <button class="copy-btn">Copy</button>
+                    </div>
+                    <pre><span class="code-keyword">curl</span> -X POST <span class="code-string">"https://api.blackroad.io/v2/users"</span> \
+  -H <span class="code-string">"Authorization: Bearer YOUR_API_KEY"</span> \
+  -H <span class="code-string">"Content-Type: application/json"</span> \
+  -d '{
+    <span class="code-property">"email"</span>: <span class="code-string">"new.user@company.com"</span>,
+    <span class="code-property">"name"</span>: <span class="code-string">"New User"</span>,
+    <span class="code-property">"role"</span>: <span class="code-string">"developer"</span>
+  }'</pre>
+                </div>
+
+                <div class="response-section">
+                    <div class="response-header">
+                        <span class="status-code success">201</span>
+                        <span>Created</span>
+                    </div>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span class="code-label">Response</span>
+                            <button class="copy-btn">Copy</button>
+                        </div>
+                        <pre>{
+  <span class="code-property">"id"</span>: <span class="code-string">"usr_0987654321"</span>,
+  <span class="code-property">"email"</span>: <span class="code-string">"new.user@company.com"</span>,
+  <span class="code-property">"name"</span>: <span class="code-string">"New User"</span>,
+  <span class="code-property">"role"</span>: <span class="code-string">"developer"</span>,
+  <span class="code-property">"status"</span>: <span class="code-string">"pending"</span>,
+  <span class="code-property">"created_at"</span>: <span class="code-string">"2026-02-05T14:00:00Z"</span>
+}</pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Delete User Endpoint -->
+            <section class="endpoint" id="delete-user">
+                <div class="endpoint-header">
+                    <span class="endpoint-method delete">DELETE</span>
+                    <code class="endpoint-path">/users/<span class="param">{user_id}</span></code>
+                    <span class="auth-badge">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                        Auth required
+                    </span>
+                </div>
+                <h2 class="endpoint-title">Delete a user</h2>
+                <p class="endpoint-description">Permanently deletes a user from your organization. This action cannot be undone.</p>
+
+                <div class="params-section">
+                    <h3 class="params-title">Path Parameters</h3>
+                    <table class="params-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Type</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="param-name">user_id</span></td>
+                                <td><span class="param-type">string</span> <span class="param-required">required</span></td>
+                                <td>The unique identifier of the user</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span class="code-label">Request</span>
+                        <button class="copy-btn">Copy</button>
+                    </div>
+                    <pre><span class="code-keyword">curl</span> -X DELETE <span class="code-string">"https://api.blackroad.io/v2/users/usr_1234567890"</span> \
+  -H <span class="code-string">"Authorization: Bearer YOUR_API_KEY"</span></pre>
+                </div>
+
+                <div class="response-section">
+                    <div class="response-header">
+                        <span class="status-code success">204</span>
+                        <span>No Content</span>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Right Sidebar -->
+        <aside class="right-sidebar">
+            <h3 class="toc-title">On This Page</h3>
+            <ul class="toc-list">
+                <li class="toc-item"><a href="#list-users" class="active">List users</a></li>
+                <li class="toc-item"><a href="#create-user">Create user</a></li>
+                <li class="toc-item"><a href="#delete-user">Delete user</a></li>
+            </ul>
+
+            <div class="try-it">
+                <h4 class="try-it-title">Try it out</h4>
+                <button class="try-it-btn">Open API Playground</button>
+            </div>
+        </aside>
+    </div>
+</body>
+</html>

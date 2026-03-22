@@ -1,0 +1,39 @@
+# docker-compose.yml
+
+version: "3.9"
+
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: blackroad-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+
+  lucidia-api:
+    build: .
+    container_name: lucidia-api
+    command: uvicorn api.server:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - OLLAMA_BASE_URL=http://ollama:11434
+    depends_on:
+      - nginx
+      - ollama
+
+  nginx:
+    image: nginx:latest
+    container_name: lucidia-nginx
+    volumes:
+      - ./nginx/lucidia.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - "80:80"
+
+volumes:
+  ollama_data:
+

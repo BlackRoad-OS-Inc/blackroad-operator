@@ -1,0 +1,120 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://blackroad-os.dev/schemas/education/progress.json",
+  "title": "LearnerProgress",
+  "description": "🧬 Progress tracking for a learner in a course/lesson/activity",
+  "type": "object",
+  "required": ["learnerId", "itemId", "itemType", "state"],
+  "properties": {
+    "learnerId": {
+      "type": "string",
+      "description": "Reference to learner (uses IDs, not PII)"
+    },
+    "itemId": {
+      "type": "string",
+      "description": "Reference to course/module/lesson/activity"
+    },
+    "itemType": {
+      "type": "string",
+      "enum": ["course", "module", "lesson", "activity", "assessment"],
+      "description": "Type of item being tracked"
+    },
+    "state": {
+      "type": "string",
+      "enum": ["not-started", "in-progress", "completed", "mastered"],
+      "description": "🧬 Current progress state"
+    },
+    "startedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When learner started this item"
+    },
+    "completedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When learner completed this item"
+    },
+    "masteredAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When learner achieved mastery"
+    },
+    "lastAccessedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Last time learner accessed this item"
+    },
+    "attemptCount": {
+      "type": "integer",
+      "minimum": 0,
+      "default": 0,
+      "description": "Number of attempts made"
+    },
+    "currentScore": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Current score (percentage)"
+    },
+    "bestScore": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Best score achieved across all attempts"
+    },
+    "feedback": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/feedbackEntry"
+      },
+      "description": "Feedback from tutors/coaches"
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "archiveRef": {
+          "type": "string",
+          "description": "🧾 Reference to archive record for compliance"
+        },
+        "certificateIssued": {
+          "type": "boolean",
+          "description": "🧾 Whether certificate was issued"
+        }
+      }
+    }
+  },
+  "definitions": {
+    "feedbackEntry": {
+      "type": "object",
+      "required": ["timestamp", "source", "content"],
+      "properties": {
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "source": {
+          "type": "object",
+          "required": ["type"],
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": ["agent", "human", "automated"]
+            },
+            "id": {
+              "type": "string",
+              "description": "Agent or human identifier"
+            }
+          }
+        },
+        "content": {
+          "type": "string",
+          "minLength": 1
+        },
+        "constructive": {
+          "type": "boolean",
+          "description": "💬 Includes next steps/actionable guidance"
+        }
+      }
+    }
+  }
+}

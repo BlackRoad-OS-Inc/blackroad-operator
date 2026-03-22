@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BlackRoad Pi Fleet Dashboard</title>
+<style>
+  :root {
+    --bg: #09090b; --surface: #18181b; --border: #27272a;
+    --text: #fafafa; --muted: #71717a;
+    --green: #22c55e; --red: #ef4444; --blue: #3b82f6; --violet: #9c27b0;
+    --amber: #f5a623; --pink: #ff1d6c;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, monospace; padding: 24px; }
+  h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; }
+  .subtitle { color: var(--muted); font-size: 0.85rem; margin-bottom: 24px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+  .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+  .hostname { font-size: 1.1rem; font-weight: 700; font-family: monospace; }
+  .badge { font-size: 0.7rem; padding: 2px 8px; border-radius: 999px; font-weight: 600; text-transform: uppercase; }
+  .badge.primary { background: rgba(34,197,94,.15); color: var(--green); border: 1px solid rgba(34,197,94,.3); }
+  .badge.secondary { background: rgba(59,130,246,.15); color: var(--blue); border: 1px solid rgba(59,130,246,.3); }
+  .badge.backup { background: rgba(113,113,122,.15); color: var(--muted); border: 1px solid var(--border); }
+  .ip { font-family: monospace; color: var(--muted); font-size: 0.85rem; margin-bottom: 12px; }
+  .stat-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.85rem; }
+  .stat-label { color: var(--muted); }
+  .stat-value { font-weight: 600; }
+  .tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 12px; }
+  .tag { font-size: 0.7rem; padding: 2px 8px; border-radius: 4px; background: var(--border); color: var(--muted); font-family: monospace; }
+  .tag.model { background: rgba(156,39,176,.15); color: #c084fc; }
+  .ping { display: inline-flex; align-items: center; gap: 6px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+  .dot.offline { background: var(--red); animation: none; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+  .summary { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 24px; }
+  .summary .card { text-align: center; }
+  .big { font-size: 2rem; font-weight: 800; }
+  .ts { color: var(--muted); font-size: 0.75rem; margin-top: 24px; text-align: center; }
+</style>
+</head>
+<body>
+<h1>🍓 Pi Fleet Dashboard</h1>
+<p class="subtitle" id="subtitle">BlackRoad OS · Loading...</p>
+
+<div class="summary">
+  <div class="card"><p class="big" id="total-cap">—</p><p style="color:var(--muted);font-size:.8rem">Agent Capacity</p></div>
+  <div class="card"><p class="big" id="node-count">—</p><p style="color:var(--muted);font-size:.8rem">Pi Nodes</p></div>
+  <div class="card"><p class="big" id="fleet-health">—</p><p style="color:var(--muted);font-size:.8rem">Avg Uptime</p></div>
+</div>
+
+<div class="grid" id="nodes"></div>
+<p class="ts" id="ts"></p>
+
+<script>
+const NODES = [
+  { hostname: "aria64", ip: "192.168.4.38", role: "primary", capacity: 22500,
+    services: ["ollama", "agent-runtime", "cloudflared"], models: ["qwen2.5:7b", "deepseek-r1:7b"], uptime: 99.9 },
+  { hostname: "blackroad-pi", ip: "192.168.4.64", role: "secondary", capacity: 7500,
+    services: ["ollama", "agent-runtime"], models: ["llama3.2:3b"], uptime: 99.5 },
+  { hostname: "lucidia", ip: "192.168.4.99", role: "backup", capacity: 0,
+    services: ["agent-runtime"], models: [], uptime: 98.2 },
+];
+
+function render() {
+  const totalCap = NODES.reduce((s,n)=>s+n.capacity,0);
+  const avgUp = NODES.reduce((s,n)=>s+n.uptime,0)/NODES.length;
+  document.getElementById("total-cap").textContent = totalCap.toLocaleString();
+  document.getElementById("node-count").textContent = NODES.length;
+  document.getElementById("fleet-health").textContent = avgUp.toFixed(1)+"%";
+  document.getElementById("subtitle").textContent = `BlackRoad OS · ${NODES.length} nodes · ${new Date().toLocaleTimeString()}`;
+
+  document.getElementById("nodes").innerHTML = NODES.map(n => `
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="ping"><span class="dot"></span><span class="hostname">${n.hostname}</span></div>
+          <p class="ip">${n.ip}</p>
+        </div>
+        <span class="badge ${n.role}">${n.role}</span>
+      </div>
+      <div class="stat-row"><span class="stat-label">Agent Capacity</span><span class="stat-value">${n.capacity.toLocaleString()}</span></div>
+      <div class="stat-row"><span class="stat-label">Uptime</span><span class="stat-value" style="color:var(--green)">${n.uptime}%</span></div>
+      <div class="stat-row"><span class="stat-label">Services</span><span class="stat-value">${n.services.length}</span></div>
+      <div class="tags">
+        ${n.services.map(s=>`<span class="tag">${s}</span>`).join("")}
+        ${n.models.map(m=>`<span class="tag model">${m}</span>`).join("")}
+      </div>
+    </div>
+  `).join("");
+
+  document.getElementById("ts").textContent = "Last updated: " + new Date().toISOString();
+}
+
+render();
+setInterval(render, 15000);
+</script>
+</body>
+</html>

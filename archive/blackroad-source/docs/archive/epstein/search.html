@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Epstein Files - Public Transparency Search</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a0a; 
+            color: #fff; 
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 { 
+            text-align: center; 
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #F5A623, #FF1D6C, #9C27B0, #2979FF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 2.5em;
+        }
+        .subtitle { text-align: center; color: #888; margin-bottom: 30px; }
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        input[type="text"] {
+            flex: 1;
+            padding: 15px 20px;
+            font-size: 18px;
+            border: 2px solid #333;
+            border-radius: 8px;
+            background: #111;
+            color: #fff;
+        }
+        input:focus { border-color: #FF1D6C; outline: none; }
+        button {
+            padding: 15px 30px;
+            font-size: 18px;
+            background: linear-gradient(135deg, #FF1D6C, #9C27B0);
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover { opacity: 0.9; }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .stat {
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+        }
+        .stat-value { font-size: 2em; color: #FF1D6C; font-weight: bold; }
+        .stat-label { color: #888; font-size: 0.9em; }
+        .results { display: grid; gap: 15px; }
+        .contact {
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .contact:hover { border-color: #FF1D6C; }
+        .contact-name { 
+            font-size: 1.3em; 
+            font-weight: bold; 
+            margin-bottom: 10px;
+            color: #F5A623;
+        }
+        .contact-detail { color: #aaa; margin: 5px 0; }
+        .contact-detail span { color: #2979FF; }
+        .highlight { background: #FF1D6C33; padding: 2px 4px; border-radius: 3px; }
+        .disclaimer {
+            background: #1a1a1a;
+            border-left: 4px solid #F5A623;
+            padding: 15px;
+            margin-bottom: 30px;
+            font-size: 0.9em;
+            color: #aaa;
+        }
+        .footer { text-align: center; margin-top: 40px; color: #666; font-size: 0.85em; }
+        a { color: #2979FF; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>EPSTEIN FILES</h1>
+        <p class="subtitle">Public Transparency Search - Official Government Documents</p>
+        
+        <div class="disclaimer">
+            <strong>Source:</strong> All data from officially released US Government documents including DOJ releases, 
+            CBP records, and the unredacted "Little Black Book" (leaked by butler Alfredo Rodriguez, publicly available via Internet Archive).
+            Being in this book does NOT imply wrongdoing - it was Epstein's personal contact list.
+        </div>
+        
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-value" id="total-contacts">1,293</div>
+                <div class="stat-label">Contacts</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">273</div>
+                <div class="stat-label">Travel Records</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">146</div>
+                <div class="stat-label">Evidence Items</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">92</div>
+                <div class="stat-label">Pages</div>
+            </div>
+        </div>
+        
+        <div class="search-box">
+            <input type="text" id="search" placeholder="Search names, phone numbers, emails..." autofocus>
+            <button onclick="search()">Search</button>
+        </div>
+        
+        <div id="results" class="results"></div>
+        
+        <div class="footer">
+            <p>For public transparency and victims' justice.</p>
+            <p><a href="https://github.com/blackboxprogramming/epstein-files-transparency">View on GitHub</a> | 
+               <a href="https://www.justice.gov/epstein">DOJ Source</a></p>
+        </div>
+    </div>
+    
+    <script>
+        let contacts = [];
+        
+        // Load contacts
+        fetch('extracted/contacts.json')
+            .then(r => r.json())
+            .then(data => {
+                contacts = data;
+                document.getElementById('total-contacts').textContent = contacts.length.toLocaleString();
+                showAll();
+            })
+            .catch(() => {
+                document.getElementById('results').innerHTML = '<p style="color:#F5A623">Load contacts.json locally or via a web server</p>';
+            });
+        
+        function showAll() {
+            displayResults(contacts.slice(0, 50));
+        }
+        
+        function search() {
+            const query = document.getElementById('search').value.toLowerCase().trim();
+            if (!query) { showAll(); return; }
+            
+            const results = contacts.filter(c => {
+                const searchStr = [
+                    c.name,
+                    ...c.phones,
+                    ...c.emails,
+                    ...c.addresses,
+                    ...c.raw
+                ].join(' ').toLowerCase();
+                return searchStr.includes(query);
+            });
+            
+            displayResults(results);
+        }
+        
+        function displayResults(results) {
+            const container = document.getElementById('results');
+            const query = document.getElementById('search').value.toLowerCase().trim();
+            
+            if (results.length === 0) {
+                container.innerHTML = '<p style="color:#888">No results found</p>';
+                return;
+            }
+            
+            container.innerHTML = `<p style="color:#888;margin-bottom:15px">Showing ${results.length} result${results.length !== 1 ? 's' : ''}</p>` +
+                results.map(c => {
+                    const name = highlight(c.name, query);
+                    const phones = c.phones.map(p => highlight(p, query)).join(', ');
+                    const emails = c.emails.map(e => highlight(e, query)).join(', ');
+                    const addrs = c.addresses.map(a => highlight(a, query)).join('<br>');
+                    
+                    return `
+                        <div class="contact">
+                            <div class="contact-name">${name}</div>
+                            ${phones ? `<div class="contact-detail">📞 <span>${phones}</span></div>` : ''}
+                            ${emails ? `<div class="contact-detail">📧 <span>${emails}</span></div>` : ''}
+                            ${addrs ? `<div class="contact-detail">📍 ${addrs}</div>` : ''}
+                        </div>
+                    `;
+                }).join('');
+        }
+        
+        function highlight(text, query) {
+            if (!query || !text) return text;
+            const regex = new RegExp(`(${query})`, 'gi');
+            return text.replace(regex, '<span class="highlight">$1</span>');
+        }
+        
+        document.getElementById('search').addEventListener('keypress', e => {
+            if (e.key === 'Enter') search();
+        });
+    </script>
+</body>
+</html>

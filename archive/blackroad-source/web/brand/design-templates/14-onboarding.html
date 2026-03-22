@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Get Started - BlackRoad</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --gray-950: #000000;
+            --gray-900: #0a0a0a;
+            --gray-800: #1a1a1a;
+            --gray-700: #404040;
+            --gray-600: #525252;
+            --gray-500: #737373;
+            --gray-400: #a3a3a3;
+            --gray-300: #d4d4d4;
+            --gray-100: #f5f5f5;
+            --accent-1: #ff8700;
+            --accent-2: #ff5f00;
+            --accent-3: #ff0087;
+            --accent-4: #af5fd7;
+            --accent-5: #ff00ff;
+            --accent-6: #1e90ff;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --radius-sm: 4px;
+            --radius-md: 6px;
+            --radius-lg: 8px;
+            --radius-xl: 12px;
+            --radius-2xl: 16px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--gray-950);
+            color: var(--gray-100);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Progress Header */
+        .progress-header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--gray-800);
+            background: var(--gray-900);
+        }
+
+        .progress-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .progress-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .logo {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            font-size: 1.25rem;
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-3));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .progress-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .step-counter {
+            font-size: 0.875rem;
+            color: var(--gray-400);
+        }
+
+        .step-counter span {
+            color: var(--accent-1);
+            font-weight: 600;
+        }
+
+        .skip-btn {
+            background: none;
+            border: none;
+            color: var(--gray-500);
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .skip-btn:hover {
+            color: var(--gray-300);
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            height: 4px;
+            background: var(--gray-800);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-1), var(--accent-3));
+            border-radius: 2px;
+            transition: width 0.5s ease;
+        }
+
+        /* Progress Steps */
+        .progress-steps {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1rem;
+        }
+
+        .step-indicator {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            flex: 1;
+        }
+
+        .step-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--gray-700);
+            position: relative;
+        }
+
+        .step-dot.completed {
+            background: var(--success);
+        }
+
+        .step-dot.active {
+            background: var(--accent-1);
+            box-shadow: 0 0 0 4px rgba(255, 135, 0, 0.2);
+        }
+
+        .step-label {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+            text-align: center;
+        }
+
+        .step-indicator.active .step-label,
+        .step-indicator.completed .step-label {
+            color: var(--gray-300);
+        }
+
+        /* Main Content */
+        .main {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .step-content {
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .step-card {
+            display: none;
+        }
+
+        .step-card.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .step-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .step-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1.5rem;
+            background: linear-gradient(135deg, rgba(255, 135, 0, 0.1), rgba(255, 0, 135, 0.1));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+        }
+
+        .step-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .step-description {
+            color: var(--gray-400);
+            font-size: 1rem;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--gray-300);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            background: var(--gray-900);
+            border: 1px solid var(--gray-700);
+            border-radius: var(--radius-md);
+            color: var(--gray-100);
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent-1);
+            box-shadow: 0 0 0 3px rgba(255, 135, 0, 0.1);
+        }
+
+        .form-input::placeholder {
+            color: var(--gray-600);
+        }
+
+        .form-hint {
+            font-size: 0.8125rem;
+            color: var(--gray-500);
+            margin-top: 0.5rem;
+        }
+
+        /* Selection Cards */
+        .selection-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .selection-card {
+            padding: 1.25rem;
+            background: var(--gray-900);
+            border: 2px solid var(--gray-800);
+            border-radius: var(--radius-xl);
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .selection-card:hover {
+            border-color: var(--gray-600);
+        }
+
+        .selection-card.selected {
+            border-color: var(--accent-1);
+            background: rgba(255, 135, 0, 0.05);
+        }
+
+        .selection-card input {
+            display: none;
+        }
+
+        .selection-icon {
+            font-size: 2rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .selection-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .selection-desc {
+            font-size: 0.8125rem;
+            color: var(--gray-500);
+        }
+
+        /* Checkmark Cards */
+        .checklist {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .check-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.25rem;
+            background: var(--gray-900);
+            border: 1px solid var(--gray-800);
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .check-item:hover {
+            border-color: var(--gray-700);
+        }
+
+        .check-item.checked {
+            border-color: var(--accent-1);
+            background: rgba(255, 135, 0, 0.05);
+        }
+
+        .check-box {
+            width: 24px;
+            height: 24px;
+            border: 2px solid var(--gray-600);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+
+        .check-item.checked .check-box {
+            background: var(--accent-1);
+            border-color: var(--accent-1);
+        }
+
+        .check-box svg {
+            width: 14px;
+            height: 14px;
+            color: white;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .check-item.checked .check-box svg {
+            opacity: 1;
+        }
+
+        .check-content {
+            flex: 1;
+        }
+
+        .check-title {
+            font-weight: 500;
+            margin-bottom: 0.125rem;
+        }
+
+        .check-desc {
+            font-size: 0.8125rem;
+            color: var(--gray-500);
+        }
+
+        /* Team Invites */
+        .invite-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .invite-row {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .invite-row input {
+            flex: 1;
+        }
+
+        .invite-row select {
+            width: 140px;
+            padding: 0.875rem 1rem;
+            background: var(--gray-900);
+            border: 1px solid var(--gray-700);
+            border-radius: var(--radius-md);
+            color: var(--gray-100);
+            font-size: 0.875rem;
+        }
+
+        .remove-btn {
+            width: 44px;
+            height: 44px;
+            background: var(--gray-800);
+            border: 1px solid var(--gray-700);
+            border-radius: var(--radius-md);
+            color: var(--gray-500);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .remove-btn:hover {
+            background: var(--error);
+            border-color: var(--error);
+            color: white;
+        }
+
+        .add-invite-btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--gray-800);
+            border: 1px dashed var(--gray-700);
+            border-radius: var(--radius-md);
+            color: var(--gray-400);
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .add-invite-btn:hover {
+            background: var(--gray-700);
+            color: var(--gray-100);
+        }
+
+        /* Navigation Buttons */
+        .step-nav {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--gray-800);
+        }
+
+        .btn {
+            padding: 0.875rem 2rem;
+            border-radius: var(--radius-md);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-secondary {
+            background: var(--gray-800);
+            color: var(--gray-100);
+            border: 1px solid var(--gray-700);
+        }
+
+        .btn-secondary:hover {
+            background: var(--gray-700);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-3));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px rgba(255, 135, 0, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        /* Success Step */
+        .success-animation {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 2rem;
+            background: linear-gradient(135deg, var(--success), #059669);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4);
+            }
+            50% {
+                box-shadow: 0 0 0 20px rgba(34, 197, 94, 0);
+            }
+        }
+
+        .success-animation svg {
+            width: 60px;
+            height: 60px;
+            color: white;
+        }
+
+        .success-features {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .feature-card {
+            padding: 1.25rem;
+            background: var(--gray-900);
+            border: 1px solid var(--gray-800);
+            border-radius: var(--radius-lg);
+            text-align: center;
+        }
+
+        .feature-icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-title {
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        /* Confetti Canvas */
+        #confetti {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .selection-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .success-features {
+                grid-template-columns: 1fr;
+            }
+
+            .step-label {
+                display: none;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Progress Header -->
+    <header class="progress-header">
+        <div class="progress-content">
+            <div class="progress-top">
+                <div class="logo">BlackRoad</div>
+                <div class="progress-info">
+                    <span class="step-counter">Step <span id="currentStep">1</span> of <span>5</span></span>
+                    <button class="skip-btn" onclick="skipOnboarding()">Skip setup</button>
+                </div>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 20%"></div>
+            </div>
+            <div class="progress-steps">
+                <div class="step-indicator active" data-step="1">
+                    <div class="step-dot active"></div>
+                    <span class="step-label">Welcome</span>
+                </div>
+                <div class="step-indicator" data-step="2">
+                    <div class="step-dot"></div>
+                    <span class="step-label">Workspace</span>
+                </div>
+                <div class="step-indicator" data-step="3">
+                    <div class="step-dot"></div>
+                    <span class="step-label">Use Case</span>
+                </div>
+                <div class="step-indicator" data-step="4">
+                    <div class="step-dot"></div>
+                    <span class="step-label">Team</span>
+                </div>
+                <div class="step-indicator" data-step="5">
+                    <div class="step-dot"></div>
+                    <span class="step-label">Complete</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+        <div class="step-content">
+            <!-- Step 1: Welcome -->
+            <div class="step-card active" data-step="1">
+                <div class="step-header">
+                    <div class="step-icon">&#128075;</div>
+                    <h1 class="step-title">Welcome to BlackRoad</h1>
+                    <p class="step-description">Let's get you set up in just a few minutes. First, tell us a bit about yourself.</p>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Full Name</label>
+                    <input type="text" class="form-input" placeholder="Alexa Mundson" id="fullName">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Company or Organization</label>
+                    <input type="text" class="form-input" placeholder="Acme Inc." id="company">
+                    <p class="form-hint">This will be used to personalize your experience</p>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">What's your role?</label>
+                    <div class="selection-grid">
+                        <label class="selection-card">
+                            <input type="radio" name="role" value="developer">
+                            <div class="selection-icon">&#128187;</div>
+                            <div class="selection-title">Developer</div>
+                            <div class="selection-desc">Building apps</div>
+                        </label>
+                        <label class="selection-card">
+                            <input type="radio" name="role" value="designer">
+                            <div class="selection-icon">&#127912;</div>
+                            <div class="selection-title">Designer</div>
+                            <div class="selection-desc">Creating UIs</div>
+                        </label>
+                        <label class="selection-card">
+                            <input type="radio" name="role" value="founder">
+                            <div class="selection-icon">&#128640;</div>
+                            <div class="selection-title">Founder</div>
+                            <div class="selection-desc">Running a startup</div>
+                        </label>
+                        <label class="selection-card">
+                            <input type="radio" name="role" value="other">
+                            <div class="selection-icon">&#128100;</div>
+                            <div class="selection-title">Other</div>
+                            <div class="selection-desc">Something else</div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="step-nav">
+                    <div></div>
+                    <button class="btn btn-primary" onclick="nextStep()">
+                        Continue
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 2: Workspace Setup -->
+            <div class="step-card" data-step="2">
+                <div class="step-header">
+                    <div class="step-icon">&#128736;</div>
+                    <h1 class="step-title">Create Your Workspace</h1>
+                    <p class="step-description">Your workspace is where all your projects and team members live.</p>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Workspace Name</label>
+                    <input type="text" class="form-input" placeholder="My Awesome Team" id="workspaceName">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Workspace URL</label>
+                    <div style="display: flex; align-items: center; gap: 0;">
+                        <span style="padding: 0.875rem 1rem; background: var(--gray-800); border: 1px solid var(--gray-700); border-right: none; border-radius: var(--radius-md) 0 0 var(--radius-md); color: var(--gray-500); font-size: 0.875rem;">blackroad.io/</span>
+                        <input type="text" class="form-input" style="border-radius: 0 var(--radius-md) var(--radius-md) 0;" placeholder="my-team" id="workspaceUrl">
+                    </div>
+                    <p class="form-hint">This will be your team's unique URL</p>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Workspace Region</label>
+                    <div class="selection-grid">
+                        <label class="selection-card">
+                            <input type="radio" name="region" value="us">
+                            <div class="selection-icon">&#127482;&#127480;</div>
+                            <div class="selection-title">United States</div>
+                            <div class="selection-desc">US West</div>
+                        </label>
+                        <label class="selection-card">
+                            <input type="radio" name="region" value="eu">
+                            <div class="selection-icon">&#127466;&#127482;</div>
+                            <div class="selection-title">Europe</div>
+                            <div class="selection-desc">Frankfurt</div>
+                        </label>
+                        <label class="selection-card">
+                            <input type="radio" name="region" value="asia">
+                            <div class="selection-icon">&#127470;&#127477;</div>
+                            <div class="selection-title">Asia Pacific</div>
+                            <div class="selection-desc">Tokyo</div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="step-nav">
+                    <button class="btn btn-secondary" onclick="prevStep()">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                        Back
+                    </button>
+                    <button class="btn btn-primary" onclick="nextStep()">
+                        Continue
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 3: Use Case -->
+            <div class="step-card" data-step="3">
+                <div class="step-header">
+                    <div class="step-icon">&#127919;</div>
+                    <h1 class="step-title">How will you use BlackRoad?</h1>
+                    <p class="step-description">Select all that apply. We'll customize your experience based on your needs.</p>
+                </div>
+
+                <div class="checklist">
+                    <div class="check-item" onclick="this.classList.toggle('checked')">
+                        <div class="check-box">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                        </div>
+                        <div class="check-content">
+                            <div class="check-title">Deploy web applications</div>
+                            <div class="check-desc">Host websites, APIs, and full-stack apps</div>
+                        </div>
+                    </div>
+                    <div class="check-item" onclick="this.classList.toggle('checked')">
+                        <div class="check-box">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                        </div>
+                        <div class="check-content">
+                            <div class="check-title">Run AI/ML workloads</div>
+                            <div class="check-desc">Train models and run inference at scale</div>
+                        </div>
+                    </div>
+                    <div class="check-item" onclick="this.classList.toggle('checked')">
+                        <div class="check-box">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                        </div>
+                        <div class="check-content">
+                            <div class="check-title">Edge computing</div>
+                            <div class="check-desc">Run code close to users worldwide</div>
+                        </div>
+                    </div>
+                    <div class="check-item" onclick="this.classList.toggle('checked')">
+                        <div class="check-box">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                        </div>
+                        <div class="check-content">
+                            <div class="check-title">Data storage & databases</div>
+                            <div class="check-desc">Store and query data globally</div>
+                        </div>
+                    </div>
+                    <div class="check-item" onclick="this.classList.toggle('checked')">
+                        <div class="check-box">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                        </div>
+                        <div class="check-content">
+                            <div class="check-title">Background jobs & cron</div>
+                            <div class="check-desc">Schedule and run background tasks</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step-nav">
+                    <button class="btn btn-secondary" onclick="prevStep()">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                        Back
+                    </button>
+                    <button class="btn btn-primary" onclick="nextStep()">
+                        Continue
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 4: Invite Team -->
+            <div class="step-card" data-step="4">
+                <div class="step-header">
+                    <div class="step-icon">&#128101;</div>
+                    <h1 class="step-title">Invite Your Team</h1>
+                    <p class="step-description">Collaboration is better together. Invite team members to join your workspace.</p>
+                </div>
+
+                <div class="invite-list" id="inviteList">
+                    <div class="invite-row">
+                        <input type="email" class="form-input" placeholder="colleague@company.com">
+                        <select>
+                            <option value="admin">Admin</option>
+                            <option value="developer" selected>Developer</option>
+                            <option value="viewer">Viewer</option>
+                        </select>
+                        <button class="remove-btn" onclick="removeInvite(this)">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <button class="add-invite-btn" onclick="addInvite()">+ Add another</button>
+
+                <div class="form-hint" style="margin-top: 1rem; text-align: center;">
+                    You can always invite more team members later from Settings
+                </div>
+
+                <div class="step-nav">
+                    <button class="btn btn-secondary" onclick="prevStep()">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                        Back
+                    </button>
+                    <button class="btn btn-primary" onclick="completeSetup()">
+                        Complete Setup
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 5: Success -->
+            <div class="step-card" data-step="5">
+                <div class="step-header">
+                    <div class="success-animation">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                    </div>
+                    <h1 class="step-title">You're All Set!</h1>
+                    <p class="step-description">Your workspace is ready. Start building something amazing.</p>
+                </div>
+
+                <div class="success-features">
+                    <div class="feature-card">
+                        <div class="feature-icon">&#128640;</div>
+                        <div class="feature-title">Deploy First App</div>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">&#128218;</div>
+                        <div class="feature-title">Read the Docs</div>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">&#128172;</div>
+                        <div class="feature-title">Join Discord</div>
+                    </div>
+                </div>
+
+                <div class="cta-buttons">
+                    <button class="btn btn-primary" onclick="goToDashboard()">
+                        Go to Dashboard
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    </button>
+                    <button class="btn btn-secondary">Explore Templates</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Confetti Canvas -->
+    <canvas id="confetti"></canvas>
+
+    <script>
+        let currentStep = 1;
+        const totalSteps = 5;
+
+        // Selection cards
+        document.querySelectorAll('.selection-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const name = card.querySelector('input').name;
+                document.querySelectorAll(`input[name="${name}"]`).forEach(input => {
+                    input.closest('.selection-card').classList.remove('selected');
+                });
+                card.classList.add('selected');
+                card.querySelector('input').checked = true;
+            });
+        });
+
+        function updateProgress() {
+            const progress = (currentStep / totalSteps) * 100;
+            document.getElementById('progressFill').style.width = `${progress}%`;
+            document.getElementById('currentStep').textContent = currentStep;
+
+            document.querySelectorAll('.step-indicator').forEach((indicator, index) => {
+                const step = index + 1;
+                indicator.classList.remove('active', 'completed');
+                indicator.querySelector('.step-dot').classList.remove('active', 'completed');
+
+                if (step < currentStep) {
+                    indicator.classList.add('completed');
+                    indicator.querySelector('.step-dot').classList.add('completed');
+                } else if (step === currentStep) {
+                    indicator.classList.add('active');
+                    indicator.querySelector('.step-dot').classList.add('active');
+                }
+            });
+
+            document.querySelectorAll('.step-card').forEach(card => {
+                card.classList.remove('active');
+                if (parseInt(card.dataset.step) === currentStep) {
+                    card.classList.add('active');
+                }
+            });
+        }
+
+        function nextStep() {
+            if (currentStep < totalSteps) {
+                currentStep++;
+                updateProgress();
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 1) {
+                currentStep--;
+                updateProgress();
+            }
+        }
+
+        function skipOnboarding() {
+            if (confirm('Are you sure you want to skip the setup? You can complete it later.')) {
+                goToDashboard();
+            }
+        }
+
+        function completeSetup() {
+            currentStep = 5;
+            updateProgress();
+            launchConfetti();
+        }
+
+        function goToDashboard() {
+            alert('Redirecting to dashboard...');
+        }
+
+        // Invite team functions
+        function addInvite() {
+            const list = document.getElementById('inviteList');
+            const row = document.createElement('div');
+            row.className = 'invite-row';
+            row.innerHTML = `
+                <input type="email" class="form-input" placeholder="colleague@company.com">
+                <select>
+                    <option value="admin">Admin</option>
+                    <option value="developer" selected>Developer</option>
+                    <option value="viewer">Viewer</option>
+                </select>
+                <button class="remove-btn" onclick="removeInvite(this)">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            `;
+            list.appendChild(row);
+        }
+
+        function removeInvite(btn) {
+            const list = document.getElementById('inviteList');
+            if (list.children.length > 1) {
+                btn.closest('.invite-row').remove();
+            }
+        }
+
+        // Confetti animation
+        function launchConfetti() {
+            const canvas = document.getElementById('confetti');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const particles = [];
+            const colors = ['#ff8700', '#ff0087', '#1e90ff', '#22c55e', '#af5fd7'];
+
+            for (let i = 0; i < 150; i++) {
+                particles.push({
+                    x: canvas.width / 2,
+                    y: canvas.height / 2,
+                    vx: (Math.random() - 0.5) * 20,
+                    vy: (Math.random() - 0.5) * 20 - 5,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    size: Math.random() * 8 + 4,
+                    rotation: Math.random() * 360,
+                    rotationSpeed: (Math.random() - 0.5) * 10
+                });
+            }
+
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                let activeParticles = 0;
+                particles.forEach(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vy += 0.3;
+                    p.rotation += p.rotationSpeed;
+                    p.vx *= 0.99;
+
+                    if (p.y < canvas.height + 50) {
+                        activeParticles++;
+                        ctx.save();
+                        ctx.translate(p.x, p.y);
+                        ctx.rotate(p.rotation * Math.PI / 180);
+                        ctx.fillStyle = p.color;
+                        ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+                        ctx.restore();
+                    }
+                });
+
+                if (activeParticles > 0) {
+                    requestAnimationFrame(animate);
+                } else {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                }
+            }
+
+            animate();
+        }
+    </script>
+</body>
+</html>

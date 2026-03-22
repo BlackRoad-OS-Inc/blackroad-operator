@@ -1,0 +1,88 @@
+#!/bin/bash
+# BlackRoad RAG — unified entry point
+# Usage:
+#   rag search "how does auth work"
+#   rag status
+#   rag index
+#   rag api
+#   rag cite "gateway routing" --style academic
+#   rag progress
+
+set -e
+
+RAG_DIR="$HOME/.blackroad-rag"
+PINK='\033[38;5;205m'
+GREEN='\033[38;5;82m'
+CYAN='\033[38;5;69m'
+AMBER='\033[38;5;214m'
+RESET='\033[0m'
+
+case "${1:-help}" in
+    search)
+        shift
+        python3 "$RAG_DIR/rag-engine.py" search "$@"
+        ;;
+    status)
+        python3 "$RAG_DIR/rag-engine.py" status
+        ;;
+    index)
+        echo -e "${PINK}Starting background indexer...${RESET}"
+        nohup python3 "$RAG_DIR/index-background.py" >> /tmp/rag-index.log 2>&1 &
+        echo -e "${GREEN}PID: $!${RESET}"
+        echo -e "${CYAN}Progress: tail -f $RAG_DIR/index-progress.txt${RESET}"
+        ;;
+    reindex)
+        echo -e "${AMBER}Dropping and rebuilding index...${RESET}"
+        python3 "$RAG_DIR/rag-engine.py" reindex
+        ;;
+    api)
+        shift
+        python3 "$RAG_DIR/rag-api.py" "$@"
+        ;;
+    progress)
+        if [[ -f "$RAG_DIR/index-progress.txt" ]]; then
+            tail -20 "$RAG_DIR/index-progress.txt"
+        else
+            echo "No indexing in progress."
+        fi
+        ;;
+    cite)
+        shift
+        # Quick citation mode via the API
+        python3 -c "
+import importlib.util, sys, json
+from pathlib import Path
+spec = importlib.util.spec_from_file_location('rag_engine', Path('$RAG_DIR/rag-engine.py'))
+rag = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(rag)
+spec2 = importlib.util.spec_from_file_location('academic_sources', Path('$RAG_DIR/academic-sources.py'))
+acad = importlib.util.module_from_spec(spec2)
+spec2.loader.exec_module(acad)
+query = ' '.join(sys.argv[1:]).replace('--style','').replace('academic','').replace('inline','').replace('markdown','').strip()
+style = 'academic'
+for a in sys.argv:
+    if a in ('inline','academic','markdown'): style = a
+results = rag.search(query, top_k=10)
+print(acad.format_citations(results, query, style=style))
+" "$@"
+        ;;
+    scan)
+        shift
+        echo -e "${PINK}Scanning repos and generating chunks...${RESET}"
+        bash "$RAG_DIR/index-repos.sh" "$@"
+        ;;
+    help|*)
+        echo -e "${PINK}BlackRoad RAG${RESET} — Semantic Code Search"
+        echo ""
+        echo "  rag search <query>     Search code semantically"
+        echo "  rag status             Show index stats"
+        echo "  rag index              Start background indexing"
+        echo "  rag reindex            Drop and rebuild index"
+        echo "  rag progress           Check indexing progress"
+        echo "  rag cite <query>       Get academic-style citations"
+        echo "  rag scan               Rescan repos into chunks"
+        echo "  rag api [--port N]     Start RAG API server"
+        echo ""
+        echo -e "  ${CYAN}We remember the Road. We pave tomorrow.${RESET}"
+        ;;
+esac

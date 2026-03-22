@@ -1,0 +1,204 @@
+# BlackRoad OS — Master Caddyfile
+# Generated 2026-03-22 by MERIDIAN
+# 19 domains, 1553+ subdomains → reverse proxy to Pi fleet via WireGuard
+# Deploy to: /etc/caddy/Caddyfile on Gematria (159.65.43.12)
+
+# Global options
+{
+    email alexa@blackroad.io
+    acme_ca https://acme-v02.api.letsencrypt.org/directory
+}
+
+# === BLACKROAD.IO (flagship) ===
+blackroad.io {
+    reverse_proxy https://blackroad-io.pages.dev {
+        header_up Host {upstream_hostport}
+    }
+}
+
+app.blackroad.io, os.blackroad.io, learn.blackroad.io, academy.blackroad.io,
+homework.blackroad.io, create.blackroad.io, explore.blackroad.io,
+store.blackroad.io, shop.blackroad.io, pricing.blackroad.io,
+about.blackroad.io, team.blackroad.io, careers.blackroad.io, jobs.blackroad.io,
+changelog.blackroad.io, sandbox.blackroad.io, playground.blackroad.io,
+lab.blackroad.io, dev.blackroad.io, staging.blackroad.io {
+    reverse_proxy https://blackroad-io.pages.dev {
+        header_up Host {upstream_hostport}
+    }
+}
+
+# Prism Console
+prism.blackroad.io {
+    reverse_proxy 10.0.0.5:8787
+}
+
+# RoundTrip Chat
+chat.blackroad.io, roundtrip.blackroad.io {
+    reverse_proxy 10.0.0.3:8094
+}
+
+# Gitea
+git.blackroad.io {
+    reverse_proxy 10.0.0.5:3100
+}
+
+# Search
+search.blackroad.io {
+    reverse_proxy 10.0.0.3:8001
+}
+
+# Grafana Dashboard
+dash.blackroad.io {
+    reverse_proxy 10.0.0.3:3000
+}
+
+# Status/API
+api.blackroad.io, status.blackroad.io {
+    reverse_proxy 10.0.0.3:8001
+}
+
+# Images CDN
+images.blackroad.io, cdn.blackroad.io {
+    reverse_proxy 10.0.0.4:9000
+}
+
+# === LUCIDIA.EARTH ===
+lucidia.earth {
+    reverse_proxy https://lucidia-earth.pages.dev {
+        header_up Host {upstream_hostport}
+    }
+}
+
+agents.lucidia.earth, workspace.lucidia.earth, terminal.lucidia.earth,
+3d.lucidia.earth, command.lucidia.earth, models.lucidia.earth,
+hub.lucidia.earth, dashboard.lucidia.earth, portal.lucidia.earth,
+console.lucidia.earth, panel.lucidia.earth, deploy.lucidia.earth,
+memory.lucidia.earth, knowledge.lucidia.earth, graph.lucidia.earth,
+skills.lucidia.earth, fleet.lucidia.earth, roster.lucidia.earth {
+    reverse_proxy 10.0.0.7:8000
+}
+
+# === BLACKROADAI.COM ===
+blackroadai.com, *.blackroadai.com {
+    reverse_proxy https://blackroadai-com.pages.dev {
+        header_up Host {upstream_hostport}
+    }
+}
+
+ollama.blackroadai.com {
+    reverse_proxy 10.0.0.4:11434
+}
+
+inference.blackroadai.com, vllm.blackroadai.com {
+    reverse_proxy 10.0.0.5:11434
+}
+
+# === BLACKROAD.NETWORK ===
+blackroad.network, *.blackroad.network {
+    reverse_proxy https://blackroad-network.pages.dev {
+        header_up Host {upstream_hostport}
+    }
+}
+
+alice.blackroad.network { reverse_proxy 10.0.0.3:8001 }
+cecilia.blackroad.network { reverse_proxy 10.0.0.4:8001 }
+octavia.blackroad.network { reverse_proxy 10.0.0.5:8001 }
+lucidia.blackroad.network { reverse_proxy 10.0.0.7:8000 }
+
+# === BLACKROAD.SYSTEMS ===
+blackroad.systems, *.blackroad.systems {
+    reverse_proxy https://blackroad-systems.pages.dev {
+        header_up Host {upstream_hostport}
+    }
+}
+
+grafana.blackroad.systems { reverse_proxy 10.0.0.3:3000 }
+
+# === ROADCHAIN.IO ===
+roadchain.io, *.roadchain.io {
+    reverse_proxy https://roadchain-io.pages.dev {
+        header_up Host {upstream_hostport}
+    }
+}
+
+# === ROADCOIN.IO ===
+roadcoin.io, *.roadcoin.io {
+    reverse_proxy https://roadcoin-io.pages.dev {
+        header_up Host {upstream_hostport}
+    }
+}
+
+# === BLACKBOXPROGRAMMING.IO ===
+blackboxprogramming.io, *.blackboxprogramming.io {
+    reverse_proxy https://blackboxprogramming-io.pages.dev {
+        header_up Host {upstream_hostport}
+    }
+}
+
+# === LUCIDIA.STUDIO ===
+lucidia.studio, *.lucidia.studio {
+    reverse_proxy https://lucidia-studio.pages.dev {
+        header_up Host {upstream_hostport}
+    }
+}
+
+# === REMAINING DOMAINS (wildcard to pages.dev) ===
+blackroad.company, *.blackroad.company {
+    reverse_proxy https://blackroad-company.pages.dev {
+        header_up Host {upstream_hostport}
+    }
+}
+
+blackroad.me, *.blackroad.me {
+    reverse_proxy https://blackroad-me.pages.dev {
+        header_up Host {upstream_hostport}
+    }
+}
+
+blackroadinc.us, *.blackroadinc.us {
+    reverse_proxy https://blackroadinc-us.pages.dev {
+        header_up Host {upstream_hostport}
+    }
+}
+
+blackroadqi.com, *.blackroadqi.com {
+    reverse_proxy https://blackroadqi-com.pages.dev {
+        header_up Host {upstream_hostport}
+    }
+}
+
+blackroadquantum.com, *.blackroadquantum.com {
+    reverse_proxy https://blackroadquantum-com.pages.dev {
+        header_up Host {upstream_hostport}
+    }
+}
+
+blackroadquantum.info, *.blackroadquantum.info {
+    reverse_proxy https://blackroadquantum-info.pages.dev {
+        header_up Host {upstream_hostport}
+    }
+}
+
+blackroadquantum.net, *.blackroadquantum.net {
+    reverse_proxy https://blackroadquantum-net.pages.dev {
+        header_up Host {upstream_hostport}
+    }
+}
+
+blackroadquantum.shop, *.blackroadquantum.shop {
+    reverse_proxy https://blackroadquantum-shop.pages.dev {
+        header_up Host {upstream_hostport}
+    }
+}
+
+blackroadquantum.store, *.blackroadquantum.store {
+    reverse_proxy https://blackroadquantum-store.pages.dev {
+        header_up Host {upstream_hostport}
+    }
+}
+
+lucidiaqi.com, *.lucidiaqi.com {
+    reverse_proxy https://lucidiaqi-com.pages.dev {
+        header_up Host {upstream_hostport}
+    }
+}

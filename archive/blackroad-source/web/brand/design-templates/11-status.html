@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>System Status — BlackRoad OS</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --gray-950: #000000;
+  --gray-900: #0a0a0a;
+  --gray-850: #121212;
+  --gray-800: #1a1a1a;
+  --gray-700: #404040;
+  --gray-600: #525252;
+  --gray-500: #737373;
+  --gray-400: #a3a3a3;
+  --gray-300: #d4d4d4;
+  --gray-200: #e5e5e5;
+  --gray-100: #f5f5f5;
+  --white: #ffffff;
+  --accent-1: #ff8700;
+  --accent-3: #ff0087;
+  --accent-6: #1e90ff;
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  --font-headline: 'Space Grotesk', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: var(--gray-950);
+  color: var(--gray-300);
+  font-family: var(--font-body);
+  line-height: 1.6;
+}
+
+/* Nav */
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 40px;
+  border-bottom: 1px solid var(--gray-900);
+}
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+.nav-logo-mark {
+  width: 32px;
+  height: 32px;
+  background: var(--gray-100);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-headline);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--gray-950);
+}
+.nav-logo-text {
+  font-family: var(--font-headline);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--gray-100);
+}
+.nav-status-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 6px 12px;
+  border-radius: 50px;
+}
+.nav-status-badge.operational {
+  background: rgba(34,197,94,0.1);
+  color: var(--success);
+  border: 1px solid rgba(34,197,94,0.2);
+}
+.nav-status-badge.degraded {
+  background: rgba(245,158,11,0.1);
+  color: var(--warning);
+  border: 1px solid rgba(245,158,11,0.2);
+}
+.nav-status-badge.outage {
+  background: rgba(239,68,68,0.1);
+  color: var(--error);
+  border: 1px solid rgba(239,68,68,0.2);
+}
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+.status-dot.operational { background: var(--success); }
+.status-dot.degraded { background: var(--warning); }
+.status-dot.outage { background: var(--error); }
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Hero */
+.status-hero {
+  padding: 60px 40px;
+  text-align: center;
+  border-bottom: 1px solid var(--gray-900);
+}
+.hero-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(34,197,94,0.1);
+  border: 1px solid rgba(34,197,94,0.2);
+  padding: 16px 32px;
+  border-radius: var(--radius-xl);
+  margin-bottom: 24px;
+}
+.hero-status-icon {
+  width: 24px;
+  height: 24px;
+  color: var(--success);
+}
+.hero-status-text {
+  font-family: var(--font-headline);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--success);
+}
+.hero-updated {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--gray-600);
+}
+
+/* Container */
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 48px 40px;
+}
+
+/* Uptime Chart */
+.uptime-section {
+  margin-bottom: 48px;
+}
+.section-title {
+  font-family: var(--font-headline);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--gray-100);
+  margin-bottom: 20px;
+}
+.uptime-chart {
+  display: flex;
+  gap: 2px;
+  height: 32px;
+  margin-bottom: 12px;
+}
+.uptime-bar {
+  flex: 1;
+  border-radius: 2px;
+  transition: all 150ms ease;
+  cursor: pointer;
+}
+.uptime-bar.up { background: var(--success); }
+.uptime-bar.degraded { background: var(--warning); }
+.uptime-bar.down { background: var(--error); }
+.uptime-bar:hover {
+  transform: scaleY(1.2);
+}
+.uptime-legend {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--gray-600);
+}
+.uptime-percentage {
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--gray-400);
+  margin-top: 16px;
+}
+.uptime-percentage strong {
+  color: var(--success);
+  font-size: 24px;
+}
+
+/* Components */
+.components-section {
+  margin-bottom: 48px;
+}
+.component-list {
+  background: var(--gray-900);
+  border: 1px solid var(--gray-800);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+}
+.component-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--gray-800);
+}
+.component-item:last-child { border-bottom: none; }
+.component-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.component-icon {
+  width: 36px;
+  height: 36px;
+  background: var(--gray-850);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gray-500);
+}
+.component-icon svg {
+  width: 18px;
+  height: 18px;
+}
+.component-name {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--gray-100);
+}
+.component-description {
+  font-size: 13px;
+  color: var(--gray-500);
+}
+.component-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.component-status.operational { color: var(--success); }
+.component-status.degraded { color: var(--warning); }
+.component-status.outage { color: var(--error); }
+.component-status::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.component-status.operational::before { background: var(--success); }
+.component-status.degraded::before { background: var(--warning); }
+.component-status.outage::before { background: var(--error); }
+
+/* Incidents */
+.incidents-section {
+  margin-bottom: 48px;
+}
+.incident-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.incident-card {
+  background: var(--gray-900);
+  border: 1px solid var(--gray-800);
+  border-radius: var(--radius-xl);
+  padding: 20px;
+}
+.incident-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.incident-title {
+  font-family: var(--font-headline);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--gray-100);
+}
+.incident-badge {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 4px 10px;
+  border-radius: 50px;
+}
+.incident-badge.resolved {
+  background: rgba(34,197,94,0.1);
+  color: var(--success);
+}
+.incident-badge.investigating {
+  background: rgba(245,158,11,0.1);
+  color: var(--warning);
+}
+.incident-badge.identified {
+  background: rgba(30,144,255,0.1);
+  color: var(--accent-6);
+}
+.incident-updates {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.incident-update {
+  display: flex;
+  gap: 12px;
+  padding-left: 12px;
+  border-left: 2px solid var(--gray-800);
+}
+.update-time {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--gray-600);
+  min-width: 100px;
+}
+.update-content {
+  font-size: 14px;
+  color: var(--gray-400);
+}
+.update-status {
+  font-weight: 500;
+  color: var(--gray-300);
+}
+
+/* Metrics */
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 48px;
+}
+.metric-card {
+  background: var(--gray-900);
+  border: 1px solid var(--gray-800);
+  border-radius: var(--radius-xl);
+  padding: 20px;
+  text-align: center;
+}
+.metric-value {
+  font-family: var(--font-headline);
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--gray-100);
+  margin-bottom: 4px;
+}
+.metric-value.success { color: var(--success); }
+.metric-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--gray-500);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Subscribe */
+.subscribe-section {
+  background: var(--gray-900);
+  border: 1px solid var(--gray-800);
+  border-radius: var(--radius-xl);
+  padding: 32px;
+  text-align: center;
+}
+.subscribe-title {
+  font-family: var(--font-headline);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--gray-100);
+  margin-bottom: 8px;
+}
+.subscribe-text {
+  font-size: 14px;
+  color: var(--gray-500);
+  margin-bottom: 20px;
+}
+.subscribe-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  padding: 12px 20px;
+  border-radius: var(--radius-md);
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 200ms ease;
+}
+.btn-primary {
+  background: var(--gray-100);
+  color: var(--gray-900);
+}
+.btn-primary:hover {
+  background: var(--white);
+  transform: translateY(-1px);
+}
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--gray-800);
+  color: var(--gray-400);
+}
+.btn-ghost:hover {
+  border-color: var(--gray-700);
+  color: var(--gray-100);
+}
+.btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Footer */
+.footer {
+  padding: 32px 40px;
+  border-top: 1px solid var(--gray-900);
+  text-align: center;
+}
+.footer-links {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-bottom: 16px;
+}
+.footer-link {
+  font-size: 14px;
+  color: var(--gray-500);
+  text-decoration: none;
+}
+.footer-link:hover { color: var(--gray-300); }
+.footer-copy {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--gray-600);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .metrics-grid { grid-template-columns: 1fr; }
+  .subscribe-buttons { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="#" class="nav-logo">
+    <div class="nav-logo-mark">B</div>
+    <span class="nav-logo-text">BlackRoad Status</span>
+  </a>
+  <div class="nav-status-badge operational">
+    <span class="status-dot operational"></span>
+    All Systems Operational
+  </div>
+</nav>
+
+<section class="status-hero">
+  <div class="hero-status">
+    <svg class="hero-status-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <polyline points="20 6 9 17 4 12"/>
+    </svg>
+    <span class="hero-status-text">All Systems Operational</span>
+  </div>
+  <p class="hero-updated">Last updated: February 5, 2026 at 14:32 UTC</p>
+</section>
+
+<div class="container">
+  <!-- Uptime Chart -->
+  <section class="uptime-section">
+    <h2 class="section-title">90-Day Uptime</h2>
+    <div class="uptime-chart">
+      <!-- Generate 90 bars -->
+      <div class="uptime-bar up"></div>
+      <div class="uptime-bar up"></div>
+      <div class="uptime-bar up"></div>
+      <div class="uptime-bar up"></div>
+      <div class="uptime-bar up"></div>
+      <div class="uptime-bar up"></div>
+      <div class="uptime-bar up"></div>
+      <div class="uptime-bar up"></div>
+      <div class="uptime-bar up"></div>
+      <div class="uptime-bar degraded"></div>
+      <div class="uptime-bar up"></div>
+      <div class="uptime-bar up"></div>
+      <div class="uptime-bar up"></div>
+      <div class="uptime-bar up"></div>
+      <div class="uptime-bar up"></div>
+      <div class="uptime-bar up"></div>
+      <div class="uptime-bar up"></div>
+      <div class="uptime-bar up"></div>
+      <div class="uptime-bar up"></div>
+      <div class="uptime-bar up"></div>
+      <div class="uptime-bar up"></div>
+      <div class="uptime-bar up"></div>
+      <div class="uptime-bar up"></div>
+      <div class="uptime-bar up"></div>
+      <div class="uptime-bar up"></div>
+      <div class="uptime-bar up"></div>
+      <div class="uptime-bar up"></div>
+      <div class="uptime-bar up"></div>
+      <div class="uptime-bar up"></div>
+      <div class="uptime-bar up"></div>
+      <div class="uptime-bar up"></div>
+      <div class="uptime-bar up"></div>
+      <div class="uptime-bar up"></div>
+      <div class="uptime-bar up"></div>
+      <div class="uptime-bar up"></div>
+      <div class="uptime-bar up"></div>
+      <div class="uptime-bar up"></div>
+      <div class="uptime-bar up"></div>
+      <div class="uptime-bar up"></div>
+      <div class="uptime-bar up"></div>
+      <div class="uptime-bar up"></div>
+      <div class="uptime-bar up"></div>
+      <div class="uptime-bar up"></div>
+      <div class="uptime-bar up"></div>
+      <div class="uptime-bar up"></div>
+    </div>
+    <div class="uptime-legend">
+      <span>90 days ago</span>
+      <span>Today</span>
+    </div>
+    <div class="uptime-percentage">
+      <strong>99.98%</strong> uptime
+    </div>
+  </section>
+
+  <!-- Metrics -->
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <div class="metric-value success">12ms</div>
+      <div class="metric-label">Avg Response Time</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-value">1.2M</div>
+      <div class="metric-label">Requests / Minute</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-value success">99.98%</div>
+      <div class="metric-label">Uptime (90 days)</div>
+    </div>
+  </div>
+
+  <!-- Components -->
+  <section class="components-section">
+    <h2 class="section-title">System Components</h2>
+    <div class="component-list">
+      <div class="component-item">
+        <div class="component-info">
+          <div class="component-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          </div>
+          <div>
+            <div class="component-name">Edge Workers</div>
+            <div class="component-description">Global edge compute network</div>
+          </div>
+        </div>
+        <span class="component-status operational">Operational</span>
+      </div>
+
+      <div class="component-item">
+        <div class="component-info">
+          <div class="component-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+          </div>
+          <div>
+            <div class="component-name">KV Storage</div>
+            <div class="component-description">Distributed key-value store</div>
+          </div>
+        </div>
+        <span class="component-status operational">Operational</span>
+      </div>
+
+      <div class="component-item">
+        <div class="component-info">
+          <div class="component-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <div>
+            <div class="component-name">Cron Triggers</div>
+            <div class="component-description">Scheduled job execution</div>
+          </div>
+        </div>
+        <span class="component-status operational">Operational</span>
+      </div>
+
+      <div class="component-item">
+        <div class="component-info">
+          <div class="component-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+          </div>
+          <div>
+            <div class="component-name">AI Agents</div>
+            <div class="component-description">Autonomous agent orchestration</div>
+          </div>
+        </div>
+        <span class="component-status operational">Operational</span>
+      </div>
+
+      <div class="component-item">
+        <div class="component-info">
+          <div class="component-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+          <div>
+            <div class="component-name">Analytics</div>
+            <div class="component-description">Real-time metrics and logging</div>
+          </div>
+        </div>
+        <span class="component-status operational">Operational</span>
+      </div>
+
+      <div class="component-item">
+        <div class="component-info">
+          <div class="component-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+          </div>
+          <div>
+            <div class="component-name">API Gateway</div>
+            <div class="component-description">Request routing and rate limiting</div>
+          </div>
+        </div>
+        <span class="component-status operational">Operational</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Incidents -->
+  <section class="incidents-section">
+    <h2 class="section-title">Past Incidents</h2>
+    <div class="incident-list">
+      <div class="incident-card">
+        <div class="incident-header">
+          <span class="incident-title">Elevated API Latency</span>
+          <span class="incident-badge resolved">Resolved</span>
+        </div>
+        <div class="incident-updates">
+          <div class="incident-update">
+            <span class="update-time">Feb 3, 09:45</span>
+            <div class="update-content">
+              <span class="update-status">Resolved</span> — All services have recovered. Root cause was identified and addressed.
+            </div>
+          </div>
+          <div class="incident-update">
+            <span class="update-time">Feb 3, 09:15</span>
+            <div class="update-content">
+              <span class="update-status">Monitoring</span> — A fix has been deployed. Monitoring for stability.
+            </div>
+          </div>
+          <div class="incident-update">
+            <span class="update-time">Feb 3, 08:30</span>
+            <div class="update-content">
+              <span class="update-status">Investigating</span> — We are investigating elevated latency on API endpoints.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="incident-card">
+        <div class="incident-header">
+          <span class="incident-title">Scheduled Maintenance</span>
+          <span class="incident-badge resolved">Completed</span>
+        </div>
+        <div class="incident-updates">
+          <div class="incident-update">
+            <span class="update-time">Jan 28, 06:00</span>
+            <div class="update-content">
+              <span class="update-status">Completed</span> — Maintenance window concluded successfully. All systems nominal.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Subscribe -->
+  <section class="subscribe-section">
+    <h3 class="subscribe-title">Stay Informed</h3>
+    <p class="subscribe-text">Get notified about incidents and scheduled maintenance.</p>
+    <div class="subscribe-buttons">
+      <a href="#" class="btn btn-primary">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        Subscribe via Email
+      </a>
+      <a href="#" class="btn btn-ghost">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/></svg>
+        RSS Feed
+      </a>
+    </div>
+  </section>
+</div>
+
+<footer class="footer">
+  <div class="footer-links">
+    <a href="#" class="footer-link">Home</a>
+    <a href="#" class="footer-link">Documentation</a>
+    <a href="#" class="footer-link">Support</a>
+    <a href="#" class="footer-link">Twitter</a>
+  </div>
+  <p class="footer-copy">BlackRoad OS · 2026</p>
+</footer>
+
+</body>
+</html>

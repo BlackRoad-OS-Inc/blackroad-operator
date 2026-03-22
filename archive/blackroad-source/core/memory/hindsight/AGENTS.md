@@ -1,0 +1,1 @@
+# blackboxprogramming/hindsight/AGENTS.md

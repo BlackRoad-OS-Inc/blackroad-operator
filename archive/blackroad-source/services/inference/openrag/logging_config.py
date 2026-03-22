@@ -1,0 +1,151 @@
+import os
+import sys
+from typing import Any, Dict
+import structlog
+from structlog import processors
+
+
+LOC_WIDTH_SHORT = 30
+LOC_WIDTH_LONG = 60
+
+LEVEL_COLORS = {
+    "DEBUG": "\033[36m",       # Cyan
+    "INFO": "\033[32m",        # Green
+    "WARNING": "\033[33m",     # Yellow
+    "ERROR": "\033[31m",       # Red
+    "CRITICAL": "\033[1;31m",  # Bold red
+}
+DIM = "\033[38;5;244m"  # Medium grey
+RESET = "\033[0m"
+
+
+def configure_logging(
+    log_level: str = "INFO",
+    json_logs: bool = False,
+    include_timestamps: bool = True,
+    service_name: str = "openrag",
+) -> None:
+    """Configure structlog for the application."""
+
+    # Convert string log level to actual level
+    level = getattr(
+        structlog.stdlib.logging, log_level.upper(), structlog.stdlib.logging.INFO
+    )
+
+    # Base processors
+    shared_processors = [
+        structlog.contextvars.merge_contextvars,
+        structlog.processors.add_log_level,
+        structlog.processors.StackInfoRenderer(),
+        structlog.dev.set_exc_info,
+    ]
+
+    if include_timestamps:
+        shared_processors.append(structlog.processors.TimeStamper(fmt="iso"))
+
+    # Add service name and file location to all logs
+    shared_processors.append(
+        structlog.processors.CallsiteParameterAdder(
+            parameters=[
+                structlog.processors.CallsiteParameter.FUNC_NAME,
+                structlog.processors.CallsiteParameter.FILENAME,
+                structlog.processors.CallsiteParameter.LINENO,
+                structlog.processors.CallsiteParameter.PATHNAME,
+            ]
+        )
+    )
+
+    # Console output configuration
+    if json_logs or os.getenv("LOG_FORMAT", "").lower() == "json":
+        # JSON output for production/containers
+        shared_processors.append(structlog.processors.JSONRenderer())
+        console_renderer = structlog.processors.JSONRenderer()
+    else:
+        # Custom clean format: timestamp path/file:loc logentry
+        use_colors = "NO_COLOR" not in os.environ and hasattr(sys.stderr, "isatty") and sys.stderr.isatty()
+
+        def custom_formatter(logger, log_method, event_dict):
+            timestamp = event_dict.pop("timestamp", "")
+            pathname = event_dict.pop("pathname", "")
+            filename = event_dict.pop("filename", "")
+            lineno = event_dict.pop("lineno", "")
+            level = event_dict.pop("level", "").upper()
+
+            if filename and lineno:
+                location = f"{filename}:{lineno}"
+                loc_width = LOC_WIDTH_SHORT
+            elif pathname and lineno:
+                location = f"{pathname}:{lineno}"
+                loc_width = LOC_WIDTH_LONG
+            elif filename:
+                location = filename
+                loc_width = LOC_WIDTH_SHORT
+            elif pathname:
+                location = pathname
+                loc_width = LOC_WIDTH_LONG
+            else:
+                location = "unknown"
+                loc_width = LOC_WIDTH_SHORT
+
+            # Build the main message
+            message_parts = []
+            event = event_dict.pop("event", "")
+            if event:
+                message_parts.append(event)
+
+            if use_colors:
+                colored_timestamp = f"{DIM}{timestamp}{RESET}"
+                color = LEVEL_COLORS.get(level, "")
+                colored_level = f"{color}{level:<7}{RESET}"
+            else:
+                colored_timestamp = timestamp
+                colored_level = f"{level:<7}"
+
+            header = f"[{colored_timestamp}] [{colored_level}] [{location:<{loc_width}}] "
+            # Visible width excludes ANSI escape codes for correct padding
+            visible_header = f"[{timestamp}] [{level:<7}] [{location:<{loc_width}}] "
+
+            # Add any remaining context as indented multi-line fields
+            extra = {k: v for k, v in event_dict.items() if k not in ["service", "func_name"]}
+            if extra:
+                padding = " " * len(visible_header)
+                for key, value in extra.items():
+                    message_parts.append(f"\n{padding}- {key}: {value}")
+
+            message = "".join(message_parts)
+
+            return f"{header}{message}"
+
+        console_renderer = custom_formatter
+
+    # Configure structlog
+    structlog.configure(
+        processors=shared_processors + [console_renderer],
+        wrapper_class=structlog.make_filtering_bound_logger(level),
+        context_class=dict,
+        logger_factory=structlog.WriteLoggerFactory(sys.stderr),
+        cache_logger_on_first_use=True,
+    )
+
+    # Add global context
+    structlog.contextvars.clear_contextvars()
+    structlog.contextvars.bind_contextvars(service=service_name)
+
+
+def get_logger(name: str = None) -> structlog.BoundLogger:
+    """Get a configured logger instance."""
+    if name:
+        return structlog.get_logger(name)
+    return structlog.get_logger()
+
+
+# Convenience function to configure logging from environment
+def configure_from_env() -> None:
+    """Configure logging from environment variables."""
+    log_level = os.getenv("LOG_LEVEL", "INFO")
+    json_logs = os.getenv("LOG_FORMAT", "").lower() == "json"
+    service_name = os.getenv("SERVICE_NAME", "openrag")
+
+    configure_logging(
+        log_level=log_level, json_logs=json_logs, service_name=service_name
+    )

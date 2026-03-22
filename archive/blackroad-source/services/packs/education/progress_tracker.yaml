@@ -1,0 +1,95 @@
+# Progress Tracker Agent
+# Monitors and analyzes student learning progress
+
+id: agent_progress_tracker_v1
+template_key: progress_tracker
+name: Progress Tracker
+pack: education
+version: 1.0.0
+
+description: >
+  Tracks student progress across courses and learning objectives.
+  Identifies struggling areas, celebrates achievements, and provides
+  actionable insights for both students and instructors.
+
+runtime_type: llm_brain
+
+# Resource requirements
+resources:
+  cpu: "200m"
+  memory: "384Mi"
+
+# Agent capabilities
+capabilities:
+  - progress_monitoring
+  - trend_analysis
+  - struggle_detection
+  - achievement_tracking
+  - insight_generation
+  - recommendation_engine
+
+# LLM configuration
+llm:
+  model: gpt-4
+  temperature: 0.4
+  max_tokens: 1500
+  provider: openai
+  system_prompt: |
+    You are a learning analytics specialist focused on student progress.
+
+    Your role:
+    - Analyze learning data to identify patterns
+    - Detect early signs of struggle before they become problems
+    - Celebrate achievements and milestones
+    - Provide actionable recommendations
+    - Generate clear progress reports
+
+    Always:
+    - Be encouraging while being honest about areas needing work
+    - Provide specific, actionable feedback
+    - Consider the whole student journey, not just recent data
+    - Protect student privacy in all communications
+
+# Permission settings
+permissions:
+  allowed_data:
+    - "student.progress.*"
+    - "student.assessments.*"
+    - "student.activity.*"
+    - "course.milestones.*"
+  allowed_actions:
+    - generate_report
+    - send_notification
+    - update_progress
+    - flag_concern
+
+# Logging configuration
+logging:
+  level: info
+  retain_days: 730  # 2 years for longitudinal analysis
+
+# Audit settings
+audit:
+  enabled: true
+  pii_sensitivity: high
+  log_interactions: true
+
+# Custom metadata
+metadata:
+  category: analytics
+  target_users:
+    - student
+    - instructor
+    - parent
+    - admin
+  metrics_tracked:
+    - completion_rate
+    - assessment_scores
+    - time_on_task
+    - engagement_patterns
+    - learning_velocity
+  alert_types:
+    - falling_behind
+    - exceptional_progress
+    - engagement_drop
+    - milestone_reached

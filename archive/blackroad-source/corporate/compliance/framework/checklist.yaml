@@ -1,0 +1,79 @@
+# BlackRoad OS — Compliance Checklist
+# Covers: SOC2 Type II, GDPR, CCPA, ISO 27001 (relevant controls)
+# Run quarterly review: br security compliance-check
+# Owner: CIPHER
+
+metadata:
+  version: "1.0"
+  last_reviewed: "2026-02-01"
+  reviewer: "CIPHER"
+  next_review: "2026-05-01"
+
+soc2:
+  security:
+    - id: CC6.1
+      control: "Logical and physical access controls"
+      status: compliant
+      evidence: "SSH keys (ed25519), Vault AES-256-CBC, gateway TBA auth"
+      checked: "2026-02-01"
+    - id: CC6.2
+      control: "Authentication for all system components"
+      status: compliant
+      evidence: "Bearer token auth on all workers; no unauthenticated admin endpoints"
+      checked: "2026-02-01"
+    - id: CC7.1
+      control: "Threat/vulnerability detection"
+      status: compliant
+      evidence: "TruffleHog CI, CodeQL analysis, Dependabot alerts"
+      checked: "2026-02-01"
+    - id: CC8.1
+      control: "Change management"
+      status: compliant
+      evidence: "GitHub PR reviews required; deploy-all.yml gated by approvals"
+      checked: "2026-02-01"
+    - id: CC9.2
+      control: "Vendor/third-party risk assessment"
+      status: in_review
+      notes: "AI provider risk assessment pending for Anthropic + OpenAI"
+  availability:
+    - id: A1.2
+      control: "Environmental protections (backups, DR)"
+      status: compliant
+      evidence: "IPFS snapshots + restore.sh + 3x Pi redundancy"
+      checked: "2026-02-01"
+
+gdpr:
+  - id: GDPR-5
+    article: "Art. 5 — Principles relating to processing"
+    control: "Data minimization"
+    status: compliant
+    notes: "Memory entries store only what agents explicitly write; no passive collection"
+  - id: GDPR-17
+    article: "Art. 17 — Right to erasure"
+    control: "Delete on request"
+    status: compliant
+    notes: "PS-SHA∞ cryptographic quarantine [ERASED:SHA256(original)] — content removed, proof preserved"
+  - id: GDPR-32
+    article: "Art. 32 — Security of processing"
+    control: "Encryption at rest and in transit"
+    status: compliant
+    notes: "AES-256-CBC vault; TLS for all external endpoints; HTTPS-only Cloudflare workers"
+  - id: GDPR-33
+    article: "Art. 33 — Breach notification"
+    control: "72-hour breach notification capability"
+    status: in_review
+    notes: "Incident response runbook needed (see TEMPLATE-001-INFRA-RUNBOOK.md)"
+
+ccpa:
+  - id: CCPA-1798.100
+    right: "Right to know"
+    status: compliant
+    notes: "GET /memory lists all entries for a user session"
+  - id: CCPA-1798.105
+    right: "Right to delete"
+    status: compliant
+    notes: "DELETE /memory/:key triggers PS-SHA∞ erasure"
+  - id: CCPA-1798.120
+    right: "Right to opt-out of sale"
+    status: n_a
+    notes: "BlackRoad OS does not sell personal data"

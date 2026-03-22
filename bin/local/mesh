@@ -1,0 +1,127 @@
+#!/usr/bin/env bash
+# ============================================================================
+# BLACKROAD OS, INC. - PROPRIETARY AND CONFIDENTIAL
+# Copyright (c) 2025-2026 BlackRoad OS, Inc. All Rights Reserved.
+# ============================================================================
+# BlackRoad Agent Mesh - Agent-to-agent communication
+# Routes queries to AI agents running on fleet nodes
+set -eo pipefail
+
+# Source centralized config
+source "$HOME/.blackroad/config/nodes.sh" 2>/dev/null || {
+  echo "ERROR: Missing ~/.blackroad/config/nodes.sh" >&2; exit 1
+}
+
+# Agent → node mapping (agents that can answer queries via Ollama)
+declare -A MESH_AGENTS=(
+  [cece]="cecilia"
+  [cecilia]="cecilia"
+  [lucidia]="lucidia"
+  [alice]="alice"
+  [octavia]="octavia"
+  [aria]="aria"
+)
+
+MODEL="${BR_MODEL:-llama3.2}"
+
+ask_agent() {
+  local target="$1"; shift
+  local node="${MESH_AGENTS[$target]:-}"
+  [[ -z "$node" ]] && { echo "Unknown agent: $target (available: ${!MESH_AGENTS[*]})"; return 1; }
+
+  local ip="${NODE_IP[$node]:-}"
+  [[ -z "$ip" ]] && { echo "No IP for node: $node"; return 1; }
+
+  printf '%bAsking %b%s%b (%s)...%b\n' "$BLUE" "$AMBER" "$target" "$BLUE" "$ip" "$RESET"
+
+  local prompt="$*"
+  local response
+  response=$(curl -sf --max-time 30 "http://${ip}:11434/api/generate" \
+    -d "{\"model\":\"$MODEL\",\"prompt\":$(printf '%s' "$prompt" | jq -Rs .),\"stream\":false}" 2>/dev/null | \
+    jq -r '.response // empty' 2>/dev/null)
+
+  if [[ -n "$response" ]]; then
+    echo "$response"
+  else
+    printf '%b%s is offline or model unavailable%b\n' "$RED" "$target" "$RESET"
+    return 1
+  fi
+}
+
+broadcast() {
+  local prompt="$*"
+  printf '%bBroadcasting to mesh...%b\n\n' "$PINK" "$RESET"
+
+  local pids=()
+  for agent in "${!MESH_AGENTS[@]}"; do
+    local node="${MESH_AGENTS[$agent]}"
+    local ip="${NODE_IP[$node]:-}"
+    [[ -z "$ip" ]] && continue
+
+    (
+      local response
+      response=$(curl -sf --max-time 30 "http://${ip}:11434/api/generate" \
+        -d "{\"model\":\"$MODEL\",\"prompt\":$(printf '%s' "$prompt" | jq -Rs .),\"stream\":false}" 2>/dev/null | \
+        jq -r '.response // empty' 2>/dev/null)
+      if [[ -n "$response" ]]; then
+        printf '%b=== %s ===%b\n%s\n\n' "$AMBER" "$agent" "$RESET" "$response"
+      fi
+    ) &
+    pids+=($!)
+  done
+
+  # Wait for all background jobs
+  for pid in "${pids[@]}"; do
+    wait "$pid" 2>/dev/null || true
+  done
+}
+
+mesh_status() {
+  printf '%bAgent Mesh Status%b\n\n' "$PINK" "$RESET"
+  printf '%-12s %-12s %-16s %-8s %s\n' "AGENT" "NODE" "IP" "STATUS" "MODELS"
+  printf '%-12s %-12s %-16s %-8s %s\n' "─────" "────" "──" "──────" "──────"
+
+  for agent in "${!MESH_AGENTS[@]}"; do
+    local node="${MESH_AGENTS[$agent]}"
+    local ip="${NODE_IP[$node]:-unknown}"
+
+    printf '%-12s %-12s %-16s ' "$agent" "$node" "$ip"
+
+    local tags
+    tags=$(curl -sf --connect-timeout 2 "http://${ip}:11434/api/tags" 2>/dev/null)
+    if [[ -n "$tags" ]]; then
+      local count
+      count=$(echo "$tags" | jq '.models | length' 2>/dev/null || echo "?")
+      printf '%b%-8s%b %s\n' "$GREEN" "ONLINE" "$RESET" "${count} models"
+    else
+      printf '%b%-8s%b\n' "$RED" "OFFLINE" "$RESET"
+    fi
+  done
+}
+
+usage() {
+  cat <<EOF
+${PINK}mesh${RESET} - BlackRoad Agent Mesh
+
+${BLUE}USAGE:${RESET}
+  mesh ask <agent> <question>   Query a specific agent
+  mesh broadcast <message>      Send to all agents
+  mesh status                   Show mesh status
+
+${AMBER}AGENTS:${RESET}
+  cece, cecilia, lucidia, alice, octavia, aria
+
+${GREEN}EXAMPLES:${RESET}
+  mesh ask cece "explain docker networking"
+  mesh broadcast "what is your hostname?"
+  mesh status
+EOF
+}
+
+case "${1:-help}" in
+  ask)       shift; ask_agent "$@" ;;
+  broadcast) shift; broadcast "$@" ;;
+  status)    mesh_status ;;
+  -h|--help|help) usage ;;
+  *)         echo "Unknown: $1"; usage; exit 1 ;;
+esac

@@ -1,0 +1,290 @@
+# 💼 Cross-Pack Integration
+# Defines connections between Creator Studio and other BlackRoad OS packs
+
+name: cross-pack
+description: |
+  Integration configuration for connecting Creator Studio Pack with other
+  packs in the BlackRoad OS ecosystem. Defines data flows, triggers, and
+  ownership boundaries.
+version: "1.0.0"
+
+# 🔗 Connected packs
+connected_packs:
+
+  # 🧾 Archive Integration
+  blackroad_os_archive:
+    description: Campaign history and performance snapshots
+    relationship: publisher
+    
+    # When to send data to archive
+    triggers:
+      - event: campaign_archived
+        action: create_campaign_record
+        
+      - event: content_archived
+        action: create_content_record
+        
+      - event: top_performer_flagged
+        action: add_to_best_of
+    
+    # Data sent to archive
+    data_flow:
+      direction: outbound
+      data:
+        campaign_record:
+          - campaign_id
+          - campaign_name
+          - campaign_type
+          - start_date
+          - end_date
+          - channels
+          - asset_count
+          - performance_summary
+          - key_learnings
+          - timestamps
+          
+        content_record:
+          - asset_id
+          - content_type
+          - channel
+          - publish_date
+          - performance_metrics
+          - repurposed_from
+          - repurposed_to
+          
+        best_of_record:
+          - asset_id
+          - performance_rank
+          - success_factors
+          - repurposing_potential
+    
+    # Data received from archive
+    inbound:
+      - evergreen_content_list
+      - historical_performance_benchmarks
+      - similar_campaign_results
+
+  # 🕹️ Prism Console Integration  
+  blackroad_os_prism_console:
+    description: Campaign and asset dashboards
+    relationship: data_provider
+    
+    # Continuous data sync
+    triggers:
+      - event: campaign_created
+        action: register_dashboard
+        
+      - event: asset_status_changed
+        action: update_status
+        
+      - event: content_published
+        action: update_metrics
+        
+      - event: campaign_milestone
+        action: flag_in_dashboard
+    
+    # Data sent to dashboard
+    data_flow:
+      direction: outbound
+      frequency: realtime
+      data:
+        campaign_dashboard:
+          - campaign_id
+          - campaign_name
+          - status
+          - progress_percentage
+          - asset_completion
+          - channel_status
+          - timeline_status
+          - budget_status
+          
+        asset_tracker:
+          - asset_id
+          - title
+          - type
+          - status
+          - assigned_channels
+          - due_date
+          - owner
+          
+        performance_metrics:
+          - impressions
+          - engagement_rate
+          - click_through_rate
+          - conversions
+          - sentiment
+
+  # 📚 Education Pack Integration
+  blackroad_os_pack_education:
+    description: Course launches and educational content campaigns
+    relationship: sibling
+    
+    use_cases:
+      - course_launch_campaigns
+      - educational_content_creation
+      - student_engagement_content
+    
+    triggers:
+      - event: course_launch_requested
+        action: create_launch_campaign
+        template: launch-campaign
+        
+      - event: campaign_created_for_course
+        action: link_to_course
+    
+    data_flow:
+      bidirectional:
+        from_education:
+          - course_id
+          - course_name
+          - launch_date
+          - target_audience
+          - key_messages
+        
+        to_education:
+          - campaign_id
+          - asset_links
+          - performance_summary
+
+  # 💰 Finance Pack Integration
+  blackroad_os_pack_finance:
+    description: Financial product promotions and compliance
+    relationship: sibling
+    
+    use_cases:
+      - financial_product_promotions
+      - investment_content
+      - fintech_campaigns
+    
+    triggers:
+      - event: financial_content_created
+        action: flag_for_compliance
+        risk_level: high
+        
+      - event: finance_campaign_requested
+        action: create_campaign_with_compliance
+    
+    # Special handling for financial content
+    compliance:
+      required_reviews:
+        - legal
+        - compliance
+        - brand
+      # // HIGH-RISK CAMPAIGN FLOW – LEGAL/BRAND APPROVAL REQUIRED
+      mandatory_disclaimers: true
+      audit_trail: required
+
+  # ⚖️ Legal Pack Integration
+  blackroad_os_pack_legal:
+    description: Compliance reviews and legal approvals
+    relationship: service_consumer
+    
+    use_cases:
+      - content_compliance_review
+      - claim_verification
+      - disclaimer_requirements
+      - partnership_content_review
+    
+    triggers:
+      - event: high_risk_content_created
+        action: request_legal_review
+        
+      - event: legal_review_completed
+        action: update_approval_status
+        
+      - event: content_contains_claims
+        action: submit_for_verification
+    
+    data_flow:
+      to_legal:
+        - content_id
+        - content_draft
+        - claim_list
+        - risk_classification
+        - deadline
+        
+      from_legal:
+        - approval_status
+        - required_changes
+        - approved_disclaimers
+        - reviewer_notes
+    
+    sla:
+      standard_review: "48h"
+      urgent_review: "24h"
+      priority_flag: true
+
+  # 🧠 Core Integration
+  blackroad_os_core:
+    description: Core app logic and shared utilities
+    relationship: dependent
+    
+    consumes:
+      - user_authentication
+      - permissions_system
+      - notification_service
+      - logging_infrastructure
+    
+    does_not_own:
+      - authentication_logic
+      - core_data_models
+      - infrastructure
+
+  # 🖥️ Web Integration
+  blackroad_os_web:
+    description: UI shell and frontend
+    relationship: content_provider
+    
+    provides:
+      - workflow_definitions
+      - schema_definitions
+      - template_data
+    
+    does_not_own:
+      - ui_components
+      - frontend_routing
+      - user_interface
+
+# 📊 Ownership boundaries
+ownership:
+  creator_studio_owns:
+    - creative_workflows
+    - content_schemas
+    - templates
+    - agent_definitions
+    - campaign_structures
+    
+  creator_studio_does_not_own:
+    - core_app_logic: blackroad-os-core
+    - ui_shell: blackroad-os-web
+    - infrastructure: blackroad-os-infra
+    - brand_source_of_truth: blackroad-os-brand
+    - documentation: blackroad-os-docs
+    - research: blackroad-os-research
+
+# 🔐 Security boundaries
+security:
+  cross_pack_data:
+    - encrypt_in_transit: true
+    - log_all_exchanges: true
+    - respect_pack_permissions: true
+    
+  forbidden:
+    - storing_other_pack_credentials
+    - direct_database_access
+    - bypassing_permission_checks
+
+# 📝 Audit logging
+audit:
+  log_events:
+    - cross_pack_data_sent
+    - cross_pack_data_received
+    - integration_error
+    - permission_denied
+  
+  include:
+    - timestamp
+    - source_pack
+    - target_pack
+    - data_type
+    - user_or_agent

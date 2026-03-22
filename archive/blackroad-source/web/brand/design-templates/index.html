@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BlackRoad Design System — Template Gallery</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --gray-950: #000000;
+  --gray-900: #0a0a0a;
+  --gray-850: #121212;
+  --gray-800: #1a1a1a;
+  --gray-700: #404040;
+  --gray-600: #525252;
+  --gray-500: #737373;
+  --gray-400: #a3a3a3;
+  --gray-300: #d4d4d4;
+  --gray-100: #f5f5f5;
+  --white: #ffffff;
+  --accent-1: #ff8700;
+  --accent-3: #ff0087;
+  --accent-6: #1e90ff;
+  --font-headline: 'Space Grotesk', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--gray-950);
+  color: var(--gray-300);
+  font-family: var(--font-body);
+  line-height: 1.6;
+}
+
+/* Hero */
+.hero {
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 80px 40px;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(255,135,0,0.08) 0%, transparent 40%),
+    radial-gradient(circle at 80% 70%, rgba(255,0,135,0.06) 0%, transparent 40%),
+    radial-gradient(circle at 50% 50%, rgba(30,144,255,0.04) 0%, transparent 50%);
+  animation: bgMove 30s ease-in-out infinite;
+}
+@keyframes bgMove {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  50% { transform: translate(-3%, -3%) rotate(5deg); }
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+}
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--accent-3);
+  background: rgba(255,0,135,0.1);
+  border: 1px solid rgba(255,0,135,0.2);
+  padding: 8px 16px;
+  border-radius: 50px;
+  margin-bottom: 32px;
+}
+.hero-badge-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--accent-3);
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+.hero-title {
+  font-family: var(--font-headline);
+  font-size: clamp(48px, 8vw, 80px);
+  font-weight: 700;
+  letter-spacing: -2px;
+  line-height: 1.1;
+  margin-bottom: 24px;
+}
+.hero-title .line1 { color: var(--gray-100); display: block; }
+.hero-title .line2 {
+  display: block;
+  background: linear-gradient(135deg, var(--accent-1), var(--accent-3), var(--accent-6));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-size: 200% 200%;
+  animation: gradientShift 4s ease infinite;
+}
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.hero-sub {
+  font-size: 18px;
+  color: var(--gray-500);
+  max-width: 600px;
+  margin: 0 auto 40px;
+}
+
+.hero-stats {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 48px;
+}
+.stat {
+  text-align: center;
+}
+.stat-value {
+  font-family: var(--font-headline);
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--gray-100);
+}
+.stat-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--gray-600);
+}
+
+/* Gallery */
+.gallery {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 40px;
+}
+
+.gallery-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 32px;
+}
+.gallery-title {
+  font-family: var(--font-headline);
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--gray-100);
+}
+.gallery-filter {
+  display: flex;
+  gap: 8px;
+}
+.filter-btn {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 8px 16px;
+  border-radius: 50px;
+  border: 1px solid var(--gray-800);
+  background: transparent;
+  color: var(--gray-500);
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+.filter-btn:hover {
+  border-color: var(--gray-700);
+  color: var(--gray-300);
+}
+.filter-btn.active {
+  background: var(--gray-100);
+  border-color: var(--gray-100);
+  color: var(--gray-950);
+}
+
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: 24px;
+}
+
+.template-card {
+  background: var(--gray-900);
+  border: 1px solid var(--gray-800);
+  border-radius: var(--radius-2xl);
+  overflow: hidden;
+  transition: all 300ms ease;
+}
+.template-card:hover {
+  border-color: var(--gray-700);
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+}
+
+.template-preview {
+  position: relative;
+  aspect-ratio: 16/10;
+  overflow: hidden;
+  background: var(--gray-950);
+}
+.template-preview iframe {
+  width: 200%;
+  height: 200%;
+  transform: scale(0.5);
+  transform-origin: top left;
+  border: none;
+  pointer-events: none;
+}
+.template-preview-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 60%, rgba(0,0,0,0.8) 100%);
+  opacity: 0;
+  transition: opacity 200ms ease;
+}
+.template-card:hover .template-preview-overlay {
+  opacity: 1;
+}
+.template-actions {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  right: 16px;
+  display: flex;
+  gap: 8px;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: all 200ms ease;
+}
+.template-card:hover .template-actions {
+  opacity: 1;
+  transform: translateY(0);
+}
+.action-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 10px 16px;
+  border-radius: var(--radius-lg);
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 150ms ease;
+}
+.action-btn.primary {
+  background: var(--gray-100);
+  color: var(--gray-900);
+}
+.action-btn.primary:hover {
+  background: var(--white);
+}
+.action-btn.secondary {
+  background: rgba(255,255,255,0.1);
+  backdrop-filter: blur(10px);
+  color: var(--gray-100);
+  border: 1px solid rgba(255,255,255,0.2);
+}
+.action-btn.secondary:hover {
+  background: rgba(255,255,255,0.2);
+}
+.action-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+.template-info {
+  padding: 20px;
+}
+.template-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.template-name {
+  font-family: var(--font-headline);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--gray-100);
+}
+.template-number {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--gray-600);
+  background: var(--gray-850);
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+.template-description {
+  font-size: 14px;
+  color: var(--gray-500);
+  margin-bottom: 16px;
+}
+.template-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.tag {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 4px 10px;
+  border-radius: 50px;
+  background: var(--gray-850);
+  color: var(--gray-500);
+}
+.tag.featured {
+  background: rgba(255,0,135,0.1);
+  color: var(--accent-3);
+}
+
+/* Footer */
+.footer {
+  padding: 60px 40px;
+  text-align: center;
+  border-top: 1px solid var(--gray-900);
+}
+.footer-logo {
+  font-family: var(--font-headline);
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.footer-logo span {
+  background: linear-gradient(135deg, var(--accent-1), var(--accent-3), var(--accent-6));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.footer-links {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin: 24px 0;
+}
+.footer-link {
+  font-size: 14px;
+  color: var(--gray-500);
+  text-decoration: none;
+  transition: color 150ms ease;
+}
+.footer-link:hover { color: var(--gray-300); }
+.footer-copy {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--gray-600);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .gallery-grid { grid-template-columns: 1fr; }
+  .hero-stats { flex-direction: column; gap: 24px; }
+  .gallery-header { flex-direction: column; gap: 16px; align-items: flex-start; }
+}
+</style>
+</head>
+<body>
+
+<section class="hero">
+  <div class="hero-content">
+    <div class="hero-badge">
+      <span class="hero-badge-dot"></span>
+      BlackRoad Design System
+    </div>
+    <h1 class="hero-title">
+      <span class="line1">Template</span>
+      <span class="line2">Gallery</span>
+    </h1>
+    <p class="hero-sub">
+      Production-ready HTML templates built with the BlackRoad design system.
+      Pure black backgrounds, gradient accents, and premium typography.
+    </p>
+    <div class="hero-stats">
+      <div class="stat">
+        <div class="stat-value">17</div>
+        <div class="stat-label">Templates</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">18</div>
+        <div class="stat-label">Animations</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">0</div>
+        <div class="stat-label">Dependencies</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="gallery">
+  <div class="gallery-header">
+    <h2 class="gallery-title">All Templates</h2>
+    <div class="gallery-filter">
+      <button class="filter-btn active">All</button>
+      <button class="filter-btn">Pages</button>
+      <button class="filter-btn">App</button>
+      <button class="filter-btn">Marketing</button>
+    </div>
+  </div>
+
+  <div class="gallery-grid">
+    <!-- Landing -->
+    <div class="template-card">
+      <div class="template-preview">
+        <iframe src="01-landing.html" loading="lazy"></iframe>
+        <div class="template-preview-overlay"></div>
+        <div class="template-actions">
+          <a href="01-landing.html" class="action-btn primary" target="_blank">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            Preview
+          </a>
+          <a href="https://github.com/blackboxprogramming/blackroad-templates" class="action-btn secondary" target="_blank">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+            Source
+          </a>
+        </div>
+      </div>
+      <div class="template-info">
+        <div class="template-header">
+          <h3 class="template-name">Landing Page</h3>
+          <span class="template-number">01</span>
+        </div>
+        <p class="template-description">Hero section, features grid, stats, testimonials, and CTA.</p>
+        <div class="template-tags">
+          <span class="tag featured">Featured</span>
+          <span class="tag">Marketing</span>
+          <span class="tag">Hero</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div class="template-card">
+      <div class="template-preview">
+        <iframe src="02-dashboard.html" loading="lazy"></iframe>
+        <div class="template-preview-overlay"></div>
+        <div class="template-actions">
+          <a href="02-dashboard.html" class="action-btn primary" target="_blank">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            Preview
+          </a>
+          <a href="https://github.com/blackboxprogramming/blackroad-templates" class="action-btn secondary" target="_blank">Source</a>
+        </div>
+      </div>
+      <div class="template-info">
+        <div class="template-header">
+          <h3 class="template-name">Dashboard</h3>
+          <span class="template-number">02</span>
+        </div>
+        <p class="template-description">Sidebar navigation, stats grid, data tables, and activity feed.</p>
+        <div class="template-tags">
+          <span class="tag">App</span>
+          <span class="tag">Admin</span>
+          <span class="tag">Tables</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Auth -->
+    <div class="template-card">
+      <div class="template-preview">
+        <iframe src="03-auth.html" loading="lazy"></iframe>
+        <div class="template-preview-overlay"></div>
+        <div class="template-actions">
+          <a href="03-auth.html" class="action-btn primary" target="_blank">Preview</a>
+          <a href="https://github.com/blackboxprogramming/blackroad-templates" class="action-btn secondary" target="_blank">Source</a>
+        </div>
+      </div>
+      <div class="template-info">
+        <div class="template-header">
+          <h3 class="template-name">Authentication</h3>
+          <span class="template-number">03</span>
+        </div>
+        <p class="template-description">Login and signup forms with OAuth provider buttons.</p>
+        <div class="template-tags">
+          <span class="tag">App</span>
+          <span class="tag">Forms</span>
+          <span class="tag">OAuth</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Docs -->
+    <div class="template-card">
+      <div class="template-preview">
+        <iframe src="04-docs.html" loading="lazy"></iframe>
+        <div class="template-preview-overlay"></div>
+        <div class="template-actions">
+          <a href="04-docs.html" class="action-btn primary" target="_blank">Preview</a>
+          <a href="https://github.com/blackboxprogramming/blackroad-templates" class="action-btn secondary" target="_blank">Source</a>
+        </div>
+      </div>
+      <div class="template-info">
+        <div class="template-header">
+          <h3 class="template-name">Documentation</h3>
+          <span class="template-number">04</span>
+        </div>
+        <p class="template-description">Sidebar nav, code blocks, callouts, and table of contents.</p>
+        <div class="template-tags">
+          <span class="tag">Pages</span>
+          <span class="tag">Docs</span>
+          <span class="tag">Code</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pricing -->
+    <div class="template-card">
+      <div class="template-preview">
+        <iframe src="05-pricing.html" loading="lazy"></iframe>
+        <div class="template-preview-overlay"></div>
+        <div class="template-actions">
+          <a href="05-pricing.html" class="action-btn primary" target="_blank">Preview</a>
+          <a href="https://github.com/blackboxprogramming/blackroad-templates" class="action-btn secondary" target="_blank">Source</a>
+        </div>
+      </div>
+      <div class="template-info">
+        <div class="template-header">
+          <h3 class="template-name">Pricing</h3>
+          <span class="template-number">05</span>
+        </div>
+        <p class="template-description">Three-tier pricing cards, comparison table, and FAQ section.</p>
+        <div class="template-tags">
+          <span class="tag">Marketing</span>
+          <span class="tag">Pricing</span>
+          <span class="tag">FAQ</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contact -->
+    <div class="template-card">
+      <div class="template-preview">
+        <iframe src="06-contact.html" loading="lazy"></iframe>
+        <div class="template-preview-overlay"></div>
+        <div class="template-actions">
+          <a href="06-contact.html" class="action-btn primary" target="_blank">Preview</a>
+          <a href="https://github.com/blackboxprogramming/blackroad-templates" class="action-btn secondary" target="_blank">Source</a>
+        </div>
+      </div>
+      <div class="template-info">
+        <div class="template-header">
+          <h3 class="template-name">Contact</h3>
+          <span class="template-number">06</span>
+        </div>
+        <p class="template-description">Contact form, office locations, and social links.</p>
+        <div class="template-tags">
+          <span class="tag">Pages</span>
+          <span class="tag">Forms</span>
+          <span class="tag">Contact</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Animation Showcase -->
+    <div class="template-card">
+      <div class="template-preview">
+        <iframe src="07-animation-showcase.html" loading="lazy"></iframe>
+        <div class="template-preview-overlay"></div>
+        <div class="template-actions">
+          <a href="07-animation-showcase.html" class="action-btn primary" target="_blank">Preview</a>
+          <a href="https://github.com/blackboxprogramming/blackroad-templates" class="action-btn secondary" target="_blank">Source</a>
+        </div>
+      </div>
+      <div class="template-info">
+        <div class="template-header">
+          <h3 class="template-name">Animation Showcase</h3>
+          <span class="template-number">07</span>
+        </div>
+        <p class="template-description">18 CSS and Canvas animations including particles, glitch, and more.</p>
+        <div class="template-tags">
+          <span class="tag featured">Featured</span>
+          <span class="tag">Animation</span>
+          <span class="tag">Canvas</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 404 -->
+    <div class="template-card">
+      <div class="template-preview">
+        <iframe src="08-404.html" loading="lazy"></iframe>
+        <div class="template-preview-overlay"></div>
+        <div class="template-actions">
+          <a href="08-404.html" class="action-btn primary" target="_blank">Preview</a>
+          <a href="https://github.com/blackboxprogramming/blackroad-templates" class="action-btn secondary" target="_blank">Source</a>
+        </div>
+      </div>
+      <div class="template-info">
+        <div class="template-header">
+          <h3 class="template-name">404 Error</h3>
+          <span class="template-number">08</span>
+        </div>
+        <p class="template-description">Glitch effects, animated grid, and terminal styling.</p>
+        <div class="template-tags">
+          <span class="tag">Pages</span>
+          <span class="tag">Error</span>
+          <span class="tag">Glitch</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Blog -->
+    <div class="template-card">
+      <div class="template-preview">
+        <iframe src="09-blog.html" loading="lazy"></iframe>
+        <div class="template-preview-overlay"></div>
+        <div class="template-actions">
+          <a href="09-blog.html" class="action-btn primary" target="_blank">Preview</a>
+          <a href="https://github.com/blackboxprogramming/blackroad-templates" class="action-btn secondary" target="_blank">Source</a>
+        </div>
+      </div>
+      <div class="template-info">
+        <div class="template-header">
+          <h3 class="template-name">Blog</h3>
+          <span class="template-number">09</span>
+        </div>
+        <p class="template-description">Featured post, article grid, filters, and newsletter signup.</p>
+        <div class="template-tags">
+          <span class="tag">Marketing</span>
+          <span class="tag">Blog</span>
+          <span class="tag">Cards</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings -->
+    <div class="template-card">
+      <div class="template-preview">
+        <iframe src="10-settings.html" loading="lazy"></iframe>
+        <div class="template-preview-overlay"></div>
+        <div class="template-actions">
+          <a href="10-settings.html" class="action-btn primary" target="_blank">Preview</a>
+          <a href="https://github.com/blackboxprogramming/blackroad-templates" class="action-btn secondary" target="_blank">Source</a>
+        </div>
+      </div>
+      <div class="template-info">
+        <div class="template-header">
+          <h3 class="template-name">Settings</h3>
+          <span class="template-number">10</span>
+        </div>
+        <p class="template-description">Profile settings, toggles, API keys, and danger zone.</p>
+        <div class="template-tags">
+          <span class="tag">App</span>
+          <span class="tag">Forms</span>
+          <span class="tag">Settings</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Status -->
+    <div class="template-card">
+      <div class="template-preview">
+        <iframe src="11-status.html" loading="lazy"></iframe>
+        <div class="template-preview-overlay"></div>
+        <div class="template-actions">
+          <a href="11-status.html" class="action-btn primary" target="_blank">Preview</a>
+          <a href="https://github.com/blackboxprogramming/blackroad-templates" class="action-btn secondary" target="_blank">Source</a>
+        </div>
+      </div>
+      <div class="template-info">
+        <div class="template-header">
+          <h3 class="template-name">Status Page</h3>
+          <span class="template-number">11</span>
+        </div>
+        <p class="template-description">Uptime chart, system components, incidents, and metrics.</p>
+        <div class="template-tags">
+          <span class="tag">Pages</span>
+          <span class="tag">Status</span>
+          <span class="tag">Metrics</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Profile -->
+    <div class="template-card">
+      <div class="template-preview">
+        <iframe src="12-profile.html" loading="lazy"></iframe>
+        <div class="template-preview-overlay"></div>
+        <div class="template-actions">
+          <a href="12-profile.html" class="action-btn primary" target="_blank">Preview</a>
+          <a href="https://github.com/blackboxprogramming/blackroad-templates" class="action-btn secondary" target="_blank">Source</a>
+        </div>
+      </div>
+      <div class="template-info">
+        <div class="template-header">
+          <h3 class="template-name">Profile</h3>
+          <span class="template-number">12</span>
+        </div>
+        <p class="template-description">User profile with avatar, stats, activity feed, and contribution graph.</p>
+        <div class="template-tags">
+          <span class="tag">App</span>
+          <span class="tag">Profile</span>
+          <span class="tag">Activity</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Changelog -->
+    <div class="template-card">
+      <div class="template-preview">
+        <iframe src="13-changelog.html" loading="lazy"></iframe>
+        <div class="template-preview-overlay"></div>
+        <div class="template-actions">
+          <a href="13-changelog.html" class="action-btn primary" target="_blank">Preview</a>
+          <a href="https://github.com/blackboxprogramming/blackroad-templates" class="action-btn secondary" target="_blank">Source</a>
+        </div>
+      </div>
+      <div class="template-info">
+        <div class="template-header">
+          <h3 class="template-name">Changelog</h3>
+          <span class="template-number">13</span>
+        </div>
+        <p class="template-description">Release notes timeline with version badges and change types.</p>
+        <div class="template-tags">
+          <span class="tag">Pages</span>
+          <span class="tag">Changelog</span>
+          <span class="tag">Releases</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Onboarding -->
+    <div class="template-card">
+      <div class="template-preview">
+        <iframe src="14-onboarding.html" loading="lazy"></iframe>
+        <div class="template-preview-overlay"></div>
+        <div class="template-actions">
+          <a href="14-onboarding.html" class="action-btn primary" target="_blank">Preview</a>
+          <a href="https://github.com/blackboxprogramming/blackroad-templates" class="action-btn secondary" target="_blank">Source</a>
+        </div>
+      </div>
+      <div class="template-info">
+        <div class="template-header">
+          <h3 class="template-name">Onboarding</h3>
+          <span class="template-number">14</span>
+        </div>
+        <p class="template-description">Multi-step wizard with progress bar, forms, and confetti celebration.</p>
+        <div class="template-tags">
+          <span class="tag featured">Featured</span>
+          <span class="tag">App</span>
+          <span class="tag">Wizard</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- API Reference -->
+    <div class="template-card">
+      <div class="template-preview">
+        <iframe src="15-api.html" loading="lazy"></iframe>
+        <div class="template-preview-overlay"></div>
+        <div class="template-actions">
+          <a href="15-api.html" class="action-btn primary" target="_blank">Preview</a>
+          <a href="https://github.com/blackboxprogramming/blackroad-templates" class="action-btn secondary" target="_blank">Source</a>
+        </div>
+      </div>
+      <div class="template-info">
+        <div class="template-header">
+          <h3 class="template-name">API Reference</h3>
+          <span class="template-number">15</span>
+        </div>
+        <p class="template-description">Three-column API docs with endpoints, code examples, and try-it playground.</p>
+        <div class="template-tags">
+          <span class="tag">Docs</span>
+          <span class="tag">API</span>
+          <span class="tag">Code</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Team -->
+    <div class="template-card">
+      <div class="template-preview">
+        <iframe src="16-team.html" loading="lazy"></iframe>
+        <div class="template-preview-overlay"></div>
+        <div class="template-actions">
+          <a href="16-team.html" class="action-btn primary" target="_blank">Preview</a>
+          <a href="https://github.com/blackboxprogramming/blackroad-templates" class="action-btn secondary" target="_blank">Source</a>
+        </div>
+      </div>
+      <div class="template-info">
+        <div class="template-header">
+          <h3 class="template-name">Team Page</h3>
+          <span class="template-number">16</span>
+        </div>
+        <p class="template-description">Leadership, team members, company values, and careers CTA.</p>
+        <div class="template-tags">
+          <span class="tag">Marketing</span>
+          <span class="tag">Team</span>
+          <span class="tag">About</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Integrations -->
+    <div class="template-card">
+      <div class="template-preview">
+        <iframe src="17-integrations.html" loading="lazy"></iframe>
+        <div class="template-preview-overlay"></div>
+        <div class="template-actions">
+          <a href="17-integrations.html" class="action-btn primary" target="_blank">Preview</a>
+          <a href="https://github.com/blackboxprogramming/blackroad-templates" class="action-btn secondary" target="_blank">Source</a>
+        </div>
+      </div>
+      <div class="template-info">
+        <div class="template-header">
+          <h3 class="template-name">Integrations</h3>
+          <span class="template-number">17</span>
+        </div>
+        <p class="template-description">App marketplace with categories, featured integrations, and install buttons.</p>
+        <div class="template-tags">
+          <span class="tag featured">Featured</span>
+          <span class="tag">App</span>
+          <span class="tag">Marketplace</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="footer-logo">BLACK<span>ROAD</span></div>
+  <div class="footer-links">
+    <a href="https://github.com/blackboxprogramming/blackroad-templates" class="footer-link">GitHub</a>
+    <a href="https://blackroad.io" class="footer-link">BlackRoad OS</a>
+    <a href="07-animation-showcase.html" class="footer-link">Animations</a>
+  </div>
+  <p class="footer-copy">BlackRoad Design System · 2026</p>
+</footer>
+
+</body>
+</html>

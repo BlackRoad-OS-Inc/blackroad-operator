@@ -1,0 +1,63 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://blackroad-os-infra/schemas/sig.beacon.spec.json",
+  "title": "SIG Beacon",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "service",
+    "version",
+    "env",
+    "status",
+    "url",
+    "last_checked_at",
+    "meta"
+  ],
+  "properties": {
+    "service": {
+      "type": "string",
+      "description": "Unique service identifier"
+    },
+    "version": {
+      "type": "string",
+      "description": "Version string including git hash"
+    },
+    "env": {
+      "type": "string",
+      "description": "Environment for the service"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["healthy", "unhealthy"],
+      "description": "Overall health status"
+    },
+    "url": {
+      "type": "string",
+      "format": "uri"
+    },
+    "last_checked_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO8601 timestamp of last check"
+    },
+    "meta": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "region": {
+          "type": "string"
+        },
+        "agent_id": {
+          "type": "string"
+        },
+        "ps_sha_infinity": {
+          "type": "string"
+        },
+        "error": {
+          "type": "string"
+        }
+      },
+      "required": ["region", "agent_id", "ps_sha_infinity"]
+    }
+  }
+}

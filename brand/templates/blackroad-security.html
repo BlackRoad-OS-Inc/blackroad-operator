@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BlackRoad Security</title>
+<meta name="description" content="BlackRoad OS — Pave Tomorrow.">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;shape-rendering:geometricPrecision}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility;-webkit-text-stroke:.2px rgba(255,255,255,.1)}
+:root{
+  --g:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);
+  --g135:linear-gradient(135deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);
+  --bg:#000;--white:#fff;--black:#000;--border:#1a1a1a;
+  --sg:'Space Grotesk',sans-serif;--jb:'JetBrains Mono',monospace;
+}
+body{background:var(--bg);color:var(--white);font-family:var(--sg);overflow-x:hidden}
+.grad-bar{height:4px;background:var(--g);image-rendering:crisp-edges}
+nav{display:flex;align-items:center;justify-content:space-between;padding:16px 48px;border-bottom:1px solid var(--border)}
+.nav-logo{font-weight:700;font-size:20px;color:var(--white);display:flex;align-items:center;gap:10px;text-decoration:none}
+.nav-links{display:flex;gap:32px}
+.nav-links a{font-size:14px;font-weight:500;color:var(--white);opacity:.5;text-decoration:none;transition:opacity .2s}
+.nav-links a:hover{opacity:1}
+a.btn-outline,a.btn-solid,a.btn-lg{text-decoration:none;display:inline-flex;align-items:center}
+.btn-outline{padding:8px 20px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--white);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--sg);transition:border-color .2s}
+.btn-outline:hover{border-color:#444}
+.btn-solid{padding:8px 20px;border:none;border-radius:6px;background:var(--white);color:var(--black);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--sg)}
+.hero{text-align:center;padding:120px 48px 80px;position:relative}
+.orb{position:absolute;border-radius:50%;filter:blur(120px);opacity:.06;pointer-events:none}
+.orb-1{width:400px;height:400px;background:#FF2255;top:-150px;left:-5%}
+.orb-2{width:350px;height:350px;background:#4488FF;top:-100px;right:-5%}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border:1px solid var(--border);border-radius:20px;font-size:12px;font-weight:500;color:var(--white);margin-bottom:32px}
+.hero-badge-dot{width:8px;height:8px;border-radius:50%;background:var(--g135)}
+.hero h1{font-size:64px;font-weight:700;color:var(--white);line-height:1.08;margin-bottom:24px;max-width:780px;margin-left:auto;margin-right:auto;letter-spacing:-.02em}
+.hero p{font-size:18px;color:var(--white);opacity:.45;max-width:520px;margin:0 auto 48px;line-height:1.7}
+.hero-cta{display:flex;gap:16px;justify-content:center}
+.btn-lg{padding:14px 36px;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;font-family:var(--sg)}
+.btn-lg-solid{background:var(--white);color:var(--black);border:none}
+.btn-lg-outline{background:transparent;color:var(--white);border:1px solid var(--border);transition:border-color .2s}
+.btn-lg-outline:hover{border-color:#444}
+.section{max-max-width:1100px;width:100%;margin:0 auto;padding:80px 48px}
+.section-label{font-family:var(--jb);font-size:10px;color:var(--white);opacity:.25;letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px}
+.section-title{font-size:32px;font-weight:700;color:var(--white);margin-bottom:12px;letter-spacing:-.015em}
+.section-desc{font-size:14px;color:var(--white);opacity:.4;max-width:460px;margin-bottom:48px}
+.threat-list{border-top:1px solid var(--border)}
+.threat-row{display:grid;grid-template-columns:auto 1fr auto auto;gap:16px;padding:18px 0;border-bottom:1px solid var(--border);align-items:center}
+.threat-severity{width:40px;height:4px;border-radius:2px;background:var(--g);image-rendering:crisp-edges}
+.threat-severity.high{opacity:1}
+.threat-severity.med{opacity:.5}
+.threat-severity.low{opacity:.2}
+.threat-info h4{font-size:14px;font-weight:600;color:var(--white);margin-bottom:2px}
+.threat-info p{font-size:11px;color:var(--white);opacity:.3}
+.threat-id{font-family:var(--jb);font-size:10px;color:var(--white);opacity:.15}
+.threat-tag{padding:3px 10px;border:1px solid var(--border);border-radius:4px;font-family:var(--jb);font-size:10px;color:var(--white);opacity:.3}
+.shield-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.shield-card{border:1px solid var(--border);border-radius:10px;padding:28px;position:relative;transition:border-color .2s;display:block;text-decoration:none;color:var(--white)}
+.shield-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--g);border-radius:10px 10px 0 0;image-rendering:crisp-edges}
+.shield-card:hover{border-color:#333}
+.shield-icon{font-size:20px;margin-bottom:16px;opacity:.5}
+.shield-name{font-size:18px;font-weight:700;color:var(--white);margin-bottom:8px}
+.shield-desc{font-size:13px;color:var(--white);opacity:.4;line-height:1.7;margin-bottom:16px}
+.shield-stat{font-family:var(--jb);font-size:10px;color:var(--white);opacity:.2}
+.audit-card{border:1px solid var(--border);border-radius:12px;overflow:hidden;position:relative}
+.audit-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--g);image-rendering:crisp-edges;z-index:1}
+.audit-header{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.audit-header h3{font-size:16px;font-weight:600;color:var(--white)}
+.audit-header span{font-family:var(--jb);font-size:10px;color:var(--white);opacity:.2}
+.audit-list{padding:0}
+.audit-row{display:grid;grid-template-columns:140px 1fr auto;gap:16px;padding:14px 24px;border-bottom:1px solid var(--border);align-items:center;font-family:var(--jb);font-size:12px}
+.audit-row:last-child{border-bottom:none}
+.audit-time{color:var(--white);opacity:.2}
+.audit-event{color:var(--white);opacity:.5}
+.audit-status{width:6px;height:6px;border-radius:50%;background:var(--g135)}
+.encrypt-table{border-top:1px solid var(--border)}
+.encrypt-row{display:grid;grid-template-columns:200px 1fr auto;gap:24px;border-bottom:1px solid var(--border);padding:16px 0;align-items:center}
+.encrypt-label{font-family:var(--jb);font-size:11px;color:var(--white);opacity:.25;letter-spacing:.04em;text-transform:uppercase}
+.encrypt-value{font-size:14px;color:var(--white);opacity:.6}
+.encrypt-tag{padding:3px 10px;border:1px solid var(--border);border-radius:4px;font-family:var(--jb);font-size:10px;color:var(--white);opacity:.3}
+.metrics-strip{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.metric-cell{padding:28px 24px;border-right:1px solid var(--border)}
+.metric-cell:last-child{border-right:none}
+.metric-value{font-size:32px;font-weight:700;color:var(--white);margin-bottom:4px;letter-spacing:-.02em}
+.metric-label{font-family:var(--jb);font-size:10px;color:var(--white);opacity:.25;letter-spacing:.06em;text-transform:uppercase}
+.cert-row{display:flex;gap:10px;flex-wrap:wrap}
+.cert-pill{padding:8px 18px;border:1px solid var(--border);border-radius:20px;font-size:12px;font-weight:500;color:var(--white);opacity:.5;display:flex;align-items:center;gap:8px}
+.cert-dot{width:6px;height:6px;border-radius:50%;background:var(--g135)}
+footer{border-top:1px solid var(--border);padding:48px;display:flex;justify-content:space-between;align-items:center}
+.footer-brand{font-weight:700;font-size:16px;color:var(--white);text-decoration:none}
+.footer-links{display:flex;gap:24px}
+.footer-links a{font-size:13px;color:var(--white);opacity:.4;text-decoration:none;transition:opacity .2s}
+.footer-links a:hover{opacity:1}
+.footer-copy{font-size:12px;color:var(--white);opacity:.2}
+@media(max-width:768px){
+  nav{padding:14px 20px;flex-wrap:wrap;gap:12px}.nav-links{display:none}
+  .hero{padding:80px 20px 60px}.hero h1{font-size:36px}
+  .hero-cta{flex-direction:column;align-items:center}
+  .section{padding:48px 20px}
+  .shield-grid{grid-template-columns:1fr}
+  .threat-row{grid-template-columns:auto 1fr auto}.threat-id{display:none}
+  .audit-row{grid-template-columns:100px 1fr auto}
+  .encrypt-row{grid-template-columns:1fr auto}.encrypt-label{display:none}
+  .metrics-strip{grid-template-columns:repeat(2,1fr)}
+  footer{flex-direction:column;gap:16px;text-align:center;padding:32px 20px}
+}
+
+/* ═══ RESPONSIVE — fit to screen ═══ */
+@media(max-max-width:1024px;width:100%){
+  .metrics-strip{grid-template-columns:repeat(3,1fr)}
+  .org-grid,.grid-4,.tier-grid,.cap-grid,.stat-grid,.shield-grid,.surface-grid,.stats-row{grid-template-columns:repeat(2,1fr)}
+  .node-grid{grid-template-columns:repeat(3,1fr)}
+  .product-grid,.features-grid,.focus-grid,.gallery,.team-grid,.pricing{grid-template-columns:repeat(2,1fr)}
+  .footer-grid{grid-template-columns:1fr 1fr}
+  .cloud-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:768px){
+  nav{padding:14px 20px;flex-wrap:wrap;gap:12px}
+  .nav-links{display:none}
+  .hero{padding:80px 20px 60px}
+  .hero h1{font-size:36px}
+  .hero-cta{flex-direction:column;align-items:center}
+  .section,.section-wide{padding:48px 20px}
+  .metrics-strip{grid-template-columns:repeat(2,1fr)}
+  .product-featured{grid-template-columns:1fr}
+  .product-grid,.features-grid,.focus-grid,.gallery,.team-grid,.pricing,.cap-grid,.tier-grid,.shield-grid{grid-template-columns:1fr}
+  .org-grid,.grid-4,.stat-grid,.stats-row,.surface-grid{grid-template-columns:1fr}
+  .node-grid{grid-template-columns:1fr 1fr}
+  .cloud-grid{grid-template-columns:1fr}
+  footer{padding:32px 20px}
+  .footer-grid{grid-template-columns:1fr}
+  .footer-bottom{flex-direction:column;gap:12px;text-align:center}
+  .topnav{padding:10px 16px}
+  .topnav-links{gap:8px;flex-wrap:wrap}
+  .topnav-links a{font-size:11px}
+}
+</style>
+<script src="https://bb.blackroad.io/bb.js" defer></script>
+<meta name="keywords" content="BlackRoad Security, zero-trust, penetration testing, compliance, encryption">
+<meta property="og:type" content="website">
+<meta property="og:title" content="BlackRoad Security — Zero-Trust Fleet Security">
+<meta property="og:description" content="Penetration testing, security audits, encryption, compliance framework, and identity management for distributed AI infrastructure.">
+<meta property="og:url" content="https://security.blackroad.io">
+<meta property="og:image" content="https://images.blackroad.io/brand/blackroad-og.png">
+<meta property="og:site_name" content="BlackRoad OS">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="BlackRoad Security — Zero-Trust Fleet Security">
+<meta name="twitter:description" content="Penetration testing, security audits, encryption, compliance framework, and identity management for distributed AI infrastructure.">
+<meta name="twitter:image" content="https://images.blackroad.io/brand/blackroad-og.png">
+<link rel="canonical" href="https://security.blackroad.io">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "BlackRoad Security — Zero-Trust Fleet Security",
+  "description": "Penetration testing, security audits, encryption, compliance framework, and identity management for distributed AI infrastructure.",
+  "url": "https://security.blackroad.io",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Linux, macOS",
+  "author": {
+    "@type": "Organization",
+    "name": "BlackRoad OS, Inc.",
+    "url": "https://blackroad.io",
+    "founder": {
+      "@type": "Person",
+      "name": "Alexa Louise Amundson"
+    }
+  },
+  "offers": {
+    "@type": "Offer",
+    "price": "5.00",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+</head>
+<body>
+
+<div class="grad-bar"></div>
+
+<nav>
+  <a href="https://blackroad-io.pages.dev" class="nav-logo"><img src="blackroad-logo.png" alt="BlackRoad" style="width:32px;height:32px;border-radius:50%"> BlackRoad Security</a>
+  <div class="nav-links">
+    <a href="#tools">Tools</a>
+    <a href="#threats">Threat Feed</a>
+    <a href="#audit">Audit Log</a>
+    <a href="#encryption">Encryption</a>
+  </div>
+  <div style="display:flex;gap:10px">
+    <a href="#fleet" class="btn-outline">Fleet Status</a>
+    <a href="https://github.com/blackroad-security" target="_blank" class="btn-solid">GitHub</a>
+  </div>
+</nav>
+
+<section class="hero" id="hero">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="hero-badge"><div class="hero-badge-dot"></div> 6 Security Tools · Zero Trust</div>
+  <h1>Your infrastructure watches itself</h1>
+  <p>Six Python tools that handle passwords, secrets, certificates, incidents, identity, and SIEM — running on your own hardware.</p>
+  <div class="hero-cta">
+    <a href="#tools" class="btn-lg btn-lg-solid">View Tools</a>
+    <a href="https://github.com/blackroad-security" target="_blank" class="btn-lg btn-lg-outline">Source Code</a>
+  </div>
+</section>
+
+<div class="section" style="padding-bottom:0">
+  <div class="metrics-strip">
+    <div class="metric-cell"><div class="metric-value">6</div><div class="metric-label">Security Tools</div></div>
+    <div class="metric-cell"><div class="metric-value">5</div><div class="metric-label">Nodes Monitored</div></div>
+    <div class="metric-cell"><div class="metric-value">0</div><div class="metric-label">External Dependencies</div></div>
+    <div class="metric-cell"><div class="metric-value">UFW</div><div class="metric-label">Firewall Active</div></div>
+  </div>
+</div>
+
+<section class="section" id="threats">
+  <div class="section-label">Threat Feed</div>
+  <div class="section-title">Real incidents, real fixes</div>
+  <div class="threat-list">
+    <div class="threat-row"><div class="threat-severity high"></div><div class="threat-info"><h4>Obfuscated cron dropper on <a href="https://blackroad-infra.pages.dev#fleet" style="color:var(--white);text-decoration:underline;text-underline-offset:3px;opacity:.7">Cecilia</a></h4><p>exec from /tmp/op.py — removed, source traced</p></div><div class="threat-id">BR-SEC-001</div><div class="threat-tag">resolved</div></div>
+    <div class="threat-row"><div class="threat-severity high"></div><div class="threat-info"><h4>Leaked GitHub PAT on <a href="https://blackroad-infra.pages.dev#fleet" style="color:var(--white);text-decoration:underline;text-underline-offset:3px;opacity:.7">Lucidia</a></h4><p>gho_Gfu* token in blackroad-git-worker.service — removed from service file</p></div><div class="threat-id">BR-SEC-002</div><div class="threat-tag">mitigated</div></div>
+    <div class="threat-row"><div class="threat-severity med"></div><div class="threat-info"><h4>xmrig crypto miner reference on <a href="https://blackroad-infra.pages.dev#fleet" style="color:var(--white);text-decoration:underline;text-underline-offset:3px;opacity:.7">Lucidia</a></h4><p>xmrig.service unit file was configured — unit gone, process terminated</p></div><div class="threat-id">BR-SEC-003</div><div class="threat-tag">resolved</div></div>
+    <div class="threat-row"><div class="threat-severity med"></div><div class="threat-info"><h4>50+ SSH keys on <a href="https://blackroad-infra.pages.dev#fleet" style="color:var(--white);text-decoration:underline;text-underline-offset:3px;opacity:.7">Alice</a> and <a href="https://blackroad-infra.pages.dev#fleet" style="color:var(--white);text-decoration:underline;text-underline-offset:3px;opacity:.7">Octavia</a></h4><p>pi@Alice=53 keys, pi@Octavia=52 keys — audit pending</p></div><div class="threat-id">BR-SEC-004</div><div class="threat-tag">open</div></div>
+    <div class="threat-row"><div class="threat-severity low"></div><div class="threat-info"><h4>PUSH_SECRET in plaintext crontabs</h4><p>Moved to /opt/blackroad/stats-push.env (chmod 600) on all nodes</p></div><div class="threat-id">BR-SEC-005</div><div class="threat-tag">resolved</div></div>
+    <div class="threat-row"><div class="threat-severity high"></div><div class="threat-info"><h4><a href="https://blackroad-infra.pages.dev#fleet" style="color:var(--white);text-decoration:underline;text-underline-offset:3px;opacity:.7">Cecilia</a> node unreachable</h4><p>SSH timed out — node down or network issue. Hailo-8 + CECE API + TTS + 16 Ollama models offline</p></div><div class="threat-id">BR-SEC-006</div><div class="threat-tag">active</div></div>
+  </div>
+</section>
+
+<section class="section" id="tools">
+  <div class="section-label">Tools</div>
+  <div class="section-title">Six security tools, all Python</div>
+  <div class="section-desc">Every tool runs locally. No SaaS, no cloud APIs, no third-party access to your secrets.</div>
+  <div class="shield-grid">
+    <div class="shield-card"><div class="shield-icon">◈</div><div class="shield-name">Password Manager</div><div class="shield-desc">PBKDF2 key derivation with Fernet symmetric encryption. Vault CRUD operations, master password authentication, encrypted storage at rest.</div><div class="shield-stat">password_manager.py</div></div>
+    <div class="shield-card"><div class="shield-icon">△</div><div class="shield-name">SIEM Engine</div><div class="shield-desc">Real-time log ingestion from all 5 nodes. Correlation engine matches patterns across sources. Custom alert rules with severity classification.</div><div class="shield-stat">siem.py</div></div>
+    <div class="shield-card"><div class="shield-icon">○</div><div class="shield-name">Certificate Manager</div><div class="shield-desc">X.509 certificate lifecycle management. Automated renewal with ACME integration. Tracks expiry dates across all domains and nodes.</div><div class="shield-stat">cert_manager.py</div></div>
+    <div class="shield-card"><div class="shield-icon">□</div><div class="shield-name">Incident Response</div><div class="shield-desc">Incident tracking with severity classification. Runbook automation for common scenarios. Timeline reconstruction from audit logs.</div><div class="shield-stat">incident_response.py</div></div>
+    <div class="shield-card"><div class="shield-icon">◇</div><div class="shield-name">Secret Scanner</div><div class="shield-desc">Regex and entropy-based scanning for leaked secrets across all repos. Catches API keys, tokens, passwords, and private keys before they ship.</div><div class="shield-stat">secret_scanner.py</div></div>
+    <div class="shield-card"><div class="shield-icon">▽</div><div class="shield-name">Identity Provider</div><div class="shield-desc">OAuth2 and OpenID Connect provider. JWT token issuance, role-based access control, user management. Your own auth server.</div><div class="shield-stat">identity_provider.py</div></div>
+  </div>
+</section>
+
+<section class="section" id="audit">
+  <div class="section-label">Audit Log</div>
+  <div class="audit-card">
+    <div class="audit-header"><h3>Fleet Security Events</h3><span>last 24h · 5 nodes</span></div>
+    <div class="audit-list">
+      <div class="audit-row"><div class="audit-time">2026-03-09 03:00</div><div class="audit-event"><a href="https://blackroad-infra.pages.dev#fleet" style="color:var(--white);opacity:.5;text-decoration:underline;text-underline-offset:3px">Cecilia</a> obfuscated cron removed — dropper /tmp/op.py deleted</div><div class="audit-status"></div></div>
+      <div class="audit-row"><div class="audit-time">2026-03-09 02:45</div><div class="audit-event">PUSH_SECRET migrated to stats-push.env on <a href="https://blackroad-infra.pages.dev#fleet" style="color:var(--white);opacity:.5;text-decoration:underline;text-underline-offset:3px">Cecilia, Octavia, Lucidia</a></div><div class="audit-status"></div></div>
+      <div class="audit-row"><div class="audit-time">2026-03-09 02:30</div><div class="audit-event"><a href="https://blackroad-infra.pages.dev#fleet" style="color:var(--white);opacity:.5;text-decoration:underline;text-underline-offset:3px">Cecilia</a> github-relay.sh credentials moved to ~/.github-relay.env</div><div class="audit-status"></div></div>
+      <div class="audit-row"><div class="audit-time">2026-03-09 02:15</div><div class="audit-event"><a href="https://blackroad-infra.pages.dev#fleet" style="color:var(--white);opacity:.5;text-decoration:underline;text-underline-offset:3px">Lucidia</a> 16 skeleton microservices disabled — ~800MB RAM freed</div><div class="audit-status"></div></div>
+      <div class="audit-row"><div class="audit-time">2026-03-09 01:00</div><div class="audit-event"><a href="https://blackroad-infra.pages.dev#fleet" style="color:var(--white);opacity:.5;text-decoration:underline;text-underline-offset:3px">Cecilia</a> rpi-connect-wayvnc crash loop fixed — system + user service masked</div><div class="audit-status"></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="encryption">
+  <div class="section-label">Encryption</div>
+  <div class="section-title">What protects the fleet</div>
+  <div class="encrypt-table">
+    <div class="encrypt-row"><div class="encrypt-label">Vault Encryption</div><div class="encrypt-value">Fernet (AES-128-CBC + HMAC-SHA256)</div><div class="encrypt-tag">password_manager.py</div></div>
+    <div class="encrypt-row"><div class="encrypt-label">Key Derivation</div><div class="encrypt-value">PBKDF2 with 100,000 iterations</div><div class="encrypt-tag">NIST SP 800-132</div></div>
+    <div class="encrypt-row"><div class="encrypt-label">Network Mesh</div><div class="encrypt-value"><a href="https://blackroad-infra.pages.dev#fleet" style="color:var(--white);opacity:.6;text-decoration:underline;text-underline-offset:3px">WireGuard</a> (ChaCha20-Poly1305)</div><div class="encrypt-tag">10.8.0.x subnet</div></div>
+    <div class="encrypt-row"><div class="encrypt-label">SSH Keys</div><div class="encrypt-value">Ed25519 across all <a href="https://blackroad-infra.pages.dev#fleet" style="color:var(--white);opacity:.6;text-decoration:underline;text-underline-offset:3px">5 nodes</a></div><div class="encrypt-tag">openssh</div></div>
+    <div class="encrypt-row"><div class="encrypt-label">TLS Termination</div><div class="encrypt-value"><a href="https://blackroad-systems.pages.dev" style="color:var(--white);opacity:.6;text-decoration:underline;text-underline-offset:3px">Cloudflare Edge</a> (18 tunnels, 48+ domains)</div><div class="encrypt-tag">cloudflared</div></div>
+  </div>
+</section>
+
+<section class="section" id="fleet">
+  <div class="section-label">Fleet Security</div>
+  <div class="section-title">Node security posture</div>
+  <div class="cert-row">
+    <a href="https://blackroad-infra.pages.dev#fleet" style="text-decoration:none"><div class="cert-pill"><div class="cert-dot"></div> Lucidia — UFW active (INPUT DROP)</div></a>
+    <a href="https://blackroad-infra.pages.dev#fleet" style="text-decoration:none"><div class="cert-pill"><div class="cert-dot"></div> All nodes — WireGuard encrypted mesh</div></a>
+    <a href="https://blackroad-infra.pages.dev#fleet" style="text-decoration:none"><div class="cert-pill"><div class="cert-dot"></div> Cecilia — NOPASSWD sudo (blackroad)</div></a>
+    <a href="https://blackroad-infra.pages.dev#fleet" style="text-decoration:none"><div class="cert-pill"><div class="cert-dot"></div> Alice — NOPASSWD sudo (alice, pi)</div></a>
+    <a href="https://blackroad-infra.pages.dev#fleet" style="text-decoration:none"><div class="cert-pill"><div class="cert-dot"></div> Octavia — NOPASSWD sudo (pi only)</div></a>
+    <a href="https://blackroad-systems.pages.dev" style="text-decoration:none"><div class="cert-pill"><div class="cert-dot"></div> 18 Cloudflare tunnels — TLS everywhere</div></a>
+  </div>
+</section>
+
+<section class="section" style="padding-bottom:0">
+  <div class="section-label">Related Divisions</div>
+  <div class="section-title">Go deeper</div>
+  <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:24px">
+    <a href="https://blackroad-infra.pages.dev#fleet" class="cert-pill" style="text-decoration:none"><div class="cert-dot"></div> Hardware Fleet</a>
+    <a href="https://blackroad-systems.pages.dev" class="cert-pill" style="text-decoration:none"><div class="cert-dot"></div> Cloudflare Infrastructure</a>
+    <a href="https://blackroadai-com.pages.dev" class="cert-pill" style="text-decoration:none"><div class="cert-dot"></div> AI Agents</a>
+    <a href="https://blackroad-assets.pages.dev" class="cert-pill" style="text-decoration:none"><div class="cert-dot"></div> Archive &amp; Backup</a>
+    <a href="https://operations-blackroad-io.pages.dev#identity" class="cert-pill" style="text-decoration:none"><div class="cert-dot"></div> Digital Identity</a>
+    <a href="https://blackroad-operator.pages.dev" class="cert-pill" style="text-decoration:none"><div class="cert-dot"></div> Enterprise Automation</a>
+    <a href="https://blackroad-os-home.pages.dev" class="cert-pill" style="text-decoration:none"><div class="cert-dot"></div> CLI Tools</a>
+    <a href="https://finance-blackroad-io.pages.dev#economics" class="cert-pill" style="text-decoration:none"><div class="cert-dot"></div> Cost Breakdown</a>
+  </div>
+</section>
+
+<footer>
+  <a href="https://blackroad-io.pages.dev" class="footer-brand">BlackRoad Security</a>
+  <div class="footer-links">
+    <a href="https://github.com/blackroad-security" target="_blank">GitHub</a>
+    <a href="https://blackroad-io.pages.dev">OS Inc</a>
+    <a href="https://blackroad-infra.pages.dev">Hardware</a>
+    <a href="https://blackroad-systems.pages.dev">Cloud</a>
+    <a href="https://blackroadai-com.pages.dev">AI</a>
+    <a href="https://blackroad-os-home.pages.dev">BlackRoad OS</a>
+  </div>
+  <div class="footer-copy">&copy; 2026 BlackRoad Security. All rights reserved.</div>
+</footer>
+<div class="grad-bar"></div>
+
+<script src="https://blackboard.amundsonalexa.workers.dev/bb.js"></script>
+<!-- BlackRoad Ecosystem Bar -->
+<div style="position:fixed;bottom:0;left:0;right:0;z-index:999;background:#0a0a0a;border-top:1px solid #1a1a1a;padding:8px 0;overflow-x:auto">
+<div style="display:flex;gap:16px;justify-content:center;align-items:center;padding:0 20px;white-space:nowrap">
+<a href="https://blackroad.io" style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:#555;text-decoration:none;transition:color 0.2s">Home</a>
+<a href="https://portal.blackroad.io" style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:#555;text-decoration:none;transition:color 0.2s">Portal</a>
+<a href="https://search.blackroad.io" style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:#555;text-decoration:none;transition:color 0.2s">Search</a>
+<a href="https://chat.blackroad.io" style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:#555;text-decoration:none;transition:color 0.2s">Chat</a>
+<a href="https://auth.blackroad.io" style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:#555;text-decoration:none;transition:color 0.2s">Auth</a>
+<a href="https://pay.blackroad.io" style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:#555;text-decoration:none;transition:color 0.2s">Pay</a>
+<a href="https://images.blackroad.io" style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:#555;text-decoration:none;transition:color 0.2s">Images</a>
+<a href="https://brand.blackroad.io" style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:#555;text-decoration:none;transition:color 0.2s">Brand</a>
+<a href="https://status.blackroad.io" style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:#555;text-decoration:none;transition:color 0.2s">Status</a>
+<a href="https://github.com/BlackRoad-OS-Inc" style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:#555;text-decoration:none;transition:color 0.2s">GitHub</a>
+</div>
+</div>
+<div style="height:36px"></div>
+<script>
+// BlackRoad Live Stats
+(function(){
+  const API='https://stats-blackroad.amundsonalexa.workers.dev';
+  async function load(){
+    try{
+      const r=await fetch(API+'/ecosystem');
+      const d=(await r.json())?.data||{};
+      document.querySelectorAll('[data-stat]').forEach(el=>{
+        const v=d[el.dataset.stat];
+        if(v!==undefined)el.textContent=typeof v==='number'?v.toLocaleString():v;
+      });
+    }catch(e){}
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',load);
+  else load();
+  setInterval(load,60000);
+})();
+</script>
+</body>
+</html>

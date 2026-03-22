@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BlackRoad OS — The Browser-Native Operating System</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --gray-950: #0a0a0a;
+  --gray-900: #171717;
+  --gray-850: #1e1e1e;
+  --gray-800: #262626;
+  --gray-700: #404040;
+  --gray-600: #525252;
+  --gray-500: #737373;
+  --gray-400: #a3a3a3;
+  --gray-300: #d4d4d4;
+  --gray-200: #e5e5e5;
+  --gray-100: #f5f5f5;
+  --white: #ffffff;
+  --accent-1: #ff8700;
+  --accent-2: #ff5f00;
+  --accent-3: #ff0087;
+  --accent-4: #af5fd7;
+  --accent-5: #ff00ff;
+  --accent-6: #1e90ff;
+  --success: #22c55e;
+  --font-headline: 'Space Grotesk', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-full: 9999px;
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.6);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--gray-950);
+  color: var(--gray-300);
+  font-family: var(--font-body);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+::selection { background: var(--accent-3); color: var(--white); }
+
+.page { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+/* Nav */
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: rgba(10,10,10,0.85);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--gray-800);
+}
+.nav-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.nav-logo {
+  font-family: var(--font-headline);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--gray-100);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.nav-logo-mark {
+  width: 28px;
+  height: 28px;
+  background: var(--gray-100);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--gray-950);
+}
+.nav-links { display: flex; gap: 4px; }
+.nav-link {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--gray-500);
+  text-decoration: none;
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
+  transition: all 150ms ease;
+}
+.nav-link:hover { color: var(--gray-200); background: var(--gray-800); }
+.gradient-bar {
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent-1), var(--accent-2), var(--accent-3), var(--accent-4), var(--accent-5), var(--accent-6));
+}
+
+/* Hero */
+.hero {
+  padding: 96px 0;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -200px;
+  right: -200px;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(255,0,135,0.06) 0%, transparent 70%);
+  animation: heroGlow 8s ease-in-out infinite alternate;
+}
+@keyframes heroGlow {
+  0% { opacity: 0.5; transform: scale(1); }
+  100% { opacity: 1; transform: scale(1.2); }
+}
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--gray-400);
+  background: var(--gray-900);
+  border: 1px solid var(--gray-800);
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  margin-bottom: 24px;
+  animation: fadeSlideUp 0.6s var(--ease-out) both;
+}
+.hero-badge-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--success);
+  border-radius: 50%;
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+.hero-title {
+  font-family: var(--font-headline);
+  font-size: clamp(48px, 7vw, 80px);
+  font-weight: 700;
+  color: var(--gray-100);
+  letter-spacing: -2px;
+  line-height: 1.05;
+  margin-bottom: 24px;
+  animation: fadeSlideUp 0.6s var(--ease-out) 0.1s both;
+}
+.gradient-text {
+  background: linear-gradient(135deg, var(--accent-1), var(--accent-3), var(--accent-6));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hero-subtitle {
+  font-size: 18px;
+  color: var(--gray-500);
+  max-width: 540px;
+  line-height: 1.7;
+  animation: fadeSlideUp 0.6s var(--ease-out) 0.2s both;
+}
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.hero-actions {
+  display: flex;
+  gap: 16px;
+  margin-top: 32px;
+  animation: fadeSlideUp 0.6s var(--ease-out) 0.3s both;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 14px;
+  padding: 12px 24px;
+  border-radius: var(--radius-md);
+  border: none;
+  cursor: pointer;
+  transition: all 300ms var(--ease-out);
+  text-decoration: none;
+}
+.btn-primary {
+  background: var(--gray-100);
+  color: var(--gray-900);
+}
+.btn-primary:hover {
+  background: var(--white);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  transform: translateY(-1px);
+}
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--gray-700);
+  color: var(--gray-300);
+}
+.btn-ghost:hover {
+  border-color: var(--gray-500);
+  color: var(--gray-100);
+  background: var(--gray-900);
+}
+.btn-gradient {
+  background: linear-gradient(135deg, var(--accent-1), var(--accent-3), var(--accent-6));
+  color: var(--white);
+  font-weight: 600;
+  background-size: 200% 200%;
+  animation: gradientShift 3s ease infinite;
+}
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.btn-gradient:hover {
+  box-shadow: 0 0 30px rgba(255,0,135,0.3);
+  transform: translateY(-2px);
+}
+
+/* Features Section */
+.section {
+  padding: 96px 0;
+  border-bottom: 1px solid var(--gray-800);
+}
+.section-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--gray-500);
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  margin-bottom: 8px;
+}
+.section-title {
+  font-family: var(--font-headline);
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--gray-100);
+  margin-bottom: 16px;
+}
+.section-desc {
+  font-size: 15px;
+  color: var(--gray-500);
+  max-width: 600px;
+  margin-bottom: 48px;
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+@media (max-width: 900px) {
+  .grid-3 { grid-template-columns: 1fr; }
+}
+
+.card {
+  background: var(--gray-900);
+  border: 1px solid var(--gray-800);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  transition: all 300ms var(--ease-out);
+}
+.card:hover {
+  border-color: var(--gray-700);
+  transform: translateY(-4px);
+}
+.card-icon {
+  width: 48px;
+  height: 48px;
+  background: var(--gray-800);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  margin-bottom: 16px;
+}
+.card-title {
+  font-family: var(--font-headline);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--gray-200);
+  margin-bottom: 8px;
+}
+.card-desc {
+  font-size: 14px;
+  color: var(--gray-500);
+  line-height: 1.6;
+}
+
+/* Stats */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  margin-top: 48px;
+}
+@media (max-width: 900px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+}
+.stat-card {
+  text-align: center;
+  padding: 24px;
+}
+.stat-value {
+  font-family: var(--font-mono);
+  font-size: 48px;
+  font-weight: 700;
+  color: var(--gray-100);
+}
+.stat-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--gray-500);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-top: 8px;
+}
+
+/* CTA */
+.cta {
+  text-align: center;
+  padding: 96px 0;
+}
+.cta-title {
+  font-family: var(--font-headline);
+  font-size: 48px;
+  font-weight: 700;
+  color: var(--gray-100);
+  margin-bottom: 16px;
+}
+.cta-subtitle {
+  font-size: 18px;
+  color: var(--gray-500);
+  margin-bottom: 32px;
+}
+
+/* Footer */
+.footer {
+  padding: 64px 0;
+  text-align: center;
+  border-top: 1px solid var(--gray-800);
+}
+.footer-logo {
+  font-family: var(--font-headline);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--gray-300);
+  margin-bottom: 16px;
+}
+.footer-text {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--gray-600);
+}
+.footer-links {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-top: 24px;
+}
+.footer-link {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--gray-500);
+  text-decoration: none;
+  transition: color 150ms ease;
+}
+.footer-link:hover { color: var(--gray-300); }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="nav-logo" href="#">
+      <div class="nav-logo-mark">B</div>
+      BlackRoad
+    </a>
+    <div class="nav-links">
+      <a href="#features" class="nav-link">Features</a>
+      <a href="#platform" class="nav-link">Platform</a>
+      <a href="#docs" class="nav-link">Docs</a>
+      <a href="#pricing" class="nav-link">Pricing</a>
+    </div>
+    <a href="#" class="btn btn-primary" style="padding: 8px 16px; font-size: 13px;">Get Started</a>
+  </div>
+</nav>
+<div class="gradient-bar"></div>
+
+<div class="page">
+  <section class="hero">
+    <div class="hero-badge">
+      <div class="hero-badge-dot"></div>
+      NOW IN BETA
+    </div>
+    <h1 class="hero-title">
+      The Browser-Native<br>
+      <span class="gradient-text">Operating System</span>
+    </h1>
+    <p class="hero-subtitle">
+      BlackRoad OS is a next-generation platform for AI agent orchestration. Deploy, manage, and scale thousands of agents from your browser.
+    </p>
+    <div class="hero-actions">
+      <a href="#" class="btn btn-gradient">Start Building</a>
+      <a href="#" class="btn btn-ghost">View Documentation →</a>
+    </div>
+  </section>
+
+  <section class="section" id="features">
+    <div class="section-label">Features</div>
+    <h2 class="section-title">Everything You Need</h2>
+    <p class="section-desc">Built from the ground up for AI-native workflows. Every feature designed for scale.</p>
+
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-icon">⚡</div>
+        <h3 class="card-title">Agent Orchestration</h3>
+        <p class="card-desc">Deploy and manage thousands of AI agents with real-time monitoring and automatic scaling.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🔐</div>
+        <h3 class="card-title">Memory Persistence</h3>
+        <p class="card-desc">PS-SHA∞ hashing ensures your agents maintain state across sessions and deployments.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🌐</div>
+        <h3 class="card-title">Edge-First</h3>
+        <p class="card-desc">Run on Cloudflare's global network. Sub-50ms latency worldwide, automatic failover.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">📊</div>
+        <h3 class="card-title">Real-Time Analytics</h3>
+        <p class="card-desc">Monitor agent performance, trace workflows, and debug in real-time with our dashboard.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🔗</div>
+        <h3 class="card-title">API-First</h3>
+        <p class="card-desc">Everything accessible via REST and WebSocket APIs. Full OpenAPI documentation included.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🛡️</div>
+        <h3 class="card-title">Enterprise Security</h3>
+        <p class="card-desc">SOC 2 compliant. End-to-end encryption. Role-based access control for your entire team.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="platform">
+    <div class="section-label">Platform</div>
+    <h2 class="section-title">Built for Scale</h2>
+    <p class="section-desc">Trusted by teams building the next generation of AI applications.</p>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value">1M+</div>
+        <div class="stat-label">Agents Deployed</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">99.9%</div>
+        <div class="stat-label">Uptime</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">23ms</div>
+        <div class="stat-label">Avg Latency</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">200+</div>
+        <div class="stat-label">Edge Locations</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta">
+    <h2 class="cta-title">Ready to Build?</h2>
+    <p class="cta-subtitle">Start deploying agents in minutes. No credit card required.</p>
+    <a href="#" class="btn btn-gradient" style="padding: 16px 32px; font-size: 16px;">Get Started Free</a>
+  </section>
+</div>
+
+<div class="gradient-bar"></div>
+<div class="page">
+  <footer class="footer">
+    <div class="footer-logo">BlackRoad<span style="color: var(--accent-3);">.</span></div>
+    <div class="footer-text">© 2025 BlackRoad OS, Inc. All rights reserved.</div>
+    <div class="footer-links">
+      <a href="#" class="footer-link">Documentation</a>
+      <a href="#" class="footer-link">GitHub</a>
+      <a href="#" class="footer-link">Discord</a>
+      <a href="#" class="footer-link">Twitter</a>
+    </div>
+  </footer>
+</div>
+
+</body>
+</html>

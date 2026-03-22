@@ -1,0 +1,43 @@
+{
+  "title": "Service Golden Signals",
+  "timezone": "browser",
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "P95 Latency",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job=\"$service\"}[5m])) by (le))"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Error Rate",
+      "targets": [
+        {
+          "expr": "sum(rate(error_rate{job=\"$service\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Uptime",
+      "targets": [
+        {
+          "expr": "app_uptime_seconds{job=\"$service\"}"
+        }
+      ]
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "service",
+        "type": "query",
+        "datasource": "Prometheus",
+        "query": "label_values(http_request_duration_seconds_count, job)"
+      }
+    ]
+  }
+}

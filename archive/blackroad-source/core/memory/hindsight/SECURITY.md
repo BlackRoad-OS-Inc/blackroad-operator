@@ -1,0 +1,1 @@
+# blackboxprogramming/hindsight/SECURITY.md

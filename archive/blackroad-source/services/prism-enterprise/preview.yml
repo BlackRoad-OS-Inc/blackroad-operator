@@ -1,0 +1,186 @@
+name: preview
+slug: pr
+state: active
+description: >-
+  Ephemeral review environments provisioned per pull request. Builds and tests
+  run on AWS ECS Fargate behind dev.blackroad.io and are destroyed as soon as
+  the pull request closes.
+branch: pr/*
+contacts:
+  reviewers:
+    - blackboxprogramming
+  slack: "#eng"
+domains:
+  base: https://dev.blackroad.io
+  pattern: https://pr-<pr-number>.dev.blackroad.io
+infrastructure:
+  cloud: aws
+  region: us-east-1
+  terraform:
+    root: infra/preview-env
+    module: modules/preview-env
+    backend:
+      bucket_secret: PREVIEW_ENV_TF_STATE_BUCKET
+      lock_table_secret: PREVIEW_ENV_TF_LOCK_TABLE
+      key_template: preview/pr-<pr-number>.tfstate
+    outputs:
+      - preview_url
+      - service_name
+automation:
+  required_checks:
+    pull_request:
+      - preview.yml (preview job)
+      - preview-containers.yml (metadata, build-image, sbom, scan)
+  workflows:
+    - name: Preview environment
+      file: .github/workflows/preview.yml
+      triggers:
+        - pull_request (opened, reopened, synchronize, closed)
+      summary: >-
+        Builds a PR-specific image, wires ECS + ALB resources, publishes the
+        preview hostname, and destroys the stack when the pull request closes.
+      secrets_required:
+        - AWS_ROLE_TO_ASSUME
+      variables_required:
+        - AWS_REGION
+        - ECR_REPO
+        - ECS_CLUSTER
+        - VPC_ID
+        - SUBNETS
+        - SERVICE_SG
+        - ALB_ARN
+        - HTTPS_LISTENER_ARN
+        - ALB_ZONE_ID
+        - ALB_DNS
+        - HOSTED_ZONE_ID
+        - CONTAINER_PORT
+        - TASK_EXECUTION_ROLE_ARN
+        - TASK_ROLE_ARN
+    - name: Preview container image
+      file: .github/workflows/preview-containers.yml
+      triggers:
+        - pull_request (opened, reopened, synchronize, ready_for_review)
+      summary: >-
+        Publishes a GHCR image per PR along with SPDX SBOM and Grype scanning
+        results; posts docker run instructions back to the pull request.
+      secrets_required: []
+    - name: Preview container cleanup
+      file: .github/workflows/preview-containers-cleanup.yml
+      triggers:
+        - pull_request (closed)
+      summary: Deletes GHCR preview tags once a pull request closes.
+    - name: Preview frontend host
+      file: .github/workflows/preview-frontend-host.yml
+      triggers:
+        - pull_request (opened, reopened, synchronize, closed)
+      summary: >-
+        Lightweight frontend-only previews that reuse the shared ALB listener
+        and Route53 rules for UI smoke testing.
+      secrets_required:
+        - AWS_ROLE_TO_ASSUME
+deployments:
+  - service: web-console
+    type: container-service
+    provider: aws-ecs-fargate
+    workflow: .github/workflows/preview.yml
+    terraform_directory: infra/preview-env
+    terraform_backend:
+      bucket_secret: PREVIEW_ENV_TF_STATE_BUCKET
+      lock_table_secret: PREVIEW_ENV_TF_LOCK_TABLE
+      key_template: preview/pr-<pr-number>.tfstate
+    module: modules/preview-env
+    domain_pattern: https://pr-<pr-number>.dev.blackroad.io
+    health_check: https://pr-<pr-number>.dev.blackroad.io/healthz/ui
+    images:
+      registry: ghcr.io/blackboxprogramming/blackroad-prism-console
+      tag_pattern: pr-<pr-number>-<short-sha>
+      sbom_artifact: pr-<pr-number>-sbom
+      vulnerability_scans:
+        - anchore/grype → GitHub code scanning
+    environment:
+      AWS_REGION: us-east-1
+      PREVIEW_DOMAIN: dev.blackroad.io
+    secrets:
+      - PREVIEW_ENV_AWS_ROLE
+      - PREVIEW_ENV_ECR_REGISTRY
+      - PREVIEW_ENV_ECR_REPOSITORY
+      - PREVIEW_ENV_CLUSTER_ARN
+      - PREVIEW_ENV_EXECUTION_ROLE_ARN
+      - PREVIEW_ENV_TASK_ROLE_ARN
+      - PREVIEW_ENV_PRIVATE_SUBNET_IDS
+      - PREVIEW_ENV_PUBLIC_SUBNET_IDS
+      - PREVIEW_ENV_VPC_ID
+      - PREVIEW_ENV_HOSTED_ZONE_ID
+      - PREVIEW_ENV_VARS_JSON
+      - PREVIEW_ENV_SECRETS_JSON
+      - SLACK_PREVIEW_CHANNEL
+      - SLACK_BOT_TOKEN
+change_management:
+  approvals: []
+  runbooks:
+    - README-DEPLOY.md
+    - README-OPS.md
+    - runbooks/examples/release_rollback_forward.yaml
+observability:
+  health_checks:
+    - name: pr-web
+      url: https://pr-<pr-number>.dev.blackroad.io/health
+  verification:
+    - terraform output -raw preview_url
+    - aws ecs describe-services --cluster <cluster-arn> --services pr-<pr-number> --region us-east-1
+    - curl -fsS https://pr-<pr-number>.dev.blackroad.io/healthz/ui
+# Preview environments are provisioned per pull request; replace <pr> with the PR number.
+url: "https://pr-<pr>.dev.blackroad.io"
+reviewers:
+  users:
+    - blackboxprogramming
+url: https://pr-<number>.dev.blackroad.io
+description: Ephemeral preview spun up per pull request via the ECS/Fargate module.
+url: https://pr-<pr-number>.dev.blackroad.io
+reviewers:
+  - blackboxprogramming
+status: planned
+description: >-
+  Ephemeral review apps spun up per pull request for product acceptance testing.
+domains:
+  primary: https://preview.blackroad.local
+deploy_targets:
+  - provider: fly.io
+    status: planned
+    app: blackroad-prism-console-preview
+    region: ord
+    release_channel: pull-request
+    notes:
+      - Create one app per PR and destroy after merge.
+  - provider: aws-ecs
+    status: planned
+    cluster: prism-console-preview
+    service: pr-*
+    region: us-east-2
+    release_channel: pull-request
+    notes:
+      - Provisioned by automation only when required for load tests.
+ci_cd:
+  branch: feature/*
+  promotes_from: null
+  workflows:
+    - deploy/ci/woodpecker.yml
+    - deploy/ci/semgrep.yml
+approvals:
+  required: false
+  reviewers: []
+  policy_gates:
+    - SECURITY_BASELINE.md
+runbooks:
+  deploy: README-OPS.md#hybrid-deploy
+  rollback: RUNBOOK.md#restoring-from-backup
+observability:
+  dashboards:
+    grafana: ops/observability/grafana
+  alerts:
+    pagerduty: pending
+  logging:
+    primary: pending
+notes:
+  - Surface preview URLs back to GitHub PRs for design and QA review.
+  - Destroy environments automatically after merges or 48 hours of inactivity.

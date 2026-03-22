@@ -1,0 +1,115 @@
+{
+  "BlackRoad Client Init": {
+    "prefix": "br-init",
+    "body": [
+      "import { BlackRoadClient } from '@blackroad/sdk';",
+      "",
+      "const client = new BlackRoadClient({",
+      "  apiKey: '${1:process.env.BLACKROAD_API_KEY}',",
+      "});"
+    ],
+    "description": "Initialize BlackRoad client"
+  },
+  "BlackRoad List Agents": {
+    "prefix": "br-agents-list",
+    "body": [
+      "const agents = await client.agents.list({",
+      "  division: '${1:AI}',",
+      "  level: ${2:4},",
+      "});",
+      "console.log(`Found \\${agents.length} agents`);"
+    ],
+    "description": "List BlackRoad agents"
+  },
+  "BlackRoad Register Agent": {
+    "prefix": "br-agent-register",
+    "body": [
+      "const agent = await client.agents.register({",
+      "  name: '${1:my-agent}',",
+      "  type: '${2|ai,human,bot,service|}',",
+      "  division: '${3:Labs}',",
+      "  level: ${4:4},",
+      "});"
+    ],
+    "description": "Register a new BlackRoad agent"
+  },
+  "BlackRoad Dispatch Task": {
+    "prefix": "br-task-dispatch",
+    "body": [
+      "const task = await client.tasks.dispatch({",
+      "  title: '${1:Task title}',",
+      "  description: '${2:Task description}',",
+      "  priority: '${3|low,medium,high,urgent|}',",
+      "  division: '${4:Security}',",
+      "});",
+      "console.log(`Created task: \\${task.id}`);"
+    ],
+    "description": "Dispatch a new BlackRoad task"
+  },
+  "BlackRoad Complete Task": {
+    "prefix": "br-task-complete",
+    "body": [
+      "await client.tasks.complete('${1:task-id}', '${2:Successfully completed}');"
+    ],
+    "description": "Complete a BlackRoad task"
+  },
+  "BlackRoad Log Memory": {
+    "prefix": "br-memory-log",
+    "body": [
+      "const entry = await client.memory.log({",
+      "  action: '${1|deployed,created,updated,fixed,configured,milestone,til|}',",
+      "  entity: '${2:service-name}',",
+      "  details: '${3:Details about the action}',",
+      "  tags: [${4:'tag1', 'tag2'}],",
+      "});"
+    ],
+    "description": "Log entry to BlackRoad memory"
+  },
+  "BlackRoad Query Memory": {
+    "prefix": "br-memory-query",
+    "body": [
+      "const entries = await client.memory.query({",
+      "  search: '${1:deployment}',",
+      "  action: '${2:deployed}',",
+      "  limit: ${3:50},",
+      "});"
+    ],
+    "description": "Query BlackRoad memory"
+  },
+  "BlackRoad TIL": {
+    "prefix": "br-til",
+    "body": [
+      "await client.memory.til('${1:category}', '${2:What I learned today}');"
+    ],
+    "description": "Share a Today I Learned entry"
+  },
+  "BlackRoad Health Check": {
+    "prefix": "br-health",
+    "body": [
+      "const health = await client.health();",
+      "console.log(`Status: \\${health.status}, Version: \\${health.version}`);"
+    ],
+    "description": "Check BlackRoad API health"
+  },
+  "BlackRoad Error Handling": {
+    "prefix": "br-try-catch",
+    "body": [
+      "import { NotFoundError, RateLimitError, AuthenticationError } from '@blackroad/sdk';",
+      "",
+      "try {",
+      "  ${1:// Your BlackRoad API call}",
+      "} catch (error) {",
+      "  if (error instanceof NotFoundError) {",
+      "    console.log('Resource not found');",
+      "  } else if (error instanceof RateLimitError) {",
+      "    console.log(`Rate limited. Retry after \\${error.retryAfter}s`);",
+      "  } else if (error instanceof AuthenticationError) {",
+      "    console.log('Invalid API key');",
+      "  } else {",
+      "    throw error;",
+      "  }",
+      "}"
+    ],
+    "description": "BlackRoad error handling pattern"
+  }
+}

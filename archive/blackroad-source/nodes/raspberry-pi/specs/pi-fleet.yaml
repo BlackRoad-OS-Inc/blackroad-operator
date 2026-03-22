@@ -1,0 +1,99 @@
+# BlackRoad Pi Fleet — Hardware Specifications
+# Source of truth for all edge compute nodes
+
+fleet:
+  blackroad-pi:
+    hostname: blackroad-pi
+    ip: "192.168.4.64"
+    model: "Raspberry Pi 4 Model B"
+    ram: "8GB"
+    storage:
+      - type: microSD
+        capacity: "64GB"
+        class: "A2"
+      - type: NVMe
+        capacity: "256GB"
+        interface: USB3
+    cpu: "Cortex-A72 (4x @ 1.8GHz)"
+    os: "Raspberry Pi OS Lite (64-bit)"
+    role: PRIMARY
+    services:
+      - cloudflared
+      - ollama
+      - blackroad-gateway
+      - blackroad-agent
+    accessories:
+      - "WS2812B LED strip (60 LEDs)"
+      - "3.5\" touchscreen"
+    network:
+      interface: eth0
+      static_ip: "192.168.4.64"
+      cloudflare_tunnel: "52915859-da18-4aa6-add5-7bd9fcac2e0b"
+
+  aria64:
+    hostname: aria64
+    ip: "192.168.4.38"
+    model: "Raspberry Pi 4 Model B"
+    ram: "8GB"
+    storage:
+      - type: microSD
+        capacity: "128GB"
+        class: "A2"
+    cpu: "Cortex-A72 (4x @ 1.8GHz)"
+    os: "Raspberry Pi OS Lite (64-bit)"
+    role: SECONDARY
+    agent_capacity: 22500
+    services:
+      - ollama
+      - blackroad-agent
+      - pi-ops
+    network:
+      interface: eth0
+      static_ip: "192.168.4.38"
+
+  alice:
+    hostname: raspberrypi
+    ip: "192.168.4.49"
+    model: "Raspberry Pi 4 Model B"
+    ram: "4GB"
+    storage:
+      - type: microSD
+        capacity: "32GB"
+        class: "A2"
+    os: "Raspberry Pi OS Lite (64-bit)"
+    role: TERTIARY
+    services:
+      - blackroad-agent
+      - pi-ops
+    network:
+      interface: eth0
+      static_ip: "192.168.4.49"
+
+  lucidia:
+    hostname: lucidia
+    ip: "192.168.4.99"
+    model: "Raspberry Pi 4 Model B"
+    ram: "4GB"
+    os: "Raspberry Pi OS Lite (64-bit)"
+    role: ALTERNATE
+    services:
+      - blackroad-agent
+    network:
+      interface: wlan0
+      ip: "192.168.4.99"
+
+  cloud:
+    hostname: blackroad-infinity
+    ip: "159.65.43.12"
+    provider: "DigitalOcean"
+    model: "Droplet — s-4vcpu-8gb"
+    ram: "8GB"
+    storage:
+      - type: SSD
+        capacity: "160GB"
+    os: "Ubuntu 22.04 LTS"
+    region: "nyc3"
+    role: CLOUD_BACKUP
+    services:
+      - blackroad-agent
+      - nginx

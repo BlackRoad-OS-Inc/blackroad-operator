@@ -1,0 +1,124 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://blackroad-os.dev/schemas/education/tutor-agent.json",
+  "title": "TutorAgent",
+  "description": "🤖 Configuration for tutor/coach agents",
+  "type": "object",
+  "required": ["agentId", "name", "role", "capabilities", "guardrails"],
+  "properties": {
+    "agentId": {
+      "type": "string",
+      "description": "Unique identifier for the agent",
+      "pattern": "^agent:[a-z0-9-]+$"
+    },
+    "name": {
+      "type": "string",
+      "description": "Agent display name",
+      "minLength": 1
+    },
+    "role": {
+      "type": "string",
+      "enum": ["explainer", "socratic-coach", "grader-assistant", "mentor", "facilitator"],
+      "description": "Primary role of the agent"
+    },
+    "description": {
+      "type": "string",
+      "description": "What this agent does"
+    },
+    "capabilities": {
+      "type": "object",
+      "required": ["canAutoFeedback", "feedbackPatterns"],
+      "properties": {
+        "canAutoFeedback": {
+          "type": "boolean",
+          "description": "Can provide automated feedback"
+        },
+        "canAutoGrade": {
+          "type": "boolean",
+          "default": false,
+          "description": "🧍‍♀️ Can auto-grade without human review"
+        },
+        "feedbackPatterns": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["inline-hints", "summary-feedback", "follow-up-questions", "error-explanation", "concept-clarification"]
+          },
+          "description": "💬 Feedback patterns this agent uses"
+        },
+        "supportedContentTypes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["lesson", "activity", "assessment", "project", "reflection"]
+          },
+          "description": "Content types this agent can work with"
+        }
+      }
+    },
+    "guardrails": {
+      "type": "object",
+      "required": ["requiresHumanReview"],
+      "properties": {
+        "requiresHumanReview": {
+          "type": "boolean",
+          "description": "🧍‍♀️ All feedback must be reviewed by human"
+        },
+        "cannotPass": {
+          "type": "boolean",
+          "default": true,
+          "description": "Cannot mark learner as passed without going through rubric"
+        },
+        "allowedPacks": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Which Packs this agent can access"
+        },
+        "dataAccessRestrictions": {
+          "type": "object",
+          "properties": {
+            "noPII": {
+              "type": "boolean",
+              "default": true,
+              "description": "🚫 Cannot access learner PII"
+            },
+            "onlyProgressData": {
+              "type": "boolean",
+              "default": true,
+              "description": "Only access progress/performance data"
+            }
+          }
+        },
+        "mustProvideNextSteps": {
+          "type": "boolean",
+          "default": true,
+          "description": "💬 All feedback must include constructive next steps"
+        }
+      }
+    },
+    "behaviorConfig": {
+      "type": "object",
+      "properties": {
+        "tone": {
+          "type": "string",
+          "enum": ["encouraging", "professional", "casual", "formal"],
+          "default": "encouraging"
+        },
+        "responsiveness": {
+          "type": "string",
+          "enum": ["immediate", "delayed", "scheduled"],
+          "description": "When agent provides feedback"
+        },
+        "personalityTraits": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Agent personality characteristics"
+        }
+      }
+    }
+  }
+}

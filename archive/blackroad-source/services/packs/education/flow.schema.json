@@ -1,0 +1,49 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://blackroad-os.dev/flows/education/start-course.json",
+  "title": "Start Course Flow",
+  "description": "🔁 Flow for starting a new course",
+  "type": "object",
+  "required": ["flowId", "version", "steps"],
+  "properties": {
+    "flowId": {
+      "type": "string",
+      "pattern": "^flow:education:[a-z0-9-]+$",
+      "description": "Unique flow identifier"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "description": {
+      "type": "string",
+      "default": "Initialize a new course for a learner, check prerequisites, create progress records"
+    },
+    "steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["stepId", "action"],
+        "properties": {
+          "stepId": {
+            "type": "string"
+          },
+          "action": {
+            "type": "string"
+          },
+          "params": {
+            "type": "object"
+          },
+          "onSuccess": {
+            "type": "string",
+            "description": "Next step on success"
+          },
+          "onFailure": {
+            "type": "string",
+            "description": "Next step on failure"
+          }
+        }
+      }
+    }
+  }
+}

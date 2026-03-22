@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+echo "📜 br-sync History"
+echo "════════════════════════════════════════"
+echo "History tracking coming in Phase 2"
+echo ""
+echo "Will track:"
+echo "  • File sync operations"
+echo "  • Version bumps"
+echo "  • Config updates"
+echo "  • Rollback points"

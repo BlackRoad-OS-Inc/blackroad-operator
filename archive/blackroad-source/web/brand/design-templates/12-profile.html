@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - BlackRoad</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --gray-950: #000000;
+            --gray-900: #0a0a0a;
+            --gray-800: #1a1a1a;
+            --gray-700: #404040;
+            --gray-600: #525252;
+            --gray-500: #737373;
+            --gray-400: #a3a3a3;
+            --gray-300: #d4d4d4;
+            --gray-100: #f5f5f5;
+            --accent-1: #ff8700;
+            --accent-2: #ff5f00;
+            --accent-3: #ff0087;
+            --accent-4: #af5fd7;
+            --accent-5: #ff00ff;
+            --accent-6: #1e90ff;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --radius-sm: 4px;
+            --radius-md: 6px;
+            --radius-lg: 8px;
+            --radius-xl: 12px;
+            --radius-2xl: 16px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--gray-950);
+            color: var(--gray-100);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Header */
+        .profile-header {
+            position: relative;
+            margin-bottom: 2rem;
+        }
+
+        .cover-image {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-3), var(--accent-6));
+            border-radius: var(--radius-xl);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cover-image::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            opacity: 0.1;
+        }
+
+        .avatar-section {
+            display: flex;
+            align-items: flex-end;
+            gap: 1.5rem;
+            margin-top: -4rem;
+            padding: 0 2rem;
+        }
+
+        .avatar {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            border: 4px solid var(--gray-950);
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-3));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 3rem;
+            font-weight: 700;
+            color: white;
+            position: relative;
+        }
+
+        .avatar-badge {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            width: 24px;
+            height: 24px;
+            background: var(--success);
+            border: 3px solid var(--gray-950);
+            border-radius: 50%;
+        }
+
+        .profile-info {
+            flex: 1;
+            padding-bottom: 1rem;
+        }
+
+        .profile-name {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .profile-handle {
+            color: var(--gray-400);
+            font-family: 'JetBrains Mono', monospace;
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-bio {
+            color: var(--gray-300);
+            max-width: 500px;
+        }
+
+        .profile-actions {
+            display: flex;
+            gap: 0.75rem;
+            padding-bottom: 1rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius-md);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            font-size: 0.875rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-3));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px rgba(255, 135, 0, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--gray-800);
+            color: var(--gray-100);
+            border: 1px solid var(--gray-700);
+        }
+
+        .btn-secondary:hover {
+            background: var(--gray-700);
+        }
+
+        /* Stats */
+        .stats-row {
+            display: flex;
+            gap: 2rem;
+            padding: 1.5rem 0;
+            border-bottom: 1px solid var(--gray-800);
+            margin-bottom: 2rem;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-3));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            color: var(--gray-400);
+            font-size: 0.875rem;
+        }
+
+        /* Grid Layout */
+        .profile-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 900px) {
+            .profile-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Cards */
+        .card {
+            background: var(--gray-900);
+            border: 1px solid var(--gray-800);
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .card-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+
+        .card-link {
+            color: var(--accent-1);
+            font-size: 0.875rem;
+            text-decoration: none;
+        }
+
+        .card-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Info List */
+        .info-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--gray-300);
+        }
+
+        .info-icon {
+            width: 20px;
+            height: 20px;
+            color: var(--gray-500);
+        }
+
+        .info-link {
+            color: var(--accent-6);
+            text-decoration: none;
+        }
+
+        .info-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Skills */
+        .skills-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .skill-tag {
+            padding: 0.5rem 1rem;
+            background: var(--gray-800);
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            color: var(--gray-300);
+            border: 1px solid var(--gray-700);
+        }
+
+        .skill-tag.featured {
+            background: linear-gradient(135deg, rgba(255, 135, 0, 0.1), rgba(255, 0, 135, 0.1));
+            border-color: var(--accent-1);
+            color: var(--accent-1);
+        }
+
+        /* Activity Feed */
+        .activity-feed {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .activity-item {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem;
+            background: var(--gray-800);
+            border-radius: var(--radius-lg);
+            transition: all 0.2s;
+        }
+
+        .activity-item:hover {
+            background: var(--gray-700);
+        }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .activity-icon.commit {
+            background: rgba(34, 197, 94, 0.1);
+            color: var(--success);
+        }
+
+        .activity-icon.pr {
+            background: rgba(30, 144, 255, 0.1);
+            color: var(--accent-6);
+        }
+
+        .activity-icon.issue {
+            background: rgba(255, 135, 0, 0.1);
+            color: var(--accent-1);
+        }
+
+        .activity-icon.deploy {
+            background: rgba(175, 95, 215, 0.1);
+            color: var(--accent-4);
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-title {
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+
+        .activity-title a {
+            color: var(--gray-100);
+            text-decoration: none;
+        }
+
+        .activity-title a:hover {
+            color: var(--accent-1);
+        }
+
+        .activity-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.875rem;
+            color: var(--gray-500);
+        }
+
+        .activity-repo {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--gray-400);
+        }
+
+        /* Projects */
+        .projects-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .project-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: var(--gray-800);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--gray-700);
+            transition: all 0.2s;
+        }
+
+        .project-card:hover {
+            border-color: var(--accent-1);
+            transform: translateX(4px);
+        }
+
+        .project-info h4 {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .project-info p {
+            font-size: 0.875rem;
+            color: var(--gray-400);
+        }
+
+        .project-stats {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.875rem;
+            color: var(--gray-500);
+        }
+
+        .project-stats span {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        /* Contribution Graph */
+        .contribution-graph {
+            margin-top: 1rem;
+        }
+
+        .graph-row {
+            display: flex;
+            gap: 3px;
+            margin-bottom: 3px;
+        }
+
+        .graph-cell {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+            background: var(--gray-800);
+        }
+
+        .graph-cell.level-1 { background: rgba(255, 135, 0, 0.2); }
+        .graph-cell.level-2 { background: rgba(255, 135, 0, 0.4); }
+        .graph-cell.level-3 { background: rgba(255, 135, 0, 0.6); }
+        .graph-cell.level-4 { background: var(--accent-1); }
+
+        /* Badges */
+        .badges-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .badge {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            position: relative;
+        }
+
+        .badge.gold {
+            background: linear-gradient(135deg, #ffd700, #ffaa00);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+        }
+
+        .badge.silver {
+            background: linear-gradient(135deg, #c0c0c0, #808080);
+        }
+
+        .badge.bronze {
+            background: linear-gradient(135deg, #cd7f32, #8b4513);
+        }
+
+        .badge.special {
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-3));
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--gray-800);
+            padding-bottom: 0.5rem;
+        }
+
+        .tab {
+            padding: 0.75rem 1.25rem;
+            background: transparent;
+            border: none;
+            color: var(--gray-400);
+            font-size: 0.875rem;
+            cursor: pointer;
+            border-radius: var(--radius-md);
+            transition: all 0.2s;
+        }
+
+        .tab:hover {
+            color: var(--gray-100);
+            background: var(--gray-800);
+        }
+
+        .tab.active {
+            color: var(--accent-1);
+            background: rgba(255, 135, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Profile Header -->
+        <div class="profile-header">
+            <div class="cover-image"></div>
+            <div class="avatar-section">
+                <div class="avatar">
+                    AM
+                    <div class="avatar-badge"></div>
+                </div>
+                <div class="profile-info">
+                    <h1 class="profile-name">Alexa Mundson</h1>
+                    <p class="profile-handle">@alexa</p>
+                    <p class="profile-bio">Building the future of distributed systems. Founder at BlackRoad. Open source enthusiast.</p>
+                </div>
+                <div class="profile-actions">
+                    <button class="btn btn-primary">Edit Profile</button>
+                    <button class="btn btn-secondary">Share</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-row">
+            <div class="stat">
+                <div class="stat-value">2,847</div>
+                <div class="stat-label">Contributions</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">156</div>
+                <div class="stat-label">Repositories</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">1.2k</div>
+                <div class="stat-label">Followers</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">89</div>
+                <div class="stat-label">Following</div>
+            </div>
+        </div>
+
+        <!-- Main Grid -->
+        <div class="profile-grid">
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <!-- Info Card -->
+                <div class="card" style="margin-bottom: 1.5rem;">
+                    <h3 class="card-title" style="margin-bottom: 1rem;">Info</h3>
+                    <div class="info-list">
+                        <div class="info-item">
+                            <svg class="info-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            </svg>
+                            San Francisco, CA
+                        </div>
+                        <div class="info-item">
+                            <svg class="info-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                            </svg>
+                            Founder at BlackRoad
+                        </div>
+                        <div class="info-item">
+                            <svg class="info-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                            </svg>
+                            <a href="#" class="info-link">blackroad.io</a>
+                        </div>
+                        <div class="info-item">
+                            <svg class="info-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                            Joined March 2020
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Skills Card -->
+                <div class="card" style="margin-bottom: 1.5rem;">
+                    <h3 class="card-title" style="margin-bottom: 1rem;">Skills</h3>
+                    <div class="skills-grid">
+                        <span class="skill-tag featured">TypeScript</span>
+                        <span class="skill-tag featured">Rust</span>
+                        <span class="skill-tag">Python</span>
+                        <span class="skill-tag">Go</span>
+                        <span class="skill-tag">React</span>
+                        <span class="skill-tag">Node.js</span>
+                        <span class="skill-tag">PostgreSQL</span>
+                        <span class="skill-tag">Kubernetes</span>
+                        <span class="skill-tag">AWS</span>
+                        <span class="skill-tag">Cloudflare</span>
+                    </div>
+                </div>
+
+                <!-- Badges Card -->
+                <div class="card">
+                    <h3 class="card-title" style="margin-bottom: 1rem;">Achievements</h3>
+                    <div class="badges-grid">
+                        <div class="badge gold" title="Top Contributor">&#9733;</div>
+                        <div class="badge special" title="Early Adopter">&#9889;</div>
+                        <div class="badge silver" title="Code Reviewer">&#128270;</div>
+                        <div class="badge bronze" title="Bug Hunter">&#128027;</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="main-content">
+                <!-- Tabs -->
+                <div class="tabs">
+                    <button class="tab active">Activity</button>
+                    <button class="tab">Repositories</button>
+                    <button class="tab">Projects</button>
+                    <button class="tab">Contributions</button>
+                </div>
+
+                <!-- Activity Feed -->
+                <div class="card" style="margin-bottom: 1.5rem;">
+                    <div class="card-header">
+                        <h3 class="card-title">Recent Activity</h3>
+                        <a href="#" class="card-link">View all</a>
+                    </div>
+                    <div class="activity-feed">
+                        <div class="activity-item">
+                            <div class="activity-icon deploy">
+                                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                                </svg>
+                            </div>
+                            <div class="activity-content">
+                                <div class="activity-title"><a href="#">Deployed v2.4.0 to production</a></div>
+                                <div class="activity-meta">
+                                    <span class="activity-repo">blackroad-os</span>
+                                    <span>2 hours ago</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon pr">
+                                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                </svg>
+                            </div>
+                            <div class="activity-content">
+                                <div class="activity-title"><a href="#">Merged PR #847: Add WebSocket support</a></div>
+                                <div class="activity-meta">
+                                    <span class="activity-repo">blackroad-api</span>
+                                    <span>5 hours ago</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon commit">
+                                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </div>
+                            <div class="activity-content">
+                                <div class="activity-title"><a href="#">Pushed 12 commits to main</a></div>
+                                <div class="activity-meta">
+                                    <span class="activity-repo">blackroad-templates</span>
+                                    <span>1 day ago</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon issue">
+                                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </div>
+                            <div class="activity-content">
+                                <div class="activity-title"><a href="#">Closed issue #234: Memory leak in worker</a></div>
+                                <div class="activity-meta">
+                                    <span class="activity-repo">blackroad-workers</span>
+                                    <span>2 days ago</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pinned Projects -->
+                <div class="card" style="margin-bottom: 1.5rem;">
+                    <div class="card-header">
+                        <h3 class="card-title">Pinned Repositories</h3>
+                        <a href="#" class="card-link">Customize</a>
+                    </div>
+                    <div class="projects-grid">
+                        <div class="project-card">
+                            <div class="project-info">
+                                <h4>blackroad-os</h4>
+                                <p>Distributed operating system for AI agents</p>
+                            </div>
+                            <div class="project-stats">
+                                <span>&#9733; 1.2k</span>
+                                <span>&#128336; 234</span>
+                            </div>
+                        </div>
+                        <div class="project-card">
+                            <div class="project-info">
+                                <h4>blackroad-templates</h4>
+                                <p>Design system templates collection</p>
+                            </div>
+                            <div class="project-stats">
+                                <span>&#9733; 89</span>
+                                <span>&#128336; 12</span>
+                            </div>
+                        </div>
+                        <div class="project-card">
+                            <div class="project-info">
+                                <h4>codex-infinity</h4>
+                                <p>Infinite code generation engine</p>
+                            </div>
+                            <div class="project-stats">
+                                <span>&#9733; 456</span>
+                                <span>&#128336; 78</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contribution Graph -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Contribution Graph</h3>
+                        <span style="color: var(--gray-500); font-size: 0.875rem;">2,847 contributions this year</span>
+                    </div>
+                    <div class="contribution-graph" id="graph"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Generate contribution graph
+        const graph = document.getElementById('graph');
+        const levels = ['', 'level-1', 'level-2', 'level-3', 'level-4'];
+
+        for (let row = 0; row < 7; row++) {
+            const rowDiv = document.createElement('div');
+            rowDiv.className = 'graph-row';
+
+            for (let col = 0; col < 52; col++) {
+                const cell = document.createElement('div');
+                cell.className = 'graph-cell';
+                const level = Math.floor(Math.random() * 5);
+                if (level > 0) cell.classList.add(levels[level]);
+                rowDiv.appendChild(cell);
+            }
+
+            graph.appendChild(rowDiv);
+        }
+
+        // Tab switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,75 @@
+# Railway Configuration: BlackRoad Agents Specialist
+# Domains: agents.blackroad.company, agents.blackroad.me
+# Models: Qwen Coder 32B (coding), DeepSeek R1 32B (reasoning)
+
+[build]
+builder = "dockerfile"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+startCommand = "python3 server-r2.py"
+healthcheckPath = "/health"
+healthcheckTimeout = 300
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 10
+
+[resources]
+# NVIDIA H100 80GB GPU (faster for specialized tasks)
+gpu = "nvidia-h100-80gb"
+replicas = 1
+memoryGB = 80
+cpuCores = 24
+
+# Environment Variables
+[[deploy.environmentVariables]]
+name = "MODEL_NAME"
+value = "blackroad-qwen-coder-32b"
+
+[[deploy.environmentVariables]]
+name = "MODEL_PATH"
+value = "r2://blackroad-models/qwen-coder-32b-q4_k_m"
+
+[[deploy.environmentVariables]]
+name = "FALLBACK_MODEL_PATH"
+value = "r2://blackroad-models/deepseek-r1-32b-q4_k_m"
+
+[[deploy.environmentVariables]]
+name = "GPU_MEMORY_UTILIZATION"
+value = "0.9"
+
+[[deploy.environmentVariables]]
+name = "MAX_MODEL_LEN"
+value = "8192"
+
+[[deploy.environmentVariables]]
+name = "MAX_CONCURRENT_REQUESTS"
+value = "200"
+
+[[deploy.environmentVariables]]
+name = "BLACKROAD_IDENTITY_VALIDATION"
+value = "true"
+
+[[deploy.environmentVariables]]
+name = "BLACKROAD_AUDIT_LOGGING"
+value = "true"
+
+[[deploy.environmentVariables]]
+name = "BLACKROAD_BREATH_SYNC"
+value = "false"
+
+# R2 Configuration (set these via Railway dashboard)
+[[deploy.environmentVariables]]
+name = "R2_ACCOUNT_ID"
+value = "${{R2_ACCOUNT_ID}}"
+
+[[deploy.environmentVariables]]
+name = "R2_ACCESS_KEY_ID"
+value = "${{R2_ACCESS_KEY_ID}}"
+
+[[deploy.environmentVariables]]
+name = "R2_SECRET_ACCESS_KEY"
+value = "${{R2_SECRET_ACCESS_KEY}}"
+
+[[deploy.environmentVariables]]
+name = "R2_BUCKET"
+value = "blackroad-models"
