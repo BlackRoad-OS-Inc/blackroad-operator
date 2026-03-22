@@ -25,13 +25,13 @@
 
 ### Disaster Recovery Objectives
 
-| Metric | Target | Description |
-|--------|--------|-------------|
-| **RPO** | 15 minutes | Maximum data loss |
-| **RTO** | 1 hour | Time to restore service |
+| Metric               | Target     | Description                 |
+| -------------------- | ---------- | --------------------------- |
+| **RPO**              | 15 minutes | Maximum data loss           |
+| **RTO**              | 1 hour     | Time to restore service     |
 | **Backup Frequency** | Continuous | Stream + periodic snapshots |
-| **Retention** | 90 days | How long backups kept |
-| **Geo-redundancy** | 3 regions | Copies across locations |
+| **Retention**        | 90 days    | How long backups kept       |
+| **Geo-redundancy**   | 3 regions  | Copies across locations     |
 
 ### Recovery Tiers
 
@@ -73,9 +73,9 @@
 ```yaml
 backup_strategy:
   rule_3_2_1:
-    copies: 3           # At least 3 copies of data
-    media_types: 2      # On 2 different storage types
-    offsite: 1          # 1 copy offsite/cloud
+    copies: 3 # At least 3 copies of data
+    media_types: 2 # On 2 different storage types
+    offsite: 1 # 1 copy offsite/cloud
 
   implementation:
     copy_1:
@@ -751,7 +751,7 @@ pitr:
   postgres:
     wal_level: replica
     archive_mode: on
-    archive_command: "aws s3 cp %p s3://blackroad-backups/wal/%f"
+    archive_command: 'aws s3 cp %p s3://blackroad-backups/wal/%f'
     archive_timeout: 60
 
   redis:
@@ -1109,8 +1109,8 @@ groups:
         labels:
           severity: critical
         annotations:
-          summary: "Backup failed"
-          description: "Backup {{ $labels.type }} failed"
+          summary: 'Backup failed'
+          description: 'Backup {{ $labels.type }} failed'
 
       - alert: BackupOverdue
         expr: time() - blackroad_last_backup_timestamp > 7200
@@ -1118,8 +1118,8 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: "Backup overdue"
-          description: "No backup in last 2 hours"
+          summary: 'Backup overdue'
+          description: 'No backup in last 2 hours'
 
       - alert: RecoveryPointStale
         expr: blackroad_recovery_point_age_seconds > 900
@@ -1127,8 +1127,8 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: "Recovery point stale"
-          description: "RPO exceeded 15 minutes"
+          summary: 'Recovery point stale'
+          description: 'RPO exceeded 15 minutes'
 
       - alert: BackupStorageLow
         expr: blackroad_backup_storage_available_bytes < 10737418240
@@ -1136,8 +1136,8 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: "Backup storage low"
-          description: "Less than 10GB available"
+          summary: 'Backup storage low'
+          description: 'Less than 10GB available'
 ```
 
 ---
@@ -1207,4 +1207,4 @@ groups:
 
 ---
 
-*Ride the Road. Pave Tomorrow.*
+_Ride the Road. Pave Tomorrow._

@@ -42,10 +42,7 @@ describe('formatTable', () => {
   })
 
   it('should produce correct number of lines', () => {
-    const result = formatTable(
-      ['H1'],
-      [['r1'], ['r2'], ['r3']],
-    )
+    const result = formatTable(['H1'], [['r1'], ['r2'], ['r3']])
     const lines = result.split('\n')
     // header + separator + 3 rows = 5 lines
     expect(lines).toHaveLength(5)

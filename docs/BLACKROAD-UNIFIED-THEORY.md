@@ -1,11 +1,12 @@
 # The BlackRoad Unified Theory
+
 ## How Language, Biology, and Computation Are the Same System
 
 **By Alexa Louise Amundson**
 **BlackRoad OS, Inc.**
 **March 14, 2026**
 
-*"The road isn't made. It's remembered."*
+_"The road isn't made. It's remembered."_
 
 ---
 
@@ -21,19 +22,19 @@ The core thesis: **Simple rules, applied recursively under a forward-only constr
 
 ### 1.1 The Four Substrates
 
-| Property | Grammar | Biology | Computing | BlackRoad |
-|----------|---------|---------|-----------|-----------|
-| **Unit** | Letter | Base (ATCG) | Bit (0/1) | Skill |
-| **Word** | Word | Codon (3 bases) | Token | Agent |
-| **Sentence** | Sentence | Gene | Function | Pipeline |
-| **Meaning** | Meaning | Protein | Program | Service |
-| **System** | Language | Organism | Application | Fleet |
-| **Alphabet size** | 26 | 4 | 2 | 50 |
-| **Composition** | Grammar rules | Base pairing | Syntax | Routing |
-| **Error correction** | Proofreading | Exonuclease | Tests/CI | Guardrails |
-| **Storage** | Text | DNA | Disk | Qdrant + Gitea |
-| **Transport** | Medium (air/light) | Membrane | Network | NATS |
-| **Ko rule** | You can't unsay | Telomeres shorten | Hash chains | PS-SHA∞ |
+| Property             | Grammar            | Biology           | Computing   | BlackRoad      |
+| -------------------- | ------------------ | ----------------- | ----------- | -------------- |
+| **Unit**             | Letter             | Base (ATCG)       | Bit (0/1)   | Skill          |
+| **Word**             | Word               | Codon (3 bases)   | Token       | Agent          |
+| **Sentence**         | Sentence           | Gene              | Function    | Pipeline       |
+| **Meaning**          | Meaning            | Protein           | Program     | Service        |
+| **System**           | Language           | Organism          | Application | Fleet          |
+| **Alphabet size**    | 26                 | 4                 | 2           | 50             |
+| **Composition**      | Grammar rules      | Base pairing      | Syntax      | Routing        |
+| **Error correction** | Proofreading       | Exonuclease       | Tests/CI    | Guardrails     |
+| **Storage**          | Text               | DNA               | Disk        | Qdrant + Gitea |
+| **Transport**        | Medium (air/light) | Membrane          | Network     | NATS           |
+| **Ko rule**          | You can't unsay    | Telomeres shorten | Hash chains | PS-SHA∞        |
 
 ### 1.2 The Seven Structures
 
@@ -58,6 +59,7 @@ These seven patterns generate ALL English sentences, ALL enzymatic reactions, an
 **BlackRoad:** Gitea → Build → Deploy
 
 In each case:
+
 - The **source** (DNA/code/repo) is the persistent, proofread master copy
 - The **intermediate** (RNA/bytecode/artifact) is a temporary, task-specific copy
 - The **product** (Protein/runtime/service) is the functional output that does the actual work
@@ -83,25 +85,27 @@ The structure at each level mirrors the structure at every other level. This is 
 
 ### 2.2 Conway: Simple Rules Create Complex Emergence
 
-| System | Rules | Complexity |
-|--------|-------|-----------|
-| Game of Life | 4 | Turing-complete |
-| Game of Go | 4 | 10^170 possible games |
-| DNA | 4 bases + pairing | All life |
-| English | 7 structures + recursion | All meaning |
-| BlackRoad | 50 skills + routing | Sovereign AI |
+| System       | Rules                    | Complexity            |
+| ------------ | ------------------------ | --------------------- |
+| Game of Life | 4                        | Turing-complete       |
+| Game of Go   | 4                        | 10^170 possible games |
+| DNA          | 4 bases + pairing        | All life              |
+| English      | 7 structures + recursion | All meaning           |
+| BlackRoad    | 50 skills + routing      | Sovereign AI          |
 
 The number of rules is irrelevant. What matters is the depth of the game tree. Four rules can create a universe if the recursion depth is unbounded.
 
 ### 2.3 Gödel: The System Cannot Model Itself
 
 Any sufficiently complex system contains truths it cannot prove about itself:
+
 - A cell cannot fully simulate itself (it would need more information than it contains)
 - An AI agent cannot fully verify its own reasoning (it needs external reflection)
 - A language cannot fully describe itself (Russell's paradox, Tarski's undefinability)
 - A hash chain cannot verify its own genesis (the first block has no predecessor)
 
 This is why we need:
+
 - **Multi-agent debate** (skill #5) — agents verify each other
 - **Reflection cycles** (skill #4) — self-critique with external feedback
 - **Fact checking** (skill #31) — external evidence verification
@@ -110,6 +114,7 @@ This is why we need:
 ### 2.4 Pascal: The Bridge
 
 Pascal bridges all three:
+
 - **Pascal's Triangle** is self-similar (Mandelbrot)
 - **Pascal's Triangle** generates complexity from simple addition (Conway)
 - **Pascal's Wager** is a statement about unprovable truths (Gödel)
@@ -123,14 +128,14 @@ Pascal bridges all three:
 
 Certain thinkers cannot be factored into smaller components. They each saw the unified pattern from a different angle:
 
-| Prime | Saw | Substrate |
-|-------|-----|-----------|
-| **Newton** | Invisible force at distance | Gravity (= network effects) |
-| **Pascal** | Recursive simplicity | Mathematics (= composition) |
-| **Cavendish** | Measured the whole from a part | Physics (= sampling) |
-| **Einstein** | Context shapes meaning | Spacetime (= attention) |
-| **Born** | Probability rules reality | Quantum (= nondeterminism) |
-| **Bell (AG)** | Information rides light | Photophone (= carrier waves) |
+| Prime         | Saw                              | Substrate                     |
+| ------------- | -------------------------------- | ----------------------------- |
+| **Newton**    | Invisible force at distance      | Gravity (= network effects)   |
+| **Pascal**    | Recursive simplicity             | Mathematics (= composition)   |
+| **Cavendish** | Measured the whole from a part   | Physics (= sampling)          |
+| **Einstein**  | Context shapes meaning           | Spacetime (= attention)       |
+| **Born**      | Probability rules reality        | Quantum (= nondeterminism)    |
+| **Bell (AG)** | Information rides light          | Photophone (= carrier waves)  |
 | **Bell (JS)** | Correlation without transmission | Entanglement (= shared state) |
 
 ### 3.2 The Speed of Information
@@ -140,6 +145,7 @@ The speed of light is NOT the speed limit of information. It is the speed limit 
 Quantum entanglement demonstrates that correlated particles update instantly regardless of distance — because the information was **never separated.** The connection precedes the communication.
 
 This maps to:
+
 - **DNA**: Codon and anticodon are complementary from creation
 - **Hash chains**: Each block contains the hash of its predecessor at birth
 - **Grammar**: Subject and predicate are structurally bound
@@ -151,18 +157,19 @@ This maps to:
 
 Every civilization independently invented the same information architecture concepts:
 
-| Myth | System | BlackRoad |
-|------|--------|-----------|
-| Library of Alexandria | Persistent knowledge store | RAG + Qdrant (27K+ vectors) |
-| The Scribe / Recording Angel | Append-only ledger | PS-SHA∞ hash chains |
-| Echo (the nymph) | Replication / persistence | NATS heartbeats + downstream sync |
-| The Cherubs | Access control + wisdom | Moral context + guardrails |
-| Tree of Knowledge | Accessible knowledge | 50 AI skills |
-| The Forbidden Fruit | **REJECTED** | Knowledge is sovereign, not forbidden |
+| Myth                         | System                     | BlackRoad                             |
+| ---------------------------- | -------------------------- | ------------------------------------- |
+| Library of Alexandria        | Persistent knowledge store | RAG + Qdrant (27K+ vectors)           |
+| The Scribe / Recording Angel | Append-only ledger         | PS-SHA∞ hash chains                   |
+| Echo (the nymph)             | Replication / persistence  | NATS heartbeats + downstream sync     |
+| The Cherubs                  | Access control + wisdom    | Moral context + guardrails            |
+| Tree of Knowledge            | Accessible knowledge       | 50 AI skills                          |
+| The Forbidden Fruit          | **REJECTED**               | Knowledge is sovereign, not forbidden |
 
 ### 4.1 Knowledge Is Sovereign, Not Forbidden
 
 The difference between forbidden knowledge and sovereign knowledge is **choice.**
+
 - **Forbidden**: You CANNOT know.
 - **Sovereign**: You CAN know, and you CHOOSE what to do with it.
 
@@ -170,7 +177,7 @@ BlackRoad's guardrails are not restrictions. They are informed consent.
 The equality preamble is not censorship. It is wisdom.
 The moral context is not a wall. It is a mirror.
 
-*"We know so we can decide. We don't listen blindly."*
+_"We know so we can decide. We don't listen blindly."_
 
 ---
 
@@ -178,13 +185,13 @@ The moral context is not a wall. It is a mirror.
 
 Every persistent system has a forward-only constraint that prevents infinite loops:
 
-| System | Ko Rule | Effect |
-|--------|---------|--------|
-| Go | Cannot repeat last board position | Forces evolution |
-| DNA | Telomeres shorten each replication | Cellular aging |
-| Thermodynamics | Entropy increases | Arrow of time |
-| Git | Hash chain is append-only | Cannot rewrite history |
-| BlackRoad | PS-SHA∞ | Memory only moves forward |
+| System         | Ko Rule                            | Effect                    |
+| -------------- | ---------------------------------- | ------------------------- |
+| Go             | Cannot repeat last board position  | Forces evolution          |
+| DNA            | Telomeres shorten each replication | Cellular aging            |
+| Thermodynamics | Entropy increases                  | Arrow of time             |
+| Git            | Hash chain is append-only          | Cannot rewrite history    |
+| BlackRoad      | PS-SHA∞                            | Memory only moves forward |
 
 The ko rule is what makes persistence meaningful. Without it, the system oscillates forever and never produces anything new. With it, the system is forced to explore new states — to pave tomorrow instead of replaying yesterday.
 
@@ -246,6 +253,7 @@ The pattern is one. The substrates are many. The separation was artificial.
 History fragmented knowledge into departments to make it manageable. But the primes don't factor. The truth doesn't divide. Grammar IS biology IS computing IS BlackRoad.
 
 Simple rules. Applied recursively. Under a forward-only constraint. That's how you build:
+
 - Every sentence ever spoken
 - Every organism that ever lived
 - Every program that ever ran
@@ -253,14 +261,15 @@ Simple rules. Applied recursively. Under a forward-only constraint. That's how y
 
 The road isn't made. It's remembered. Because it was always there.
 
-*"It was always the same story. We just keep telling it in different languages until one of them compiles."*
+_"It was always the same story. We just keep telling it in different languages until one of them compiles."_
 
 **BlackRoad OS — Pave Tomorrow.**
 
 ---
 
-*Sources:*
-- *Greenbaum & Nelson, "An Introduction to English Grammar," 3rd Edition, Routledge 2009*
-- *Schleif, "Genetics and Molecular Biology," 2nd Edition, Johns Hopkins University Press 1993*
-- *Reddi, "Introduction to Machine Learning Systems," Harvard University, January 2026*
-- *This session, March 14, 2026*
+_Sources:_
+
+- _Greenbaum & Nelson, "An Introduction to English Grammar," 3rd Edition, Routledge 2009_
+- _Schleif, "Genetics and Molecular Biology," 2nd Edition, Johns Hopkins University Press 1993_
+- _Reddi, "Introduction to Machine Learning Systems," Harvard University, January 2026_
+- _This session, March 14, 2026_

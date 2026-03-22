@@ -1,221 +1,536 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=1920,height=1080">
-<title>BlackRoad — Manifesto</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Inter:wght@300;400&display=swap" rel="stylesheet">
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-html,body{width:1920px;height:1080px;overflow:hidden;background:#000;color:#fff}
-.scene{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;opacity:0}
-.scene.active{animation:fadeIn .8s ease forwards}
-.scene.exit{animation:fadeOut .6s ease forwards}
-@keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-@keyframes fadeOut{from{opacity:1}to{opacity:0}}
-
-/* Gradient line */
-.grad-line{height:3px;border-radius:2px;background:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);animation:lineGrow 1.2s ease forwards}
-@keyframes lineGrow{from{width:0}to{width:var(--line-w,400px)}}
-
-/* Gradient text */
-.grad-text{background:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-
-/* Typography */
-.display{font-family:'Space Grotesk',sans-serif;font-weight:700;letter-spacing:-0.02em}
-.mono{font-family:'JetBrains Mono',monospace}
-.body-text{font-family:'Inter',sans-serif;font-weight:300}
-
-/* Typing effect */
-.typewriter{overflow:hidden;white-space:nowrap;border-right:2px solid #fff;animation:typing 2s steps(40) forwards,blink .7s step-end infinite}
-@keyframes typing{from{width:0}to{width:100%}}
-@keyframes blink{50%{border-color:transparent}}
-
-/* Particle background */
-canvas#particles{position:fixed;inset:0;z-index:0;opacity:.3}
-.scene{z-index:1}
-
-/* Pulse ring */
-.pulse-ring{width:200px;height:200px;border-radius:50%;border:1px solid rgba(255,255,255,.1);position:absolute;animation:pulseRing 3s ease-out infinite}
-.pulse-ring:nth-child(2){animation-delay:.5s}
-.pulse-ring:nth-child(3){animation-delay:1s}
-@keyframes pulseRing{0%{transform:scale(.5);opacity:.8}100%{transform:scale(3);opacity:0}}
-
-/* Code block */
-.code-block{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:32px 40px;font-family:'JetBrains Mono',monospace;font-size:20px;line-height:1.8;text-align:left}
-.code-block .comment{color:#555}
-.code-block .keyword{color:#fff}
-.code-block .string{color:#fff;opacity:.7}
-
-/* Stats counter */
-.stat-num{font-family:'JetBrains Mono',monospace;font-size:72px;font-weight:700}
-.stat-label{font-family:'JetBrains Mono',monospace;font-size:16px;text-transform:uppercase;letter-spacing:.15em;color:rgba(255,255,255,.4);margin-top:8px}
-
-/* Grid lines */
-.grid-bg{position:absolute;inset:0;background-image:
-  linear-gradient(rgba(255,255,255,.02) 1px,transparent 1px),
-  linear-gradient(90deg,rgba(255,255,255,.02) 1px,transparent 1px);
-  background-size:60px 60px}
-
-/* Logo mark */
-.logo-mark{height:4px;border-radius:2px;background:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF)}
-</style>
-</head>
-<body>
-<canvas id="particles"></canvas>
-<div class="grid-bg"></div>
-
-<!-- SCENE 1: Black screen → gradient line appears → "BLACKROAD" -->
-<div class="scene" id="s1">
-  <div class="logo-mark" style="width:0;animation:lineGrow 1.5s ease .5s forwards;--line-w:300px"></div>
-  <div class="display" style="font-size:64px;margin-top:32px;opacity:0;animation:fadeIn .8s ease 1.2s forwards">BLACKROAD</div>
-  <div class="mono" style="font-size:14px;letter-spacing:.3em;color:rgba(255,255,255,.3);margin-top:16px;opacity:0;animation:fadeIn .8s ease 1.8s forwards">OPERATING SYSTEM</div>
-</div>
-
-<!-- SCENE 2: "Pick up your agent." -->
-<div class="scene" id="s2">
-  <div class="display" style="font-size:56px;opacity:0;animation:fadeIn .8s ease .3s forwards">Pick up your agent.</div>
-  <div class="grad-line" style="margin-top:24px;--line-w:200px;animation-delay:.8s"></div>
-</div>
-
-<!-- SCENE 3: "Ride the BlackRoad together." -->
-<div class="scene" id="s3">
-  <div class="display grad-text" style="font-size:64px;opacity:0;animation:fadeIn .8s ease .3s forwards">Ride the BlackRoad together.</div>
-</div>
-
-<!-- SCENE 4: "Remember the Road. Pave Tomorrow." -->
-<div class="scene" id="s4">
-  <div class="body-text" style="font-size:28px;color:rgba(255,255,255,.5);opacity:0;animation:fadeIn .8s ease .3s forwards">Remember the Road.</div>
-  <div class="display" style="font-size:52px;margin-top:16px;opacity:0;animation:fadeIn .8s ease .8s forwards">Pave Tomorrow.</div>
-</div>
-
-<!-- SCENE 5: "The Prompt Legend of All Time." -->
-<div class="scene" id="s5">
-  <div class="display" style="font-size:48px;opacity:0;animation:fadeIn .8s ease .3s forwards">The Prompt Legend</div>
-  <div class="display grad-text" style="font-size:48px;opacity:0;animation:fadeIn .8s ease .8s forwards">of All Time.</div>
-</div>
-
-<!-- SCENE 6: Stats fly in -->
-<div class="scene" id="s6">
-  <div style="display:flex;gap:120px;text-align:center">
-    <div style="opacity:0;animation:fadeIn .6s ease .3s forwards">
-      <div class="stat-num" id="c1">0</div>
-      <div class="stat-label">Agents</div>
-    </div>
-    <div style="opacity:0;animation:fadeIn .6s ease .6s forwards">
-      <div class="stat-num" id="c2">0</div>
-      <div class="stat-label">Nodes</div>
-    </div>
-    <div style="opacity:0;animation:fadeIn .6s ease .9s forwards">
-      <div class="stat-num" id="c3">0</div>
-      <div class="stat-label">TOPS</div>
-    </div>
-    <div style="opacity:0;animation:fadeIn .6s ease 1.2s forwards">
-      <div class="stat-num" id="c4">0</div>
-      <div class="stat-label">Domains</div>
-    </div>
-  </div>
-</div>
-
-<!-- SCENE 7: Code snippet -->
-<div class="scene" id="s7">
-  <div class="code-block" style="opacity:0;animation:fadeIn .8s ease .3s forwards">
-    <span class="comment">// sovereign. self-healing. unstoppable.</span><br>
-    <span class="keyword">bb</span>.track(<span class="string">'visitor'</span>, {<br>
-    &nbsp;&nbsp;fingerprint: <span class="string">true</span>,<br>
-    &nbsp;&nbsp;vitals: <span class="string">true</span>,<br>
-    &nbsp;&nbsp;heatmap: <span class="string">true</span>,<br>
-    &nbsp;&nbsp;threats: <span class="string">true</span><br>
-    });<br>
-    <span class="comment">// if it hits us, it's known.</span>
-  </div>
-</div>
-
-<!-- SCENE 8: Pulse rings → "blackroad.io" -->
-<div class="scene" id="s8">
-  <div style="position:relative;display:flex;align-items:center;justify-content:center;width:600px;height:600px">
-    <div class="pulse-ring"></div>
-    <div class="pulse-ring"></div>
-    <div class="pulse-ring"></div>
-    <div style="text-align:center;z-index:2">
-      <div class="display" style="font-size:40px;opacity:0;animation:fadeIn .8s ease .5s forwards">blackroad.io</div>
-      <div class="grad-line" style="margin:16px auto 0;--line-w:200px;animation-delay:1s"></div>
-      <div class="mono" style="font-size:13px;color:rgba(255,255,255,.3);margin-top:12px;letter-spacing:.2em;opacity:0;animation:fadeIn .8s ease 1.5s forwards">RIDE THE BLACKROAD</div>
-    </div>
-  </div>
-</div>
-
-<script>
-// Particle background
-const canvas = document.getElementById('particles');
-const ctx = canvas.getContext('2d');
-canvas.width = 1920; canvas.height = 1080;
-const particles = Array.from({length: 80}, () => ({
-  x: Math.random() * 1920, y: Math.random() * 1080,
-  vx: (Math.random() - .5) * .3, vy: (Math.random() - .5) * .3,
-  r: Math.random() * 1.5 + .5
-}));
-function drawParticles() {
-  ctx.clearRect(0, 0, 1920, 1080);
-  ctx.fillStyle = '#fff';
-  particles.forEach(p => {
-    p.x += p.vx; p.y += p.vy;
-    if (p.x < 0 || p.x > 1920) p.vx *= -1;
-    if (p.y < 0 || p.y > 1080) p.vy *= -1;
-    ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fill();
-  });
-  // Draw connections
-  ctx.strokeStyle = 'rgba(255,255,255,.05)';
-  ctx.lineWidth = .5;
-  for (let i = 0; i < particles.length; i++) {
-    for (let j = i + 1; j < particles.length; j++) {
-      const dx = particles[i].x - particles[j].x;
-      const dy = particles[i].y - particles[j].y;
-      if (dx * dx + dy * dy < 20000) {
-        ctx.beginPath(); ctx.moveTo(particles[i].x, particles[i].y);
-        ctx.lineTo(particles[j].x, particles[j].y); ctx.stroke();
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920,height=1080" />
+    <title>BlackRoad — Manifesto</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Inter:wght@300;400&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
       }
-    }
-  }
-  requestAnimationFrame(drawParticles);
-}
-drawParticles();
+      html,
+      body {
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: #000;
+        color: #fff;
+      }
+      .scene {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        opacity: 0;
+      }
+      .scene.active {
+        animation: fadeIn 0.8s ease forwards;
+      }
+      .scene.exit {
+        animation: fadeOut 0.6s ease forwards;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      @keyframes fadeOut {
+        from {
+          opacity: 1;
+        }
+        to {
+          opacity: 0;
+        }
+      }
 
-// Scene sequencer
-const scenes = document.querySelectorAll('.scene');
-const durations = [4000, 3500, 3500, 4000, 4000, 5000, 5000, 6000];
-let current = 0;
+      /* Gradient line */
+      .grad-line {
+        height: 3px;
+        border-radius: 2px;
+        background: linear-gradient(
+          90deg,
+          #ff6b2b,
+          #ff2255,
+          #cc00aa,
+          #8844ff,
+          #4488ff,
+          #00d4ff
+        );
+        animation: lineGrow 1.2s ease forwards;
+      }
+      @keyframes lineGrow {
+        from {
+          width: 0;
+        }
+        to {
+          width: var(--line-w, 400px);
+        }
+      }
 
-function countUp(el, target, duration) {
-  const start = Date.now();
-  const tick = () => {
-    const progress = Math.min((Date.now() - start) / duration, 1);
-    el.textContent = Math.round(progress * target);
-    if (progress < 1) requestAnimationFrame(tick);
-  };
-  tick();
-}
+      /* Gradient text */
+      .grad-text {
+        background: linear-gradient(
+          90deg,
+          #ff6b2b,
+          #ff2255,
+          #cc00aa,
+          #8844ff,
+          #4488ff,
+          #00d4ff
+        );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
 
-function showScene(i) {
-  if (i >= scenes.length) { current = 0; i = 0; }
-  scenes.forEach((s, idx) => {
-    if (idx === i) { s.classList.remove('exit'); s.classList.add('active'); }
-    else if (s.classList.contains('active')) { s.classList.remove('active'); s.classList.add('exit'); }
-  });
-  // Stats animation for scene 6
-  if (i === 5) {
-    setTimeout(() => {
-      countUp(document.getElementById('c1'), 14, 2000);
-      countUp(document.getElementById('c2'), 7, 2000);
-      countUp(document.getElementById('c3'), 52, 2000);
-      countUp(document.getElementById('c4'), 48, 2000);
-    }, 500);
-  }
-  current = i;
-  setTimeout(() => showScene(i + 1), durations[i]);
-}
+      /* Typography */
+      .display {
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+      }
+      .mono {
+        font-family: 'JetBrains Mono', monospace;
+      }
+      .body-text {
+        font-family: 'Inter', sans-serif;
+        font-weight: 300;
+      }
 
-showScene(0);
-</script>
-</body>
+      /* Typing effect */
+      .typewriter {
+        overflow: hidden;
+        white-space: nowrap;
+        border-right: 2px solid #fff;
+        animation:
+          typing 2s steps(40) forwards,
+          blink 0.7s step-end infinite;
+      }
+      @keyframes typing {
+        from {
+          width: 0;
+        }
+        to {
+          width: 100%;
+        }
+      }
+      @keyframes blink {
+        50% {
+          border-color: transparent;
+        }
+      }
+
+      /* Particle background */
+      canvas#particles {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        opacity: 0.3;
+      }
+      .scene {
+        z-index: 1;
+      }
+
+      /* Pulse ring */
+      .pulse-ring {
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        position: absolute;
+        animation: pulseRing 3s ease-out infinite;
+      }
+      .pulse-ring:nth-child(2) {
+        animation-delay: 0.5s;
+      }
+      .pulse-ring:nth-child(3) {
+        animation-delay: 1s;
+      }
+      @keyframes pulseRing {
+        0% {
+          transform: scale(0.5);
+          opacity: 0.8;
+        }
+        100% {
+          transform: scale(3);
+          opacity: 0;
+        }
+      }
+
+      /* Code block */
+      .code-block {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 8px;
+        padding: 32px 40px;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 20px;
+        line-height: 1.8;
+        text-align: left;
+      }
+      .code-block .comment {
+        color: #555;
+      }
+      .code-block .keyword {
+        color: #fff;
+      }
+      .code-block .string {
+        color: #fff;
+        opacity: 0.7;
+      }
+
+      /* Stats counter */
+      .stat-num {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 72px;
+        font-weight: 700;
+      }
+      .stat-label {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 16px;
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        color: rgba(255, 255, 255, 0.4);
+        margin-top: 8px;
+      }
+
+      /* Grid lines */
+      .grid-bg {
+        position: absolute;
+        inset: 0;
+        background-image:
+          linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+        background-size: 60px 60px;
+      }
+
+      /* Logo mark */
+      .logo-mark {
+        height: 4px;
+        border-radius: 2px;
+        background: linear-gradient(
+          90deg,
+          #ff6b2b,
+          #ff2255,
+          #cc00aa,
+          #8844ff,
+          #4488ff,
+          #00d4ff
+        );
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="particles"></canvas>
+    <div class="grid-bg"></div>
+
+    <!-- SCENE 1: Black screen → gradient line appears → "BLACKROAD" -->
+    <div class="scene" id="s1">
+      <div
+        class="logo-mark"
+        style="
+          width: 0;
+          animation: lineGrow 1.5s ease 0.5s forwards;
+          --line-w: 300px;
+        "
+      ></div>
+      <div
+        class="display"
+        style="
+          font-size: 64px;
+          margin-top: 32px;
+          opacity: 0;
+          animation: fadeIn 0.8s ease 1.2s forwards;
+        "
+      >
+        BLACKROAD
+      </div>
+      <div
+        class="mono"
+        style="
+          font-size: 14px;
+          letter-spacing: 0.3em;
+          color: rgba(255, 255, 255, 0.3);
+          margin-top: 16px;
+          opacity: 0;
+          animation: fadeIn 0.8s ease 1.8s forwards;
+        "
+      >
+        OPERATING SYSTEM
+      </div>
+    </div>
+
+    <!-- SCENE 2: "Pick up your agent." -->
+    <div class="scene" id="s2">
+      <div
+        class="display"
+        style="
+          font-size: 56px;
+          opacity: 0;
+          animation: fadeIn 0.8s ease 0.3s forwards;
+        "
+      >
+        Pick up your agent.
+      </div>
+      <div
+        class="grad-line"
+        style="margin-top: 24px; --line-w: 200px; animation-delay: 0.8s"
+      ></div>
+    </div>
+
+    <!-- SCENE 3: "Ride the BlackRoad together." -->
+    <div class="scene" id="s3">
+      <div
+        class="display grad-text"
+        style="
+          font-size: 64px;
+          opacity: 0;
+          animation: fadeIn 0.8s ease 0.3s forwards;
+        "
+      >
+        Ride the BlackRoad together.
+      </div>
+    </div>
+
+    <!-- SCENE 4: "Remember the Road. Pave Tomorrow." -->
+    <div class="scene" id="s4">
+      <div
+        class="body-text"
+        style="
+          font-size: 28px;
+          color: rgba(255, 255, 255, 0.5);
+          opacity: 0;
+          animation: fadeIn 0.8s ease 0.3s forwards;
+        "
+      >
+        Remember the Road.
+      </div>
+      <div
+        class="display"
+        style="
+          font-size: 52px;
+          margin-top: 16px;
+          opacity: 0;
+          animation: fadeIn 0.8s ease 0.8s forwards;
+        "
+      >
+        Pave Tomorrow.
+      </div>
+    </div>
+
+    <!-- SCENE 5: "The Prompt Legend of All Time." -->
+    <div class="scene" id="s5">
+      <div
+        class="display"
+        style="
+          font-size: 48px;
+          opacity: 0;
+          animation: fadeIn 0.8s ease 0.3s forwards;
+        "
+      >
+        The Prompt Legend
+      </div>
+      <div
+        class="display grad-text"
+        style="
+          font-size: 48px;
+          opacity: 0;
+          animation: fadeIn 0.8s ease 0.8s forwards;
+        "
+      >
+        of All Time.
+      </div>
+    </div>
+
+    <!-- SCENE 6: Stats fly in -->
+    <div class="scene" id="s6">
+      <div style="display: flex; gap: 120px; text-align: center">
+        <div style="opacity: 0; animation: fadeIn 0.6s ease 0.3s forwards">
+          <div class="stat-num" id="c1">0</div>
+          <div class="stat-label">Agents</div>
+        </div>
+        <div style="opacity: 0; animation: fadeIn 0.6s ease 0.6s forwards">
+          <div class="stat-num" id="c2">0</div>
+          <div class="stat-label">Nodes</div>
+        </div>
+        <div style="opacity: 0; animation: fadeIn 0.6s ease 0.9s forwards">
+          <div class="stat-num" id="c3">0</div>
+          <div class="stat-label">TOPS</div>
+        </div>
+        <div style="opacity: 0; animation: fadeIn 0.6s ease 1.2s forwards">
+          <div class="stat-num" id="c4">0</div>
+          <div class="stat-label">Domains</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCENE 7: Code snippet -->
+    <div class="scene" id="s7">
+      <div
+        class="code-block"
+        style="opacity: 0; animation: fadeIn 0.8s ease 0.3s forwards"
+      >
+        <span class="comment">// sovereign. self-healing. unstoppable.</span
+        ><br />
+        <span class="keyword">bb</span>.track(<span class="string"
+          >'visitor'</span
+        >, {<br />
+        &nbsp;&nbsp;fingerprint: <span class="string">true</span>,<br />
+        &nbsp;&nbsp;vitals: <span class="string">true</span>,<br />
+        &nbsp;&nbsp;heatmap: <span class="string">true</span>,<br />
+        &nbsp;&nbsp;threats: <span class="string">true</span><br />
+        });<br />
+        <span class="comment">// if it hits us, it's known.</span>
+      </div>
+    </div>
+
+    <!-- SCENE 8: Pulse rings → "blackroad.io" -->
+    <div class="scene" id="s8">
+      <div
+        style="
+          position: relative;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 600px;
+          height: 600px;
+        "
+      >
+        <div class="pulse-ring"></div>
+        <div class="pulse-ring"></div>
+        <div class="pulse-ring"></div>
+        <div style="text-align: center; z-index: 2">
+          <div
+            class="display"
+            style="
+              font-size: 40px;
+              opacity: 0;
+              animation: fadeIn 0.8s ease 0.5s forwards;
+            "
+          >
+            blackroad.io
+          </div>
+          <div
+            class="grad-line"
+            style="margin: 16px auto 0; --line-w: 200px; animation-delay: 1s"
+          ></div>
+          <div
+            class="mono"
+            style="
+              font-size: 13px;
+              color: rgba(255, 255, 255, 0.3);
+              margin-top: 12px;
+              letter-spacing: 0.2em;
+              opacity: 0;
+              animation: fadeIn 0.8s ease 1.5s forwards;
+            "
+          >
+            RIDE THE BLACKROAD
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Particle background
+      const canvas = document.getElementById('particles')
+      const ctx = canvas.getContext('2d')
+      canvas.width = 1920
+      canvas.height = 1080
+      const particles = Array.from({ length: 80 }, () => ({
+        x: Math.random() * 1920,
+        y: Math.random() * 1080,
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: (Math.random() - 0.5) * 0.3,
+        r: Math.random() * 1.5 + 0.5,
+      }))
+      function drawParticles() {
+        ctx.clearRect(0, 0, 1920, 1080)
+        ctx.fillStyle = '#fff'
+        particles.forEach((p) => {
+          p.x += p.vx
+          p.y += p.vy
+          if (p.x < 0 || p.x > 1920) p.vx *= -1
+          if (p.y < 0 || p.y > 1080) p.vy *= -1
+          ctx.beginPath()
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2)
+          ctx.fill()
+        })
+        // Draw connections
+        ctx.strokeStyle = 'rgba(255,255,255,.05)'
+        ctx.lineWidth = 0.5
+        for (let i = 0; i < particles.length; i++) {
+          for (let j = i + 1; j < particles.length; j++) {
+            const dx = particles[i].x - particles[j].x
+            const dy = particles[i].y - particles[j].y
+            if (dx * dx + dy * dy < 20000) {
+              ctx.beginPath()
+              ctx.moveTo(particles[i].x, particles[i].y)
+              ctx.lineTo(particles[j].x, particles[j].y)
+              ctx.stroke()
+            }
+          }
+        }
+        requestAnimationFrame(drawParticles)
+      }
+      drawParticles()
+
+      // Scene sequencer
+      const scenes = document.querySelectorAll('.scene')
+      const durations = [4000, 3500, 3500, 4000, 4000, 5000, 5000, 6000]
+      let current = 0
+
+      function countUp(el, target, duration) {
+        const start = Date.now()
+        const tick = () => {
+          const progress = Math.min((Date.now() - start) / duration, 1)
+          el.textContent = Math.round(progress * target)
+          if (progress < 1) requestAnimationFrame(tick)
+        }
+        tick()
+      }
+
+      function showScene(i) {
+        if (i >= scenes.length) {
+          current = 0
+          i = 0
+        }
+        scenes.forEach((s, idx) => {
+          if (idx === i) {
+            s.classList.remove('exit')
+            s.classList.add('active')
+          } else if (s.classList.contains('active')) {
+            s.classList.remove('active')
+            s.classList.add('exit')
+          }
+        })
+        // Stats animation for scene 6
+        if (i === 5) {
+          setTimeout(() => {
+            countUp(document.getElementById('c1'), 14, 2000)
+            countUp(document.getElementById('c2'), 7, 2000)
+            countUp(document.getElementById('c3'), 52, 2000)
+            countUp(document.getElementById('c4'), 48, 2000)
+          }, 500)
+        }
+        current = i
+        setTimeout(() => showScene(i + 1), durations[i])
+      }
+
+      showScene(0)
+    </script>
+  </body>
 </html>

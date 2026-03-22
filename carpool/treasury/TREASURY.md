@@ -6,26 +6,30 @@
 ## Backed Up Assets
 
 ### Wallet Files
-| File | Source | Type |
-|------|--------|------|
-| mainnet-alexa_main.wallet.dat | ~/.bitcoin-main/wallets/alexa_main/ | MAINNET |
-| mainnet-watch_only.wallet.dat | ~/.bitcoin-main/wallets/watch_only/ | MAINNET |
-| mywallet.wallet.dat | ~/Library/.../Bitcoin/wallets/mywallet/ | MAINNET |
+
+| File                          | Source                                  | Type    |
+| ----------------------------- | --------------------------------------- | ------- |
+| mainnet-alexa_main.wallet.dat | ~/.bitcoin-main/wallets/alexa_main/     | MAINNET |
+| mainnet-watch_only.wallet.dat | ~/.bitcoin-main/wallets/watch_only/     | MAINNET |
+| mywallet.wallet.dat           | ~/Library/.../Bitcoin/wallets/mywallet/ | MAINNET |
 
 ### Seeds
-| File | Contents |
-|------|----------|
+
+| File                 | Contents                             |
+| -------------------- | ------------------------------------ |
 | addresses_backup.txt | 12-word seed + 22K derived addresses |
 
 ### Configs
-| File | Source |
-|------|--------|
+
+| File                 | Source                      |
+| -------------------- | --------------------------- |
 | regtest-bitcoin.conf | Bitcoin Core regtest config |
-| electrum.conf | Electrum config |
+| electrum.conf        | Electrum config             |
 
 ## ⚠️ SECURITY NOTICE
 
 These files contain SENSITIVE cryptographic material:
+
 - wallet.dat files are encrypted (need passphrase to decrypt)
 - Seed phrase can derive ALL private keys
 - NEVER share or commit to git
@@ -42,5 +46,6 @@ These files contain SENSITIVE cryptographic material:
 ## Wallet Passwords
 
 Record your passwords securely (NOT in this file):
-- mainnet-alexa_main: ____________
-- mywallet: ____________
+
+- mainnet-alexa_main: \***\*\_\_\_\_\*\***
+- mywallet: \***\*\_\_\_\_\*\***

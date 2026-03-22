@@ -37,12 +37,13 @@ jq 'select(.traffic_light=="🔴")' .blackroad/workflow-index.jsonl
 Format: `{owner}/{repo}#{WORKFLOW_ID}`
 
 Example:
+
 ```json
 {
   "id": "WF-20260213-SVC-0005",
   "deps": [
-    "WF-20260212-SYS-0001",                    // Local dependency
-    "BlackRoad-OS/api#SEC-20260213-PUB-0006"  // Cross-repo dependency
+    "WF-20260212-SYS-0001", // Local dependency
+    "BlackRoad-OS/api#SEC-20260213-PUB-0006" // Cross-repo dependency
   ]
 }
 ```

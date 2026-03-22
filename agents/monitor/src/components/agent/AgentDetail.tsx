@@ -2,29 +2,39 @@
 // AgentDetail - Rich agent detail panel
 // ============================================================================
 
-'use client';
+'use client'
 
-import type { AgentConfig, AgentDashboardState } from '@/lib/types';
-import { BEHAVIOR_INFO, formatTokens, formatUptime } from '@/lib/state-mapper';
-import StatusBadge from '@/components/shared/StatusBadge';
-import { drawAgent } from '@/sprites/characters';
+import type { AgentConfig, AgentDashboardState } from '@/lib/types'
+import { BEHAVIOR_INFO, formatTokens, formatUptime } from '@/lib/state-mapper'
+import StatusBadge from '@/components/shared/StatusBadge'
+import { drawAgent } from '@/sprites/characters'
 
 interface AgentDetailProps {
-  agent: AgentConfig;
-  state: AgentDashboardState | undefined;
-  onChatClick: () => void;
+  agent: AgentConfig
+  state: AgentDashboardState | undefined
+  onChatClick: () => void
 }
 
 function LargePixelAvatar({ agent }: { agent: AgentConfig }) {
-  const size = 80;
+  const size = 80
   const canvasRef = (canvas: HTMLCanvasElement | null) => {
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    ctx.clearRect(0, 0, size, size);
-    ctx.imageSmoothingEnabled = false;
-    drawAgent(ctx, size / 2, size / 2 + 12, 'stand', 's', 0, agent.avatar, agent.color, '');
-  };
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+    ctx.clearRect(0, 0, size, size)
+    ctx.imageSmoothingEnabled = false
+    drawAgent(
+      ctx,
+      size / 2,
+      size / 2 + 12,
+      'stand',
+      's',
+      0,
+      agent.avatar,
+      agent.color,
+      '',
+    )
+  }
 
   return (
     <canvas
@@ -38,28 +48,43 @@ function LargePixelAvatar({ agent }: { agent: AgentConfig }) {
         border: `2px solid ${agent.color}40`,
       }}
     />
-  );
+  )
 }
 
-function DetailStat({ label, value, color }: { label: string; value: string; color: string }) {
+function DetailStat({
+  label,
+  value,
+  color,
+}: {
+  label: string
+  value: string
+  color: string
+}) {
   return (
     <div>
-      <span className="text-[10px] font-mono block" style={{ color: 'var(--text-secondary)' }}>
+      <span
+        className="text-[10px] font-mono block"
+        style={{ color: 'var(--text-secondary)' }}
+      >
         {label}
       </span>
       <span className="font-pixel text-sm" style={{ color }}>
         {value}
       </span>
     </div>
-  );
+  )
 }
 
-export default function AgentDetail({ agent, state, onChatClick }: AgentDetailProps) {
-  const behavior = state?.behavior ?? 'idle';
-  const info = BEHAVIOR_INFO[behavior];
+export default function AgentDetail({
+  agent,
+  state,
+  onChatClick,
+}: AgentDetailProps) {
+  const behavior = state?.behavior ?? 'idle'
+  const info = BEHAVIOR_INFO[behavior]
   const branchLabel = agent.isSubagent
     ? `Subagent${agent.parentId ? ` of ${agent.parentId}` : ''}`
-    : `${agent.subagentIds?.length ?? 0} subagents`;
+    : `${agent.subagentIds?.length ?? 0} subagents`
 
   return (
     <div
@@ -74,14 +99,20 @@ export default function AgentDetail({ agent, state, onChatClick }: AgentDetailPr
 
         <div className="flex-1">
           <div className="flex flex-wrap items-center gap-2 mb-2">
-            <h1 className="font-pixel text-xl" style={{ color: 'var(--text-primary)' }}>
+            <h1
+              className="font-pixel text-xl"
+              style={{ color: 'var(--text-primary)' }}
+            >
               {agent.name}
             </h1>
             <span className="text-xl">{agent.emoji}</span>
             {agent.isSubagent && (
               <span
                 className="text-[10px] font-mono px-2 py-1 rounded"
-                style={{ backgroundColor: 'var(--accent-warning)20', color: 'var(--accent-warning)' }}
+                style={{
+                  backgroundColor: 'var(--accent-warning)20',
+                  color: 'var(--accent-warning)',
+                }}
               >
                 SUBAGENT
               </span>
@@ -91,7 +122,10 @@ export default function AgentDetail({ agent, state, onChatClick }: AgentDetailPr
           <StatusBadge behavior={behavior} size="lg" />
 
           {state?.statusSummary && (
-            <p className="mt-3 text-sm leading-6" style={{ color: 'var(--text-primary)' }}>
+            <p
+              className="mt-3 text-sm leading-6"
+              style={{ color: 'var(--text-primary)' }}
+            >
               {state.statusSummary}
             </p>
           )}
@@ -122,14 +156,26 @@ export default function AgentDetail({ agent, state, onChatClick }: AgentDetailPr
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
             <div
               className="rounded-xl p-4"
-              style={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border)' }}
+              style={{
+                backgroundColor: 'var(--bg-secondary)',
+                border: '1px solid var(--border)',
+              }}
             >
-              <div className="text-[10px] font-mono mb-2" style={{ color: 'var(--text-secondary)' }}>
+              <div
+                className="text-[10px] font-mono mb-2"
+                style={{ color: 'var(--text-secondary)' }}
+              >
                 SESSION
               </div>
-              <div className="space-y-1 text-xs" style={{ color: 'var(--text-primary)' }}>
+              <div
+                className="space-y-1 text-xs"
+                style={{ color: 'var(--text-primary)' }}
+              >
                 <div>{agent.sessionKind ?? 'unknown'} session</div>
-                <div>{agent.modelProvider ? `${agent.modelProvider}/` : ''}{agent.model ?? 'unknown'}</div>
+                <div>
+                  {agent.modelProvider ? `${agent.modelProvider}/` : ''}
+                  {agent.model ?? 'unknown'}
+                </div>
                 <div>{agent.channel ?? 'default channel'}</div>
                 <div>{agent.sendPolicy ?? 'unknown'} send policy</div>
               </div>
@@ -137,16 +183,41 @@ export default function AgentDetail({ agent, state, onChatClick }: AgentDetailPr
 
             <div
               className="rounded-xl p-4"
-              style={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border)' }}
+              style={{
+                backgroundColor: 'var(--bg-secondary)',
+                border: '1px solid var(--border)',
+              }}
             >
-              <div className="text-[10px] font-mono mb-2" style={{ color: 'var(--text-secondary)' }}>
+              <div
+                className="text-[10px] font-mono mb-2"
+                style={{ color: 'var(--text-secondary)' }}
+              >
                 LIVE EXECUTION
               </div>
-              <div className="space-y-1 text-xs" style={{ color: 'var(--text-primary)' }}>
-                <div>{state?.toolName ? `Tool: ${state.toolName}${state.toolPhase ? ` (${state.toolPhase})` : ''}` : 'No active tool'}</div>
-                <div>{state?.streamType ? `Stream: ${state.streamType}` : 'No live stream event'}</div>
-                <div>{state?.lastRunId ? `Run: ${state.lastRunId}` : 'Run ID unavailable'}</div>
-                <div>{agent.reasoningLevel ? `Reasoning: ${agent.reasoningLevel}` : 'Reasoning level unavailable'}</div>
+              <div
+                className="space-y-1 text-xs"
+                style={{ color: 'var(--text-primary)' }}
+              >
+                <div>
+                  {state?.toolName
+                    ? `Tool: ${state.toolName}${state.toolPhase ? ` (${state.toolPhase})` : ''}`
+                    : 'No active tool'}
+                </div>
+                <div>
+                  {state?.streamType
+                    ? `Stream: ${state.streamType}`
+                    : 'No live stream event'}
+                </div>
+                <div>
+                  {state?.lastRunId
+                    ? `Run: ${state.lastRunId}`
+                    : 'Run ID unavailable'}
+                </div>
+                <div>
+                  {agent.reasoningLevel
+                    ? `Reasoning: ${agent.reasoningLevel}`
+                    : 'Reasoning level unavailable'}
+                </div>
               </div>
             </div>
           </div>
@@ -154,7 +225,11 @@ export default function AgentDetail({ agent, state, onChatClick }: AgentDetailPr
           {agent.lastMessagePreview && (
             <div
               className="mt-4 rounded-xl p-4 text-xs leading-5"
-              style={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
+              style={{
+                backgroundColor: 'var(--bg-secondary)',
+                border: '1px solid var(--border)',
+                color: 'var(--text-primary)',
+              }}
             >
               {agent.lastMessagePreview}
             </div>
@@ -174,5 +249,5 @@ export default function AgentDetail({ agent, state, onChatClick }: AgentDetailPr
         </button>
       </div>
     </div>
-  );
+  )
 }

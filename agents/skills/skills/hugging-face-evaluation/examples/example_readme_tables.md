@@ -6,7 +6,7 @@ This file shows various formats of evaluation tables that can be extracted from 
 
 ```markdown
 | Benchmark | Score |
-|-----------|-------|
+| --------- | ----- |
 | MMLU      | 85.2  |
 | HumanEval | 72.5  |
 | GSM8K     | 91.3  |
@@ -17,7 +17,7 @@ This file shows various formats of evaluation tables that can be extracted from 
 
 ```markdown
 | Benchmark | Accuracy | F1 Score |
-|-----------|----------|----------|
+| --------- | -------- | -------- |
 | MMLU      | 85.2     | 0.84     |
 | GSM8K     | 91.3     | 0.91     |
 | DROP      | 78.5     | 0.77     |
@@ -27,19 +27,19 @@ This file shows various formats of evaluation tables that can be extracted from 
 
 ```markdown
 | MMLU | HumanEval | GSM8K | HellaSwag |
-|------|-----------|-------|-----------|
+| ---- | --------- | ----- | --------- |
 | 85.2 | 72.5      | 91.3  | 88.9      |
 ```
 
 ## Format 4: Percentage Values
 
 ```markdown
-| Benchmark     | Score    |
-|---------------|----------|
-| MMLU          | 85.2%    |
-| HumanEval     | 72.5%    |
-| GSM8K         | 91.3%    |
-| TruthfulQA    | 68.7%    |
+| Benchmark  | Score |
+| ---------- | ----- |
+| MMLU       | 85.2% |
+| HumanEval  | 72.5% |
+| GSM8K      | 91.3% |
+| TruthfulQA | 68.7% |
 ```
 
 ## Format 5: Mixed Format with Categories
@@ -48,7 +48,7 @@ This file shows various formats of evaluation tables that can be extracted from 
 ### Reasoning
 
 | Benchmark | Score |
-|-----------|-------|
+| --------- | ----- |
 | MMLU      | 85.2  |
 | BBH       | 82.4  |
 | GPQA      | 71.3  |
@@ -56,14 +56,14 @@ This file shows various formats of evaluation tables that can be extracted from 
 ### Coding
 
 | Benchmark | Score |
-|-----------|-------|
+| --------- | ----- |
 | HumanEval | 72.5  |
 | MBPP      | 78.9  |
 
 ### Math
 
 | Benchmark | Score |
-|-----------|-------|
+| --------- | ----- |
 | GSM8K     | 91.3  |
 | MATH      | 65.8  |
 ```
@@ -71,16 +71,17 @@ This file shows various formats of evaluation tables that can be extracted from 
 ## Format 6: With Additional Columns
 
 ```markdown
-| Benchmark | Score | Rank | Notes              |
-|-----------|-------|------|--------------------|
-| MMLU      | 85.2  | #5   | 5-shot             |
-| HumanEval | 72.5  | #8   | pass@1             |
-| GSM8K     | 91.3  | #3   | 8-shot, maj@1      |
+| Benchmark | Score | Rank | Notes         |
+| --------- | ----- | ---- | ------------- |
+| MMLU      | 85.2  | #5   | 5-shot        |
+| HumanEval | 72.5  | #8   | pass@1        |
+| GSM8K     | 91.3  | #3   | 8-shot, maj@1 |
 ```
 
 ## How the Extractor Works
 
 The script will:
+
 1. Find all markdown tables in the README
 2. Identify which tables contain evaluation results
 3. Parse the table structure (rows vs columns)
@@ -107,7 +108,7 @@ To ensure your evaluation tables are properly extracted:
 Our model was evaluated on several standard benchmarks:
 
 | Benchmark     | Score |
-|---------------|-------|
+| ------------- | ----- |
 | MMLU          | 85.2  |
 | HumanEval     | 72.5  |
 | GSM8K         | 91.3  |

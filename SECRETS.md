@@ -28,13 +28,13 @@
 
 BlackRoad OS handles thousands of agents accessing sensitive data:
 
-| Challenge | Solution |
-|-----------|----------|
-| **API Keys** | Encrypted vault with automatic rotation |
-| **Credentials** | Zero-knowledge storage |
-| **Certificates** | Automated PKI management |
-| **Agent Identity** | Cryptographic attestation |
-| **Compliance** | Full audit trail |
+| Challenge          | Solution                                |
+| ------------------ | --------------------------------------- |
+| **API Keys**       | Encrypted vault with automatic rotation |
+| **Credentials**    | Zero-knowledge storage                  |
+| **Certificates**   | Automated PKI management                |
+| **Agent Identity** | Cryptographic attestation               |
+| **Compliance**     | Full audit trail                        |
 
 ### Security Principles
 
@@ -127,17 +127,17 @@ secrets:
     path: api/openai
     type: kv
     data:
-      api_key: "sk-..."
-      org_id: "org-..."
+      api_key: 'sk-...'
+      org_id: 'org-...'
     metadata:
       rotation_days: 90
-      last_rotated: "2024-01-15"
+      last_rotated: '2024-01-15'
 
   anthropic:
     path: api/anthropic
     type: kv
     data:
-      api_key: "sk-ant-..."
+      api_key: 'sk-ant-...'
     metadata:
       rotation_days: 90
 
@@ -145,8 +145,8 @@ secrets:
     path: api/github
     type: kv
     data:
-      token: "ghp_..."
-      app_id: "12345"
+      token: 'ghp_...'
+      app_id: '12345'
       private_key: |
         -----BEGIN RSA PRIVATE KEY-----
         ...
@@ -166,7 +166,7 @@ secrets:
       host: db.blackroad.io
       port: 5432
       database: blackroad
-      username_template: "agent_{{random 8}}"
+      username_template: 'agent_{{random 8}}'
       default_ttl: 1h
       max_ttl: 24h
     roles:
@@ -189,16 +189,16 @@ secrets:
     path: pki/agents
     type: pki
     config:
-      ttl: 8760h  # 1 year
-      max_ttl: 43800h  # 5 years
+      ttl: 8760h # 1 year
+      max_ttl: 43800h # 5 years
       key_type: ec
       key_bits: 256
     roles:
       agent:
         allowed_domains:
-          - "*.agent.blackroad.io"
+          - '*.agent.blackroad.io'
         allow_subdomains: true
-        max_ttl: 720h  # 30 days
+        max_ttl: 720h # 30 days
         key_usage:
           - DigitalSignature
           - KeyEncipherment
@@ -611,32 +611,32 @@ path "blackroad/secrets/data/admin/*" {
 # config/rbac.yaml
 roles:
   agent_basic:
-    description: "Basic agent access"
+    description: 'Basic agent access'
     policies:
       - agent-policy
     allowed_paths:
-      - "secrets/data/agents/{{agent_id}}/*"
-      - "secrets/data/api/readonly/*"
-      - "transit/encrypt/*"
-      - "transit/decrypt/*"
+      - 'secrets/data/agents/{{agent_id}}/*'
+      - 'secrets/data/api/readonly/*'
+      - 'transit/encrypt/*'
+      - 'transit/decrypt/*'
 
   agent_privileged:
-    description: "Privileged agent access"
+    description: 'Privileged agent access'
     inherits: agent_basic
     policies:
       - agent-policy
       - privileged-policy
     allowed_paths:
-      - "secrets/data/agents/*"
-      - "secrets/data/api/*"
-      - "pki/issue/*"
+      - 'secrets/data/agents/*'
+      - 'secrets/data/api/*'
+      - 'pki/issue/*'
 
   admin:
-    description: "Full administrative access"
+    description: 'Full administrative access'
     policies:
       - admin-policy
     allowed_paths:
-      - "*"
+      - '*'
 
 # Agent role assignments
 assignments:
@@ -645,7 +645,7 @@ assignments:
   OCTAVIA: agent_privileged
   PRISM: agent_basic
   ECHO: agent_basic
-  CIPHER: admin  # Security agent needs full access
+  CIPHER: admin # Security agent needs full access
 ```
 
 ### Token-Based Auth
@@ -1089,8 +1089,8 @@ metadata:
 spec:
   provider: vault
   parameters:
-    vaultAddress: "https://vault.blackroad.io"
-    roleName: "agent-role"
+    vaultAddress: 'https://vault.blackroad.io'
+    roleName: 'agent-role'
     objects: |
       - objectName: "openai-api-key"
         secretPath: "blackroad/secrets/data/api/openai"
@@ -1112,7 +1112,7 @@ spec:
         - name: agent
           volumeMounts:
             - name: secrets
-              mountPath: "/secrets"
+              mountPath: '/secrets'
               readOnly: true
           env:
             - name: OPENAI_API_KEY
@@ -1126,7 +1126,7 @@ spec:
             driver: secrets-store.csi.k8s.io
             readOnly: true
             volumeAttributes:
-              secretProviderClass: "blackroad-secrets"
+              secretProviderClass: 'blackroad-secrets'
 ```
 
 ---
@@ -1405,4 +1405,4 @@ VAULT_SKIP_VERIFY=false           # TLS verification
 
 ---
 
-*Ride the Road. Pave Tomorrow.*
+_Ride the Road. Pave Tomorrow._

@@ -2,36 +2,36 @@
 // Keyboard Shortcuts — Core Definitions
 // ============================================================================
 
-import type { AgentConfig } from './types';
+import type { AgentConfig } from './types'
 
 /** Shortcut categories */
-export type ShortcutCategory = 
+export type ShortcutCategory =
   | 'global'
   | 'navigation'
   | 'chat'
   | 'agent'
   | 'vim'
-  | 'settings';
+  | 'settings'
 
 /** A keyboard shortcut definition */
 export interface KeyboardShortcut {
-  id: string;
-  key: string;
-  modifiers: ('ctrl' | 'alt' | 'shift' | 'meta')[];
-  category: ShortcutCategory;
-  description: string;
-  action: string;
+  id: string
+  key: string
+  modifiers: ('ctrl' | 'alt' | 'shift' | 'meta')[]
+  category: ShortcutCategory
+  description: string
+  action: string
   // For key sequences (like 'g' then 'o')
-  sequence?: string[];
+  sequence?: string[]
   // For dynamic shortcuts (like selecting specific agents)
-  dynamic?: boolean;
+  dynamic?: boolean
 }
 
 /** Shortcut key sequence state */
 export interface KeySequenceState {
-  sequence: string[];
-  timeout: NodeJS.Timeout | null;
-  maxDelay: number;
+  sequence: string[]
+  timeout: NodeJS.Timeout | null
+  maxDelay: number
 }
 
 // ---------------------------------------------------------------------------
@@ -304,7 +304,7 @@ export const GLOBAL_SHORTCUTS: KeyboardShortcut[] = [
     description: 'Open shortcut customization',
     action: 'settings-customize',
   },
-];
+]
 
 // ---------------------------------------------------------------------------
 // Shortcut Configuration & Customization
@@ -312,23 +312,23 @@ export const GLOBAL_SHORTCUTS: KeyboardShortcut[] = [
 
 /** User-customized shortcut binding */
 export interface ShortcutBinding {
-  shortcutId: string;
-  key: string;
-  modifiers: ('ctrl' | 'alt' | 'shift' | 'meta')[];
-  enabled: boolean;
+  shortcutId: string
+  key: string
+  modifiers: ('ctrl' | 'alt' | 'shift' | 'meta')[]
+  enabled: boolean
 }
 
 /** Shortcut settings */
 export interface ShortcutSettings {
-  bindings: ShortcutBinding[];
-  vimModeEnabled: boolean;
-  showHints: boolean;
-  customShortcuts: KeyboardShortcut[];
+  bindings: ShortcutBinding[]
+  vimModeEnabled: boolean
+  showHints: boolean
+  customShortcuts: KeyboardShortcut[]
 }
 
 /** Default shortcut settings */
 export const DEFAULT_SHORTCUT_SETTINGS: ShortcutSettings = {
-  bindings: GLOBAL_SHORTCUTS.map(s => ({
+  bindings: GLOBAL_SHORTCUTS.map((s) => ({
     shortcutId: s.id,
     key: s.key,
     modifiers: s.modifiers,
@@ -337,7 +337,7 @@ export const DEFAULT_SHORTCUT_SETTINGS: ShortcutSettings = {
   vimModeEnabled: true,
   showHints: true,
   customShortcuts: [],
-};
+}
 
 // ---------------------------------------------------------------------------
 // Helper Functions
@@ -346,89 +346,92 @@ export const DEFAULT_SHORTCUT_SETTINGS: ShortcutSettings = {
 /** Generate a unique key for a shortcut binding */
 export function getShortcutKey(
   key: string,
-  modifiers: ('ctrl' | 'alt' | 'shift' | 'meta')[]
+  modifiers: ('ctrl' | 'alt' | 'shift' | 'meta')[],
 ): string {
-  const modStr = modifiers.sort().join('+');
-  return modStr ? `${modStr}+${key.toUpperCase()}` : key.toUpperCase();
+  const modStr = modifiers.sort().join('+')
+  return modStr ? `${modStr}+${key.toUpperCase()}` : key.toUpperCase()
 }
 
 /** Parse a keyboard event to get key and modifiers */
 export function parseKeyboardEvent(e: KeyboardEvent): {
-  key: string;
-  modifiers: ('ctrl' | 'alt' | 'shift' | 'meta')[];
+  key: string
+  modifiers: ('ctrl' | 'alt' | 'shift' | 'meta')[]
 } {
-  const modifiers: ('ctrl' | 'alt' | 'shift' | 'meta')[] = [];
-  
-  if (e.ctrlKey) modifiers.push('ctrl');
-  if (e.altKey) modifiers.push('alt');
-  if (e.shiftKey) modifiers.push('shift');
-  if (e.metaKey) modifiers.push('meta');
-  
+  const modifiers: ('ctrl' | 'alt' | 'shift' | 'meta')[] = []
+
+  if (e.ctrlKey) modifiers.push('ctrl')
+  if (e.altKey) modifiers.push('alt')
+  if (e.shiftKey) modifiers.push('shift')
+  if (e.metaKey) modifiers.push('meta')
+
   // Normalize key
-  let key = e.key;
-  if (key === 'ArrowUp') key = 'up';
-  if (key === 'ArrowDown') key = 'down';
-  if (key === 'ArrowLeft') key = 'left';
-  if (key === 'ArrowRight') key = 'right';
-  if (key === ' ') key = 'space';
-  
-  return { key: key.toLowerCase(), modifiers };
+  let key = e.key
+  if (key === 'ArrowUp') key = 'up'
+  if (key === 'ArrowDown') key = 'down'
+  if (key === 'ArrowLeft') key = 'left'
+  if (key === 'ArrowRight') key = 'right'
+  if (key === ' ') key = 'space'
+
+  return { key: key.toLowerCase(), modifiers }
 }
 
 /** Find matching shortcut for a keyboard event */
 export function findMatchingShortcut(
   event: { key: string; modifiers: ('ctrl' | 'alt' | 'shift' | 'meta')[] },
-  shortcuts: KeyboardShortcut[]
+  shortcuts: KeyboardShortcut[],
 ): KeyboardShortcut | null {
-  const key = event.key.toLowerCase();
-  const mods = [...event.modifiers].sort();
-  
+  const key = event.key.toLowerCase()
+  const mods = [...event.modifiers].sort()
+
   for (const shortcut of shortcuts) {
-    if (!true) continue;
-    
-    const shortcutKey = shortcut.key.toLowerCase();
-    const shortcutMods = [...shortcut.modifiers].sort();
-    
-    if (shortcutKey === key && 
-        mods.length === shortcutMods.length &&
-        mods.every((m, i) => m === shortcutMods[i])) {
-      return shortcut;
+    if (!true) continue
+
+    const shortcutKey = shortcut.key.toLowerCase()
+    const shortcutMods = [...shortcut.modifiers].sort()
+
+    if (
+      shortcutKey === key &&
+      mods.length === shortcutMods.length &&
+      mods.every((m, i) => m === shortcutMods[i])
+    ) {
+      return shortcut
     }
   }
-  
-  return null;
+
+  return null
 }
 
 /** Search shortcuts by query */
 export function searchShortcuts(
   query: string,
-  shortcuts: KeyboardShortcut[]
+  shortcuts: KeyboardShortcut[],
 ): KeyboardShortcut[] {
-  const lower = query.toLowerCase();
-  
-  return shortcuts.filter(s => 
-    s.description.toLowerCase().includes(lower) ||
-    s.id.toLowerCase().includes(lower) ||
-    s.category.toLowerCase().includes(lower)
-  );
+  const lower = query.toLowerCase()
+
+  return shortcuts.filter(
+    (s) =>
+      s.description.toLowerCase().includes(lower) ||
+      s.id.toLowerCase().includes(lower) ||
+      s.category.toLowerCase().includes(lower),
+  )
 }
 
 /** Get keyboard shortcut display string */
 export function getShortcutDisplay(
   key: string,
-  modifiers: ('ctrl' | 'alt' | 'shift' | 'meta')[]
+  modifiers: ('ctrl' | 'alt' | 'shift' | 'meta')[],
 ): string {
   const labels: Record<string, string> = {
     ctrl: 'Ctrl',
     alt: 'Alt',
     shift: 'Shift',
     meta: '⌘',
-  };
-  
-  const parts = [...modifiers].map(m => labels[m] || m);
-  parts.push(key.toUpperCase());
-  
-  return parts.join('+');
+  }
+
+  const parts = [...modifiers].map((m) => labels[m] || m)
+  parts.push(key.toUpperCase())
+
+  return parts.join('+')
 }
 
 /** Category icons */
@@ -439,7 +442,7 @@ export const CATEGORY_ICONS: Record<ShortcutCategory, string> = {
   agent: '🤖',
   vim: '⌨️',
   settings: '⚙️',
-};
+}
 
 /** Category labels */
 export const CATEGORY_LABELS: Record<ShortcutCategory, string> = {
@@ -449,4 +452,4 @@ export const CATEGORY_LABELS: Record<ShortcutCategory, string> = {
   agent: 'Agent Actions',
   vim: 'Vim Mode',
   settings: 'Settings',
-};
+}

@@ -25,15 +25,15 @@
 
 ### Network Requirements
 
-| Component | Ports | Protocol | Notes |
-|-----------|-------|----------|-------|
-| API Gateway | 443 | HTTPS | Public |
-| WebSocket | 443 | WSS | Public |
-| Agent Mesh | 7946 | TCP/UDP | Internal |
-| Redis | 6379 | TCP | Internal |
-| PostgreSQL | 5432 | TCP | Internal |
-| Ollama | 11434 | HTTP | Internal |
-| Prometheus | 9090 | HTTP | Internal |
+| Component   | Ports | Protocol | Notes    |
+| ----------- | ----- | -------- | -------- |
+| API Gateway | 443   | HTTPS    | Public   |
+| WebSocket   | 443   | WSS      | Public   |
+| Agent Mesh  | 7946  | TCP/UDP  | Internal |
+| Redis       | 6379  | TCP      | Internal |
+| PostgreSQL  | 5432  | TCP      | Internal |
+| Ollama      | 11434 | HTTP     | Internal |
+| Prometheus  | 9090  | HTTP     | Internal |
 
 ### Network Architecture
 
@@ -219,7 +219,7 @@ mesh:
     retry:
       attempts: 3
       per_try_timeout: 5s
-      retry_on: "5xx,reset,connect-failure"
+      retry_on: '5xx,reset,connect-failure'
 ```
 
 ### Service Discovery
@@ -425,7 +425,7 @@ zones:
       - name: api
         type: A
         proxied: true
-        content: 104.21.x.x  # Cloudflare proxy
+        content: 104.21.x.x # Cloudflare proxy
 
       # WebSocket (needs direct connection)
       - name: ws
@@ -440,15 +440,15 @@ zones:
         content: 192.168.4.38
 
       # Mail
-      - name: "@"
+      - name: '@'
         type: MX
         priority: 10
         content: mail.blackroad.io
 
       # SPF
-      - name: "@"
+      - name: '@'
         type: TXT
-        content: "v=spf1 include:_spf.google.com ~all"
+        content: 'v=spf1 include:_spf.google.com ~all'
 ```
 
 ### Internal DNS
@@ -836,13 +836,13 @@ wg show
 
 ### Common Issues
 
-| Issue | Cause | Solution |
-|-------|-------|----------|
-| Connection timeout | Firewall blocking | Check security groups |
-| DNS not resolving | DNS misconfigured | Verify DNS records |
-| SSL error | Certificate expired | Renew certificate |
-| WebSocket disconnect | Proxy timeout | Increase proxy timeout |
-| High latency | Geographic distance | Use regional endpoints |
+| Issue                | Cause               | Solution               |
+| -------------------- | ------------------- | ---------------------- |
+| Connection timeout   | Firewall blocking   | Check security groups  |
+| DNS not resolving    | DNS misconfigured   | Verify DNS records     |
+| SSL error            | Certificate expired | Renew certificate      |
+| WebSocket disconnect | Proxy timeout       | Increase proxy timeout |
+| High latency         | Geographic distance | Use regional endpoints |
 
 ---
 
@@ -850,16 +850,16 @@ wg show
 
 ### Important Ports
 
-| Port | Service | Protocol |
-|------|---------|----------|
-| 22 | SSH | TCP |
-| 80 | HTTP | TCP |
-| 443 | HTTPS | TCP |
-| 5432 | PostgreSQL | TCP |
-| 6379 | Redis | TCP |
-| 8080 | API | TCP |
-| 11434 | Ollama | TCP |
-| 51820 | WireGuard | UDP |
+| Port  | Service    | Protocol |
+| ----- | ---------- | -------- |
+| 22    | SSH        | TCP      |
+| 80    | HTTP       | TCP      |
+| 443   | HTTPS      | TCP      |
+| 5432  | PostgreSQL | TCP      |
+| 6379  | Redis      | TCP      |
+| 8080  | API        | TCP      |
+| 11434 | Ollama     | TCP      |
+| 51820 | WireGuard  | UDP      |
 
 ### Network Commands
 
@@ -892,4 +892,4 @@ tcpdump -i eth0 port 443
 
 ---
 
-*Ride the Road. Pave Tomorrow.*
+_Ride the Road. Pave Tomorrow._

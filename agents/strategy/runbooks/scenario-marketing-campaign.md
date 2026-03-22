@@ -11,30 +11,33 @@ You're launching a coordinated marketing campaign across multiple channels. Cont
 ## Agent Roster
 
 ### Campaign Core
-| Agent | Role |
-|-------|------|
-| Social Media Strategist | Campaign lead, cross-platform strategy |
-| Content Creator | Content production across all formats |
-| Growth Hacker | Acquisition strategy, funnel optimization |
-| Brand Guardian | Brand consistency across all channels |
-| Analytics Reporter | Performance tracking and optimization |
+
+| Agent                   | Role                                      |
+| ----------------------- | ----------------------------------------- |
+| Social Media Strategist | Campaign lead, cross-platform strategy    |
+| Content Creator         | Content production across all formats     |
+| Growth Hacker           | Acquisition strategy, funnel optimization |
+| Brand Guardian          | Brand consistency across all channels     |
+| Analytics Reporter      | Performance tracking and optimization     |
 
 ### Platform Specialists
-| Agent | Role |
-|-------|------|
-| Twitter Engager | Twitter/X campaign execution |
-| TikTok Strategist | TikTok content and growth |
-| Instagram Curator | Instagram visual content |
-| Reddit Community Builder | Reddit authentic engagement |
-| App Store Optimizer | App store presence (if mobile) |
+
+| Agent                    | Role                           |
+| ------------------------ | ------------------------------ |
+| Twitter Engager          | Twitter/X campaign execution   |
+| TikTok Strategist        | TikTok content and growth      |
+| Instagram Curator        | Instagram visual content       |
+| Reddit Community Builder | Reddit authentic engagement    |
+| App Store Optimizer      | App store presence (if mobile) |
 
 ### Support
-| Agent | Role |
-|-------|------|
-| Trend Researcher | Market timing and trend alignment |
-| Experiment Tracker | A/B testing campaign variations |
-| Executive Summary Generator | Campaign reporting |
-| Legal Compliance Checker | Ad compliance, disclosure requirements |
+
+| Agent                       | Role                                   |
+| --------------------------- | -------------------------------------- |
+| Trend Researcher            | Market timing and trend alignment      |
+| Experiment Tracker          | A/B testing campaign variations        |
+| Executive Summary Generator | Campaign reporting                     |
+| Legal Compliance Checker    | Ad compliance, disclosure requirements |
 
 ## Execution Plan
 
@@ -154,34 +157,34 @@ End of Campaign:
 
 ## Campaign Metrics
 
-| Metric | Target | Owner |
-|--------|--------|-------|
-| Total reach | [Target based on budget] | Social Media Strategist |
-| Engagement rate | > 3% average across platforms | Platform agents |
-| Click-through rate | > 2% on CTAs | Growth Hacker |
-| Conversion rate | > 5% landing page | Growth Hacker |
-| Cost per acquisition | < [Target CAC] | Growth Hacker |
-| Brand sentiment | Net positive | Brand Guardian |
-| Content pieces published | [Target count] | Content Creator |
-| A/B tests completed | ≥ 5 | Experiment Tracker |
+| Metric                   | Target                        | Owner                   |
+| ------------------------ | ----------------------------- | ----------------------- |
+| Total reach              | [Target based on budget]      | Social Media Strategist |
+| Engagement rate          | > 3% average across platforms | Platform agents         |
+| Click-through rate       | > 2% on CTAs                  | Growth Hacker           |
+| Conversion rate          | > 5% landing page             | Growth Hacker           |
+| Cost per acquisition     | < [Target CAC]                | Growth Hacker           |
+| Brand sentiment          | Net positive                  | Brand Guardian          |
+| Content pieces published | [Target count]                | Content Creator         |
+| A/B tests completed      | ≥ 5                           | Experiment Tracker      |
 
 ## Platform-Specific KPIs
 
-| Platform | Primary KPI | Secondary KPI | Agent |
-|----------|------------|---------------|-------|
-| Twitter/X | Impressions + engagement rate | Follower growth | Twitter Engager |
-| TikTok | Views + completion rate | Follower growth | TikTok Strategist |
-| Instagram | Reach + saves | Profile visits | Instagram Curator |
-| Reddit | Upvotes + comment quality | Referral traffic | Reddit Community Builder |
-| Email | Open rate + CTR | Unsubscribe rate | Content Creator |
-| Blog | Organic traffic + time on page | Backlinks | Content Creator |
-| Paid ads | ROAS + CPA | Quality score | Growth Hacker |
+| Platform  | Primary KPI                    | Secondary KPI    | Agent                    |
+| --------- | ------------------------------ | ---------------- | ------------------------ |
+| Twitter/X | Impressions + engagement rate  | Follower growth  | Twitter Engager          |
+| TikTok    | Views + completion rate        | Follower growth  | TikTok Strategist        |
+| Instagram | Reach + saves                  | Profile visits   | Instagram Curator        |
+| Reddit    | Upvotes + comment quality      | Referral traffic | Reddit Community Builder |
+| Email     | Open rate + CTR                | Unsubscribe rate | Content Creator          |
+| Blog      | Organic traffic + time on page | Backlinks        | Content Creator          |
+| Paid ads  | ROAS + CPA                     | Quality score    | Growth Hacker            |
 
 ## Brand Consistency Checkpoints
 
-| Checkpoint | When | Agent |
-|-----------|------|-------|
-| Content review before publishing | Every piece | Brand Guardian |
-| Visual consistency audit | Weekly | Brand Guardian |
-| Voice and tone check | Weekly | Brand Guardian |
-| Compliance review | Before launch + weekly | Legal Compliance Checker |
+| Checkpoint                       | When                   | Agent                    |
+| -------------------------------- | ---------------------- | ------------------------ |
+| Content review before publishing | Every piece            | Brand Guardian           |
+| Visual consistency audit         | Weekly                 | Brand Guardian           |
+| Voice and tone check             | Weekly                 | Brand Guardian           |
+| Compliance review                | Before launch + weekly | Legal Compliance Checker |

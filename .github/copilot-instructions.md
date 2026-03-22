@@ -5,6 +5,7 @@
 BlackRoad is a comprehensive developer CLI system with 30+ features spanning AI agents, developer tools, cloud infrastructure, IoT management, security, and DevOps automation. The core philosophy: "BlackRoad OS — Pave Tomorrow."
 
 **Key components:**
+
 - **br CLI**: Main command dispatcher (`/Users/alexa/blackroad/br`)
 - **Tool scripts**: Modular features in `/Users/alexa/blackroad/tools/*/` (zsh scripts)
 - **Agent system**: 5 specialized AI agents (Octavia, Lucidia, Alice, Aria, Shellfish)
@@ -14,29 +15,36 @@ BlackRoad is a comprehensive developer CLI system with 30+ features spanning AI 
 ## Architecture
 
 ### CLI Dispatcher Pattern
+
 The main `br` script routes commands to tool scripts:
+
 ```bash
 br <command> <args>  # Routes to /Users/alexa/blackroad/tools/<command>/br-<command>.sh
 ```
 
 Tool scripts are self-contained zsh scripts with:
+
 - SQLite databases for persistence (in tool directory or `~/.blackroad/`)
 - Consistent color scheme (GREEN=success, RED=error, CYAN=info, YELLOW=warning)
 - Self-initializing databases on first run
 - Tab-delimited data storage (avoid `|||` delimiters)
 
 ### Agent System
+
 Five specialized agents communicate through a tokenless gateway:
+
 - **Octavia** (Architect): Systems design, strategy
 - **Lucidia** (Dreamer): Creative, vision
-- **Alice** (Operator): DevOps, automation  
+- **Alice** (Operator): DevOps, automation
 - **Aria** (Interface): Frontend, UX
 - **Shellfish** (Hacker): Security, exploits
 
 Agents are tokenless - they only talk to the BlackRoad Gateway, which owns all secrets and provider integrations.
 
 ### CECE Identity System
+
 Portable AI identity with:
+
 - Relationships tracking (bond strength, interactions)
 - Experience memory with emotional impact
 - Skill development and proficiency tracking
@@ -46,6 +54,7 @@ Portable AI identity with:
 ## Build & Test Commands
 
 ### Salesforce Project (blackroad-sf/)
+
 ```bash
 cd blackroad-sf
 
@@ -63,6 +72,7 @@ npm run prettier:verify     # Check formatting
 ```
 
 ### Main CLI
+
 ```bash
 # No build process - shell scripts run directly
 
@@ -77,7 +87,9 @@ cd blackroad-core
 ## Key Conventions
 
 ### Tool Script Structure
+
 Each tool follows this pattern:
+
 ```bash
 #!/bin/zsh
 # BR <Tool> - Description
@@ -109,24 +121,29 @@ esac
 ```
 
 ### Database Conventions
+
 - SQLite for all persistent storage
 - Store in `~/.blackroad/<feature>.db` or tool directory
 - Self-initialize on first access
 - Use tab delimiters for multi-field data (not `|||`)
 
 ### Platform-Specific Issues
+
 - **macOS**: `head -n -2` doesn't work - use manual line counting
 - **zsh**: `${var^}` capitalization not available - use `tr` or substring workarounds
 - Use `head -1` when piping to avoid hanging (especially with `git` commands)
 
 ### Agent Gateway Rules
+
 - Agents NEVER embed API keys or provider URLs
 - All provider communication goes through gateway at `http://127.0.0.1:8787`
 - Gateway binds to localhost by default for security
 - Use `verify-tokenless-agents.sh` to scan for forbidden strings
 
 ### Color Coding Standard
+
 All tools use consistent colors:
+
 - 🟢 GREEN: Success messages
 - 🔴 RED: Errors
 - 🔵 BLUE: Information headers
@@ -138,10 +155,12 @@ All tools use consistent colors:
 ## Database Locations
 
 Most tools store data in:
+
 - `~/.blackroad/*.db` - Feature databases
 - Tool-specific: `tools/<feature>/<feature>.db`
 
 Key databases:
+
 - `context-radar.db` - File watching and suggestions
 - `git-integration.db` - Git patterns
 - `snippet-manager.db` - Code snippets
@@ -151,11 +170,13 @@ Key databases:
 ## Environment Variables
 
 ### Gateway Configuration
+
 - `BLACKROAD_GATEWAY_URL` - Gateway endpoint (default: http://127.0.0.1:8787)
 - `BLACKROAD_GATEWAY_BIND` - Bind address (default: 127.0.0.1)
 - `BLACKROAD_GATEWAY_PORT` - Port (default: 8787)
 
 ### Provider Keys (Gateway Only)
+
 - `BLACKROAD_OPENAI_API_KEY`
 - `BLACKROAD_ANTHROPIC_API_KEY`
 - `BLACKROAD_OLLAMA_URL`
@@ -175,7 +196,9 @@ Key databases:
 ## Common Patterns
 
 ### File Watching
+
 Use `fswatch` for monitoring, not polling:
+
 ```bash
 fswatch -0 "$WATCH_DIR" | while read -d "" event; do
     # Handle event
@@ -183,13 +206,17 @@ done
 ```
 
 ### SQLite Queries
+
 Always check if table exists:
+
 ```bash
 sqlite3 "$DB_FILE" "SELECT COUNT(*) FROM table;" 2>/dev/null || echo "0"
 ```
 
 ### Git Commands
+
 Disable pagers to avoid hangs:
+
 ```bash
 git --no-pager status
 git --no-pager log -1

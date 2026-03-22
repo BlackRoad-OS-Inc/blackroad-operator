@@ -59,17 +59,17 @@ ls *.sh
 
 ## Command Categories
 
-| Category | Commands | Description |
-|----------|----------|-------------|
-| **Agent** | 8 | Manage AI agents |
-| **Task** | 5 | Task management |
-| **Memory** | 4 | Memory operations |
-| **Communication** | 6 | Messaging & alerts |
-| **Infrastructure** | 10 | System management |
-| **Monitoring** | 8 | Health & metrics |
-| **Development** | 7 | Dev tools |
-| **Utility** | 5 | Helpers |
-| **Interactive** | 4 | Games & demos |
+| Category           | Commands | Description        |
+| ------------------ | -------- | ------------------ |
+| **Agent**          | 8        | Manage AI agents   |
+| **Task**           | 5        | Task management    |
+| **Memory**         | 4        | Memory operations  |
+| **Communication**  | 6        | Messaging & alerts |
+| **Infrastructure** | 10       | System management  |
+| **Monitoring**     | 8        | Health & metrics   |
+| **Development**    | 7        | Dev tools          |
+| **Utility**        | 5        | Helpers            |
+| **Interactive**    | 4        | Games & demos      |
 
 ---
 
@@ -95,6 +95,7 @@ ls *.sh
 | `--timeout <sec>` | Wake timeout (default: 30) |
 
 **Output:**
+
 ```
 ☀ WAKING ALICE
 ├── Initializing consciousness...
@@ -125,6 +126,7 @@ ls *.sh
 ```
 
 **Agent Info Output:**
+
 ```
 Agent: ALICE
 ├── Type: worker
@@ -153,6 +155,7 @@ Agent: ALICE
 ```
 
 **Output:**
+
 ```
 BLACKROAD AGENT ROSTER
 ======================
@@ -190,6 +193,7 @@ Total: 6 agents | 5 online | 1 offline
 ```
 
 **Output:**
+
 ```
 AGENT RELATIONSHIPS
 ===================
@@ -223,6 +227,7 @@ ALICE ←→ OCTAVIA
 ```
 
 **Output:**
+
 ```
 COUNCIL CONVENED
 ================
@@ -318,6 +323,7 @@ CONSENSUS: APPROVE (3/3 in favor)
 ```
 
 **Task List Output:**
+
 ```
 TASK QUEUE
 ==========
@@ -394,6 +400,7 @@ Total: 4 tasks | 2 running | 2 pending
 ```
 
 **Output:**
+
 ```
 ⚡ SPARK
 ========
@@ -465,6 +472,7 @@ Assigned to: PRISM
 ```
 
 **Memory Stats Output:**
+
 ```
 MEMORY STATISTICS
 =================
@@ -549,6 +557,7 @@ Next Scheduled: 4h
 ```
 
 **Output:**
+
 ```
 🔒 WHISPER TO ALICE
 ==================
@@ -600,6 +609,7 @@ Shall I post this review to GitHub? [Y/n]
 ```
 
 **Interactive Session:**
+
 ```
 CHAT WITH ALICE
 ===============
@@ -690,6 +700,7 @@ Goodbye! 👋
 ```
 
 **Output:**
+
 ```
 BLACKROAD BOOT SEQUENCE
 =======================
@@ -756,6 +767,7 @@ API: http://localhost:8000
 ```
 
 **Output:**
+
 ```
 BLACKROAD INFRASTRUCTURE MESH
 =============================
@@ -930,6 +942,7 @@ Services:
 ```
 
 **Output:**
+
 ```
 BLACKROAD PULSE
 ===============
@@ -1307,4 +1320,4 @@ python chess_game.py LUCIDIA          # Play LUCIDIA
 
 ---
 
-*Last updated: 2026-02-05*
+_Last updated: 2026-02-05_

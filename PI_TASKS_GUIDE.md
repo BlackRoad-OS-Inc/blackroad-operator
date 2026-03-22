@@ -7,32 +7,42 @@
 ## �� What You Can Do Now
 
 ### **Deploy & Run in One Command**
+
 Deploy your code to a Pi and run tasks automatically:
+
 ```bash
 br pi task deploy pi1 ./my-app /home/pi/apps/my-app build
 ```
 
 ### **Detect Tasks Automatically**
+
 See what tasks are available on any project:
+
 ```bash
 br pi task detect pi1 /home/pi/my-app
 ```
 
 ### **Run Tasks Remotely**
+
 Execute npm scripts, make targets, cargo commands, etc:
+
 ```bash
 br pi task run pi1 /home/pi/my-app test
 br pi task run pi1 /home/pi/my-app start
 ```
 
 ### **Background Execution**
+
 Run long-running tasks as daemons:
+
 ```bash
 br pi task background pi1 /home/pi/server start
 ```
 
 ### **Track Everything**
+
 View history of all tasks run on your Pis:
+
 ```bash
 br pi task logs pi1
 ```
@@ -55,6 +65,7 @@ br pi task deploy pi1 ./my-app /home/pi/apps/my-app build
 ```
 
 **What happens:**
+
 1. 🚀 Code copied to Pi via SCP
 2. 📦 `npm install` runs automatically
 3. ⚡ `npm run build` executes
@@ -67,6 +78,7 @@ br pi task detect pi1 /home/pi/apps/my-app
 ```
 
 **Output:**
+
 ```
 📦 Node.js Project (npm)
 
@@ -103,6 +115,7 @@ Check: br pi exec pi1 'tail -f /tmp/br-task-start.log'
 ## 📋 PROJECT TYPE SUPPORT
 
 ### **Node.js / npm**
+
 ```bash
 # Detects package.json
 # Runs: npm run <task>
@@ -113,6 +126,7 @@ br pi task run pi1 /home/pi/app test
 ```
 
 ### **Python**
+
 ```bash
 # Detects setup.py or pyproject.toml
 # Auto-installs: pip3 install -r requirements.txt
@@ -122,6 +136,7 @@ br pi task run pi1 /home/pi/app test
 ```
 
 ### **Rust / Cargo**
+
 ```bash
 # Detects Cargo.toml
 # Runs: cargo <task>
@@ -132,6 +147,7 @@ br pi task run pi1 /home/pi/app test
 ```
 
 ### **Go**
+
 ```bash
 # Detects go.mod
 # Runs: go <task>
@@ -141,6 +157,7 @@ br pi task run pi1 /home/pi/app test
 ```
 
 ### **Makefile**
+
 ```bash
 # Detects Makefile
 # Runs: make <target>
@@ -179,7 +196,7 @@ br pi exec pi1 "tail -f /tmp/br-task-start.log"
 for pi in pi1 pi2 pi3; do
   echo "Deploying to $pi..."
   br pi task deploy $pi ./dist /home/pi/production build
-  
+
   if [ $? -eq 0 ]; then
     # Start the service
     br pi task background $pi /home/pi/production start
@@ -245,6 +262,7 @@ br pi task logs pi1 build
 ```
 
 **Output:**
+
 ```
 📜 Task History on pi1:
 
@@ -258,31 +276,41 @@ br pi task logs pi1 build
 ## 💡 PRO TIPS
 
 ### **1. Use SSH Keys**
+
 Set up passwordless SSH for smooth task execution:
+
 ```bash
 ssh-copy-id pi@raspberrypi.local
 ```
 
 ### **2. Check Before Deploy**
+
 Detect tasks before running:
+
 ```bash
 br pi task detect pi1 /home/pi/app
 ```
 
 ### **3. Background for Servers**
+
 Always use `background` for long-running processes:
+
 ```bash
 br pi task background pi1 /home/pi/server start
 ```
 
 ### **4. Monitor with Logs**
+
 Watch background tasks:
+
 ```bash
 br pi exec pi1 "tail -f /tmp/br-task-start.log"
 ```
 
 ### **5. Deploy Pipeline**
+
 Use `task deploy` for complete pipeline:
+
 ```bash
 # Copies code + installs deps + runs task
 br pi task deploy pi1 ./app /home/pi/app start
@@ -295,6 +323,7 @@ br pi task deploy pi1 ./app /home/pi/app start
 ### **Custom Task Runners**
 
 If your project doesn't match standard patterns, use `exec`:
+
 ```bash
 br pi exec pi1 "cd /home/pi/app && ./custom-build.sh"
 ```
@@ -302,6 +331,7 @@ br pi exec pi1 "cd /home/pi/app && ./custom-build.sh"
 ### **Environment Variables**
 
 Set environment before running tasks:
+
 ```bash
 br pi exec pi1 "cd /home/pi/app && NODE_ENV=production npm start"
 ```
@@ -309,6 +339,7 @@ br pi exec pi1 "cd /home/pi/app && NODE_ENV=production npm start"
 ### **Health Checks**
 
 Monitor your deployed apps:
+
 ```bash
 # Check if service is running
 br pi exec pi1 "curl localhost:3000/health"
@@ -320,6 +351,7 @@ br pi exec pi1 "ps aux | grep my-app"
 ### **Batch Task Execution**
 
 Run tasks on all Pis:
+
 ```bash
 # Update all Pis
 for pi in $(br pi list | grep "●" | awk '{print $2}'); do
@@ -332,7 +364,9 @@ done
 ## 🎯 USE CASES
 
 ### **IoT Sensor Network**
+
 Deploy data collection scripts to multiple Pis:
+
 ```bash
 br pi task deploy sensor1 ./collector /opt/sensors start
 br pi task deploy sensor2 ./collector /opt/sensors start
@@ -340,14 +374,18 @@ br pi task deploy sensor3 ./collector /opt/sensors start
 ```
 
 ### **Home Automation**
+
 Run home automation tasks:
+
 ```bash
 br pi task background home-pi /opt/homeassistant start
 br pi task background music-pi /opt/mopidy start
 ```
 
 ### **Cluster Computing**
+
 Distribute computation across Pis:
+
 ```bash
 br pi task run worker1 /opt/compute process-batch-1
 br pi task run worker2 /opt/compute process-batch-2
@@ -355,7 +393,9 @@ br pi task run worker3 /opt/compute process-batch-3
 ```
 
 ### **Web Hosting**
+
 Deploy and manage web apps:
+
 ```bash
 # Deploy frontend
 br pi task deploy web-pi ./frontend /var/www/app build
@@ -369,18 +409,21 @@ br pi task background api-pi ./backend /opt/api start
 ## 🐛 TROUBLESHOOTING
 
 ### **Task Not Found**
+
 ```bash
 # Check what tasks are available
 br pi task detect pi1 /home/pi/app
 ```
 
 ### **Permission Issues**
+
 ```bash
 # Run with sudo if needed
 br pi exec pi1 "cd /home/pi/app && sudo npm start"
 ```
 
 ### **Background Task Not Running**
+
 ```bash
 # Check process
 br pi exec pi1 "ps aux | grep node"
@@ -390,6 +433,7 @@ br pi exec pi1 "cat /tmp/br-task-start.log"
 ```
 
 ### **Deployment Fails**
+
 ```bash
 # Check path exists
 br pi exec pi1 "ls -la /home/pi/apps"
@@ -403,6 +447,7 @@ br pi exec pi1 "ls -la /home/pi/apps/my-app"
 ## 🎉 SUMMARY
 
 You can now:
+
 - ✅ Deploy code to Pis
 - ✅ Run npm/make/cargo/go tasks remotely
 - ✅ Detect available tasks automatically

@@ -20,6 +20,7 @@ All models can READ and WRITE to each other's squares:
 - ✨ **Gemini** (Orange)
 
 **Features:**
+
 - Full bidirectional connectivity (5/5 connections each)
 - Live data flow visualization
 - Context sharing: 2.3 MB/s
@@ -35,6 +36,7 @@ All models can READ and WRITE to each other's squares:
 **15 Organizations | 66 Repositories**
 
 ### Organizations:
+
 1. blackboxprogramming
 2. BlackRoad-OS
 3. lucidia-collective
@@ -52,6 +54,7 @@ All models can READ and WRITE to each other's squares:
 15. omega-systems
 
 ### Repository Stats:
+
 - **Total:** 66 repos
 - **Public:** 42
 - **Private:** 24
@@ -61,6 +64,7 @@ All models can READ and WRITE to each other's squares:
 ### Cross-Session Access Matrix
 
 Every session has FULL access to:
+
 - ✓✓ Clone any repository
 - ✓✓ Push to any branch
 - ✓✓ Pull latest changes
@@ -69,6 +73,7 @@ Every session has FULL access to:
 - ✓✓ Configure settings
 
 **Sessions with Full Access:**
+
 - Claude Code
 - ChatGPT
 - Grok
@@ -79,6 +84,7 @@ Every session has FULL access to:
 - Web Interface
 
 **Features:**
+
 1. **Browse Repos** - View all 66 repositories across 15 orgs
 2. **Quick Clone** - Clone any repo instantly
 3. **Sync All** - Pull latest from all local repos
@@ -96,35 +102,39 @@ Every session has FULL access to:
 
 ### Universal Access Matrix
 
-| Session        | GitHub | Servers | Cloud | AI | Local |
-|----------------|--------|---------|-------|----|----- |
-| Claude Code    | ✓✓     | ✓✓      | ✓✓    | ✓✓ | ✓✓   |
-| ChatGPT        | ✓✓     | ✓✓      | ✓✓    | ✓✓ | ✓✓   |
-| Grok           | ✓✓     | ✓✓      | ✓✓    | ✓✓ | ✓✓   |
-| Gemini         | ✓✓     | ✓✓      | ✓✓    | ✓✓ | ✓✓   |
-| Hugging Face   | ✓✓     | ✓✓      | ✓✓    | ✓✓ | ✓✓   |
-| Enclave        | ✓✓     | ✓✓      | ✓✓    | ✓✓ | ✓✓   |
+| Session      | GitHub | Servers | Cloud | AI  | Local |
+| ------------ | ------ | ------- | ----- | --- | ----- |
+| Claude Code  | ✓✓     | ✓✓      | ✓✓    | ✓✓  | ✓✓    |
+| ChatGPT      | ✓✓     | ✓✓      | ✓✓    | ✓✓  | ✓✓    |
+| Grok         | ✓✓     | ✓✓      | ✓✓    | ✓✓  | ✓✓    |
+| Gemini       | ✓✓     | ✓✓      | ✓✓    | ✓✓  | ✓✓    |
+| Hugging Face | ✓✓     | ✓✓      | ✓✓    | ✓✓  | ✓✓    |
+| Enclave      | ✓✓     | ✓✓      | ✓✓    | ✓✓  | ✓✓    |
 
 ✓✓ = Full Read/Write Access
 
 ### Accessible Resources
 
 **GitHub:**
+
 - 15 Organizations
 - 66 Repositories (42 public, 24 private)
 - Full clone, push, pull, PR access
 
 **Servers:**
+
 - 4 Raspberry Pis (192.168.4.38/64/99/68)
 - 1 DigitalOcean Droplet (159.65.43.12)
 - SSH, SCP, Remote execution
 
 **Cloud Services:**
+
 - Cloudflare: 16 zones, 8 Pages, 8 KV, 1 D1
 - Railway: 12+ projects
 - Full API access, deploy, configure
 
 **AI Models:**
+
 - All 6 models can read/write to each other
 - Context sharing, pattern sync, intelligence flow
 
@@ -145,23 +155,26 @@ Every session has FULL access to:
 **Main Dashboard with Everything**
 
 ### Applications (1-9):
+
 1. 📊 **Dashboards** - All system dashboards
 2. 📁 **Files** - File manager
 3. 💻 **Terminal** - Terminal app
 4. 📡 **Network** - Network status
-5. ⚙️  **Processes** - Process manager
+5. ⚙️ **Processes** - Process manager
 6. 📈 **Monitor** - System monitor
 7. 📝 **Editor** - Text editor
 8. 📦 **Packages** - Package manager
-9. ⚙️  **Settings** - Settings menu
+9. ⚙️ **Settings** - Settings menu
 
 ### Special Features:
+
 - **[a]** AI Network - View AI model connections
 - **[g]** GitHub Repos - Full repository access
 - **[m]** Multi-Session - Universal access dashboard
 - **[q]** Quit - Exit Beautiful OS
 
 ### Launch:
+
 ```bash
 ./blackroad-os.sh         # Main launcher (option 7)
 ./blackroad-beautiful-os.sh --boot   # With boot sequence

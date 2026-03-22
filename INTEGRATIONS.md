@@ -25,13 +25,13 @@ BlackRoad OS integrates with a wide ecosystem of tools and services. Integration
 
 ### Integration Types
 
-| Type | Description | Examples |
-|------|-------------|----------|
-| **Native** | Built into BlackRoad | Cloudflare, Railway, Vercel |
-| **Plugin** | Installable extensions | Slack, Discord, GitHub |
-| **API** | Direct API connections | Any REST/GraphQL API |
-| **Webhook** | Event-driven | GitHub, Stripe, Twilio |
-| **MCP** | Model Context Protocol | Claude, custom tools |
+| Type        | Description            | Examples                    |
+| ----------- | ---------------------- | --------------------------- |
+| **Native**  | Built into BlackRoad   | Cloudflare, Railway, Vercel |
+| **Plugin**  | Installable extensions | Slack, Discord, GitHub      |
+| **API**     | Direct API connections | Any REST/GraphQL API        |
+| **Webhook** | Event-driven           | GitHub, Stripe, Twilio      |
+| **MCP**     | Model Context Protocol | Claude, custom tools        |
 
 ### Configuration Location
 
@@ -66,7 +66,7 @@ cloudflare:
   workers:
     enabled: true
     routes:
-      - pattern: "api.blackroad.io/*"
+      - pattern: 'api.blackroad.io/*'
         worker: blackroad-api
 
   # KV Storage
@@ -1007,4 +1007,4 @@ Integrations Status
 
 ---
 
-*Last updated: 2026-02-05*
+_Last updated: 2026-02-05_

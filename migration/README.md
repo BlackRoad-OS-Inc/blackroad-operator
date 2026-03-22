@@ -12,17 +12,17 @@ INTERNET → codex-infinity (159.65.43.12) → WireGuard → Pis
 
 ## Phases
 
-| Phase | Directory | What |
-|-------|-----------|------|
-| 0 | phase0-export/ | Export all Cloudflare data |
-| 1 | phase1-postgres-redis/ | PostgreSQL + Redis on Cecilia |
-| 2 | phase2-minio/ | MinIO object storage on Lucidia |
-| 3 | phase3-wireguard-caddy/ | WireGuard mesh + Caddy reverse proxy |
-| 4 | phase4-services/ | Port Workers to Hono/Node.js |
-| 5 | phase5-dns/ | Rolling DNS cutover |
-| 6 | phase6-pihole/ | Pi-hole internal DNS |
-| 7 | phase7-monitoring/ | Health checks + hardening |
-| 8 | phase8-decommission/ | Remove Cloudflare services |
+| Phase | Directory               | What                                 |
+| ----- | ----------------------- | ------------------------------------ |
+| 0     | phase0-export/          | Export all Cloudflare data           |
+| 1     | phase1-postgres-redis/  | PostgreSQL + Redis on Cecilia        |
+| 2     | phase2-minio/           | MinIO object storage on Lucidia      |
+| 3     | phase3-wireguard-caddy/ | WireGuard mesh + Caddy reverse proxy |
+| 4     | phase4-services/        | Port Workers to Hono/Node.js         |
+| 5     | phase5-dns/             | Rolling DNS cutover                  |
+| 6     | phase6-pihole/          | Pi-hole internal DNS                 |
+| 7     | phase7-monitoring/      | Health checks + hardening            |
+| 8     | phase8-decommission/    | Remove Cloudflare services           |
 
 ## Quick Start
 
@@ -63,12 +63,12 @@ cd phase8-decommission && ./decommission.sh
 
 ## Device Roles After Migration
 
-| Device | IP | Role | RAM Budget |
-|--------|-----|------|-----------|
-| Cecilia | 192.168.4.89 | DB + DNS | 4GB |
-| Lucidia | 192.168.4.81 | Object Storage | 1GB |
-| Octavia | 192.168.4.38 | App Server | 3GB |
-| Aria | 192.168.4.82 | AI + Mesh | 4GB |
-| Alice | 192.168.4.49 | Monitoring | 256MB |
-| codex-infinity | 159.65.43.12 | Primary Edge | 2GB |
-| shellfish | 174.138.44.45 | Failover Edge | 512MB |
+| Device         | IP            | Role           | RAM Budget |
+| -------------- | ------------- | -------------- | ---------- |
+| Cecilia        | 192.168.4.89  | DB + DNS       | 4GB        |
+| Lucidia        | 192.168.4.81  | Object Storage | 1GB        |
+| Octavia        | 192.168.4.38  | App Server     | 3GB        |
+| Aria           | 192.168.4.82  | AI + Mesh      | 4GB        |
+| Alice          | 192.168.4.49  | Monitoring     | 256MB      |
+| codex-infinity | 159.65.43.12  | Primary Edge   | 2GB        |
+| shellfish      | 174.138.44.45 | Failover Edge  | 512MB      |

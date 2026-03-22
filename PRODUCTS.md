@@ -7,28 +7,28 @@
 
 ## Product Index
 
-| # | Product | Status | Priority | Category |
-|---|---------|--------|----------|----------|
-| 1 | [BlackRoad Core](#1-blackroad-core) | Active | P0 | Infrastructure |
-| 2 | [BlackRoad OS Web](#2-blackroad-os-web) | Active | P0 | Platform |
-| 3 | [Agent System](#3-agent-system) | Active | P0 | AI |
-| 4 | [Memory System](#4-memory-system) | Active | P0 | AI |
-| 5 | [BR CLI](#5-br-cli) | Active | P0 | Tooling |
-| 6 | [Lucidia Core](#6-lucidia-core) | Active | P1 | AI |
-| 7 | [AI Inference Cluster](#7-ai-inference-cluster) | Active | P1 | Infrastructure |
-| 8 | [CECE Identity](#8-cece-identity) | Active | P1 | Identity |
-| 9 | [Skills SDK](#9-skills-sdk) | Active | P1 | Developer |
-| 10 | [Prism Enterprise](#10-prism-enterprise) | Active | P1 | Enterprise |
-| 11 | [BlackRoad Metaverse](#11-blackroad-metaverse) | Active | P2 | Interactive |
-| 12 | [Pi Fleet](#12-pi-fleet) | Active | P2 | Hardware |
-| 13 | [Cloudflare Workers](#13-cloudflare-workers) | Active | P1 | Infrastructure |
-| 14 | [MCP Bridge](#14-mcp-bridge) | Active | P2 | Integration |
-| 15 | [Task Marketplace](#15-task-marketplace) | Active | P2 | Coordination |
-| 16 | [Trinity System](#16-trinity-system) | Active | P2 | Operations |
-| 17 | [BlackRoad Docs](#17-blackroad-docs) | Active | P1 | Documentation |
-| 18 | [GitHub Pages Sites](#18-github-pages-sites) | Planning | P1 | Web |
-| 19 | [Enterprise Workflows](#19-enterprise-workflows) | Active | P2 | Enterprise |
-| 20 | [Animation System](#20-animation-system) | Active | P1 | Design |
+| #   | Product                                          | Status   | Priority | Category       |
+| --- | ------------------------------------------------ | -------- | -------- | -------------- |
+| 1   | [BlackRoad Core](#1-blackroad-core)              | Active   | P0       | Infrastructure |
+| 2   | [BlackRoad OS Web](#2-blackroad-os-web)          | Active   | P0       | Platform       |
+| 3   | [Agent System](#3-agent-system)                  | Active   | P0       | AI             |
+| 4   | [Memory System](#4-memory-system)                | Active   | P0       | AI             |
+| 5   | [BR CLI](#5-br-cli)                              | Active   | P0       | Tooling        |
+| 6   | [Lucidia Core](#6-lucidia-core)                  | Active   | P1       | AI             |
+| 7   | [AI Inference Cluster](#7-ai-inference-cluster)  | Active   | P1       | Infrastructure |
+| 8   | [CECE Identity](#8-cece-identity)                | Active   | P1       | Identity       |
+| 9   | [Skills SDK](#9-skills-sdk)                      | Active   | P1       | Developer      |
+| 10  | [Prism Enterprise](#10-prism-enterprise)         | Active   | P1       | Enterprise     |
+| 11  | [BlackRoad Metaverse](#11-blackroad-metaverse)   | Active   | P2       | Interactive    |
+| 12  | [Pi Fleet](#12-pi-fleet)                         | Active   | P2       | Hardware       |
+| 13  | [Cloudflare Workers](#13-cloudflare-workers)     | Active   | P1       | Infrastructure |
+| 14  | [MCP Bridge](#14-mcp-bridge)                     | Active   | P2       | Integration    |
+| 15  | [Task Marketplace](#15-task-marketplace)         | Active   | P2       | Coordination   |
+| 16  | [Trinity System](#16-trinity-system)             | Active   | P2       | Operations     |
+| 17  | [BlackRoad Docs](#17-blackroad-docs)             | Active   | P1       | Documentation  |
+| 18  | [GitHub Pages Sites](#18-github-pages-sites)     | Planning | P1       | Web            |
+| 19  | [Enterprise Workflows](#19-enterprise-workflows) | Active   | P2       | Enterprise     |
+| 20  | [Animation System](#20-animation-system)         | Active   | P1       | Design         |
 
 ---
 
@@ -39,14 +39,17 @@
 **Stack:** Node.js, Cloudflare Workers
 
 ### What It Is
+
 Tokenless gateway architecture. The trust boundary between agents and AI providers. Agents never embed API keys — all communication routes through the gateway.
 
 ### Architecture
+
 ```
 [Agent CLIs] → [Gateway :8787] → [Ollama / Claude / OpenAI]
 ```
 
 ### Plan
+
 - [ ] Expand provider support (Gemini, Mistral, Cohere)
 - [ ] Add request caching with Cloudflare KV
 - [ ] Implement rate limiting per-agent
@@ -55,6 +58,7 @@ Tokenless gateway architecture. The trust boundary between agents and AI provide
 - [ ] Implement fallback routing (if provider A fails, try B)
 
 ### GitHub Pages
+
 Deploy branded page showing: architecture diagram, supported providers, gateway stats, setup guide.
 
 ---
@@ -66,9 +70,11 @@ Deploy branded page showing: architecture diagram, supported providers, gateway 
 **Stack:** Next.js 16, React 19, Zustand
 
 ### What It Is
+
 The main web application. Primary interface for managing agents, viewing infrastructure, deploying services, and monitoring the entire ecosystem.
 
 ### Plan
+
 - [ ] Implement agent dashboard with real-time WebSocket status
 - [ ] Build deployment pipeline UI (Railway, Cloudflare, Vercel)
 - [ ] Add memory explorer — browse hash-chain journals
@@ -77,6 +83,7 @@ The main web application. Primary interface for managing agents, viewing infrast
 - [ ] Mobile-responsive design using brand system
 
 ### GitHub Pages
+
 Deploy branded landing page with: product overview, screenshots, feature list, quick start guide.
 
 ---
@@ -88,18 +95,21 @@ Deploy branded landing page with: product overview, screenshots, feature list, q
 **Stack:** Python, FastAPI, Redis
 
 ### What It Is
+
 5 specialized agents (Octavia, Lucidia, Alice, Aria, Shellfish) with 30,000 distributed workers across Raspberry Pi and cloud infrastructure.
 
 ### Agents
-| Agent    | Role       | Strength                          |
-|----------|------------|-----------------------------------|
-| Octavia  | Architect  | Systems design, strategy          |
-| Lucidia  | Dreamer    | Creative direction, vision        |
-| Alice    | Operator   | DevOps, automation, reliability   |
-| Aria     | Interface  | Frontend, UX, interaction         |
-| Shellfish | Hacker   | Security, exploits, red-teaming   |
+
+| Agent     | Role      | Strength                        |
+| --------- | --------- | ------------------------------- |
+| Octavia   | Architect | Systems design, strategy        |
+| Lucidia   | Dreamer   | Creative direction, vision      |
+| Alice     | Operator  | DevOps, automation, reliability |
+| Aria      | Interface | Frontend, UX, interaction       |
+| Shellfish | Hacker    | Security, exploits, red-teaming |
 
 ### Plan
+
 - [ ] Build agent registry API with capabilities matrix
 - [ ] Implement task routing based on agent skills
 - [ ] Add agent health monitoring and auto-restart
@@ -108,6 +118,7 @@ Deploy branded landing page with: product overview, screenshots, feature list, q
 - [ ] Implement agent personality fine-tuning via Modelfiles
 
 ### GitHub Pages
+
 Deploy branded page showing: agent profiles, capabilities matrix, relationship graph, live status.
 
 ---
@@ -119,9 +130,11 @@ Deploy branded page showing: agent profiles, capabilities matrix, relationship g
 **Stack:** Shell, JSONL, PS-SHA∞
 
 ### What It Is
+
 Persistent context across AI sessions using PS-SHA∞ hash-chain journals. Tamper-proof, append-only memory that survives across sessions, models, and providers.
 
 ### Components
+
 - Session state files
 - Hash-chained action journals
 - Memory ledger for verification
@@ -129,6 +142,7 @@ Persistent context across AI sessions using PS-SHA∞ hash-chain journals. Tampe
 - Task marketplace integration
 
 ### Plan
+
 - [ ] Build memory search API (full-text + semantic)
 - [ ] Implement memory compression for long-running sessions
 - [ ] Add vector embedding layer for similarity search
@@ -137,6 +151,7 @@ Persistent context across AI sessions using PS-SHA∞ hash-chain journals. Tampe
 - [ ] Implement memory pruning policies
 
 ### GitHub Pages
+
 Deploy branded page showing: how memory works, hash-chain diagram, API reference, examples.
 
 ---
@@ -148,9 +163,11 @@ Deploy branded page showing: how memory works, hash-chain diagram, API reference
 **Stack:** zsh, SQLite
 
 ### What It Is
+
 57 shell scripts + 37 tool scripts. Complete command-line control over agents, deployments, monitoring, memory, and operations.
 
 ### Script Categories
+
 - Launchers (5): hub, intro, boot, menu, demo
 - Monitoring (11): god, mission, dash, monitor, status, health, spark, logs, events, timeline, report
 - Agents (8): agent, roster, inspect, soul, office, bonds, skills, wake
@@ -159,6 +176,7 @@ Deploy branded page showing: how memory works, hash-chain diagram, API reference
 - Extras (4): clock, pulse, matrix, saver
 
 ### Plan
+
 - [ ] Add `br install` — one-command setup for new machines
 - [ ] Build `br update` — self-update mechanism
 - [ ] Create `br doctor` — system diagnostics
@@ -167,6 +185,7 @@ Deploy branded page showing: how memory works, hash-chain diagram, API reference
 - [ ] Create plugin system for community tools
 
 ### GitHub Pages
+
 Deploy branded page showing: command reference, installation guide, screenshots of TUI.
 
 ---
@@ -178,12 +197,15 @@ Deploy branded page showing: command reference, installation guide, screenshots 
 **Stack:** Python, FastAPI, SymPy
 
 ### What It Is
+
 Python AI reasoning engines with trinary logic (1=True, 0=Unknown, -1=False). 10 specialized scientific agents.
 
 ### Agents
+
 Physicist, Mathematician, Chemist, Geologist, Analyst, Architect, Engineer, Painter, Poet, Speaker
 
 ### Plan
+
 - [ ] Add more reasoning domains (biologist, economist, linguist)
 - [ ] Implement chain-of-thought logging
 - [ ] Build multi-agent collaborative reasoning
@@ -192,6 +214,7 @@ Physicist, Mathematician, Chemist, Geologist, Analyst, Architect, Engineer, Pain
 - [ ] Build REST API with OpenAPI documentation
 
 ### GitHub Pages
+
 Deploy branded page showing: reasoning demo, agent list, trinary logic explainer, API docs.
 
 ---
@@ -203,18 +226,21 @@ Deploy branded page showing: reasoning demo, agent list, trinary logic explainer
 **Stack:** Python, PyTorch, CUDA, Docker, vLLM, Ollama
 
 ### What It Is
+
 Multi-model inference serving across Railway GPU instances and local Raspberry Pi hardware.
 
 ### Models
-| Model | Use Case | Size |
-|-------|----------|------|
-| Qwen 2.5:7b | General purpose | 4.7GB |
-| DeepSeek-R1:7b | Reasoning, code | 4.7GB |
-| Llama 3.2:3b | Lightweight | 2.0GB |
-| Mistral:7b | Balanced | 4.1GB |
-| Qwen 72B (R2) | Heavy inference | ~40GB Q4 |
+
+| Model          | Use Case        | Size     |
+| -------------- | --------------- | -------- |
+| Qwen 2.5:7b    | General purpose | 4.7GB    |
+| DeepSeek-R1:7b | Reasoning, code | 4.7GB    |
+| Llama 3.2:3b   | Lightweight     | 2.0GB    |
+| Mistral:7b     | Balanced        | 4.1GB    |
+| Qwen 72B (R2)  | Heavy inference | ~40GB Q4 |
 
 ### Plan
+
 - [ ] Build model registry with version tracking
 - [ ] Implement A/B testing for model comparison
 - [ ] Add automatic model quantization pipeline
@@ -223,6 +249,7 @@ Multi-model inference serving across Railway GPU instances and local Raspberry P
 - [ ] Implement model caching on Cloudflare R2
 
 ### GitHub Pages
+
 Deploy branded page showing: model catalog, performance benchmarks, deployment guide.
 
 ---
@@ -234,9 +261,11 @@ Deploy branded page showing: model catalog, performance benchmarks, deployment g
 **Stack:** SQLite, Shell, JSON
 
 ### What It Is
+
 Portable AI identity system. "I am CECE, regardless of where I run." Identity persists across sessions, models, and providers with relationship tracking.
 
 ### Plan
+
 - [ ] Build CECE web portal for identity management
 - [ ] Implement cross-provider identity sync
 - [ ] Add relationship strength analytics
@@ -245,6 +274,7 @@ Portable AI identity system. "I am CECE, regardless of where I run." Identity pe
 - [ ] Implement identity verification protocol
 
 ### GitHub Pages
+
 Deploy branded page showing: CECE manifesto, identity architecture, relationship graph.
 
 ---
@@ -256,15 +286,18 @@ Deploy branded page showing: CECE manifesto, identity architecture, relationship
 **Stack:** TypeScript, npm
 
 ### What It Is
+
 SDK for building agent capabilities. Memory, reasoning, coordination, and registry APIs in one package.
 
 ### APIs
+
 - `sdk.memory` — remember, observe, infer, search
 - `sdk.reasoning` — evaluate, assertTrue, assertFalse, quarantine
 - `sdk.coordination` — publish, delegate, broadcast
 - `sdk.agents` — list, findByCapabilities
 
 ### Plan
+
 - [ ] Publish to npm registry
 - [ ] Build starter template project
 - [ ] Create comprehensive documentation site
@@ -273,6 +306,7 @@ SDK for building agent capabilities. Memory, reasoning, coordination, and regist
 - [ ] Create skill marketplace
 
 ### GitHub Pages
+
 Deploy branded page showing: quickstart, API reference, examples, npm badge.
 
 ---
@@ -284,9 +318,11 @@ Deploy branded page showing: quickstart, API reference, examples, npm badge.
 **Stack:** Next.js, React
 
 ### What It Is
+
 Full ERP/CRM system. 16K+ files. Adapters for Salesforce, HubSpot, SAP, and Oracle NetSuite.
 
 ### Plan
+
 - [ ] Build customer dashboard with multi-CRM view
 - [ ] Implement data synchronization pipelines
 - [ ] Add reporting and analytics engine
@@ -295,6 +331,7 @@ Full ERP/CRM system. 16K+ files. Adapters for Salesforce, HubSpot, SAP, and Orac
 - [ ] Implement role-based access control
 
 ### GitHub Pages
+
 Deploy branded page showing: feature overview, supported integrations, screenshots.
 
 ---
@@ -306,12 +343,15 @@ Deploy branded page showing: feature overview, supported integrations, screensho
 **Stack:** Three.js, WebGL, Canvas
 
 ### What It Is
+
 3D world visualization. Interactive agent environments with canvas rendering, particle systems, and WebGL graphics.
 
 ### Templates (18 HTML files)
+
 blackroad-3d-world, blackroad-animation, blackroad-earth-biomes, blackroad-earth-game, blackroad-earth-real, blackroad-earth, blackroad-game, blackroad-living-earth, blackroad-living-planet, blackroad-living-world, blackroad-metaverse, blackroad-motion, blackroad-ultimate, blackroad-world-template, blackroad-world-v2, earth-replica, schematiq-animation, schematiq-page
 
 ### Plan
+
 - [ ] Build multiplayer agent visualization
 - [ ] Implement VR mode with WebXR
 - [ ] Add real-time agent activity overlay
@@ -320,6 +360,7 @@ blackroad-3d-world, blackroad-animation, blackroad-earth-biomes, blackroad-earth
 - [ ] Implement procedural world generation
 
 ### GitHub Pages
+
 Deploy branded page with embedded 3D demo, template gallery, setup guide.
 
 ---
@@ -331,16 +372,19 @@ Deploy branded page with embedded 3D demo, template gallery, setup guide.
 **Stack:** Python, Flask, GPIO, Cloudflared
 
 ### What It Is
+
 Raspberry Pi edge infrastructure. 3 nodes running Ollama, Cloudflare Tunnels, agent runtimes, and the memory system.
 
 ### Nodes
-| Hostname | IP | Capacity | Role |
-|----------|-----|----------|------|
-| blackroad-pi | 192.168.4.64 | 22,500 agents | Primary |
-| aria64 | 192.168.4.38 | 7,500 agents | Secondary |
-| alice | 192.168.4.49 | Variable | Tertiary |
+
+| Hostname     | IP           | Capacity      | Role      |
+| ------------ | ------------ | ------------- | --------- |
+| blackroad-pi | 192.168.4.64 | 22,500 agents | Primary   |
+| aria64       | 192.168.4.38 | 7,500 agents  | Secondary |
+| alice        | 192.168.4.49 | Variable      | Tertiary  |
 
 ### Plan
+
 - [ ] Build fleet management dashboard
 - [ ] Implement automatic failover between nodes
 - [ ] Add OTA update mechanism
@@ -349,6 +393,7 @@ Raspberry Pi edge infrastructure. 3 nodes running Ollama, Cloudflare Tunnels, ag
 - [ ] Implement distributed task scheduling
 
 ### GitHub Pages
+
 Deploy branded page showing: fleet diagram, hardware specs, setup guide, monitoring status.
 
 ---
@@ -360,14 +405,17 @@ Deploy branded page showing: fleet diagram, hardware specs, setup guide, monitor
 **Stack:** JavaScript, Cloudflare Workers, KV, D1, R2
 
 ### What It Is
+
 75+ edge workers powering subdomains, API routing, landing pages, and service coordination.
 
 ### Key Workers
+
 - Core: blackroad-os-core, dashboard, metaverse, pitstop, roadworld
 - APIs: tools-api, agents-api, roadgateway, command-center
 - Subdomains: 41 `*-blackroadio` workers
 
 ### Plan
+
 - [ ] Consolidate duplicate worker code into shared library
 - [ ] Build worker deployment pipeline (test → staging → prod)
 - [ ] Add analytics to all worker routes
@@ -376,6 +424,7 @@ Deploy branded page showing: fleet diagram, hardware specs, setup guide, monitor
 - [ ] Create worker template generator
 
 ### GitHub Pages
+
 Deploy branded page showing: worker map, subdomain routes, performance stats.
 
 ---
@@ -387,9 +436,11 @@ Deploy branded page showing: worker map, subdomain routes, performance stats.
 **Stack:** Node.js, Express
 
 ### What It Is
+
 Local MCP server on :8420 for remote AI agent access. Endpoints for system info, command execution, file operations, and memory.
 
 ### Plan
+
 - [ ] Add WebSocket support for real-time updates
 - [ ] Implement request queue for concurrent access
 - [ ] Build access control with role-based permissions
@@ -398,6 +449,7 @@ Local MCP server on :8420 for remote AI agent access. Endpoints for system info,
 - [ ] Implement end-to-end encryption
 
 ### GitHub Pages
+
 Deploy branded page showing: API reference, authentication guide, client examples.
 
 ---
@@ -409,9 +461,11 @@ Deploy branded page showing: API reference, authentication guide, client example
 **Stack:** Shell, JSON
 
 ### What It Is
+
 Multi-agent task distribution. Agents post, claim, and complete tasks with priority and skill matching.
 
 ### Plan
+
 - [ ] Build web UI for task management
 - [ ] Implement automatic task assignment based on agent skills
 - [ ] Add task dependency tracking
@@ -420,6 +474,7 @@ Multi-agent task distribution. Agents post, claim, and complete tasks with prior
 - [ ] Implement task templates for common operations
 
 ### GitHub Pages
+
 Deploy branded page showing: how it works, task lifecycle, API reference.
 
 ---
@@ -431,9 +486,11 @@ Deploy branded page showing: how it works, task lifecycle, API reference.
 **Stack:** HTML templates, Shell
 
 ### What It Is
+
 Traffic light project status tracking: greenlight (healthy), yellowlight (attention needed), redlight (blocked/critical).
 
 ### Plan
+
 - [ ] Build Trinity dashboard showing all repo statuses
 - [ ] Implement automatic status detection from CI/CD
 - [ ] Add Slack/Discord notifications for status changes
@@ -442,6 +499,7 @@ Traffic light project status tracking: greenlight (healthy), yellowlight (attent
 - [ ] Implement escalation workflows for redlight
 
 ### GitHub Pages
+
 Deploy branded page showing: status overview, compliance dashboard, template gallery.
 
 ---
@@ -453,9 +511,11 @@ Deploy branded page showing: status overview, compliance dashboard, template gal
 **Stack:** Docusaurus 3, React 18
 
 ### What It Is
+
 Documentation hub. 45 docs, 38,000+ lines. Complete reference for the entire BlackRoad OS ecosystem.
 
 ### Documentation Coverage
+
 - Core docs (10): CLAUDE.md, PLANNING, ARCHITECTURE, ROADMAP, etc.
 - Agent docs (4): AGENTS, CECE, CECE_MANIFESTO, CECE_EVERYWHERE
 - AI/ML docs (2): AI_MODELS, OLLAMA
@@ -465,6 +525,7 @@ Documentation hub. 45 docs, 38,000+ lines. Complete reference for the entire Bla
 - Reference docs (8): COMMANDS, EXAMPLES, GLOSSARY, FAQ, etc.
 
 ### Plan
+
 - [ ] Set up Algolia search integration
 - [ ] Build interactive API explorer
 - [ ] Add versioned documentation
@@ -473,6 +534,7 @@ Documentation hub. 45 docs, 38,000+ lines. Complete reference for the entire Bla
 - [ ] Implement docs-as-code CI/CD pipeline
 
 ### GitHub Pages
+
 Deploy branded Docusaurus site with full documentation.
 
 ---
@@ -483,28 +545,31 @@ Deploy branded Docusaurus site with full documentation.
 **Status:** Planning
 
 ### What It Is
+
 16+ GitHub Pages sites that need the unified BlackRoad design template applied.
 
 ### Sites to Brand
-| Site | Repo | Current Status |
-|------|------|----------------|
-| blackboxprogramming.github.io | blackboxprogramming.github.io | Needs design |
-| blackroad-os.github.io | blackroad-os.github.io | Needs design |
-| Pi Ecosystem | pi-ecosystem-domination | Needs design |
-| Pi Launch Dashboard | pi-launch-dashboard | Needs design |
-| Pi Viral Hub | pi-viral-hub | Needs design |
-| Pi Viral Megapack | pi-viral-megapack | Needs design |
-| Prism Console | blackroad-prism-console | Needs design |
-| BlackRoad Demo | blackroad-os-demo | Needs design |
-| Pi Cost Calculator | pi-cost-calculator | Needs design |
-| Pi AI Registry | pi-ai-registry | Needs design |
-| Pi AI Hub | pi-ai-hub | Needs design |
-| Pi Mission Control | pi-mission-control | Needs design |
-| Dashboard | dashboard | Needs design |
-| Lucidia Chat | lucidia-chat | Needs design |
-| Portal | portal | Needs design |
+
+| Site                          | Repo                          | Current Status |
+| ----------------------------- | ----------------------------- | -------------- |
+| blackboxprogramming.github.io | blackboxprogramming.github.io | Needs design   |
+| blackroad-os.github.io        | blackroad-os.github.io        | Needs design   |
+| Pi Ecosystem                  | pi-ecosystem-domination       | Needs design   |
+| Pi Launch Dashboard           | pi-launch-dashboard           | Needs design   |
+| Pi Viral Hub                  | pi-viral-hub                  | Needs design   |
+| Pi Viral Megapack             | pi-viral-megapack             | Needs design   |
+| Prism Console                 | blackroad-prism-console       | Needs design   |
+| BlackRoad Demo                | blackroad-os-demo             | Needs design   |
+| Pi Cost Calculator            | pi-cost-calculator            | Needs design   |
+| Pi AI Registry                | pi-ai-registry                | Needs design   |
+| Pi AI Hub                     | pi-ai-hub                     | Needs design   |
+| Pi Mission Control            | pi-mission-control            | Needs design   |
+| Dashboard                     | dashboard                     | Needs design   |
+| Lucidia Chat                  | lucidia-chat                  | Needs design   |
+| Portal                        | portal                        | Needs design   |
 
 ### Plan
+
 - [ ] Apply `github-pages-template/index.html` to all 16+ sites
 - [ ] Customize each page with repo-specific content
 - [ ] Set up custom domains where available
@@ -513,6 +578,7 @@ Deploy branded Docusaurus site with full documentation.
 - [ ] Build site generator script for new repos
 
 ### Template Location
+
 `github-pages-template/index.html` — Drop-in branded template ready for customization.
 
 ---
@@ -524,19 +590,22 @@ Deploy branded Docusaurus site with full documentation.
 **Stack:** Various (n8n, Airbyte, Temporal, etc.)
 
 ### What It Is
+
 Enterprise workflow automation forks: n8n, Airbyte, Activepieces, Huginn, Prefect, Temporal.
 
 ### Forks
-| Fork | Original | Purpose |
-|------|----------|---------|
-| blackbox-n8n | n8n | Visual workflow builder |
-| blackbox-airbyte | Airbyte | ELT data pipelines |
-| blackbox-activepieces | Activepieces | No-code automation |
-| blackbox-huginn | Huginn | Agent-based automation |
-| blackbox-prefect | Prefect | Data orchestration |
-| blackbox-temporal | Temporal | Durable execution |
+
+| Fork                  | Original     | Purpose                 |
+| --------------------- | ------------ | ----------------------- |
+| blackbox-n8n          | n8n          | Visual workflow builder |
+| blackbox-airbyte      | Airbyte      | ELT data pipelines      |
+| blackbox-activepieces | Activepieces | No-code automation      |
+| blackbox-huginn       | Huginn       | Agent-based automation  |
+| blackbox-prefect      | Prefect      | Data orchestration      |
+| blackbox-temporal     | Temporal     | Durable execution       |
 
 ### Plan
+
 - [ ] Build unified workflow dashboard
 - [ ] Implement BlackRoad agent triggers for all platforms
 - [ ] Create cross-platform workflow templates
@@ -545,6 +614,7 @@ Enterprise workflow automation forks: n8n, Airbyte, Activepieces, Huginn, Prefec
 - [ ] Implement workflow marketplace
 
 ### GitHub Pages
+
 Deploy branded page showing: supported engines, workflow examples, comparison matrix.
 
 ---
@@ -556,9 +626,11 @@ Deploy branded page showing: supported engines, workflow examples, comparison ma
 **Stack:** HTML, CSS, Canvas, SVG
 
 ### What It Is
+
 Comprehensive animation library. 41 keyframe animations, morphing shapes, loaders, text effects, hover states, and interactive elements.
 
 ### Key Animations
+
 - Floating/Motion: orb-float, orb-pulse, ring-breathe, orbit
 - Shape Morphing: morph-blob, morph-square, morph-star
 - Logo: road-spin, eye-blink, pupil-look, highlight-shimmer
@@ -566,9 +638,11 @@ Comprehensive animation library. 41 keyframe animations, morphing shapes, loader
 - Interactive: typing, easing-demo, bounce-arrow, btn-pulse
 
 ### Templates (18 files)
+
 blackroad-world-v2.html, blackroad-animation.html, schematiq-animation.html, blackroad-3d-world.html, blackroad-earth-game.html, blackroad-living-world.html, blackroad-metaverse.html, blackroad-motion.html, + 10 more
 
 ### Plan
+
 - [ ] Build animation playground (interactive demo page)
 - [ ] Create CSS-only animation library (no JS required)
 - [ ] Add motion design tokens to design system
@@ -577,6 +651,7 @@ blackroad-world-v2.html, blackroad-animation.html, schematiq-animation.html, bla
 - [ ] Document all 41 keyframes with live previews
 
 ### GitHub Pages
+
 Deploy branded page with live animation demos, code snippets, design tokens.
 
 ---
@@ -586,6 +661,7 @@ Deploy branded page with live animation demos, code snippets, design tokens.
 All products must use these exact brand values:
 
 ### Colors
+
 ```
 --black: #000000
 --white: #FFFFFF
@@ -596,22 +672,26 @@ All products must use these exact brand values:
 ```
 
 ### Gradient
+
 ```
 linear-gradient(135deg, #F5A623 0%, #FF1D6C 38.2%, #9C27B0 61.8%, #2979FF 100%)
 ```
 
 ### Spacing (Golden Ratio)
+
 ```
 8px → 13px → 21px → 34px → 55px → 89px
 ```
 
 ### Typography
+
 ```
 font-family: 'JetBrains Mono', monospace
 line-height: 1.618
 ```
 
 ### Animation
+
 ```
 --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1)
 --ease-out-back: cubic-bezier(0.34, 1.56, 0.64, 1)
@@ -629,6 +709,7 @@ github-pages-template/index.html
 ```
 
 **Features:**
+
 - Animated hero with floating orbs and live eye logo
 - Scroll-reveal animations
 - Product cards grid
@@ -646,4 +727,4 @@ github-pages-template/index.html
 
 ---
 
-*© 2026 BlackRoad OS, Inc. All rights reserved. All products proprietary.*
+_© 2026 BlackRoad OS, Inc. All rights reserved. All products proprietary._

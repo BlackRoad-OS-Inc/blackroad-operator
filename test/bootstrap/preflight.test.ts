@@ -10,20 +10,14 @@ describe('runPreflight', () => {
 
   it('should return true when node version is 22+', async () => {
     // Current test env is Node 22+, gateway will fail but that is a warn, not a failure
-    vi.stubGlobal(
-      'fetch',
-      vi.fn().mockRejectedValue(new Error('ECONNREFUSED')),
-    )
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('ECONNREFUSED')))
     const result = await runPreflight()
     expect(result).toBe(true)
     vi.unstubAllGlobals()
   })
 
   it('should succeed even when gateway is unreachable', async () => {
-    vi.stubGlobal(
-      'fetch',
-      vi.fn().mockRejectedValue(new Error('ECONNREFUSED')),
-    )
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('ECONNREFUSED')))
     const result = await runPreflight()
     expect(result).toBe(true)
     vi.unstubAllGlobals()

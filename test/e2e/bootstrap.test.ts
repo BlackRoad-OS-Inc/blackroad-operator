@@ -56,7 +56,9 @@ describe('templates e2e', () => {
   it('should have valid file contents in api template', () => {
     const api = templates.find((t) => t.name === 'api')!
     expect(api.files['src/index.ts']).toContain('Hono')
-    const pkg = JSON.parse(api.files['package.json']) as { dependencies: Record<string, string> }
+    const pkg = JSON.parse(api.files['package.json']) as {
+      dependencies: Record<string, string>
+    }
     expect(pkg.dependencies).toHaveProperty('hono')
   })
 })

@@ -82,12 +82,12 @@ BlackRoad OS uses the **Three Pillars of Observability**: Metrics, Logs, and Tra
 
 ### Metric Types
 
-| Type | Description | Example |
-|------|-------------|---------|
-| **Counter** | Monotonically increasing | `requests_total` |
-| **Gauge** | Can go up or down | `active_agents` |
-| **Histogram** | Distribution of values | `request_duration` |
-| **Summary** | Similar to histogram | `response_size` |
+| Type          | Description              | Example            |
+| ------------- | ------------------------ | ------------------ |
+| **Counter**   | Monotonically increasing | `requests_total`   |
+| **Gauge**     | Can go up or down        | `active_agents`    |
+| **Histogram** | Distribution of values   | `request_duration` |
+| **Summary**   | Similar to histogram     | `response_size`    |
 
 ### Core Metrics
 
@@ -211,14 +211,14 @@ scrape_configs:
 
 ### Key Metrics to Monitor
 
-| Metric | Warning | Critical | Description |
-|--------|---------|----------|-------------|
-| `agents_active` | <10 | <5 | Active agents |
-| `task_queue_length` | >100 | >500 | Pending tasks |
-| `error_rate` | >1% | >5% | Error percentage |
-| `p99_latency` | >1s | >5s | 99th percentile |
-| `memory_usage` | >80% | >95% | Memory utilization |
-| `cpu_usage` | >70% | >90% | CPU utilization |
+| Metric              | Warning | Critical | Description        |
+| ------------------- | ------- | -------- | ------------------ |
+| `agents_active`     | <10     | <5       | Active agents      |
+| `task_queue_length` | >100    | >500     | Pending tasks      |
+| `error_rate`        | >1%     | >5%      | Error percentage   |
+| `p99_latency`       | >1s     | >5s      | 99th percentile    |
+| `memory_usage`      | >80%    | >95%     | Memory utilization |
+| `cpu_usage`         | >70%    | >90%     | CPU utilization    |
 
 ---
 
@@ -226,12 +226,12 @@ scrape_configs:
 
 ### Log Levels
 
-| Level | Use Case |
-|-------|----------|
-| `DEBUG` | Detailed debugging information |
-| `INFO` | General operational information |
-| `WARNING` | Unexpected but handled situations |
-| `ERROR` | Errors that need attention |
+| Level      | Use Case                                   |
+| ---------- | ------------------------------------------ |
+| `DEBUG`    | Detailed debugging information             |
+| `INFO`     | General operational information            |
+| `WARNING`  | Unexpected but handled situations          |
+| `ERROR`    | Errors that need attention                 |
 | `CRITICAL` | System failures requiring immediate action |
 
 ### Structured Logging
@@ -510,8 +510,8 @@ groups:
         labels:
           severity: critical
         annotations:
-          summary: "High error rate detected"
-          description: "Error rate is {{ $value | humanizePercentage }}"
+          summary: 'High error rate detected'
+          description: 'Error rate is {{ $value | humanizePercentage }}'
 
       # Low active agents
       - alert: LowActiveAgents
@@ -520,8 +520,8 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: "Low number of active agents"
-          description: "Only {{ $value }} agents are active"
+          summary: 'Low number of active agents'
+          description: 'Only {{ $value }} agents are active'
 
       # High latency
       - alert: HighLatency
@@ -533,8 +533,8 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: "High API latency"
-          description: "P99 latency is {{ $value }}s"
+          summary: 'High API latency'
+          description: 'P99 latency is {{ $value }}s'
 
       # Memory usage high
       - alert: HighMemoryUsage
@@ -544,8 +544,8 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: "High memory usage"
-          description: "Memory usage is at {{ $value | humanizePercentage }}"
+          summary: 'High memory usage'
+          description: 'Memory usage is at {{ $value | humanizePercentage }}'
 
       # Task queue backing up
       - alert: TaskQueueBacklog
@@ -554,8 +554,8 @@ groups:
         labels:
           severity: critical
         annotations:
-          summary: "Task queue backlog"
-          description: "{{ $value }} tasks in queue"
+          summary: 'Task queue backlog'
+          description: '{{ $value }} tasks in queue'
 ```
 
 ### Alertmanager Configuration
@@ -697,9 +697,9 @@ BlackRoad Dashboards
       ],
       "thresholds": {
         "steps": [
-          {"color": "green", "value": 0},
-          {"color": "yellow", "value": 1},
-          {"color": "red", "value": 5}
+          { "color": "green", "value": 0 },
+          { "color": "yellow", "value": 1 },
+          { "color": "red", "value": 5 }
         ]
       }
     }
@@ -884,13 +884,13 @@ metrics.histogram("response_size", len(response))
 
 ### Performance Baselines
 
-| Operation | P50 | P95 | P99 | Target |
-|-----------|-----|-----|-----|--------|
-| API Request | 50ms | 150ms | 300ms | <500ms |
-| Agent Task | 500ms | 2s | 5s | <10s |
-| Memory Read | 5ms | 20ms | 50ms | <100ms |
-| Memory Write | 10ms | 50ms | 100ms | <200ms |
-| Search | 50ms | 200ms | 500ms | <1s |
+| Operation    | P50   | P95   | P99   | Target |
+| ------------ | ----- | ----- | ----- | ------ |
+| API Request  | 50ms  | 150ms | 300ms | <500ms |
+| Agent Task   | 500ms | 2s    | 5s    | <10s   |
+| Memory Read  | 5ms   | 20ms  | 50ms  | <100ms |
+| Memory Write | 10ms  | 50ms  | 100ms | <200ms |
+| Search       | 50ms  | 200ms | 500ms | <1s    |
 
 ### Profiling
 
@@ -925,7 +925,7 @@ cost_tracking:
   providers:
     cloudflare:
       enabled: true
-      budget: 500  # USD/month
+      budget: 500 # USD/month
 
     railway:
       enabled: true
@@ -940,9 +940,9 @@ cost_tracking:
       budget: 100
 
   alerts:
-    - threshold: 80  # % of budget
+    - threshold: 80 # % of budget
       action: slack
-      channel: "#cost-alerts"
+      channel: '#cost-alerts'
 
     - threshold: 100
       action: pagerduty
@@ -1009,12 +1009,12 @@ for rec in recommendations:
 
 ### Incident Severity Levels
 
-| Level | Response Time | Examples |
-|-------|--------------|----------|
-| **P1** | 15 min | System down, data loss |
-| **P2** | 1 hour | Major feature broken |
-| **P3** | 4 hours | Minor feature broken |
-| **P4** | 24 hours | Cosmetic issues |
+| Level  | Response Time | Examples               |
+| ------ | ------------- | ---------------------- |
+| **P1** | 15 min        | System down, data loss |
+| **P2** | 1 hour        | Major feature broken   |
+| **P3** | 4 hours       | Minor feature broken   |
+| **P4** | 24 hours      | Cosmetic issues        |
 
 ### Runbooks
 
@@ -1022,20 +1022,24 @@ for rec in recommendations:
 # High Error Rate Runbook
 
 ## Symptoms
+
 - Error rate > 5%
 - Alert: HighErrorRate
 
 ## Investigation
+
 1. Check recent deployments: `./status.sh deployments`
 2. View error logs: `./logs.sh --level error --since 1h`
 3. Check external dependencies: `./health.sh`
 
 ## Mitigation
+
 1. If recent deployment: `./rollback.sh`
 2. If dependency issue: Enable fallback
 3. If overload: Scale up
 
 ## Resolution
+
 1. Identify root cause
 2. Deploy fix
 3. Verify metrics return to normal
@@ -1061,9 +1065,9 @@ status_page:
 
   maintenance_windows:
     - component: API
-      start: "2026-02-10T02:00:00Z"
-      end: "2026-02-10T04:00:00Z"
-      description: "Planned maintenance"
+      start: '2026-02-10T02:00:00Z'
+      end: '2026-02-10T04:00:00Z'
+      description: 'Planned maintenance'
 ```
 
 ---
@@ -1115,4 +1119,4 @@ sum(rate(blackroad_agent_tasks_total[5m]))
 
 ---
 
-*Last updated: 2026-02-05*
+_Last updated: 2026-02-05_

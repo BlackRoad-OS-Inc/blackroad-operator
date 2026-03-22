@@ -1,8 +1,8 @@
 /**
  * Remote Agent SDK
- * 
+ *
  * Use this to register and connect remote agents to the dashboard
- * 
+ *
  * Usage:
  * const sdk = new RemoteAgentSDK('http://your-dashboard:3000');
  * await sdk.register({ agentName: 'MyAgent', computerName: 'MyPC' });
@@ -10,34 +10,34 @@
  */
 
 export interface AgentConfig {
-  agentName: string;
-  agentEmoji?: string;
-  agentColor?: string;
-  computerName: string;
+  agentName: string
+  agentEmoji?: string
+  agentColor?: string
+  computerName: string
 }
 
 export interface RegistrationResult {
-  ok: boolean;
-  agentId: string;
-  authToken: string;
-  message: string;
+  ok: boolean
+  agentId: string
+  authToken: string
+  message: string
 }
 
 export interface AgentStatus {
-  id: string;
-  agentName: string;
-  status: 'active' | 'inactive' | 'offline';
-  lastSeen: number;
+  id: string
+  agentName: string
+  status: 'active' | 'inactive' | 'offline'
+  lastSeen: number
 }
 
 export class RemoteAgentSDK {
-  private baseUrl: string;
-  private agentId: string | null = null;
-  private authToken: string | null = null;
-  private heartbeatInterval: NodeJS.Timeout | null = null;
+  private baseUrl: string
+  private agentId: string | null = null
+  private authToken: string | null = null
+  private heartbeatInterval: NodeJS.Timeout | null = null
 
   constructor(baseUrl: string) {
-    this.baseUrl = baseUrl.replace(/\/$/, ''); // Remove trailing slash
+    this.baseUrl = baseUrl.replace(/\/$/, '') // Remove trailing slash
   }
 
   /**
@@ -49,24 +49,26 @@ export class RemoteAgentSDK {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(config),
-      });
+      })
 
-      const data = await response.json();
-      
+      const data = await response.json()
+
       if (data.ok) {
-        this.agentId = data.agentId;
-        this.authToken = data.authToken;
-        
+        this.agentId = data.agentId
+        this.authToken = data.authToken
+
         // Auto-start heartbeat
-        this.startHeartbeat();
-        
-        console.log(`[RemoteAgent] Registered as ${config.agentName} (${data.agentId})`);
+        this.startHeartbeat()
+
+        console.log(
+          `[RemoteAgent] Registered as ${config.agentName} (${data.agentId})`,
+        )
       }
-      
-      return data;
+
+      return data
     } catch (error) {
-      console.error('[RemoteAgent] Registration failed:', error);
-      throw error;
+      console.error('[RemoteAgent] Registration failed:', error)
+      throw error
     }
   }
 
@@ -75,7 +77,7 @@ export class RemoteAgentSDK {
    */
   async sendHeartbeat(): Promise<void> {
     if (!this.agentId || !this.authToken) {
-      throw new Error('Agent not registered');
+      throw new Error('Agent not registered')
     }
 
     try {
@@ -86,15 +88,15 @@ export class RemoteAgentSDK {
           agentId: this.agentId,
           authToken: this.authToken,
         }),
-      });
+      })
 
-      const data = await response.json();
-      
+      const data = await response.json()
+
       if (!data.ok) {
-        console.warn('[RemoteAgent] Heartbeat failed:', data.error);
+        console.warn('[RemoteAgent] Heartbeat failed:', data.error)
       }
     } catch (error) {
-      console.error('[RemoteAgent] Heartbeat error:', error);
+      console.error('[RemoteAgent] Heartbeat error:', error)
     }
   }
 
@@ -103,14 +105,14 @@ export class RemoteAgentSDK {
    */
   startHeartbeat(intervalMs: number = 30000): void {
     if (this.heartbeatInterval) {
-      clearInterval(this.heartbeatInterval);
+      clearInterval(this.heartbeatInterval)
     }
 
     this.heartbeatInterval = setInterval(() => {
-      this.sendHeartbeat();
-    }, intervalMs);
+      this.sendHeartbeat()
+    }, intervalMs)
 
-    console.log(`[RemoteAgent] Heartbeat started (${intervalMs}ms interval)`);
+    console.log(`[RemoteAgent] Heartbeat started (${intervalMs}ms interval)`)
   }
 
   /**
@@ -118,9 +120,9 @@ export class RemoteAgentSDK {
    */
   stopHeartbeat(): void {
     if (this.heartbeatInterval) {
-      clearInterval(this.heartbeatInterval);
-      this.heartbeatInterval = null;
-      console.log('[RemoteAgent] Heartbeat stopped');
+      clearInterval(this.heartbeatInterval)
+      this.heartbeatInterval = null
+      console.log('[RemoteAgent] Heartbeat stopped')
     }
   }
 
@@ -129,17 +131,17 @@ export class RemoteAgentSDK {
    */
   async getAgents(): Promise<AgentStatus[]> {
     try {
-      const response = await fetch(`${this.baseUrl}/api/agents/register`);
-      const data = await response.json();
-      
+      const response = await fetch(`${this.baseUrl}/api/agents/register`)
+      const data = await response.json()
+
       if (data.ok) {
-        return data.agents;
+        return data.agents
       }
-      
-      return [];
+
+      return []
     } catch (error) {
-      console.error('[RemoteAgent] Failed to fetch agents:', error);
-      return [];
+      console.error('[RemoteAgent] Failed to fetch agents:', error)
+      return []
     }
   }
 
@@ -147,18 +149,18 @@ export class RemoteAgentSDK {
    * Get current agent ID
    */
   getAgentId(): string | null {
-    return this.agentId;
+    return this.agentId
   }
 
   /**
    * Cleanup
    */
   destroy(): void {
-    this.stopHeartbeat();
-    this.agentId = null;
-    this.authToken = null;
+    this.stopHeartbeat()
+    this.agentId = null
+    this.authToken = null
   }
 }
 
 // Export singleton instance
-export const remoteAgent = new RemoteAgentSDK(window.location.origin);
+export const remoteAgent = new RemoteAgentSDK(window.location.origin)

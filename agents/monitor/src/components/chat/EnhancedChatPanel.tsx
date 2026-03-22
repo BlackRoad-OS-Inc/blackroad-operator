@@ -1,17 +1,17 @@
-"use client";
+'use client'
 
-import React, { useState, useEffect, useRef } from 'react';
-import type { ChatMessage } from '@/lib/types';
+import React, { useState, useEffect, useRef } from 'react'
+import type { ChatMessage } from '@/lib/types'
 
 interface EnhancedChatPanelProps {
-  messages: ChatMessage[];
-  connected: boolean;
-  demoMode: boolean;
-  totalAgents: number;
-  onSend: (message: string) => void | Promise<void>;
+  messages: ChatMessage[]
+  connected: boolean
+  demoMode: boolean
+  totalAgents: number
+  onSend: (message: string) => void | Promise<void>
 }
 
-type ChatFilter = 'all' | 'broadcast' | 'direct' | 'system' | 'mentions';
+type ChatFilter = 'all' | 'broadcast' | 'direct' | 'system' | 'mentions'
 
 export default function EnhancedChatPanel({
   messages,
@@ -20,44 +20,59 @@ export default function EnhancedChatPanel({
   totalAgents,
   onSend,
 }: EnhancedChatPanelProps) {
-  const [filter, setFilter] = useState<ChatFilter>('all');
-  const [inputMessage, setInputMessage] = useState('');
-  const [selectedChannel, setSelectedChannel] = useState<string>('general');
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [typingAgents, setTypingAgents] = useState<Set<string>>(new Set());
+  const [filter, setFilter] = useState<ChatFilter>('all')
+  const [inputMessage, setInputMessage] = useState('')
+  const [selectedChannel, setSelectedChannel] = useState<string>('general')
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const [typingAgents, setTypingAgents] = useState<Set<string>>(new Set())
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    scrollToBottom()
+  }, [messages])
 
-  const filteredMessages = messages.filter(msg => {
-    if (filter === 'all') return true;
-    if (filter === 'mentions') return msg.content.includes('@');
-    return msg.scope === filter;
-  });
+  const filteredMessages = messages.filter((msg) => {
+    if (filter === 'all') return true
+    if (filter === 'mentions') return msg.content.includes('@')
+    return msg.scope === filter
+  })
 
   const handleSend = () => {
-    if (!inputMessage.trim() || !connected) return;
-    onSend(inputMessage.trim());
-    setInputMessage('');
-  };
+    if (!inputMessage.trim() || !connected) return
+    onSend(inputMessage.trim())
+    setInputMessage('')
+  }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
+      e.preventDefault()
+      handleSend()
     }
-  };
+  }
 
   const channels = [
-    { id: 'general', name: 'General', icon: '💬', count: messages.filter(m => m.scope === 'broadcast').length },
-    { id: 'direct', name: 'Direct', icon: '💭', count: messages.filter(m => m.scope === 'direct').length },
-    { id: 'system', name: 'System', icon: '🖥️', count: messages.filter(m => m.role === 'system').length },
-  ];
+    {
+      id: 'general',
+      name: 'General',
+      icon: '💬',
+      count: messages.filter((m) => m.scope === 'broadcast').length,
+    },
+    {
+      id: 'direct',
+      name: 'Direct',
+      icon: '💭',
+      count: messages.filter((m) => m.scope === 'direct').length,
+    },
+    {
+      id: 'system',
+      name: 'System',
+      icon: '🖥️',
+      count: messages.filter((m) => m.role === 'system').length,
+    },
+  ]
 
   return (
     <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-xl flex flex-col h-[600px]">
@@ -66,19 +81,26 @@ export default function EnhancedChatPanel({
         <div className="flex items-center gap-3">
           <span className="text-2xl">💬</span>
           <div>
-            <h2 className="font-pixel text-lg" style={{ color: 'var(--text-primary)' }}>
+            <h2
+              className="font-pixel text-lg"
+              style={{ color: 'var(--text-primary)' }}
+            >
               Team Chat
             </h2>
             <div className="text-xs text-[var(--text-secondary)] flex items-center gap-2">
-              <span className={`w-2 h-2 rounded-full ${connected ? 'bg-green-500' : 'bg-red-500'}`} />
+              <span
+                className={`w-2 h-2 rounded-full ${connected ? 'bg-green-500' : 'bg-red-500'}`}
+              />
               {connected ? `${totalAgents} agents online` : 'Disconnected'}
             </div>
           </div>
         </div>
-        
+
         {/* Filter Tabs */}
         <div className="flex gap-1">
-          {(['all', 'broadcast', 'direct', 'system', 'mentions'] as ChatFilter[]).map(f => (
+          {(
+            ['all', 'broadcast', 'direct', 'system', 'mentions'] as ChatFilter[]
+          ).map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
@@ -96,7 +118,7 @@ export default function EnhancedChatPanel({
 
       {/* Channel Selector */}
       <div className="flex gap-2 p-3 border-b border-[var(--border)]">
-        {channels.map(channel => (
+        {channels.map((channel) => (
           <button
             key={channel.id}
             onClick={() => setSelectedChannel(channel.id)}
@@ -130,9 +152,15 @@ export default function EnhancedChatPanel({
               className={`flex items-start gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}
             >
               <div className="text-2xl">
-                {msg.role === 'user' ? '👤' : msg.agentId === 'system' ? '🖥️' : '🤖'}
+                {msg.role === 'user'
+                  ? '👤'
+                  : msg.agentId === 'system'
+                    ? '🖥️'
+                    : '🤖'}
               </div>
-              <div className={`flex-1 ${msg.role === 'user' ? 'text-right' : ''}`}>
+              <div
+                className={`flex-1 ${msg.role === 'user' ? 'text-right' : ''}`}
+              >
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-xs font-bold text-[var(--text-primary)]">
                     {msg.role === 'user' ? 'You' : msg.agentName}
@@ -146,8 +174,8 @@ export default function EnhancedChatPanel({
                     msg.role === 'user'
                       ? 'bg-[var(--accent-primary)] text-white'
                       : msg.agentId === 'system'
-                      ? 'bg-[var(--bg-secondary)] text-[var(--text-secondary)]'
-                      : 'bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border)]'
+                        ? 'bg-[var(--bg-secondary)] text-[var(--text-secondary)]'
+                        : 'bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border)]'
                   }`}
                 >
                   {msg.content}
@@ -174,7 +202,7 @@ export default function EnhancedChatPanel({
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder={connected ? "Type a message..." : "Disconnected..."}
+            placeholder={connected ? 'Type a message...' : 'Disconnected...'}
             disabled={!connected}
             className="flex-1 px-4 py-2 bg-[var(--bg-secondary)] border border-[var(--border)] rounded-lg text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent-primary)] disabled:opacity-50"
           />
@@ -191,5 +219,5 @@ export default function EnhancedChatPanel({
         </div>
       </div>
     </div>
-  );
+  )
 }

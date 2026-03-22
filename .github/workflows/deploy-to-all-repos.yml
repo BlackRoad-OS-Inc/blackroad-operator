@@ -1,4 +1,4 @@
-name: "Deploy Workflows to All Repos"
+name: 'Deploy Workflows to All Repos'
 
 on:
   workflow_dispatch:
@@ -6,16 +6,16 @@ on:
       target_orgs:
         description: "Comma-separated org names (or 'all')"
         required: true
-        default: "all"
+        default: 'all'
       dry_run:
-        description: "Dry run (no actual pushes)"
+        description: 'Dry run (no actual pushes)'
         required: true
-        default: "true"
+        default: 'true'
         type: boolean
       workflow_set:
-        description: "Which workflow set to deploy"
+        description: 'Which workflow set to deploy'
         required: true
-        default: "standard"
+        default: 'standard'
         type: choice
         options:
           - standard
@@ -32,7 +32,7 @@ env:
 
 jobs:
   prepare:
-    name: "Prepare deployment manifest"
+    name: 'Prepare deployment manifest'
     runs-on: ubuntu-latest
     outputs:
       repos: ${{ steps.list.outputs.repos }}
@@ -67,7 +67,7 @@ jobs:
           echo "repos=$(echo "$REPOS" | jq -c .)" >> $GITHUB_OUTPUT
 
   deploy:
-    name: "Deploy to ${{ matrix.repo }}"
+    name: 'Deploy to ${{ matrix.repo }}'
     needs: prepare
     runs-on: ubuntu-latest
     strategy:
@@ -171,7 +171,7 @@ jobs:
           echo "- **Dry run:** ${{ inputs.dry_run }}" >> $GITHUB_STEP_SUMMARY
 
   summary:
-    name: "Deployment summary"
+    name: 'Deployment summary'
     needs: deploy
     runs-on: ubuntu-latest
     if: always()

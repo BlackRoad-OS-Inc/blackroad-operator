@@ -62,12 +62,12 @@ GET /v1/agents
 
 **Parameters:**
 
-| Name | Type | Description |
-|------|------|-------------|
-| `status` | string | Filter by status (online, offline, busy) |
-| `type` | string | Filter by agent type |
-| `limit` | integer | Max results (default: 20, max: 100) |
-| `offset` | integer | Pagination offset |
+| Name     | Type    | Description                              |
+| -------- | ------- | ---------------------------------------- |
+| `status` | string  | Filter by status (online, offline, busy) |
+| `type`   | string  | Filter by agent type                     |
+| `limit`  | integer | Max results (default: 20, max: 100)      |
+| `offset` | integer | Pagination offset                        |
 
 **Response:**
 
@@ -372,11 +372,11 @@ GET /v1/tasks
 
 **Parameters:**
 
-| Name | Type | Description |
-|------|------|-------------|
-| `status` | string | queued, in_progress, completed, failed |
-| `agent_id` | string | Filter by agent |
-| `priority` | string | low, normal, high, critical |
+| Name       | Type   | Description                            |
+| ---------- | ------ | -------------------------------------- |
+| `status`   | string | queued, in_progress, completed, failed |
+| `agent_id` | string | Filter by agent                        |
+| `priority` | string | low, normal, high, critical            |
 
 ### Cancel Task
 
@@ -437,8 +437,8 @@ POST /v1/chat/completions
 {
   "model": "llama3.2",
   "messages": [
-    {"role": "system", "content": "You are a helpful assistant."},
-    {"role": "user", "content": "Hello!"}
+    { "role": "system", "content": "You are a helpful assistant." },
+    { "role": "user", "content": "Hello!" }
   ],
   "temperature": 0.7,
   "max_tokens": 1024,
@@ -529,14 +529,14 @@ POST /v1/webhooks
 
 ### Webhook Events
 
-| Event | Description |
-|-------|-------------|
-| `task.created` | New task created |
-| `task.started` | Task execution started |
-| `task.completed` | Task completed successfully |
-| `task.failed` | Task failed |
-| `agent.status_changed` | Agent status changed |
-| `memory.consolidated` | Memory consolidation completed |
+| Event                  | Description                    |
+| ---------------------- | ------------------------------ |
+| `task.created`         | New task created               |
+| `task.started`         | Task execution started         |
+| `task.completed`       | Task completed successfully    |
+| `task.failed`          | Task failed                    |
+| `agent.status_changed` | Agent status changed           |
+| `memory.consolidated`  | Memory consolidation completed |
 
 ### Webhook Payload
 
@@ -575,14 +575,14 @@ POST /v1/webhooks
 
 ### Error Codes
 
-| Code | HTTP Status | Description |
-|------|-------------|-------------|
-| `invalid_request` | 400 | Malformed request |
-| `unauthorized` | 401 | Invalid credentials |
-| `forbidden` | 403 | Insufficient permissions |
-| `not_found` | 404 | Resource not found |
-| `rate_limited` | 429 | Too many requests |
-| `internal_error` | 500 | Server error |
+| Code              | HTTP Status | Description              |
+| ----------------- | ----------- | ------------------------ |
+| `invalid_request` | 400         | Malformed request        |
+| `unauthorized`    | 401         | Invalid credentials      |
+| `forbidden`       | 403         | Insufficient permissions |
+| `not_found`       | 404         | Resource not found       |
+| `rate_limited`    | 429         | Too many requests        |
+| `internal_error`  | 500         | Server error             |
 
 ---
 
@@ -590,11 +590,11 @@ POST /v1/webhooks
 
 ### Limits by Tier
 
-| Tier | Requests/min | Requests/day |
-|------|--------------|--------------|
-| Free | 60 | 1,000 |
-| Pro | 600 | 50,000 |
-| Enterprise | 6,000 | Unlimited |
+| Tier       | Requests/min | Requests/day |
+| ---------- | ------------ | ------------ |
+| Free       | 60           | 1,000        |
+| Pro        | 600          | 50,000       |
+| Enterprise | 6,000        | Unlimited    |
 
 ### Rate Limit Headers
 
@@ -634,24 +634,24 @@ response = client.chat.completions.create(
 ### TypeScript
 
 ```typescript
-import { BlackRoadClient } from '@blackroad/sdk';
+import { BlackRoadClient } from '@blackroad/sdk'
 
-const client = new BlackRoadClient({ apiKey: 'YOUR_API_KEY' });
+const client = new BlackRoadClient({ apiKey: 'YOUR_API_KEY' })
 
 // List agents
-const agents = await client.agents.list();
+const agents = await client.agents.list()
 
 // Create task
 const task = await client.tasks.create({
   title: 'Analyze code',
-  agentId: 'agent_cipher_001'
-});
+  agentId: 'agent_cipher_001',
+})
 
 // Chat completion
 const response = await client.chat.completions.create({
   model: 'llama3.2',
-  messages: [{ role: 'user', content: 'Hello!' }]
-});
+  messages: [{ role: 'user', content: 'Hello!' }],
+})
 ```
 
 ### cURL Examples
@@ -672,12 +672,12 @@ curl -X POST "https://api.blackroad.io/v1/tasks" \
 
 ## Base URLs
 
-| Environment | URL |
-|-------------|-----|
-| Production | https://api.blackroad.io |
-| Staging | https://staging-api.blackroad.io |
-| Local | http://localhost:8000 |
+| Environment | URL                              |
+| ----------- | -------------------------------- |
+| Production  | https://api.blackroad.io         |
+| Staging     | https://staging-api.blackroad.io |
+| Local       | http://localhost:8000            |
 
 ---
 
-*Last updated: 2026-02-05*
+_Last updated: 2026-02-05_

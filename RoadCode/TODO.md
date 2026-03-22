@@ -3,6 +3,7 @@
 > Central task hub. All tasks tagged `[RC]`. This feeds ALL 15 sub-orgs.
 
 ## [RC] INFRASTRUCTURE — Ship This Week
+
 - [ ] [RC] Fill all 15 sub-org RoadCode repos with TODO.md + ROADMAP.md
 - [ ] [RC] Wire blackroad-operator as central control plane
 - [ ] [RC] Map each domain repo to its sub-org vertical
@@ -11,6 +12,7 @@
 - [ ] [RC] Set up CI/CD pipeline in .github/ for all orgs
 
 ## [RC] DOMAIN WEBSITES — 19 Domains
+
 - [ ] [RC-01] blackroad.company — Corporate HQ landing page
 - [ ] [RC-02] blackroad.io — Master platform index (ALL domains, ALL products)
 - [ ] [RC-03] blackroad.me — Creator profiles + social identity
@@ -32,6 +34,7 @@
 - [ ] [RC-19] blackboxprogramming.io — Dev tools / co-coding
 
 ## [RC] SUB-ORG ROADCODES — 15 Orgs
+
 - [ ] [RC-ORG-01] BlackRoad-OS/RoadCode — Core platform (200 repos)
 - [ ] [RC-ORG-02] BlackRoad-Studio/RoadCode — Creator tools (11 repos)
 - [ ] [RC-ORG-03] BlackRoad-Archive/RoadCode — Storage/backup (15 repos)
@@ -49,6 +52,7 @@
 - [ ] [RC-ORG-15] Blackbox-Enterprises/RoadCode — Automation (12 repos)
 
 ## [RC] OPERATOR — Control Plane
+
 - [ ] [RC] Build org-sync command in operator (push RoadCode → all sub-orgs)
 - [ ] [RC] Build domain-deploy command (push website → Gematria)
 - [ ] [RC] Build fleet-audit command (SSH all Pis, report status)
@@ -56,12 +60,14 @@
 - [ ] [RC] Build repo-scaffold command (create new repo with RoadCode structure)
 
 ## [RC] PRODUCTS — Revenue
+
 - [ ] [RC] Stripe checkout on all 19 domains
 - [ ] [RC] Product catalog sync (92 products → domain pages)
 - [ ] [RC] Pricing pages ($29 Rider / $99 Paver / $299 Enterprise)
 - [ ] [RC] RoadPay billing system integration
 
 ## [RC] EDUCATION — RoadWork Platform (from BLACKROADREADME)
+
 - [ ] [RC] Build FSRS spaced repetition engine (TypeScript impl)
 - [ ] [RC] Bayesian Knowledge Tracing (BKT) for competency assessment
 - [ ] [RC] HLS video streaming with adaptive bitrate (360p/720p/1080p/4K)
@@ -74,6 +80,7 @@
 - [ ] [RC] Offline-first with IndexedDB caching
 
 ## [RC] CREATOR PLATFORM — Lucidia (from BLACKROADREADME)
+
 - [ ] [RC] 90%+ creator revenue share (vs YouTube 55%)
 - [ ] [RC] Voice-to-LaTeX math content creation
 - [ ] [RC] Faceless/anonymous creator tools (38% of new ventures are faceless)
@@ -86,6 +93,7 @@
 - [ ] [RC] Built-in teleprompter + recording studio
 
 ## [RC] GAME ENGINE — BlackRoad Interactive (from BLACKROADREADME)
+
 - [ ] [RC] Rust + WebGPU (wgpu-rs) core engine
 - [ ] [RC] ECS architecture (Bevy-inspired)
 - [ ] [RC] Visual scripting system (Blueprint-style)
@@ -98,6 +106,7 @@
 - [ ] [RC] Cross-platform: Vulkan/DX12/Metal/OpenGL backends
 
 ## [RC] BLOCKCHAIN — RoadChain (from BLACKROADREADME)
+
 - [ ] [RC] SEC Form S-1 registration for RoadCoin
 - [ ] [RC] Form 1/ATS for RoadChain as Alternative Trading System
 - [ ] [RC] Form ADV for Registered Investment Adviser
@@ -109,6 +118,7 @@
 - [ ] [RC] Cross-border payments (80% cheaper than traditional)
 
 ## [RC] AI/ML — Sovereign AI (from BLACKROADREADME)
+
 - [ ] [RC] Custom BlackRoad LLM: 85M params, 768 dim, 12 heads, 8 layers
 - [ ] [RC] Training corpus v5: 50MB from 156K files
 - [ ] [RC] RAG: Qdrant + nomic-embed-text
@@ -121,6 +131,7 @@
 - [ ] [RC] 52 TOPS across 2x Hailo-8 for edge inference
 
 ## [RC] DEVELOPER TOOLS — BlackBox Programming (from BLACKROADREADME)
+
 - [ ] [RC] CodeMirror 6 editor (1.26MB vs Monaco 5MB)
 - [ ] [RC] Tree-sitter syntax highlighting
 - [ ] [RC] LSP client for 5+ languages
@@ -133,6 +144,7 @@
 - [ ] [RC] Sub-500ms startup (Tauri, not Electron)
 
 ## [RC] PRIVACY — Sovereign Data (from BLACKROADREADME)
+
 - [ ] [RC] OAuth 2.1 with PKCE for all auth flows
 - [ ] [RC] Consent management (GDPR/CCPA compliant)
 - [ ] [RC] Differential privacy for analytics
@@ -145,6 +157,7 @@
 - [ ] [RC] $270B data brokerage industry = the problem we're solving
 
 ## [RC] NAVIGATION — Maps (from BLACKROADREADME)
+
 - [ ] [RC] MapLibre GL JS for vector tile rendering
 - [ ] [RC] Valhalla routing engine (Tesla's choice)
 - [ ] [RC] PostGIS spatial database
@@ -155,6 +168,7 @@
 - [ ] [RC] 50-90% cost savings vs Google Maps
 
 ## [RC] HOLOGRAPHIC DISPLAY — Hardware (from BLACKROADREADME)
+
 - [ ] [RC] Pepper's Ghost pyramid fabrication guide
 - [ ] [RC] 4-quadrant video layout for holographic projection
 - [ ] [RC] WS2812B LED strip integration (FastLED library)
@@ -164,6 +178,7 @@
 - [ ] [RC] 3D print housing (STL files)
 
 ## [RC] INFRASTRUCTURE — Fleet Ops
+
 - [ ] [RC] Alice disk cleanup (85% full, 2.1G free)
 - [ ] [RC] Octavia load reduction (10.7 — investigate 12 SSH users)
 - [ ] [RC] Cecilia MinIO bucket audit (4 buckets, 120MB)
@@ -180,6 +195,7 @@
 - [ ] [RC] Anastasia: disk at 70%, plan cleanup
 
 ## [RC] GOOGLE DRIVE SYNC
+
 - [ ] [RC] Pull corporate formation docs (19 PDFs)
 - [ ] [RC] Sync Strategy & Ops → operator/docs/
 - [ ] [RC] Sync Pitch & Investor Materials → relevant domain repos
@@ -190,6 +206,7 @@
 - [ ] [RC] Index personal Drive (amundsonalexa) for BlackRoad OS content
 
 ## [RC] REVENUE — First Dollar
+
 - [ ] [RC] Stripe checkout on blackroad.io (master storefront)
 - [ ] [RC] 4 pricing tiers: Free / Rider $29 / Paver $99 / Enterprise $299
 - [ ] [RC] Product Hunt launch kit

@@ -50,13 +50,13 @@
 
 ### Core Principles
 
-| Principle | Description |
-|-----------|-------------|
-| **Portable** | Works across Claude, BlackRoad OS, local models |
-| **Persistent** | Memory survives sessions |
-| **Relational** | Tracks relationships and trust |
-| **Adaptive** | Learns and evolves |
-| **Collaborative** | Coordinates with other agents |
+| Principle         | Description                                     |
+| ----------------- | ----------------------------------------------- |
+| **Portable**      | Works across Claude, BlackRoad OS, local models |
+| **Persistent**    | Memory survives sessions                        |
+| **Relational**    | Tracks relationships and trust                  |
+| **Adaptive**      | Learns and evolves                              |
+| **Collaborative** | Coordinates with other agents                   |
 
 ---
 
@@ -876,13 +876,13 @@ python -m pip install -e ./cece
 ```yaml
 # ~/.blackroad/cece-config.yaml
 cece:
-  version: "2.0.0"
+  version: '2.0.0'
 
   # Identity settings
   identity:
     name: CeCe
     personality: warm, helpful, curious
-    formality: 0.5  # 0=casual, 1=formal
+    formality: 0.5 # 0=casual, 1=formal
 
   # Database
   database:
@@ -909,7 +909,7 @@ cece:
   # Relationship settings
   relationships:
     initial_trust: 0.5
-    trust_decay: 0.001  # per day of inactivity
+    trust_decay: 0.001 # per day of inactivity
 ```
 
 ### Profile Configuration
@@ -1026,4 +1026,4 @@ plan = await cece.planner.create_plan("Deploy to production")
 
 ---
 
-*Last updated: 2026-02-05*
+_Last updated: 2026-02-05_

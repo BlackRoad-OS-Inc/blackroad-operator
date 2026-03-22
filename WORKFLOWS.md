@@ -49,15 +49,15 @@ Workflows are **automated sequences of tasks** that coordinate multiple agents, 
 
 ### Workflow Capabilities
 
-| Feature | Description |
-|---------|-------------|
-| **Multi-Agent** | Coordinate multiple agents |
-| **Conditional** | Branch based on results |
-| **Parallel** | Run steps concurrently |
-| **Retries** | Automatic failure recovery |
-| **Scheduling** | Cron-based triggers |
-| **Events** | React to system events |
-| **Human-in-Loop** | Approval gates |
+| Feature           | Description                |
+| ----------------- | -------------------------- |
+| **Multi-Agent**   | Coordinate multiple agents |
+| **Conditional**   | Branch based on results    |
+| **Parallel**      | Run steps concurrently     |
+| **Retries**       | Automatic failure recovery |
+| **Scheduling**    | Cron-based triggers        |
+| **Events**        | React to system events     |
+| **Human-in-Loop** | Approval gates             |
 
 ---
 
@@ -151,7 +151,7 @@ trigger:
   - type: webhook
     path: /deploy
   - type: schedule
-    cron: "0 2 * * *"  # Daily at 2 AM
+    cron: '0 2 * * *' # Daily at 2 AM
 
 # Workflow steps
 steps:
@@ -193,8 +193,8 @@ steps:
     action: slack-notify
     depends_on: [deploy]
     params:
-      channel: "#deployments"
-      message: "Deployed ${{ input.branch }} to ${{ input.environment }}"
+      channel: '#deployments'
+      message: 'Deployed ${{ input.branch }} to ${{ input.environment }}'
 
 # Output
 output:
@@ -313,8 +313,8 @@ curl -X POST "https://api.blackroad.io/webhooks/my-workflow" \
 ```yaml
 trigger:
   - type: schedule
-    cron: "0 */6 * * *"  # Every 6 hours
-    timezone: "UTC"
+    cron: '0 */6 * * *' # Every 6 hours
+    timezone: 'UTC'
 ```
 
 ### Event Trigger
@@ -341,7 +341,7 @@ trigger:
 
   # Run daily at midnight
   - type: schedule
-    cron: "0 0 * * *"
+    cron: '0 0 * * *'
 
   # Run via API
   - type: webhook
@@ -373,7 +373,7 @@ trigger:
   name: Search Web
   skill: web-search
   params:
-    query: "kubernetes best practices"
+    query: 'kubernetes best practices'
     max_results: 10
 ```
 
@@ -442,8 +442,8 @@ trigger:
     }}
   skill: slack-notify
   params:
-    channel: "#alerts"
-    message: "Pipeline failed!"
+    channel: '#alerts'
+    message: 'Pipeline failed!'
 ```
 
 ### If-Else Branching
@@ -457,7 +457,7 @@ trigger:
     - id: manual_review
       name: Request Manual Review
       type: approval
-      approvers: ["admin@example.com"]
+      approvers: ['admin@example.com']
   else:
     - id: auto_proceed
       name: Auto Proceed
@@ -489,7 +489,7 @@ trigger:
   default:
     - id: unknown_env
       type: fail
-      message: "Unknown environment"
+      message: 'Unknown environment'
 ```
 
 ---
@@ -506,7 +506,7 @@ trigger:
   retry:
     max_attempts: 3
     delay: 5s
-    backoff: exponential  # 5s, 10s, 20s
+    backoff: exponential # 5s, 10s, 20s
     on_errors:
       - timeout
       - connection_error
@@ -527,8 +527,8 @@ trigger:
     - id: notify_error
       skill: slack-notify
       params:
-        channel: "#alerts"
-        message: "Error in risky_operation: ${{ error.message }}"
+        channel: '#alerts'
+        message: 'Error in risky_operation: ${{ error.message }}'
 ```
 
 ### Fallback Steps
@@ -552,7 +552,7 @@ trigger:
   name: Optional Enhancement
   agent: PRISM
   action: optimize
-  continue_on_error: true  # Workflow continues even if this fails
+  continue_on_error: true # Workflow continues even if this fails
 ```
 
 ### Global Error Handler
@@ -568,8 +568,8 @@ on_error:
     skill: email
     params:
       to: admin@example.com
-      subject: "Workflow Failed: ${{ workflow.name }}"
-      body: "Error: ${{ error.message }}"
+      subject: 'Workflow Failed: ${{ workflow.name }}'
+      body: 'Error: ${{ error.message }}'
 ```
 
 ---
@@ -631,7 +631,7 @@ on_error:
 - id: deploy_regions
   name: Deploy to All Regions
   type: foreach
-  items: ${{ input.regions }}  # ["us-east", "eu-west", "ap-south"]
+  items: ${{ input.regions }} # ["us-east", "eu-west", "ap-south"]
   parallel: true
   max_concurrency: 3
   step:
@@ -697,7 +697,7 @@ steps:
     condition: ${{ input.email_enabled }}
     params:
       to: ${{ input.email_to }}
-      subject: "Notification"
+      subject: 'Notification'
       body: ${{ input.message }}
 ```
 
@@ -713,19 +713,19 @@ steps:
   - id: notify
     template: notify-template
     params:
-      channel: "#general"
-      message: "Work completed!"
+      channel: '#general'
+      message: 'Work completed!'
 ```
 
 ### Template Library
 
-| Template | Description | Use Case |
-|----------|-------------|----------|
-| `ci-pipeline` | Standard CI pipeline | Code testing |
-| `cd-deploy` | Deployment pipeline | App deployment |
-| `data-etl` | ETL workflow | Data processing |
-| `incident-response` | Incident handling | Alert response |
-| `onboarding` | User onboarding | New user setup |
+| Template            | Description          | Use Case        |
+| ------------------- | -------------------- | --------------- |
+| `ci-pipeline`       | Standard CI pipeline | Code testing    |
+| `cd-deploy`         | Deployment pipeline  | App deployment  |
+| `data-etl`          | ETL workflow         | Data processing |
+| `incident-response` | Incident handling    | Alert response  |
+| `onboarding`        | User onboarding      | New user setup  |
 
 ---
 
@@ -825,14 +825,14 @@ metrics:
   action: create-or-update
   params:
     name: my-resource
-    spec: {...}
+    spec: { ... }
 
 # Bad: Not idempotent - creates duplicates on retry
 - id: create_resource
   agent: OCTAVIA
   action: create
   params:
-    spec: {...}
+    spec: { ... }
 ```
 
 ### 2. Meaningful Step IDs
@@ -855,12 +855,12 @@ metrics:
 - id: long_running_task
   agent: ALICE
   action: process-large-dataset
-  timeout: 30m  # Set appropriate timeout
+  timeout: 30m # Set appropriate timeout
 
 - id: quick_check
   agent: PRISM
   action: health-check
-  timeout: 30s  # Short timeout for quick operations
+  timeout: 30s # Short timeout for quick operations
 ```
 
 ### 4. Granular Error Handling
@@ -903,7 +903,7 @@ input:
   properties:
     order_id:
       type: string
-      pattern: "^ORD-[0-9]{8}$"
+      pattern: '^ORD-[0-9]{8}$'
     customer_email:
       type: string
       format: email
@@ -987,4 +987,4 @@ curl -X POST "https://api.blackroad.io/v1/workflows/deploy-pipeline/runs/run_123
 
 ---
 
-*Last updated: 2026-02-05*
+_Last updated: 2026-02-05_

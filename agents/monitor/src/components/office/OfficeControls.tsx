@@ -2,24 +2,39 @@
 // OfficeControls — Bottom control bar for the office view
 // ============================================================================
 
-'use client';
+'use client'
 
-import { useState } from 'react';
-import type { AgentConfig, AgentBehavior, AgentDashboardState } from '@/lib/types';
-import { BEHAVIOR_INFO } from '@/lib/state-mapper';
+import { useState } from 'react'
+import type {
+  AgentConfig,
+  AgentBehavior,
+  AgentDashboardState,
+} from '@/lib/types'
+import { BEHAVIOR_INFO } from '@/lib/state-mapper'
 
 interface OfficeControlsProps {
-  agents: AgentConfig[];
-  agentStates: Record<string, AgentDashboardState>;
-  demoMode: boolean;
-  onSetBehavior: (agentId: string, behavior: AgentBehavior) => void;
+  agents: AgentConfig[]
+  agentStates: Record<string, AgentDashboardState>
+  demoMode: boolean
+  onSetBehavior: (agentId: string, behavior: AgentBehavior) => void
 }
 
 const QUICK_BEHAVIORS: AgentBehavior[] = [
-  'working', 'thinking', 'researching', 'meeting', 'deploying',
-  'debugging', 'idle', 'coffee', 'sleeping', 'toilet',
-  'panicking', 'dead', 'overloaded', 'reviving',
-];
+  'working',
+  'thinking',
+  'researching',
+  'meeting',
+  'deploying',
+  'debugging',
+  'idle',
+  'coffee',
+  'sleeping',
+  'toilet',
+  'panicking',
+  'dead',
+  'overloaded',
+  'reviving',
+]
 
 export default function OfficeControls({
   agents,
@@ -27,8 +42,10 @@ export default function OfficeControls({
   demoMode,
   onSetBehavior,
 }: OfficeControlsProps) {
-  const [selectedAgent, setSelectedAgent] = useState<string>(agents[0]?.id ?? '');
-  const [expanded, setExpanded] = useState(false);
+  const [selectedAgent, setSelectedAgent] = useState<string>(
+    agents[0]?.id ?? '',
+  )
+  const [expanded, setExpanded] = useState(false)
 
   return (
     <div
@@ -40,9 +57,20 @@ export default function OfficeControls({
     >
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
-          <span className="text-xs font-mono" style={{ color: 'var(--text-secondary)' }}>🎮 Controls</span>
+          <span
+            className="text-xs font-mono"
+            style={{ color: 'var(--text-secondary)' }}
+          >
+            🎮 Controls
+          </span>
           {demoMode && (
-            <span className="text-[10px] px-1.5 py-0.5 rounded font-mono" style={{ backgroundColor: 'rgba(255,202,40,0.12)', color: 'var(--accent-warning)' }}>
+            <span
+              className="text-[10px] px-1.5 py-0.5 rounded font-mono"
+              style={{
+                backgroundColor: 'rgba(255,202,40,0.12)',
+                color: 'var(--accent-warning)',
+              }}
+            >
               DEMO
             </span>
           )}
@@ -59,7 +87,12 @@ export default function OfficeControls({
       {expanded && demoMode && (
         <div className="pt-3" style={{ borderTop: '1px solid var(--border)' }}>
           <div className="flex items-center gap-2 mb-2">
-            <span className="text-[10px] font-mono" style={{ color: 'var(--text-secondary)' }}>Agent:</span>
+            <span
+              className="text-[10px] font-mono"
+              style={{ color: 'var(--text-secondary)' }}
+            >
+              Agent:
+            </span>
             <select
               value={selectedAgent}
               onChange={(e) => setSelectedAgent(e.target.value)}
@@ -70,14 +103,16 @@ export default function OfficeControls({
                 backgroundColor: 'var(--bg-primary)',
               }}
             >
-              {agents.map(a => (
-                <option key={a.id} value={a.id}>{a.emoji} {a.name}</option>
+              {agents.map((a) => (
+                <option key={a.id} value={a.id}>
+                  {a.emoji} {a.name}
+                </option>
               ))}
             </select>
           </div>
           <div className="flex flex-wrap gap-1">
-            {QUICK_BEHAVIORS.map(behavior => {
-              const info = BEHAVIOR_INFO[behavior];
+            {QUICK_BEHAVIORS.map((behavior) => {
+              const info = BEHAVIOR_INFO[behavior]
               return (
                 <button
                   key={behavior}
@@ -91,11 +126,11 @@ export default function OfficeControls({
                 >
                   {info.emoji} {info.label}
                 </button>
-              );
+              )
             })}
           </div>
         </div>
       )}
     </div>
-  );
+  )
 }

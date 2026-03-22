@@ -3,20 +3,21 @@
 You have additional SKILLs documented in directories containing a "SKILL.md" file.
 
 These skills are:
- - gradio -> "skills/huggingface-gradio/SKILL.md"
- - hf-cli -> "skills/hf-cli/SKILL.md"
- - hugging-face-dataset-viewer -> "skills/hugging-face-dataset-viewer/SKILL.md"
- - hugging-face-datasets -> "skills/hugging-face-datasets/SKILL.md"
- - hugging-face-evaluation -> "skills/hugging-face-evaluation/SKILL.md"
- - hugging-face-jobs -> "skills/hugging-face-jobs/SKILL.md"
- - hugging-face-model-trainer -> "skills/hugging-face-model-trainer/SKILL.md"
- - hugging-face-paper-publisher -> "skills/hugging-face-paper-publisher/SKILL.md"
- - hugging-face-tool-builder -> "skills/hugging-face-tool-builder/SKILL.md"
- - hugging-face-trackio -> "skills/hugging-face-trackio/SKILL.md"
- - hugging-face-vision-trainer -> "skills/hugging-face-vision-trainer/SKILL.md"
- - transformers-js -> "skills/transformers.js/SKILL.md"
 
-IMPORTANT: You MUST read the SKILL.md file whenever the description of the skills matches the user intent, or may help accomplish their task. 
+- gradio -> "skills/huggingface-gradio/SKILL.md"
+- hf-cli -> "skills/hf-cli/SKILL.md"
+- hugging-face-dataset-viewer -> "skills/hugging-face-dataset-viewer/SKILL.md"
+- hugging-face-datasets -> "skills/hugging-face-datasets/SKILL.md"
+- hugging-face-evaluation -> "skills/hugging-face-evaluation/SKILL.md"
+- hugging-face-jobs -> "skills/hugging-face-jobs/SKILL.md"
+- hugging-face-model-trainer -> "skills/hugging-face-model-trainer/SKILL.md"
+- hugging-face-paper-publisher -> "skills/hugging-face-paper-publisher/SKILL.md"
+- hugging-face-tool-builder -> "skills/hugging-face-tool-builder/SKILL.md"
+- hugging-face-trackio -> "skills/hugging-face-trackio/SKILL.md"
+- hugging-face-vision-trainer -> "skills/hugging-face-vision-trainer/SKILL.md"
+- transformers-js -> "skills/transformers.js/SKILL.md"
+
+IMPORTANT: You MUST read the SKILL.md file whenever the description of the skills matches the user intent, or may help accomplish their task.
 
 <available_skills>
 
@@ -34,6 +35,6 @@ hugging-face-vision-trainer: `Trains and fine-tunes vision models for object det
 transformers-js: `Use Transformers.js to run state-of-the-art machine learning models directly in JavaScript/TypeScript. Supports NLP (text classification, translation, summarization), computer vision (image classification, object detection), audio (speech recognition, audio classification), and multimodal tasks. Works in Node.js and browsers (with WebGPU/WASM) using pre-trained models from Hugging Face Hub.`
 </available_skills>
 
-Paths referenced within SKILL folders are relative to that SKILL. For example the hf-datasets `scripts/example.py` would be referenced as `hf-datasets/scripts/example.py`. 
+Paths referenced within SKILL folders are relative to that SKILL. For example the hf-datasets `scripts/example.py` would be referenced as `hf-datasets/scripts/example.py`.
 
 </skills>

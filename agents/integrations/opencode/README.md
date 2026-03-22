@@ -38,7 +38,7 @@ Each generated agent file contains:
 name: Frontend Developer
 description: Expert frontend developer specializing in modern web technologies...
 mode: subagent
-color: "#00FFFF"
+color: '#00FFFF'
 ---
 ```
 

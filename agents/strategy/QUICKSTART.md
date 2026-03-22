@@ -10,11 +10,11 @@
 
 ## Choose Your Mode
 
-| I want to... | Use | Agents | Time |
-|-------------|-----|--------|------|
-| Build a complete product from scratch | **NEXUS-Full** | All | 12-24 weeks |
-| Build a feature or MVP | **NEXUS-Sprint** | 15-25 | 2-6 weeks |
-| Do a specific task (bug fix, campaign, audit) | **NEXUS-Micro** | 5-10 | 1-5 days |
+| I want to...                                  | Use              | Agents | Time        |
+| --------------------------------------------- | ---------------- | ------ | ----------- |
+| Build a complete product from scratch         | **NEXUS-Full**   | All    | 12-24 weeks |
+| Build a feature or MVP                        | **NEXUS-Sprint** | 15-25  | 2-6 weeks   |
+| Do a specific task (bug fix, campaign, audit) | **NEXUS-Micro**  | 5-10   | 1-5 days    |
 
 ---
 
@@ -73,6 +73,7 @@ Reality Checker approval required before launch.
 **Pick your scenario and copy the prompt:**
 
 ### Fix a Bug
+
 ```
 Activate Backend Architect to investigate and fix [BUG DESCRIPTION].
 After fix, activate API Tester to verify the fix.
@@ -80,6 +81,7 @@ Then activate Evidence Collector to confirm no visual regressions.
 ```
 
 ### Run a Marketing Campaign
+
 ```
 Activate Social Media Strategist as campaign lead for [CAMPAIGN DESCRIPTION].
 Team: Content Creator, Twitter Engager, Instagram Curator, Reddit Community Builder.
@@ -89,6 +91,7 @@ Growth Hacker optimizes channels weekly.
 ```
 
 ### Conduct a Compliance Audit
+
 ```
 Activate Legal Compliance Checker for comprehensive compliance audit.
 Scope: [GDPR / CCPA / HIPAA / ALL]
@@ -96,6 +99,7 @@ After audit, activate Executive Summary Generator to create stakeholder report.
 ```
 
 ### Investigate Performance Issues
+
 ```
 Activate Performance Benchmarker to diagnose performance issues.
 Scope: [API response times / Page load / Database queries / All]
@@ -104,6 +108,7 @@ DevOps Automator deploys any infrastructure changes.
 ```
 
 ### Market Research
+
 ```
 Activate Trend Researcher for market intelligence on [DOMAIN].
 Deliverables: Competitive landscape, market sizing, trend forecast.
@@ -111,6 +116,7 @@ After research, activate Executive Summary Generator for executive brief.
 ```
 
 ### UX Improvement
+
 ```
 Activate UX Researcher to identify usability issues in [FEATURE/PRODUCT].
 After research, activate UX Architect to design improvements.
@@ -122,22 +128,22 @@ Evidence Collector verifies improvements.
 
 ## 📁 Strategy Documents
 
-| Document | Purpose | Location |
-|----------|---------|----------|
-| **Master Strategy** | Complete NEXUS doctrine | `strategy/nexus-strategy.md` |
-| **Phase 0 Playbook** | Discovery & intelligence | `strategy/playbooks/phase-0-discovery.md` |
-| **Phase 1 Playbook** | Strategy & architecture | `strategy/playbooks/phase-1-strategy.md` |
-| **Phase 2 Playbook** | Foundation & scaffolding | `strategy/playbooks/phase-2-foundation.md` |
-| **Phase 3 Playbook** | Build & iterate | `strategy/playbooks/phase-3-build.md` |
-| **Phase 4 Playbook** | Quality & hardening | `strategy/playbooks/phase-4-hardening.md` |
-| **Phase 5 Playbook** | Launch & growth | `strategy/playbooks/phase-5-launch.md` |
-| **Phase 6 Playbook** | Operate & evolve | `strategy/playbooks/phase-6-operate.md` |
-| **Activation Prompts** | Ready-to-use agent prompts | `strategy/coordination/agent-activation-prompts.md` |
-| **Handoff Templates** | Standardized handoff formats | `strategy/coordination/handoff-templates.md` |
-| **Startup MVP Runbook** | 4-6 week MVP build | `strategy/runbooks/scenario-startup-mvp.md` |
-| **Enterprise Feature Runbook** | Enterprise feature development | `strategy/runbooks/scenario-enterprise-feature.md` |
-| **Marketing Campaign Runbook** | Multi-channel campaign | `strategy/runbooks/scenario-marketing-campaign.md` |
-| **Incident Response Runbook** | Production incident handling | `strategy/runbooks/scenario-incident-response.md` |
+| Document                       | Purpose                        | Location                                            |
+| ------------------------------ | ------------------------------ | --------------------------------------------------- |
+| **Master Strategy**            | Complete NEXUS doctrine        | `strategy/nexus-strategy.md`                        |
+| **Phase 0 Playbook**           | Discovery & intelligence       | `strategy/playbooks/phase-0-discovery.md`           |
+| **Phase 1 Playbook**           | Strategy & architecture        | `strategy/playbooks/phase-1-strategy.md`            |
+| **Phase 2 Playbook**           | Foundation & scaffolding       | `strategy/playbooks/phase-2-foundation.md`          |
+| **Phase 3 Playbook**           | Build & iterate                | `strategy/playbooks/phase-3-build.md`               |
+| **Phase 4 Playbook**           | Quality & hardening            | `strategy/playbooks/phase-4-hardening.md`           |
+| **Phase 5 Playbook**           | Launch & growth                | `strategy/playbooks/phase-5-launch.md`              |
+| **Phase 6 Playbook**           | Operate & evolve               | `strategy/playbooks/phase-6-operate.md`             |
+| **Activation Prompts**         | Ready-to-use agent prompts     | `strategy/coordination/agent-activation-prompts.md` |
+| **Handoff Templates**          | Standardized handoff formats   | `strategy/coordination/handoff-templates.md`        |
+| **Startup MVP Runbook**        | 4-6 week MVP build             | `strategy/runbooks/scenario-startup-mvp.md`         |
+| **Enterprise Feature Runbook** | Enterprise feature development | `strategy/runbooks/scenario-enterprise-feature.md`  |
+| **Marketing Campaign Runbook** | Multi-channel campaign         | `strategy/runbooks/scenario-marketing-campaign.md`  |
+| **Incident Response Runbook**  | Production incident handling   | `strategy/runbooks/scenario-incident-response.md`   |
 
 ---
 

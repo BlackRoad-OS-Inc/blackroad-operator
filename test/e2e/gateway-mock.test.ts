@@ -1,6 +1,11 @@
 // Copyright (c) 2025-2026 BlackRoad OS, Inc. All Rights Reserved.
 import { describe, it, expect, beforeAll, afterAll } from 'vitest'
-import { createServer, type Server, type IncomingMessage, type ServerResponse } from 'node:http'
+import {
+  createServer,
+  type Server,
+  type IncomingMessage,
+  type ServerResponse,
+} from 'node:http'
 import { execFile } from 'node:child_process'
 import { promisify } from 'node:util'
 import { fileURLToPath } from 'node:url'
@@ -18,7 +23,9 @@ function handler(req: IncomingMessage, res: ServerResponse) {
   res.setHeader('Content-Type', 'application/json')
 
   if (req.url === '/v1/health') {
-    res.end(JSON.stringify({ status: 'healthy', version: '1.2.3', uptime: 9876 }))
+    res.end(
+      JSON.stringify({ status: 'healthy', version: '1.2.3', uptime: 9876 }),
+    )
     return
   }
 
@@ -40,7 +47,11 @@ function handler(req: IncomingMessage, res: ServerResponse) {
     req.on('data', (chunk) => (body += chunk))
     req.on('end', () => {
       const parsed = JSON.parse(body) as { agent: string; task: string }
-      res.end(JSON.stringify({ content: `Agent ${parsed.agent} completed: ${parsed.task}` }))
+      res.end(
+        JSON.stringify({
+          content: `Agent ${parsed.agent} completed: ${parsed.task}`,
+        }),
+      )
     })
     return
   }
@@ -52,7 +63,11 @@ function handler(req: IncomingMessage, res: ServerResponse) {
 function run(...args: string[]) {
   return exec('npx', ['tsx', CLI, ...args], {
     cwd: ROOT,
-    env: { ...process.env, BLACKROAD_GATEWAY_URL: `http://127.0.0.1:${port}`, NO_COLOR: '1' },
+    env: {
+      ...process.env,
+      BLACKROAD_GATEWAY_URL: `http://127.0.0.1:${port}`,
+      NO_COLOR: '1',
+    },
     timeout: 15_000,
   })
 }

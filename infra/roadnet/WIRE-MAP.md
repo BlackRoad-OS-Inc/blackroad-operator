@@ -1,4 +1,5 @@
 # RoadNet Wire Map — Physical + Logical Topology
+
 # Generated 2026-03-09
 
 ```

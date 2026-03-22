@@ -21,13 +21,13 @@ Transformers.js models can be large (from a few MB to several GB), so caching is
 ### Default Behavior
 
 ```javascript
-import { pipeline } from '@huggingface/transformers';
+import { pipeline } from '@huggingface/transformers'
 
 // First load: downloads model
-const pipe = await pipeline('sentiment-analysis');
+const pipe = await pipeline('sentiment-analysis')
 
 // Subsequent loads: uses cached model
-const pipe2 = await pipeline('sentiment-analysis'); // Fast!
+const pipe2 = await pipeline('sentiment-analysis') // Fast!
 ```
 
 Caching is **automatic** and enabled by default. Models are cached after the first download.
@@ -39,13 +39,13 @@ Caching is **automatic** and enabled by default. Models are cached after the fir
 In browser environments, Transformers.js uses the [Cache API](https://developer.mozilla.org/en-US/docs/Web/API/Cache) to store models:
 
 ```javascript
-import { env, pipeline } from '@huggingface/transformers';
+import { env, pipeline } from '@huggingface/transformers'
 
 // Browser cache is enabled by default
-console.log(env.useBrowserCache); // true
+console.log(env.useBrowserCache) // true
 
 // Load model (cached automatically)
-const classifier = await pipeline('sentiment-analysis');
+const classifier = await pipeline('sentiment-analysis')
 ```
 
 **How it works:**
@@ -58,6 +58,7 @@ const classifier = await pipeline('sentiment-analysis');
 ### Cache Location
 
 Browser caches are stored in:
+
 - **Chrome/Edge**: `Cache Storage` in DevTools → Application tab → Cache storage
 - **Firefox**: `about:cache` → Storage
 - **Safari**: Web Inspector → Storage tab
@@ -65,10 +66,10 @@ Browser caches are stored in:
 ### Disable Browser Cache
 
 ```javascript
-import { env } from '@huggingface/transformers';
+import { env } from '@huggingface/transformers'
 
 // Disable browser caching (not recommended)
-env.useBrowserCache = false;
+env.useBrowserCache = false
 
 // Models will be re-downloaded on every page load
 ```
@@ -87,10 +88,12 @@ Browsers impose storage quotas:
 
 ```javascript
 if ('storage' in navigator && 'estimate' in navigator.storage) {
-  const estimate = await navigator.storage.estimate();
-  const percentUsed = (estimate.usage / estimate.quota) * 100;
-  console.log(`Storage: ${percentUsed.toFixed(2)}% used`);
-  console.log(`Available: ${((estimate.quota - estimate.usage) / 1024 / 1024).toFixed(2)} MB`);
+  const estimate = await navigator.storage.estimate()
+  const percentUsed = (estimate.usage / estimate.quota) * 100
+  console.log(`Storage: ${percentUsed.toFixed(2)}% used`)
+  console.log(
+    `Available: ${((estimate.quota - estimate.usage) / 1024 / 1024).toFixed(2)} MB`,
+  )
 }
 ```
 
@@ -101,21 +104,22 @@ if ('storage' in navigator && 'estimate' in navigator.storage) {
 In Node.js, models are cached to the filesystem:
 
 ```javascript
-import { env, pipeline } from '@huggingface/transformers';
+import { env, pipeline } from '@huggingface/transformers'
 
 // Default cache directory (Node.js)
-console.log(env.cacheDir); // './.cache' (relative to current directory)
+console.log(env.cacheDir) // './.cache' (relative to current directory)
 
 // Filesystem cache is enabled by default
-console.log(env.useFSCache); // true
+console.log(env.useFSCache) // true
 
 // Load model (cached to disk)
-const classifier = await pipeline('sentiment-analysis');
+const classifier = await pipeline('sentiment-analysis')
 ```
 
 ### Default Cache Location
 
 **Default behavior:**
+
 - Cache directory: `./.cache` (relative to where Node.js process runs)
 - Full default path: `~/.cache/huggingface/` when using Hugging Face tools
 
@@ -124,16 +128,16 @@ const classifier = await pipeline('sentiment-analysis');
 ### Custom Cache Directory
 
 ```javascript
-import { env, pipeline } from '@huggingface/transformers';
+import { env, pipeline } from '@huggingface/transformers'
 
 // Set custom cache directory
-env.cacheDir = '/var/cache/transformers';
+env.cacheDir = '/var/cache/transformers'
 
 // Or use environment variable (Node.js convention)
-env.cacheDir = process.env.HF_HOME || '~/.cache/huggingface';
+env.cacheDir = process.env.HF_HOME || '~/.cache/huggingface'
 
 // Now load model
-const classifier = await pipeline('sentiment-analysis');
+const classifier = await pipeline('sentiment-analysis')
 // Cached to: /var/cache/transformers/models--Xenova--distilbert-base-uncased-finetuned-sst-2-english/
 ```
 
@@ -142,10 +146,10 @@ const classifier = await pipeline('sentiment-analysis');
 ### Disable Filesystem Cache
 
 ```javascript
-import { env } from '@huggingface/transformers';
+import { env } from '@huggingface/transformers'
 
 // Disable filesystem caching (not recommended)
-env.useFSCache = false;
+env.useFSCache = false
 
 // Models will be re-downloaded on every load
 ```
@@ -163,84 +167,90 @@ interface CacheInterface {
   /**
    * Check if a URL is cached
    */
-  match(url: string): Promise<Response | undefined>;
-  
+  match(url: string): Promise<Response | undefined>
+
   /**
    * Store a URL and its response
    */
-  put(url: string, response: Response): Promise<void>;
+  put(url: string, response: Response): Promise<void>
 }
 ```
 
 ### Example: Cloud Storage Cache (S3)
 
 ```javascript
-import { env, pipeline } from '@huggingface/transformers';
-import { S3Client, GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
-import { Readable } from 'stream';
+import { env, pipeline } from '@huggingface/transformers'
+import {
+  S3Client,
+  GetObjectCommand,
+  PutObjectCommand,
+} from '@aws-sdk/client-s3'
+import { Readable } from 'stream'
 
 class S3Cache {
   constructor(bucket, region = 'us-east-1') {
-    this.bucket = bucket;
-    this.s3 = new S3Client({ region });
+    this.bucket = bucket
+    this.s3 = new S3Client({ region })
   }
 
   async match(url) {
-    const key = this.urlToKey(url);
-    
+    const key = this.urlToKey(url)
+
     try {
       const command = new GetObjectCommand({
         Bucket: this.bucket,
-        Key: key
-      });
-      const response = await this.s3.send(command);
-      
+        Key: key,
+      })
+      const response = await this.s3.send(command)
+
       // Convert stream to buffer
-      const chunks = [];
+      const chunks = []
       for await (const chunk of response.Body) {
-        chunks.push(chunk);
+        chunks.push(chunk)
       }
-      const body = Buffer.concat(chunks);
-      
+      const body = Buffer.concat(chunks)
+
       return new Response(body, {
         status: 200,
-        headers: JSON.parse(response.Metadata.headers || '{}')
-      });
+        headers: JSON.parse(response.Metadata.headers || '{}'),
+      })
     } catch (error) {
-      if (error.name === 'NoSuchKey') return undefined;
-      throw error;
+      if (error.name === 'NoSuchKey') return undefined
+      throw error
     }
   }
 
   async put(url, response) {
-    const key = this.urlToKey(url);
-    const clonedResponse = response.clone();
-    const body = Buffer.from(await clonedResponse.arrayBuffer());
-    const headers = JSON.stringify(Object.fromEntries(response.headers.entries()));
+    const key = this.urlToKey(url)
+    const clonedResponse = response.clone()
+    const body = Buffer.from(await clonedResponse.arrayBuffer())
+    const headers = JSON.stringify(
+      Object.fromEntries(response.headers.entries()),
+    )
 
     const command = new PutObjectCommand({
       Bucket: this.bucket,
       Key: key,
       Body: body,
-      Metadata: { headers }
-    });
-    
-    await this.s3.send(command);
+      Metadata: { headers },
+    })
+
+    await this.s3.send(command)
   }
 
   urlToKey(url) {
     // Convert URL to S3 key (remove protocol, replace slashes)
-    return url.replace(/^https?:\/\//, '').replace(/\//g, '_');
+    return url.replace(/^https?:\/\//, '').replace(/\//g, '_')
   }
 }
 
 // Configure S3 cache
-env.useCustomCache = true;
-env.customCache = new S3Cache('my-transformers-cache', 'us-east-1');
-env.useFSCache = false;
+env.useCustomCache = true
+env.customCache = new S3Cache('my-transformers-cache', 'us-east-1')
+env.useFSCache = false
 
 // Use S3 cache
-const classifier = await pipeline('sentiment-analysis');
+const classifier = await pipeline('sentiment-analysis')
 ```
 
 ## Cache Configuration
@@ -250,22 +260,22 @@ const classifier = await pipeline('sentiment-analysis');
 Use environment variables to configure caching:
 
 ```javascript
-import { env } from '@huggingface/transformers';
+import { env } from '@huggingface/transformers'
 
 // Configure cache directory from environment
-env.cacheDir = process.env.TRANSFORMERS_CACHE || './.cache';
+env.cacheDir = process.env.TRANSFORMERS_CACHE || './.cache'
 
 // Disable caching in CI/CD
 if (process.env.CI === 'true') {
-  env.useFSCache = false;
-  env.useBrowserCache = false;
+  env.useFSCache = false
+  env.useBrowserCache = false
 }
 
 // Production: use pre-cached models
 if (process.env.NODE_ENV === 'production') {
-  env.allowRemoteModels = false;
-  env.allowLocalModels = true;
-  env.localModelPath = process.env.MODEL_PATH || '/app/models';
+  env.allowRemoteModels = false
+  env.allowLocalModels = true
+  env.localModelPath = process.env.MODEL_PATH || '/app/models'
 }
 ```
 
@@ -274,45 +284,45 @@ if (process.env.NODE_ENV === 'production') {
 #### Development: Enable All Caching
 
 ```javascript
-import { env } from '@huggingface/transformers';
+import { env } from '@huggingface/transformers'
 
-env.allowRemoteModels = true;
-env.useFSCache = true;         // Node.js
-env.useBrowserCache = true;    // Browser
-env.cacheDir = './.cache';
+env.allowRemoteModels = true
+env.useFSCache = true // Node.js
+env.useBrowserCache = true // Browser
+env.cacheDir = './.cache'
 ```
 
 #### Production: Local Models Only
 
 ```javascript
-import { env } from '@huggingface/transformers';
+import { env } from '@huggingface/transformers'
 
-env.allowRemoteModels = false;
-env.allowLocalModels = true;
-env.localModelPath = '/app/models';
-env.useFSCache = true;
+env.allowRemoteModels = false
+env.allowLocalModels = true
+env.localModelPath = '/app/models'
+env.useFSCache = true
 ```
 
 #### Testing: Disable Caching
 
 ```javascript
-import { env } from '@huggingface/transformers';
+import { env } from '@huggingface/transformers'
 
-env.useFSCache = false;
-env.useBrowserCache = false;
-env.allowRemoteModels = true; // Download every time
+env.useFSCache = false
+env.useBrowserCache = false
+env.allowRemoteModels = true // Download every time
 ```
 
 #### Hybrid: Cache + Remote Fallback
 
 ```javascript
-import { env } from '@huggingface/transformers';
+import { env } from '@huggingface/transformers'
 
 // Try local cache first, fall back to remote
-env.allowRemoteModels = true;
-env.allowLocalModels = true;
-env.useFSCache = true;
-env.localModelPath = './models';
+env.allowRemoteModels = true
+env.allowLocalModels = true
+env.useFSCache = true
+env.localModelPath = './models'
 ```
 
 ---
@@ -335,5 +345,6 @@ Transformers.js provides flexible caching options:
 6. Pre-download models for production deployments
 
 For more configuration options, see:
+
 - [Configuration Reference](./CONFIGURATION.md)
 - [Pipeline Options](./PIPELINE_OPTIONS.md)

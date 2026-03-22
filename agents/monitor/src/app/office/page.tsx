@@ -1,16 +1,16 @@
-"use client";
+'use client'
 
-import { useState, useEffect } from "react";
-import { useAgents } from "@/hooks/useAgents";
-import { useOffice } from "@/hooks/useOffice";
-import OfficeCanvasInner from "@/components/office/OfficeCanvas";
-import OfficeControls from "@/components/office/OfficeControls";
-import ChatWindow from "@/components/chat/ChatWindow";
-import type { AgentBehavior } from "@/lib/types";
-import { loadConfig, DEFAULT_OWNER } from "@/lib/config";
+import { useState, useEffect } from 'react'
+import { useAgents } from '@/hooks/useAgents'
+import { useOffice } from '@/hooks/useOffice'
+import OfficeCanvasInner from '@/components/office/OfficeCanvas'
+import OfficeControls from '@/components/office/OfficeControls'
+import ChatWindow from '@/components/chat/ChatWindow'
+import type { AgentBehavior } from '@/lib/types'
+import { loadConfig, DEFAULT_OWNER } from '@/lib/config'
 
 export default function OfficePage() {
-  const [chatAgent, setChatAgent] = useState<string | null>(null);
+  const [chatAgent, setChatAgent] = useState<string | null>(null)
 
   const {
     agents,
@@ -21,20 +21,23 @@ export default function OfficePage() {
     sendChat,
     setBehavior,
     loadChatHistory,
-  } = useAgents();
+  } = useAgents()
 
-  const { officeState, tick } = useOffice(agents, agentStates);
+  const { officeState, tick } = useOffice(agents, agentStates)
 
   const [ownerConfig] = useState(() => {
     if (typeof window !== 'undefined') {
-      return loadConfig().owner;
+      return loadConfig().owner
     }
-    return DEFAULT_OWNER;
-  });
-  const openAgent = chatAgent ? agents.find((a) => a.id === chatAgent) : null;
+    return DEFAULT_OWNER
+  })
+  const openAgent = chatAgent ? agents.find((a) => a.id === chatAgent) : null
 
   return (
-    <div className="h-screen flex flex-col bg-[var(--bg-primary)] overflow-hidden" data-theme="default">
+    <div
+      className="h-screen flex flex-col bg-[var(--bg-primary)] overflow-hidden"
+      data-theme="default"
+    >
       <div className="flex-1 relative flex items-center justify-center overflow-auto">
         <OfficeCanvasInner
           officeState={officeState}
@@ -68,5 +71,5 @@ export default function OfficePage() {
         />
       )}
     </div>
-  );
+  )
 }

@@ -4,16 +4,16 @@
 
 IPs change. Planes do not. Every device and service is assigned to one or more network planes.
 
-| Plane | Purpose | Range | Example |
-|-------|---------|-------|---------|
-| **LAN** | Local trust (home/office Wi-Fi) | `192.168.x.x` | `192.168.4.64` |
-| **Mesh** | Zero-trust identity (Tailscale) | `100.x.x.x` | `100.66.58.5` |
-| **Docker** | Internal container runtime | `172.17.x.x` / `172.18.x.x` | `172.17.0.1` |
-| **Public** | Internet-facing (attack surface) | Varies | `159.65.43.12` |
-| **IPv6 Global** | Modern internet | `2001:…` | `2001:1960:7000:…` |
-| **IPv6 Private** | Internal ULA | `fdxx:…` | `fdbc:b2ba:6fa5:…` |
-| **IPv6 Tailscale** | Mesh IPv6 | `fd7a:115c:a1e0:…` | `fd7a:115c:a1e0::…` |
-| **Loopback** | Self | `127.0.0.1` | `127.0.0.1` |
+| Plane              | Purpose                          | Range                       | Example             |
+| ------------------ | -------------------------------- | --------------------------- | ------------------- |
+| **LAN**            | Local trust (home/office Wi-Fi)  | `192.168.x.x`               | `192.168.4.64`      |
+| **Mesh**           | Zero-trust identity (Tailscale)  | `100.x.x.x`                 | `100.66.58.5`       |
+| **Docker**         | Internal container runtime       | `172.17.x.x` / `172.18.x.x` | `172.17.0.1`        |
+| **Public**         | Internet-facing (attack surface) | Varies                      | `159.65.43.12`      |
+| **IPv6 Global**    | Modern internet                  | `2001:…`                    | `2001:1960:7000:…`  |
+| **IPv6 Private**   | Internal ULA                     | `fdxx:…`                    | `fdbc:b2ba:6fa5:…`  |
+| **IPv6 Tailscale** | Mesh IPv6                        | `fd7a:115c:a1e0:…`          | `fd7a:115c:a1e0::…` |
+| **Loopback**       | Self                             | `127.0.0.1`                 | `127.0.0.1`         |
 
 ---
 
@@ -21,23 +21,24 @@ IPs change. Planes do not. Every device and service is assigned to one or more n
 
 ### Node: blackroad-pi (Primary)
 
-| Property | Value |
-|----------|-------|
-| **Hostname** | blackroad-pi / lucidia.local |
-| **Role** | Primary Pi node, Cloudflare tunnel, agent host |
-| **OS** | Debian (Raspberry Pi OS) |
-| **Capacity** | 7,500 agents |
+| Property     | Value                                          |
+| ------------ | ---------------------------------------------- |
+| **Hostname** | blackroad-pi / lucidia.local                   |
+| **Role**     | Primary Pi node, Cloudflare tunnel, agent host |
+| **OS**       | Debian (Raspberry Pi OS)                       |
+| **Capacity** | 7,500 agents                                   |
 
-| Plane | Address | Interface |
-|-------|---------|-----------|
-| LAN IPv4 | `192.168.4.64` | wlan0 |
-| Mesh IPv4 | `100.66.x.x` | tailscale0 |
-| Mesh IPv6 | `fd7a:115c:a1e0::x` | tailscale0 |
-| Docker Bridge | `172.17.0.1` | docker0 |
-| IPv6 ULA | `fdbc:b2ba:6fa5::x` | — |
-| IPv6 Global | `2001:1960:7000:9fcd::x` | — |
+| Plane         | Address                  | Interface  |
+| ------------- | ------------------------ | ---------- |
+| LAN IPv4      | `192.168.4.64`           | wlan0      |
+| Mesh IPv4     | `100.66.x.x`             | tailscale0 |
+| Mesh IPv6     | `fd7a:115c:a1e0::x`      | tailscale0 |
+| Docker Bridge | `172.17.0.1`             | docker0    |
+| IPv6 ULA      | `fdbc:b2ba:6fa5::x`      | —          |
+| IPv6 Global   | `2001:1960:7000:9fcd::x` | —          |
 
 **Services Running:**
+
 - Cloudflare Tunnel (QUIC, tunnel ID: `52915859-da18-4aa6-add5-7bd9fcac2e0b`)
 - Ollama (port 11434)
 - Agent runtime
@@ -47,19 +48,20 @@ IPs change. Planes do not. Every device and service is assigned to one or more n
 
 ### Node: aria64 (Octavia Pi)
 
-| Property | Value |
-|----------|-------|
-| **Hostname** | aria64 |
-| **Role** | Primary agent host (AI accelerator + NVMe) |
-| **OS** | Debian (Raspberry Pi OS) |
-| **Capacity** | 22,500 agents |
+| Property     | Value                                      |
+| ------------ | ------------------------------------------ |
+| **Hostname** | aria64                                     |
+| **Role**     | Primary agent host (AI accelerator + NVMe) |
+| **OS**       | Debian (Raspberry Pi OS)                   |
+| **Capacity** | 22,500 agents                              |
 
-| Plane | Address | Interface |
-|-------|---------|-----------|
-| LAN IPv4 | `192.168.4.38` | wlan0 |
-| Mesh IPv4 | `100.66.58.5` | tailscale0 |
+| Plane     | Address        | Interface  |
+| --------- | -------------- | ---------- |
+| LAN IPv4  | `192.168.4.38` | wlan0      |
+| Mesh IPv4 | `100.66.58.5`  | tailscale0 |
 
 **Services Running:**
+
 - Agent runtime (22,500 agent capacity)
 - AI accelerator workloads
 - NVMe storage
@@ -68,60 +70,60 @@ IPs change. Planes do not. Every device and service is assigned to one or more n
 
 ### Node: alice (Tertiary Pi)
 
-| Property | Value |
-|----------|-------|
+| Property     | Value                     |
+| ------------ | ------------------------- |
 | **Hostname** | alice / raspberrypi.local |
-| **Role** | Tertiary Pi node |
-| **OS** | Debian (Raspberry Pi OS) |
-| **User** | alice |
+| **Role**     | Tertiary Pi node          |
+| **OS**       | Debian (Raspberry Pi OS)  |
+| **User**     | alice                     |
 
-| Plane | Address | Interface |
-|-------|---------|-----------|
-| LAN IPv4 | `192.168.4.49` | wlan0 |
+| Plane    | Address        | Interface |
+| -------- | -------------- | --------- |
+| LAN IPv4 | `192.168.4.49` | wlan0     |
 
 ---
 
 ### Node: lucidia (Alternate)
 
-| Property | Value |
-|----------|-------|
-| **Hostname** | lucidia |
-| **Role** | Alternate/backup Pi instance |
-| **OS** | Debian (Raspberry Pi OS) |
-| **User** | lucidia |
+| Property     | Value                        |
+| ------------ | ---------------------------- |
+| **Hostname** | lucidia                      |
+| **Role**     | Alternate/backup Pi instance |
+| **OS**       | Debian (Raspberry Pi OS)     |
+| **User**     | lucidia                      |
 
-| Plane | Address | Interface |
-|-------|---------|-----------|
-| LAN IPv4 | `192.168.4.99` | wlan0 |
+| Plane    | Address        | Interface |
+| -------- | -------------- | --------- |
+| LAN IPv4 | `192.168.4.99` | wlan0     |
 
 ---
 
 ### Node: codex-infinity (DigitalOcean Droplet)
 
-| Property | Value |
-|----------|-------|
-| **Hostname** | blackroad os-infinity |
-| **Role** | Primary cloud server, failover |
-| **Provider** | DigitalOcean |
-| **Capacity** | Failover (0 default agents) |
+| Property     | Value                          |
+| ------------ | ------------------------------ |
+| **Hostname** | blackroad os-infinity          |
+| **Role**     | Primary cloud server, failover |
+| **Provider** | DigitalOcean                   |
+| **Capacity** | Failover (0 default agents)    |
 
-| Plane | Address | Interface |
-|-------|---------|-----------|
-| Public IPv4 | `159.65.43.12` | eth0 |
-| Mesh IPv4 | `100.66.x.x` | tailscale0 |
+| Plane       | Address        | Interface  |
+| ----------- | -------------- | ---------- |
+| Public IPv4 | `159.65.43.12` | eth0       |
+| Mesh IPv4   | `100.66.x.x`   | tailscale0 |
 
 ---
 
 ### Node: iPhone Koder (Mobile)
 
-| Property | Value |
-|----------|-------|
-| **Hostname** | iPhone Koder |
-| **Role** | Mobile development |
+| Property     | Value              |
+| ------------ | ------------------ |
+| **Hostname** | iPhone Koder       |
+| **Role**     | Mobile development |
 
-| Plane | Address | Interface |
-|-------|---------|-----------|
-| LAN IPv4 | `192.168.4.68` | Wi-Fi |
+| Plane    | Address        | Interface |
+| -------- | -------------- | --------- |
+| LAN IPv4 | `192.168.4.68` | Wi-Fi     |
 
 **Services:** HTTP server on port `8080`
 
@@ -129,21 +131,21 @@ IPs change. Planes do not. Every device and service is assigned to one or more n
 
 ## Cloudflare Tunnel
 
-| Property | Value |
-|----------|-------|
-| Tunnel ID | `52915859-da18-4aa6-add5-7bd9fcac2e0b` |
-| Tunnel Name | `blackroad` |
-| Status | Active |
-| Protocol | QUIC |
-| Edge Location | `dfw08` (Dallas) |
-| Running On | blackroad-pi (`192.168.4.64`) |
+| Property      | Value                                  |
+| ------------- | -------------------------------------- |
+| Tunnel ID     | `52915859-da18-4aa6-add5-7bd9fcac2e0b` |
+| Tunnel Name   | `blackroad`                            |
+| Status        | Active                                 |
+| Protocol      | QUIC                                   |
+| Edge Location | `dfw08` (Dallas)                       |
+| Running On    | blackroad-pi (`192.168.4.64`)          |
 
 ### Tunnel Routes
 
-| Public Domain | Local Target |
-|---------------|--------------|
+| Public Domain        | Local Target     |
+| -------------------- | ---------------- |
 | `agent.blackroad.ai` | `localhost:8080` |
-| `api.blackroad.ai` | `localhost:3000` |
+| `api.blackroad.ai`   | `localhost:3000` |
 
 ### Tunnel Service (systemd)
 
@@ -162,42 +164,42 @@ RestartSec=5s
 
 ### Standard Ports
 
-| Port | Service | Node | Protocol |
-|------|---------|------|----------|
-| 22 | SSH | All Pis | TCP |
-| 80 | HTTP | Workers, Pages | TCP |
-| 443 | HTTPS | Workers, Pages | TCP |
-| 3000 | API Server | blackroad-pi | TCP |
-| 8080 | Agent API / Koder | blackroad-pi, iPhone | TCP |
-| 8001 | Ollama Wrapper (with [MEMORY]) | blackroad-pi | TCP |
-| 8420 | MCP Bridge | localhost only | TCP |
-| 8787 | BlackRoad Gateway | localhost only | TCP |
-| 11434 | Ollama | blackroad-pi | TCP |
+| Port  | Service                        | Node                 | Protocol |
+| ----- | ------------------------------ | -------------------- | -------- |
+| 22    | SSH                            | All Pis              | TCP      |
+| 80    | HTTP                           | Workers, Pages       | TCP      |
+| 443   | HTTPS                          | Workers, Pages       | TCP      |
+| 3000  | API Server                     | blackroad-pi         | TCP      |
+| 8080  | Agent API / Koder              | blackroad-pi, iPhone | TCP      |
+| 8001  | Ollama Wrapper (with [MEMORY]) | blackroad-pi         | TCP      |
+| 8420  | MCP Bridge                     | localhost only       | TCP      |
+| 8787  | BlackRoad Gateway              | localhost only       | TCP      |
+| 11434 | Ollama                         | blackroad-pi         | TCP      |
 
 ### Railway Services
 
-| Port | Service | Project |
-|------|---------|---------|
+| Port | Service         | Project              |
+| ---- | --------------- | -------------------- |
 | 8080 | Default Railway | All Railway projects |
 
 ---
 
 ## Agent Distribution Map
 
-| Node | IP (LAN) | IP (Mesh) | Capacity | Role |
-|------|----------|-----------|----------|------|
-| aria64 | `192.168.4.38` | `100.66.58.5` | 22,500 | PRIMARY |
-| blackroad-pi | `192.168.4.64` | `100.66.x.x` | 7,500 | SECONDARY |
-| codex-infinity | `159.65.43.12` | `100.66.x.x` | 0 (failover) | FAILOVER |
+| Node           | IP (LAN)       | IP (Mesh)     | Capacity     | Role      |
+| -------------- | -------------- | ------------- | ------------ | --------- |
+| aria64         | `192.168.4.38` | `100.66.58.5` | 22,500       | PRIMARY   |
+| blackroad-pi   | `192.168.4.64` | `100.66.x.x`  | 7,500        | SECONDARY |
+| codex-infinity | `159.65.43.12` | `100.66.x.x`  | 0 (failover) | FAILOVER  |
 
 **Total Agent Capacity: 30,000**
 
-| Task Type | Count | Percentage |
-|-----------|-------|------------|
-| AI Research | 12,592 | 42% |
-| Code Deploy | 8,407 | 28% |
-| Infrastructure | 5,401 | 18% |
-| Monitoring | 3,600 | 12% |
+| Task Type      | Count  | Percentage |
+| -------------- | ------ | ---------- |
+| AI Research    | 12,592 | 42%        |
+| Code Deploy    | 8,407  | 28%        |
+| Infrastructure | 5,401  | 18%        |
+| Monitoring     | 3,600  | 12%        |
 
 ---
 
@@ -212,19 +214,19 @@ chad.ns.cloudflare.com
 
 ### Cloudflare DNS Records (Primary Zone: blackroad.io)
 
-| Type | Name | Target | Proxy |
-|------|------|--------|-------|
-| A | `blackroad.io` | Cloudflare Pages | Proxied |
-| CNAME | `agent` | Tunnel | Proxied |
-| CNAME | `api` | Tunnel | Proxied |
-| CNAME | `about` | Worker | Proxied |
-| CNAME | `admin` | Worker | Proxied |
-| CNAME | `agents` | Worker | Proxied |
-| CNAME | `ai` | Worker | Proxied |
-| CNAME | `dashboard` | Worker | Proxied |
-| CNAME | `docs` | Worker | Proxied |
-| CNAME | `dev` | Worker | Proxied |
-| *(41 subdomain workers total)* | | | |
+| Type                           | Name           | Target           | Proxy   |
+| ------------------------------ | -------------- | ---------------- | ------- |
+| A                              | `blackroad.io` | Cloudflare Pages | Proxied |
+| CNAME                          | `agent`        | Tunnel           | Proxied |
+| CNAME                          | `api`          | Tunnel           | Proxied |
+| CNAME                          | `about`        | Worker           | Proxied |
+| CNAME                          | `admin`        | Worker           | Proxied |
+| CNAME                          | `agents`       | Worker           | Proxied |
+| CNAME                          | `ai`           | Worker           | Proxied |
+| CNAME                          | `dashboard`    | Worker           | Proxied |
+| CNAME                          | `docs`         | Worker           | Proxied |
+| CNAME                          | `dev`          | Worker           | Proxied |
+| _(41 subdomain workers total)_ |                |                  |         |
 
 ---
 

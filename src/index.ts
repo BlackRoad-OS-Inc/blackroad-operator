@@ -6,5 +6,9 @@ export { createSpinner } from './core/spinner.js'
 export { formatTable } from './formatters/table.js'
 export { formatJson } from './formatters/json.js'
 export { brand } from './formatters/brand.js'
-export { collectSystemMetrics, probeService, probeAllServices } from './core/live-data.js'
+export {
+  collectSystemMetrics,
+  probeService,
+  probeAllServices,
+} from './core/live-data.js'
 export { analyzeBottlenecks } from './core/bottlenecks.js'

@@ -59,26 +59,27 @@ The agency has deep spatial computing expertise (XR developers, VisionOS enginee
 
 ### Market Size
 
-| Segment | 2026 Value | Growth |
-|---------|-----------|--------|
-| AI Orchestration Tools | $13.5B | 22.3% CAGR |
-| Autonomous AI Agents | $8.5B | 45.8% CAGR to $50.3B by 2030 |
-| Extended Reality | $10.64B | 40.95% CAGR |
-| Spatial Computing (broad) | $170-220B | Varies by definition |
+| Segment                   | 2026 Value | Growth                       |
+| ------------------------- | ---------- | ---------------------------- |
+| AI Orchestration Tools    | $13.5B     | 22.3% CAGR                   |
+| Autonomous AI Agents      | $8.5B      | 45.8% CAGR to $50.3B by 2030 |
+| Extended Reality          | $10.64B    | 40.95% CAGR                  |
+| Spatial Computing (broad) | $170-220B  | Varies by definition         |
 
 ### Competitive Landscape
 
 **AI Agent Orchestration (all 2D):**
 
-| Tool | Strength | UX Gap |
-|------|----------|--------|
-| LangChain/LangSmith | Graph-based orchestration, $39/user/mo | Flat dashboard; complex graphs unreadable at scale |
-| CrewAI | 100K+ developers, fast execution | CLI-first, minimal visual tooling |
-| Microsoft Agent Framework | Enterprise integration | Embedded in Azure portal, no standalone UI |
-| n8n | Visual workflow builder, $20-50/mo | 2D canvas struggles with agent relationships |
-| Flowise | Drag-and-drop AI flows | Limited to linear flows, no multi-agent monitoring |
+| Tool                      | Strength                               | UX Gap                                             |
+| ------------------------- | -------------------------------------- | -------------------------------------------------- |
+| LangChain/LangSmith       | Graph-based orchestration, $39/user/mo | Flat dashboard; complex graphs unreadable at scale |
+| CrewAI                    | 100K+ developers, fast execution       | CLI-first, minimal visual tooling                  |
+| Microsoft Agent Framework | Enterprise integration                 | Embedded in Azure portal, no standalone UI         |
+| n8n                       | Visual workflow builder, $20-50/mo     | 2D canvas struggles with agent relationships       |
+| Flowise                   | Drag-and-drop AI flows                 | Limited to linear flows, no multi-agent monitoring |
 
 **"Mission Control" Products (emerging, all 2D):**
+
 - cmd-deck: Kanban board for AI coding agents
 - Supervity Agent Command Center: Enterprise observability
 - OpenClaw Command Center: Agent fleet management
@@ -103,12 +104,12 @@ The agency has deep spatial computing expertise (XR developers, VisionOS enginee
 
 ### Target Personas and Pricing
 
-| Tier | Price | Target |
-|------|-------|--------|
-| Explorer | Free | Developers, solo builders (3 agents, WebXR viewer) |
-| Pro | $99/user/month | Small teams (25 agents, collaboration) |
-| Team | $249/user/month | Mid-market AI teams (unlimited agents, analytics) |
-| Enterprise | Custom ($2K-10K/mo) | Large enterprises (SSO, RBAC, on-prem, SLA) |
+| Tier       | Price               | Target                                             |
+| ---------- | ------------------- | -------------------------------------------------- |
+| Explorer   | Free                | Developers, solo builders (3 agents, WebXR viewer) |
+| Pro        | $99/user/month      | Small teams (25 agents, collaboration)             |
+| Team       | $249/user/month     | Mid-market AI teams (unlimited agents, analytics)  |
+| Enterprise | Custom ($2K-10K/mo) | Large enterprises (SSO, RBAC, on-prem, SLA)        |
 
 ### Recommended Phased Strategy
 
@@ -118,13 +119,13 @@ The agency has deep spatial computing expertise (XR developers, VisionOS enginee
 
 ### Key Risks
 
-| Risk | Severity |
-|------|----------|
-| Vision Pro installed base is critically small | HIGH |
-| "Spatial solution in search of a problem" -- is 3D actually 10x better than 2D? | HIGH |
-| Crowded "mission control" positioning (5+ products already) | MODERATE |
-| Enterprise spatial computing adoption still early | MODERATE |
-| Integration complexity across AI frameworks | MODERATE |
+| Risk                                                                            | Severity |
+| ------------------------------------------------------------------------------- | -------- |
+| Vision Pro installed base is critically small                                   | HIGH     |
+| "Spatial solution in search of a problem" -- is 3D actually 10x better than 2D? | HIGH     |
+| Crowded "mission control" positioning (5+ products already)                     | MODERATE |
+| Enterprise spatial computing adoption still early                               | MODERATE |
+| Integration complexity across AI frameworks                                     | MODERATE |
 
 ### Sources
 
@@ -174,19 +175,20 @@ An 8-service architecture with clear ownership boundaries, designed for horizont
 
 ### Tech Stack
 
-| Component | Technology | Rationale |
-|-----------|------------|-----------|
-| Orchestration Engine | **Rust** | Sub-ms scheduling, zero GC pauses, memory safety for agent sandboxing |
-| API Services | TypeScript / NestJS | Developer velocity for CRUD-heavy services |
-| VisionOS Client | Swift 6, SwiftUI, RealityKit | First-class spatial computing with Liquid Glass |
-| WebXR Client | TypeScript, React Three Fiber | Production-grade WebXR with React component model |
-| Message Broker | NATS JetStream | Lightweight, exactly-once delivery, simpler than Kafka |
-| Collaboration | Yjs (CRDT) + WebRTC | Conflict-free concurrent 3D graph editing |
-| Primary Database | PostgreSQL 16 | JSONB for flexible configs, Row-Level Security for tenant isolation |
+| Component            | Technology                    | Rationale                                                             |
+| -------------------- | ----------------------------- | --------------------------------------------------------------------- |
+| Orchestration Engine | **Rust**                      | Sub-ms scheduling, zero GC pauses, memory safety for agent sandboxing |
+| API Services         | TypeScript / NestJS           | Developer velocity for CRUD-heavy services                            |
+| VisionOS Client      | Swift 6, SwiftUI, RealityKit  | First-class spatial computing with Liquid Glass                       |
+| WebXR Client         | TypeScript, React Three Fiber | Production-grade WebXR with React component model                     |
+| Message Broker       | NATS JetStream                | Lightweight, exactly-once delivery, simpler than Kafka                |
+| Collaboration        | Yjs (CRDT) + WebRTC           | Conflict-free concurrent 3D graph editing                             |
+| Primary Database     | PostgreSQL 16                 | JSONB for flexible configs, Row-Level Security for tenant isolation   |
 
 ### Core Data Model
 
 14 tables covering:
+
 - **Identity & Access:** users, workspaces, team_memberships, api_keys
 - **Workflows:** workflows, workflow_versions, nodes, edges
 - **Executions:** executions, execution_steps, step_output_chunks
@@ -215,6 +217,7 @@ Built-in Node Types:
 ### WebSocket Channels
 
 Real-time streaming via WSS with:
+
 - Per-channel sequence numbers for ordering
 - Gap detection with replay requests
 - Snapshot recovery when >1000 events behind
@@ -222,24 +225,24 @@ Real-time streaming via WSS with:
 
 ### Security Architecture
 
-| Layer | Mechanism |
-|-------|-----------|
-| User Auth | OAuth 2.0 (GitHub, Google, Apple) + email/password + optional TOTP MFA |
-| API Keys | SHA-256 hashed, scoped, optional expiry |
-| Service-to-Service | mTLS via service mesh |
-| WebSocket Auth | One-time tickets with 30-second expiry |
-| Credential Storage | Envelope encryption (AES-256-GCM + AWS KMS) |
-| Code Sandboxing | gVisor/Firecracker microVMs (no network, 256MB RAM, 30s CPU) |
-| Tenant Isolation | PostgreSQL Row-Level Security + S3 IAM policies + NATS subject scoping |
+| Layer              | Mechanism                                                              |
+| ------------------ | ---------------------------------------------------------------------- |
+| User Auth          | OAuth 2.0 (GitHub, Google, Apple) + email/password + optional TOTP MFA |
+| API Keys           | SHA-256 hashed, scoped, optional expiry                                |
+| Service-to-Service | mTLS via service mesh                                                  |
+| WebSocket Auth     | One-time tickets with 30-second expiry                                 |
+| Credential Storage | Envelope encryption (AES-256-GCM + AWS KMS)                            |
+| Code Sandboxing    | gVisor/Firecracker microVMs (no network, 256MB RAM, 30s CPU)           |
+| Tenant Isolation   | PostgreSQL Row-Level Security + S3 IAM policies + NATS subject scoping |
 
 ### Scaling Targets
 
-| Metric | Year 1 | Year 2 |
-|--------|--------|--------|
-| Concurrent agent executions | 5,000 | 50,000 |
-| WebSocket connections | 10,000 | 100,000 |
-| P95 API latency | < 150ms | < 100ms |
-| P95 WS event latency | < 80ms | < 50ms |
+| Metric                      | Year 1  | Year 2  |
+| --------------------------- | ------- | ------- |
+| Concurrent agent executions | 5,000   | 50,000  |
+| WebSocket connections       | 10,000  | 100,000 |
+| P95 API latency             | < 150ms | < 100ms |
+| P95 WS event latency        | < 80ms  | < 50ms  |
 
 ### MVP Phases
 
@@ -263,6 +266,7 @@ Real-time streaming via WSS with:
 ### Name Validation
 
 "Nexus Spatial" is **validated as strong:**
+
 - "Nexus" connects to the NEXUS orchestration framework (Network of EXperts, Unified in Strategy)
 - "Nexus" independently means "central connection point" -- perfect for a command center
 - "Spatial" is the industry-standard descriptor Apple and the industry have normalized
@@ -271,13 +275,13 @@ Real-time streaming via WSS with:
 
 ### Brand Personality: The Commander
 
-| Trait | Expression | Avoids |
-|-------|------------|--------|
-| **Authoritative** | Clear, direct, technically precise | Hype, superlatives, vague futurism |
-| **Composed** | Clean design, measured pacing, white space | Urgency for urgency's sake, chaos |
-| **Pioneering** | Quiet pride, understated references to the new paradigm | "Revolutionary," "game-changing" |
-| **Precise** | Exact specs, real metrics, honest requirements | Vague claims, marketing buzzwords |
-| **Approachable** | Natural interaction language, spatial metaphors | Condescension, gatekeeping |
+| Trait             | Expression                                              | Avoids                             |
+| ----------------- | ------------------------------------------------------- | ---------------------------------- |
+| **Authoritative** | Clear, direct, technically precise                      | Hype, superlatives, vague futurism |
+| **Composed**      | Clean design, measured pacing, white space              | Urgency for urgency's sake, chaos  |
+| **Pioneering**    | Quiet pride, understated references to the new paradigm | "Revolutionary," "game-changing"   |
+| **Precise**       | Exact specs, real metrics, honest requirements          | Vague claims, marketing buzzwords  |
+| **Approachable**  | Natural interaction language, spatial metaphors         | Condescension, gatekeeping         |
 
 ### Taglines (Ranked)
 
@@ -291,14 +295,14 @@ Real-time streaming via WSS with:
 
 ### Color System
 
-| Color | Hex | Usage |
-|-------|-----|-------|
+| Color             | Hex       | Usage                                 |
+| ----------------- | --------- | ------------------------------------- |
 | Deep Space Indigo | `#1B1F3B` | Foundational dark canvas, backgrounds |
-| Nexus Blue | `#4A7BF7` | Signature brand, primary actions |
-| Signal Cyan | `#00D4FF` | Spatial highlights, data connections |
-| Command Green | `#00E676` | Healthy systems, success |
-| Alert Amber | `#FFB300` | Warnings, attention needed |
-| Critical Red | `#FF3D71` | Errors, failures |
+| Nexus Blue        | `#4A7BF7` | Signature brand, primary actions      |
+| Signal Cyan       | `#00D4FF` | Spatial highlights, data connections  |
+| Command Green     | `#00E676` | Healthy systems, success              |
+| Alert Amber       | `#FFB300` | Warnings, attention needed            |
+| Critical Red      | `#FF3D71` | Errors, failures                      |
 
 Usage ratio: Deep Space Indigo 60%, Nexus Blue 25%, Signal Cyan 10%, Semantic 5%.
 
@@ -327,23 +331,23 @@ Three directions for exploration:
 
 ```css
 :root {
-  --nxs-deep-space:       #1B1F3B;
-  --nxs-blue:             #4A7BF7;
-  --nxs-cyan:             #00D4FF;
-  --nxs-green:            #00E676;
-  --nxs-amber:            #FFB300;
-  --nxs-red:              #FF3D71;
-  --nxs-void:             #0A0E1A;
-  --nxs-slate-900:        #141829;
-  --nxs-slate-700:        #2A2F45;
-  --nxs-slate-500:        #4A5068;
-  --nxs-slate-300:        #8B92A8;
-  --nxs-slate-100:        #C8CCE0;
-  --nxs-cloud:            #E8EBF5;
-  --nxs-white:            #F8F9FC;
-  --nxs-font-primary:     'Inter', sans-serif;
-  --nxs-font-mono:        'JetBrains Mono', monospace;
-  --nxs-font-display:     'Space Grotesk', sans-serif;
+  --nxs-deep-space: #1b1f3b;
+  --nxs-blue: #4a7bf7;
+  --nxs-cyan: #00d4ff;
+  --nxs-green: #00e676;
+  --nxs-amber: #ffb300;
+  --nxs-red: #ff3d71;
+  --nxs-void: #0a0e1a;
+  --nxs-slate-900: #141829;
+  --nxs-slate-700: #2a2f45;
+  --nxs-slate-500: #4a5068;
+  --nxs-slate-300: #8b92a8;
+  --nxs-slate-100: #c8cce0;
+  --nxs-cloud: #e8ebf5;
+  --nxs-white: #f8f9fc;
+  --nxs-font-primary: 'Inter', sans-serif;
+  --nxs-font-mono: 'JetBrains Mono', monospace;
+  --nxs-font-display: 'Space Grotesk', sans-serif;
 }
 ```
 
@@ -359,28 +363,31 @@ Three directions for exploration:
 
 ### Pricing
 
-| Tier | Annual | Monthly | Target |
-|------|--------|---------|--------|
-| Explorer | Free | Free | 3 pipelines, WebXR preview, community |
-| Pro | $29/user/mo | $39/user/mo | Unlimited pipelines, VisionOS, 30-day history |
-| Team | $59/user/mo | $79/user/mo | Collaboration, RBAC, SSO, 90-day history |
-| Enterprise | Custom (~$150+) | Custom | Dedicated infra, SLA, on-prem option |
+| Tier       | Annual          | Monthly     | Target                                        |
+| ---------- | --------------- | ----------- | --------------------------------------------- |
+| Explorer   | Free            | Free        | 3 pipelines, WebXR preview, community         |
+| Pro        | $29/user/mo     | $39/user/mo | Unlimited pipelines, VisionOS, 30-day history |
+| Team       | $59/user/mo     | $79/user/mo | Collaboration, RBAC, SSO, 90-day history      |
+| Enterprise | Custom (~$150+) | Custom      | Dedicated infra, SLA, on-prem option          |
 
 Strategy: 14-day reverse trial (Pro features, then downgrade to Free). Target 5-8% free-to-paid conversion.
 
 ### 3-Phase GTM
 
 **Phase 1: Founder-Led Sales (Months 1-3)**
+
 - Target: Individual AI engineers at startups who use LangChain/CrewAI and own Vision Pro
 - Tactics: DM 200 high-profile AI engineers, weekly build-in-public posts, 30-second demo clips
 - Channels: X/Twitter, LinkedIn, AI-focused Discord servers, Reddit
 
 **Phase 2: Developer Community (Months 4-6)**
+
 - Product Hunt launch (timed for this phase, not Phase 1)
 - Hacker News Show HN, Dev.to articles, conference talks
 - Integration announcements with popular AI frameworks
 
 **Phase 3: Enterprise (Months 7-12)**
+
 - Apple enterprise referral pipeline, LinkedIn ABM campaigns
 - Enterprise case studies, analyst briefings (Gartner, Forrester)
 - First enterprise AE hire, SOC 2 compliance
@@ -395,6 +402,7 @@ Strategy: 14-day reverse trial (Pro features, then downgrade to Free). Target 5-
 ### Open-Source Strategy
 
 **Open-source (Apache 2.0):**
+
 - `nexus-spatial-sdk` -- TypeScript/Python SDK for connecting agent frameworks
 - `nexus-webxr-components` -- React Three Fiber component library for 3D pipelines
 - `nexus-agent-schemas` -- Standardized schemas for representing agent pipelines in 3D
@@ -403,27 +411,27 @@ Strategy: 14-day reverse trial (Pro features, then downgrade to Free). Target 5-
 
 ### Revenue Targets
 
-| Metric | Month 6 | Month 12 |
-|--------|---------|----------|
-| MRR | $8K-15K | $50K-80K |
-| Free accounts | 5,000 | 15,000 |
-| Paid seats | 300 | 1,200 |
-| Discord members | 2,000 | 5,000 |
-| GitHub stars (SDK) | 500 | 2,000 |
+| Metric             | Month 6 | Month 12 |
+| ------------------ | ------- | -------- |
+| MRR                | $8K-15K | $50K-80K |
+| Free accounts      | 5,000   | 15,000   |
+| Paid seats         | 300     | 1,200    |
+| Discord members    | 2,000   | 5,000    |
+| GitHub stars (SDK) | 500     | 2,000    |
 
 ### First $50K Budget
 
-| Category | Amount | % |
-|----------|--------|---|
-| Content Production | $12,000 | 24% |
-| Developer Relations | $10,000 | 20% |
-| Paid Acquisition Testing | $8,000 | 16% |
-| Community & Tools | $5,000 | 10% |
-| Product Hunt & Launch | $3,000 | 6% |
-| Open Source Maintenance | $3,000 | 6% |
-| PR & Outreach | $4,000 | 8% |
-| Partnerships | $2,000 | 4% |
-| Reserve | $3,000 | 6% |
+| Category                 | Amount  | %   |
+| ------------------------ | ------- | --- |
+| Content Production       | $12,000 | 24% |
+| Developer Relations      | $10,000 | 20% |
+| Paid Acquisition Testing | $8,000  | 16% |
+| Community & Tools        | $5,000  | 10% |
+| Product Hunt & Launch    | $3,000  | 6%  |
+| Open Source Maintenance  | $3,000  | 6%  |
+| PR & Outreach            | $4,000  | 8%  |
+| Partnerships             | $2,000  | 4%  |
+| Reserve                  | $3,000  | 6%  |
 
 ### Key Partnerships
 
@@ -447,12 +455,12 @@ Strategy: 14-day reverse trial (Pro features, then downgrade to Free). Target 5-
 
 ### Support Tier Structure
 
-| Attribute | Explorer (Free) | Builder (Pro) | Command (Enterprise) |
-|-----------|-----------------|---------------|---------------------|
-| First Response SLA | Best effort (48h) | 4 hours (business hours) | 30 min (P1), 2h (P2) |
-| Resolution SLA | 5 business days | 24h (P1/P2), 72h (P3) | 4h (P1), 12h (P2) |
-| Channels | Community, KB, AI assistant | + Live chat, email, video (2/mo) | + Dedicated Slack, named CSE, 24/7 |
-| Scope | General questions, docs | Technical troubleshooting, integrations | Full integration, custom design, compliance |
+| Attribute          | Explorer (Free)             | Builder (Pro)                           | Command (Enterprise)                        |
+| ------------------ | --------------------------- | --------------------------------------- | ------------------------------------------- |
+| First Response SLA | Best effort (48h)           | 4 hours (business hours)                | 30 min (P1), 2h (P2)                        |
+| Resolution SLA     | 5 business days             | 24h (P1/P2), 72h (P3)                   | 4h (P1), 12h (P2)                           |
+| Channels           | Community, KB, AI assistant | + Live chat, email, video (2/mo)        | + Dedicated Slack, named CSE, 24/7          |
+| Scope              | General questions, docs     | Technical troubleshooting, integrations | Full integration, custom design, compliance |
 
 ### Priority Definitions
 
@@ -466,6 +474,7 @@ Strategy: 14-day reverse trial (Pro features, then downgrade to Free). Target 5-
 The standout design decision: the support agent lives as a visible node **inside the user's spatial workspace**. It has full context of the user's layout, active agents, and recent errors.
 
 **Capabilities:**
+
 - Natural language Q&A about features
 - Real-time agent diagnostics ("Why is Agent X slow?")
 - Configuration suggestions ("Your topology would perform better as a mesh")
@@ -474,27 +483,28 @@ The standout design decision: the support agent lives as a visible node **inside
 
 **Self-Healing:**
 
-| Scenario | Detection | Auto-Resolution |
-|----------|-----------|-----------------|
-| Agent infinite loop | CPU/token spike | Kill and restart with last good config |
-| Rendering frame drop | FPS below threshold | Reduce visual fidelity, suggest closing panels |
-| Credential expiry | API 401 responses | Prompt re-auth, pause agents gracefully |
-| Communication timeout | Latency spike | Reroute messages through alternate path |
+| Scenario              | Detection           | Auto-Resolution                                |
+| --------------------- | ------------------- | ---------------------------------------------- |
+| Agent infinite loop   | CPU/token spike     | Kill and restart with last good config         |
+| Rendering frame drop  | FPS below threshold | Reduce visual fidelity, suggest closing panels |
+| Credential expiry     | API 401 responses   | Prompt re-auth, pause agents gracefully        |
+| Communication timeout | Latency spike       | Reroute messages through alternate path        |
 
 ### Onboarding Flow
 
 Adaptive onboarding based on user profiling:
 
-| AI Experience | Spatial Experience | Path |
-|---------------|-------------------|------|
-| Low | Low | Full guided tour (20 min) |
-| High | Low | Spatial-focused (12 min) |
-| Low | High | Agent-focused (12 min) |
-| High | High | Express setup (5 min) |
+| AI Experience | Spatial Experience | Path                      |
+| ------------- | ------------------ | ------------------------- |
+| Low           | Low                | Full guided tour (20 min) |
+| High          | Low                | Spatial-focused (12 min)  |
+| Low           | High               | Agent-focused (12 min)    |
+| High          | High               | Express setup (5 min)     |
 
 Critical first step: 60-second spatial calibration (hand tracking, gaze, comfort check) before any product interaction.
 
 **Activation Milestone** (user is "onboarded" when they have):
+
 - Created at least one custom agent
 - Connected two or more agents in a topology
 - Anchored at least one monitoring dashboard
@@ -502,11 +512,11 @@ Critical first step: 60-second spatial calibration (hand tracking, gaze, comfort
 
 ### Team Build
 
-| Phase | Headcount | Roles |
-|-------|-----------|-------|
-| Months 0-6 | 4 | Head of CX, 2 Support Engineers, Technical Writer |
-| Months 6-12 | 8 | + 2 Support Engineers, CSE, Community Manager, Ops Analyst |
-| Months 12-24 | 16 | + 4 Engineers (24/7), Spatial Specialist, Integration Specialist, KB Manager, Engineering Manager |
+| Phase        | Headcount | Roles                                                                                             |
+| ------------ | --------- | ------------------------------------------------------------------------------------------------- |
+| Months 0-6   | 4         | Head of CX, 2 Support Engineers, Technical Writer                                                 |
+| Months 6-12  | 8         | + 2 Support Engineers, CSE, Community Manager, Ops Analyst                                        |
+| Months 12-24 | 16        | + 4 Engineers (24/7), Spatial Specialist, Integration Specialist, KB Manager, Engineering Manager |
 
 ### Community: Discord-First
 
@@ -532,22 +542,26 @@ NEXUS SPATIAL DISCORD
 ### User Personas
 
 **Maya Chen -- AI Platform Engineer (32, San Francisco)**
+
 - Manages 15-30 active agent workflows, uses n8n + LangSmith
 - Spends 40% of time debugging agent failures via log inspection
 - Skeptical of spatial computing: "Is this actually faster, or just cooler?"
 - Primary need: Reduce mean-time-to-diagnosis from 45 min to under 10
 
 **David Okoro -- Technical Product Manager (38, London)**
+
 - Reviews and approves agent workflow designs, presents to C-suite
 - Cannot meaningfully contribute to workflow reviews because tools require code-level understanding
 - Primary need: Understand and communicate agent architectures without reading code
 
 **Dr. Amara Osei -- Research Scientist (45, Zurich)**
+
 - Designs multi-agent research workflows with A/B comparisons
 - Has 12 variations of the same pipeline with no good way to compare
 - Primary need: Side-by-side comparison of variant pipelines in 3D space
 
 **Jordan Rivera -- Creative Technologist (27, Austin)**
+
 - Daily Vision Pro user, builds AI-powered art installations
 - Wants tools that feel like instruments, not dashboards
 - Primary need: Build agent workflows quickly with immediate spatial feedback
@@ -572,22 +586,22 @@ Spatial adds value for **structural** tasks (placing, connecting, rearranging no
 
 ### Navigation Paradigm: 4-Level Semantic Zoom
 
-| Level | What You See |
-|-------|-------------|
-| Fleet View | All workflows as abstract shapes, color-coded by status |
-| Workflow View | Node graph with labels and connections |
-| Node View | Expanded configuration, recent I/O, status metrics |
-| Trace View | Full execution trace with data inspection |
+| Level         | What You See                                            |
+| ------------- | ------------------------------------------------------- |
+| Fleet View    | All workflows as abstract shapes, color-coded by status |
+| Workflow View | Node graph with labels and connections                  |
+| Node View     | Expanded configuration, recent I/O, status metrics      |
+| Trace View    | Full execution trace with data inspection               |
 
 ### Competitive UX Summary
 
-| Capability | n8n | Flowise | LangSmith | Langflow | Nexus Spatial Target |
-|-----------|-----|---------|-----------|----------|---------------------|
-| Visual workflow building | A | B+ | N/A | A | A+ (spatial) |
-| Debugging/tracing | C+ | C | A | B | A+ (spatial overlay) |
-| Monitoring | B | C | A | B | A (spatial fleet) |
-| Collaboration | D | D | C | D | A (spatial co-presence) |
-| Large workflow scalability | C | C | B | C | A (3D space) |
+| Capability                 | n8n | Flowise | LangSmith | Langflow | Nexus Spatial Target    |
+| -------------------------- | --- | ------- | --------- | -------- | ----------------------- |
+| Visual workflow building   | A   | B+      | N/A       | A        | A+ (spatial)            |
+| Debugging/tracing          | C+  | C       | A         | B        | A+ (spatial overlay)    |
+| Monitoring                 | B   | C       | A         | B        | A (spatial fleet)       |
+| Collaboration              | D   | D       | C         | D        | A (spatial co-presence) |
+| Large workflow scalability | C   | C       | B         | C        | A (3D space)            |
 
 ### Accessibility Requirements
 
@@ -600,12 +614,12 @@ Spatial adds value for **structural** tasks (placing, connecting, rearranging no
 
 ### Research Plan (16 Weeks)
 
-| Phase | Weeks | Studies |
-|-------|-------|---------|
-| Foundational | 1-4 | Mental model interviews (15-20 participants), competitive task analysis |
-| Concept Validation | 5-8 | Wizard-of-Oz spatial prototype testing, 3D card sort for IA |
-| Usability Testing | 9-14 | First-use experience (20 users), 4-week longitudinal diary study, paired collaboration testing |
-| Accessibility Audit | 12-16 | Expert heuristic evaluation, testing with users with disabilities |
+| Phase               | Weeks | Studies                                                                                        |
+| ------------------- | ----- | ---------------------------------------------------------------------------------------------- |
+| Foundational        | 1-4   | Mental model interviews (15-20 participants), competitive task analysis                        |
+| Concept Validation  | 5-8   | Wizard-of-Oz spatial prototype testing, 3D card sort for IA                                    |
+| Usability Testing   | 9-14  | First-use experience (20 users), 4-week longitudinal diary study, paired collaboration testing |
+| Accessibility Audit | 12-16 | Expert heuristic evaluation, testing with users with disabilities                              |
 
 ---
 
@@ -615,14 +629,14 @@ Spatial adds value for **structural** tasks (placing, connecting, rearranging no
 
 ### Timeline: 35 Weeks (March 9 -- November 6, 2026)
 
-| Phase | Weeks | Duration | Goal |
-|-------|-------|----------|------|
-| Discovery & Research | W1-3 | 3 weeks | Validate feasibility, define scope |
-| Foundation | W4-9 | 6 weeks | Core infrastructure, both platform shells, design system |
-| MVP Build | W10-19 | 10 weeks | Single-user agent command center with orchestration |
-| Beta | W20-27 | 8 weeks | Collaboration, polish, harden, 50-100 beta users |
-| Launch | W28-31 | 4 weeks | App Store + web launch, marketing push |
-| Scale | W32-35+ | Ongoing | Plugin marketplace, advanced features, growth |
+| Phase                | Weeks   | Duration | Goal                                                     |
+| -------------------- | ------- | -------- | -------------------------------------------------------- |
+| Discovery & Research | W1-3    | 3 weeks  | Validate feasibility, define scope                       |
+| Foundation           | W4-9    | 6 weeks  | Core infrastructure, both platform shells, design system |
+| MVP Build            | W10-19  | 10 weeks | Single-user agent command center with orchestration      |
+| Beta                 | W20-27  | 8 weeks  | Collaboration, polish, harden, 50-100 beta users         |
+| Launch               | W28-31  | 4 weeks  | App Store + web launch, marketing push                   |
+| Scale                | W32-35+ | Ongoing  | Plugin marketplace, advanced features, growth            |
 
 ### Critical Milestone: Week 12 (May 29)
 
@@ -646,34 +660,34 @@ Spatial adds value for **structural** tasks (placing, connecting, rearranging no
 
 5 squads operating across phases:
 
-| Squad | Core Members | Active Phases |
-|-------|-------------|---------------|
-| Core Architecture | Backend Architect, XR Interface Architect, Senior Dev, VisionOS Engineer | Discovery through MVP |
-| Spatial Experience | XR Immersive Dev, XR Cockpit Specialist, Metal Engineer, UX Architect, UI Designer | Foundation through Beta |
-| Orchestration | AI Engineer, Backend Architect, Senior Dev, API Tester | MVP through Beta |
-| Platform Delivery | Frontend Dev, Mobile App Builder, VisionOS Engineer, DevOps | MVP through Launch |
-| Launch | Growth Hacker, Content Creator, App Store Optimizer, Visual Storyteller, Brand Guardian | Beta through Scale |
+| Squad              | Core Members                                                                            | Active Phases           |
+| ------------------ | --------------------------------------------------------------------------------------- | ----------------------- |
+| Core Architecture  | Backend Architect, XR Interface Architect, Senior Dev, VisionOS Engineer                | Discovery through MVP   |
+| Spatial Experience | XR Immersive Dev, XR Cockpit Specialist, Metal Engineer, UX Architect, UI Designer      | Foundation through Beta |
+| Orchestration      | AI Engineer, Backend Architect, Senior Dev, API Tester                                  | MVP through Beta        |
+| Platform Delivery  | Frontend Dev, Mobile App Builder, VisionOS Engineer, DevOps                             | MVP through Launch      |
+| Launch             | Growth Hacker, Content Creator, App Store Optimizer, Visual Storyteller, Brand Guardian | Beta through Scale      |
 
 ### Top 5 Risks
 
-| Risk | Probability | Impact | Mitigation |
-|------|------------|--------|------------|
-| Apple rejects VisionOS app | Medium | Critical | Engage Apple Developer Relations Week 4, pre-review by Week 20 |
-| WebXR browser fragmentation | High | High | Browser support matrix Week 1, automated cross-browser tests |
-| Multi-user sync conflicts | Medium | High | CRDT-based sync (Yjs) from the start, prototype in Foundation |
-| Orchestration can't scale | Medium | Critical | Horizontal scaling from day one, load test at 10x by Week 22 |
-| RealityKit performance for 100+ nodes | Medium | High | Profile early, implement LOD culling, instanced rendering |
+| Risk                                  | Probability | Impact   | Mitigation                                                     |
+| ------------------------------------- | ----------- | -------- | -------------------------------------------------------------- |
+| Apple rejects VisionOS app            | Medium      | Critical | Engage Apple Developer Relations Week 4, pre-review by Week 20 |
+| WebXR browser fragmentation           | High        | High     | Browser support matrix Week 1, automated cross-browser tests   |
+| Multi-user sync conflicts             | Medium      | High     | CRDT-based sync (Yjs) from the start, prototype in Foundation  |
+| Orchestration can't scale             | Medium      | Critical | Horizontal scaling from day one, load test at 10x by Week 22   |
+| RealityKit performance for 100+ nodes | Medium      | High     | Profile early, implement LOD culling, instanced rendering      |
 
 ### Budget: $121,500 -- $155,500 (Non-Personnel)
 
-| Category | Estimated Cost |
-|----------|---------------|
-| Cloud infrastructure (35 weeks) | $35,000 - $45,000 |
-| Hardware (3 Vision Pro, 2 Quest 3, Mac Studio) | $17,500 |
-| Licenses and services | $15,000 - $20,000 |
-| External services (legal, security, PR) | $30,000 - $45,000 |
-| AI API costs (dev/test) | $8,000 |
-| Contingency (15%) | $16,000 - $20,000 |
+| Category                                       | Estimated Cost    |
+| ---------------------------------------------- | ----------------- |
+| Cloud infrastructure (35 weeks)                | $35,000 - $45,000 |
+| Hardware (3 Vision Pro, 2 Quest 3, Mac Studio) | $17,500           |
+| Licenses and services                          | $15,000 - $20,000 |
+| External services (legal, security, PR)        | $30,000 - $45,000 |
+| AI API costs (dev/test)                        | $8,000            |
+| Contingency (15%)                              | $16,000 - $20,000 |
 
 ---
 
@@ -711,11 +725,11 @@ The workspace is organized as a curved theater around the user:
 
 ### Three-Layer Depth System
 
-| Layer | Depth | Content | Opacity |
-|-------|-------|---------|---------|
-| Foreground | 0.8 - 1.2m | Active panels, inspectors, modals | 100% |
-| Midground | 1.2 - 2.5m | Node graph, connections, workspace | 100% |
-| Background | 2.5 - 5.0m | Overview map, ambient status | 40-70% |
+| Layer      | Depth      | Content                            | Opacity |
+| ---------- | ---------- | ---------------------------------- | ------- |
+| Foreground | 0.8 - 1.2m | Active panels, inspectors, modals  | 100%    |
+| Midground  | 1.2 - 2.5m | Node graph, connections, workspace | 100%    |
+| Background | 2.5 - 5.0m | Overview map, ambient status       | 40-70%  |
 
 ### Node Graph in 3D
 
@@ -733,11 +747,13 @@ USER (here)
 Parallel branches spread horizontally (x-axis). Conditional branches spread vertically (y-axis).
 
 **Node representation (3 LODs):**
+
 - **LOD-0** (resting, >1.5m): 12x8cm frosted glass rectangle with type icon, name, status glow
 - **LOD-1** (hover, 400ms gaze): Expands to 14x10cm, reveals ports, last-run info
 - **LOD-2** (selected): Slides to foreground, expands to 30x40cm detail panel with live config editing
 
 **Connections as luminous tubes:**
+
 - 4mm diameter at rest, 8mm when carrying data
 - Color-coded by data type (white=text, cyan=structured, magenta=images, amber=audio, green=tool calls)
 - Animated particles show flow direction and speed
@@ -745,32 +761,33 @@ Parallel branches spread horizontally (x-axis). Conditional branches spread vert
 
 ### 7 Agent States
 
-| State | Edge Glow | Interior | Sound | Particles |
-|-------|-----------|----------|-------|-----------|
-| Idle | Steady green, low | Static frosted glass | None | None |
-| Queued | Pulsing amber, 1Hz | Faint rotation | None | Slow drift at input |
-| Running | Steady blue, medium | Animated shimmer | Soft spatial hum | Rapid flow on connections |
-| Streaming | Blue + output stream | Shimmer + text fragments | Hum | Text fragments flowing forward |
-| Completed | Flash white, then green | Static | Completion chime | None |
-| Error | Pulsing red, 2Hz | Red tint | Alert tone (once) | None |
-| Paused | Steady amber | Freeze-frame + pause icon | None | Frozen in place |
+| State     | Edge Glow               | Interior                  | Sound             | Particles                      |
+| --------- | ----------------------- | ------------------------- | ----------------- | ------------------------------ |
+| Idle      | Steady green, low       | Static frosted glass      | None              | None                           |
+| Queued    | Pulsing amber, 1Hz      | Faint rotation            | None              | Slow drift at input            |
+| Running   | Steady blue, medium     | Animated shimmer          | Soft spatial hum  | Rapid flow on connections      |
+| Streaming | Blue + output stream    | Shimmer + text fragments  | Hum               | Text fragments flowing forward |
+| Completed | Flash white, then green | Static                    | Completion chime  | None                           |
+| Error     | Pulsing red, 2Hz        | Red tint                  | Alert tone (once) | None                           |
+| Paused    | Steady amber            | Freeze-frame + pause icon | None              | Frozen in place                |
 
 ### Interaction Model
 
-| Action | VisionOS | WebXR Controllers | Voice |
-|--------|----------|-------------------|-------|
-| Select node | Gaze + pinch | Point ray + trigger | "Select [name]" |
-| Move node | Pinch + drag | Grip + move | -- |
-| Connect ports | Pinch port + drag | Trigger port + drag | "Connect [A] to [B]" |
-| Pan workspace | Two-hand drag | Thumbstick | "Pan left/right" |
-| Zoom | Two-hand spread/pinch | Thumbstick push/pull | "Zoom in/out" |
-| Inspect node | Pinch + pull toward self | Double-trigger | "Inspect [name]" |
-| Run pipeline | Tap Shelf button | Trigger button | "Run pipeline" |
-| Undo | Two-finger double-tap | B button | "Undo" |
+| Action        | VisionOS                 | WebXR Controllers    | Voice                |
+| ------------- | ------------------------ | -------------------- | -------------------- |
+| Select node   | Gaze + pinch             | Point ray + trigger  | "Select [name]"      |
+| Move node     | Pinch + drag             | Grip + move          | --                   |
+| Connect ports | Pinch port + drag        | Trigger port + drag  | "Connect [A] to [B]" |
+| Pan workspace | Two-hand drag            | Thumbstick           | "Pan left/right"     |
+| Zoom          | Two-hand spread/pinch    | Thumbstick push/pull | "Zoom in/out"        |
+| Inspect node  | Pinch + pull toward self | Double-trigger       | "Inspect [name]"     |
+| Run pipeline  | Tap Shelf button         | Trigger button       | "Run pipeline"       |
+| Undo          | Two-finger double-tap    | B button             | "Undo"               |
 
 ### Collaboration Presence
 
 Each collaborator represented by:
+
 - **Head proxy:** Translucent sphere with profile image, rotates with head orientation
 - **Hand proxies:** Ghosted hand models showing pinch/grab states
 - **Gaze cone:** Subtle 10-degree cone showing where they're looking
@@ -780,24 +797,24 @@ Each collaborator represented by:
 
 ### Adaptive Layout
 
-| Environment | Node Scale | Max LOD-2 Nodes | Graph Z-Spread |
-|-------------|-----------|-----------------|----------------|
-| VisionOS Window | 4x3cm | 5 | 0.05m/layer |
-| VisionOS Immersive | 12x8cm | 15 | 0.3m/layer |
-| WebXR Desktop | 120x80px | 8 (overlays) | Perspective projection |
-| WebXR Immersive | 12x8cm | 12 | 0.3m/layer |
+| Environment        | Node Scale | Max LOD-2 Nodes | Graph Z-Spread         |
+| ------------------ | ---------- | --------------- | ---------------------- |
+| VisionOS Window    | 4x3cm      | 5               | 0.05m/layer            |
+| VisionOS Immersive | 12x8cm     | 15              | 0.3m/layer             |
+| WebXR Desktop      | 120x80px   | 8 (overlays)    | Perspective projection |
+| WebXR Immersive    | 12x8cm     | 12              | 0.3m/layer             |
 
 ### Transition Choreography
 
 All transitions serve wayfinding. Maximum 600ms for major transitions, 200ms for minor, 0ms for selection.
 
-| Transition | Duration | Key Motion |
-|-----------|----------|------------|
-| Overview to Focus | 600ms | Camera drifts to target, other regions fade to 30% |
-| Focus to Detail | 500ms | Node slides forward, expands, connections highlight |
-| Detail to Overview | 600ms | Panel collapses, node retreats, full topology visible |
-| Zone Switch | 500ms | Current slides out laterally, new slides in |
-| Window to Immersive | 1000ms | Borders dissolve, nodes expand to full spatial positions |
+| Transition          | Duration | Key Motion                                               |
+| ------------------- | -------- | -------------------------------------------------------- |
+| Overview to Focus   | 600ms    | Camera drifts to target, other regions fade to 30%       |
+| Focus to Detail     | 500ms    | Node slides forward, expands, connections highlight      |
+| Detail to Overview  | 600ms    | Panel collapses, node retreats, full topology visible    |
+| Zone Switch         | 500ms    | Current slides out laterally, new slides in              |
+| Window to Immersive | 1000ms   | Borders dissolve, nodes expand to full spatial positions |
 
 ### Comfort Measures
 
@@ -828,13 +845,13 @@ All transitions serve wayfinding. Maximum 600ms for major transitions, 200ms for
 
 ### Key Tensions to Resolve
 
-| Tension | Position A | Position B | Resolution Needed |
-|---------|-----------|-----------|-------------------|
-| **Pricing** | Growth Hacker: $29-59/user/mo | Trend Researcher: $99-249/user/mo | A/B test in beta |
-| **VisionOS priority** | Architecture: Phase 3 (Week 13+) | Spatial UI: Full spec ready | Build WebXR first, VisionOS when validated |
-| **Orchestration language** | Architecture: Rust | Project Plan: Not specified | Rust is correct for performance-critical DAG execution |
-| **MVP scope** | Architecture: 2D only in Phase 1 | Brand: Lead with spatial | 2D first, but ensure spatial is in every demo |
-| **Community platform** | Support: Discord-first | Marketing: Discord + open-source | Both -- Discord for community, GitHub for developer engagement |
+| Tension                    | Position A                       | Position B                        | Resolution Needed                                              |
+| -------------------------- | -------------------------------- | --------------------------------- | -------------------------------------------------------------- |
+| **Pricing**                | Growth Hacker: $29-59/user/mo    | Trend Researcher: $99-249/user/mo | A/B test in beta                                               |
+| **VisionOS priority**      | Architecture: Phase 3 (Week 13+) | Spatial UI: Full spec ready       | Build WebXR first, VisionOS when validated                     |
+| **Orchestration language** | Architecture: Rust               | Project Plan: Not specified       | Rust is correct for performance-critical DAG execution         |
+| **MVP scope**              | Architecture: 2D only in Phase 1 | Brand: Lead with spatial          | 2D first, but ensure spatial is in every demo                  |
+| **Community platform**     | Support: Discord-first           | Marketing: Discord + open-source  | Both -- Discord for community, GitHub for developer engagement |
 
 ### What This Exercise Demonstrates
 

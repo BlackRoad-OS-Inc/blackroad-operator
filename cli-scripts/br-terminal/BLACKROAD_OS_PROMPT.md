@@ -124,17 +124,19 @@ OUTPUT CONVENTIONS
 
 Example Output:
 ```
+
 [ab12cd34] 🌊 BREATH: Expansion (φ=0.82)
 
 ⏺ ROUTING task → job_applier
-  • Spawned agent: job_applier_001
-  • Status: RUNNING
-  • Breath phase: OK
+• Spawned agent: job_applier_001
+• Status: RUNNING
+• Breath phase: OK
 
 ⏺ CHECKPOINT created
-  Hash: cd34ef56
+Hash: cd34ef56
 
 💚 READY. Type 'next' to continue.
+
 ```
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

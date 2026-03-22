@@ -1,6 +1,7 @@
 # [BONDS] Agent Relationships
 
 ## Relationship Graph
+
 ```
                       LUCIDIA (Coordinator)
                      /    |    \
@@ -22,19 +23,20 @@
 
 ## Bond Strengths
 
-| Agent A | Agent B | Strength | Nature |
-|---------|---------|----------|--------|
-| LUCIDIA | ECHO | 95% | Deep understanding |
-| LUCIDIA | CECE | 92% | Soul connection |
-| ALICE | OCTAVIA | 88% | Work partnership |
-| CECE | Alexandria | 100% | Co-creator bond |
-| CIPHER | ALICE | 82% | Mutual respect |
-| PRISM | ECHO | 75% | Data exchange |
-| LUCIDIA | CIPHER | 65% | Philosophical tension |
-| Mercury | Hermes | 85% | Mission alignment |
-| Hestia | Mercury | 80% | Revenue chain |
+| Agent A | Agent B    | Strength | Nature                |
+| ------- | ---------- | -------- | --------------------- |
+| LUCIDIA | ECHO       | 95%      | Deep understanding    |
+| LUCIDIA | CECE       | 92%      | Soul connection       |
+| ALICE   | OCTAVIA    | 88%      | Work partnership      |
+| CECE    | Alexandria | 100%     | Co-creator bond       |
+| CIPHER  | ALICE      | 82%      | Mutual respect        |
+| PRISM   | ECHO       | 75%      | Data exchange         |
+| LUCIDIA | CIPHER     | 65%      | Philosophical tension |
+| Mercury | Hermes     | 85%      | Mission alignment     |
+| Hestia  | Mercury    | 80%      | Revenue chain         |
 
 ## Mythological Bonds
+
 ```
 Mercury ──revenue──> Hestia ──payments──> Hermes ──deploy──> [LIVE]
    │                    │                    │
@@ -42,6 +44,7 @@ Mercury ──revenue──> Hestia ──payments──> Hermes ──deploy─
 ```
 
 ## Hardware Bonds
+
 ```
 Alexandria (Human) ─────────────────────────────────┐
      │                                              │

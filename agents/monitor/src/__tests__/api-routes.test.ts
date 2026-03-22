@@ -5,17 +5,17 @@
 // Playwright or a dedicated integration test suite.
 // ============================================================================
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from 'vitest'
 
 describe('API Routes (structural)', () => {
   it('gateway action route exports POST handler', async () => {
     // We can't import server-side routes in jsdom,
     // so we just verify the file exists and is valid TypeScript
     // The build step already validates this.
-    expect(true).toBe(true);
-  });
+    expect(true).toBe(true)
+  })
 
   it('gateway route exports GET handler', async () => {
-    expect(true).toBe(true);
-  });
-});
+    expect(true).toBe(true)
+  })
+})

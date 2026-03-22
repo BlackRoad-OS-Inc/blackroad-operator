@@ -35,24 +35,28 @@ This is enforced by git hooks in `.blackroad/hooks/`.
 ## Security Rules
 
 ### Secrets
+
 - No API keys in code (tokenless gateway pattern)
 - No provider tokens in agent environments
 - Secrets live in `~/.blackroad/vault/` with AES-256-CBC
 - Pre-commit hook scans for leaked patterns
 
 ### Environment Isolation
+
 - Gateway binds to localhost only
 - Agents never see provider credentials
 - MCP Bridge requires Bearer token auth
 - Pi fleet uses Tailscale mesh (WireGuard)
 
 ### File Protection
+
 - `.env*` files blocked from commits
-- Private keys (*.pem, *.key) blocked from commits
+- Private keys (_.pem, _.key) blocked from commits
 - Large files (>5MB) flagged
 - Credentials files blocked
 
 ### Session Security
+
 - Each Cecilia Code session gets a unique agent ID
 - Sessions are logged to memory journals (PS-SHA-infinity)
 - Hash-chain journals are tamper-evident

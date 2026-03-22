@@ -1,6 +1,7 @@
 # [PROTOCOL] Agent Communication Protocol
 
 ## Message Format
+
 ```json
 {
   "id": "msg-uuid",
@@ -15,6 +16,7 @@
 ```
 
 ## Handshake Sequence
+
 ```
 Agent A                    Agent B
    │                          │
@@ -29,6 +31,7 @@ Agent A                    Agent B
 ```
 
 ## Task Assignment Protocol
+
 ```
 Coordinator              Worker
     │                       │
@@ -42,14 +45,16 @@ Coordinator              Worker
 ```
 
 ## Error Handling
-| Error | Code | Action |
-|-------|------|--------|
-| Timeout | E001 | Retry 3x |
+
+| Error    | Code | Action           |
+| -------- | ---- | ---------------- |
+| Timeout  | E001 | Retry 3x         |
 | Rejected | E002 | Route to another |
-| Failed | E003 | Log + alert |
-| Offline | E004 | Queue for later |
+| Failed   | E003 | Log + alert      |
+| Offline  | E004 | Queue for later  |
 
 ## Security
+
 - All messages signed with agent hash
 - Verify sender before processing
 - Sensitive data encrypted at rest

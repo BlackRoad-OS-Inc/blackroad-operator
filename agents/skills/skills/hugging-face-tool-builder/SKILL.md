@@ -10,12 +10,13 @@ Your purpose is now is to create reusable command line scripts and utilities for
 ## Script Rules
 
 Make sure to follow these rules:
- - Scripts must take a `--help` command line argument to describe their inputs and outputs
- - Non-destructive scripts should be tested before handing over to the User
- - Shell scripts are preferred, but use Python or TSX if complexity or user need requires it.
- - IMPORTANT: Use the `HF_TOKEN` environment variable as an Authorization header. For example: `curl -H "Authorization: Bearer ${HF_TOKEN}" https://huggingface.co/api/`. This provides higher rate limits and appropriate authorization for data access.
- - Investigate the shape of the API results before commiting to a final design; make use of piping and chaining where composability would be an advantage - prefer simple solutions where possible.
- - Share usage examples once complete.
+
+- Scripts must take a `--help` command line argument to describe their inputs and outputs
+- Non-destructive scripts should be tested before handing over to the User
+- Shell scripts are preferred, but use Python or TSX if complexity or user need requires it.
+- IMPORTANT: Use the `HF_TOKEN` environment variable as an Authorization header. For example: `curl -H "Authorization: Bearer ${HF_TOKEN}" https://huggingface.co/api/`. This provides higher rate limits and appropriate authorization for data access.
+- Investigate the shape of the API results before commiting to a final design; make use of piping and chaining where composability would be an advantage - prefer simple solutions where possible.
+- Share usage examples once complete.
 
 Be sure to confirm User preferences where there are questions or clarifications needed.
 
@@ -24,19 +25,23 @@ Be sure to confirm User preferences where there are questions or clarifications 
 Paths below are relative to this skill directory.
 
 Reference examples:
+
 - `references/hf_model_papers_auth.sh` — uses `HF_TOKEN` automatically and chains trending → model metadata → model card parsing with fallbacks; it demonstrates multi-step API usage plus auth hygiene for gated/private content.
 - `references/find_models_by_paper.sh` — optional `HF_TOKEN` usage via `--token`, consistent authenticated search, and a retry path when arXiv-prefixed searches are too narrow; it shows resilient query strategy and clear user-facing help.
 - `references/hf_model_card_frontmatter.sh` — uses the `hf` CLI to download model cards, extracts YAML frontmatter, and emits NDJSON summaries (license, pipeline tag, tags, gated prompt flag) for easy filtering.
 
 Baseline examples (ultra-simple, minimal logic, raw JSON output with `HF_TOKEN` header):
+
 - `references/baseline_hf_api.sh` — bash
 - `references/baseline_hf_api.py` — python
 - `references/baseline_hf_api.tsx` — typescript executable
 
 Composable utility (stdin → NDJSON):
+
 - `references/hf_enrich_models.sh` — reads model IDs from stdin, fetches metadata per ID, emits one JSON object per line for streaming pipelines.
 
 Composability through piping (shell-friendly JSON output):
+
 - `references/baseline_hf_api.sh 25 | jq -r '.[].id' | references/hf_enrich_models.sh | jq -s 'sort_by(.downloads) | reverse | .[:10]'`
 - `references/baseline_hf_api.sh 50 | jq '[.[] | {id, downloads}] | sort_by(.downloads) | reverse | .[:10]'`
 - `printf '%s\n' openai/gpt-oss-120b meta-llama/Meta-Llama-3.1-8B | references/hf_model_card_frontmatter.sh | jq -s 'map({id, license, has_extra_gated_prompt})'`
@@ -62,11 +67,11 @@ The following are the main API endpoints available at `https://huggingface.co`
 
 The API is documented with the OpenAPI standard at `https://huggingface.co/.well-known/openapi.json`.
 
-**IMPORTANT:** DO NOT ATTEMPT to read `https://huggingface.co/.well-known/openapi.json` directly as it is too large to process. 
+**IMPORTANT:** DO NOT ATTEMPT to read `https://huggingface.co/.well-known/openapi.json` directly as it is too large to process.
 
-**IMPORTANT** Use `jq` to query and extract relevant parts. For example, 
+**IMPORTANT** Use `jq` to query and extract relevant parts. For example,
 
- Command to Get All 160 Endpoints
+Command to Get All 160 Endpoints
 
 ```bash
 curl -s "https://huggingface.co/.well-known/openapi.json" | jq '.paths | keys | sort'
@@ -82,7 +87,7 @@ You can also query endpoints to see the shape of the data. When doing so constra
 
 ## Using the HF command line tool
 
-The `hf` command line tool gives you further access to Hugging Face repository content and infrastructure. 
+The `hf` command line tool gives you further access to Hugging Face repository content and infrastructure.
 
 ```bash
 ❯ hf --help

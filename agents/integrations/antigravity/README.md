@@ -21,6 +21,7 @@ Use the agency-frontend-developer skill to review this component.
 ```
 
 Available slugs follow the pattern `agency-<agent-name>`, e.g.:
+
 - `agency-frontend-developer`
 - `agency-backend-architect`
 - `agency-reality-checker`

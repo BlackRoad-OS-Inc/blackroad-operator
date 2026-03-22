@@ -46,16 +46,16 @@ The meeting will initialize with a system message confirming all agents can now 
 
 ## Features List
 
-| Feature | Description |
-|---------|-------------|
-| **One-Click Start** | Single button to initiate a multi-agent meeting |
-| **Real-Time Chat** | Send messages and receive agent responses instantly |
-| **Participant Display** | Shows all available agents with their emoji and name |
-| **Sub-Agent Detection** | Labels sub-agents with a "Sub-Agent" badge |
-| **Timestamp Tracking** | Each message shows time of delivery |
-| **Auto-Scroll** | Automatically scrolls to newest messages |
-| **Visual Meeting State** | Clear active/inactive visual states |
-| **Agent Count** | Displays number of available participants |
+| Feature                  | Description                                          |
+| ------------------------ | ---------------------------------------------------- |
+| **One-Click Start**      | Single button to initiate a multi-agent meeting      |
+| **Real-Time Chat**       | Send messages and receive agent responses instantly  |
+| **Participant Display**  | Shows all available agents with their emoji and name |
+| **Sub-Agent Detection**  | Labels sub-agents with a "Sub-Agent" badge           |
+| **Timestamp Tracking**   | Each message shows time of delivery                  |
+| **Auto-Scroll**          | Automatically scrolls to newest messages             |
+| **Visual Meeting State** | Clear active/inactive visual states                  |
+| **Agent Count**          | Displays number of available participants            |
 
 ---
 
@@ -64,20 +64,28 @@ The meeting will initialize with a system message confirming all agents can now 
 The AgentMeeting feature supports multiple collaboration modes:
 
 ### 🧠 Brainstorming Mode
+
 When you pose a question or idea, agents contribute various perspectives and suggestions. Example prompts:
+
 - "What are some ideas for optimizing our workflow?"
 - "How should we approach this new feature?"
 
 ### 🤝 Collaboration Mode
+
 Agents work together on a shared task, with each contributing their specialized knowledge. Example:
+
 - "Let's plan the architecture for this project"
 
 ### 📋 Planning Mode
+
 Use the meeting to coordinate project planning across multiple agents. Example:
+
 - "Create a task list for the next sprint"
 
 ### ✅ Decision Making Mode
+
 Present options to agents and gather consensus or recommendations. Example:
+
 - "Should we use TypeScript or JavaScript for this module?"
 
 ---
@@ -85,6 +93,7 @@ Present options to agents and gather consensus or recommendations. Example:
 ## Screenshots & UI Components
 
 ### Inactive State (Meeting Room)
+
 ```
 ┌─────────────────────────────────────────────────────┐
 │ 💬 Agent Meeting Room                    [Start]   │
@@ -101,6 +110,7 @@ Present options to agents and gather consensus or recommendations. Example:
 ```
 
 ### Active State (Meeting Chat)
+
 ```
 ┌─────────────────────────────────────────────────────┐
 │ 💬 Agent Meeting                         [End]     │
@@ -130,6 +140,7 @@ Present options to agents and gather consensus or recommendations. Example:
 ## Integration Details
 
 ### Component Location
+
 - **Main Component:** `src/components/meeting/AgentMeeting.tsx`
 - **Used In:** `src/app/page.tsx` (imported as `<AgentMeeting agents={agents} />`)
 
@@ -137,32 +148,36 @@ Present options to agents and gather consensus or recommendations. Example:
 
 ```typescript
 interface AgentMeetingProps {
-  agents?: any[];  // Array of available agent objects
+  agents?: any[] // Array of available agent objects
 }
 
 interface Message {
-  id: string;
-  agentId: string;
-  agentName: string;
-  agentEmoji: string;
-  content: string;
-  timestamp: number;
-  isSubAgent: boolean;
+  id: string
+  agentId: string
+  agentName: string
+  agentEmoji: string
+  content: string
+  timestamp: number
+  isSubAgent: boolean
 }
 ```
 
 ### State Management
+
 - `isMeetingActive` - Boolean tracking meeting state
 - `messages` - Array of Message objects for chat history
 - `inputMessage` - Current user input
 
 ### Dependencies
+
 - React (useState, useRef, useEffect)
 - Tailwind CSS for styling
 - CSS custom properties for theming
 
 ### Office Integration
+
 The meeting room is visualized in the pixel-art office view:
+
 - **Location:** Grid position (col: 14, row: 7)
 - **Zone:** `meeting_room` with 🤝 emoji
 - **Furniture:** Meeting chairs available via `drawMeetingChair`
@@ -172,16 +187,20 @@ The meeting room is visualized in the pixel-art office view:
 ## Technical Notes
 
 ### Message Flow
+
 1. User types and sends message
 2. Message added to local state with `agentId: 'user'`
 3. After 1.5s delay, random agent simulates response
 4. Response added to message thread
 
 ### Demo Mode
+
 In demo mode (when no real agents connected), the feature still works with simulated agent data.
 
 ### Theming
+
 Uses CSS custom properties:
+
 - `--bg-card` - Card background
 - `--bg-secondary` - Secondary background
 - `--border` - Border color

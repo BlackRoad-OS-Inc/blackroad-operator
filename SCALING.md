@@ -25,13 +25,13 @@ BlackRoad OS is designed to scale from a single-node development setup to a **30
 
 ### Scaling Targets
 
-| Phase | Agents | Infra Cost | Timeline |
-|-------|--------|------------|----------|
-| Development | 10-100 | $0 | Now |
-| Alpha | 100-1,000 | $500/mo | Q1 2026 |
-| Beta | 1,000-5,000 | $2,000/mo | Q1 2026 |
-| GA | 5,000-10,000 | $5,000/mo | Q2 2026 |
-| Scale | 10,000-30,000 | $15,000/mo | Q3 2026 |
+| Phase       | Agents        | Infra Cost | Timeline |
+| ----------- | ------------- | ---------- | -------- |
+| Development | 10-100        | $0         | Now      |
+| Alpha       | 100-1,000     | $500/mo    | Q1 2026  |
+| Beta        | 1,000-5,000   | $2,000/mo  | Q1 2026  |
+| GA          | 5,000-10,000  | $5,000/mo  | Q2 2026  |
+| Scale       | 10,000-30,000 | $15,000/mo | Q3 2026  |
 
 ### Scaling Dimensions
 
@@ -91,6 +91,7 @@ Requirements:
 ```
 
 **Setup:**
+
 ```bash
 # Start all services locally
 ./boot.sh
@@ -142,6 +143,7 @@ Requirements:
 ```
 
 **Deployment:**
+
 ```yaml
 # railway.yaml
 services:
@@ -333,29 +335,29 @@ spec:
         app: blackroad-api
     spec:
       containers:
-      - name: api
-        image: blackroad/api:latest
-        resources:
-          requests:
-            cpu: "2"
-            memory: "4Gi"
-          limits:
-            cpu: "4"
-            memory: "8Gi"
-        ports:
-        - containerPort: 8000
-        readinessProbe:
-          httpGet:
-            path: /health
-            port: 8000
-          initialDelaySeconds: 5
-          periodSeconds: 10
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 8000
-          initialDelaySeconds: 15
-          periodSeconds: 20
+        - name: api
+          image: blackroad/api:latest
+          resources:
+            requests:
+              cpu: '2'
+              memory: '4Gi'
+            limits:
+              cpu: '4'
+              memory: '8Gi'
+          ports:
+            - containerPort: 8000
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 20
 ---
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
@@ -369,18 +371,18 @@ spec:
   minReplicas: 5
   maxReplicas: 50
   metrics:
-  - type: Resource
-    resource:
-      name: cpu
-      target:
-        type: Utilization
-        averageUtilization: 70
-  - type: Resource
-    resource:
-      name: memory
-      target:
-        type: Utilization
-        averageUtilization: 80
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
 ```
 
 ### Auto-Scaling Rules
@@ -763,12 +765,12 @@ class CostCalculator:
 
 ### Cost by Scale
 
-| Scale | CPU | Memory | GPU | Storage | Network | Total |
-|-------|-----|--------|-----|---------|---------|-------|
-| 1K agents | $200 | $100 | $500 | $50 | $50 | $900/mo |
-| 5K agents | $800 | $400 | $2,000 | $200 | $200 | $3,600/mo |
-| 10K agents | $1,500 | $800 | $4,000 | $500 | $500 | $7,300/mo |
-| 30K agents | $4,000 | $2,000 | $10,000 | $1,500 | $1,500 | $19,000/mo |
+| Scale      | CPU    | Memory | GPU     | Storage | Network | Total      |
+| ---------- | ------ | ------ | ------- | ------- | ------- | ---------- |
+| 1K agents  | $200   | $100   | $500    | $50     | $50     | $900/mo    |
+| 5K agents  | $800   | $400   | $2,000  | $200    | $200    | $3,600/mo  |
+| 10K agents | $1,500 | $800   | $4,000  | $500    | $500    | $7,300/mo  |
+| 30K agents | $4,000 | $2,000 | $10,000 | $1,500  | $1,500  | $19,000/mo |
 
 ---
 
@@ -787,7 +789,7 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: "Agent count below target"
+          summary: 'Agent count below target'
 
       - alert: TaskQueueBacklog
         expr: blackroad_task_queue_length > 10000
@@ -795,7 +797,7 @@ groups:
         labels:
           severity: critical
         annotations:
-          summary: "Task queue backlog critical"
+          summary: 'Task queue backlog critical'
 
       - alert: GPUUtilizationLow
         expr: avg(blackroad_gpu_utilization) < 0.3
@@ -803,7 +805,7 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: "GPU utilization low - consider scaling down"
+          summary: 'GPU utilization low - consider scaling down'
 ```
 
 ### Scaling Dashboard
@@ -836,4 +838,4 @@ groups:
 
 ---
 
-*Last updated: 2026-02-05*
+_Last updated: 2026-02-05_

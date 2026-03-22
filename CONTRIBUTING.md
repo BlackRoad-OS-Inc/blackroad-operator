@@ -27,12 +27,14 @@ We pledge to make participation in our project a harassment-free experience for 
 ### Our Standards
 
 **Positive behaviors:**
+
 - Using welcoming and inclusive language
 - Being respectful of differing viewpoints
 - Gracefully accepting constructive criticism
 - Focusing on what is best for the community
 
 **Unacceptable behaviors:**
+
 - Trolling, insulting comments, personal attacks
 - Public or private harassment
 - Publishing others' private information
@@ -44,18 +46,19 @@ We pledge to make participation in our project a harassment-free experience for 
 
 ### Types of Contributions
 
-| Type | Description | Difficulty |
-|------|-------------|------------|
-| 🐛 Bug fixes | Fix reported issues | Easy-Medium |
-| 📝 Documentation | Improve docs, fix typos | Easy |
-| ✨ Features | Add new functionality | Medium-Hard |
-| 🧪 Tests | Add test coverage | Medium |
-| 🔧 Tooling | Improve dev experience | Medium |
-| 🎨 Design | UI/UX improvements | Medium |
+| Type             | Description             | Difficulty  |
+| ---------------- | ----------------------- | ----------- |
+| 🐛 Bug fixes     | Fix reported issues     | Easy-Medium |
+| 📝 Documentation | Improve docs, fix typos | Easy        |
+| ✨ Features      | Add new functionality   | Medium-Hard |
+| 🧪 Tests         | Add test coverage       | Medium      |
+| 🔧 Tooling       | Improve dev experience  | Medium      |
+| 🎨 Design        | UI/UX improvements      | Medium      |
 
 ### Good First Issues
 
 Look for issues labeled:
+
 - `good first issue` - Great for newcomers
 - `help wanted` - We need help!
 - `documentation` - Doc improvements
@@ -139,6 +142,7 @@ Follow [Conventional Commits](https://conventionalcommits.org/):
 ```
 
 **Types:**
+
 - `feat`: New feature
 - `fix`: Bug fix
 - `docs`: Documentation
@@ -148,6 +152,7 @@ Follow [Conventional Commits](https://conventionalcommits.org/):
 - `chore`: Maintenance
 
 **Examples:**
+
 ```
 feat(agents): add task retry mechanism
 
@@ -187,23 +192,28 @@ docs(readme): update installation instructions
 
 ```markdown
 ## Description
+
 Brief description of changes
 
 ## Type of Change
+
 - [ ] Bug fix
 - [ ] New feature
 - [ ] Breaking change
 - [ ] Documentation update
 
 ## Testing
+
 How has this been tested?
 
 ## Checklist
+
 - [ ] Tests added/updated
 - [ ] Documentation updated
 - [ ] No breaking changes (or documented)
 
 ## Related Issues
+
 Closes #123
 ```
 
@@ -216,11 +226,11 @@ Closes #123
 
 ### Review Timeline
 
-| PR Size | Expected Review Time |
-|---------|---------------------|
-| Small (<100 lines) | 1-2 days |
-| Medium (100-500 lines) | 2-5 days |
-| Large (>500 lines) | 5-10 days |
+| PR Size                | Expected Review Time |
+| ---------------------- | -------------------- |
+| Small (<100 lines)     | 1-2 days             |
+| Medium (100-500 lines) | 2-5 days             |
+| Large (>500 lines)     | 5-10 days            |
 
 ---
 
@@ -321,27 +331,27 @@ tests/
 describe('Agent', () => {
   describe('createAgent', () => {
     it('should create agent with valid config', async () => {
-      const config = { name: 'test', type: 'worker' };
-      const agent = await createAgent(config);
-      expect(agent.name).toBe('test');
-    });
+      const config = { name: 'test', type: 'worker' }
+      const agent = await createAgent(config)
+      expect(agent.name).toBe('test')
+    })
 
     it('should throw error with invalid config', async () => {
-      const config = { name: '' };
-      await expect(createAgent(config)).rejects.toThrow('Invalid config');
-    });
-  });
-});
+      const config = { name: '' }
+      await expect(createAgent(config)).rejects.toThrow('Invalid config')
+    })
+  })
+})
 ```
 
 ### Test Coverage
 
-| Component | Minimum Coverage |
-|-----------|-----------------|
-| Core logic | 80% |
-| API endpoints | 70% |
-| UI components | 60% |
-| Utilities | 90% |
+| Component     | Minimum Coverage |
+| ------------- | ---------------- |
+| Core logic    | 80%              |
+| API endpoints | 70%              |
+| UI components | 60%              |
+| Utilities     | 90%              |
 
 ---
 
@@ -368,12 +378,12 @@ describe('Agent', () => {
 
 ### Communication Channels
 
-| Channel | Purpose |
-|---------|---------|
-| GitHub Issues | Bug reports, features |
-| GitHub Discussions | Questions, ideas |
-| Discord | Real-time chat |
-| Email | Private matters |
+| Channel            | Purpose               |
+| ------------------ | --------------------- |
+| GitHub Issues      | Bug reports, features |
+| GitHub Discussions | Questions, ideas      |
+| Discord            | Real-time chat        |
+| Email              | Private matters       |
 
 ### Getting Help
 
@@ -385,6 +395,7 @@ describe('Agent', () => {
 ### Recognition
 
 Contributors are recognized in:
+
 - CONTRIBUTORS.md file
 - Release notes
 - Annual contributor spotlight
@@ -397,4 +408,4 @@ By contributing, you agree that your contributions will be licensed under the pr
 
 ---
 
-*Thank you for contributing to BlackRoad OS! 🖤🛣️*
+_Thank you for contributing to BlackRoad OS! 🖤🛣️_

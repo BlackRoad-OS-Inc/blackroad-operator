@@ -11,38 +11,41 @@ You're adding a major feature to an existing enterprise product. Compliance, sec
 ## Agent Roster
 
 ### Core Team
-| Agent | Role |
-|-------|------|
-| Agents Orchestrator | Pipeline controller |
-| Project Shepherd | Cross-functional coordination |
-| Senior Project Manager | Spec-to-task conversion |
-| Sprint Prioritizer | Backlog management |
-| UX Architect | Technical foundation |
-| UX Researcher | User validation |
-| UI Designer | Component design |
-| Frontend Developer | UI implementation |
-| Backend Architect | API and system integration |
-| Senior Developer | Complex implementation |
-| DevOps Automator | CI/CD and deployment |
-| Evidence Collector | Visual QA |
-| API Tester | Endpoint validation |
-| Reality Checker | Final quality gate |
-| Performance Benchmarker | Load testing |
+
+| Agent                   | Role                          |
+| ----------------------- | ----------------------------- |
+| Agents Orchestrator     | Pipeline controller           |
+| Project Shepherd        | Cross-functional coordination |
+| Senior Project Manager  | Spec-to-task conversion       |
+| Sprint Prioritizer      | Backlog management            |
+| UX Architect            | Technical foundation          |
+| UX Researcher           | User validation               |
+| UI Designer             | Component design              |
+| Frontend Developer      | UI implementation             |
+| Backend Architect       | API and system integration    |
+| Senior Developer        | Complex implementation        |
+| DevOps Automator        | CI/CD and deployment          |
+| Evidence Collector      | Visual QA                     |
+| API Tester              | Endpoint validation           |
+| Reality Checker         | Final quality gate            |
+| Performance Benchmarker | Load testing                  |
 
 ### Compliance & Governance
-| Agent | Role |
-|-------|------|
-| Legal Compliance Checker | Regulatory compliance |
-| Brand Guardian | Brand consistency |
-| Finance Tracker | Budget tracking |
+
+| Agent                       | Role                  |
+| --------------------------- | --------------------- |
+| Legal Compliance Checker    | Regulatory compliance |
+| Brand Guardian              | Brand consistency     |
+| Finance Tracker             | Budget tracking       |
 | Executive Summary Generator | Stakeholder reporting |
 
 ### Quality Assurance
-| Agent | Role |
-|-------|------|
-| Test Results Analyzer | Quality metrics |
-| Workflow Optimizer | Process improvement |
-| Experiment Tracker | A/B testing |
+
+| Agent                 | Role                |
+| --------------------- | ------------------- |
+| Test Results Analyzer | Quality metrics     |
+| Workflow Optimizer    | Process improvement |
+| Experiment Tracker    | A/B testing         |
 
 ## Execution Plan
 
@@ -126,32 +129,32 @@ Week 11: Final Judgment
 
 ## Stakeholder Communication Cadence
 
-| Audience | Frequency | Agent | Format |
-|----------|-----------|-------|--------|
+| Audience           | Frequency | Agent                       | Format                    |
+| ------------------ | --------- | --------------------------- | ------------------------- |
 | Executive sponsors | Bi-weekly | Executive Summary Generator | SCQA summary (≤500 words) |
-| Product team | Weekly | Project Shepherd | Status report |
-| Engineering team | Daily | Agents Orchestrator | Pipeline status |
-| Compliance team | Monthly | Legal Compliance Checker | Compliance status |
-| Finance | Monthly | Finance Tracker | Budget report |
+| Product team       | Weekly    | Project Shepherd            | Status report             |
+| Engineering team   | Daily     | Agents Orchestrator         | Pipeline status           |
+| Compliance team    | Monthly   | Legal Compliance Checker    | Compliance status         |
+| Finance            | Monthly   | Finance Tracker             | Budget report             |
 
 ## Quality Requirements
 
-| Requirement | Threshold | Verification |
-|-------------|-----------|-------------|
-| Code coverage | > 80% | Test Results Analyzer |
-| API response time | P95 < 200ms | Performance Benchmarker |
-| Accessibility | WCAG 2.1 AA | Evidence Collector |
-| Security | Zero critical vulnerabilities | Legal Compliance Checker |
-| Brand consistency | 95%+ adherence | Brand Guardian |
-| Spec compliance | 100% | Reality Checker |
-| Load handling | 10x current traffic | Performance Benchmarker |
+| Requirement       | Threshold                     | Verification             |
+| ----------------- | ----------------------------- | ------------------------ |
+| Code coverage     | > 80%                         | Test Results Analyzer    |
+| API response time | P95 < 200ms                   | Performance Benchmarker  |
+| Accessibility     | WCAG 2.1 AA                   | Evidence Collector       |
+| Security          | Zero critical vulnerabilities | Legal Compliance Checker |
+| Brand consistency | 95%+ adherence                | Brand Guardian           |
+| Spec compliance   | 100%                          | Reality Checker          |
+| Load handling     | 10x current traffic           | Performance Benchmarker  |
 
 ## Risk Management
 
-| Risk | Probability | Impact | Mitigation | Owner |
-|------|------------|--------|-----------|-------|
-| Integration complexity | High | High | Early integration testing, API Tester in every sprint | Backend Architect |
-| Scope creep | Medium | High | Sprint Prioritizer enforces MoSCoW, Project Shepherd manages changes | Sprint Prioritizer |
-| Compliance issues | Medium | Critical | Legal Compliance Checker involved from Day 1 | Legal Compliance Checker |
-| Performance regression | Medium | High | Performance Benchmarker tests every sprint | Performance Benchmarker |
-| Stakeholder misalignment | Low | High | Bi-weekly executive briefings, Project Shepherd coordination | Project Shepherd |
+| Risk                     | Probability | Impact   | Mitigation                                                           | Owner                    |
+| ------------------------ | ----------- | -------- | -------------------------------------------------------------------- | ------------------------ |
+| Integration complexity   | High        | High     | Early integration testing, API Tester in every sprint                | Backend Architect        |
+| Scope creep              | Medium      | High     | Sprint Prioritizer enforces MoSCoW, Project Shepherd manages changes | Sprint Prioritizer       |
+| Compliance issues        | Medium      | Critical | Legal Compliance Checker involved from Day 1                         | Legal Compliance Checker |
+| Performance regression   | Medium      | High     | Performance Benchmarker tests every sprint                           | Performance Benchmarker  |
+| Stakeholder misalignment | Low         | High     | Bi-weekly executive briefings, Project Shepherd coordination         | Project Shepherd         |

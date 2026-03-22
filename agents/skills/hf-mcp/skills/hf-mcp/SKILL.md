@@ -155,18 +155,18 @@ hf_jobs(operation="scheduled uv", args={
 
 ## Tool Selection Guide
 
-| Goal | Tool |
-|------|------|
-| Find models | `model_search` |
-| Find datasets | `dataset_search` |
-| Find Spaces/apps | `space_search` |
-| Find papers | `paper_search` |
-| Get repo README/details | `hub_repo_details` |
-| Learn library usage | `hf_doc_search` → `hf_doc_fetch` |
-| Run code on GPU/CPU | `hf_jobs` |
-| Use Gradio apps as tools | `dynamic_space` |
-| Generate images | `gr1_flux1_schnell_infer` or `dynamic_space` |
-| Check auth | `hf_whoami` |
+| Goal                     | Tool                                         |
+| ------------------------ | -------------------------------------------- |
+| Find models              | `model_search`                               |
+| Find datasets            | `dataset_search`                             |
+| Find Spaces/apps         | `space_search`                               |
+| Find papers              | `paper_search`                               |
+| Get repo README/details  | `hub_repo_details`                           |
+| Learn library usage      | `hf_doc_search` → `hf_doc_fetch`             |
+| Run code on GPU/CPU      | `hf_jobs`                                    |
+| Use Gradio apps as tools | `dynamic_space`                              |
+| Generate images          | `gr1_flux1_schnell_infer` or `dynamic_space` |
+| Check auth               | `hf_whoami`                                  |
 
 ## Tips
 

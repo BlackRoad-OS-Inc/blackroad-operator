@@ -19,6 +19,7 @@ Validate the opportunity before committing resources. No building until the prob
 ### Wave 1: Parallel Launch (Day 1)
 
 #### 🔍 Trend Researcher — Market Intelligence Lead
+
 ```
 Activate Trend Researcher for market intelligence on [PROJECT DOMAIN].
 
@@ -35,6 +36,7 @@ Timeline: 3 days
 ```
 
 #### 💬 Feedback Synthesizer — User Needs Analysis
+
 ```
 Activate Feedback Synthesizer for user needs analysis on [PROJECT DOMAIN].
 
@@ -50,6 +52,7 @@ Timeline: 3 days
 ```
 
 #### 🔍 UX Researcher — User Behavior Analysis
+
 ```
 Activate UX Researcher for user behavior analysis on [PROJECT DOMAIN].
 
@@ -67,6 +70,7 @@ Timeline: 5 days
 ### Wave 2: Parallel Launch (Day 1, independent of Wave 1)
 
 #### 📊 Analytics Reporter — Data Landscape Assessment
+
 ```
 Activate Analytics Reporter for data landscape assessment on [PROJECT DOMAIN].
 
@@ -82,6 +86,7 @@ Timeline: 2 days
 ```
 
 #### ⚖️ Legal Compliance Checker — Regulatory Scan
+
 ```
 Activate Legal Compliance Checker for regulatory scan on [PROJECT DOMAIN].
 
@@ -97,6 +102,7 @@ Timeline: 3 days
 ```
 
 #### 🛠️ Tool Evaluator — Technology Landscape
+
 ```
 Activate Tool Evaluator for technology landscape assessment on [PROJECT DOMAIN].
 
@@ -133,14 +139,14 @@ Include: Quantified market opportunity, validated user needs, regulatory path, t
 
 ## Quality Gate Checklist
 
-| # | Criterion | Evidence Source | Status |
-|---|-----------|----------------|--------|
-| 1 | Market opportunity validated with TAM > minimum viable threshold | Trend Researcher report | ☐ |
-| 2 | ≥3 validated user pain points with supporting data | Feedback Synthesizer + UX Researcher | ☐ |
-| 3 | No blocking compliance issues identified | Legal Compliance Checker matrix | ☐ |
-| 4 | Key metrics and data sources identified | Analytics Reporter audit | ☐ |
-| 5 | Technology stack feasible and assessed | Tool Evaluator assessment | ☐ |
-| 6 | Executive summary delivered with GO/NO-GO recommendation | Executive Summary Generator | ☐ |
+| #   | Criterion                                                        | Evidence Source                      | Status |
+| --- | ---------------------------------------------------------------- | ------------------------------------ | ------ |
+| 1   | Market opportunity validated with TAM > minimum viable threshold | Trend Researcher report              | ☐      |
+| 2   | ≥3 validated user pain points with supporting data               | Feedback Synthesizer + UX Researcher | ☐      |
+| 3   | No blocking compliance issues identified                         | Legal Compliance Checker matrix      | ☐      |
+| 4   | Key metrics and data sources identified                          | Analytics Reporter audit             | ☐      |
+| 5   | Technology stack feasible and assessed                           | Tool Evaluator assessment            | ☐      |
+| 6   | Executive summary delivered with GO/NO-GO recommendation         | Executive Summary Generator          | ☐      |
 
 ## Gate Decision
 
@@ -154,6 +160,7 @@ Include: Quantified market opportunity, validated user needs, regulatory path, t
 ## Phase 0 → Phase 1 Handoff Package
 
 ### Documents to carry forward:
+
 1. Market Analysis Report (Trend Researcher)
 2. Synthesized Feedback Report (Feedback Synthesizer)
 3. User Personas and Journey Maps (UX Researcher)
@@ -163,11 +170,13 @@ Include: Quantified market opportunity, validated user needs, regulatory path, t
 7. Executive Summary with GO decision (Executive Summary Generator)
 
 ### Key constraints identified:
+
 - [Regulatory constraints from Legal Compliance Checker]
 - [Technical constraints from Tool Evaluator]
 - [Market timing constraints from Trend Researcher]
 
 ### Priority user needs (for Sprint Prioritizer):
+
 1. [Pain point 1 — from Feedback Synthesizer]
 2. [Pain point 2 — from UX Researcher]
 3. [Pain point 3 — from Feedback Synthesizer]
@@ -175,4 +184,4 @@ Include: Quantified market opportunity, validated user needs, regulatory path, t
 
 ---
 
-*Phase 0 is complete when the Executive Summary Generator delivers a GO decision with supporting evidence from all six discovery agents.*
+_Phase 0 is complete when the Executive Summary Generator delivers a GO decision with supporting evidence from all six discovery agents._

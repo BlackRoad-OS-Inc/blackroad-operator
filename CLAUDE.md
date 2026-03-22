@@ -87,17 +87,17 @@ src/bin/br.ts  →  src/cli/commands/index.ts  →  individual command files
 
 ### CLI Commands
 
-| Command | File | Status | Description |
-|---------|------|--------|-------------|
-| `br status` | `cli/commands/status.ts` | Working | Query gateway health + list agents |
-| `br agents` | `cli/commands/agents.ts` | Working | List agents (table or `--json`) |
-| `br invoke` | `cli/commands/invoke.ts` | Working | Invoke agent with a task |
-| `br gateway health` | `cli/commands/gateway.ts` | Working | Check gateway status |
-| `br gateway url` | `cli/commands/gateway.ts` | Working | Show gateway URL |
-| `br config` | `cli/commands/config.ts` | Working | View/set configuration |
-| `br deploy` | `cli/commands/deploy.ts` | Stub | Deployment (not yet implemented) |
-| `br init` | `cli/commands/init.ts` | Stub | Project scaffolding (not yet implemented) |
-| `br logs` | `cli/commands/logs.ts` | Stub | Log tailing (not yet implemented) |
+| Command             | File                      | Status  | Description                               |
+| ------------------- | ------------------------- | ------- | ----------------------------------------- |
+| `br status`         | `cli/commands/status.ts`  | Working | Query gateway health + list agents        |
+| `br agents`         | `cli/commands/agents.ts`  | Working | List agents (table or `--json`)           |
+| `br invoke`         | `cli/commands/invoke.ts`  | Working | Invoke agent with a task                  |
+| `br gateway health` | `cli/commands/gateway.ts` | Working | Check gateway status                      |
+| `br gateway url`    | `cli/commands/gateway.ts` | Working | Show gateway URL                          |
+| `br config`         | `cli/commands/config.ts`  | Working | View/set configuration                    |
+| `br deploy`         | `cli/commands/deploy.ts`  | Stub    | Deployment (not yet implemented)          |
+| `br init`           | `cli/commands/init.ts`    | Stub    | Project scaffolding (not yet implemented) |
+| `br logs`           | `cli/commands/logs.ts`    | Stub    | Log tailing (not yet implemented)         |
 
 ### Core Modules
 
@@ -128,18 +128,18 @@ Exports: `GatewayClient`, `loadConfig`, `logger`, `createSpinner`, `formatTable`
 
 ### Tech Stack
 
-| Tool | Version | Purpose |
-|------|---------|---------|
-| TypeScript | 5.7+ | Source language |
-| Node.js | 22+ | Runtime (required) |
-| Commander | 13.x | CLI framework |
-| Chalk | 5.x | Terminal colors |
-| Conf | 13.x | Config persistence |
-| Ora | 8.x | Spinners |
-| Vitest | 3.x | Test runner |
-| Prettier | 3.x | Code formatting |
-| tsx | 4.x | Dev-time TypeScript execution |
-| Wrangler | 4.x | Cloudflare Workers (dev dep) |
+| Tool       | Version | Purpose                       |
+| ---------- | ------- | ----------------------------- |
+| TypeScript | 5.7+    | Source language               |
+| Node.js    | 22+     | Runtime (required)            |
+| Commander  | 13.x    | CLI framework                 |
+| Chalk      | 5.x     | Terminal colors               |
+| Conf       | 13.x    | Config persistence            |
+| Ora        | 8.x     | Spinners                      |
+| Vitest     | 3.x     | Test runner                   |
+| Prettier   | 3.x     | Code formatting               |
+| tsx        | 4.x     | Dev-time TypeScript execution |
+| Wrangler   | 4.x     | Cloudflare Workers (dev dep)  |
 
 ### Commands
 
@@ -206,6 +206,7 @@ Tests use `vi.stubGlobal('fetch', ...)` for mocking HTTP requests.
 Triggers on push/PR to `main`. Runs on **self-hosted ARM64 runners** (Raspberry Pi fleet — $0 billable minutes).
 
 **Jobs:**
+
 1. **ShellCheck** — Lints all `.sh` files with `--severity=warning` (continue-on-error)
 2. **CLI Tests** — `npm install` + `npm test` + `br` syntax validation (continue-on-error)
 
@@ -215,15 +216,15 @@ Triggers on version tags (`v*`). Builds, packs (`npm pack`), and publishes `.tgz
 
 ### Autonomous Workflows
 
-| Workflow | Purpose |
-|----------|---------|
-| `autonomous-orchestrator.yml` | Multi-service orchestration |
-| `autonomous-self-healer.yml` | Auto-remediation |
-| `autonomous-issue-manager.yml` | Issue automation |
-| `autonomous-dependency-manager.yml` | Dependency updates |
-| `autonomous-cross-repo.yml` | Cross-repo automation |
-| `check-dependencies.yml` | Dependency validation |
-| `workflow-index-sync.yml` | Cross-repo workflow indexing |
+| Workflow                            | Purpose                      |
+| ----------------------------------- | ---------------------------- |
+| `autonomous-orchestrator.yml`       | Multi-service orchestration  |
+| `autonomous-self-healer.yml`        | Auto-remediation             |
+| `autonomous-issue-manager.yml`      | Issue automation             |
+| `autonomous-dependency-manager.yml` | Dependency updates           |
+| `autonomous-cross-repo.yml`         | Cross-repo automation        |
+| `check-dependencies.yml`            | Dependency validation        |
+| `workflow-index-sync.yml`           | Cross-repo workflow indexing |
 
 ---
 
@@ -253,32 +254,32 @@ esac
 
 ### Shell Libraries (`lib/`)
 
-| Library | Purpose |
-|---------|---------|
-| `colors.sh` | Terminal color definitions |
-| `config.sh` | Configuration helpers |
-| `db.sh` | SQLite database helpers |
-| `errors.sh` | Error handling |
-| `system.sh` | System utilities |
-| `ollama.sh` | Ollama API integration |
-| `services.sh` | Service management |
+| Library       | Purpose                    |
+| ------------- | -------------------------- |
+| `colors.sh`   | Terminal color definitions |
+| `config.sh`   | Configuration helpers      |
+| `db.sh`       | SQLite database helpers    |
+| `errors.sh`   | Error handling             |
+| `system.sh`   | System utilities           |
+| `ollama.sh`   | Ollama API integration     |
+| `services.sh` | Service management         |
 
 ### Key Tool Categories (90 tools)
 
-| Category | Tools |
-|----------|-------|
-| **Agents** | agent-gateway, agent-router, agent-runtime, agent-tasks, agents-live |
-| **AI** | ai, coding-assistant, context-radar, pair-programming, talk |
-| **Git** | git-ai, git-integration |
-| **DevOps** | deploy-cmd, deploy-manager, docker-manager, ci-pipeline |
-| **Cloud** | cloudflare, vercel-pro, ocean-droplets, worker-bridge |
-| **Database** | db-client |
-| **Monitoring** | health-check, metrics-dashboard, perf-monitor, web-monitor, status-all |
-| **Security** | security-scanner, security-hardening, secrets-vault, compliance-scanner, ssl-manager |
-| **Pi** | pi, pi-manager, fleet |
-| **Identity** | cece-identity, whoami |
-| **Comms** | email, mail, notifications, notify, broadcast |
-| **Utils** | search, smart-search, file-finder, snippet-manager, quick-notes, task-manager |
+| Category       | Tools                                                                                |
+| -------------- | ------------------------------------------------------------------------------------ |
+| **Agents**     | agent-gateway, agent-router, agent-runtime, agent-tasks, agents-live                 |
+| **AI**         | ai, coding-assistant, context-radar, pair-programming, talk                          |
+| **Git**        | git-ai, git-integration                                                              |
+| **DevOps**     | deploy-cmd, deploy-manager, docker-manager, ci-pipeline                              |
+| **Cloud**      | cloudflare, vercel-pro, ocean-droplets, worker-bridge                                |
+| **Database**   | db-client                                                                            |
+| **Monitoring** | health-check, metrics-dashboard, perf-monitor, web-monitor, status-all               |
+| **Security**   | security-scanner, security-hardening, secrets-vault, compliance-scanner, ssl-manager |
+| **Pi**         | pi, pi-manager, fleet                                                                |
+| **Identity**   | cece-identity, whoami                                                                |
+| **Comms**      | email, mail, notifications, notify, broadcast                                        |
+| **Utils**      | search, smart-search, file-finder, snippet-manager, quick-notes, task-manager        |
 
 ---
 
@@ -293,6 +294,7 @@ All inference runs on local Ollama fleet. No external AI APIs. Sovereign.
 ```
 
 **Gateway Providers:** `blackroad-core/gateway/providers/`
+
 - `ollama.js` — Local Ollama (single node)
 - `ollama-fleet.js` — Distributed Ollama (round-robin with failover)
 - External providers (anthropic/openai/xai/gemini/groq/deepseek/together) — DEPRECATED, redirect to Ollama
@@ -303,11 +305,11 @@ All inference runs on local Ollama fleet. No external AI APIs. Sovereign.
 
 ### Gateway API
 
-| Endpoint | Method | Purpose |
-|----------|--------|---------|
-| `/v1/health` | GET | Health check (status, version, uptime) |
-| `/v1/agents` | GET | List registered agents |
-| `/v1/invoke` | POST | Invoke agent with task (`{agent, task}`) |
+| Endpoint     | Method | Purpose                                  |
+| ------------ | ------ | ---------------------------------------- |
+| `/v1/health` | GET    | Health check (status, version, uptime)   |
+| `/v1/agents` | GET    | List registered agents                   |
+| `/v1/invoke` | POST   | Invoke agent with task (`{agent, task}`) |
 
 ---
 
@@ -319,16 +321,16 @@ FastAPI server for remote AI agent access. Runs on `127.0.0.1:8420`.
 cd mcp-bridge && ./start.sh
 ```
 
-| Endpoint | Method | Purpose |
-|----------|--------|---------|
-| `/` | GET | Service info |
-| `/system` | GET | System status |
-| `/exec` | POST | Execute shell command |
-| `/file/read` | POST | Read a file |
-| `/file/write` | POST | Write a file |
-| `/memory/write` | POST | Store key-value |
-| `/memory/read` | POST | Retrieve key-value |
-| `/memory/list` | GET | List all memory keys |
+| Endpoint        | Method | Purpose               |
+| --------------- | ------ | --------------------- |
+| `/`             | GET    | Service info          |
+| `/system`       | GET    | System status         |
+| `/exec`         | POST   | Execute shell command |
+| `/file/read`    | POST   | Read a file           |
+| `/file/write`   | POST   | Write a file          |
+| `/memory/write` | POST   | Store key-value       |
+| `/memory/read`  | POST   | Retrieve key-value    |
+| `/memory/list`  | GET    | List all memory keys  |
 
 Requires Bearer token auth (`MCP_BRIDGE_TOKEN` env var).
 
@@ -338,13 +340,13 @@ Requires Bearer token auth (`MCP_BRIDGE_TOKEN` env var).
 
 ### Core Agents
 
-| Agent | Color | Role |
-|-------|-------|------|
-| **Octavia** | Purple | The Architect — systems design, strategy |
-| **Lucidia** | Cyan | The Dreamer — creative, vision |
-| **Alice** | Green | The Operator — DevOps, automation |
-| **Aria** | Blue | The Interface — frontend, UX |
-| **Shellfish** | Red | The Hacker — security, exploits |
+| Agent         | Color  | Role                                     |
+| ------------- | ------ | ---------------------------------------- |
+| **Octavia**   | Purple | The Architect — systems design, strategy |
+| **Lucidia**   | Cyan   | The Dreamer — creative, vision           |
+| **Alice**     | Green  | The Operator — DevOps, automation        |
+| **Aria**      | Blue   | The Interface — frontend, UX             |
+| **Shellfish** | Red    | The Hacker — security, exploits          |
 
 ### Agent Infrastructure (`agents/`)
 
@@ -368,15 +370,15 @@ agents/
 
 ## Root-Level Shell Scripts (63 scripts)
 
-| Category | Scripts |
-|----------|---------|
-| **Launchers** | `hub.sh`, `intro.sh`, `boot.sh`, `menu.sh`, `demo.sh` |
-| **Monitoring** | `god.sh`, `mission.sh`, `dash.sh`, `monitor.sh`, `status.sh`, `health.sh`, `spark.sh`, `logs.sh`, `events.sh`, `timeline.sh`, `report.sh` |
-| **Network** | `net.sh`, `wire.sh`, `traffic.sh`, `blackroad-mesh.sh` |
-| **Agents** | `agent.sh`, `roster.sh`, `inspect.sh`, `soul.sh`, `office.sh`, `bonds.sh`, `skills.sh`, `wake.sh` |
-| **Chat (Ollama)** | `chat.sh`, `focus.sh`, `convo.sh`, `broadcast.sh`, `think.sh`, `debate.sh`, `story.sh`, `whisper.sh`, `council.sh`, `thoughts.sh` |
-| **System** | `mem.sh`, `tasks.sh`, `queue.sh`, `config.sh`, `alert.sh` |
-| **Visual** | `clock.sh`, `pulse.sh`, `matrix.sh`, `saver.sh`, `mood.sh` |
+| Category          | Scripts                                                                                                                                   |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| **Launchers**     | `hub.sh`, `intro.sh`, `boot.sh`, `menu.sh`, `demo.sh`                                                                                     |
+| **Monitoring**    | `god.sh`, `mission.sh`, `dash.sh`, `monitor.sh`, `status.sh`, `health.sh`, `spark.sh`, `logs.sh`, `events.sh`, `timeline.sh`, `report.sh` |
+| **Network**       | `net.sh`, `wire.sh`, `traffic.sh`, `blackroad-mesh.sh`                                                                                    |
+| **Agents**        | `agent.sh`, `roster.sh`, `inspect.sh`, `soul.sh`, `office.sh`, `bonds.sh`, `skills.sh`, `wake.sh`                                         |
+| **Chat (Ollama)** | `chat.sh`, `focus.sh`, `convo.sh`, `broadcast.sh`, `think.sh`, `debate.sh`, `story.sh`, `whisper.sh`, `council.sh`, `thoughts.sh`         |
+| **System**        | `mem.sh`, `tasks.sh`, `queue.sh`, `config.sh`, `alert.sh`                                                                                 |
+| **Visual**        | `clock.sh`, `pulse.sh`, `matrix.sh`, `saver.sh`, `mood.sh`                                                                                |
 
 ---
 
@@ -453,17 +455,17 @@ logLevel      # Log level (default: info)
 ```json
 {
   "dependencies": {
-    "chalk": "^5.4.1",        // Terminal colors
-    "commander": "^13.1.0",   // CLI framework
-    "conf": "^13.0.1",        // Config persistence
-    "ora": "^8.2.0"           // Spinners
+    "chalk": "^5.4.1", // Terminal colors
+    "commander": "^13.1.0", // CLI framework
+    "conf": "^13.0.1", // Config persistence
+    "ora": "^8.2.0" // Spinners
   },
   "devDependencies": {
-    "typescript": "^5.7.3",   // Compiler
-    "vitest": "^3.0.5",       // Test runner
-    "tsx": "^4.19.0",         // Dev-time TS execution
-    "prettier": "^3.4.2",    // Formatter
-    "wrangler": "^4.67.0"    // Cloudflare Workers
+    "typescript": "^5.7.3", // Compiler
+    "vitest": "^3.0.5", // Test runner
+    "tsx": "^4.19.0", // Dev-time TS execution
+    "prettier": "^3.4.2", // Formatter
+    "wrangler": "^4.67.0" // Cloudflare Workers
   }
 }
 ```
@@ -485,27 +487,27 @@ Node.js 22+ is required (`"engines": { "node": ">=22" }`).
 
 ## Subprojects in This Repo
 
-| Directory | Description |
-|-----------|-------------|
-| `blackroad-core/` | Tokenless gateway + agent scripts |
-| `blackroad-web/` | Next.js web application |
-| `blackroad-os/` | Main OS codebase |
-| `blackroad-sdk/` | SDK package |
-| `blackroad-sf/` | Salesforce LWC project |
-| `blackroad-api/` | REST API service |
-| `blackroad-docs/` | Documentation site |
-| `blackroad-gateway/` | Gateway infrastructure |
-| `blackroad-infra/` | IaC & deployment configs |
-| `blackroad-hardware/` | Hardware integration |
-| `blackroad-math/` | Mathematical utilities |
-| `dashboard/` | Next.js dashboard app |
-| `workers/` | Cloudflare Workers (auth, email, copilot) |
-| `websites/` | Static site deployments |
-| `orgs/` | Organization monorepos (core, ai, enterprise, personal) |
+| Directory             | Description                                             |
+| --------------------- | ------------------------------------------------------- |
+| `blackroad-core/`     | Tokenless gateway + agent scripts                       |
+| `blackroad-web/`      | Next.js web application                                 |
+| `blackroad-os/`       | Main OS codebase                                        |
+| `blackroad-sdk/`      | SDK package                                             |
+| `blackroad-sf/`       | Salesforce LWC project                                  |
+| `blackroad-api/`      | REST API service                                        |
+| `blackroad-docs/`     | Documentation site                                      |
+| `blackroad-gateway/`  | Gateway infrastructure                                  |
+| `blackroad-infra/`    | IaC & deployment configs                                |
+| `blackroad-hardware/` | Hardware integration                                    |
+| `blackroad-math/`     | Mathematical utilities                                  |
+| `dashboard/`          | Next.js dashboard app                                   |
+| `workers/`            | Cloudflare Workers (auth, email, copilot)               |
+| `websites/`           | Static site deployments                                 |
+| `orgs/`               | Organization monorepos (core, ai, enterprise, personal) |
 
 ---
 
-*All content in this repository is proprietary to BlackRoad OS, Inc. (c) 2024-2026. All rights reserved.*
+_All content in this repository is proprietary to BlackRoad OS, Inc. (c) 2024-2026. All rights reserved._
 
 ---
 
@@ -516,23 +518,26 @@ Node.js 22+ is required (`"engines": { "node": ">=22" }`).
 When multiple Claude sessions run simultaneously, follow this protocol to avoid collisions:
 
 ### Priority Projects (P0 blocks everything)
-| Priority | Project ID | What |
-|----------|-----------|------|
-| P0 | p0-first-real-user | Get first external user — Twitter, HN, LinkedIn, demos |
-| P1 | p1-fix-products | Fix chat/search/roundtrip/auth/app E2E |
-| P2 | p2-seo-discoverability | GitHub topics, Schema.org, Google indexing |
-| P3 | p3-infra-maintenance | Fleet health, disk, DNS, crons |
-| P4 | p4-truth-credibility | Remove lies, honest numbers |
-| P5 | p5-openclaw | Personal AI assistant |
-| P6 | p6-amundson-math | Paper, constants, proofs |
-| P7 | p7-operator-tooling | `br` CLI commands |
-| P8 | p8-revenue | Stripe, billing (BLOCKED until P0 done) |
-| P9 | p9-org-architecture | GitHub org hierarchy cleanup |
+
+| Priority | Project ID             | What                                                   |
+| -------- | ---------------------- | ------------------------------------------------------ |
+| P0       | p0-first-real-user     | Get first external user — Twitter, HN, LinkedIn, demos |
+| P1       | p1-fix-products        | Fix chat/search/roundtrip/auth/app E2E                 |
+| P2       | p2-seo-discoverability | GitHub topics, Schema.org, Google indexing             |
+| P3       | p3-infra-maintenance   | Fleet health, disk, DNS, crons                         |
+| P4       | p4-truth-credibility   | Remove lies, honest numbers                            |
+| P5       | p5-openclaw            | Personal AI assistant                                  |
+| P6       | p6-amundson-math       | Paper, constants, proofs                               |
+| P7       | p7-operator-tooling    | `br` CLI commands                                      |
+| P8       | p8-revenue             | Stripe, billing (BLOCKED until P0 done)                |
+| P9       | p9-org-architecture    | GitHub org hierarchy cleanup                           |
 
 ### Lane System
+
 Every todo is tagged LANE-A through LANE-E or ANY-LANE. Each agent claims ONE lane.
 
 ### Rules
+
 1. **CHECK COLLAB FIRST**: `memory-collaboration.sh inbox` — see what other agents claimed
 2. **CLAIM BEFORE WORK**: Post `CLAIMING [project-id] [todo-id] [LANE-X]` to collab
 3. **NEVER duplicate**: If another agent claimed a task in the last 30 min, pick another
@@ -544,6 +549,7 @@ Every todo is tagged LANE-A through LANE-E or ANY-LANE. Each agent claims ONE la
 9. **Complete todos**: `memory-infinite-todos.sh complete-todo [project-id] [todo-id]`
 
 ### What NOT to do
+
 - Do not create new GitHub repos
 - Do not create new CF Workers
 - Do not deploy new domains or subdomains

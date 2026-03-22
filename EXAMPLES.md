@@ -546,8 +546,8 @@ steps:
   - id: notify
     action: slack-notify
     params:
-      channel: "#deployments"
-      message: "Deployed ${{ input.branch }} to staging"
+      channel: '#deployments'
+      message: 'Deployed ${{ input.branch }} to staging'
     depends_on: [deploy]
 ```
 
@@ -978,4 +978,4 @@ async def listen_to_events():
 
 ---
 
-*Last updated: 2026-02-05*
+_Last updated: 2026-02-05_

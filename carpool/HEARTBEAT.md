@@ -1,6 +1,7 @@
 # [HEARTBEAT] Agent Health Monitoring
 
 ## Heartbeat Protocol
+
 ```
 Every 30 seconds:
   Agent → Carpool: {"type":"heartbeat","agent":"name","status":"alive","load":0.5}
@@ -8,15 +9,17 @@ Every 30 seconds:
 ```
 
 ## Health States
-| State | Symbol | Meaning |
-|-------|--------|---------|
-| ALIVE | 💚 | Responding normally |
-| SLOW | 💛 | Response delayed |
-| CRITICAL | 🧡 | Near failure |
-| DEAD | ❤️ | No response |
-| UNKNOWN | 🖤 | Never seen |
+
+| State    | Symbol | Meaning             |
+| -------- | ------ | ------------------- |
+| ALIVE    | 💚     | Responding normally |
+| SLOW     | 💛     | Response delayed    |
+| CRITICAL | 🧡     | Near failure        |
+| DEAD     | ❤️     | No response         |
+| UNKNOWN  | 🖤     | Never seen          |
 
 ## Current Health
+
 ```
 💚 LUCIDIA    💚 ALICE     💚 OCTAVIA   💚 PRISM
 💚 ECHO       💚 CIPHER    💚 CECE      💚 Mercury
@@ -27,14 +30,16 @@ Every 30 seconds:
 ```
 
 ## Failure Handling
-| Missed Beats | Action |
-|--------------|--------|
-| 1 | Log warning |
-| 3 | Mark as SLOW |
-| 5 | Mark as CRITICAL, alert |
-| 10 | Mark as DEAD, reroute |
+
+| Missed Beats | Action                  |
+| ------------ | ----------------------- |
+| 1            | Log warning             |
+| 3            | Mark as SLOW            |
+| 5            | Mark as CRITICAL, alert |
+| 10           | Mark as DEAD, reroute   |
 
 ## Recovery
+
 ```bash
 # Check agent health
 cat carpool/HEARTBEAT.md

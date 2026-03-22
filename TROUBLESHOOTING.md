@@ -29,6 +29,7 @@ Run these commands first to diagnose issues:
 ### System Won't Start
 
 **Symptoms:**
+
 - `./boot.sh` fails
 - Services don't come online
 - No agent response
@@ -58,6 +59,7 @@ lsof -i :3000  # Web port
 ### Agent Not Responding
 
 **Symptoms:**
+
 - Agent shows as offline
 - Tasks stuck in queue
 - No wake response
@@ -86,6 +88,7 @@ cat cece-logs/alice-*.log | tail -50
 ### Memory System Failure
 
 **Symptoms:**
+
 - Memory writes fail
 - Search returns empty
 - Consolidation errors
@@ -592,12 +595,14 @@ netstat -tlnp
 ## Bug Report
 
 **Environment:**
+
 - OS: macOS 14.0
 - Node: 22.0.0
 - Python: 3.12.0
 - Ollama: 0.1.27
 
 **Steps to Reproduce:**
+
 1. Run `./boot.sh`
 2. Execute `./wake.sh ALICE`
 3. Observe error
@@ -610,7 +615,9 @@ Error: "model not found"
 
 **Logs:**
 ```
+
 [paste relevant logs]
+
 ```
 
 **Additional Context:**
@@ -619,4 +626,4 @@ First time setup, fresh install
 
 ---
 
-*Last updated: 2026-02-05*
+_Last updated: 2026-02-05_

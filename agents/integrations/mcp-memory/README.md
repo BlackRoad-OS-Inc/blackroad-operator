@@ -37,18 +37,22 @@ To enhance an existing agent with persistent memory, add a **Memory Integration*
 ## Memory Integration
 
 When you start a session:
+
 - Recall relevant context from previous sessions using your role and the current project as search terms
 - Review any memories tagged with your agent name to pick up where you left off
 
 When you make key decisions or complete deliverables:
+
 - Remember the decision or deliverable with descriptive tags (your agent name, the project, the topic)
 - Include enough context that a future session — or a different agent — can understand what was done and why
 
 When handing off to another agent:
+
 - Remember your deliverables tagged for the receiving agent
 - Include the handoff metadata: what you completed, what's pending, and what the next agent needs to know
 
 When something fails and you need to recover:
+
 - Search for the last known-good state
 - Use rollback to restore to that point rather than rebuilding from scratch
 ```

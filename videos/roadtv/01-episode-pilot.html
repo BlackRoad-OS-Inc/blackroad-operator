@@ -1,149 +1,450 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=1920,height=1080">
-<title>RoadTV — Episode 1: Genesis</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Inter:wght@300;400&display=swap" rel="stylesheet">
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-html,body{width:1920px;height:1080px;overflow:hidden;background:#000;color:#fff;font-family:'Space Grotesk',sans-serif}
-.scene{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;opacity:0;transition:opacity 1s}
-.scene.active{opacity:1}
-.mono{font-family:'JetBrains Mono',monospace}
-.grad{background:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.grad-line{height:3px;border-radius:2px;background:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF)}
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920,height=1080" />
+    <title>RoadTV — Episode 1: Genesis</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Inter:wght@300;400&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: #000;
+        color: #fff;
+        font-family: 'Space Grotesk', sans-serif;
+      }
+      .scene {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        opacity: 0;
+        transition: opacity 1s;
+      }
+      .scene.active {
+        opacity: 1;
+      }
+      .mono {
+        font-family: 'JetBrains Mono', monospace;
+      }
+      .grad {
+        background: linear-gradient(
+          90deg,
+          #ff6b2b,
+          #ff2255,
+          #cc00aa,
+          #8844ff,
+          #4488ff,
+          #00d4ff
+        );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      .grad-line {
+        height: 3px;
+        border-radius: 2px;
+        background: linear-gradient(
+          90deg,
+          #ff6b2b,
+          #ff2255,
+          #cc00aa,
+          #8844ff,
+          #4488ff,
+          #00d4ff
+        );
+      }
 
-/* Cinematic bars */
-.cinema-top,.cinema-bot{position:fixed;left:0;right:0;background:#000;z-index:100;transition:height 1.5s ease}
-.cinema-top{top:0;height:80px}
-.cinema-bot{bottom:0;height:80px}
-.cinema-top.open,.cinema-bot.open{height:0}
+      /* Cinematic bars */
+      .cinema-top,
+      .cinema-bot {
+        position: fixed;
+        left: 0;
+        right: 0;
+        background: #000;
+        z-index: 100;
+        transition: height 1.5s ease;
+      }
+      .cinema-top {
+        top: 0;
+        height: 80px;
+      }
+      .cinema-bot {
+        bottom: 0;
+        height: 80px;
+      }
+      .cinema-top.open,
+      .cinema-bot.open {
+        height: 0;
+      }
 
-/* Lower third */
-.lower-third{position:absolute;bottom:140px;left:80px;z-index:10}
-.lt-name{font-size:28px;font-weight:600;padding:8px 0;border-bottom:2px solid;border-image:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF) 1;display:inline-block;opacity:0;transform:translateX(-20px);transition:all .6s}
-.lt-name.show{opacity:1;transform:translateX(0)}
-.lt-title{font-size:15px;color:rgba(255,255,255,.4);margin-top:8px;font-family:'JetBrains Mono',monospace;opacity:0;transition:opacity .6s .3s}
-.lt-title.show{opacity:1}
+      /* Lower third */
+      .lower-third {
+        position: absolute;
+        bottom: 140px;
+        left: 80px;
+        z-index: 10;
+      }
+      .lt-name {
+        font-size: 28px;
+        font-weight: 600;
+        padding: 8px 0;
+        border-bottom: 2px solid;
+        border-image: linear-gradient(
+            90deg,
+            #ff6b2b,
+            #ff2255,
+            #cc00aa,
+            #8844ff,
+            #4488ff,
+            #00d4ff
+          )
+          1;
+        display: inline-block;
+        opacity: 0;
+        transform: translateX(-20px);
+        transition: all 0.6s;
+      }
+      .lt-name.show {
+        opacity: 1;
+        transform: translateX(0);
+      }
+      .lt-title {
+        font-size: 15px;
+        color: rgba(255, 255, 255, 0.4);
+        margin-top: 8px;
+        font-family: 'JetBrains Mono', monospace;
+        opacity: 0;
+        transition: opacity 0.6s 0.3s;
+      }
+      .lt-title.show {
+        opacity: 1;
+      }
 
-/* Episode counter */
-.ep-badge{position:absolute;top:100px;right:80px;z-index:10;text-align:right}
-.ep-badge .ep-num{font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:.3em;color:rgba(255,255,255,.2)}
-.ep-badge .ep-title{font-size:18px;font-weight:600;margin-top:4px}
+      /* Episode counter */
+      .ep-badge {
+        position: absolute;
+        top: 100px;
+        right: 80px;
+        z-index: 10;
+        text-align: right;
+      }
+      .ep-badge .ep-num {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 13px;
+        letter-spacing: 0.3em;
+        color: rgba(255, 255, 255, 0.2);
+      }
+      .ep-badge .ep-title {
+        font-size: 18px;
+        font-weight: 600;
+        margin-top: 4px;
+      }
 
-/* Chapter title */
-.chapter{position:absolute;bottom:160px;left:80px;z-index:10}
-.chapter-num{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.3em;color:rgba(255,255,255,.2)}
-.chapter-name{font-size:20px;font-weight:500;margin-top:4px}
+      /* Chapter title */
+      .chapter {
+        position: absolute;
+        bottom: 160px;
+        left: 80px;
+        z-index: 10;
+      }
+      .chapter-num {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 12px;
+        letter-spacing: 0.3em;
+        color: rgba(255, 255, 255, 0.2);
+      }
+      .chapter-name {
+        font-size: 20px;
+        font-weight: 500;
+        margin-top: 4px;
+      }
 
-/* Timeline */
-.timeline{width:1200px;position:relative;padding-left:40px;border-left:1px solid rgba(255,255,255,.08)}
-.tl-item{padding:20px 0 20px 40px;position:relative;opacity:0;transform:translateX(-20px);transition:all .5s}
-.tl-item.visible{opacity:1;transform:translateX(0)}
-.tl-item::before{content:'';position:absolute;left:-5px;top:28px;width:9px;height:9px;border-radius:50%;border:2px solid;border-image:linear-gradient(135deg,#FF6B2B,#00D4FF) 1;background:#000}
-.tl-date{font-family:'JetBrains Mono',monospace;font-size:12px;color:rgba(255,255,255,.3);letter-spacing:.1em}
-.tl-event{font-size:22px;font-weight:500;margin-top:4px}
-.tl-detail{font-size:14px;color:rgba(255,255,255,.3);margin-top:4px}
+      /* Timeline */
+      .timeline {
+        width: 1200px;
+        position: relative;
+        padding-left: 40px;
+        border-left: 1px solid rgba(255, 255, 255, 0.08);
+      }
+      .tl-item {
+        padding: 20px 0 20px 40px;
+        position: relative;
+        opacity: 0;
+        transform: translateX(-20px);
+        transition: all 0.5s;
+      }
+      .tl-item.visible {
+        opacity: 1;
+        transform: translateX(0);
+      }
+      .tl-item::before {
+        content: '';
+        position: absolute;
+        left: -5px;
+        top: 28px;
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        border: 2px solid;
+        border-image: linear-gradient(135deg, #ff6b2b, #00d4ff) 1;
+        background: #000;
+      }
+      .tl-date {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.3);
+        letter-spacing: 0.1em;
+      }
+      .tl-event {
+        font-size: 22px;
+        font-weight: 500;
+        margin-top: 4px;
+      }
+      .tl-detail {
+        font-size: 14px;
+        color: rgba(255, 255, 255, 0.3);
+        margin-top: 4px;
+      }
 
-/* Quote */
-.quote{font-size:36px;font-weight:300;line-height:1.6;max-width:900px;text-align:center;font-style:italic;color:rgba(255,255,255,.7)}
-.quote-attr{font-family:'JetBrains Mono',monospace;font-size:14px;color:rgba(255,255,255,.3);margin-top:24px;letter-spacing:.1em}
-</style>
-</head>
-<body>
-<div class="cinema-top" id="ctop"></div>
-<div class="cinema-bot" id="cbot"></div>
+      /* Quote */
+      .quote {
+        font-size: 36px;
+        font-weight: 300;
+        line-height: 1.6;
+        max-width: 900px;
+        text-align: center;
+        font-style: italic;
+        color: rgba(255, 255, 255, 0.7);
+      }
+      .quote-attr {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 14px;
+        color: rgba(255, 255, 255, 0.3);
+        margin-top: 24px;
+        letter-spacing: 0.1em;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="cinema-top" id="ctop"></div>
+    <div class="cinema-bot" id="cbot"></div>
 
-<!-- SCENE 1: RoadTV Intro -->
-<div class="scene" id="s1">
-  <div class="mono" style="font-size:13px;letter-spacing:.4em;color:rgba(255,255,255,.2)">ROAD TV</div>
-  <div class="grad-line" style="width:60px;margin:20px 0"></div>
-  <div style="font-size:14px;color:rgba(255,255,255,.3);letter-spacing:.15em" class="mono">PRESENTS</div>
-</div>
-
-<!-- SCENE 2: Episode title -->
-<div class="scene" id="s2">
-  <div class="mono" style="font-size:13px;letter-spacing:.3em;color:rgba(255,255,255,.2);margin-bottom:16px">EPISODE 01</div>
-  <div style="font-size:72px;font-weight:700" class="grad">Genesis</div>
-  <div style="font-size:20px;color:rgba(255,255,255,.3);margin-top:16px;font-weight:300">How BlackRoad OS was born.</div>
-</div>
-
-<!-- SCENE 3: Quote -->
-<div class="scene" id="s3">
-  <div class="quote">"I didn't want to rent someone else's cloud. I wanted to own the road."</div>
-  <div class="quote-attr">— ALEXA AMUNDSON, FOUNDER</div>
-</div>
-
-<!-- SCENE 4: Timeline -->
-<div class="scene" id="s4">
-  <div style="font-size:14px;letter-spacing:.2em;color:rgba(255,255,255,.2);margin-bottom:40px" class="mono">THE TIMELINE</div>
-  <div class="timeline">
-    <div class="tl-item" style="transition-delay:.1s"><div class="tl-date">2024</div><div class="tl-event">First Raspberry Pi arrives</div><div class="tl-detail">Alice. The gateway. The beginning.</div></div>
-    <div class="tl-item" style="transition-delay:.3s"><div class="tl-date">EARLY 2025</div><div class="tl-event">The fleet expands</div><div class="tl-detail">Cecilia, Octavia, Aria, Lucidia join. WireGuard mesh goes live.</div></div>
-    <div class="tl-item" style="transition-delay:.5s"><div class="tl-date">MID 2025</div><div class="tl-event">Hailo-8 accelerators installed</div><div class="tl-detail">52 TOPS of sovereign AI compute. No cloud needed.</div></div>
-    <div class="tl-item" style="transition-delay:.7s"><div class="tl-date">LATE 2025</div><div class="tl-event">400+ scripts. 48+ domains.</div><div class="tl-detail">BlackRoad OS becomes a real operating system.</div></div>
-    <div class="tl-item" style="transition-delay:.9s"><div class="tl-date">2026</div><div class="tl-event">BlackBoard v2. The Mesh.</div><div class="tl-detail">Every browser tab becomes a compute node. 7.2M lines of code.</div></div>
-  </div>
-</div>
-
-<!-- SCENE 5: The vision -->
-<div class="scene" id="s5">
-  <div style="text-align:center;max-width:1000px">
-    <div style="font-size:20px;color:rgba(255,255,255,.3);margin-bottom:32px;line-height:2">
-      Most companies rent their infrastructure.<br>
-      We built ours from scratch.<br>
-      On hardware we own. Running code we wrote.<br>
-      With AI that runs in our house.
+    <!-- SCENE 1: RoadTV Intro -->
+    <div class="scene" id="s1">
+      <div
+        class="mono"
+        style="
+          font-size: 13px;
+          letter-spacing: 0.4em;
+          color: rgba(255, 255, 255, 0.2);
+        "
+      >
+        ROAD TV
+      </div>
+      <div class="grad-line" style="width: 60px; margin: 20px 0"></div>
+      <div
+        style="
+          font-size: 14px;
+          color: rgba(255, 255, 255, 0.3);
+          letter-spacing: 0.15em;
+        "
+        class="mono"
+      >
+        PRESENTS
+      </div>
     </div>
-    <div class="grad-line" style="width:200px;margin:32px auto"></div>
-    <div style="font-size:40px;font-weight:700;margin-top:32px">This is <span class="grad">sovereign computing.</span></div>
-  </div>
-</div>
 
-<!-- SCENE 6: End card -->
-<div class="scene" id="s6">
-  <div class="grad-line" style="width:200px;margin-bottom:32px"></div>
-  <div style="font-size:48px;font-weight:700">BLACKROAD</div>
-  <div class="mono" style="font-size:14px;color:rgba(255,255,255,.2);margin-top:16px;letter-spacing:.3em">OPERATING SYSTEM</div>
-  <div class="grad-line" style="width:200px;margin-top:32px"></div>
-  <div style="display:flex;gap:48px;margin-top:48px">
-    <div class="mono" style="font-size:13px;color:rgba(255,255,255,.2)">blackroad.io</div>
-    <div class="mono" style="font-size:13px;color:rgba(255,255,255,.2)">github.com/blackboxprogramming</div>
-    <div class="mono" style="font-size:13px;color:rgba(255,255,255,.2)">ROAD TV</div>
-  </div>
-</div>
+    <!-- SCENE 2: Episode title -->
+    <div class="scene" id="s2">
+      <div
+        class="mono"
+        style="
+          font-size: 13px;
+          letter-spacing: 0.3em;
+          color: rgba(255, 255, 255, 0.2);
+          margin-bottom: 16px;
+        "
+      >
+        EPISODE 01
+      </div>
+      <div style="font-size: 72px; font-weight: 700" class="grad">Genesis</div>
+      <div
+        style="
+          font-size: 20px;
+          color: rgba(255, 255, 255, 0.3);
+          margin-top: 16px;
+          font-weight: 300;
+        "
+      >
+        How BlackRoad OS was born.
+      </div>
+    </div>
 
-<script>
-const scenes = document.querySelectorAll('.scene');
-const durations = [3000, 5000, 6000, 8000, 7000, 6000];
-let cur = 0;
+    <!-- SCENE 3: Quote -->
+    <div class="scene" id="s3">
+      <div class="quote">
+        "I didn't want to rent someone else's cloud. I wanted to own the road."
+      </div>
+      <div class="quote-attr">— ALEXA AMUNDSON, FOUNDER</div>
+    </div>
 
-function show(i) {
-  if (i >= scenes.length) return;
-  scenes.forEach(s => s.classList.remove('active'));
-  scenes[i].classList.add('active');
+    <!-- SCENE 4: Timeline -->
+    <div class="scene" id="s4">
+      <div
+        style="
+          font-size: 14px;
+          letter-spacing: 0.2em;
+          color: rgba(255, 255, 255, 0.2);
+          margin-bottom: 40px;
+        "
+        class="mono"
+      >
+        THE TIMELINE
+      </div>
+      <div class="timeline">
+        <div class="tl-item" style="transition-delay: 0.1s">
+          <div class="tl-date">2024</div>
+          <div class="tl-event">First Raspberry Pi arrives</div>
+          <div class="tl-detail">Alice. The gateway. The beginning.</div>
+        </div>
+        <div class="tl-item" style="transition-delay: 0.3s">
+          <div class="tl-date">EARLY 2025</div>
+          <div class="tl-event">The fleet expands</div>
+          <div class="tl-detail">
+            Cecilia, Octavia, Aria, Lucidia join. WireGuard mesh goes live.
+          </div>
+        </div>
+        <div class="tl-item" style="transition-delay: 0.5s">
+          <div class="tl-date">MID 2025</div>
+          <div class="tl-event">Hailo-8 accelerators installed</div>
+          <div class="tl-detail">
+            52 TOPS of sovereign AI compute. No cloud needed.
+          </div>
+        </div>
+        <div class="tl-item" style="transition-delay: 0.7s">
+          <div class="tl-date">LATE 2025</div>
+          <div class="tl-event">400+ scripts. 48+ domains.</div>
+          <div class="tl-detail">
+            BlackRoad OS becomes a real operating system.
+          </div>
+        </div>
+        <div class="tl-item" style="transition-delay: 0.9s">
+          <div class="tl-date">2026</div>
+          <div class="tl-event">BlackBoard v2. The Mesh.</div>
+          <div class="tl-detail">
+            Every browser tab becomes a compute node. 7.2M lines of code.
+          </div>
+        </div>
+      </div>
+    </div>
 
-  // Open cinematic bars after intro
-  if (i === 1) {
-    document.getElementById('ctop').classList.add('open');
-    document.getElementById('cbot').classList.add('open');
-  }
+    <!-- SCENE 5: The vision -->
+    <div class="scene" id="s5">
+      <div style="text-align: center; max-width: 1000px">
+        <div
+          style="
+            font-size: 20px;
+            color: rgba(255, 255, 255, 0.3);
+            margin-bottom: 32px;
+            line-height: 2;
+          "
+        >
+          Most companies rent their infrastructure.<br />
+          We built ours from scratch.<br />
+          On hardware we own. Running code we wrote.<br />
+          With AI that runs in our house.
+        </div>
+        <div class="grad-line" style="width: 200px; margin: 32px auto"></div>
+        <div style="font-size: 40px; font-weight: 700; margin-top: 32px">
+          This is <span class="grad">sovereign computing.</span>
+        </div>
+      </div>
+    </div>
 
-  if (i === 3) {
-    document.querySelectorAll('.tl-item').forEach((el, j) =>
-      setTimeout(() => el.classList.add('visible'), j * 400));
-  }
+    <!-- SCENE 6: End card -->
+    <div class="scene" id="s6">
+      <div class="grad-line" style="width: 200px; margin-bottom: 32px"></div>
+      <div style="font-size: 48px; font-weight: 700">BLACKROAD</div>
+      <div
+        class="mono"
+        style="
+          font-size: 14px;
+          color: rgba(255, 255, 255, 0.2);
+          margin-top: 16px;
+          letter-spacing: 0.3em;
+        "
+      >
+        OPERATING SYSTEM
+      </div>
+      <div class="grad-line" style="width: 200px; margin-top: 32px"></div>
+      <div style="display: flex; gap: 48px; margin-top: 48px">
+        <div
+          class="mono"
+          style="font-size: 13px; color: rgba(255, 255, 255, 0.2)"
+        >
+          blackroad.io
+        </div>
+        <div
+          class="mono"
+          style="font-size: 13px; color: rgba(255, 255, 255, 0.2)"
+        >
+          github.com/blackboxprogramming
+        </div>
+        <div
+          class="mono"
+          style="font-size: 13px; color: rgba(255, 255, 255, 0.2)"
+        >
+          ROAD TV
+        </div>
+      </div>
+    </div>
 
-  // Close bars for end card
-  if (i === 5) {
-    document.getElementById('ctop').classList.remove('open');
-    document.getElementById('cbot').classList.remove('open');
-  }
+    <script>
+      const scenes = document.querySelectorAll('.scene')
+      const durations = [3000, 5000, 6000, 8000, 7000, 6000]
+      let cur = 0
 
-  setTimeout(() => show(i + 1), durations[i]);
-}
-show(0);
-</script>
-</body>
+      function show(i) {
+        if (i >= scenes.length) return
+        scenes.forEach((s) => s.classList.remove('active'))
+        scenes[i].classList.add('active')
+
+        // Open cinematic bars after intro
+        if (i === 1) {
+          document.getElementById('ctop').classList.add('open')
+          document.getElementById('cbot').classList.add('open')
+        }
+
+        if (i === 3) {
+          document
+            .querySelectorAll('.tl-item')
+            .forEach((el, j) =>
+              setTimeout(() => el.classList.add('visible'), j * 400),
+            )
+        }
+
+        // Close bars for end card
+        if (i === 5) {
+          document.getElementById('ctop').classList.remove('open')
+          document.getElementById('cbot').classList.remove('open')
+        }
+
+        setTimeout(() => show(i + 1), durations[i])
+      }
+      show(0)
+    </script>
+  </body>
 </html>

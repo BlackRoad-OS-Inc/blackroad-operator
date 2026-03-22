@@ -7,6 +7,7 @@
 ## ✨ Features
 
 ### 🎨 Neon-Branded Prompt
+
 - **Status indicator:** 💚 (success) / 🔥 (failure)
 - **Timestamp:** 🕒 HH:MM
 - **Git branch:** 🌿 branch-name
@@ -16,6 +17,7 @@
 - **Full neon palette:** `#FF9D00 #FF6B00 #FF0066 #FF006B #D600AA #7700FF #0066FF`
 
 ### ⚡ Productivity Aliases
+
 - **Navigation:** `br`, `bro`, `brd` (jump to BlackRoad repos)
 - **Git shortcuts:** `gs`, `ga`, `gc`, `gp`, `gl`, `gd`, etc.
 - **Python:** `py`, `pip`, `venv`, `activate`
@@ -25,6 +27,7 @@
 - **Docker:** `d`, `dc`, `dps`, `dimg`, `dex`, `dlog`
 
 ### 🛠️ Utility Functions
+
 - `serve [port]` — Quick HTTP server
 - `mkcd <dir>` — Make directory and cd
 - `port <number>` — Find process on port
@@ -36,6 +39,7 @@
 - `topmem [n]` — Top processes by memory
 
 ### 🌍 Environment
+
 - **BlackRoad paths:** `$BLACKROAD_HOME`, `$BLACKROAD_OPERATOR`, `$BLACKROAD_DOCS`
 - **Brand colors:** `$BR_ORANGE`, `$BR_PINK`, `$BR_PURPLE`, `$BR_BLUE`
 - **History:** 10,000 commands, no duplicates, shared between sessions
@@ -74,7 +78,9 @@ Your original config is backed up to `~/.zshrc.backup.YYYYMMDD_HHMMSS`.
 ## 🎨 Components
 
 ### `br-prompt.zsh`
+
 The heart of the system — neon-branded prompt with:
+
 - Exit code indicator (💚/🔥)
 - Timestamp (🕒)
 - Git branch (🌿)
@@ -84,7 +90,9 @@ The heart of the system — neon-branded prompt with:
 - Welcome banner on shell startup
 
 ### `br-aliases.zsh`
+
 Productivity aliases and functions:
+
 - Navigation shortcuts
 - Git workflow helpers
 - Language-specific aliases (Python, Node, etc.)
@@ -92,7 +100,9 @@ Productivity aliases and functions:
 - Utility functions
 
 ### `br-env.zsh`
+
 Environment configuration:
+
 - Editor and language settings
 - History optimization
 - BlackRoad path exports
@@ -101,7 +111,9 @@ Environment configuration:
 - Python and Node defaults
 
 ### `install.sh`
+
 Automated installer:
+
 - Detects Bash/Zsh automatically
 - Backs up existing config
 - Prevents duplicate installations
@@ -112,6 +124,7 @@ Automated installer:
 ## 🎯 Customization
 
 ### Change the Sigil
+
 Edit `br-prompt.zsh`, find `_br_trinary()`:
 
 ```zsh
@@ -126,6 +139,7 @@ printf "%s🚗%s" "$(_br_rgb 0x${BR_ORANGE#\#})" "$BR_RESET"
 ```
 
 ### Change Colors
+
 Edit the palette at the top of `br-prompt.zsh`:
 
 ```zsh
@@ -136,6 +150,7 @@ BR_BLUE="#0066FF"       # Your color here
 ```
 
 ### Add Your Own Aliases
+
 Edit `br-aliases.zsh` and add to the bottom:
 
 ```zsh
@@ -241,6 +256,7 @@ After a failed command:
 This terminal environment is part of the BlackRoad OS ecosystem.
 
 To suggest improvements:
+
 1. Edit the relevant `.zsh` file
 2. Test in your shell
 3. Commit with `gc "feat: improve prompt"`

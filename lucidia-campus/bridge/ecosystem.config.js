@@ -10,18 +10,18 @@
 module.exports = {
   apps: [
     {
-      name: "campus-data-bridge",
-      script: "campus-data-bridge.js",
+      name: 'campus-data-bridge',
+      script: 'campus-data-bridge.js',
       instances: 1,
       autorestart: true,
       watch: false,
-      max_memory_restart: "50M",
+      max_memory_restart: '50M',
       env: {
-        NODE_ENV: "production",
-        BRIDGE_WS_PORT: "9100",
-        BRIDGE_WS_HOST: "0.0.0.0",
-        NATS_URL: "nats://localhost:4222",
+        NODE_ENV: 'production',
+        BRIDGE_WS_PORT: '9100',
+        BRIDGE_WS_HOST: '0.0.0.0',
+        NATS_URL: 'nats://localhost:4222',
       },
     },
   ],
-};
+}

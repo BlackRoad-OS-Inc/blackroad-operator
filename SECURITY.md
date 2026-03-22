@@ -13,18 +13,18 @@ Email **security@blackroad.io** with:
 
 ### Response Timeline
 
-| Phase | Timeline |
-|-------|----------|
-| Initial response | 24 hours |
-| Triage and assessment | 72 hours |
-| Fix development | 7-14 days |
-| Coordinated disclosure | 90 days |
+| Phase                  | Timeline  |
+| ---------------------- | --------- |
+| Initial response       | 24 hours  |
+| Triage and assessment  | 72 hours  |
+| Fix development        | 7-14 days |
+| Coordinated disclosure | 90 days   |
 
 ## Supported Versions
 
-| Version | Status |
-|---------|--------|
-| Latest on `main` | Active support |
+| Version           | Status              |
+| ----------------- | ------------------- |
+| Latest on `main`  | Active support      |
 | Previous releases | Security fixes only |
 
 ## Architecture
@@ -37,13 +37,13 @@ Agent --> Gateway (localhost:8787) --> Provider (Ollama / Claude / OpenAI)
 
 ### Authentication
 
-| Component | Method |
-|-----------|--------|
-| API | JWT via auth.blackroad.io |
-| CLI | Token-based |
-| Fleet SSH | Public key authentication |
-| Cloudflare Workers | Wrangler auth |
-| MCP Bridge | Bearer token |
+| Component          | Method                    |
+| ------------------ | ------------------------- |
+| API                | JWT via auth.blackroad.io |
+| CLI                | Token-based               |
+| Fleet SSH          | Public key authentication |
+| Cloudflare Workers | Wrangler auth             |
+| MCP Bridge         | Bearer token              |
 
 ### Infrastructure Security
 
@@ -56,12 +56,12 @@ Agent --> Gateway (localhost:8787) --> Provider (Ollama / Claude / OpenAI)
 
 ### Automated Scanning
 
-| Scan | Tool | Frequency |
-|------|------|-----------|
-| Static analysis | CodeQL | Every PR |
-| Dependencies | Dependabot | Daily |
-| Secret detection | GitHub Secret Scanning | Every commit |
-| Shell linting | ShellCheck | CI on every push |
+| Scan             | Tool                   | Frequency        |
+| ---------------- | ---------------------- | ---------------- |
+| Static analysis  | CodeQL                 | Every PR         |
+| Dependencies     | Dependabot             | Daily            |
+| Secret detection | GitHub Secret Scanning | Every commit     |
+| Shell linting    | ShellCheck             | CI on every push |
 
 ## For Contributors
 
@@ -73,19 +73,19 @@ Agent --> Gateway (localhost:8787) --> Provider (Ollama / Claude / OpenAI)
 
 ## Scope
 
-| In Scope | Out of Scope |
-|----------|--------------|
-| *.blackroad.io | Third-party services |
-| API endpoints | Social engineering |
-| Agent infrastructure | Physical access attacks |
-| Authentication and authorization | Denial of service |
+| In Scope                         | Out of Scope            |
+| -------------------------------- | ----------------------- |
+| \*.blackroad.io                  | Third-party services    |
+| API endpoints                    | Social engineering      |
+| Agent infrastructure             | Physical access attacks |
+| Authentication and authorization | Denial of service       |
 
 ## Contact
 
-| Role | Contact |
-|------|---------|
-| Security Lead | security@blackroad.io |
-| Backup | blackroad.systems@gmail.com |
+| Role          | Contact                     |
+| ------------- | --------------------------- |
+| Security Lead | security@blackroad.io       |
+| Backup        | blackroad.systems@gmail.com |
 
 ---
 

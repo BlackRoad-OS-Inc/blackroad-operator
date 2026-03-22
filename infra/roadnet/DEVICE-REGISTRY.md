@@ -1,5 +1,7 @@
 # BlackRoad Device Registry — Master Index
+
 # Generated 2026-03-09 (Exhaustive Deep Scan — All Nodes)
+
 # Every device gets a unique ID (1-255)
 
 ```

@@ -69,12 +69,12 @@ A developer or an agent types `@BlackRoadBot [natural language intent]` into any
 
 ## Target Users
 
-| User | Context | Primary Use Case |
-|------|---------|------------------|
-| **Alexa (Founder/Architect)** | Has full mental model of the system | Trigger cross-platform work via single comment; reduce context-switching |
-| **BlackRoad Agents (Lucidia, Cecilia, etc.)** | Autonomous agents with GitHub write access | Self-dispatch tasks without human intermediary |
-| **Future BlackRoad Contributors** | Developers joining the ecosystem | Onboard to infrastructure without learning every platform |
-| **Enterprise Partners** | External integrators via Blackbox-Enterprises | Trigger scoped workflows without credentials to internal systems |
+| User                                          | Context                                       | Primary Use Case                                                         |
+| --------------------------------------------- | --------------------------------------------- | ------------------------------------------------------------------------ |
+| **Alexa (Founder/Architect)**                 | Has full mental model of the system           | Trigger cross-platform work via single comment; reduce context-switching |
+| **BlackRoad Agents (Lucidia, Cecilia, etc.)** | Autonomous agents with GitHub write access    | Self-dispatch tasks without human intermediary                           |
+| **Future BlackRoad Contributors**             | Developers joining the ecosystem              | Onboard to infrastructure without learning every platform                |
+| **Enterprise Partners**                       | External integrators via Blackbox-Enterprises | Trigger scoped workflows without credentials to internal systems         |
 
 ---
 
@@ -99,18 +99,18 @@ Every `@BlackRoadBot` invocation passes through a deterministic 10-layer executi
 
 ### Layer Specification
 
-| Layer | Name | Responsibility | Target System | v1.0? |
-|-------|------|----------------|---------------|-------|
-| 1 | **Intent Reviewer** | Parse NL intent, validate security + resource constraints, produce execution plan | Lucidia Core (Layer 6) | Yes |
-| 2 | **Org Distributor** | Route task to correct BlackRoad organization based on domain classification | GitHub Apps API | Yes |
-| 3 | **Team Distributor** | Route to specific team; pause for HITL approval on high-risk ops | GitHub Teams + HITL webhook | Yes |
-| 4 | **Project Recorder** | Log task to GitHub Project board; sync metadata to Salesforce | GitHub Projects + Salesforce Data Cloud | v1.1 |
-| 5 | **Agent Instantiator** | Spin up or assign specialized agent (Planner-Executor-Reflector pattern) | Local Ollama / HF Inference | Yes |
-| 6 | **Repo Distributor** | Create branch in target repo; isolate changes via GitHub Flow | GitHub Contents API | Yes |
-| 7 | **Device Router** | Dispatch firmware/infra tasks to Pi cluster, Droplets, or Jetson | Tailscale + doctl + SSH | Yes |
-| 8 | **Drive Distributor** | Write artifacts (logs, docs, reports) to Google Drive via GSA | Google Drive API (Service Account) | v1.1 |
-| 9 | **Cloudflare Executor** | Apply DNS changes, create/update Tunnels, modify Workers | Cloudflare API | Yes |
-| 10 | **Website Editor** | Update headless CMS or trigger Vercel rebuild for presentation changes | Strapi / Vercel / Wix Harmony | v1.2 |
+| Layer | Name                    | Responsibility                                                                    | Target System                           | v1.0? |
+| ----- | ----------------------- | --------------------------------------------------------------------------------- | --------------------------------------- | ----- |
+| 1     | **Intent Reviewer**     | Parse NL intent, validate security + resource constraints, produce execution plan | Lucidia Core (Layer 6)                  | Yes   |
+| 2     | **Org Distributor**     | Route task to correct BlackRoad organization based on domain classification       | GitHub Apps API                         | Yes   |
+| 3     | **Team Distributor**    | Route to specific team; pause for HITL approval on high-risk ops                  | GitHub Teams + HITL webhook             | Yes   |
+| 4     | **Project Recorder**    | Log task to GitHub Project board; sync metadata to Salesforce                     | GitHub Projects + Salesforce Data Cloud | v1.1  |
+| 5     | **Agent Instantiator**  | Spin up or assign specialized agent (Planner-Executor-Reflector pattern)          | Local Ollama / HF Inference             | Yes   |
+| 6     | **Repo Distributor**    | Create branch in target repo; isolate changes via GitHub Flow                     | GitHub Contents API                     | Yes   |
+| 7     | **Device Router**       | Dispatch firmware/infra tasks to Pi cluster, Droplets, or Jetson                  | Tailscale + doctl + SSH                 | Yes   |
+| 8     | **Drive Distributor**   | Write artifacts (logs, docs, reports) to Google Drive via GSA                     | Google Drive API (Service Account)      | v1.1  |
+| 9     | **Cloudflare Executor** | Apply DNS changes, create/update Tunnels, modify Workers                          | Cloudflare API                          | Yes   |
+| 10    | **Website Editor**      | Update headless CMS or trigger Vercel rebuild for presentation changes            | Strapi / Vercel / Wix Harmony           | v1.2  |
 
 ### Layer Dependency Graph
 
@@ -139,32 +139,32 @@ Every `@BlackRoadBot` invocation passes through a deterministic 10-layer executi
 
 The bot uses intent classification to determine the target organization. Classification runs locally via the Ollama proxy before any external API calls are made.
 
-| Detected Intent Category | Target Organization | Example Command |
-|--------------------------|---------------------|-----------------|
-| LLM / Reasoning / Agent dev | BlackRoad-AI | `@BlackRoadBot add memory context for Cecilia re: sprint goals` |
-| Infrastructure / IaC | BlackRoad-Cloud | `@BlackRoadBot rebuild the staging droplet` |
-| Firmware / Pi / IoT | BlackRoad-Hardware | `@BlackRoadBot deploy latest agent-os to octavia` |
-| Security / Crypto / Audit | BlackRoad-Security | `@BlackRoadBot witness this commit hash to roadchain` |
-| Frontend / UI | BlackRoad-Interactive | `@BlackRoadBot regenerate the blackroad.io hero section` |
-| Tokenomics / Funding | BlackRoad-Ventures | `@BlackRoadBot update roadcoin.io pricing page` |
-| R&D / Experimental | BlackRoad-Labs | `@BlackRoadBot run quantum lab sim on pi cluster` |
-| Compliance / Policy | BlackRoad-Gov | `@BlackRoadBot log compliance check for Q1 audit` |
+| Detected Intent Category    | Target Organization   | Example Command                                                 |
+| --------------------------- | --------------------- | --------------------------------------------------------------- |
+| LLM / Reasoning / Agent dev | BlackRoad-AI          | `@BlackRoadBot add memory context for Cecilia re: sprint goals` |
+| Infrastructure / IaC        | BlackRoad-Cloud       | `@BlackRoadBot rebuild the staging droplet`                     |
+| Firmware / Pi / IoT         | BlackRoad-Hardware    | `@BlackRoadBot deploy latest agent-os to octavia`               |
+| Security / Crypto / Audit   | BlackRoad-Security    | `@BlackRoadBot witness this commit hash to roadchain`           |
+| Frontend / UI               | BlackRoad-Interactive | `@BlackRoadBot regenerate the blackroad.io hero section`        |
+| Tokenomics / Funding        | BlackRoad-Ventures    | `@BlackRoadBot update roadcoin.io pricing page`                 |
+| R&D / Experimental          | BlackRoad-Labs        | `@BlackRoadBot run quantum lab sim on pi cluster`               |
+| Compliance / Policy         | BlackRoad-Gov         | `@BlackRoadBot log compliance check for Q1 audit`               |
 
 ### Platform Integration Map
 
-| Platform | Auth Method | Trigger Condition | v1.0 |
-|----------|-------------|-------------------|------|
-| GitHub (all 15 orgs) | GitHub App (OAuth) | Every invocation -- base routing layer | Yes |
-| Raspberry Pi Cluster | Tailscale + SSH key | Any firmware, inference offload, or device task | Yes |
-| DigitalOcean | doctl + API token | Droplet create/rebuild/scale commands | Yes |
-| Cloudflare | API token (scoped) | DNS, Tunnel, Worker, Pages commands | Yes |
-| Ollama (local) | HTTP via Cloudflare Tunnel | Intent classification + inference fallback | Yes |
-| Hugging Face | HF_TOKEN rotation | High-compute tasks exceeding Pi capacity | Yes |
-| Google Drive | Service Account (GSA) | Log/artifact storage after task completion | v1.1 |
-| Salesforce | Apex webhook + OAuth2 | Enterprise task tracking, CRM sync | v1.1 |
-| Railway | Railway CLI + token | Ephemeral test environment deploys | v1.1 |
-| Vercel | Vercel API token | Frontend rebuild / headless CMS trigger | v1.2 |
-| roadchain (internal) | PS-SHA-infinity ledger | Every state transition auto-witnessed | Yes |
+| Platform             | Auth Method                | Trigger Condition                               | v1.0 |
+| -------------------- | -------------------------- | ----------------------------------------------- | ---- |
+| GitHub (all 15 orgs) | GitHub App (OAuth)         | Every invocation -- base routing layer          | Yes  |
+| Raspberry Pi Cluster | Tailscale + SSH key        | Any firmware, inference offload, or device task | Yes  |
+| DigitalOcean         | doctl + API token          | Droplet create/rebuild/scale commands           | Yes  |
+| Cloudflare           | API token (scoped)         | DNS, Tunnel, Worker, Pages commands             | Yes  |
+| Ollama (local)       | HTTP via Cloudflare Tunnel | Intent classification + inference fallback      | Yes  |
+| Hugging Face         | HF_TOKEN rotation          | High-compute tasks exceeding Pi capacity        | Yes  |
+| Google Drive         | Service Account (GSA)      | Log/artifact storage after task completion      | v1.1 |
+| Salesforce           | Apex webhook + OAuth2      | Enterprise task tracking, CRM sync              | v1.1 |
+| Railway              | Railway CLI + token        | Ephemeral test environment deploys              | v1.1 |
+| Vercel               | Vercel API token           | Frontend rebuild / headless CMS trigger         | v1.2 |
+| roadchain (internal) | PS-SHA-infinity ledger     | Every state transition auto-witnessed           | Yes  |
 
 ### @BLACKROAD Directory Waterfall Integration
 
@@ -185,21 +185,21 @@ Centralized LLM providers impose rate limits that are incompatible with autonomo
 
 ### Local Inference Stack
 
-| Node | Hardware | Role | Models Served |
-|------|----------|------|---------------|
-| octavia | Pi 5 + Hailo-8 NPU + NVMe | Primary inference node | Llama 3.2 3B, Gemma 2B (INT8 via Hailo) |
-| cecilia | Pi 5 + Hailo-8 NPU + NVMe | Secondary inference / failover | TinyLlama, code-focused GGUF models |
-| lucidia | Pi 5 (ElectroCookie) | Memory core + orchestration | Lightweight embedding models |
-| olympia | Pi 4B | LiteLLM proxy + load balancer | Routing only -- no inference |
+| Node    | Hardware                  | Role                           | Models Served                           |
+| ------- | ------------------------- | ------------------------------ | --------------------------------------- |
+| octavia | Pi 5 + Hailo-8 NPU + NVMe | Primary inference node         | Llama 3.2 3B, Gemma 2B (INT8 via Hailo) |
+| cecilia | Pi 5 + Hailo-8 NPU + NVMe | Secondary inference / failover | TinyLlama, code-focused GGUF models     |
+| lucidia | Pi 5 (ElectroCookie)      | Memory core + orchestration    | Lightweight embedding models            |
+| olympia | Pi 4B                     | LiteLLM proxy + load balancer  | Routing only -- no inference            |
 
 ### Fallback Chain
 
-| Priority | Provider | Condition for Use |
-|----------|----------|-------------------|
-| 1 | Local Ollama (Pi cluster via LiteLLM) | All routine classification and code generation tasks |
-| 2 | Hugging Face Inference Endpoint | High-compute tasks (>7B param models) or Pi unavailability |
-| 3 | Claude API (claude-sonnet-4-6) | Complex reasoning, cross-domain synthesis, HITL escalation |
-| 4 | GitHub Copilot (override proxy) | Legacy compatibility; routed to LiteLLM proxy by default |
+| Priority | Provider                              | Condition for Use                                          |
+| -------- | ------------------------------------- | ---------------------------------------------------------- |
+| 1        | Local Ollama (Pi cluster via LiteLLM) | All routine classification and code generation tasks       |
+| 2        | Hugging Face Inference Endpoint       | High-compute tasks (>7B param models) or Pi unavailability |
+| 3        | Claude API (claude-sonnet-4-6)        | Complex reasoning, cross-domain synthesis, HITL escalation |
+| 4        | GitHub Copilot (override proxy)       | Legacy compatibility; routed to LiteLLM proxy by default   |
 
 ### Inference Flow
 
@@ -266,7 +266,11 @@ The genesis block is 64 zeros -- the Trivial Zero from which all BlackRoad syste
     "model": "llama3.2:3b",
     "inference_node": "octavia",
     "actions": [
-      { "type": "branch_create", "repo": "BlackRoad-Hardware/agent-os", "branch": "deploy/octavia-2026-04-15" },
+      {
+        "type": "branch_create",
+        "repo": "BlackRoad-Hardware/agent-os",
+        "branch": "deploy/octavia-2026-04-15"
+      },
       { "type": "ssh_deploy", "target": "192.168.4.38", "status": "success" }
     ],
     "status": "success",
@@ -288,43 +292,43 @@ Feb 2026          Mar 2026          Apr 2026          May 2026          Jun 2026
    |                 |                 |                 |                 | v1.1 Drive+SF
 ```
 
-| Milestone | Target Date | Deliverables |
-|-----------|-------------|--------------|
-| **M0 -- Foundation** | March 2026 | GitHub App installed across all 15 orgs; Ollama proxy live on Pi cluster; roadchain genesis block committed |
-| **M1 -- Scaffold Layers 1-3** | March 2026 | Intent parsing via local LLM; org + team routing; HITL pause for high-risk ops |
-| **M2 -- Scaffold Layers 5-7** | April 2026 | Agent instantiation (Planner-Executor-Reflector); repo branching; device routing to Pi cluster + DigitalOcean |
-| **M3 -- Scaffold Layer 9 + roadchain** | April 2026 | Cloudflare DNS/Tunnel/Worker automation; every action witnessed to roadchain |
-| **v1.0 GA** | May 2026 | Stable routing across 8 of 10 scaffold layers; <5s p95 latency for Layers 1-3; roadchain audit log live |
-| **v1.1 -- Drive + Salesforce** | June 2026 | Layers 4 + 8: artifact persistence to Drive; enterprise task tracking in Salesforce |
-| **v1.2 -- Website Layer** | Q3 2026 | Layer 10: autonomous headless CMS updates; Vercel rebuild triggers; Wix Harmony integration |
-| **v2.0 -- 30k Agents** | Q4 2026 | Kubernetes auto-scaling scaffold; 30,000-agent concurrency; ARM datacenter node support |
+| Milestone                              | Target Date | Deliverables                                                                                                  |
+| -------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------- |
+| **M0 -- Foundation**                   | March 2026  | GitHub App installed across all 15 orgs; Ollama proxy live on Pi cluster; roadchain genesis block committed   |
+| **M1 -- Scaffold Layers 1-3**          | March 2026  | Intent parsing via local LLM; org + team routing; HITL pause for high-risk ops                                |
+| **M2 -- Scaffold Layers 5-7**          | April 2026  | Agent instantiation (Planner-Executor-Reflector); repo branching; device routing to Pi cluster + DigitalOcean |
+| **M3 -- Scaffold Layer 9 + roadchain** | April 2026  | Cloudflare DNS/Tunnel/Worker automation; every action witnessed to roadchain                                  |
+| **v1.0 GA**                            | May 2026    | Stable routing across 8 of 10 scaffold layers; <5s p95 latency for Layers 1-3; roadchain audit log live       |
+| **v1.1 -- Drive + Salesforce**         | June 2026   | Layers 4 + 8: artifact persistence to Drive; enterprise task tracking in Salesforce                           |
+| **v1.2 -- Website Layer**              | Q3 2026     | Layer 10: autonomous headless CMS updates; Vercel rebuild triggers; Wix Harmony integration                   |
+| **v2.0 -- 30k Agents**                 | Q4 2026     | Kubernetes auto-scaling scaffold; 30,000-agent concurrency; ARM datacenter node support                       |
 
 ---
 
 ## Success Metrics
 
-| Metric | v1.0 Target | Measurement Method |
-|--------|-------------|-------------------|
-| Intent classification accuracy | >90% | Human review of 100 sampled commands |
-| Org routing accuracy | >95% | Audit of roadchain routing decisions |
-| p95 latency (Layers 1-3) | <5 seconds | roadchain timestamps from comment to routing confirmation |
-| Local inference hit rate | >80% | LiteLLM proxy logs (local vs. external calls) |
-| HITL escalation rate | <10% | roadchain escalation events / total tasks |
-| roadchain integrity | 100% | Hash chain validation on every block |
-| Platform coverage (v1.0) | 8/10 layers | Feature flag tracking per scaffold layer |
+| Metric                         | v1.0 Target | Measurement Method                                        |
+| ------------------------------ | ----------- | --------------------------------------------------------- |
+| Intent classification accuracy | >90%        | Human review of 100 sampled commands                      |
+| Org routing accuracy           | >95%        | Audit of roadchain routing decisions                      |
+| p95 latency (Layers 1-3)       | <5 seconds  | roadchain timestamps from comment to routing confirmation |
+| Local inference hit rate       | >80%        | LiteLLM proxy logs (local vs. external calls)             |
+| HITL escalation rate           | <10%        | roadchain escalation events / total tasks                 |
+| roadchain integrity            | 100%        | Hash chain validation on every block                      |
+| Platform coverage (v1.0)       | 8/10 layers | Feature flag tracking per scaffold layer                  |
 
 ---
 
 ## Risks & Mitigations
 
-| Risk | Likelihood | Impact | Mitigation |
-|------|-----------|--------|------------|
-| Pi cluster unavailability breaks inference | Medium | High | Multi-node LiteLLM with auto-failover to HF Inference; health checks every 30s |
-| GitHub App token expiry breaks cross-org access | High | High | Automated token refresh via GitHub App installation tokens (valid 1hr); monitored via roadchain |
-| Ambiguous NL intent causes wrong org routing | Medium | Medium | Confidence threshold gate: route <75% confidence to HITL before execution |
-| Rate limits on external platforms during burst | Medium | Medium | Layer 7 Orchestration queue with exponential backoff; roadchain logs all 429 events |
-| Malicious @BlackRoadBot invocation by bad actor | Low | High | GitHub App scope limited to specific repos per org; HITL required for prod/security ops |
-| roadchain storage growth at 30k agent scale | Medium | Medium | Bloom filter index + IPFS archival for blocks older than 90 days |
+| Risk                                            | Likelihood | Impact | Mitigation                                                                                      |
+| ----------------------------------------------- | ---------- | ------ | ----------------------------------------------------------------------------------------------- |
+| Pi cluster unavailability breaks inference      | Medium     | High   | Multi-node LiteLLM with auto-failover to HF Inference; health checks every 30s                  |
+| GitHub App token expiry breaks cross-org access | High       | High   | Automated token refresh via GitHub App installation tokens (valid 1hr); monitored via roadchain |
+| Ambiguous NL intent causes wrong org routing    | Medium     | Medium | Confidence threshold gate: route <75% confidence to HITL before execution                       |
+| Rate limits on external platforms during burst  | Medium     | Medium | Layer 7 Orchestration queue with exponential backoff; roadchain logs all 429 events             |
+| Malicious @BlackRoadBot invocation by bad actor | Low        | High   | GitHub App scope limited to specific repos per org; HITL required for prod/security ops         |
+| roadchain storage growth at 30k agent scale     | Medium     | Medium | Bloom filter index + IPFS archival for blocks older than 90 days                                |
 
 ---
 
@@ -548,18 +552,19 @@ GitHub Webhook --> HMAC-SHA256 signature validation
 
 ### Authorization Rules
 
-| Operation Category | Required Approval | HITL Gate? |
-|--------------------|-------------------|------------|
-| Read-only queries (status, list, info) | None | No |
-| Branch creation / PR opening | Bot auto-approve | No |
-| Device deployment (non-prod) | Bot auto-approve | No |
-| DNS changes | Alexa approval + allowlisted actor | Yes |
-| Production deployment | Alexa approval | Yes |
-| Security-scoped operations | Alexa approval | Yes |
-| Destructive operations (delete, rebuild) | Alexa approval | Yes |
-| Cross-org data movement | Alexa approval | Yes |
+| Operation Category                       | Required Approval                  | HITL Gate? |
+| ---------------------------------------- | ---------------------------------- | ---------- |
+| Read-only queries (status, list, info)   | None                               | No         |
+| Branch creation / PR opening             | Bot auto-approve                   | No         |
+| Device deployment (non-prod)             | Bot auto-approve                   | No         |
+| DNS changes                              | Alexa approval + allowlisted actor | Yes        |
+| Production deployment                    | Alexa approval                     | Yes        |
+| Security-scoped operations               | Alexa approval                     | Yes        |
+| Destructive operations (delete, rebuild) | Alexa approval                     | Yes        |
+| Cross-org data movement                  | Alexa approval                     | Yes        |
 
 > DNS-modifying intents are always treated as high-risk. Only explicitly allowlisted actors may approve DNS changes, and this rule MUST be enforced consistently across Layers 1–3 and within the Cloudflare executor (no direct or indirect bypass paths).
+
 ### HITL Flow
 
 ```
@@ -575,38 +580,38 @@ GitHub Webhook --> HMAC-SHA256 signature validation
 
 ## Related Documents
 
-| Document | Relevance |
-|----------|-----------|
-| [PLANNING.md](./PLANNING.md) | Overall BlackRoad OS strategic planning |
-| [ROADMAP.md](./ROADMAP.md) | Feature roadmap and release timeline |
-| [ARCHITECTURE.md](./ARCHITECTURE.md) | System architecture diagrams |
-| [AGENTS.md](./AGENTS.md) | Agent system deep dive |
-| [INFRASTRUCTURE.md](./INFRASTRUCTURE.md) | Infrastructure overview |
-| [NETWORKING.md](./NETWORKING.md) | Network topology and tunnels |
-| [MEMORY.md](./MEMORY.md) | Memory system (PS-SHA-infinity) |
-| [CLAUDE.md](./CLAUDE.md) | AI assistant guidance |
+| Document                                 | Relevance                               |
+| ---------------------------------------- | --------------------------------------- |
+| [PLANNING.md](./PLANNING.md)             | Overall BlackRoad OS strategic planning |
+| [ROADMAP.md](./ROADMAP.md)               | Feature roadmap and release timeline    |
+| [ARCHITECTURE.md](./ARCHITECTURE.md)     | System architecture diagrams            |
+| [AGENTS.md](./AGENTS.md)                 | Agent system deep dive                  |
+| [INFRASTRUCTURE.md](./INFRASTRUCTURE.md) | Infrastructure overview                 |
+| [NETWORKING.md](./NETWORKING.md)         | Network topology and tunnels            |
+| [MEMORY.md](./MEMORY.md)                 | Memory system (PS-SHA-infinity)         |
+| [CLAUDE.md](./CLAUDE.md)                 | AI assistant guidance                   |
 
 ---
 
 ## Appendix: Organization Quick Reference
 
-| Organization | Domain | Primary Responsibility |
-|--------------|--------|----------------------|
-| BlackRoad-OS | blackroad.io | Core CLI kernel |
-| BlackRoad-AI | blackroadai.com / lucidia.earth | LLM, reasoning, Lucidia memory core |
-| BlackRoad-Cloud | blackroad.network / blackroad.systems | IaC, DigitalOcean, Railway |
-| BlackRoad-Hardware | (internal) | Pi firmware, SBC management |
-| BlackRoad-Security | roadchain.io | Cryptography, witnessing, audit |
-| BlackRoad-Interactive | blackroad.io/ui | Frontend, web |
-| BlackRoad-Labs | blackroadquantum.com | Experimental R&D |
-| BlackRoad-Studio | lucidia.studio | Creative assets |
-| BlackRoad-Ventures | roadcoin.io | Tokenomics, funding |
-| BlackRoad-Media | (internal) | Content, PR automation |
-| BlackRoad-Gov | blackroadinc.us | Compliance, policy |
-| BlackRoad-Education | (internal) | Onboarding, docs |
-| BlackRoad-Archive | (internal) | Long-term data persistence |
-| BlackRoad-Foundation | (internal) | Governance, protocol standards |
-| Blackbox-Enterprises | blackboxprogramming.io | Enterprise integrations |
+| Organization          | Domain                                | Primary Responsibility              |
+| --------------------- | ------------------------------------- | ----------------------------------- |
+| BlackRoad-OS          | blackroad.io                          | Core CLI kernel                     |
+| BlackRoad-AI          | blackroadai.com / lucidia.earth       | LLM, reasoning, Lucidia memory core |
+| BlackRoad-Cloud       | blackroad.network / blackroad.systems | IaC, DigitalOcean, Railway          |
+| BlackRoad-Hardware    | (internal)                            | Pi firmware, SBC management         |
+| BlackRoad-Security    | roadchain.io                          | Cryptography, witnessing, audit     |
+| BlackRoad-Interactive | blackroad.io/ui                       | Frontend, web                       |
+| BlackRoad-Labs        | blackroadquantum.com                  | Experimental R&D                    |
+| BlackRoad-Studio      | lucidia.studio                        | Creative assets                     |
+| BlackRoad-Ventures    | roadcoin.io                           | Tokenomics, funding                 |
+| BlackRoad-Media       | (internal)                            | Content, PR automation              |
+| BlackRoad-Gov         | blackroadinc.us                       | Compliance, policy                  |
+| BlackRoad-Education   | (internal)                            | Onboarding, docs                    |
+| BlackRoad-Archive     | (internal)                            | Long-term data persistence          |
+| BlackRoad-Foundation  | (internal)                            | Governance, protocol standards      |
+| Blackbox-Enterprises  | blackboxprogramming.io                | Enterprise integrations             |
 
 ---
 
@@ -652,11 +657,11 @@ GitHub Webhook --> HMAC-SHA256 signature validation
 
 ## Change Log
 
-| Date | Author | Change |
-|------|--------|--------|
+| Date       | Author            | Change                                               |
+| ---------- | ----------------- | ---------------------------------------------------- |
 | 2026-02-28 | Claude (Opus 4.6) | Initial product planning document from specification |
 
 ---
 
-*This document is proprietary to BlackRoad OS, Inc. All rights reserved.*
-*All code, architecture, and systems described herein are the exclusive intellectual property of BlackRoad OS, Inc.*
+_This document is proprietary to BlackRoad OS, Inc. All rights reserved._
+_All code, architecture, and systems described herein are the exclusive intellectual property of BlackRoad OS, Inc._

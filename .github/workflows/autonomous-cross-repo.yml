@@ -1,7 +1,7 @@
 # .github/workflows/autonomous-cross-repo.yml
 # Cross-repository coordination for synchronized changes
 
-name: "Autonomous Cross-Repo Coordinator"
+name: 'Autonomous Cross-Repo Coordinator'
 
 on:
   push:
@@ -44,7 +44,7 @@ jobs:
   # Identify Affected Repositories
   # ============================================
   identify-repos:
-    name: "Identify Affected Repos"
+    name: 'Identify Affected Repos'
     runs-on: ubuntu-latest
     outputs:
       repos: ${{ steps.find.outputs.repos }}
@@ -93,7 +93,7 @@ jobs:
   # Sync Workflows
   # ============================================
   sync-workflows:
-    name: "Sync Workflows"
+    name: 'Sync Workflows'
     needs: identify-repos
     if: github.event.inputs.sync_type == 'workflows' || github.event.inputs.sync_type == 'all' || contains(needs.identify-repos.outputs.sync_files, '.github/workflows')
     runs-on: ubuntu-latest
@@ -183,7 +183,7 @@ jobs:
   # Sync Configurations
   # ============================================
   sync-config:
-    name: "Sync Configurations"
+    name: 'Sync Configurations'
     needs: identify-repos
     if: github.event.inputs.sync_type == 'config' || github.event.inputs.sync_type == 'all'
     runs-on: ubuntu-latest
@@ -260,7 +260,7 @@ jobs:
   # Sync Dependencies
   # ============================================
   sync-deps:
-    name: "Sync Dependencies"
+    name: 'Sync Dependencies'
     needs: identify-repos
     if: github.event.inputs.sync_type == 'dependencies' || github.event.inputs.sync_type == 'all'
     runs-on: ubuntu-latest
@@ -298,7 +298,7 @@ jobs:
   # Broadcast Changes
   # ============================================
   broadcast:
-    name: "Broadcast Changes"
+    name: 'Broadcast Changes'
     needs: [sync-workflows, sync-config, sync-deps]
     if: always()
     runs-on: ubuntu-latest

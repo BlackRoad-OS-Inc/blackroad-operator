@@ -1,14 +1,14 @@
-'use client';
+'use client'
 
-import React from 'react';
+import React from 'react'
 
 interface PerformanceMetricsProps {
-  tasksCompleted?: number;
-  avgResponseTime?: number;
-  successRate?: number;
-  xp?: number;
-  level?: number;
-  achievements?: string[];
+  tasksCompleted?: number
+  avgResponseTime?: number
+  successRate?: number
+  xp?: number
+  level?: number
+  achievements?: string[]
 }
 
 export function PerformanceMetrics({
@@ -17,21 +17,27 @@ export function PerformanceMetrics({
   successRate = 100,
   xp = 0,
   level = 1,
-  achievements = []
+  achievements = [],
 }: PerformanceMetricsProps) {
-  const nextLevelXP = level * 1000;
-  const currentLevelXP = (level - 1) * 1000;
-  const xpProgress = ((xp - currentLevelXP) / (nextLevelXP - currentLevelXP)) * 100;
+  const nextLevelXP = level * 1000
+  const currentLevelXP = (level - 1) * 1000
+  const xpProgress =
+    ((xp - currentLevelXP) / (nextLevelXP - currentLevelXP)) * 100
 
   // Determine success rate color
-  const successColorClass = successRate >= 95 ? 'text-[var(--success)]' : successRate >= 80 ? 'text-[var(--warning)]' : 'text-[var(--danger)]';
+  const successColorClass =
+    successRate >= 95
+      ? 'text-[var(--success)]'
+      : successRate >= 80
+        ? 'text-[var(--warning)]'
+        : 'text-[var(--danger)]'
 
   return (
     <div className="p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-card)]">
       <h3 className="text-sm font-bold text-[var(--text-primary)] mb-3">
         📊 Performance
       </h3>
-      
+
       {/* Level & XP */}
       <div className="mb-4">
         <div className="flex justify-between items-center mb-2">
@@ -43,13 +49,13 @@ export function PerformanceMetrics({
           </span>
         </div>
         <div className="h-3 bg-[var(--bg-secondary)] rounded-full overflow-hidden">
-          <div 
+          <div
             className="h-full bg-gradient-to-r from-[var(--warning)] to-[var(--accent-primary)] transition-all duration-500"
             style={{ width: `${xpProgress}%` }}
           />
         </div>
       </div>
-      
+
       {/* Stats Grid */}
       <div className="grid grid-cols-3 gap-2 mb-4">
         <div className="text-center p-2 rounded-lg bg-[var(--bg-secondary)]">
@@ -71,7 +77,7 @@ export function PerformanceMetrics({
           <p className="text-xs text-[var(--text-secondary)]">Success</p>
         </div>
       </div>
-      
+
       {/* Achievements */}
       {achievements.length > 0 && (
         <div>
@@ -97,7 +103,7 @@ export function PerformanceMetrics({
         </div>
       )}
     </div>
-  );
+  )
 }
 
-export default PerformanceMetrics;
+export default PerformanceMetrics

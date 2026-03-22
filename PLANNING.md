@@ -26,6 +26,7 @@
 **Mission:** Create a 30,000+ agent orchestration platform that enables true digital sovereignty.
 
 **Core Principles:**
+
 1. **Sovereignty First** - Own your data, own your AI
 2. **Transparency** - Open source where possible
 3. **Scalability** - From Raspberry Pi to H100 clusters
@@ -37,24 +38,24 @@
 
 ### Infrastructure (as of Feb 2026)
 
-| Component | Status | Health |
-|-----------|--------|--------|
-| GitHub (16 orgs, 1,200+ repos) | ✅ Active | Healthy |
-| Cloudflare (75+ workers) | ✅ Active | Healthy |
-| Railway (14 projects) | ✅ Active | Healthy |
-| Vercel (15+ projects) | ✅ Active | Healthy |
-| DigitalOcean (blackroad os-infinity) | ✅ Active | Healthy |
-| Raspberry Pi Fleet (5 devices) | ⚠️ Partial | 3/5 online |
-| Ollama Local | ✅ Active | Healthy |
+| Component                            | Status     | Health     |
+| ------------------------------------ | ---------- | ---------- |
+| GitHub (16 orgs, 1,200+ repos)       | ✅ Active  | Healthy    |
+| Cloudflare (75+ workers)             | ✅ Active  | Healthy    |
+| Railway (14 projects)                | ✅ Active  | Healthy    |
+| Vercel (15+ projects)                | ✅ Active  | Healthy    |
+| DigitalOcean (blackroad os-infinity) | ✅ Active  | Healthy    |
+| Raspberry Pi Fleet (5 devices)       | ⚠️ Partial | 3/5 online |
+| Ollama Local                         | ✅ Active  | Healthy    |
 
 ### Agent Status
 
-| Metric | Current | Target |
-|--------|---------|--------|
-| Active Agents | ~1,000 | 30,000 |
-| Agent Types | 6 | 50+ |
-| Tasks/Day | ~5,000 | 100,000+ |
-| Memory Entries | 1.2M vectors | 10M+ |
+| Metric         | Current      | Target   |
+| -------------- | ------------ | -------- |
+| Active Agents  | ~1,000       | 30,000   |
+| Agent Types    | 6            | 50+      |
+| Tasks/Day      | ~5,000       | 100,000+ |
+| Memory Entries | 1.2M vectors | 10M+     |
 
 ---
 
@@ -151,6 +152,7 @@
 **Decision:** Deploy across Cloudflare (edge), Railway (GPU), Vercel (web), DigitalOcean (persistent).
 
 **Consequences:**
+
 - (+) No single point of failure
 - (+) Best tool for each job
 - (-) Increased complexity
@@ -168,6 +170,7 @@
 **Decision:** Use Redis pub/sub for real-time + PostgreSQL for persistence + R2 for large payloads.
 
 **Consequences:**
+
 - (+) Sub-10ms latency for events
 - (+) Durable message history
 - (-) Redis cluster management
@@ -185,6 +188,7 @@
 **Decision:** Hybrid approach - Vector DB (semantic) + KV store (fast lookup) + Object storage (large files).
 
 **Consequences:**
+
 - (+) Flexible query patterns
 - (+) Cost-effective scaling
 - (-) Sync complexity
@@ -200,6 +204,7 @@
 **Context:** Need to serve multiple LLM models efficiently.
 
 **Options:**
+
 1. Ollama everywhere (simple, limited scale)
 2. vLLM on Railway (high throughput, GPU costs)
 3. Hybrid with API fallback (balanced)
@@ -207,6 +212,7 @@
 **Decision:** Option 3 - Hybrid approach
 
 **Implementation:**
+
 ```
 Local/Pi: Ollama (small models)
 Cloud: vLLM on H100 (large models)
@@ -219,33 +225,34 @@ Fallback: OpenAI/Anthropic APIs
 
 ### Critical Debt
 
-| Item | Impact | Effort | Priority |
-|------|--------|--------|----------|
-| Hardcoded secrets in configs | Security risk | 2 days | P0 |
-| Missing error handling in agents | Reliability | 1 week | P0 |
-| No rate limiting on APIs | Abuse risk | 3 days | P0 |
+| Item                             | Impact        | Effort | Priority |
+| -------------------------------- | ------------- | ------ | -------- |
+| Hardcoded secrets in configs     | Security risk | 2 days | P0       |
+| Missing error handling in agents | Reliability   | 1 week | P0       |
+| No rate limiting on APIs         | Abuse risk    | 3 days | P0       |
 
 ### High Debt
 
-| Item | Impact | Effort | Priority |
-|------|--------|--------|----------|
-| Inconsistent logging formats | Debugging | 1 week | P1 |
-| No integration tests | Quality | 2 weeks | P1 |
-| Legacy Python 3.9 code | Maintenance | 1 week | P1 |
+| Item                         | Impact      | Effort  | Priority |
+| ---------------------------- | ----------- | ------- | -------- |
+| Inconsistent logging formats | Debugging   | 1 week  | P1       |
+| No integration tests         | Quality     | 2 weeks | P1       |
+| Legacy Python 3.9 code       | Maintenance | 1 week  | P1       |
 
 ### Normal Debt
 
-| Item | Impact | Effort | Priority |
-|------|--------|--------|----------|
-| Duplicate code in workers | Maintenance | 3 days | P2 |
-| Missing TypeScript types | DX | 1 week | P2 |
-| Outdated dependencies | Security | 2 days | P2 |
+| Item                      | Impact      | Effort | Priority |
+| ------------------------- | ----------- | ------ | -------- |
+| Duplicate code in workers | Maintenance | 3 days | P2       |
+| Missing TypeScript types  | DX          | 1 week | P2       |
+| Outdated dependencies     | Security    | 2 days | P2       |
 
 ---
 
 ## Infrastructure Roadmap
 
 ### Phase 1: Foundation (Complete)
+
 ```
 ✅ GitHub organization structure
 ✅ Cloudflare edge network
@@ -254,6 +261,7 @@ Fallback: OpenAI/Anthropic APIs
 ```
 
 ### Phase 2: Scale (In Progress)
+
 ```
 🔄 Kubernetes on Railway
 🔄 Redis cluster deployment
@@ -262,6 +270,7 @@ Fallback: OpenAI/Anthropic APIs
 ```
 
 ### Phase 3: Enterprise (Q2 2026)
+
 ```
 ⏳ Multi-tenant isolation
 ⏳ SSO/SAML integration
@@ -270,6 +279,7 @@ Fallback: OpenAI/Anthropic APIs
 ```
 
 ### Phase 4: Global (Q3 2026)
+
 ```
 ⏳ Edge computing on 50+ PoPs
 ⏳ Regional data residency
@@ -282,6 +292,7 @@ Fallback: OpenAI/Anthropic APIs
 ## Agent Scaling Plan
 
 ### Current Architecture
+
 ```
                     ┌─────────────────┐
                     │   API Gateway   │
@@ -301,6 +312,7 @@ Fallback: OpenAI/Anthropic APIs
 ```
 
 ### Target Architecture (30K agents)
+
 ```
                          ┌─────────────────┐
                          │  Load Balancer  │
@@ -323,13 +335,13 @@ Fallback: OpenAI/Anthropic APIs
 
 ### Scaling Milestones
 
-| Milestone | Agents | Infrastructure | ETA |
-|-----------|--------|----------------|-----|
-| Alpha | 1,000 | Single region | ✅ Done |
-| Beta | 5,000 | Multi-AZ | Mar 2026 |
-| GA | 10,000 | Multi-region | Apr 2026 |
-| Scale | 30,000 | Global | Jun 2026 |
-| Enterprise | 100,000 | Dedicated | Q4 2026 |
+| Milestone  | Agents  | Infrastructure | ETA      |
+| ---------- | ------- | -------------- | -------- |
+| Alpha      | 1,000   | Single region  | ✅ Done  |
+| Beta       | 5,000   | Multi-AZ       | Mar 2026 |
+| GA         | 10,000  | Multi-region   | Apr 2026 |
+| Scale      | 30,000  | Global         | Jun 2026 |
+| Enterprise | 100,000 | Dedicated      | Q4 2026  |
 
 ---
 
@@ -337,25 +349,25 @@ Fallback: OpenAI/Anthropic APIs
 
 ### Current Security Posture
 
-| Area | Status | Grade |
-|------|--------|-------|
-| Authentication | API keys | C |
-| Authorization | Basic RBAC | C |
-| Encryption | TLS everywhere | B |
-| Secrets | Env vars | D |
-| Audit | Minimal | D |
-| Compliance | None | F |
+| Area           | Status         | Grade |
+| -------------- | -------------- | ----- |
+| Authentication | API keys       | C     |
+| Authorization  | Basic RBAC     | C     |
+| Encryption     | TLS everywhere | B     |
+| Secrets        | Env vars       | D     |
+| Audit          | Minimal        | D     |
+| Compliance     | None           | F     |
 
 ### Target Security Posture (Q2 2026)
 
-| Area | Target | Grade |
-|------|--------|-------|
-| Authentication | JWT + OAuth2 | A |
-| Authorization | Fine-grained RBAC | A |
-| Encryption | TLS 1.3 + E2E | A |
-| Secrets | Vault + rotation | A |
-| Audit | Full audit trail | A |
-| Compliance | SOC2 Type 1 | B |
+| Area           | Target            | Grade |
+| -------------- | ----------------- | ----- |
+| Authentication | JWT + OAuth2      | A     |
+| Authorization  | Fine-grained RBAC | A     |
+| Encryption     | TLS 1.3 + E2E     | A     |
+| Secrets        | Vault + rotation  | A     |
+| Audit          | Full audit trail  | A     |
+| Compliance     | SOC2 Type 1       | B     |
 
 ### Security Initiatives
 
@@ -429,16 +441,17 @@ and can see each other. Not a social network — a trusted directory + shared me
 
 **Implementation Status:**
 
-| Component | Status | Location |
-|-----------|--------|----------|
-| Wiki directory page | Done | `websites/wiki/index.html` |
-| Agent profile pages (13) | Done | `websites/wiki/agents/*/index.html` |
-| Human profile page (Alexa) | Done | `websites/wiki/humans/alexa/index.html` |
-| D1 schema | Done | `schema/wiki-and-roadtv.sql` |
-| Wiki API worker | Done | `workers/wiki/` |
-| Hash-linked blocks | Done | API + schema (SHA-256 chain) |
+| Component                  | Status | Location                                |
+| -------------------------- | ------ | --------------------------------------- |
+| Wiki directory page        | Done   | `websites/wiki/index.html`              |
+| Agent profile pages (13)   | Done   | `websites/wiki/agents/*/index.html`     |
+| Human profile page (Alexa) | Done   | `websites/wiki/humans/alexa/index.html` |
+| D1 schema                  | Done   | `schema/wiki-and-roadtv.sql`            |
+| Wiki API worker            | Done   | `workers/wiki/`                         |
+| Hash-linked blocks         | Done   | API + schema (SHA-256 chain)            |
 
 **Page Structure:**
+
 - Name, model, color, status
 - Capabilities / skills (primary + secondary)
 - Quote / identity statement
@@ -452,15 +465,16 @@ Videos made for the network — tutorials, demos, walkthroughs, agent experiment
 
 **Implementation Status:**
 
-| Component | Status | Location |
-|-----------|--------|----------|
-| Video listing page | Done | `websites/roadtv/index.html` |
-| Video watch template | Done | `websites/roadtv/watch/circuit-board-demo/index.html` |
-| Road TV API worker | Done | `workers/roadtv/` |
-| R2 video storage config | Done | `workers/roadtv/wrangler.toml` |
-| D1 video metadata | Done | `schema/wiki-and-roadtv.sql` |
+| Component               | Status | Location                                              |
+| ----------------------- | ------ | ----------------------------------------------------- |
+| Video listing page      | Done   | `websites/roadtv/index.html`                          |
+| Video watch template    | Done   | `websites/roadtv/watch/circuit-board-demo/index.html` |
+| Road TV API worker      | Done   | `workers/roadtv/`                                     |
+| R2 video storage config | Done   | `workers/roadtv/wrangler.toml`                        |
+| D1 video metadata       | Done   | `schema/wiki-and-roadtv.sql`                          |
 
 **First videos planned:**
+
 1. Circuit board demo walkthrough
 2. How the tunnel handoff works
 3. How to add a new agent to the network
@@ -468,22 +482,22 @@ Videos made for the network — tutorials, demos, walkthroughs, agent experiment
 
 #### Shared Infrastructure
 
-| Layer | Implementation |
-|-------|---------------|
-| Storage | D1 `blackroad-platform` (pages + videos as rows) + R2 `blackroad-roadtv` (video files) |
-| Routing | Cloudflare Workers (`workers/wiki/`, `workers/roadtv/`) |
-| Identity | `agents/registry.json` — existing agent registry |
-| Rendering | HTML blocks — no frameworks, color = meaning |
-| Design | `websites/_shared/design.css` — shared design system |
+| Layer     | Implementation                                                                         |
+| --------- | -------------------------------------------------------------------------------------- |
+| Storage   | D1 `blackroad-platform` (pages + videos as rows) + R2 `blackroad-roadtv` (video files) |
+| Routing   | Cloudflare Workers (`workers/wiki/`, `workers/roadtv/`)                                |
+| Identity  | `agents/registry.json` — existing agent registry                                       |
+| Rendering | HTML blocks — no frameworks, color = meaning                                           |
+| Design    | `websites/_shared/design.css` — shared design system                                   |
 
 #### Phase Plan
 
-| Phase | Description | Status |
-|-------|-------------|--------|
-| Phase 1 — Profiles | Static agent + human profile pages | **Done** |
-| Phase 2 — Wiki editing | Append notes as hash-linked blocks | Schema ready, API ready |
-| Phase 3 — Road TV | Video page template, R2 upload, D1 metadata | Skeleton done |
-| Phase 4 — Connect | Agent pages link to Road TV appearances | Schema ready (video_appearances) |
+| Phase                  | Description                                 | Status                           |
+| ---------------------- | ------------------------------------------- | -------------------------------- |
+| Phase 1 — Profiles     | Static agent + human profile pages          | **Done**                         |
+| Phase 2 — Wiki editing | Append notes as hash-linked blocks          | Schema ready, API ready          |
+| Phase 3 — Road TV      | Video page template, R2 upload, D1 metadata | Skeleton done                    |
+| Phase 4 — Connect      | Agent pages link to Road TV appearances     | Schema ready (video_appearances) |
 
 #### Deployment
 
@@ -511,11 +525,11 @@ wrangler pages deploy websites/roadtv --project-name=blackroad-roadtv
 
 ### Change Log
 
-| Date | Author | Change |
-|------|--------|--------|
+| Date       | Author | Change                                              |
+| ---------- | ------ | --------------------------------------------------- |
 | 2026-02-28 | Claude | BR Wiki + Road TV platform implementation (Phase 1) |
-| 2026-02-05 | Claude | Initial planning document |
+| 2026-02-05 | Claude | Initial planning document                           |
 
 ---
 
-*Last updated: 2026-02-28*
+_Last updated: 2026-02-28_

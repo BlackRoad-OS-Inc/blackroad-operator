@@ -1,51 +1,60 @@
-"use client";
+'use client'
 
-import { useState } from "react";
-import type { AgentConfig, AgentAvatar, OwnerAvatar, ThemeName } from "@/lib/types";
+import { useState } from 'react'
+import type {
+  AgentConfig,
+  AgentAvatar,
+  OwnerAvatar,
+  ThemeName,
+} from '@/lib/types'
 import {
   AGENT_COLOR_PALETTE,
   AVATAR_OPTIONS,
   MAX_AGENTS,
   OWNER_AVATAR_OPTIONS,
   type DashboardConfig,
-} from "@/lib/config";
+} from '@/lib/config'
 
 const THEMES: Array<{ id: ThemeName; label: string; description: string }> = [
-  { id: "default", label: "Midnight", description: "Deep dark with cyan accents" },
-  { id: "dark", label: "Void", description: "Coldest and darkest" },
-  { id: "cozy", label: "Warm", description: "Warm tones and amber glow" },
-  { id: "cyberpunk", label: "Neon", description: "High-contrast accent mode" },
-];
+  {
+    id: 'default',
+    label: 'Midnight',
+    description: 'Deep dark with cyan accents',
+  },
+  { id: 'dark', label: 'Void', description: 'Coldest and darkest' },
+  { id: 'cozy', label: 'Warm', description: 'Warm tones and amber glow' },
+  { id: 'cyberpunk', label: 'Neon', description: 'High-contrast accent mode' },
+]
 
 function Toggle({
   checked,
   onChange,
 }: {
-  checked: boolean;
-  onChange: () => void;
+  checked: boolean
+  onChange: () => void
 }) {
   return (
     <button
       onClick={onChange}
       className={`relative h-6 w-11 rounded-full transition-colors ${
-        checked ? "bg-[var(--accent-primary)]" : "bg-[var(--border)]"
+        checked ? 'bg-[var(--accent-primary)]' : 'bg-[var(--border)]'
       }`}
     >
       <span
         className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
-          checked ? "translate-x-5" : "translate-x-0.5"
+          checked ? 'translate-x-5' : 'translate-x-0.5'
         }`}
       />
     </button>
-  );
+  )
 }
 
 function ThemeSelector({
   current,
   onChange,
 }: {
-  current: ThemeName;
-  onChange: (theme: ThemeName) => void;
+  current: ThemeName
+  onChange: (theme: ThemeName) => void
 }) {
   return (
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -55,37 +64,43 @@ function ThemeSelector({
           onClick={() => onChange(theme.id)}
           className={`rounded-xl border p-3 text-left transition-colors ${
             current === theme.id
-              ? "border-[var(--accent-primary)] bg-[var(--accent-primary)]/10"
-              : "border-[var(--border)] hover:border-[var(--text-secondary)]"
+              ? 'border-[var(--accent-primary)] bg-[var(--accent-primary)]/10'
+              : 'border-[var(--border)] hover:border-[var(--text-secondary)]'
           }`}
         >
-          <div className="text-sm font-semibold text-[var(--text-primary)]">{theme.label}</div>
-          <div className="mt-1 text-xs text-[var(--text-secondary)]">{theme.description}</div>
+          <div className="text-sm font-semibold text-[var(--text-primary)]">
+            {theme.label}
+          </div>
+          <div className="mt-1 text-xs text-[var(--text-secondary)]">
+            {theme.description}
+          </div>
         </button>
       ))}
     </div>
-  );
+  )
 }
 
 function OwnerCustomizer({
   config,
   onUpdate,
 }: {
-  config: DashboardConfig;
-  onUpdate: (config: DashboardConfig) => void;
+  config: DashboardConfig
+  onUpdate: (config: DashboardConfig) => void
 }) {
-  const updateOwner = (patch: Partial<DashboardConfig["owner"]>) => {
+  const updateOwner = (patch: Partial<DashboardConfig['owner']>) => {
     onUpdate({
       ...config,
       owner: { ...config.owner, ...patch },
-    });
-  };
+    })
+  }
 
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div>
-          <label className="mb-1 block text-xs text-[var(--text-secondary)]">Boss name</label>
+          <label className="mb-1 block text-xs text-[var(--text-secondary)]">
+            Boss name
+          </label>
           <input
             value={config.owner.name}
             onChange={(event) => updateOwner({ name: event.target.value })}
@@ -94,7 +109,9 @@ function OwnerCustomizer({
           />
         </div>
         <div>
-          <label className="mb-1 block text-xs text-[var(--text-secondary)]">Boss emoji</label>
+          <label className="mb-1 block text-xs text-[var(--text-secondary)]">
+            Boss emoji
+          </label>
           <input
             value={config.owner.emoji}
             onChange={(event) => updateOwner({ emoji: event.target.value })}
@@ -105,7 +122,9 @@ function OwnerCustomizer({
       </div>
 
       <div>
-        <div className="mb-2 text-xs text-[var(--text-secondary)]">Boss avatar</div>
+        <div className="mb-2 text-xs text-[var(--text-secondary)]">
+          Boss avatar
+        </div>
         <div className="flex flex-wrap gap-2">
           {OWNER_AVATAR_OPTIONS.map((avatar) => (
             <button
@@ -113,8 +132,8 @@ function OwnerCustomizer({
               onClick={() => updateOwner({ avatar: avatar as OwnerAvatar })}
               className={`rounded-lg border px-3 py-1.5 text-xs transition-colors ${
                 config.owner.avatar === avatar
-                  ? "border-[var(--accent-primary)] bg-[var(--accent-primary)]/10 text-[var(--accent-primary)]"
-                  : "border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                  ? 'border-[var(--accent-primary)] bg-[var(--accent-primary)]/10 text-[var(--accent-primary)]'
+                  : 'border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
               }`}
             >
               {avatar}
@@ -124,13 +143,16 @@ function OwnerCustomizer({
       </div>
 
       <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] p-4">
-        <div className="text-sm font-semibold text-[var(--text-primary)]">Global chat sender</div>
+        <div className="text-sm font-semibold text-[var(--text-primary)]">
+          Global chat sender
+        </div>
         <div className="mt-1 text-xs text-[var(--text-secondary)]">
-          Broadcasts go out as {config.owner.emoji || "B"} {config.owner.name || "Boss"}.
+          Broadcasts go out as {config.owner.emoji || 'B'}{' '}
+          {config.owner.name || 'Boss'}.
         </div>
       </div>
     </div>
-  );
+  )
 }
 
 function AgentCustomizer({
@@ -138,9 +160,9 @@ function AgentCustomizer({
   onUpdate,
   onRemove,
 }: {
-  agent: AgentConfig;
-  onUpdate: (patch: Partial<AgentConfig>) => void;
-  onRemove: () => void;
+  agent: AgentConfig
+  onUpdate: (patch: Partial<AgentConfig>) => void
+  onRemove: () => void
 }) {
   return (
     <div className="space-y-3 rounded-xl border border-[var(--border)] bg-[var(--bg-card)] p-3">
@@ -149,7 +171,9 @@ function AgentCustomizer({
           <div className="truncate text-sm font-semibold text-[var(--text-primary)]">
             {agent.emoji} {agent.name}
           </div>
-          <div className="truncate text-xs text-[var(--text-secondary)]">{agent.id}</div>
+          <div className="truncate text-xs text-[var(--text-secondary)]">
+            {agent.id}
+          </div>
         </div>
         <button
           onClick={onRemove}
@@ -183,8 +207,8 @@ function AgentCustomizer({
               onClick={() => onUpdate({ avatar: avatar as AgentAvatar })}
               className={`rounded-md border px-2 py-1 text-xs transition-colors ${
                 agent.avatar === avatar
-                  ? "border-[var(--accent-primary)] bg-[var(--accent-primary)]/10 text-[var(--accent-primary)]"
-                  : "border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                  ? 'border-[var(--accent-primary)] bg-[var(--accent-primary)]/10 text-[var(--accent-primary)]'
+                  : 'border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
               }`}
             >
               {avatar}
@@ -201,7 +225,9 @@ function AgentCustomizer({
               key={color}
               onClick={() => onUpdate({ color })}
               className={`h-6 w-6 rounded-full border-2 transition-transform ${
-                agent.color === color ? "scale-110 border-white" : "border-transparent"
+                agent.color === color
+                  ? 'scale-110 border-white'
+                  : 'border-transparent'
               }`}
               style={{ backgroundColor: color }}
             />
@@ -209,16 +235,16 @@ function AgentCustomizer({
         </div>
       </div>
     </div>
-  );
+  )
 }
 
 interface SettingsPanelProps {
-  config: DashboardConfig;
-  connected: boolean;
-  sessionCount: number;
-  onUpdate: (config: DashboardConfig) => void;
-  onReset: () => void;
-  onClose: () => void;
+  config: DashboardConfig
+  connected: boolean
+  sessionCount: number
+  onUpdate: (config: DashboardConfig) => void
+  onReset: () => void
+  onClose: () => void
 }
 
 export default function SettingsPanel({
@@ -229,37 +255,44 @@ export default function SettingsPanel({
   onReset,
   onClose,
 }: SettingsPanelProps) {
-  const [tab, setTab] = useState<"gateway" | "owner" | "agents" | "theme">("gateway");
+  const [tab, setTab] = useState<'gateway' | 'owner' | 'agents' | 'theme'>(
+    'gateway',
+  )
 
-  const updateGateway = (field: keyof DashboardConfig["gateway"], value: string) => {
+  const updateGateway = (
+    field: keyof DashboardConfig['gateway'],
+    value: string,
+  ) => {
     onUpdate({
       ...config,
       gateway: { ...config.gateway, [field]: value },
-    });
-  };
+    })
+  }
 
   const updateTheme = (theme: ThemeName) => {
-    onUpdate({ ...config, theme });
-  };
+    onUpdate({ ...config, theme })
+  }
 
   const updateAgent = (id: string, patch: Partial<AgentConfig>) => {
     onUpdate({
       ...config,
-      agents: config.agents.map((agent) => (agent.id === id ? { ...agent, ...patch } : agent)),
-    });
-  };
+      agents: config.agents.map((agent) =>
+        agent.id === id ? { ...agent, ...patch } : agent,
+      ),
+    })
+  }
 
   const removeAgent = (id: string) => {
     onUpdate({
       ...config,
       agents: config.agents.filter((agent) => agent.id !== id),
-    });
-  };
+    })
+  }
 
   const addAgent = () => {
-    if (config.agents.length >= MAX_AGENTS) return;
+    if (config.agents.length >= MAX_AGENTS) return
 
-    const index = config.agents.length;
+    const index = config.agents.length
     onUpdate({
       ...config,
       agents: [
@@ -267,13 +300,13 @@ export default function SettingsPanel({
         {
           id: `agent-${Date.now()}`,
           name: `Agent ${index + 1}`,
-          emoji: "AI",
+          emoji: 'AI',
           color: AGENT_COLOR_PALETTE[index % AGENT_COLOR_PALETTE.length],
           avatar: AVATAR_OPTIONS[index % AVATAR_OPTIONS.length] as AgentAvatar,
         },
       ],
-    });
-  };
+    })
+  }
 
   return (
     <div
@@ -286,7 +319,9 @@ export default function SettingsPanel({
       >
         <div className="flex items-center justify-between border-b border-[var(--border)] px-6 py-4">
           <div>
-            <h2 className="text-lg font-semibold text-[var(--text-primary)]">Settings</h2>
+            <h2 className="text-lg font-semibold text-[var(--text-primary)]">
+              Settings
+            </h2>
             <div className="text-xs text-[var(--text-secondary)]">
               Local OpenClaw auto-connect with saved dashboard preferences.
             </div>
@@ -300,19 +335,21 @@ export default function SettingsPanel({
         </div>
 
         <div className="flex flex-wrap border-b border-[var(--border)]">
-          {([
-            ["gateway", "Gateway"],
-            ["owner", "Boss"],
-            ["agents", "Agents"],
-            ["theme", "Theme"],
-          ] as const).map(([key, label]) => (
+          {(
+            [
+              ['gateway', 'Gateway'],
+              ['owner', 'Boss'],
+              ['agents', 'Agents'],
+              ['theme', 'Theme'],
+            ] as const
+          ).map(([key, label]) => (
             <button
               key={key}
               onClick={() => setTab(key)}
               className={`px-4 py-3 text-sm font-medium transition-colors ${
                 tab === key
-                  ? "border-b-2 border-[var(--accent-primary)] text-[var(--accent-primary)]"
-                  : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                  ? 'border-b-2 border-[var(--accent-primary)] text-[var(--accent-primary)]'
+                  : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
               }`}
             >
               {label}
@@ -321,56 +358,71 @@ export default function SettingsPanel({
         </div>
 
         <div className="max-h-[70vh] space-y-4 overflow-y-auto p-6">
-          {tab === "gateway" && (
+          {tab === 'gateway' && (
             <>
               <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
                 <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] p-4">
-                  <div className="text-sm font-semibold text-[var(--text-primary)]">Connection</div>
+                  <div className="text-sm font-semibold text-[var(--text-primary)]">
+                    Connection
+                  </div>
                   <div
                     className="mt-2 text-sm"
                     style={{
-                      color: connected ? "var(--accent-success)" : "var(--accent-warning)",
+                      color: connected
+                        ? 'var(--accent-success)'
+                        : 'var(--accent-warning)',
                     }}
                   >
-                    {connected ? "Connected to local OpenClaw" : "Scanning for local OpenClaw"}
+                    {connected
+                      ? 'Connected to local OpenClaw'
+                      : 'Scanning for local OpenClaw'}
                   </div>
                   <div className="mt-1 text-xs text-[var(--text-secondary)]">
                     {connected
                       ? `Monitoring ${sessionCount} live session(s).`
-                      : "The dashboard keeps retrying local gateway discovery until a gateway answers."}
+                      : 'The dashboard keeps retrying local gateway discovery until a gateway answers.'}
                   </div>
                 </div>
 
                 <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] p-4">
-                  <div className="text-sm font-semibold text-[var(--text-primary)]">Auto-connect</div>
+                  <div className="text-sm font-semibold text-[var(--text-primary)]">
+                    Auto-connect
+                  </div>
                   <div className="mt-2 text-xs text-[var(--text-secondary)]">
-                    Local discovery reads your OpenClaw config and now uses device-aware auth, so
-                    current OpenClaw gateways grant real operator scopes instead of dropping the
-                    dashboard into an empty state.
+                    Local discovery reads your OpenClaw config and now uses
+                    device-aware auth, so current OpenClaw gateways grant real
+                    operator scopes instead of dropping the dashboard into an
+                    empty state.
                   </div>
                 </div>
               </div>
 
               <div>
-                <label className="mb-1 block text-xs text-[var(--text-secondary)]">Saved gateway URL</label>
+                <label className="mb-1 block text-xs text-[var(--text-secondary)]">
+                  Saved gateway URL
+                </label>
                 <input
                   value={config.gateway.url}
-                  onChange={(event) => updateGateway("url", event.target.value)}
+                  onChange={(event) => updateGateway('url', event.target.value)}
                   placeholder="http://localhost:18789"
                   className="w-full rounded-xl border border-[var(--border)] bg-[var(--bg-card)] px-4 py-2.5 text-sm text-[var(--text-primary)] focus:border-[var(--accent-primary)] focus:outline-none"
                 />
                 <div className="mt-1 text-xs text-[var(--text-secondary)]">
-                  Stored for overrides and diagnostics. The live local connection still auto-discovers your
-                  OpenClaw instance first.
+                  Stored for overrides and diagnostics. The live local
+                  connection still auto-discovers your OpenClaw instance first.
                 </div>
               </div>
 
               <div>
-                <label className="mb-1 block text-xs text-[var(--text-secondary)]">Saved gateway token</label>
+                <label className="mb-1 block text-xs text-[var(--text-secondary)]">
+                  Saved gateway token
+                </label>
                 <input
                   type="password"
                   value={config.gateway.token}
-                  onChange={(event) => updateGateway("token", event.target.value)}
+                  onChange={(event) =>
+                    updateGateway('token', event.target.value)
+                  }
                   placeholder="Optional"
                   className="w-full rounded-xl border border-[var(--border)] bg-[var(--bg-card)] px-4 py-2.5 text-sm text-[var(--text-primary)] focus:border-[var(--accent-primary)] focus:outline-none"
                 />
@@ -378,29 +430,34 @@ export default function SettingsPanel({
 
               <div className="flex items-center justify-between rounded-xl border border-[var(--border)] bg-[var(--bg-card)] p-4">
                 <div>
-                  <div className="text-sm font-semibold text-[var(--text-primary)]">Demo mode</div>
+                  <div className="text-sm font-semibold text-[var(--text-primary)]">
+                    Demo mode
+                  </div>
                   <div className="mt-1 text-xs text-[var(--text-secondary)]">
-                    Keep this off for real OpenClaw sessions. Enable only if you want simulated agents.
+                    Keep this off for real OpenClaw sessions. Enable only if you
+                    want simulated agents.
                   </div>
                 </div>
                 <Toggle
                   checked={config.demoMode}
-                  onChange={() => onUpdate({ ...config, demoMode: !config.demoMode })}
+                  onChange={() =>
+                    onUpdate({ ...config, demoMode: !config.demoMode })
+                  }
                 />
               </div>
             </>
           )}
 
-          {tab === "owner" && (
+          {tab === 'owner' && (
             <OwnerCustomizer config={config} onUpdate={onUpdate} />
           )}
 
-          {tab === "agents" && (
+          {tab === 'agents' && (
             <>
               <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] p-4 text-xs text-[var(--text-secondary)]">
-                These saved presets are kept for demo layouts and future override mapping. Live
-                OpenClaw session metadata currently takes priority when the gateway reports names
-                and identity details.
+                These saved presets are kept for demo layouts and future
+                override mapping. Live OpenClaw session metadata currently takes
+                priority when the gateway reports names and identity details.
               </div>
               <div className="space-y-3">
                 {config.agents.map((agent) => (
@@ -423,7 +480,9 @@ export default function SettingsPanel({
             </>
           )}
 
-          {tab === "theme" && <ThemeSelector current={config.theme} onChange={updateTheme} />}
+          {tab === 'theme' && (
+            <ThemeSelector current={config.theme} onChange={updateTheme} />
+          )}
         </div>
 
         <div className="flex flex-col gap-3 border-t border-[var(--border)] px-6 py-4 sm:flex-row sm:justify-between">
@@ -442,5 +501,5 @@ export default function SettingsPanel({
         </div>
       </div>
     </div>
-  );
+  )
 }

@@ -52,12 +52,12 @@ The **Model Context Protocol (MCP)** is BlackRoad's system for connecting AI mod
 
 ### Key Concepts
 
-| Concept | Description |
-|---------|-------------|
-| **Tools** | Functions the model can call |
+| Concept       | Description                     |
+| ------------- | ------------------------------- |
+| **Tools**     | Functions the model can call    |
 | **Resources** | Data sources the model can read |
-| **Prompts** | Reusable prompt templates |
-| **Transport** | Communication protocol |
+| **Prompts**   | Reusable prompt templates       |
+| **Transport** | Communication protocol          |
 
 ---
 
@@ -136,7 +136,7 @@ server:
   host: localhost
 
 transport:
-  type: stdio  # or http, websocket
+  type: stdio # or http, websocket
   timeout: 30
 
 tools:
@@ -156,8 +156,8 @@ tools:
 
   web:
     allowed_domains:
-      - "*.blackroad.io"
-      - "api.github.com"
+      - '*.blackroad.io'
+      - 'api.github.com'
     timeout: 30
 
   shell:
@@ -668,7 +668,7 @@ class MemoryResource(Resource):
 
 ### Prompt Templates
 
-```yaml
+````yaml
 # prompts/templates/code_review.yaml
 name: code_review
 description: Review code for quality and issues
@@ -689,18 +689,20 @@ template: |
 
   ```{{ language or "" }}
   {{ code }}
-  ```
+````
 
-  {% if focus %}
-  Focus areas: {{ focus }}
-  {% endif %}
+{% if focus %}
+Focus areas: {{ focus }}
+{% endif %}
 
-  Provide:
-  1. Overall assessment
-  2. Potential issues
-  3. Suggestions for improvement
-  4. Security considerations
-```
+Provide:
+
+1. Overall assessment
+2. Potential issues
+3. Suggestions for improvement
+4. Security considerations
+
+````
 
 ```yaml
 # prompts/templates/summarize.yaml
@@ -722,7 +724,7 @@ template: |
   {{ content }}
 
   Provide a {{ length }} summary that captures the key points.
-```
+````
 
 ### Loading Prompts
 
@@ -880,17 +882,17 @@ security:
         - grep
         - git
       blocked_patterns:
-        - "rm -rf"
-        - "sudo"
-        - "chmod 777"
+        - 'rm -rf'
+        - 'sudo'
+        - 'chmod 777'
 
     web:
       allowed_domains:
-        - "*.blackroad.io"
-        - "api.github.com"
-        - "api.openai.com"
+        - '*.blackroad.io'
+        - 'api.github.com'
+        - 'api.openai.com'
       blocked_domains:
-        - "*.malicious.com"
+        - '*.malicious.com'
       max_request_size: 10MB
 
   # Rate limiting
@@ -1061,4 +1063,4 @@ template: |
 
 ---
 
-*Last updated: 2026-02-05*
+_Last updated: 2026-02-05_

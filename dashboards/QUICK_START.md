@@ -3,20 +3,25 @@
 ## Super Fast Launch
 
 ### Option 1: Launcher Menu (Easiest!)
+
 ```bash
 cd ~/blackroad-dashboards
 ./br-dashboards.sh
 ```
+
 Choose from all 12 dashboards in an interactive menu!
 
 ### Option 2: Direct Launch (Recommended)
+
 ```bash
 # THE ONE DASHBOARD TO RULE THEM ALL
 ~/blackroad-dashboards/blackroad-master-control.sh
 ```
 
 ### Option 3: Add to Your Shell
+
 Add to `~/.bashrc` or `~/.zshrc`:
+
 ```bash
 alias brd='~/blackroad-dashboards/br-dashboards.sh'
 alias br-control='~/blackroad-dashboards/blackroad-master-control.sh'
@@ -24,6 +29,7 @@ alias br-lottery='~/blackroad-dashboards/blackroad-cosmic-lottery.sh'
 ```
 
 Then just type:
+
 ```bash
 brd              # Opens launcher menu
 br-control       # Opens Master Control
@@ -35,11 +41,13 @@ br-lottery       # Opens Cosmic Lottery
 ## What to Run First?
 
 ### 👉 **START HERE:** Master Control
+
 ```bash
 ./blackroad-master-control.sh
 ```
 
 **Why?**
+
 - See EVERYTHING at once
 - All 5 devices, 16 zones, 66 repos, crypto portfolio
 - Interactive: press [1-4] to drill into specific systems
@@ -49,11 +57,13 @@ br-lottery       # Opens Cosmic Lottery
 ### Then Try:
 
 **For Fun:**
+
 ```bash
 ./blackroad-cosmic-lottery.sh    # Watch quantum lottery draws!
 ```
 
 **For Deep Dives:**
+
 ```bash
 ./device-raspberry-pi.sh --watch   # Pi cluster monitoring
 ./device-cloudflare.sh --watch     # Edge network details
@@ -65,15 +75,15 @@ br-lottery       # Opens Cosmic Lottery
 
 ## 📊 Dashboard Cheat Sheet
 
-| Command | What It Does | Auto-Refresh |
-|---------|-------------|--------------|
-| `./br-dashboards.sh` | **Launcher menu** | - |
-| `./blackroad-master-control.sh` | **Everything unified** ⚡ | ✅ 5s |
-| `./blackroad-cosmic-lottery.sh` | **Quantum lottery** ∞ | ✅ 5s |
-| `./device-raspberry-pi.sh --watch` | **4 Pi devices** 🥧 | ✅ 5s |
-| `./device-cloudflare.sh --watch` | **Cloudflare edge** ☁️ | ✅ 5s |
-| `./device-github.sh --watch` | **GitHub repos** 🐙 | ✅ 5s |
-| `./device-railway.sh --watch` | **Railway deploys** 🚂 | ✅ 5s |
+| Command                            | What It Does              | Auto-Refresh |
+| ---------------------------------- | ------------------------- | ------------ |
+| `./br-dashboards.sh`               | **Launcher menu**         | -            |
+| `./blackroad-master-control.sh`    | **Everything unified** ⚡ | ✅ 5s        |
+| `./blackroad-cosmic-lottery.sh`    | **Quantum lottery** ∞     | ✅ 5s        |
+| `./device-raspberry-pi.sh --watch` | **4 Pi devices** 🥧       | ✅ 5s        |
+| `./device-cloudflare.sh --watch`   | **Cloudflare edge** ☁️    | ✅ 5s        |
+| `./device-github.sh --watch`       | **GitHub repos** 🐙       | ✅ 5s        |
+| `./device-railway.sh --watch`      | **Railway deploys** 🚂    | ✅ 5s        |
 
 ---
 
@@ -90,6 +100,7 @@ br-lottery       # Opens Cosmic Lottery
 ## 🎨 What You'll See
 
 ### Master Control View:
+
 ```
 ⚡ MASTER CONTROL ⚡
 ├─ 5 Network Devices (with sparklines!)
@@ -104,6 +115,7 @@ Press [1] Pi Fleet | [2] Cloudflare | [3] GitHub | [4] Lottery | [s] SSH | [q] Q
 ```
 
 ### Cosmic Lottery View:
+
 ```
 ∞ COSMIC LOTTERY ∞
 ├─ Quantum Compute Grid (all 5 devices)
@@ -119,6 +131,7 @@ Press [1] Pi Fleet | [2] Cloudflare | [3] GitHub | [4] Lottery | [s] SSH | [q] Q
 ## 🚨 First Time Setup
 
 ### Make Sure SSH Keys Are Configured:
+
 ```bash
 ssh-copy-id lucidia@192.168.4.38   # Lucidia Prime
 ssh-copy-id pi@192.168.4.64        # BlackRoad Pi
@@ -127,13 +140,17 @@ ssh-copy-id root@159.65.43.12      # Codex Infinity
 ```
 
 ### Optional: Cloudflare API Token
+
 For live Cloudflare stats in ULTIMATE dashboard:
+
 ```bash
 export CF_TOKEN="your_cloudflare_api_token"
 ```
 
 ### Optional: Railway CLI
+
 For Railway integration:
+
 ```bash
 npm install -g @railway/cli
 railway login
@@ -143,22 +160,23 @@ railway login
 
 ## ❓ Which Dashboard For What?
 
-| I Want To... | Use This Dashboard |
-|--------------|-------------------|
-| **See everything at once** | `blackroad-master-control.sh` ⚡ |
-| **Monitor Pi cluster** | `device-raspberry-pi.sh --watch` 🥧 |
-| **Check DNS/CDN** | `device-cloudflare.sh --watch` ☁️ |
-| **Review all repos** | `device-github.sh --watch` 🐙 |
-| **Track deployments** | `device-railway.sh --watch` 🚂 |
-| **Have fun / demo** | `blackroad-cosmic-lottery.sh` ∞ |
-| **SSH to a device** | Master Control → press 's' |
-| **Retro vibes** | `blackroad-os95.sh --watch` 🪟 |
+| I Want To...               | Use This Dashboard                  |
+| -------------------------- | ----------------------------------- |
+| **See everything at once** | `blackroad-master-control.sh` ⚡    |
+| **Monitor Pi cluster**     | `device-raspberry-pi.sh --watch` 🥧 |
+| **Check DNS/CDN**          | `device-cloudflare.sh --watch` ☁️   |
+| **Review all repos**       | `device-github.sh --watch` 🐙       |
+| **Track deployments**      | `device-railway.sh --watch` 🚂      |
+| **Have fun / demo**        | `blackroad-cosmic-lottery.sh` ∞     |
+| **SSH to a device**        | Master Control → press 's'          |
+| **Retro vibes**            | `blackroad-os95.sh --watch` 🪟      |
 
 ---
 
 ## 🎯 Common Workflows
 
 ### Morning Check-In
+
 ```bash
 ./blackroad-master-control.sh
 # Quick scan of all systems
@@ -166,6 +184,7 @@ railway login
 ```
 
 ### Deployment Day
+
 ```bash
 ./device-railway.sh --watch
 # Monitor all deployments
@@ -173,6 +192,7 @@ railway login
 ```
 
 ### Infrastructure Review
+
 ```bash
 ./device-cloudflare.sh --watch
 # Check zone health
@@ -181,6 +201,7 @@ railway login
 ```
 
 ### Code Review Day
+
 ```bash
 ./device-github.sh --watch
 # See all repos
@@ -189,6 +210,7 @@ railway login
 ```
 
 ### Pi Cluster Maintenance
+
 ```bash
 ./device-raspberry-pi.sh --watch
 # Monitor all 4 Pis
@@ -221,16 +243,18 @@ railway login
 ---
 
 **Ready? Start here:**
+
 ```bash
 cd ~/blackroad-dashboards
 ./blackroad-master-control.sh
 ```
 
 **Or use the launcher:**
+
 ```bash
 ./br-dashboards.sh
 ```
 
 🎉 **Enjoy your 12 terminal dashboards!**
 
-*Colors: #FF9D00 #FF6B00 #FF0066 #FF006B #D600AA #7700FF #0066FF #FFD700*
+_Colors: #FF9D00 #FF6B00 #FF0066 #FF006B #D600AA #7700FF #0066FF #FFD700_

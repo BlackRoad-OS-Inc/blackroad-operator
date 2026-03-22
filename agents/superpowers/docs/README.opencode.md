@@ -53,6 +53,7 @@ Both should show symlinks pointing to the superpowers directory.
 ### Windows
 
 **Prerequisites:**
+
 - Git installed
 - Either **Developer Mode** enabled OR **Administrator privileges**
   - Windows 10: Settings → Update & Security → For developers
@@ -141,12 +142,14 @@ If running OpenCode inside WSL, use the [macOS / Linux](#macos--linux) instructi
 #### Verify Installation
 
 **Command Prompt:**
+
 ```cmd
 dir /AL "%USERPROFILE%\.config\opencode\plugins"
 dir /AL "%USERPROFILE%\.config\opencode\skills"
 ```
 
 **PowerShell:**
+
 ```powershell
 Get-ChildItem "$env:USERPROFILE\.config\opencode\plugins" | Where-Object { $_.LinkType }
 Get-ChildItem "$env:USERPROFILE\.config\opencode\skills" | Where-Object { $_.LinkType }
@@ -157,13 +160,16 @@ Look for `<SYMLINK>` or `<JUNCTION>` in the output.
 #### Troubleshooting Windows
 
 **"You do not have sufficient privilege" error:**
+
 - Enable Developer Mode in Windows Settings, OR
 - Right-click your terminal → "Run as Administrator"
 
 **"Cannot create a file when that file already exists":**
+
 - Run the removal commands (step 3) first, then retry
 
 **Symlinks not working after git clone:**
+
 - Run `git config --global core.symlinks true` and re-clone
 
 ## Usage
@@ -261,6 +267,7 @@ Skills written for Claude Code are automatically adapted for OpenCode. The boots
 **Location:** `~/.config/opencode/superpowers/.opencode/plugins/superpowers.js`
 
 **Components:**
+
 - `experimental.chat.system.transform` hook for bootstrap injection
 - Reads and injects the "using-superpowers" skill content
 
@@ -297,6 +304,7 @@ Restart OpenCode to load the updates.
 ### Windows: Module not found error
 
 If you see `Cannot find module` errors on Windows:
+
 - **Cause:** Git Bash `ln -sf` copies files instead of creating symlinks
 - **Fix:** Use `mklink /J` directory junctions instead (see Windows installation steps)
 

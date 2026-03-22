@@ -1,15 +1,17 @@
 # [INDEX] Carpool Directory Structure
 
 ## Status Semantics
-| Status | Meaning | Allowed Actions |
-|--------|---------|-----------------|
-| `active` | Production use | Bug fixes, improvements |
-| `experimental` | Under development | Any changes |
-| `archived` | Historical | Documentation only |
-| `deprecated` | Migrate away | Critical fixes only |
-| `frozen` | Version-locked | None (read-only) |
+
+| Status         | Meaning           | Allowed Actions         |
+| -------------- | ----------------- | ----------------------- |
+| `active`       | Production use    | Bug fixes, improvements |
+| `experimental` | Under development | Any changes             |
+| `archived`     | Historical        | Documentation only      |
+| `deprecated`   | Migrate away      | Critical fixes only     |
+| `frozen`       | Version-locked    | None (read-only)        |
 
 ## Directory Layout
+
 ```
 carpool/
 ├── memory/                 [active] Memory system
@@ -37,18 +39,20 @@ carpool/
 ```
 
 ## Naming Conventions
-| Prefix | Type | Example |
-|--------|------|---------|
-| `core-` | Core agents | `core-lucidia.json` |
+
+| Prefix    | Type               | Example                       |
+| --------- | ------------------ | ----------------------------- |
+| `core-`   | Core agents        | `core-lucidia.json`           |
 | `worker-` | Cloudflare workers | `worker-api-blackroadio.json` |
-| `myth-` | Mythology AI | `myth-mercury.json` |
-| `ai-` | AI platform agents | `ai-cadence.json` |
-| `hw-` | Hardware agents | `hw-cordelia.json` |
-| `pi-` | Pi devices | `pi-alice.json` |
-| `pixel-` | Pixel agents | `pixel-cece-c706eb23.json` |
-| `agent-` | Named agents | `agent-echo-138b7f.json` |
+| `myth-`   | Mythology AI       | `myth-mercury.json`           |
+| `ai-`     | AI platform agents | `ai-cadence.json`             |
+| `hw-`     | Hardware agents    | `hw-cordelia.json`            |
+| `pi-`     | Pi devices         | `pi-alice.json`               |
+| `pixel-`  | Pixel agents       | `pixel-cece-c706eb23.json`    |
+| `agent-`  | Named agents       | `agent-echo-138b7f.json`      |
 
 ## Rules
+
 1. ALL agent files must be JSON
 2. ALL system docs must be markdown with [BRACKETS]
 3. Memory is append-only (JSONL)

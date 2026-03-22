@@ -8,70 +8,81 @@
 ## 🐛 **BUGS FOUND (Priority: HIGH)**
 
 ### 1. **Gateway Connection Retry Logic Missing**
+
 **File:** `src/lib/gateway-connection.ts`  
 **Issue:** No exponential backoff for reconnection  
-**Impact:** Spams gateway on connection failure  
+**Impact:** Spams gateway on connection failure
 
 **Fix:**
+
 ```typescript
 // Add exponential backoff
-const MAX_RECONNECT_DELAY = 30000;
-const reconnectDelay = Math.min(1000 * Math.pow(2, reconnectAttempts), MAX_RECONNECT_DELAY);
+const MAX_RECONNECT_DELAY = 30000
+const reconnectDelay = Math.min(
+  1000 * Math.pow(2, reconnectAttempts),
+  MAX_RECONNECT_DELAY,
+)
 ```
 
 ### 2. **Memory Leak in Event Subscriptions**
+
 **File:** `src/hooks/useAgents.ts`  
 **Issue:** Event listeners not cleaned up on unmount  
-**Impact:** Memory grows over time  
+**Impact:** Memory grows over time
 
 **Fix:**
+
 ```typescript
 useEffect(() => {
   return () => {
     // Clean up event source
-    if (eventSource) eventSource.close();
-  };
-}, []);
+    if (eventSource) eventSource.close()
+  }
+}, [])
 ```
 
 ### 3. **Race Condition in Chat Messages**
+
 **File:** `src/hooks/useAgents.ts:180`  
 **Issue:** `appendUniqueMessage` doesn't handle concurrent updates  
-**Impact:** Duplicate messages in chat  
+**Impact:** Duplicate messages in chat
 
 **Fix:**
+
 ```typescript
 // Use functional update with proper locking
-setChatMessages(prev => {
-  const thread = prev[agentId] || [];
-  if (thread.some(m => m.id === message.id)) return prev;
-  return { ...prev, [agentId]: [...thread, message].slice(-MAX) };
-});
+setChatMessages((prev) => {
+  const thread = prev[agentId] || []
+  if (thread.some((m) => m.id === message.id)) return prev
+  return { ...prev, [agentId]: [...thread, message].slice(-MAX) }
+})
 ```
 
 ### 4. **Missing Error Boundary**
+
 **File:** `src/app/layout.tsx`  
 **Issue:** No error boundary for crash recovery  
-**Impact:** Whole app crashes on component error  
+**Impact:** Whole app crashes on component error
 
 **Fix:**
+
 ```tsx
 // Add ErrorBoundary component
-<ErrorBoundary fallback={<ErrorScreen />}>
-  {children}
-</ErrorBoundary>
+<ErrorBoundary fallback={<ErrorScreen />}>{children}</ErrorBoundary>
 ```
 
 ### 5. **Hardcoded Tile Dimensions**
+
 **File:** `src/engine/isometric.ts:7-8`  
 **Issue:** `TILE_W = 48, TILE_H = 24` not configurable  
-**Impact:** Can't scale for different screen sizes  
+**Impact:** Can't scale for different screen sizes
 
 **Fix:**
+
 ```typescript
 // Make responsive
-const TILE_W = Math.min(48, window.innerWidth / 20);
-const TILE_H = TILE_W / 2;
+const TILE_W = Math.min(48, window.innerWidth / 20)
+const TILE_H = TILE_W / 2
 ```
 
 ---
@@ -81,9 +92,11 @@ const TILE_H = TILE_W / 2;
 ### **Visual Enhancements (Priority: HIGH)**
 
 #### 1. **Better Agent Sprites**
+
 **File:** `src/sprites/characters.ts`  
 **Current:** 5 avatar types (glasses, hoodie, suit, casual, robot, cat, dog)  
 **Enhancement:** Add 10+ more avatars including:
+
 - 🦆 DuckBot (custom avatar)
 - 🤖 Agent Smith
 - 👽 Alien
@@ -96,9 +109,11 @@ const TILE_H = TILE_W / 2;
 - 🔬 Scientist
 
 #### 2. **Animated Agent States**
+
 **File:** `src/engine/animation.ts`  
 **Current:** Basic movement animation  
 **Enhancement:** Add 18 behavior animations:
+
 - Working (typing animation)
 - Thinking (lightbulb above head)
 - Meeting (speech bubbles)
@@ -109,9 +124,11 @@ const TILE_H = TILE_W / 2;
 - Debugging (magnifying glass)
 
 #### 3. **Office Furniture**
+
 **File:** `src/sprites/furniture.ts`  
 **Current:** Basic desks and chairs  
 **Enhancement:** Add:
+
 - Computer monitors (with screen glow)
 - Whiteboards (with writing)
 - Coffee machines (steam animation)
@@ -122,9 +139,11 @@ const TILE_H = TILE_W / 2;
 - Windows (day/night cycle view)
 
 #### 4. **Lighting System**
+
 **File:** `src/engine/canvas.ts`  
 **Current:** Flat lighting  
 **Enhancement:** Add:
+
 - Day/night cycle
 - Desk lamps (individual lighting)
 - Window light (dynamic shadows)
@@ -136,9 +155,11 @@ const TILE_H = TILE_W / 2;
 ### **Feature Enhancements (Priority: HIGH)**
 
 #### 5. **Real-time Token Tracking**
+
 **File:** `src/app/api/gateway/route.ts`  
 **Current:** Shows total tokens  
 **Enhancement:** Add:
+
 - Real-time token counter (tokens/second)
 - Cost estimation ($ per session)
 - Token usage graphs
@@ -146,9 +167,11 @@ const TILE_H = TILE_W / 2;
 - Model comparison (cost vs performance)
 
 #### 6. **Agent Performance Metrics**
+
 **File:** `src/components/dashboard/AgentGrid.tsx`  
 **Current:** Basic status display  
 **Enhancement:** Add:
+
 - Tasks completed counter
 - Average response time
 - Success rate percentage
@@ -157,9 +180,11 @@ const TILE_H = TILE_W / 2;
 - Leaderboard ranking
 
 #### 7. **Advanced Filtering**
+
 **File:** `src/components/dashboard/AgentGrid.tsx`  
 **Current:** No filtering  
 **Enhancement:** Add filters for:
+
 - Status (active, idle, offline)
 - Model type
 - Token usage range
@@ -168,8 +193,10 @@ const TILE_H = TILE_W / 2;
 - Custom tags
 
 #### 8. **Session Timeline**
+
 **File:** `src/components/session/SessionTimeline.tsx` (NEW)  
 **Enhancement:** Create timeline view showing:
+
 - Session start/end times
 - Key events (tool calls, decisions)
 - Token usage over time
@@ -181,32 +208,38 @@ const TILE_H = TILE_W / 2;
 ### **Performance Enhancements (Priority: MEDIUM)**
 
 #### 9. **Canvas Rendering Optimization**
+
 **File:** `src/engine/canvas.ts`  
 **Current:** Re-renders entire canvas every frame  
 **Enhancement:**
+
 - Dirty rectangle rendering (only update changed areas)
 - Sprite batching (group similar sprites)
 - Level of detail (reduce detail for distant agents)
 - Web Workers for off-screen rendering
 
 #### 10. **SSE Connection Pooling**
+
 **File:** `src/hooks/useAgents.ts`  
 **Current:** Single SSE connection  
 **Enhancement:**
+
 - Connection pooling for multiple data streams
 - Automatic reconnection with backoff
 - Message deduplication
 - Compression for large payloads
 
 #### 11. **Lazy Loading Components**
+
 **File:** `src/app/page.tsx`  
 **Current:** All components load at once  
 **Enhancement:**
+
 ```tsx
 const MiniOffice = dynamic(() => import('@/components/office/MiniOffice'), {
   loading: () => <OfficeSkeleton />,
-  ssr: false
-});
+  ssr: false,
+})
 ```
 
 ---
@@ -214,17 +247,21 @@ const MiniOffice = dynamic(() => import('@/components/office/MiniOffice'), {
 ### **UI/UX Enhancements (Priority: MEDIUM)**
 
 #### 12. **Theme System Upgrade**
+
 **File:** `src/lib/config.ts`  
 **Current:** 4 themes (default, dark, light, cyberpunk)  
 **Enhancement:** Add:
+
 - Custom theme creator
 - Theme sharing (export/import JSON)
 - Auto-theme based on time of day
 - Accessibility themes (high contrast, colorblind)
 
 #### 13. **Keyboard Shortcuts**
+
 **File:** `src/components/KeyboardShortcuts.tsx` (NEW)  
 **Enhancement:** Add shortcuts:
+
 - `Ctrl+K` - Command palette
 - `Ctrl+T` - Toggle theme
 - `Ctrl+F` - Filter agents
@@ -233,8 +270,10 @@ const MiniOffice = dynamic(() => import('@/components/office/MiniOffice'), {
 - `Esc` - Close panels
 
 #### 14. **Notifications System**
+
 **File:** `src/components/Notifications.tsx` (NEW)  
 **Enhancement:** Add notifications for:
+
 - Agent completed task
 - Agent needs help
 - Token budget exceeded
@@ -242,9 +281,11 @@ const MiniOffice = dynamic(() => import('@/components/office/MiniOffice'), {
 - Autowork completed
 
 #### 15. **Responsive Design**
+
 **File:** All components  
 **Current:** Desktop-first  
 **Enhancement:**
+
 - Mobile-friendly layout
 - Tablet optimization
 - Touch gestures for office view
@@ -255,27 +296,33 @@ const MiniOffice = dynamic(() => import('@/components/office/MiniOffice'), {
 ### **Backend Enhancements (Priority: LOW)**
 
 #### 16. **WebSocket Instead of Polling**
+
 **File:** `src/app/api/gateway/route.ts`  
 **Current:** HTTP polling every 5 seconds  
 **Enhancement:**
+
 - WebSocket for real-time updates
 - Reduced server load
 - Instant state updates
 - Bidirectional communication
 
 #### 17. **Database for History**
+
 **File:** `src/lib/database.ts` (NEW)  
 **Current:** In-memory storage  
 **Enhancement:**
+
 - SQLite for session history
 - Persistent chat logs
 - Analytics data storage
 - Export/import functionality
 
 #### 18. **API Rate Limiting**
+
 **File:** `src/app/api/gateway/route.ts`  
 **Current:** No rate limiting  
 **Enhancement:**
+
 - Request throttling
 - Caching layer
 - Request deduplication
@@ -286,6 +333,7 @@ const MiniOffice = dynamic(() => import('@/components/office/MiniOffice'), {
 ## 📈 **METRICS TO TRACK**
 
 ### Performance Metrics:
+
 - Frame rate (target: 60 FPS)
 - Memory usage (target: <200MB)
 - API response time (target: <500ms)
@@ -293,6 +341,7 @@ const MiniOffice = dynamic(() => import('@/components/office/MiniOffice'), {
 - Initial load time (target: <3s)
 
 ### User Metrics:
+
 - Daily active users
 - Session duration
 - Feature usage (which panels most used)
@@ -304,6 +353,7 @@ const MiniOffice = dynamic(() => import('@/components/office/MiniOffice'), {
 ## 🎯 **IMPLEMENTATION PRIORITY**
 
 ### Phase 1 (Week 1):
+
 - [ ] Fix memory leak (#2)
 - [ ] Fix race condition (#3)
 - [ ] Add error boundary (#4)
@@ -311,6 +361,7 @@ const MiniOffice = dynamic(() => import('@/components/office/MiniOffice'), {
 - [ ] Animated agent states (#2)
 
 ### Phase 2 (Week 2):
+
 - [ ] Real-time token tracking (#5)
 - [ ] Agent performance metrics (#6)
 - [ ] Advanced filtering (#7)
@@ -318,6 +369,7 @@ const MiniOffice = dynamic(() => import('@/components/office/MiniOffice'), {
 - [ ] Lighting system (#4)
 
 ### Phase 3 (Week 3):
+
 - [ ] Canvas optimization (#9)
 - [ ] Lazy loading (#11)
 - [ ] Theme creator (#12)
@@ -325,6 +377,7 @@ const MiniOffice = dynamic(() => import('@/components/office/MiniOffice'), {
 - [ ] Notifications (#14)
 
 ### Phase 4 (Week 4):
+
 - [ ] Session timeline (#8)
 - [ ] SSE optimization (#10)
 - [ ] Responsive design (#15)
@@ -367,4 +420,4 @@ const MiniOffice = dynamic(() => import('@/components/office/MiniOffice'), {
 
 ---
 
-*Analysis generated by DuckBot - February 28, 2026*
+_Analysis generated by DuckBot - February 28, 2026_

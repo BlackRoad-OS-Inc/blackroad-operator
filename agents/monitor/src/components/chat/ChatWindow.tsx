@@ -1,18 +1,18 @@
-"use client";
+'use client'
 
-import { useState, useRef, useEffect } from "react";
-import DOMPurify from "dompurify";
-import type { ChatMessage } from "@/lib/types";
+import { useState, useRef, useEffect } from 'react'
+import DOMPurify from 'dompurify'
+import type { ChatMessage } from '@/lib/types'
 
 interface ChatWindowProps {
-  agentId: string;
-  agentName: string;
-  agentEmoji: string;
-  agentColor: string;
-  messages: ChatMessage[];
-  onSend: (agentId: string, message: string) => void;
-  onClose: () => void;
-  onOpen?: () => void;
+  agentId: string
+  agentName: string
+  agentEmoji: string
+  agentColor: string
+  messages: ChatMessage[]
+  onSend: (agentId: string, message: string) => void
+  onClose: () => void
+  onOpen?: () => void
 }
 
 export default function ChatWindow({
@@ -25,61 +25,61 @@ export default function ChatWindow({
   onClose,
   onOpen,
 }: ChatWindowProps) {
-  const [input, setInput] = useState("");
-  const bottomRef = useRef<HTMLDivElement>(null);
-  const messagesContainerRef = useRef<HTMLDivElement>(null);
-  const userSentRef = useRef(false);
-  const prevMessageCountRef = useRef(0);
-  const onOpenRef = useRef(onOpen);
-  onOpenRef.current = onOpen;
+  const [input, setInput] = useState('')
+  const bottomRef = useRef<HTMLDivElement>(null)
+  const messagesContainerRef = useRef<HTMLDivElement>(null)
+  const userSentRef = useRef(false)
+  const prevMessageCountRef = useRef(0)
+  const onOpenRef = useRef(onOpen)
+  onOpenRef.current = onOpen
 
   // Fire onOpen only once on mount (not on every re-render)
   useEffect(() => {
-    onOpenRef.current?.();
-  }, []);
+    onOpenRef.current?.()
+  }, [])
 
   useEffect(() => {
-    const container = messagesContainerRef.current;
-    if (!container) return;
+    const container = messagesContainerRef.current
+    if (!container) return
 
-    const prevCount = prevMessageCountRef.current;
-    prevMessageCountRef.current = messages.length;
+    const prevCount = prevMessageCountRef.current
+    prevMessageCountRef.current = messages.length
 
     // History just loaded (went from 0 to N) — scroll to bottom instantly
     if (prevCount === 0 && messages.length > 0) {
-      bottomRef.current?.scrollIntoView({ behavior: "instant" });
-      return;
+      bottomRef.current?.scrollIntoView({ behavior: 'instant' })
+      return
     }
 
     // Always scroll if user just sent a message
     if (userSentRef.current) {
-      userSentRef.current = false;
-      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-      return;
+      userSentRef.current = false
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+      return
     }
 
     // Otherwise, only auto-scroll if already near the bottom
-    const { scrollTop, scrollHeight, clientHeight } = container;
-    const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
+    const { scrollTop, scrollHeight, clientHeight } = container
+    const isNearBottom = scrollHeight - scrollTop - clientHeight < 100
     if (isNearBottom) {
-      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
     }
-  }, [messages]);
+  }, [messages])
 
   const handleSend = () => {
-    const text = input.trim();
-    if (!text) return;
-    userSentRef.current = true;
-    onSend(agentId, text);
-    setInput("");
-  };
+    const text = input.trim()
+    if (!text) return
+    userSentRef.current = true
+    onSend(agentId, text)
+    setInput('')
+  }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      handleSend()
     }
-  };
+  }
 
   return (
     <div className="fixed right-0 top-0 bottom-0 w-96 z-50 flex flex-col bg-[var(--bg-primary)] border-l border-[var(--border)] shadow-2xl animate-slide-in">
@@ -90,7 +90,9 @@ export default function ChatWindow({
       >
         <div className="flex items-center gap-2">
           <span className="text-xl">{agentEmoji}</span>
-          <span className="font-bold text-[var(--text-primary)]">{agentName}</span>
+          <span className="font-bold text-[var(--text-primary)]">
+            {agentName}
+          </span>
         </div>
         <button
           onClick={onClose}
@@ -101,7 +103,10 @@ export default function ChatWindow({
       </div>
 
       {/* Messages */}
-      <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 space-y-3">
+      <div
+        ref={messagesContainerRef}
+        className="flex-1 overflow-y-auto p-4 space-y-3"
+      >
         {messages.length === 0 && (
           <div className="text-center text-[var(--text-secondary)] text-sm mt-8">
             <span className="text-3xl block mb-2">{agentEmoji}</span>
@@ -111,22 +116,26 @@ export default function ChatWindow({
         {messages.map((msg) => (
           <div
             key={msg.id}
-            className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+            className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
           >
             <div
               className={`max-w-[80%] rounded-2xl px-4 py-2 text-sm ${
-                msg.role === "user"
-                  ? "bg-[var(--accent-primary)] text-white rounded-br-md"
-                  : msg.role === "system"
-                    ? "bg-[var(--bg-secondary)] text-[var(--text-secondary)] rounded-bl-md border border-[var(--border)]"
-                    : "bg-[var(--bg-card)] text-[var(--text-primary)] rounded-bl-md border border-[var(--border)]"
+                msg.role === 'user'
+                  ? 'bg-[var(--accent-primary)] text-white rounded-br-md'
+                  : msg.role === 'system'
+                    ? 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] rounded-bl-md border border-[var(--border)]'
+                    : 'bg-[var(--bg-card)] text-[var(--text-primary)] rounded-bl-md border border-[var(--border)]'
               }`}
             >
-              {msg.role === "user" || msg.role === "system" ? msg.content : DOMPurify.sanitize(msg.content)}
-              {msg.scope !== "history" && (
+              {msg.role === 'user' || msg.role === 'system'
+                ? msg.content
+                : DOMPurify.sanitize(msg.content)}
+              {msg.scope !== 'history' && (
                 <div
                   className={`text-[10px] mt-1 ${
-                    msg.role === "user" ? "text-white/60" : "text-[var(--text-secondary)]"
+                    msg.role === 'user'
+                      ? 'text-white/60'
+                      : 'text-[var(--text-secondary)]'
                   }`}
                 >
                   {new Date(msg.timestamp).toLocaleTimeString()}
@@ -152,12 +161,12 @@ export default function ChatWindow({
           <button
             onClick={handleSend}
             className="w-12 sm:w-auto px-3 sm:px-4 py-2.5 sm:py-2 rounded-xl text-base sm:text-sm font-medium transition-colors touch-manipulation"
-            style={{ background: agentColor, color: "#fff" }}
+            style={{ background: agentColor, color: '#fff' }}
           >
             ↑
           </button>
         </div>
       </div>
     </div>
-  );
+  )
 }

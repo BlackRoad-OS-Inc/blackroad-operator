@@ -9,11 +9,11 @@ Trackio is an experiment tracking library for logging and visualizing ML trainin
 
 ## Three Interfaces
 
-| Task | Interface | Reference |
-|------|-----------|-----------|
-| **Logging metrics** during training | Python API | [references/logging_metrics.md](references/logging_metrics.md) |
-| **Firing alerts** for training diagnostics | Python API | [references/alerts.md](references/alerts.md) |
-| **Retrieving metrics & alerts** after/during training | CLI | [references/retrieving_metrics.md](references/retrieving_metrics.md) |
+| Task                                                  | Interface  | Reference                                                            |
+| ----------------------------------------------------- | ---------- | -------------------------------------------------------------------- |
+| **Logging metrics** during training                   | Python API | [references/logging_metrics.md](references/logging_metrics.md)       |
+| **Firing alerts** for training diagnostics            | Python API | [references/alerts.md](references/alerts.md)                         |
+| **Retrieving metrics & alerts** after/during training | CLI        | [references/retrieving_metrics.md](references/retrieving_metrics.md) |
 
 ## When to Use Each
 

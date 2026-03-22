@@ -1,4 +1,5 @@
 # RoadCode Standard
+
 > The canonical definition of RoadCode across all three layers.
 > Last updated: 2026-03-21
 
@@ -8,17 +9,18 @@
 
 It exists simultaneously at three layers:
 
-| Layer | What it is | Where it lives |
-|-------|-----------|----------------|
-| **RoadCode Repo** | The constitution, map, and contract for a single org | `{org}/RoadCode` on GitHub (16 repos) |
-| **RoadCode Platform** | The forked Gitea instance — sovereign Git hosting, mirroring, webhooks, CI/CD | Octavia :3100 (self-hosted) |
-| **RoadCode Control Plane** | The registry that answers "what exists, where, who owns it, what serves it" | Built on top of the Platform layer |
+| Layer                      | What it is                                                                    | Where it lives                        |
+| -------------------------- | ----------------------------------------------------------------------------- | ------------------------------------- |
+| **RoadCode Repo**          | The constitution, map, and contract for a single org                          | `{org}/RoadCode` on GitHub (16 repos) |
+| **RoadCode Platform**      | The forked Gitea instance — sovereign Git hosting, mirroring, webhooks, CI/CD | Octavia :3100 (self-hosted)           |
+| **RoadCode Control Plane** | The registry that answers "what exists, where, who owns it, what serves it"   | Built on top of the Platform layer    |
 
 ## B. The Three-Layer Distinction
 
 ### Layer 1: RoadCode Repo (the org constitution)
 
 Each of the 16 organizations has exactly one repo named `RoadCode`. This is:
+
 - The **entry point** — first thing you read when you enter an org
 - The **map** — lists every repo, domain, agent, and service in that org
 - The **contract** — defines scope boundaries (what belongs here, what doesn't)
@@ -29,6 +31,7 @@ Each of the 16 organizations has exactly one repo named `RoadCode`. This is:
 ### Layer 2: RoadCode Platform (the sovereign Gitea fork)
 
 RoadCode Platform is the forked Gitea running on Octavia. It is:
+
 - The **sovereign Git server** — all repos mirrored from GitHub, but Gitea is primary
 - The **webhook engine** — triggers deployments, agent dispatches, sync operations
 - The **CI/CD runner** — Gitea Actions with act_runner on the Pi fleet
@@ -41,6 +44,7 @@ GitHub remains the public-facing mirror. RoadCode Platform is the sovereign orig
 ### Layer 3: RoadCode Control Plane (the registry brain)
 
 Built on top of the Platform, the Control Plane is the query surface that answers:
+
 - "What orgs exist?" → org registry
 - "What repos exist in org X?" → repo registry
 - "What domain serves org X?" → domain registry
@@ -128,26 +132,26 @@ Every domain org's RoadCode follows a minimal standard:
 
 ## D. Platform vs Repo: What Goes Where
 
-| Function | RoadCode Repo | RoadCode Platform | Regular Repos |
-|----------|:---:|:---:|:---:|
-| Org purpose & scope definition | YES | — | — |
-| Repo registry / listing | YES | — | — |
-| Domain ownership declaration | YES | — | — |
-| Agent roster | YES | — | — |
-| Service inventory | YES | — | — |
-| Agent instructions (CLAUDE.md) | YES | — | YES (per-repo) |
-| Application code | — | — | YES |
-| Deployment scripts | — | — | YES (in BlackRoad-OS repos) |
-| Git hosting | — | YES | — |
-| Webhook dispatch | — | YES | — |
-| CI/CD pipeline execution | — | YES | — |
-| Mirror sync (Gitea ↔ GitHub) | — | YES | — |
-| Search/discovery index | — | YES | — |
-| Audit ledger | — | YES | — |
-| Auth / identity | — | YES | — |
-| Node management | — | YES | — |
-| Build artifacts | — | — | — (never in Git) |
-| Secrets / credentials | — | — | — (never in Git) |
+| Function                       | RoadCode Repo | RoadCode Platform |        Regular Repos        |
+| ------------------------------ | :-----------: | :---------------: | :-------------------------: |
+| Org purpose & scope definition |      YES      |         —         |              —              |
+| Repo registry / listing        |      YES      |         —         |              —              |
+| Domain ownership declaration   |      YES      |         —         |              —              |
+| Agent roster                   |      YES      |         —         |              —              |
+| Service inventory              |      YES      |         —         |              —              |
+| Agent instructions (CLAUDE.md) |      YES      |         —         |       YES (per-repo)        |
+| Application code               |       —       |         —         |             YES             |
+| Deployment scripts             |       —       |         —         | YES (in BlackRoad-OS repos) |
+| Git hosting                    |       —       |        YES        |              —              |
+| Webhook dispatch               |       —       |        YES        |              —              |
+| CI/CD pipeline execution       |       —       |        YES        |              —              |
+| Mirror sync (Gitea ↔ GitHub)   |       —       |        YES        |              —              |
+| Search/discovery index         |       —       |        YES        |              —              |
+| Audit ledger                   |       —       |        YES        |              —              |
+| Auth / identity                |       —       |        YES        |              —              |
+| Node management                |       —       |        YES        |              —              |
+| Build artifacts                |       —       |         —         |      — (never in Git)       |
+| Secrets / credentials          |       —       |         —         |      — (never in Git)       |
 
 ## E. RoadCode Platform Module Map
 
@@ -229,6 +233,7 @@ RoadCode Platform (Octavia :3100)
 ```
 
 **Data flow:**
+
 1. Code is pushed to **RoadCode Platform** (Gitea on Octavia) — this is the origin
 2. RoadCode mirrors to **GitHub Enterprise** — this is the public face
 3. Webhooks fire to **deploy workers** on Pi fleet nodes
@@ -238,6 +243,7 @@ RoadCode Platform (Octavia :3100)
 7. Audit ledger records every action with hash chain integrity
 
 **Cloudflare integration (during sovereignty migration):**
+
 - CF Workers serve website frontends (19 domains)
 - CF DNS points domains to Gematria (edge) or direct to Pi fleet
 - As sovereignty completes: CF Workers → Octavia self-hosted Workers (:9001-9015)
@@ -246,37 +252,41 @@ RoadCode Platform (Octavia :3100)
 ## G. Naming Conventions
 
 ### Repos
-| Pattern | Scope | Example |
-|---------|-------|---------|
-| `RoadCode` | Org entrypoint (one per org) | `BlackRoad-AI/RoadCode` |
-| `road-{function}` | Shared platform tool | `road-deploy`, `road-sync`, `road-search` |
-| `Road{Name}` | Forked sovereignty dep | `RoadCode`, `TollBooth`, `Passenger` |
-| `blackroad-{product}` | Product/service repo | `blackroad-chat`, `blackroad-hq` |
-| `br-{tool}` | Internal CLI/script | `br-search`, `br-sync` |
+
+| Pattern               | Scope                        | Example                                   |
+| --------------------- | ---------------------------- | ----------------------------------------- |
+| `RoadCode`            | Org entrypoint (one per org) | `BlackRoad-AI/RoadCode`                   |
+| `road-{function}`     | Shared platform tool         | `road-deploy`, `road-sync`, `road-search` |
+| `Road{Name}`          | Forked sovereignty dep       | `RoadCode`, `TollBooth`, `Passenger`      |
+| `blackroad-{product}` | Product/service repo         | `blackroad-chat`, `blackroad-hq`          |
+| `br-{tool}`           | Internal CLI/script          | `br-search`, `br-sync`                    |
 
 ### Services (systemd / container names)
-| Pattern | Example |
-|---------|---------|
-| `roadcode` | The Gitea/RoadCode Platform itself |
+
+| Pattern           | Example                                       |
+| ----------------- | --------------------------------------------- |
+| `roadcode`        | The Gitea/RoadCode Platform itself            |
 | `road-{function}` | `road-mirror`, `road-registry`, `road-search` |
-| `br-{service}` | `br-memory`, `br-codex`, `br-agents` |
+| `br-{service}`    | `br-memory`, `br-codex`, `br-agents`          |
 
 ### Subdomains
-| Pattern | Purpose | Example |
-|---------|---------|---------|
-| `{product}.blackroad.io` | Product verticals | `chat.blackroad.io`, `hq.blackroad.io` |
-| `code.blackroad.io` | RoadCode Platform web UI | — |
-| `api.blackroad.io` | Platform API | — |
-| `pay.blackroad.io` | Stripe/payment | — |
-| `auth.blackroad.io` | Authentication | — |
-| `search.blackroad.io` | Discovery/search | — |
+
+| Pattern                  | Purpose                  | Example                                |
+| ------------------------ | ------------------------ | -------------------------------------- |
+| `{product}.blackroad.io` | Product verticals        | `chat.blackroad.io`, `hq.blackroad.io` |
+| `code.blackroad.io`      | RoadCode Platform web UI | —                                      |
+| `api.blackroad.io`       | Platform API             | —                                      |
+| `pay.blackroad.io`       | Stripe/payment           | —                                      |
+| `auth.blackroad.io`      | Authentication           | —                                      |
+| `search.blackroad.io`    | Discovery/search         | —                                      |
 
 ### Containers (Docker/Podman)
-| Pattern | Example |
-|---------|---------|
-| `roadcode-{module}` | `roadcode-registry`, `roadcode-mirror` |
-| `br-{service}` | `br-memory`, `br-codex` |
-| `road-{dep}` | `road-gitea`, `road-minio`, `road-caddy` |
+
+| Pattern             | Example                                  |
+| ------------------- | ---------------------------------------- |
+| `roadcode-{module}` | `roadcode-registry`, `roadcode-mirror`   |
+| `br-{service}`      | `br-memory`, `br-codex`                  |
+| `road-{dep}`        | `road-gitea`, `road-minio`, `road-caddy` |
 
 ## H. Anti-Duplication Rules
 
@@ -292,12 +302,14 @@ RoadCode Platform (Octavia :3100)
 ## I. Current State vs Target State
 
 ### Current (what exists now)
+
 - 16 RoadCode repos on GitHub, each with ~298 files (mostly `.gitkeep` scaffolds)
 - Application code mixed into RoadCode repos (JSX templates, site files, API stubs)
 - Gitea on Octavia exists but is partially operational
 - GitHub is treated as primary, Gitea as secondary
 
 ### Target (what we're building)
+
 - 16 RoadCode repos: THIN, document-only, following the standard contract
 - Application code extracted to proper domain repos
 - RoadCode Platform (Gitea) is PRIMARY, GitHub is public mirror
@@ -306,6 +318,7 @@ RoadCode Platform (Octavia :3100)
 - Discovery/search integrated into Platform
 
 ### Migration Path
+
 1. **Clean existing RoadCode repos** — strip application code, remove .gitkeep forests
 2. **Standardize to contract** — README, ORG.md, REPOS.md, DOMAINS.md, AGENTS.md, SERVICES.md, LICENSE, CLAUDE.md
 3. **Create registries** — build orgs.json, domains.json, agents.json, nodes.json in OS-Inc/RoadCode
@@ -325,6 +338,7 @@ RoadCode Platform (Octavia :3100)
 3. **RoadCode Control Plane** = built on the Platform. Registries, discovery, audit, policy enforcement. The nervous system that makes the enterprise navigable by humans, agents, and automation.
 
 **The hierarchy is:**
+
 ```
 Enterprise (BlackRoad)
   └── Control Plane (RoadCode Platform on Octavia)
@@ -339,7 +353,8 @@ Enterprise (BlackRoad)
 **code.blackroad.io is the internal expression.** It's the RoadCode Platform web UI where agents and humans navigate the sovereign infrastructure.
 
 **The separation is absolute:**
-- Registry data → OS-Inc/RoadCode/registries/*.json
+
+- Registry data → OS-Inc/RoadCode/registries/\*.json
 - Platform tools → BlackRoad-OS repos
 - Domain work → domain org repos
 - Org contracts → {org}/RoadCode (thin, document-only)

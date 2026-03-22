@@ -21,8 +21,9 @@
 ## 📦 CURRENT FEATURES (28 Working)
 
 ### 🤖 Agent System (5 features)
+
 1. **Octavia** - The Architect
-2. **Lucidia** - The Dreamer  
+2. **Lucidia** - The Dreamer
 3. **Alice** - The Operator
 4. **Aria** - The Interface
 5. **Shellfish** - The Hacker
@@ -30,12 +31,14 @@
 7. **Providers** - Cloud/Edge/Serverless management
 
 ### 🧪 Testing & Quality (4 features)
+
 8. **Test Suite** - 8 frameworks supported
 9. **Security Scanner** - Vulnerability detection
 10. **Backup Manager** - Git/DB/Files
 11. **Code Quality** - Multi-language linting
 
 ### ☁️ Cloud & Infrastructure (5 features)
+
 12. **Cloudflare** - DNS, Pages, Workers
 13. **DigitalOcean** - Droplets, SSH
 14. **Deploy Manager** - Vercel, Netlify, Heroku
@@ -43,11 +46,13 @@
 16. **Pi Fleet** - Remote IoT management
 
 ### 🌐 Web Development (3 features)
+
 17. **Web Toolkit** - 6 framework scaffolding
 18. **Website Monitor** - Uptime & SSL
 19. **Smart Search** - Intelligent code search
 
 ### 🛠️ Developer Tools (11 features)
+
 20. **Git Integration** - AI-powered commits
 21. **Snippet Manager** - Code snippets
 22. **Pair Programming** - AI assistant
@@ -69,11 +74,13 @@
 ## 🆕 NEXT 3 FEATURES (Ready to Install!)
 
 ### Feature #29: 🔧 CI/CD Pipeline Manager
+
 **File:** `NEXT_FEATURE_29_CI_PIPELINE.sh`
 
 **Move to:** `/Users/alexa/blackroad/tools/ci-pipeline/br-ci.sh`
 
 **What it does:**
+
 - Create custom CI/CD pipelines
 - Multi-stage execution (install, lint, test, build, deploy)
 - Retry failed stages automatically
@@ -82,6 +89,7 @@
 - Watch mode for live updates
 
 **Commands:**
+
 ```bash
 br ci create myapp               # Create pipeline
 br ci run myapp                  # Run it
@@ -91,6 +99,7 @@ br ci add-stage myapp deploy "npm run deploy" 5
 ```
 
 **Features:**
+
 - ✓ Auto-retry with configurable attempts
 - ✓ Timeout protection
 - ✓ Continue on failure option
@@ -101,11 +110,13 @@ br ci add-stage myapp deploy "npm run deploy" 5
 ---
 
 ### Feature #30: 🔔 Notification System
+
 **File:** `NEXT_FEATURE_30_NOTIFICATIONS.sh`
 
 **Move to:** `/Users/alexa/blackroad/tools/notifications/br-notify.sh`
 
 **What it does:**
+
 - Multi-channel notifications (Desktop, Email, Slack, Webhook)
 - Priority levels (critical, high, normal, low)
 - Notification rules and automation
@@ -113,6 +124,7 @@ br ci add-stage myapp deploy "npm run deploy" 5
 - Notification history
 
 **Commands:**
+
 ```bash
 br notify send "Title" "Message" high desktop
 br notify config slack             # Configure Slack
@@ -121,6 +133,7 @@ br notify test desktop             # Test it
 ```
 
 **Channels:**
+
 - 🖥️ Desktop - System notifications (macOS/Linux)
 - 📧 Email - SMTP email delivery
 - 💬 Slack - Webhook integration
@@ -129,11 +142,13 @@ br notify test desktop             # Test it
 ---
 
 ### Feature #31: 📊 Metrics Dashboard
+
 **File:** `NEXT_FEATURE_31_METRICS.sh`
 
 **Move to:** `/Users/alexa/blackroad/tools/metrics-dashboard/br-metrics.sh`
 
 **What it does:**
+
 - Real-time system metrics (CPU, Memory, Disk)
 - Custom metric tracking
 - Live dashboard with visualizations
@@ -142,6 +157,7 @@ br notify test desktop             # Test it
 - Export to CSV/JSON
 
 **Commands:**
+
 ```bash
 br metrics dashboard              # Live dashboard
 br metrics record api_calls 1523  # Track custom metric
@@ -151,6 +167,7 @@ br metrics export csv my-data     # Export
 ```
 
 **Metrics:**
+
 - 💻 System: CPU, Memory, Disk, Load
 - 📈 Custom: Any numerical metric
 - 📊 Statistics: Avg, Min, Max
@@ -161,12 +178,13 @@ br metrics export csv my-data     # Export
 ## 🎯 INSTALLATION STEPS
 
 ### 1. Move the feature scripts:
+
 ```bash
 cd /Users/alexa/blackroad
 
 # Create directories
 mkdir -p tools/ci-pipeline
-mkdir -p tools/notifications  
+mkdir -p tools/notifications
 mkdir -p tools/metrics-dashboard
 
 # Move scripts
@@ -209,6 +227,7 @@ echo "║                                                               ║"
 ```
 
 ### 4. Test the features:
+
 ```bash
 # Test CI/CD
 br ci create test-pipeline
@@ -250,6 +269,7 @@ br metrics dashboard
 ## 🎨 WHAT YOU CAN DO
 
 ### Complete Development Workflow
+
 ```bash
 # Morning: Check systems
 br metrics dashboard
@@ -278,6 +298,7 @@ br monitor check
 ```
 
 ### DevOps Automation
+
 ```bash
 # Infrastructure
 br agent register builder devops "ci,deploy" server1
@@ -293,6 +314,7 @@ br notify add-rule "ci_failed" "slack" "critical"
 ```
 
 ### Multi-Agent Coordination
+
 ```bash
 # Register team
 br agent register octavia architect "systems" local
@@ -383,6 +405,7 @@ After installing these 3 features, you could add:
 ## 📚 DOCUMENTATION FILES
 
 All documentation saved:
+
 - `BLACKROAD_DASHBOARD.md` - Visual dashboard & stats
 - `NEXT_FEATURE_29_CI_PIPELINE.sh` - CI/CD pipeline manager
 - `NEXT_FEATURE_30_NOTIFICATIONS.sh` - Notification system

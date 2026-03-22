@@ -8,298 +8,395 @@
  * RUNS ON CECILIA (same machine as PostgreSQL for security)
  */
 
-import { Hono } from 'hono';
-import { cors } from 'hono/cors';
-import { serve } from '@hono/node-server';
-import { KVNamespace } from '../adapters/kv-adapter.js';
-import { D1Database } from '../adapters/d1-adapter.js';
-import { PRICING, getTier, getStripePriceId, type PricingTier } from './pricing.js';
-import { verifyWebhookSignature } from './webhook-verify.js';
+import { Hono } from 'hono'
+import { cors } from 'hono/cors'
+import { serve } from '@hono/node-server'
+import { KVNamespace } from '../adapters/kv-adapter.js'
+import { D1Database } from '../adapters/d1-adapter.js'
+import {
+  PRICING,
+  getTier,
+  getStripePriceId,
+  type PricingTier,
+} from './pricing.js'
+import { verifyWebhookSignature } from './webhook-verify.js'
 
-const app = new Hono();
+const app = new Hono()
 
 // Adapters
-const SUBSCRIPTIONS_KV = new KVNamespace('SUBSCRIPTIONS_KV');
-const USERS_KV = new KVNamespace('USERS_KV');
-const REVENUE_D1 = new D1Database('blackroad_revenue');
+const SUBSCRIPTIONS_KV = new KVNamespace('SUBSCRIPTIONS_KV')
+const USERS_KV = new KVNamespace('USERS_KV')
+const REVENUE_D1 = new D1Database('blackroad_revenue')
 
-const CORS_ORIGIN = process.env.CORS_ORIGIN || 'https://blackroad.io';
+const CORS_ORIGIN = process.env.CORS_ORIGIN || 'https://blackroad.io'
 
-app.use('*', cors({
-  origin: CORS_ORIGIN,
-  allowMethods: ['GET', 'POST', 'OPTIONS'],
-  allowHeaders: ['Content-Type', 'Authorization'],
-}));
+app.use(
+  '*',
+  cors({
+    origin: CORS_ORIGIN,
+    allowMethods: ['GET', 'POST', 'OPTIONS'],
+    allowHeaders: ['Content-Type', 'Authorization'],
+  }),
+)
 
 // ─── HTML Helpers ───
 function json(data: unknown, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
     headers: { 'Content-Type': 'application/json' },
-  });
+  })
 }
 
 // ─── Health ───
-app.get('/health', (c) => c.json({
-  status: 'healthy',
-  version: '3.0.0',
-  source: 'self-hosted',
-  timestamp: new Date().toISOString(),
-}));
+app.get('/health', (c) =>
+  c.json({
+    status: 'healthy',
+    version: '3.0.0',
+    source: 'self-hosted',
+    timestamp: new Date().toISOString(),
+  }),
+)
 
 // ─── Pricing ───
-app.get('/api/pricing', (c) => c.json(PRICING));
+app.get('/api/pricing', (c) => c.json(PRICING))
 
 // ─── Pricing Page ───
 app.get('/', (c) => {
-  return c.html(renderPricingPage());
-});
+  return c.html(renderPricingPage())
+})
 
-app.get('/success', (c) => c.html(renderSuccessPage()));
-app.get('/cancel', (c) => c.html(renderCancelPage()));
+app.get('/success', (c) => c.html(renderSuccessPage()))
+app.get('/cancel', (c) => c.html(renderCancelPage()))
 
 // ─── Checkout Session ───
 app.post('/create-checkout-session', async (c) => {
   const body = await c.req.json<{
-    tierId?: string;
-    billingPeriod?: string;
-    userId?: string;
-    email?: string;
-  }>();
-  const { tierId, billingPeriod = 'monthly', userId, email } = body;
+    tierId?: string
+    billingPeriod?: string
+    userId?: string
+    email?: string
+  }>()
+  const { tierId, billingPeriod = 'monthly', userId, email } = body
 
-  const tier = getTier(tierId || '');
+  const tier = getTier(tierId || '')
   if (!tier || tier.id === 'free' || tier.id === 'custom') {
-    return c.json({ error: 'Invalid tier for checkout' }, 400);
+    return c.json({ error: 'Invalid tier for checkout' }, 400)
   }
 
-  const priceId = getStripePriceId(tier, billingPeriod as 'monthly' | 'yearly');
+  const priceId = getStripePriceId(tier, billingPeriod as 'monthly' | 'yearly')
   if (!priceId) {
-    return c.json({ error: 'Price not configured. Set Stripe price ID env vars.' }, 500);
+    return c.json(
+      { error: 'Price not configured. Set Stripe price ID env vars.' },
+      500,
+    )
   }
 
   const params = new URLSearchParams({
-    'mode': 'subscription',
+    mode: 'subscription',
     'payment_method_types[]': 'card',
     'line_items[0][price]': priceId,
     'line_items[0][quantity]': '1',
-    'success_url': 'https://pay.blackroad.io/success?session_id={CHECKOUT_SESSION_ID}',
-    'cancel_url': 'https://pay.blackroad.io/cancel',
-    'allow_promotion_codes': 'true',
+    success_url:
+      'https://pay.blackroad.io/success?session_id={CHECKOUT_SESSION_ID}',
+    cancel_url: 'https://pay.blackroad.io/cancel',
+    allow_promotion_codes: 'true',
     'automatic_tax[enabled]': 'true',
-    'billing_address_collection': 'required',
+    billing_address_collection: 'required',
     'tax_id_collection[enabled]': 'true',
     'metadata[tier_id]': tier.id,
-  });
+  })
 
-  if (email) params.set('customer_email', email);
+  if (email) params.set('customer_email', email)
   if (userId) {
-    params.set('client_reference_id', userId);
-    params.set('metadata[user_id]', userId);
+    params.set('client_reference_id', userId)
+    params.set('metadata[user_id]', userId)
   }
   if (tier.trialDays > 0) {
-    params.set('subscription_data[trial_period_days]', String(tier.trialDays));
+    params.set('subscription_data[trial_period_days]', String(tier.trialDays))
   }
 
-  const res = await stripeAPI('POST', '/v1/checkout/sessions', params.toString());
-  const session = await res.json() as { id?: string; url?: string; error?: { message?: string } };
+  const res = await stripeAPI(
+    'POST',
+    '/v1/checkout/sessions',
+    params.toString(),
+  )
+  const session = (await res.json()) as {
+    id?: string
+    url?: string
+    error?: { message?: string }
+  }
 
   if (session.error) {
-    return c.json({ error: session.error.message || 'Stripe error' }, 400);
+    return c.json({ error: session.error.message || 'Stripe error' }, 400)
   }
 
-  return c.json({ sessionId: session.id, url: session.url });
-});
+  return c.json({ sessionId: session.id, url: session.url })
+})
 
 // ─── Portal Session ───
 app.post('/create-portal-session', async (c) => {
-  const { customerId } = await c.req.json<{ customerId?: string }>();
-  if (!customerId) return c.json({ error: 'Missing customerId' }, 400);
+  const { customerId } = await c.req.json<{ customerId?: string }>()
+  if (!customerId) return c.json({ error: 'Missing customerId' }, 400)
 
   const params = new URLSearchParams({
-    'customer': customerId,
-    'return_url': 'https://pay.blackroad.io/',
-  });
+    customer: customerId,
+    return_url: 'https://pay.blackroad.io/',
+  })
 
-  const res = await stripeAPI('POST', '/v1/billing_portal/sessions', params.toString());
-  const session = await res.json() as { url?: string; error?: { message?: string } };
-
-  if (session.error) {
-    return c.json({ error: session.error.message || 'Stripe error' }, 400);
+  const res = await stripeAPI(
+    'POST',
+    '/v1/billing_portal/sessions',
+    params.toString(),
+  )
+  const session = (await res.json()) as {
+    url?: string
+    error?: { message?: string }
   }
 
-  return c.json({ url: session.url });
-});
+  if (session.error) {
+    return c.json({ error: session.error.message || 'Stripe error' }, 400)
+  }
+
+  return c.json({ url: session.url })
+})
 
 // ─── Webhook ───
 app.post('/webhook', async (c) => {
-  const sigHeader = c.req.header('stripe-signature');
+  const sigHeader = c.req.header('stripe-signature')
   if (!sigHeader) {
-    return c.json({ error: 'Missing Stripe-Signature header' }, 400);
+    return c.json({ error: 'Missing Stripe-Signature header' }, 400)
   }
 
-  const body = await c.req.text();
-  const secret = process.env.STRIPE_WEBHOOK_SECRET;
+  const body = await c.req.text()
+  const secret = process.env.STRIPE_WEBHOOK_SECRET
   if (!secret) {
-    return c.json({ error: 'Webhook secret not configured' }, 500);
+    return c.json({ error: 'Webhook secret not configured' }, 500)
   }
 
-  const verification = await verifyWebhookSignature(body, sigHeader, secret);
+  const verification = await verifyWebhookSignature(body, sigHeader, secret)
   if (!verification.valid) {
-    console.error('Webhook verification failed:', verification.error);
-    return c.json({ error: 'Invalid signature' }, 400);
+    console.error('Webhook verification failed:', verification.error)
+    return c.json({ error: 'Invalid signature' }, 400)
   }
 
-  const event = JSON.parse(body) as { id: string; type: string; data: { object: any } };
+  const event = JSON.parse(body) as {
+    id: string
+    type: string
+    data: { object: any }
+  }
 
   // Idempotency check
   const existing = await REVENUE_D1.prepare(
-    'SELECT stripe_event_id FROM webhook_events WHERE stripe_event_id = ?'
-  ).bind(event.id).first();
+    'SELECT stripe_event_id FROM webhook_events WHERE stripe_event_id = ?',
+  )
+    .bind(event.id)
+    .first()
 
   if (existing) {
-    return c.json({ received: true, duplicate: true });
+    return c.json({ received: true, duplicate: true })
   }
 
-  let success = true;
+  let success = true
   try {
     switch (event.type) {
       case 'checkout.session.completed':
-        await handleCheckoutCompleted(event.data.object);
-        break;
+        await handleCheckoutCompleted(event.data.object)
+        break
       case 'customer.subscription.created':
       case 'customer.subscription.updated':
-        await handleSubscriptionUpdate(event.data.object);
-        break;
+        await handleSubscriptionUpdate(event.data.object)
+        break
       case 'customer.subscription.deleted':
-        await handleSubscriptionDeleted(event.data.object);
-        break;
+        await handleSubscriptionDeleted(event.data.object)
+        break
       case 'invoice.payment_succeeded':
-        await handlePaymentSucceeded(event.data.object);
-        break;
+        await handlePaymentSucceeded(event.data.object)
+        break
       case 'invoice.payment_failed':
-        console.error('Payment failed for invoice:', event.data.object.id);
-        break;
+        console.error('Payment failed for invoice:', event.data.object.id)
+        break
     }
   } catch (err) {
-    console.error(`Webhook handler error for ${event.type}:`, err);
-    success = false;
+    console.error(`Webhook handler error for ${event.type}:`, err)
+    success = false
   }
 
   await REVENUE_D1.prepare(
-    'INSERT INTO webhook_events (stripe_event_id, event_type, processed_at, success) VALUES (?, ?, ?, ?)'
-  ).bind(event.id, event.type, new Date().toISOString(), success ? 1 : 0).run();
+    'INSERT INTO webhook_events (stripe_event_id, event_type, processed_at, success) VALUES (?, ?, ?, ?)',
+  )
+    .bind(event.id, event.type, new Date().toISOString(), success ? 1 : 0)
+    .run()
 
-  return c.json({ received: true });
-});
+  return c.json({ received: true })
+})
 
 // ─── Subscription Status ───
 app.get('/subscription-status', async (c) => {
-  const userId = c.req.query('userId');
-  if (!userId) return c.json({ error: 'Missing userId' }, 400);
+  const userId = c.req.query('userId')
+  if (!userId) return c.json({ error: 'Missing userId' }, 400)
 
-  const subscription = await SUBSCRIPTIONS_KV.get(`user:${userId}`, 'json');
-  return c.json(subscription || { status: 'none' });
-});
+  const subscription = await SUBSCRIPTIONS_KV.get(`user:${userId}`, 'json')
+  return c.json(subscription || { status: 'none' })
+})
 
 // ─── Webhook Handlers ───
 async function handleCheckoutCompleted(session: any): Promise<void> {
-  const userId = session.client_reference_id || session.metadata?.user_id;
-  const tierId = session.metadata?.tier_id;
-  if (!userId) return;
+  const userId = session.client_reference_id || session.metadata?.user_id
+  const tierId = session.metadata?.tier_id
+  if (!userId) return
 
   if (session.subscription) {
-    const now = new Date().toISOString();
-    await REVENUE_D1.prepare(`
+    const now = new Date().toISOString()
+    await REVENUE_D1.prepare(
+      `
       INSERT INTO subscriptions (stripe_subscription_id, stripe_customer_id, user_id, tier_id, status, created_at, updated_at)
       VALUES (?, ?, ?, ?, 'active', ?, ?)
       ON CONFLICT(stripe_subscription_id) DO UPDATE SET status='active', updated_at=?
-    `).bind(
-      session.subscription, session.customer, userId, tierId || 'pro', now, now, now
-    ).run();
+    `,
+    )
+      .bind(
+        session.subscription,
+        session.customer,
+        userId,
+        tierId || 'pro',
+        now,
+        now,
+        now,
+      )
+      .run()
   }
 
   await SUBSCRIPTIONS_KV.put(
     `user:${userId}`,
     JSON.stringify({
-      userId, tierId,
+      userId,
+      tierId,
       customerId: session.customer,
       subscriptionId: session.subscription,
       status: 'active',
       createdAt: new Date().toISOString(),
-    })
-  );
+    }),
+  )
 
   if (session.amount_total) {
     await REVENUE_D1.prepare(
-      'INSERT INTO revenue (user_id, tier_id, amount, currency, created_at) VALUES (?, ?, ?, ?, ?)'
-    ).bind(userId, tierId, session.amount_total / 100, session.currency || 'usd', new Date().toISOString()).run();
+      'INSERT INTO revenue (user_id, tier_id, amount, currency, created_at) VALUES (?, ?, ?, ?, ?)',
+    )
+      .bind(
+        userId,
+        tierId,
+        session.amount_total / 100,
+        session.currency || 'usd',
+        new Date().toISOString(),
+      )
+      .run()
   }
 }
 
 async function handleSubscriptionUpdate(subscription: any): Promise<void> {
-  const userId = subscription.metadata?.user_id;
-  const now = new Date().toISOString();
+  const userId = subscription.metadata?.user_id
+  const now = new Date().toISOString()
   const periodEnd = subscription.current_period_end
     ? new Date(subscription.current_period_end * 1000).toISOString()
-    : null;
+    : null
 
-  await REVENUE_D1.prepare(`
+  await REVENUE_D1.prepare(
+    `
     UPDATE subscriptions
     SET status = ?, current_period_end = ?, cancel_at_period_end = ?, updated_at = ?
     WHERE stripe_subscription_id = ?
-  `).bind(subscription.status, periodEnd, subscription.cancel_at_period_end ? 1 : 0, now, subscription.id).run();
+  `,
+  )
+    .bind(
+      subscription.status,
+      periodEnd,
+      subscription.cancel_at_period_end ? 1 : 0,
+      now,
+      subscription.id,
+    )
+    .run()
 
   if (userId) {
-    const existing = await SUBSCRIPTIONS_KV.get(`user:${userId}`, 'json') as any;
+    const existing = (await SUBSCRIPTIONS_KV.get(
+      `user:${userId}`,
+      'json',
+    )) as any
     if (existing) {
-      await SUBSCRIPTIONS_KV.put(`user:${userId}`, JSON.stringify({
-        ...existing, status: subscription.status, currentPeriodEnd: periodEnd, updatedAt: now,
-      }));
+      await SUBSCRIPTIONS_KV.put(
+        `user:${userId}`,
+        JSON.stringify({
+          ...existing,
+          status: subscription.status,
+          currentPeriodEnd: periodEnd,
+          updatedAt: now,
+        }),
+      )
     }
   }
 }
 
 async function handleSubscriptionDeleted(subscription: any): Promise<void> {
-  const userId = subscription.metadata?.user_id;
-  const now = new Date().toISOString();
+  const userId = subscription.metadata?.user_id
+  const now = new Date().toISOString()
 
   await REVENUE_D1.prepare(
-    'UPDATE subscriptions SET status = ?, updated_at = ? WHERE stripe_subscription_id = ?'
-  ).bind('canceled', now, subscription.id).run();
+    'UPDATE subscriptions SET status = ?, updated_at = ? WHERE stripe_subscription_id = ?',
+  )
+    .bind('canceled', now, subscription.id)
+    .run()
 
   if (userId) {
-    const existing = await SUBSCRIPTIONS_KV.get(`user:${userId}`, 'json') as any;
+    const existing = (await SUBSCRIPTIONS_KV.get(
+      `user:${userId}`,
+      'json',
+    )) as any
     if (existing) {
-      await SUBSCRIPTIONS_KV.put(`user:${userId}`, JSON.stringify({
-        ...existing, status: 'canceled', canceledAt: now,
-      }));
+      await SUBSCRIPTIONS_KV.put(
+        `user:${userId}`,
+        JSON.stringify({
+          ...existing,
+          status: 'canceled',
+          canceledAt: now,
+        }),
+      )
     }
   }
 }
 
 async function handlePaymentSucceeded(invoice: any): Promise<void> {
-  const userId = invoice.subscription_details?.metadata?.user_id || invoice.metadata?.user_id;
-  if (!userId) return;
+  const userId =
+    invoice.subscription_details?.metadata?.user_id || invoice.metadata?.user_id
+  if (!userId) return
 
   await REVENUE_D1.prepare(
-    'INSERT INTO revenue (user_id, amount, currency, created_at) VALUES (?, ?, ?, ?)'
-  ).bind(userId, (invoice.amount_paid || 0) / 100, invoice.currency || 'usd', new Date().toISOString()).run();
+    'INSERT INTO revenue (user_id, amount, currency, created_at) VALUES (?, ?, ?, ?)',
+  )
+    .bind(
+      userId,
+      (invoice.amount_paid || 0) / 100,
+      invoice.currency || 'usd',
+      new Date().toISOString(),
+    )
+    .run()
 }
 
 // ─── Stripe API Helper ───
-async function stripeAPI(method: string, endpoint: string, body?: string): Promise<globalThis.Response> {
-  const key = process.env.STRIPE_SECRET_KEY;
-  if (!key) throw new Error('STRIPE_SECRET_KEY not set');
+async function stripeAPI(
+  method: string,
+  endpoint: string,
+  body?: string,
+): Promise<globalThis.Response> {
+  const key = process.env.STRIPE_SECRET_KEY
+  if (!key) throw new Error('STRIPE_SECRET_KEY not set')
 
   return fetch(`https://api.stripe.com${endpoint}`, {
     method,
     headers: {
-      'Authorization': `Bearer ${key}`,
+      Authorization: `Bearer ${key}`,
       'Content-Type': 'application/x-www-form-urlencoded',
     },
     body,
-  });
+  })
 }
 
 // ─── HTML Pages ───
@@ -324,22 +421,32 @@ function pageShell(title: string, content: string): string {
   a { color: var(--hot-pink); text-decoration: none; }
   a:hover { text-decoration: underline; }
 </style>
-${content}`;
+${content}`
 }
 
 function renderPricingPage(): string {
   const tierCards = PRICING.map((tier) => {
-    const isPopular = tier.popular;
-    const isCustom = tier.id === 'custom';
-    const isFree = tier.id === 'free';
-    const monthlyDisplay = isCustom ? 'Custom' : isFree ? '$0' : `$${tier.priceMonthly}`;
-    const yearlyDisplay = isCustom ? 'Custom' : isFree ? '$0' : `$${Math.round(tier.priceYearly / 12)}`;
-    const featuresHtml = tier.features.map(f => `<li><span class="check">&#10003;</span> ${f}</li>`).join('');
+    const isPopular = tier.popular
+    const isCustom = tier.id === 'custom'
+    const isFree = tier.id === 'free'
+    const monthlyDisplay = isCustom
+      ? 'Custom'
+      : isFree
+        ? '$0'
+        : `$${tier.priceMonthly}`
+    const yearlyDisplay = isCustom
+      ? 'Custom'
+      : isFree
+        ? '$0'
+        : `$${Math.round(tier.priceYearly / 12)}`
+    const featuresHtml = tier.features
+      .map((f) => `<li><span class="check">&#10003;</span> ${f}</li>`)
+      .join('')
     const buttonAction = isFree
       ? 'onclick="window.location.href=\'https://blackroad.io/signup\'"'
       : isCustom
         ? 'onclick="window.location.href=\'mailto:sales@blackroad.io?subject=Enterprise%20Custom%20Inquiry\'"'
-        : `onclick="checkout('${tier.id}')"`;
+        : `onclick="checkout('${tier.id}')"`
 
     return `<div class="tier-card${isPopular ? ' popular' : ''}">
       ${isPopular ? '<div class="popular-badge">Most Popular</div>' : ''}
@@ -352,10 +459,12 @@ function renderPricingPage(): string {
       ${tier.trialDays > 0 ? `<p class="trial">${tier.trialDays}-day free trial</p>` : ''}
       <ul class="features">${featuresHtml}</ul>
       <button class="cta-btn${isPopular ? ' cta-primary' : ''}" ${buttonAction}>${tier.cta}</button>
-    </div>`;
-  }).join('');
+    </div>`
+  }).join('')
 
-  return pageShell('Pricing', `
+  return pageShell(
+    'Pricing',
+    `
 <style>
   .hero{text-align:center;padding:var(--space-2xl) var(--space-lg) var(--space-xl)}
   .hero h1{font-size:3rem;font-weight:800;background:var(--gradient-brand);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:var(--space-sm)}
@@ -397,11 +506,14 @@ function renderPricingPage(): string {
     function togglePeriod(){setPeriod(period==='monthly'?'yearly':'monthly');}
     async function checkout(tierId){const btn=event.target;btn.textContent='Loading...';btn.disabled=true;try{const res=await fetch('/create-checkout-session',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tierId,billingPeriod:period})});const data=await res.json();if(data.url){window.location.href=data.url}else{alert(data.error||'Something went wrong');btn.textContent='Try Again';btn.disabled=false}}catch(e){alert('Network error.');btn.textContent='Try Again';btn.disabled=false}}
   </script>
-</body></html>`);
+</body></html>`,
+  )
 }
 
 function renderSuccessPage(): string {
-  return pageShell('Payment Successful', `
+  return pageShell(
+    'Payment Successful',
+    `
 <style>.container{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:var(--space-lg)}.card{background:#111;border:1px solid #222;border-radius:var(--space-sm);padding:var(--space-xl);text-align:center;max-width:500px;width:100%}.card h1{font-size:2rem;font-weight:800;background:var(--gradient-brand);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:var(--space-md)}.card p{color:#aaa;margin-bottom:var(--space-lg)}.card .icon{font-size:3rem;margin-bottom:var(--space-md)}.btn{display:inline-block;padding:var(--space-sm) var(--space-lg);background:var(--gradient-brand);color:var(--white);border-radius:8px;font-weight:600;text-decoration:none}.btn:hover{opacity:.9;text-decoration:none}</style>
 </head><body>
   <div class="container"><div class="card">
@@ -410,11 +522,14 @@ function renderSuccessPage(): string {
     <p>Your subscription is active. You now have access to all the features in your plan.</p>
     <a class="btn" href="https://blackroad.io/dashboard">Go to Dashboard</a>
   </div></div>
-</body></html>`);
+</body></html>`,
+  )
 }
 
 function renderCancelPage(): string {
-  return pageShell('Checkout Canceled', `
+  return pageShell(
+    'Checkout Canceled',
+    `
 <style>.container{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:var(--space-lg)}.card{background:#111;border:1px solid #222;border-radius:var(--space-sm);padding:var(--space-xl);text-align:center;max-width:500px;width:100%}.card h1{font-size:1.8rem;margin-bottom:var(--space-md)}.card p{color:#aaa;margin-bottom:var(--space-lg)}.btn{display:inline-block;padding:var(--space-sm) var(--space-lg);border:1px solid var(--hot-pink);color:var(--hot-pink);border-radius:8px;font-weight:600;text-decoration:none}.btn:hover{background:rgba(255,29,108,.1);text-decoration:none}</style>
 </head><body>
   <div class="container"><div class="card">
@@ -422,15 +537,16 @@ function renderCancelPage(): string {
     <p>Your checkout was canceled. No charges were made. Come back anytime.</p>
     <a class="btn" href="https://pay.blackroad.io/">Back to Pricing</a>
   </div></div>
-</body></html>`);
+</body></html>`,
+  )
 }
 
 // ─── Start ───
-const PORT = parseInt(process.env.PORT || '3002');
-console.log(`[payment-gateway] Starting on port ${PORT}`);
+const PORT = parseInt(process.env.PORT || '3002')
+console.log(`[payment-gateway] Starting on port ${PORT}`)
 
 serve({ fetch: app.fetch, port: PORT }, (info) => {
-  console.log(`[payment-gateway] Listening on http://0.0.0.0:${info.port}`);
-});
+  console.log(`[payment-gateway] Listening on http://0.0.0.0:${info.port}`)
+})
 
-export default app;
+export default app

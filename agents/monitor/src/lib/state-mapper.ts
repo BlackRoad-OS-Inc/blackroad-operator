@@ -12,51 +12,159 @@ import type {
   SystemStats,
   AgentConfig,
   AgentState,
-} from './types';
-import type { SessionLiveState } from './gateway-connection';
+} from './types'
+import type { SessionLiveState } from './gateway-connection'
 
 // ---------------------------------------------------------------------------
 // Behavior metadata
 // ---------------------------------------------------------------------------
 
 export interface BehaviorInfo {
-  label: string;
-  emoji: string;
-  category: 'work' | 'interaction' | 'life' | 'anomaly';
-  color: string;
-  neonColor: string;
+  label: string
+  emoji: string
+  category: 'work' | 'interaction' | 'life' | 'anomaly'
+  color: string
+  neonColor: string
 }
 
 export const BEHAVIOR_INFO: Record<AgentBehavior, BehaviorInfo> = {
-  working:        { label: 'Working',        emoji: '💻', category: 'work',        color: '#4CAF50', neonColor: '#4FC3F7' },
-  thinking:       { label: 'Thinking',       emoji: '🤔', category: 'work',        color: '#FF9800', neonColor: '#FFCA28' },
-  researching:    { label: 'Researching',    emoji: '📚', category: 'work',        color: '#2196F3', neonColor: '#42A5F5' },
-  meeting:        { label: 'Meeting',        emoji: '🤝', category: 'work',        color: '#9C27B0', neonColor: '#AB47BC' },
-  deploying:      { label: 'Deploying',      emoji: '🚀', category: 'work',        color: '#00BCD4', neonColor: '#00E5FF' },
-  debugging:      { label: 'Debugging',      emoji: '🐛', category: 'work',        color: '#F44336', neonColor: '#FF5252' },
-  receiving_task: { label: 'Receiving Task', emoji: '📋', category: 'interaction', color: '#3F51B5', neonColor: '#536DFE' },
-  reporting:      { label: 'Reporting',      emoji: '✅', category: 'interaction', color: '#8BC34A', neonColor: '#76FF03' },
-  idle:           { label: 'Idle',           emoji: '☕', category: 'life',        color: '#795548', neonColor: '#FFCA28' },
-  coffee:         { label: 'Coffee Break',   emoji: '☕', category: 'life',        color: '#795548', neonColor: '#A1887F' },
-  snacking:       { label: 'Snacking',       emoji: '🍪', category: 'life',        color: '#FF9800', neonColor: '#FFD740' },
-  toilet:         { label: 'Restroom',       emoji: '🚽', category: 'life',        color: '#607D8B', neonColor: '#90A4AE' },
-  sleeping:       { label: 'Sleeping',       emoji: '😴', category: 'life',        color: '#673AB7', neonColor: '#AB47BC' },
-  napping:        { label: 'Napping',        emoji: '💤', category: 'life',        color: '#9575CD', neonColor: '#B388FF' },
-  panicking:      { label: 'Error!',         emoji: '😱', category: 'anomaly',     color: '#F44336', neonColor: '#FF1744' },
-  dead:           { label: 'Crashed',        emoji: '💀', category: 'anomaly',     color: '#B71C1C', neonColor: '#D50000' },
-  overloaded:     { label: 'Overloaded',     emoji: '🔥', category: 'anomaly',     color: '#FF5722', neonColor: '#FF3D00' },
-  reviving:       { label: 'Restarting',     emoji: '🔄', category: 'anomaly',     color: '#FF9800', neonColor: '#FFAB00' },
-};
+  working: {
+    label: 'Working',
+    emoji: '💻',
+    category: 'work',
+    color: '#4CAF50',
+    neonColor: '#4FC3F7',
+  },
+  thinking: {
+    label: 'Thinking',
+    emoji: '🤔',
+    category: 'work',
+    color: '#FF9800',
+    neonColor: '#FFCA28',
+  },
+  researching: {
+    label: 'Researching',
+    emoji: '📚',
+    category: 'work',
+    color: '#2196F3',
+    neonColor: '#42A5F5',
+  },
+  meeting: {
+    label: 'Meeting',
+    emoji: '🤝',
+    category: 'work',
+    color: '#9C27B0',
+    neonColor: '#AB47BC',
+  },
+  deploying: {
+    label: 'Deploying',
+    emoji: '🚀',
+    category: 'work',
+    color: '#00BCD4',
+    neonColor: '#00E5FF',
+  },
+  debugging: {
+    label: 'Debugging',
+    emoji: '🐛',
+    category: 'work',
+    color: '#F44336',
+    neonColor: '#FF5252',
+  },
+  receiving_task: {
+    label: 'Receiving Task',
+    emoji: '📋',
+    category: 'interaction',
+    color: '#3F51B5',
+    neonColor: '#536DFE',
+  },
+  reporting: {
+    label: 'Reporting',
+    emoji: '✅',
+    category: 'interaction',
+    color: '#8BC34A',
+    neonColor: '#76FF03',
+  },
+  idle: {
+    label: 'Idle',
+    emoji: '☕',
+    category: 'life',
+    color: '#795548',
+    neonColor: '#FFCA28',
+  },
+  coffee: {
+    label: 'Coffee Break',
+    emoji: '☕',
+    category: 'life',
+    color: '#795548',
+    neonColor: '#A1887F',
+  },
+  snacking: {
+    label: 'Snacking',
+    emoji: '🍪',
+    category: 'life',
+    color: '#FF9800',
+    neonColor: '#FFD740',
+  },
+  toilet: {
+    label: 'Restroom',
+    emoji: '🚽',
+    category: 'life',
+    color: '#607D8B',
+    neonColor: '#90A4AE',
+  },
+  sleeping: {
+    label: 'Sleeping',
+    emoji: '😴',
+    category: 'life',
+    color: '#673AB7',
+    neonColor: '#AB47BC',
+  },
+  napping: {
+    label: 'Napping',
+    emoji: '💤',
+    category: 'life',
+    color: '#9575CD',
+    neonColor: '#B388FF',
+  },
+  panicking: {
+    label: 'Error!',
+    emoji: '😱',
+    category: 'anomaly',
+    color: '#F44336',
+    neonColor: '#FF1744',
+  },
+  dead: {
+    label: 'Crashed',
+    emoji: '💀',
+    category: 'anomaly',
+    color: '#B71C1C',
+    neonColor: '#D50000',
+  },
+  overloaded: {
+    label: 'Overloaded',
+    emoji: '🔥',
+    category: 'anomaly',
+    color: '#FF5722',
+    neonColor: '#FF3D00',
+  },
+  reviving: {
+    label: 'Restarting',
+    emoji: '🔄',
+    category: 'anomaly',
+    color: '#FF9800',
+    neonColor: '#FFAB00',
+  },
+}
 
 /** Check if a behavior is a "working" state */
 export function isWorkingBehavior(behavior: AgentBehavior): boolean {
-  return BEHAVIOR_INFO[behavior].category === 'work';
+  return BEHAVIOR_INFO[behavior].category === 'work'
 }
 
 /** Check if a behavior is an "active" state (working or interacting) */
 export function isActiveBehavior(behavior: AgentBehavior): boolean {
-  const cat = BEHAVIOR_INFO[behavior].category;
-  return cat === 'work' || cat === 'interaction';
+  const cat = BEHAVIOR_INFO[behavior].category
+  return cat === 'work' || cat === 'interaction'
 }
 
 /** Map behavior → simplified office state */
@@ -64,34 +172,34 @@ export function behaviorToOfficeState(behavior: AgentBehavior): AgentState {
   switch (behavior) {
     case 'working':
     case 'debugging':
-      return 'working';
+      return 'working'
     case 'thinking':
-      return 'thinking';
+      return 'thinking'
     case 'researching':
-      return 'researching';
+      return 'researching'
     case 'meeting':
-      return 'meeting';
+      return 'meeting'
     case 'deploying':
-      return 'deploying';
+      return 'deploying'
     case 'receiving_task':
-      return 'receiving_task';
+      return 'receiving_task'
     case 'reporting':
-      return 'reporting';
+      return 'reporting'
     case 'sleeping':
     case 'napping':
-      return 'resting';
+      return 'resting'
     case 'idle':
     case 'coffee':
     case 'snacking':
     case 'toilet':
-      return 'idle';
+      return 'idle'
     case 'panicking':
     case 'dead':
     case 'overloaded':
     case 'reviving':
-      return 'waiting';
+      return 'waiting'
     default:
-      return 'idle';
+      return 'idle'
   }
 }
 
@@ -121,109 +229,115 @@ export function executionStateToBehavior(
 ): AgentBehavior {
   // If abortedLastRun is set in session metadata and we have no live state
   // contradicting it, treat as dead
-  if (abortedLastRun && (!live || !live.chatStatus || live.chatStatus === 'aborted')) {
-    return 'dead';
+  if (
+    abortedLastRun &&
+    (!live || !live.chatStatus || live.chatStatus === 'aborted')
+  ) {
+    return 'dead'
   }
 
   if (!live || !live.chatStatus) {
-    return 'idle';
+    return 'idle'
   }
 
   switch (live.chatStatus) {
     case 'delta':
-      return 'working';
+      return 'working'
     case 'final':
-      return 'idle';
+      return 'idle'
     case 'aborted':
-      return 'dead';
+      return 'dead'
     case 'error':
-      return 'panicking';
+      return 'panicking'
     default:
-      return 'idle';
+      return 'idle'
   }
 }
 
 export interface ExecutionSummaryInput {
-  behavior: AgentBehavior;
-  agentStatus?: string | null;
-  chatStatus?: string | null;
-  agentEventData?: Record<string, unknown> | null;
-  isSubagent?: boolean;
+  behavior: AgentBehavior
+  agentStatus?: string | null
+  chatStatus?: string | null
+  agentEventData?: Record<string, unknown> | null
+  isSubagent?: boolean
 }
 
 function toTitleCase(value: string): string {
-  return value
-    .replace(/[_-]+/g, ' ')
-    .replace(/\b\w/g, (ch) => ch.toUpperCase());
+  return value.replace(/[_-]+/g, ' ').replace(/\b\w/g, (ch) => ch.toUpperCase())
 }
 
 /** Extract the currently running tool from live gateway event data. */
-export function getToolSnapshot(agentEventData?: Record<string, unknown> | null): {
-  toolName: string | null;
-  toolPhase: string | null;
+export function getToolSnapshot(
+  agentEventData?: Record<string, unknown> | null,
+): {
+  toolName: string | null
+  toolPhase: string | null
 } {
-  const toolName = typeof agentEventData?.name === 'string' ? agentEventData.name : null;
-  const toolPhase = typeof agentEventData?.phase === 'string'
-    ? agentEventData.phase
-    : typeof agentEventData?.status === 'string'
-      ? agentEventData.status
-      : null;
-  return { toolName, toolPhase };
+  const toolName =
+    typeof agentEventData?.name === 'string' ? agentEventData.name : null
+  const toolPhase =
+    typeof agentEventData?.phase === 'string'
+      ? agentEventData.phase
+      : typeof agentEventData?.status === 'string'
+        ? agentEventData.status
+        : null
+  return { toolName, toolPhase }
 }
 
 /** Convert raw gateway execution data into a short operator-facing status line. */
 export function summarizeExecution(input: ExecutionSummaryInput): string {
-  const { toolName, toolPhase } = getToolSnapshot(input.agentEventData);
-  const actor = input.isSubagent ? 'Subagent' : 'Agent';
+  const { toolName, toolPhase } = getToolSnapshot(input.agentEventData)
+  const actor = input.isSubagent ? 'Subagent' : 'Agent'
 
   if (toolName) {
-    const phase = toolPhase ? ` (${toTitleCase(toolPhase)})` : '';
-    return `${actor} running ${toolName}${phase}`;
+    const phase = toolPhase ? ` (${toTitleCase(toolPhase)})` : ''
+    return `${actor} running ${toolName}${phase}`
   }
 
   if (input.agentStatus === 'assistant' && input.chatStatus === 'delta') {
-    return `${actor} streaming a response`;
+    return `${actor} streaming a response`
   }
 
   if (input.agentStatus === 'lifecycle') {
-    const phase = typeof input.agentEventData?.phase === 'string'
-      ? toTitleCase(input.agentEventData.phase)
-      : 'Lifecycle update';
-    return `${actor} ${phase.toLowerCase()}`;
+    const phase =
+      typeof input.agentEventData?.phase === 'string'
+        ? toTitleCase(input.agentEventData.phase)
+        : 'Lifecycle update'
+    return `${actor} ${phase.toLowerCase()}`
   }
 
   if (input.agentStatus === 'error' || input.behavior === 'panicking') {
-    return `${actor} hit an execution error`;
+    return `${actor} hit an execution error`
   }
 
   switch (input.behavior) {
     case 'working':
-      return `${actor} actively working`;
+      return `${actor} actively working`
     case 'thinking':
-      return `${actor} reasoning about the next step`;
+      return `${actor} reasoning about the next step`
     case 'researching':
-      return `${actor} gathering context`;
+      return `${actor} gathering context`
     case 'meeting':
-      return `${actor} coordinating with the team`;
+      return `${actor} coordinating with the team`
     case 'deploying':
-      return `${actor} shipping a change`;
+      return `${actor} shipping a change`
     case 'debugging':
-      return `${actor} investigating a bug`;
+      return `${actor} investigating a bug`
     case 'receiving_task':
-      return `${actor} receiving a new task`;
+      return `${actor} receiving a new task`
     case 'reporting':
-      return `${actor} sending an update`;
+      return `${actor} sending an update`
     case 'dead':
-      return `${actor} needs a reset`;
+      return `${actor} needs a reset`
     case 'overloaded':
-      return `${actor} is close to context limits`;
+      return `${actor} is close to context limits`
     case 'reviving':
-      return `${actor} is restarting`;
+      return `${actor} is restarting`
     case 'sleeping':
     case 'napping':
-      return `${actor} is idle`;
+      return `${actor} is idle`
     default:
-      return `${actor} is standing by`;
+      return `${actor} is standing by`
   }
 }
 
@@ -232,9 +346,18 @@ export function summarizeExecution(input: ExecutionSummaryInput): string {
 // ---------------------------------------------------------------------------
 
 const DEMO_BEHAVIORS: AgentBehavior[] = [
-  'working', 'thinking', 'researching', 'meeting', 'deploying',
-  'debugging', 'idle', 'coffee', 'sleeping', 'receiving_task', 'reporting',
-];
+  'working',
+  'thinking',
+  'researching',
+  'meeting',
+  'deploying',
+  'debugging',
+  'idle',
+  'coffee',
+  'sleeping',
+  'receiving_task',
+  'reporting',
+]
 
 const DEMO_TASKS: string[] = [
   'Implement user authentication',
@@ -251,33 +374,33 @@ const DEMO_TASKS: string[] = [
   'Migrate to TypeScript strict mode',
   'Add rate limiting middleware',
   'Design REST API endpoints',
-];
+]
 
-let demoEventId = 0;
+let demoEventId = 0
 
 function randomBehavior(): AgentBehavior {
-  return DEMO_BEHAVIORS[Math.floor(Math.random() * DEMO_BEHAVIORS.length)];
+  return DEMO_BEHAVIORS[Math.floor(Math.random() * DEMO_BEHAVIORS.length)]
 }
 
 /** Generate demo dashboard state for a single agent */
 export function generateDemoAgentState(agentId: string): AgentDashboardState {
-  const behavior = randomBehavior();
-  const now = Date.now();
+  const behavior = randomBehavior()
+  const now = Date.now()
 
-  const tokenUsage: TokenUsage[] = [];
+  const tokenUsage: TokenUsage[] = []
   for (let i = 23; i >= 0; i--) {
-    const input = Math.floor(Math.random() * 5000) + 500;
-    const output = Math.floor(Math.random() * 3000) + 200;
+    const input = Math.floor(Math.random() * 5000) + 500
+    const output = Math.floor(Math.random() * 3000) + 200
     tokenUsage.push({
       timestamp: now - i * 3600000,
       input,
       output,
       total: input + output,
-    });
+    })
   }
 
-  const totalTokens = tokenUsage.reduce((sum, t) => sum + t.total, 0);
-  const totalTasks = Math.floor(Math.random() * 20) + 5;
+  const totalTokens = tokenUsage.reduce((sum, t) => sum + t.total, 0)
+  const totalTasks = Math.floor(Math.random() * 20) + 5
 
   const currentTask: AgentTask | null = isWorkingBehavior(behavior)
     ? {
@@ -286,16 +409,21 @@ export function generateDemoAgentState(agentId: string): AgentDashboardState {
         status: 'active',
         startedAt: now - Math.floor(Math.random() * 300000),
       }
-    : null;
+    : null
 
-  const taskHistory: AgentTask[] = Array.from({ length: Math.min(totalTasks, 10) }, (_, i) => ({
-    id: `task-${agentId}-hist-${i}`,
-    title: DEMO_TASKS[i % DEMO_TASKS.length],
-    status: (Math.random() > 0.1 ? 'completed' : 'failed') as AgentTask['status'],
-    startedAt: now - (i + 1) * 1800000,
-    completedAt: now - (i + 1) * 1800000 + Math.floor(Math.random() * 600000),
-    tokenUsage: Math.floor(Math.random() * 10000) + 1000,
-  }));
+  const taskHistory: AgentTask[] = Array.from(
+    { length: Math.min(totalTasks, 10) },
+    (_, i) => ({
+      id: `task-${agentId}-hist-${i}`,
+      title: DEMO_TASKS[i % DEMO_TASKS.length],
+      status: (Math.random() > 0.1
+        ? 'completed'
+        : 'failed') as AgentTask['status'],
+      startedAt: now - (i + 1) * 1800000,
+      completedAt: now - (i + 1) * 1800000 + Math.floor(Math.random() * 600000),
+      tokenUsage: Math.floor(Math.random() * 10000) + 1000,
+    }),
+  )
 
   return {
     behavior,
@@ -308,14 +436,19 @@ export function generateDemoAgentState(agentId: string): AgentDashboardState {
     lastActivity: now - Math.floor(Math.random() * 60000),
     sessionLog: generateDemoLogs(agentId),
     uptime: Math.floor(Math.random() * 86400000),
-  };
+  }
 }
 
 function generateDemoLogs(agentId: string): string[] {
-  const now = new Date();
+  const now = new Date()
   return Array.from({ length: 20 }, (_, i) => {
-    const time = new Date(now.getTime() - i * 30000);
-    const ts = time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+    const time = new Date(now.getTime() - i * 30000)
+    const ts = time.toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false,
+    })
     const messages = [
       `[${ts}] Processing user request...`,
       `[${ts}] Tool call: web_search("latest AI news")`,
@@ -327,9 +460,9 @@ function generateDemoLogs(agentId: string): string[] {
       `[${ts}] Executing: npm run build`,
       `[${ts}] Reading file: src/app/page.tsx`,
       `[${ts}] Writing 2,456 bytes to output`,
-    ];
-    return messages[i % messages.length];
-  }).reverse();
+    ]
+    return messages[i % messages.length]
+  }).reverse()
 }
 
 /** Generate a demo activity event */
@@ -343,25 +476,51 @@ export function generateDemoEvent(agents: AgentConfig[]): ActivityEvent {
       type: 'system',
       message: 'System health check OK',
       timestamp: Date.now(),
-    };
+    }
   }
 
-  const agent = agents[Math.floor(Math.random() * agents.length)];
-  const types: ActivityEvent['type'][] = ['state_change', 'task_start', 'task_complete', 'tool_call', 'message'];
-  const type = types[Math.floor(Math.random() * types.length)];
+  const agent = agents[Math.floor(Math.random() * agents.length)]
+  const types: ActivityEvent['type'][] = [
+    'state_change',
+    'task_start',
+    'task_complete',
+    'tool_call',
+    'message',
+  ]
+  const type = types[Math.floor(Math.random() * types.length)]
 
   const messages: Record<ActivityEvent['type'], string[]> = {
-    state_change: ['Started working', 'Now thinking...', 'Taking a coffee break', 'Deploying to production', 'Back to idle', 'Entering meeting room'],
-    task_start: ['New task: ' + DEMO_TASKS[Math.floor(Math.random() * DEMO_TASKS.length)]],
-    task_complete: ['Completed: ' + DEMO_TASKS[Math.floor(Math.random() * DEMO_TASKS.length)]],
+    state_change: [
+      'Started working',
+      'Now thinking...',
+      'Taking a coffee break',
+      'Deploying to production',
+      'Back to idle',
+      'Entering meeting room',
+    ],
+    task_start: [
+      'New task: ' + DEMO_TASKS[Math.floor(Math.random() * DEMO_TASKS.length)],
+    ],
+    task_complete: [
+      'Completed: ' + DEMO_TASKS[Math.floor(Math.random() * DEMO_TASKS.length)],
+    ],
     task_fail: ['Failed: Connection timeout', 'Failed: Rate limit exceeded'],
-    tool_call: ['web_search("react hooks")', 'read_file("config.ts")', 'exec("npm run build")', 'browser.navigate("docs.api.com")'],
-    message: ['Processing user request...', 'Generating response...', 'Sending reply...'],
+    tool_call: [
+      'web_search("react hooks")',
+      'read_file("config.ts")',
+      'exec("npm run build")',
+      'browser.navigate("docs.api.com")',
+    ],
+    message: [
+      'Processing user request...',
+      'Generating response...',
+      'Sending reply...',
+    ],
     error: ['Error: Connection lost', 'Error: Token limit exceeded'],
     system: ['System health check OK', 'Gateway reconnected'],
-  };
+  }
 
-  const msgList = messages[type] ?? ['Unknown event'];
+  const msgList = messages[type] ?? ['Unknown event']
 
   return {
     id: `event-${++demoEventId}`,
@@ -371,12 +530,12 @@ export function generateDemoEvent(agents: AgentConfig[]): ActivityEvent {
     type,
     message: msgList[Math.floor(Math.random() * msgList.length)],
     timestamp: Date.now(),
-  };
+  }
 }
 
 /** Generate demo system stats */
 export function generateDemoStats(agents: AgentConfig[]): SystemStats {
-  const activeCount = Math.max(1, Math.floor(Math.random() * agents.length) + 1);
+  const activeCount = Math.max(1, Math.floor(Math.random() * agents.length) + 1)
   return {
     totalAgents: agents.length,
     activeAgents: Math.min(activeCount, agents.length),
@@ -386,30 +545,30 @@ export function generateDemoStats(agents: AgentConfig[]): SystemStats {
     failedTasks: Math.floor(Math.random() * 10),
     uptime: Math.floor(Math.random() * 86400),
     connected: false,
-  };
+  }
 }
 
 /** Format token count for display */
 export function formatTokens(n: number): string {
-  if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
-  if (n >= 1000) return (n / 1000).toFixed(1) + 'k';
-  return n.toString();
+  if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M'
+  if (n >= 1000) return (n / 1000).toFixed(1) + 'k'
+  return n.toString()
 }
 
 /** Format uptime seconds to human-readable */
 export function formatUptime(seconds: number): string {
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  if (h > 0) return `${h}h ${m}m`;
-  return `${m}m`;
+  const h = Math.floor(seconds / 3600)
+  const m = Math.floor((seconds % 3600) / 60)
+  if (h > 0) return `${h}h ${m}m`
+  return `${m}m`
 }
 
 /** Format relative time */
 export function formatRelativeTime(timestamp: number): string {
-  const diff = Date.now() - timestamp;
-  if (diff < 1000) return 'just now';
-  if (diff < 60000) return `${Math.floor(diff / 1000)}s ago`;
-  if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
-  if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
-  return `${Math.floor(diff / 86400000)}d ago`;
+  const diff = Date.now() - timestamp
+  if (diff < 1000) return 'just now'
+  if (diff < 60000) return `${Math.floor(diff / 1000)}s ago`
+  if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`
+  if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`
+  return `${Math.floor(diff / 86400000)}d ago`
 }

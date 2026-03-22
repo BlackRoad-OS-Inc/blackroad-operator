@@ -28,14 +28,14 @@
 
 BlackRoad OS embraces local-first AI for:
 
-| Benefit | Description |
-|---------|-------------|
-| **Privacy** | Data never leaves your hardware |
-| **Cost** | Zero API costs after setup |
-| **Speed** | No network latency |
-| **Control** | Full ownership of AI behavior |
-| **Offline** | Works without internet |
-| **Customization** | Fine-tune for your use case |
+| Benefit           | Description                     |
+| ----------------- | ------------------------------- |
+| **Privacy**       | Data never leaves your hardware |
+| **Cost**          | Zero API costs after setup      |
+| **Speed**         | No network latency              |
+| **Control**       | Full ownership of AI behavior   |
+| **Offline**       | Works without internet          |
+| **Customization** | Fine-tune for your use case     |
 
 ### Ollama in BlackRoad
 
@@ -66,12 +66,14 @@ BlackRoad OS embraces local-first AI for:
 ### System Requirements
 
 #### Minimum (Edge/Pi)
+
 - **CPU**: ARM64 or x86_64
 - **RAM**: 4GB (for 1-3B models)
 - **Storage**: 10GB
 - **OS**: Linux, macOS, Windows
 
 #### Recommended (Development)
+
 - **CPU**: 8+ cores
 - **RAM**: 16GB (for 7B models)
 - **GPU**: NVIDIA RTX 3060+ (optional)
@@ -79,6 +81,7 @@ BlackRoad OS embraces local-first AI for:
 - **OS**: Linux or macOS
 
 #### Production (Server)
+
 - **CPU**: 16+ cores
 - **RAM**: 64GB+ (for 70B models)
 - **GPU**: NVIDIA A100 or RTX 4090
@@ -433,14 +436,14 @@ ollama_query() {
 
 ### By Use Case
 
-| Use Case | Recommended Model | VRAM | Notes |
-|----------|-------------------|------|-------|
-| **Edge/Pi** | llama3.2:1b | 2GB | Fast, efficient |
-| **Chat** | llama3.2:3b | 4GB | Balanced |
-| **Code** | codellama:7b | 6GB | Best for coding |
-| **Analysis** | mistral:7b | 6GB | Strong reasoning |
-| **Creative** | llama3.1:8b | 8GB | Better creativity |
-| **Production** | llama3.1:70b | 48GB | Best quality |
+| Use Case       | Recommended Model | VRAM | Notes             |
+| -------------- | ----------------- | ---- | ----------------- |
+| **Edge/Pi**    | llama3.2:1b       | 2GB  | Fast, efficient   |
+| **Chat**       | llama3.2:3b       | 4GB  | Balanced          |
+| **Code**       | codellama:7b      | 6GB  | Best for coding   |
+| **Analysis**   | mistral:7b        | 6GB  | Strong reasoning  |
+| **Creative**   | llama3.1:8b       | 8GB  | Better creativity |
+| **Production** | llama3.1:70b      | 48GB | Best quality      |
 
 ### By Hardware
 
@@ -1182,16 +1185,16 @@ OLLAMA_MAX_LOADED_MODELS=3  # Max loaded models
 
 ### Model Sizes
 
-| Model | Parameters | Size | RAM Needed |
-|-------|------------|------|------------|
-| qwen2:0.5b | 0.5B | 395MB | 2GB |
-| llama3.2:1b | 1.2B | 1.3GB | 3GB |
-| phi3:mini | 3.8B | 2.3GB | 4GB |
-| llama3.2:3b | 3.2B | 2.0GB | 4GB |
-| mistral:7b | 7B | 4.1GB | 8GB |
-| llama3.1:8b | 8B | 4.7GB | 10GB |
-| codellama:13b | 13B | 7.4GB | 16GB |
-| llama3.1:70b | 70B | 40GB | 64GB |
+| Model         | Parameters | Size  | RAM Needed |
+| ------------- | ---------- | ----- | ---------- |
+| qwen2:0.5b    | 0.5B       | 395MB | 2GB        |
+| llama3.2:1b   | 1.2B       | 1.3GB | 3GB        |
+| phi3:mini     | 3.8B       | 2.3GB | 4GB        |
+| llama3.2:3b   | 3.2B       | 2.0GB | 4GB        |
+| mistral:7b    | 7B         | 4.1GB | 8GB        |
+| llama3.1:8b   | 8B         | 4.7GB | 10GB       |
+| codellama:13b | 13B        | 7.4GB | 16GB       |
+| llama3.1:70b  | 70B        | 40GB  | 64GB       |
 
 ---
 
@@ -1205,4 +1208,4 @@ OLLAMA_MAX_LOADED_MODELS=3  # Max loaded models
 
 ---
 
-*Ride the Road. Pave Tomorrow.*
+_Ride the Road. Pave Tomorrow._

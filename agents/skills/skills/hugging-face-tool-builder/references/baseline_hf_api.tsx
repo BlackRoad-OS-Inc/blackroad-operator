@@ -22,36 +22,36 @@ Examples:
   baseline_hf_api.tsx
   baseline_hf_api.tsx 5
   HF_TOKEN=your_token baseline_hf_api.tsx 10
-`);
-};
-
-const arg = process.argv[2];
-if (arg === "--help") {
-  showHelp();
-  process.exit(0);
+`)
 }
 
-const limit = arg ?? "3";
+const arg = process.argv[2]
+if (arg === '--help') {
+  showHelp()
+  process.exit(0)
+}
+
+const limit = arg ?? '3'
 if (!/^\d+$/.test(limit)) {
-  console.error("Error: limit must be a number");
-  process.exit(1);
+  console.error('Error: limit must be a number')
+  process.exit(1)
 }
 
-const token = process.env.HF_TOKEN;
+const token = process.env.HF_TOKEN
 const headers: Record<string, string> = token
   ? { Authorization: `Bearer ${token}` }
-  : {};
+  : {}
 
-const url = `https://huggingface.co/api/models?limit=${limit}`;
+const url = `https://huggingface.co/api/models?limit=${limit}`
 
-(async () => {
-  const res = await fetch(url, { headers });
+;(async () => {
+  const res = await fetch(url, { headers })
 
   if (!res.ok) {
-    console.error(`Error: ${res.status} ${res.statusText}`);
-    process.exit(1);
+    console.error(`Error: ${res.status} ${res.statusText}`)
+    process.exit(1)
   }
 
-  const text = await res.text();
-  process.stdout.write(text);
-})();
+  const text = await res.text()
+  process.stdout.write(text)
+})()

@@ -25,11 +25,11 @@ BlackRoad OS supports **Raspberry Pi devices** as edge computing nodes. These de
 
 ### Current Fleet
 
-| Name | IP | Model | RAM | Role |
-|------|-----|-------|-----|------|
-| `lucidia` | 192.168.4.38 | Pi 4B | 8GB | Primary edge |
-| `blackroad-pi` | 192.168.4.64 | Pi 4B | 4GB | Secondary |
-| `lucidia-alt` | 192.168.4.99 | Pi 4B | 8GB | Backup |
+| Name           | IP           | Model | RAM | Role         |
+| -------------- | ------------ | ----- | --- | ------------ |
+| `lucidia`      | 192.168.4.38 | Pi 4B | 8GB | Primary edge |
+| `blackroad-pi` | 192.168.4.64 | Pi 4B | 4GB | Secondary    |
+| `lucidia-alt`  | 192.168.4.99 | Pi 4B | 8GB | Backup       |
 
 ### Capabilities
 
@@ -64,6 +64,7 @@ BlackRoad OS supports **Raspberry Pi devices** as edge computing nodes. These de
 ### Recommended Hardware
 
 **Essential:**
+
 - Raspberry Pi 4 Model B (4GB or 8GB)
 - 64GB+ microSD card (Class 10 or better)
 - Official power supply (5V 3A USB-C)
@@ -71,6 +72,7 @@ BlackRoad OS supports **Raspberry Pi devices** as edge computing nodes. These de
 - Case with ventilation
 
 **Optional:**
+
 - LED Matrix (32x64 RGB)
 - USB SSD for storage
 - Temperature/humidity sensor (DHT22)
@@ -306,8 +308,8 @@ fleet:
       - /home/pi/blackroad/config/
       - /home/pi/blackroad/scripts/
     exclude:
-      - "*.log"
-      - "__pycache__"
+      - '*.log'
+      - '__pycache__'
 
   monitoring:
     interval: 60
@@ -526,12 +528,12 @@ class PiInference:
 
 ### Model Selection for Pi
 
-| Model | Size | RAM | Speed | Quality |
-|-------|------|-----|-------|---------|
-| `llama3.2:1b` | 1.3GB | 2GB | Fast | Good |
-| `phi3:mini` | 2.3GB | 4GB | Medium | Better |
-| `qwen2:0.5b` | 0.5GB | 1GB | Very Fast | Basic |
-| `tinyllama` | 0.6GB | 1GB | Very Fast | Basic |
+| Model         | Size  | RAM | Speed     | Quality |
+| ------------- | ----- | --- | --------- | ------- |
+| `llama3.2:1b` | 1.3GB | 2GB | Fast      | Good    |
+| `phi3:mini`   | 2.3GB | 4GB | Medium    | Better  |
+| `qwen2:0.5b`  | 0.5GB | 1GB | Very Fast | Basic   |
+| `tinyllama`   | 0.6GB | 1GB | Very Fast | Basic   |
 
 ### Optimizing Inference
 
@@ -788,13 +790,13 @@ Unattended-Upgrade::Automatic-Reboot-Time "02:00";
 
 ### Common Issues
 
-| Issue | Cause | Solution |
-|-------|-------|----------|
-| Pi won't boot | Corrupt SD | Reflash OS |
-| High CPU temp | Poor cooling | Add heatsink/fan |
-| Ollama OOM | Model too large | Use smaller model |
-| LED not working | Wiring issue | Check GPIO connections |
-| Network drops | WiFi interference | Use Ethernet |
+| Issue           | Cause             | Solution               |
+| --------------- | ----------------- | ---------------------- |
+| Pi won't boot   | Corrupt SD        | Reflash OS             |
+| High CPU temp   | Poor cooling      | Add heatsink/fan       |
+| Ollama OOM      | Model too large   | Use smaller model      |
+| LED not working | Wiring issue      | Check GPIO connections |
+| Network drops   | WiFi interference | Use Ethernet           |
 
 ### Diagnostic Commands
 
@@ -856,4 +858,4 @@ ssh pi@100.x.x.x  # Tailscale IP
 
 ---
 
-*Last updated: 2026-02-05*
+_Last updated: 2026-02-05_

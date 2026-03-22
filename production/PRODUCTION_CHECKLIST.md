@@ -138,14 +138,14 @@ After provisioning, update all `stripe-config.json` files with real price IDs:
 
 ## Product Summary (After Provisioning)
 
-| # | Product | Prices | Revenue Potential |
-|---|---------|--------|-------------------|
-| 1 | BlackRoad OS Pro | $29/mo, $290/yr | Core MRR |
-| 2 | BlackRoad OS Enterprise | $199/mo, $1,990/yr | Enterprise MRR |
-| 3 | Open Source Support | $5-$500 | Sponsorship |
-| 4 | Commercial License | $499-$2,499/yr | Licensing ARR |
-| 5 | Consulting | $250-$5,000 | Services |
-| 6 | Priority Support | $499/mo | Support MRR |
-| 7-11 | Per-Repo Products (5x) | $9-$99/mo each | Module MRR |
+| #    | Product                 | Prices             | Revenue Potential |
+| ---- | ----------------------- | ------------------ | ----------------- |
+| 1    | BlackRoad OS Pro        | $29/mo, $290/yr    | Core MRR          |
+| 2    | BlackRoad OS Enterprise | $199/mo, $1,990/yr | Enterprise MRR    |
+| 3    | Open Source Support     | $5-$500            | Sponsorship       |
+| 4    | Commercial License      | $499-$2,499/yr     | Licensing ARR     |
+| 5    | Consulting              | $250-$5,000        | Services          |
+| 6    | Priority Support        | $499/mo            | Support MRR       |
+| 7-11 | Per-Repo Products (5x)  | $9-$99/mo each     | Module MRR        |
 
 **Total Products: 11 | Total Price Points: 35+**

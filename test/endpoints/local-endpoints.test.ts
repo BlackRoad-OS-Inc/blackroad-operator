@@ -78,12 +78,36 @@ describe('Gateway — blackroad-core/gateway/server.js', () => {
   describe('GET /v1/agents', () => {
     it('should return agent roster from policy', () => {
       const roster = [
-        { name: 'planner', intents: ['analyze', 'plan'], providers: ['ollama', 'claude'] },
-        { name: 'octavia', intents: ['architect', 'review'], providers: ['ollama', 'claude'] },
-        { name: 'lucidia', intents: ['vision', 'synthesize'], providers: ['ollama', 'claude'] },
-        { name: 'alice', intents: ['deploy', 'automate'], providers: ['ollama', 'claude'] },
-        { name: 'cipher', intents: ['audit', 'harden'], providers: ['ollama', 'claude'] },
-        { name: 'prism', intents: ['analyze', 'correlate'], providers: ['ollama', 'claude'] },
+        {
+          name: 'planner',
+          intents: ['analyze', 'plan'],
+          providers: ['ollama', 'claude'],
+        },
+        {
+          name: 'octavia',
+          intents: ['architect', 'review'],
+          providers: ['ollama', 'claude'],
+        },
+        {
+          name: 'lucidia',
+          intents: ['vision', 'synthesize'],
+          providers: ['ollama', 'claude'],
+        },
+        {
+          name: 'alice',
+          intents: ['deploy', 'automate'],
+          providers: ['ollama', 'claude'],
+        },
+        {
+          name: 'cipher',
+          intents: ['audit', 'harden'],
+          providers: ['ollama', 'claude'],
+        },
+        {
+          name: 'prism',
+          intents: ['analyze', 'correlate'],
+          providers: ['ollama', 'claude'],
+        },
       ]
       expect(roster.length).toBe(6)
       for (const agent of roster) {
@@ -102,12 +126,19 @@ describe('Gateway — blackroad-core/gateway/server.js', () => {
       if (!p.agent || typeof p.agent !== 'string') return 'Missing agent'
       if (!p.intent || typeof p.intent !== 'string') return 'Missing intent'
       if (typeof p.input !== 'string') return 'Missing input'
-      if (p.context && typeof p.context !== 'object') return 'Context must be an object'
+      if (p.context && typeof p.context !== 'object')
+        return 'Context must be an object'
       return null
     }
 
     it('should accept valid request', () => {
-      expect(validateRequest({ agent: 'planner', intent: 'analyze', input: 'hello' })).toBeNull()
+      expect(
+        validateRequest({
+          agent: 'planner',
+          intent: 'analyze',
+          input: 'hello',
+        }),
+      ).toBeNull()
     })
 
     it('should accept request with context', () => {
@@ -117,7 +148,7 @@ describe('Gateway — blackroad-core/gateway/server.js', () => {
           intent: 'analyze',
           input: 'hello',
           context: { phase: 'Q1' },
-        })
+        }),
       ).toBeNull()
     })
 
@@ -134,12 +165,19 @@ describe('Gateway — blackroad-core/gateway/server.js', () => {
     })
 
     it('should reject missing input', () => {
-      expect(validateRequest({ agent: 'planner', intent: 'analyze' })).toBe('Missing input')
+      expect(validateRequest({ agent: 'planner', intent: 'analyze' })).toBe(
+        'Missing input',
+      )
     })
 
     it('should reject non-object context', () => {
       expect(
-        validateRequest({ agent: 'planner', intent: 'analyze', input: 'hi', context: 'bad' })
+        validateRequest({
+          agent: 'planner',
+          intent: 'analyze',
+          input: 'hi',
+          context: 'bad',
+        }),
       ).toBe('Context must be an object')
     })
   })
@@ -147,11 +185,15 @@ describe('Gateway — blackroad-core/gateway/server.js', () => {
   describe('POST /v1/agent — provider selection', () => {
     function pickProvider(
       requested: string | null,
-      policy: { default_provider?: string; intent_routes?: Record<string, string> },
-      intent: string
+      policy: {
+        default_provider?: string
+        intent_routes?: Record<string, string>
+      },
+      intent: string,
     ) {
       if (requested) return requested
-      if (policy.intent_routes && policy.intent_routes[intent]) return policy.intent_routes[intent]
+      if (policy.intent_routes && policy.intent_routes[intent])
+        return policy.intent_routes[intent]
       return policy.default_provider || null
     }
 
@@ -234,39 +276,55 @@ describe('Gateway — blackroad-core/gateway/server.js', () => {
     })
 
     it('should reject disallowed intent', () => {
-      const agents = (policy as { agents: Record<string, { allowed_intents: string[] }> }).agents
+      const agents = (
+        policy as { agents: Record<string, { allowed_intents: string[] }> }
+      ).agents
       expect(agents.planner.allowed_intents.includes('hack')).toBe(false)
     })
 
     it('should accept allowed intent', () => {
-      const agents = (policy as { agents: Record<string, { allowed_intents: string[] }> }).agents
+      const agents = (
+        policy as { agents: Record<string, { allowed_intents: string[] }> }
+      ).agents
       expect(agents.planner.allowed_intents.includes('analyze')).toBe(true)
     })
 
     it('should reject disallowed provider', () => {
-      const agents = (policy as { agents: Record<string, { allowed_providers: string[] }> }).agents
+      const agents = (
+        policy as { agents: Record<string, { allowed_providers: string[] }> }
+      ).agents
       expect(agents.cipher.allowed_providers.includes('gemini')).toBe(false)
     })
 
     it('should accept allowed provider', () => {
-      const agents = (policy as { agents: Record<string, { allowed_providers: string[] }> }).agents
+      const agents = (
+        policy as { agents: Record<string, { allowed_providers: string[] }> }
+      ).agents
       expect(agents.cipher.allowed_providers.includes('claude')).toBe(true)
     })
   })
 
   describe('system prompt building', () => {
     function buildSystemPrompt(
-      prompts: { default?: string; agents?: Record<string, string>; intents?: Record<string, string> } | null,
+      prompts: {
+        default?: string
+        agents?: Record<string, string>
+        intents?: Record<string, string>
+      } | null,
       agent: string,
       intent: string,
-      context: Record<string, unknown> | null
+      context: Record<string, unknown> | null,
     ) {
       if (!prompts) return ''
       const parts: string[] = []
-      if (typeof prompts.default === 'string' && prompts.default.trim()) parts.push(prompts.default.trim())
-      if (prompts.agents && typeof prompts.agents[agent] === 'string') parts.push(prompts.agents[agent].trim())
-      if (prompts.intents && typeof prompts.intents[intent] === 'string') parts.push(prompts.intents[intent].trim())
-      if (context && Object.keys(context).length > 0) parts.push(`Context JSON:\n${JSON.stringify(context)}`)
+      if (typeof prompts.default === 'string' && prompts.default.trim())
+        parts.push(prompts.default.trim())
+      if (prompts.agents && typeof prompts.agents[agent] === 'string')
+        parts.push(prompts.agents[agent].trim())
+      if (prompts.intents && typeof prompts.intents[intent] === 'string')
+        parts.push(prompts.intents[intent].trim())
+      if (context && Object.keys(context).length > 0)
+        parts.push(`Context JSON:\n${JSON.stringify(context)}`)
       return parts.join('\n\n')
     }
 
@@ -298,7 +356,12 @@ describe('Gateway — blackroad-core/gateway/server.js', () => {
     it('should return 404 payload for non-existent paths', () => {
       const method = 'GET'
       const url = '/unknown/path'
-      const isKnown = ['/healthz', '/metrics', '/v1/agents', '/v1/worlds'].includes(url)
+      const isKnown = [
+        '/healthz',
+        '/metrics',
+        '/v1/agents',
+        '/v1/worlds',
+      ].includes(url)
       expect(isKnown).toBe(false)
     })
   })
@@ -322,7 +385,13 @@ describe('Auth Worker — workers/auth (BRAT v1)', () => {
         protocol: 'BRAT v1',
         signing: 'HMAC-SHA256',
         configured: true,
-        endpoints: ['/auth/token', '/auth/verify', '/auth/me', '/auth/revoke', '/auth/status'],
+        endpoints: [
+          '/auth/token',
+          '/auth/verify',
+          '/auth/me',
+          '/auth/revoke',
+          '/auth/status',
+        ],
         roles: ['owner', 'coordinator', 'agent', 'guest'],
       }
       expect(response.ok).toBe(true)
@@ -571,9 +640,22 @@ describe('Copilot-CLI Worker — workers/copilot-cli', () => {
 
 describe('Email Worker — workers/email', () => {
   const AGENTS = [
-    'alexa', 'lucidia', 'alice', 'octavia', 'aria', 'cecilia',
-    'cipher', 'prism', 'echo', 'oracle', 'atlas', 'shellfish',
-    'anastasia', 'gematria', 'blackroad', 'inbox',
+    'alexa',
+    'lucidia',
+    'alice',
+    'octavia',
+    'aria',
+    'cecilia',
+    'cipher',
+    'prism',
+    'echo',
+    'oracle',
+    'atlas',
+    'shellfish',
+    'anastasia',
+    'gematria',
+    'blackroad',
+    'inbox',
   ]
 
   describe('GET / — agent registry', () => {
@@ -701,7 +783,10 @@ describe('Email Setup Worker — workers/email-setup', () => {
       const status = {
         domain: 'blackroad.io',
         routing: { enabled: true, status: 'active' },
-        catch_all: { configured: true, actions: [{ type: 'worker', value: ['blackroad-email'] }] },
+        catch_all: {
+          configured: true,
+          actions: [{ type: 'worker', value: ['blackroad-email'] }],
+        },
         mx: { provider: 'cloudflare', records: [] as unknown[] },
         ready: true,
       }
@@ -714,7 +799,12 @@ describe('Email Setup Worker — workers/email-setup', () => {
 
   describe('POST /setup — full setup steps', () => {
     it('should execute all setup steps in order', () => {
-      const steps = ['enable_routing', 'add_destination', 'catch_all_rule', 'switch_mx']
+      const steps = [
+        'enable_routing',
+        'add_destination',
+        'catch_all_rule',
+        'switch_mx',
+      ]
       expect(steps).toHaveLength(4)
       expect(steps[0]).toBe('enable_routing')
       expect(steps[3]).toBe('switch_mx')
@@ -819,7 +909,9 @@ describe('BlackRoad OS API Worker — blackroad-os/workers/blackroad-os-api', ()
       expect(status.status).toBe('operational')
       expect(status.capacity).toBe(30000)
       expect(status.agents.total).toBe(8)
-      expect(status.agents.online + status.agents.standby).toBe(status.agents.total)
+      expect(status.agents.online + status.agents.standby).toBe(
+        status.agents.total,
+      )
     })
   })
 
@@ -837,7 +929,9 @@ describe('BlackRoad OS API Worker — blackroad-os/workers/blackroad-os-api', ()
 
   describe('GET /railway/deployments', () => {
     it('should accept project query parameter', () => {
-      const url = new URL('https://example.com/railway/deployments?project=abc-123')
+      const url = new URL(
+        'https://example.com/railway/deployments?project=abc-123',
+      )
       expect(url.searchParams.get('project')).toBe('abc-123')
     })
   })
@@ -883,11 +977,30 @@ describe('BlackRoad OS API Worker — blackroad-os/workers/blackroad-os-api', ()
 //   GET  /agents         — Agent email registry
 
 describe('Email Router Worker — blackroad-os/workers/email-router', () => {
-  const AGENT_ROUTES: Record<string, { name: string; role: string; forward: string | null }> = {
-    lucidia: { name: 'Lucidia', role: 'The Dreamer', forward: 'blackroad@gmail.com' },
-    alice: { name: 'Alice', role: 'The Operator', forward: 'blackroad@gmail.com' },
-    octavia: { name: 'Octavia', role: 'The Architect', forward: 'blackroad@gmail.com' },
-    cece: { name: 'CECE', role: 'The Identity', forward: 'blackroad@gmail.com' },
+  const AGENT_ROUTES: Record<
+    string,
+    { name: string; role: string; forward: string | null }
+  > = {
+    lucidia: {
+      name: 'Lucidia',
+      role: 'The Dreamer',
+      forward: 'blackroad@gmail.com',
+    },
+    alice: {
+      name: 'Alice',
+      role: 'The Operator',
+      forward: 'blackroad@gmail.com',
+    },
+    octavia: {
+      name: 'Octavia',
+      role: 'The Architect',
+      forward: 'blackroad@gmail.com',
+    },
+    cece: {
+      name: 'CECE',
+      role: 'The Identity',
+      forward: 'blackroad@gmail.com',
+    },
     noreply: { name: 'System', role: 'System', forward: null },
   }
 
@@ -1110,7 +1223,10 @@ describe('Dashboard API — dashboard/app/api (Next.js)', () => {
     })
 
     it('should return 503 when not ready', () => {
-      const notReady = { ready: false, reason: 'Service dependencies not available' }
+      const notReady = {
+        ready: false,
+        reason: 'Service dependencies not available',
+      }
       expect(notReady.ready).toBe(false)
       expect(notReady.reason).toBeTruthy()
     })
@@ -1206,7 +1322,10 @@ describe('Wrangler Configurations', () => {
 
   describe('workers/auth', () => {
     it('should have correct worker name and account', () => {
-      const config = { name: 'blackroad-auth', account_id: CLOUDFLARE_ACCOUNT_ID }
+      const config = {
+        name: 'blackroad-auth',
+        account_id: CLOUDFLARE_ACCOUNT_ID,
+      }
       expect(config.name).toBe('blackroad-auth')
       expect(config.account_id).toBe(CLOUDFLARE_ACCOUNT_ID)
     })
@@ -1293,16 +1412,31 @@ describe('Railway Configurations', () => {
   describe('Railway project IDs', () => {
     it('should have known project IDs', () => {
       const projects = [
-        { id: '9d3d2549-3778-4c86-8afd-cefceaaa74d2', name: 'RoadWork Production' },
-        { id: '6d4ab1b5-3e97-460e-bba0-4db86691c476', name: 'RoadWork Staging' },
-        { id: 'aa968fb7-ec35-4a8b-92dc-1eba70fa8478', name: 'BlackRoad Core Services' },
-        { id: 'e8b256aa-8708-4eb2-ba24-99eba4fe7c2e', name: 'BlackRoad Operator' },
-        { id: '85e6de55-fefd-4e8d-a9ec-d20c235c2551', name: 'BlackRoad Master' },
+        {
+          id: '9d3d2549-3778-4c86-8afd-cefceaaa74d2',
+          name: 'RoadWork Production',
+        },
+        {
+          id: '6d4ab1b5-3e97-460e-bba0-4db86691c476',
+          name: 'RoadWork Staging',
+        },
+        {
+          id: 'aa968fb7-ec35-4a8b-92dc-1eba70fa8478',
+          name: 'BlackRoad Core Services',
+        },
+        {
+          id: 'e8b256aa-8708-4eb2-ba24-99eba4fe7c2e',
+          name: 'BlackRoad Operator',
+        },
+        {
+          id: '85e6de55-fefd-4e8d-a9ec-d20c235c2551',
+          name: 'BlackRoad Master',
+        },
       ]
       expect(projects.length).toBeGreaterThanOrEqual(5)
       for (const p of projects) {
         expect(p.id).toMatch(
-          /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
+          /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/,
         )
       }
     })
@@ -1365,11 +1499,7 @@ describe('Cross-Service Endpoint Inventory', () => {
       'GET /github/repo',
       'GET /github/orgs',
     ],
-    'Email Router (CF)': [
-      'GET /health',
-      'GET /inbox/:agent',
-      'GET /agents',
-    ],
+    'Email Router (CF)': ['GET /health', 'GET /inbox/:agent', 'GET /agents'],
     'MCP Bridge (:8420)': [
       'GET  /',
       'GET  /system',
@@ -1398,20 +1528,10 @@ describe('Cross-Service Endpoint Inventory', () => {
       'POST /webhook',
       'GET  /subscription-status',
     ],
-    'Simple Launch Webhook (:5000)': [
-      'POST /webhook/stripe',
-      'GET  /health',
-    ],
-    'Metrics Webhook (:4242)': [
-      'POST /webhook',
-    ],
-    'Deploy Orchestrator (:8080)': [
-      'GET  /health',
-      'POST /webhook',
-    ],
-    'Python Webhook (:9000)': [
-      'POST /webhook',
-    ],
+    'Simple Launch Webhook (:5000)': ['POST /webhook/stripe', 'GET  /health'],
+    'Metrics Webhook (:4242)': ['POST /webhook'],
+    'Deploy Orchestrator (:8080)': ['GET  /health', 'POST /webhook'],
+    'Python Webhook (:9000)': ['POST /webhook'],
   }
 
   it('should have 14 services registered', () => {
@@ -1419,13 +1539,17 @@ describe('Cross-Service Endpoint Inventory', () => {
   })
 
   it('should have 69+ total endpoints across all services', () => {
-    const total = Object.values(ALL_ENDPOINTS).reduce((sum, eps) => sum + eps.length, 0)
+    const total = Object.values(ALL_ENDPOINTS).reduce(
+      (sum, eps) => sum + eps.length,
+      0,
+    )
     expect(total).toBeGreaterThanOrEqual(69)
   })
 
   it('should have health endpoints on all HTTP services', () => {
-    const servicesWithHealth = Object.entries(ALL_ENDPOINTS).filter(([, endpoints]) =>
-      endpoints.some((ep) => ep.toLowerCase().includes('health'))
+    const servicesWithHealth = Object.entries(ALL_ENDPOINTS).filter(
+      ([, endpoints]) =>
+        endpoints.some((ep) => ep.toLowerCase().includes('health')),
     )
     // Gateway, Copilot-CLI, OS API, Email Router, Dashboard all have health checks
     expect(servicesWithHealth.length).toBeGreaterThanOrEqual(5)
@@ -1523,8 +1647,16 @@ describe('Agent Policy Configuration', () => {
       },
     },
     cost_tiers: {
-      standard: { max_requests_per_hour: 200, max_tokens_per_request: 2048, priority: 1 },
-      premium: { max_requests_per_hour: 100, max_tokens_per_request: 4096, priority: 2 },
+      standard: {
+        max_requests_per_hour: 200,
+        max_tokens_per_request: 2048,
+        priority: 1,
+      },
+      premium: {
+        max_requests_per_hour: 100,
+        max_tokens_per_request: 4096,
+        priority: 2,
+      },
     },
   }
 
@@ -1548,14 +1680,20 @@ describe('Agent Policy Configuration', () => {
   })
 
   it('should have premium agents with higher input limits', () => {
-    const premium = Object.entries(policy.agents).filter(([, a]) => a.cost_tier === 'premium')
-    const standard = Object.entries(policy.agents).filter(([, a]) => a.cost_tier === 'standard')
+    const premium = Object.entries(policy.agents).filter(
+      ([, a]) => a.cost_tier === 'premium',
+    )
+    const standard = Object.entries(policy.agents).filter(
+      ([, a]) => a.cost_tier === 'standard',
+    )
     expect(premium.length).toBe(3) // octavia, lucidia, cipher
     expect(standard.length).toBe(3) // planner, alice, prism
   })
 
   it('should have unique rate limits per agent', () => {
-    const limits = Object.values(policy.agents).map((a) => a.rate_limit_per_minute)
+    const limits = Object.values(policy.agents).map(
+      (a) => a.rate_limit_per_minute,
+    )
     // Not all unique, but all > 0
     for (const limit of limits) {
       expect(limit).toBeGreaterThan(0)
@@ -1565,7 +1703,7 @@ describe('Agent Policy Configuration', () => {
   it('should have two cost tiers', () => {
     expect(Object.keys(policy.cost_tiers)).toHaveLength(2)
     expect(policy.cost_tiers.premium.max_tokens_per_request).toBeGreaterThan(
-      policy.cost_tiers.standard.max_tokens_per_request
+      policy.cost_tiers.standard.max_tokens_per_request,
     )
   })
 })
@@ -1634,7 +1772,8 @@ describe('Payment Gateway — Stripe Endpoints (Port 3002)', () => {
         'payment_method_types[]': 'card',
         'line_items[0][price]': 'price_xxx',
         'line_items[0][quantity]': '1',
-        success_url: 'https://pay.blackroad.io/success?session_id={CHECKOUT_SESSION_ID}',
+        success_url:
+          'https://pay.blackroad.io/success?session_id={CHECKOUT_SESSION_ID}',
         cancel_url: 'https://pay.blackroad.io/cancel',
         allow_promotion_codes: 'true',
       })
@@ -1863,15 +2002,43 @@ describe('Port & URL Configuration', () => {
   const services = {
     gateway: { port: 8787, bind: '127.0.0.1', url: 'http://127.0.0.1:8787' },
     mcpBridge: { port: 8420, bind: '127.0.0.1', url: 'http://127.0.0.1:8420' },
-    paymentGateway: { port: 3002, bind: '0.0.0.0', url: 'http://localhost:3002' },
-    dashboardGateway: { port: 3030, bind: 'localhost', url: 'http://localhost:3030' },
+    paymentGateway: {
+      port: 3002,
+      bind: '0.0.0.0',
+      url: 'http://localhost:3002',
+    },
+    dashboardGateway: {
+      port: 3030,
+      bind: 'localhost',
+      url: 'http://localhost:3030',
+    },
     ollama: { port: 11434, bind: 'localhost', url: 'http://localhost:11434' },
-    ollamaWrapper: { port: 8001, bind: 'localhost', url: 'http://localhost:8001' },
+    ollamaWrapper: {
+      port: 8001,
+      bind: 'localhost',
+      url: 'http://localhost:8001',
+    },
     deployApi: { port: 3000, bind: 'localhost', url: 'http://localhost:3000' },
-    simpleLaunchWebhook: { port: 5000, bind: 'localhost', url: 'http://localhost:5000' },
-    metricsWebhook: { port: 4242, bind: 'localhost', url: 'http://localhost:4242' },
-    deployOrchestrator: { port: 8080, bind: 'localhost', url: 'http://localhost:8080' },
-    pythonWebhook: { port: 9000, bind: '0.0.0.0', url: 'http://localhost:9000' },
+    simpleLaunchWebhook: {
+      port: 5000,
+      bind: 'localhost',
+      url: 'http://localhost:5000',
+    },
+    metricsWebhook: {
+      port: 4242,
+      bind: 'localhost',
+      url: 'http://localhost:4242',
+    },
+    deployOrchestrator: {
+      port: 8080,
+      bind: 'localhost',
+      url: 'http://localhost:8080',
+    },
+    pythonWebhook: {
+      port: 9000,
+      bind: '0.0.0.0',
+      url: 'http://localhost:9000',
+    },
   }
 
   it('should have no port conflicts', () => {

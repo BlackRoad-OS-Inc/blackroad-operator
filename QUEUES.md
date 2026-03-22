@@ -27,13 +27,13 @@
 
 BlackRoad OS queues enable:
 
-| Feature | Benefit |
-|---------|---------|
-| **Decoupling** | Agents work independently |
-| **Reliability** | Jobs survive crashes |
-| **Scalability** | Add workers dynamically |
-| **Priority** | Critical tasks first |
-| **Scheduling** | Delayed execution |
+| Feature         | Benefit                   |
+| --------------- | ------------------------- |
+| **Decoupling**  | Agents work independently |
+| **Reliability** | Jobs survive crashes      |
+| **Scalability** | Add workers dynamically   |
+| **Priority**    | Critical tasks first      |
+| **Scheduling**  | Delayed execution         |
 
 ### Queue Types
 
@@ -1250,29 +1250,29 @@ worker_jobs_processing = Gauge(
 ```yaml
 # dashboards/queues.yaml
 dashboard:
-  title: "BlackRoad Queue System"
+  title: 'BlackRoad Queue System'
 
   panels:
-    - title: "Queue Depth by State"
+    - title: 'Queue Depth by State'
       type: graph
       queries:
         - blackroad_queue_depth{state="pending"}
         - blackroad_queue_depth{state="running"}
         - blackroad_queue_depth{state="delayed"}
 
-    - title: "Job Processing Rate"
+    - title: 'Job Processing Rate'
       type: graph
       query: rate(blackroad_jobs_completed_total[5m])
 
-    - title: "Job Duration (p99)"
+    - title: 'Job Duration (p99)'
       type: graph
       query: histogram_quantile(0.99, rate(blackroad_job_duration_seconds_bucket[5m]))
 
-    - title: "Failed Jobs"
+    - title: 'Failed Jobs'
       type: counter
       query: sum(increase(blackroad_jobs_failed_total[1h]))
 
-    - title: "Dead Letter Queue Size"
+    - title: 'Dead Letter Queue Size'
       type: stat
       query: sum(blackroad_queue_depth{state="dead"})
 ```
@@ -1303,9 +1303,9 @@ spec:
             - name: REDIS_URL
               value: redis://redis:6379
             - name: WORKER_CONCURRENCY
-              value: "10"
+              value: '10'
             - name: QUEUES
-              value: "agent:lucidia,agent:alice,agent:default"
+              value: 'agent:lucidia,agent:alice,agent:default'
           resources:
             requests:
               cpu: 500m
@@ -1369,13 +1369,13 @@ blackroad worker scale <queue> <n>      # Scale workers
 
 ### Priority Levels
 
-| Level | Value | Use Case |
-|-------|-------|----------|
-| CRITICAL | 0 | System emergencies |
-| HIGH | 1 | User requests |
-| NORMAL | 5 | Standard tasks |
-| LOW | 8 | Background jobs |
-| BULK | 10 | Batch processing |
+| Level    | Value | Use Case           |
+| -------- | ----- | ------------------ |
+| CRITICAL | 0     | System emergencies |
+| HIGH     | 1     | User requests      |
+| NORMAL   | 5     | Standard tasks     |
+| LOW      | 8     | Background jobs    |
+| BULK     | 10    | Batch processing   |
 
 ---
 
@@ -1389,4 +1389,4 @@ blackroad worker scale <queue> <n>      # Scale workers
 
 ---
 
-*Ride the Road. Pave Tomorrow.*
+_Ride the Road. Pave Tomorrow._

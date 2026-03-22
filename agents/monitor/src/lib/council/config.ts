@@ -2,7 +2,7 @@
 // AI Council Chamber — Councilor Configurations
 // ============================================================================
 
-import type { CouncilorConfig } from './types';
+import type { CouncilorConfig } from './types'
 
 export const CORE_COUNCILORS: CouncilorConfig[] = [
   {
@@ -73,7 +73,7 @@ export const CORE_COUNCILORS: CouncilorConfig[] = [
     votingWeight: 1.0,
     isActive: true,
   },
-];
+]
 
 export const SPECIALIST_COUNCILORS: Record<string, CouncilorConfig> = {
   skeptic: {
@@ -144,11 +144,11 @@ export const SPECIALIST_COUNCILORS: Record<string, CouncilorConfig> = {
     votingWeight: 1.0,
     isActive: false,
   },
-};
+}
 
 export const DEFAULT_CONSENSUS_CONFIG = {
   threshold: 0.75,
   vetoPower: ['Ethicist', 'Sentinel'],
   quorum: 0.5,
   timeout: 600000, // 10 minutes
-};
+}

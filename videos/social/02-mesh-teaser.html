@@ -1,125 +1,249 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=1080,height=1920">
-<title>BlackRoad — Mesh Teaser</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-html,body{width:1080px;height:1920px;overflow:hidden;background:#000;color:#fff;font-family:'Space Grotesk',sans-serif}
-.scene{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:80px;opacity:0;transition:opacity .6s}
-.scene.active{opacity:1}
-.mono{font-family:'JetBrains Mono',monospace}
-.grad{background:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.grad-line{height:4px;border-radius:2px;background:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF)}
-.big{font-size:72px;font-weight:700;line-height:1.1;text-align:center}
-canvas#mesh{position:fixed;inset:0;z-index:0;opacity:.4}
-.scene{z-index:1}
-</style>
-</head>
-<body>
-<canvas id="mesh"></canvas>
-
-<!-- Frame 1 -->
-<div class="scene" id="s1">
-  <div class="big">What if every<br>browser tab<br>was a <span class="grad">compute node?</span></div>
-</div>
-
-<!-- Frame 2 -->
-<div class="scene" id="s2">
-  <div class="big" style="font-size:56px">
-    5 Raspberry Pis.<br>
-    <span class="grad">52 TOPS.</span><br>
-    2 cloud nodes.<br>
-    <span style="color:rgba(255,255,255,.3)">+ every visitor's browser.</span>
-  </div>
-</div>
-
-<!-- Frame 3 -->
-<div class="scene" id="s3">
-  <div style="font-size:28px;color:rgba(255,255,255,.4);margin-bottom:24px">WebGPU + WASM + WebRTC</div>
-  <div class="big" style="font-size:64px">Distributed<br><span class="grad">AI inference</span><br>at the edge.</div>
-</div>
-
-<!-- Frame 4 -->
-<div class="scene" id="s4">
-  <div style="text-align:center">
-    <div style="font-size:28px;color:rgba(255,255,255,.3);margin-bottom:16px">Every link is a node.</div>
-    <div style="font-size:28px;color:rgba(255,255,255,.3);margin-bottom:16px">Every tab is compute.</div>
-    <div style="font-size:28px;color:rgba(255,255,255,.3);margin-bottom:32px">Every visitor is the network.</div>
-    <div class="grad-line" style="width:200px;margin:0 auto"></div>
-    <div class="big" style="font-size:60px;margin-top:32px">The <span class="grad">Mesh.</span></div>
-  </div>
-</div>
-
-<!-- Frame 5 -->
-<div class="scene" id="s5">
-  <div class="grad-line" style="width:300px;margin-bottom:48px"></div>
-  <div class="big" style="font-size:64px">BLACKROAD</div>
-  <div class="mono" style="font-size:20px;color:rgba(255,255,255,.3);margin-top:24px;letter-spacing:.2em">RIDE THE BLACKROAD</div>
-  <div class="grad-line" style="width:300px;margin-top:48px"></div>
-</div>
-
-<script>
-// Animated mesh background
-const c = document.getElementById('mesh');
-const ctx = c.getContext('2d');
-c.width = 1080; c.height = 1920;
-const nodes = Array.from({length: 60}, () => ({
-  x: Math.random() * 1080, y: Math.random() * 1920,
-  vx: (Math.random() - .5) * .8, vy: (Math.random() - .5) * .8,
-  r: Math.random() * 2 + 1
-}));
-
-const gradient = ctx.createLinearGradient(0, 0, 1080, 0);
-gradient.addColorStop(0, '#FF6B2B');
-gradient.addColorStop(.2, '#FF2255');
-gradient.addColorStop(.4, '#CC00AA');
-gradient.addColorStop(.6, '#8844FF');
-gradient.addColorStop(.8, '#4488FF');
-gradient.addColorStop(1, '#00D4FF');
-
-function draw() {
-  ctx.clearRect(0, 0, 1080, 1920);
-  nodes.forEach(p => {
-    p.x += p.vx; p.y += p.vy;
-    if (p.x < 0 || p.x > 1080) p.vx *= -1;
-    if (p.y < 0 || p.y > 1920) p.vy *= -1;
-    ctx.fillStyle = '#fff';
-    ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fill();
-  });
-  ctx.strokeStyle = gradient;
-  ctx.lineWidth = .5;
-  ctx.globalAlpha = .15;
-  for (let i = 0; i < nodes.length; i++) {
-    for (let j = i + 1; j < nodes.length; j++) {
-      const dx = nodes[i].x - nodes[j].x;
-      const dy = nodes[i].y - nodes[j].y;
-      if (dx * dx + dy * dy < 40000) {
-        ctx.beginPath();
-        ctx.moveTo(nodes[i].x, nodes[i].y);
-        ctx.lineTo(nodes[j].x, nodes[j].y);
-        ctx.stroke();
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080,height=1920" />
+    <title>BlackRoad — Mesh Teaser</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
       }
-    }
-  }
-  ctx.globalAlpha = 1;
-  requestAnimationFrame(draw);
-}
-draw();
+      html,
+      body {
+        width: 1080px;
+        height: 1920px;
+        overflow: hidden;
+        background: #000;
+        color: #fff;
+        font-family: 'Space Grotesk', sans-serif;
+      }
+      .scene {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        padding: 80px;
+        opacity: 0;
+        transition: opacity 0.6s;
+      }
+      .scene.active {
+        opacity: 1;
+      }
+      .mono {
+        font-family: 'JetBrains Mono', monospace;
+      }
+      .grad {
+        background: linear-gradient(
+          90deg,
+          #ff6b2b,
+          #ff2255,
+          #cc00aa,
+          #8844ff,
+          #4488ff,
+          #00d4ff
+        );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      .grad-line {
+        height: 4px;
+        border-radius: 2px;
+        background: linear-gradient(
+          90deg,
+          #ff6b2b,
+          #ff2255,
+          #cc00aa,
+          #8844ff,
+          #4488ff,
+          #00d4ff
+        );
+      }
+      .big {
+        font-size: 72px;
+        font-weight: 700;
+        line-height: 1.1;
+        text-align: center;
+      }
+      canvas#mesh {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        opacity: 0.4;
+      }
+      .scene {
+        z-index: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="mesh"></canvas>
 
-// Scenes
-const scenes = document.querySelectorAll('.scene');
-const durations = [4000, 5000, 5000, 6000, 4000];
-let cur = 0;
-function show(i) {
-  if (i >= scenes.length) return;
-  scenes.forEach(s => s.classList.remove('active'));
-  scenes[i].classList.add('active');
-  setTimeout(() => show(i + 1), durations[i]);
-}
-show(0);
-</script>
-</body>
+    <!-- Frame 1 -->
+    <div class="scene" id="s1">
+      <div class="big">
+        What if every<br />browser tab<br />was a
+        <span class="grad">compute node?</span>
+      </div>
+    </div>
+
+    <!-- Frame 2 -->
+    <div class="scene" id="s2">
+      <div class="big" style="font-size: 56px">
+        5 Raspberry Pis.<br />
+        <span class="grad">52 TOPS.</span><br />
+        2 cloud nodes.<br />
+        <span style="color: rgba(255, 255, 255, 0.3)"
+          >+ every visitor's browser.</span
+        >
+      </div>
+    </div>
+
+    <!-- Frame 3 -->
+    <div class="scene" id="s3">
+      <div
+        style="
+          font-size: 28px;
+          color: rgba(255, 255, 255, 0.4);
+          margin-bottom: 24px;
+        "
+      >
+        WebGPU + WASM + WebRTC
+      </div>
+      <div class="big" style="font-size: 64px">
+        Distributed<br /><span class="grad">AI inference</span><br />at the
+        edge.
+      </div>
+    </div>
+
+    <!-- Frame 4 -->
+    <div class="scene" id="s4">
+      <div style="text-align: center">
+        <div
+          style="
+            font-size: 28px;
+            color: rgba(255, 255, 255, 0.3);
+            margin-bottom: 16px;
+          "
+        >
+          Every link is a node.
+        </div>
+        <div
+          style="
+            font-size: 28px;
+            color: rgba(255, 255, 255, 0.3);
+            margin-bottom: 16px;
+          "
+        >
+          Every tab is compute.
+        </div>
+        <div
+          style="
+            font-size: 28px;
+            color: rgba(255, 255, 255, 0.3);
+            margin-bottom: 32px;
+          "
+        >
+          Every visitor is the network.
+        </div>
+        <div class="grad-line" style="width: 200px; margin: 0 auto"></div>
+        <div class="big" style="font-size: 60px; margin-top: 32px">
+          The <span class="grad">Mesh.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Frame 5 -->
+    <div class="scene" id="s5">
+      <div class="grad-line" style="width: 300px; margin-bottom: 48px"></div>
+      <div class="big" style="font-size: 64px">BLACKROAD</div>
+      <div
+        class="mono"
+        style="
+          font-size: 20px;
+          color: rgba(255, 255, 255, 0.3);
+          margin-top: 24px;
+          letter-spacing: 0.2em;
+        "
+      >
+        RIDE THE BLACKROAD
+      </div>
+      <div class="grad-line" style="width: 300px; margin-top: 48px"></div>
+    </div>
+
+    <script>
+      // Animated mesh background
+      const c = document.getElementById('mesh')
+      const ctx = c.getContext('2d')
+      c.width = 1080
+      c.height = 1920
+      const nodes = Array.from({ length: 60 }, () => ({
+        x: Math.random() * 1080,
+        y: Math.random() * 1920,
+        vx: (Math.random() - 0.5) * 0.8,
+        vy: (Math.random() - 0.5) * 0.8,
+        r: Math.random() * 2 + 1,
+      }))
+
+      const gradient = ctx.createLinearGradient(0, 0, 1080, 0)
+      gradient.addColorStop(0, '#FF6B2B')
+      gradient.addColorStop(0.2, '#FF2255')
+      gradient.addColorStop(0.4, '#CC00AA')
+      gradient.addColorStop(0.6, '#8844FF')
+      gradient.addColorStop(0.8, '#4488FF')
+      gradient.addColorStop(1, '#00D4FF')
+
+      function draw() {
+        ctx.clearRect(0, 0, 1080, 1920)
+        nodes.forEach((p) => {
+          p.x += p.vx
+          p.y += p.vy
+          if (p.x < 0 || p.x > 1080) p.vx *= -1
+          if (p.y < 0 || p.y > 1920) p.vy *= -1
+          ctx.fillStyle = '#fff'
+          ctx.beginPath()
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2)
+          ctx.fill()
+        })
+        ctx.strokeStyle = gradient
+        ctx.lineWidth = 0.5
+        ctx.globalAlpha = 0.15
+        for (let i = 0; i < nodes.length; i++) {
+          for (let j = i + 1; j < nodes.length; j++) {
+            const dx = nodes[i].x - nodes[j].x
+            const dy = nodes[i].y - nodes[j].y
+            if (dx * dx + dy * dy < 40000) {
+              ctx.beginPath()
+              ctx.moveTo(nodes[i].x, nodes[i].y)
+              ctx.lineTo(nodes[j].x, nodes[j].y)
+              ctx.stroke()
+            }
+          }
+        }
+        ctx.globalAlpha = 1
+        requestAnimationFrame(draw)
+      }
+      draw()
+
+      // Scenes
+      const scenes = document.querySelectorAll('.scene')
+      const durations = [4000, 5000, 5000, 6000, 4000]
+      let cur = 0
+      function show(i) {
+        if (i >= scenes.length) return
+        scenes.forEach((s) => s.classList.remove('active'))
+        scenes[i].classList.add('active')
+        setTimeout(() => show(i + 1), durations[i])
+      }
+      show(0)
+    </script>
+  </body>
 </html>

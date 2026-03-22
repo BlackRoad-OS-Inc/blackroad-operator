@@ -26,7 +26,7 @@ Or enable a rule as always-on by editing its frontmatter:
 ```yaml
 ---
 description: Expert frontend developer...
-globs: "**/*.tsx,**/*.ts"
+globs: '**/*.tsx,**/*.ts'
 alwaysApply: true
 ---
 ```

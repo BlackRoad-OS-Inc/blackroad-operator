@@ -2,7 +2,7 @@
 # Master coordinator for all autonomous agents
 # Drop this in any repo for full autonomous operation
 
-name: "Autonomous Orchestrator"
+name: 'Autonomous Orchestrator'
 
 on:
   push:
@@ -14,7 +14,7 @@ on:
   issue_comment:
     types: [created]
   schedule:
-    - cron: '0 */4 * * *'  # Every 4 hours
+    - cron: '0 */4 * * *' # Every 4 hours
   workflow_dispatch:
     inputs:
       mode:
@@ -56,7 +56,7 @@ jobs:
   # Stage 1: Intelligence Gathering
   # ============================================
   analyze:
-    name: "Analyze Repository"
+    name: 'Analyze Repository'
     runs-on: ubuntu-latest
     outputs:
       project_type: ${{ steps.detect.outputs.type }}
@@ -192,7 +192,7 @@ jobs:
   # Stage 2: Test & Build
   # ============================================
   test-and-build:
-    name: "Test & Build"
+    name: 'Test & Build'
     needs: analyze
     runs-on: ubuntu-latest
     if: needs.analyze.outputs.project_type != 'unknown'
@@ -293,7 +293,7 @@ jobs:
   # Stage 3: Security & Quality
   # ============================================
   security-scan:
-    name: "Security Scan"
+    name: 'Security Scan'
     needs: analyze
     runs-on: ubuntu-latest
     outputs:
@@ -354,7 +354,7 @@ jobs:
   # Stage 4: Code Review (PRs only)
   # ============================================
   code-review:
-    name: "AI Code Review"
+    name: 'AI Code Review'
     needs: [analyze, test-and-build]
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
@@ -429,7 +429,7 @@ jobs:
   # Stage 5: Auto-Merge
   # ============================================
   auto-merge:
-    name: "Auto-Merge"
+    name: 'Auto-Merge'
     needs: [analyze, test-and-build, security-scan, code-review]
     if: |
       github.event_name == 'pull_request' &&
@@ -437,7 +437,6 @@ jobs:
       needs.test-and-build.outputs.build_result != 'failed' &&
       needs.security-scan.outputs.severity != 'critical'
     runs-on: ubuntu-latest
-
     steps:
       - name: Enable Auto-Merge
         env:
@@ -460,7 +459,7 @@ jobs:
   # Stage 6: Auto-Deploy
   # ============================================
   auto-deploy:
-    name: "Auto-Deploy"
+    name: 'Auto-Deploy'
     needs: [analyze, test-and-build, security-scan]
     if: |
       github.event_name == 'push' &&
@@ -468,7 +467,6 @@ jobs:
       needs.test-and-build.outputs.test_result != 'failed' &&
       needs.security-scan.outputs.severity != 'critical'
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v6
 
@@ -507,7 +505,7 @@ jobs:
   # Stage 7: Memory Persistence
   # ============================================
   persist-memory:
-    name: "Persist Memory"
+    name: 'Persist Memory'
     needs: [test-and-build, security-scan]
     if: always()
     runs-on: ubuntu-latest
@@ -533,7 +531,7 @@ jobs:
   # Stage 8: Issue Triage (Issues only)
   # ============================================
   issue-triage:
-    name: "Issue Triage"
+    name: 'Issue Triage'
     needs: analyze
     if: github.event_name == 'issues' && github.event.action == 'opened'
     runs-on: ubuntu-latest
@@ -593,7 +591,7 @@ jobs:
   # Stage 9: Scheduled Maintenance
   # ============================================
   maintenance:
-    name: "Scheduled Maintenance"
+    name: 'Scheduled Maintenance'
     needs: analyze
     if: github.event_name == 'schedule'
     runs-on: ubuntu-latest

@@ -6,7 +6,14 @@ export type Severity = 'critical' | 'warning' | 'info'
 export interface Bottleneck {
   id: string
   severity: Severity
-  category: 'cpu' | 'memory' | 'disk' | 'network' | 'service' | 'process' | 'load'
+  category:
+    | 'cpu'
+    | 'memory'
+    | 'disk'
+    | 'network'
+    | 'service'
+    | 'process'
+    | 'load'
   title: string
   detail: string
   metric: string
@@ -45,7 +52,8 @@ function analyzeCpu(metrics: SystemMetrics): Bottleneck[] {
       detail: `CPU usage at ${usagePercent}% across ${count} cores`,
       metric: `${usagePercent}%`,
       threshold: `>${THRESHOLDS.cpu.critical}%`,
-      recommendation: 'Identify CPU-heavy processes. Consider scaling horizontally or offloading inference to GPU.',
+      recommendation:
+        'Identify CPU-heavy processes. Consider scaling horizontally or offloading inference to GPU.',
     })
   } else if (usagePercent >= THRESHOLDS.cpu.warning) {
     results.push({
@@ -56,7 +64,8 @@ function analyzeCpu(metrics: SystemMetrics): Bottleneck[] {
       detail: `CPU usage at ${usagePercent}% across ${count} cores`,
       metric: `${usagePercent}%`,
       threshold: `>${THRESHOLDS.cpu.warning}%`,
-      recommendation: 'Monitor trending. If sustained, review agent task distribution.',
+      recommendation:
+        'Monitor trending. If sustained, review agent task distribution.',
     })
   }
 
@@ -69,7 +78,8 @@ function analyzeCpu(metrics: SystemMetrics): Bottleneck[] {
       detail: `Load average ${loadAvg1m} on ${count} cores (${loadPerCore.toFixed(2)}/core)`,
       metric: `${loadPerCore.toFixed(2)}/core`,
       threshold: `>${THRESHOLDS.loadPerCore.critical}/core`,
-      recommendation: 'System is oversubscribed. Reduce concurrent agent count or add compute capacity.',
+      recommendation:
+        'System is oversubscribed. Reduce concurrent agent count or add compute capacity.',
     })
   } else if (loadPerCore >= THRESHOLDS.loadPerCore.warning) {
     results.push({
@@ -89,7 +99,8 @@ function analyzeCpu(metrics: SystemMetrics): Bottleneck[] {
 
 function analyzeMemory(metrics: SystemMetrics): Bottleneck[] {
   const results: Bottleneck[] = []
-  const { usagePercent, usedMB, totalMB, swapTotalMB, swapUsedMB } = metrics.memory
+  const { usagePercent, usedMB, totalMB, swapTotalMB, swapUsedMB } =
+    metrics.memory
 
   if (usagePercent >= THRESHOLDS.memory.critical) {
     results.push({
@@ -100,7 +111,8 @@ function analyzeMemory(metrics: SystemMetrics): Bottleneck[] {
       detail: `${usedMB}MB / ${totalMB}MB used (${usagePercent}%)`,
       metric: `${usagePercent}%`,
       threshold: `>${THRESHOLDS.memory.critical}%`,
-      recommendation: 'Kill non-essential processes. Reduce Ollama model context size or unload unused models.',
+      recommendation:
+        'Kill non-essential processes. Reduce Ollama model context size or unload unused models.',
     })
   } else if (usagePercent >= THRESHOLDS.memory.warning) {
     results.push({
@@ -111,7 +123,8 @@ function analyzeMemory(metrics: SystemMetrics): Bottleneck[] {
       detail: `${usedMB}MB / ${totalMB}MB used (${usagePercent}%)`,
       metric: `${usagePercent}%`,
       threshold: `>${THRESHOLDS.memory.warning}%`,
-      recommendation: 'Monitor memory-hungry processes. Consider smaller quantized models.',
+      recommendation:
+        'Monitor memory-hungry processes. Consider smaller quantized models.',
     })
   }
 
@@ -126,7 +139,8 @@ function analyzeMemory(metrics: SystemMetrics): Bottleneck[] {
         detail: `${swapUsedMB}MB / ${swapTotalMB}MB swap used (${swapPercent}%)`,
         metric: `${swapPercent}%`,
         threshold: `>${THRESHOLDS.swap.critical}%`,
-        recommendation: 'System is thrashing. Free memory immediately or add RAM.',
+        recommendation:
+          'System is thrashing. Free memory immediately or add RAM.',
       })
     } else if (swapPercent >= THRESHOLDS.swap.warning) {
       results.push({
@@ -137,7 +151,8 @@ function analyzeMemory(metrics: SystemMetrics): Bottleneck[] {
         detail: `${swapUsedMB}MB / ${swapTotalMB}MB swap used (${swapPercent}%)`,
         metric: `${swapPercent}%`,
         threshold: `>${THRESHOLDS.swap.warning}%`,
-        recommendation: 'Memory pressure is high. Consider reducing agent concurrency.',
+        recommendation:
+          'Memory pressure is high. Consider reducing agent concurrency.',
       })
     }
   }
@@ -158,7 +173,8 @@ function analyzeDisk(metrics: SystemMetrics): Bottleneck[] {
       detail: `${usedGB}GB / ${totalGB}GB used on ${mountPoint} (${usagePercent}%)`,
       metric: `${usagePercent}%`,
       threshold: `>${THRESHOLDS.disk.critical}%`,
-      recommendation: 'Purge old logs, prune Docker images, remove unused model files from R2 cache.',
+      recommendation:
+        'Purge old logs, prune Docker images, remove unused model files from R2 cache.',
     })
   } else if (usagePercent >= THRESHOLDS.disk.warning) {
     results.push({
@@ -169,7 +185,8 @@ function analyzeDisk(metrics: SystemMetrics): Bottleneck[] {
       detail: `${usedGB}GB / ${totalGB}GB used on ${mountPoint} (${usagePercent}%)`,
       metric: `${usagePercent}%`,
       threshold: `>${THRESHOLDS.disk.warning}%`,
-      recommendation: 'Clean up temp files, rotate logs, archive old memory journals.',
+      recommendation:
+        'Clean up temp files, rotate logs, archive old memory journals.',
     })
   }
 
@@ -189,7 +206,8 @@ function analyzeNetwork(metrics: SystemMetrics): Bottleneck[] {
       detail: `${openConnections} established connections`,
       metric: `${openConnections}`,
       threshold: `>${THRESHOLDS.openConnections.critical}`,
-      recommendation: 'Possible connection leak. Check agent WebSocket connections and gateway pooling.',
+      recommendation:
+        'Possible connection leak. Check agent WebSocket connections and gateway pooling.',
     })
   } else if (openConnections >= THRESHOLDS.openConnections.warning) {
     results.push({
@@ -200,7 +218,8 @@ function analyzeNetwork(metrics: SystemMetrics): Bottleneck[] {
       detail: `${openConnections} established connections`,
       metric: `${openConnections}`,
       threshold: `>${THRESHOLDS.openConnections.warning}`,
-      recommendation: 'Review connection pooling. Enable keep-alive where appropriate.',
+      recommendation:
+        'Review connection pooling. Enable keep-alive where appropriate.',
     })
   }
 
@@ -213,7 +232,8 @@ function analyzeNetwork(metrics: SystemMetrics): Bottleneck[] {
       detail: 'No IPv4 network interfaces found (excluding loopback)',
       metric: '0 interfaces',
       threshold: '>=1',
-      recommendation: 'Check network configuration. Agent mesh requires network connectivity.',
+      recommendation:
+        'Check network configuration. Agent mesh requires network connectivity.',
     })
   }
 
@@ -294,7 +314,10 @@ function buildSummary(score: number, bottlenecks: Bottleneck[]): string {
   return `Health score: ${score}/100. Found ${parts.join(', ')}. Top priority: ${bottlenecks[0].title}`
 }
 
-export function analyzeBottlenecks(metrics: SystemMetrics, probes: ServiceProbe[]): BottleneckReport {
+export function analyzeBottlenecks(
+  metrics: SystemMetrics,
+  probes: ServiceProbe[],
+): BottleneckReport {
   const bottlenecks: Bottleneck[] = [
     ...analyzeCpu(metrics),
     ...analyzeMemory(metrics),

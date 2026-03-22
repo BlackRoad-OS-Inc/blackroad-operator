@@ -22,23 +22,24 @@ Alice (192.168.4.49) — Edge Router
 
 ## Components
 
-| Component | Service | Node | Port |
-|-----------|---------|------|------|
-| Edge Router | nginx | Alice | 80/443 |
-| DNS (authoritative) | PowerDNS | Lucidia | 53 |
-| DNS (ad-blocking) | Pi-hole | Alice | 53 |
-| Object Storage | MinIO | Cecilia | 9000 |
-| Workers Runtime | workerd | Octavia | 8787 |
-| Message Bus | NATS | Octavia | 4222 |
-| Vector DB | Qdrant | Alice | 6333 |
-| Container Mgmt | Portainer | Aria | 9443 |
-| VPN Mesh | Headscale | Aria | 443 |
-| Git Hosting | Gitea | Octavia | 3100 |
-| AI Gateway | ai-router | Cecilia | 7000 |
+| Component           | Service   | Node    | Port   |
+| ------------------- | --------- | ------- | ------ |
+| Edge Router         | nginx     | Alice   | 80/443 |
+| DNS (authoritative) | PowerDNS  | Lucidia | 53     |
+| DNS (ad-blocking)   | Pi-hole   | Alice   | 53     |
+| Object Storage      | MinIO     | Cecilia | 9000   |
+| Workers Runtime     | workerd   | Octavia | 8787   |
+| Message Bus         | NATS      | Octavia | 4222   |
+| Vector DB           | Qdrant    | Alice   | 6333   |
+| Container Mgmt      | Portainer | Aria    | 9443   |
+| VPN Mesh            | Headscale | Aria    | 443    |
+| Git Hosting         | Gitea     | Octavia | 3100   |
+| AI Gateway          | ai-router | Cecilia | 7000   |
 
 ## Self-Hosting Capability
 
 What Cloudflare does → What we run instead:
+
 - **Pages** → nginx + static files on Alice/Lucidia
 - **Workers** → workerd on Octavia (V8 isolates)
 - **R2** → MinIO on Cecilia (S3-compatible)

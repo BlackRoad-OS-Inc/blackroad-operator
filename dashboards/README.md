@@ -5,6 +5,7 @@ A collection of beautiful terminal dashboards for monitoring BlackRoad infrastru
 ## 🎨 Dashboards
 
 ### 1. **blackroad-dashboard.sh** - Basic Dashboard
+
 Simple, clean dashboard with agent grid and terminal output.
 
 ```bash
@@ -12,6 +13,7 @@ Simple, clean dashboard with agent grid and terminal output.
 ```
 
 **Features:**
+
 - Agent status grid (6 agents)
 - System metrics
 - Terminal window simulation
@@ -20,6 +22,7 @@ Simple, clean dashboard with agent grid and terminal output.
 ---
 
 ### 2. **blackroad-live-dashboard.sh** - Live Monitor
+
 Comprehensive infrastructure monitoring with real device checks.
 
 ```bash
@@ -27,6 +30,7 @@ Comprehensive infrastructure monitoring with real device checks.
 ```
 
 **Features:**
+
 - ✅ Raspberry Pi network (4 devices): 192.168.4.38, .64, .99, .68
 - ✅ DigitalOcean droplet: 159.65.43.12
 - ✅ Cloudflare zones (16 total)
@@ -39,6 +43,7 @@ Comprehensive infrastructure monitoring with real device checks.
 ---
 
 ### 3. **blackroad-full-system.sh** - Enhanced System Monitor
+
 Extended dashboard with visual enhancements and progress bars.
 
 ```bash
@@ -47,6 +52,7 @@ Extended dashboard with visual enhancements and progress bars.
 ```
 
 **Features:**
+
 - 📊 2x2 device grid with color-coded borders
 - 📈 Visual progress bars for crypto holdings
 - 🌐 Cloudflare tree view
@@ -57,6 +63,7 @@ Extended dashboard with visual enhancements and progress bars.
 ---
 
 ### 4. **blackroad-ultimate.sh** - ULTIMATE Edition ⚡
+
 The most advanced dashboard with sound, APIs, and interactivity.
 
 ```bash
@@ -64,6 +71,7 @@ The most advanced dashboard with sound, APIs, and interactivity.
 ```
 
 **Features:**
+
 - 🔊 **Sound effects** (macOS system sounds)
 - 🌐 **GitHub API** integration for live stats
 - 💰 **Crypto price tracking** (simulated)
@@ -75,11 +83,13 @@ The most advanced dashboard with sound, APIs, and interactivity.
 - ⌨️ **Interactive controls**
 
 **Keyboard Controls:**
+
 - `s` - SSH Connection Menu
 - `r` - Force Refresh
 - `q` - Quit
 
 **SSH Menu includes:**
+
 1. Lucidia Prime (192.168.4.38)
 2. BlackRoad Pi (192.168.4.64)
 3. Lucidia Alt (192.168.4.99)
@@ -89,6 +99,7 @@ The most advanced dashboard with sound, APIs, and interactivity.
 ---
 
 ### 5. **blackroad-os95.sh** - Windows 95 Edition 🪟
+
 Retro Windows 95 UI in your terminal!
 
 ```bash
@@ -100,6 +111,7 @@ Retro Windows 95 UI in your terminal!
 ---
 
 ### 6. **agent-detail.sh** - Agent Detail Viewer 🔍
+
 Individual agent inspection with live logs and resource monitoring.
 
 ```bash
@@ -109,6 +121,7 @@ Individual agent inspection with live logs and resource monitoring.
 ```
 
 **Features:**
+
 - 📊 **Tabbed Interface** (Overview, Logs, Memory, Connections, Config, Events)
 - 🔴 **Live Terminal/Logs** - Real-time agent output streaming
 - 📈 **Resource Monitoring** - CPU, Memory, Network, Disk I/O meters
@@ -120,12 +133,14 @@ Individual agent inspection with live logs and resource monitoring.
 - 🎨 **Full Color UI** - Matching web design aesthetic
 
 **Interactive Controls (--watch mode):**
+
 - `1-6` - Switch between tabs
 - `s` - SSH to agent host
 - `r` - Force refresh
 - `q` - Return to dashboard
 
 ---
+
 - 🪟 **Multiple overlapping windows**
   - Agent Manager (12 agents)
   - Lucidia Terminal (with command history)
@@ -137,6 +152,7 @@ Individual agent inspection with live logs and resource monitoring.
 - 🎵 **Boot/shutdown sounds**
 
 **Interactive Controls (--watch mode):**
+
 - `s` - Toggle Start Menu
 - `p` - Show Properties
 - `q` - Shutdown
@@ -162,18 +178,21 @@ All dashboards use the official BlackRoad color scheme:
 ## 📡 Infrastructure Monitored
 
 ### Raspberry Pi Network
+
 - Lucidia Prime: `192.168.4.38`
 - BlackRoad Pi: `192.168.4.64`
 - Lucidia Alt: `192.168.4.99`
 - iPhone Koder: `192.168.4.68:8080`
 
 ### Cloud Services
+
 - **DigitalOcean**: Codex Infinity (`159.65.43.12`)
 - **Cloudflare**: 16 zones, 8 Pages, 8 KV, 1 D1
 - **GitHub**: 15 orgs, 66 repos (blackboxprogramming)
 - **Railway**: 12+ active projects
 
 ### Crypto Portfolio
+
 - **Bitcoin**: 0.1 BTC (Coinbase)
 - **Ethereum**: 2.5 ETH (MetaMask)
 - **Solana**: 100 SOL (Phantom)
@@ -194,6 +213,7 @@ cd ~/blackroad-dashboards
 ```
 
 The setup wizard will guide you through:
+
 1. **Connected Services** - View your linked accounts
 2. **Deployment Mode** - Choose Local, Hybrid, or Cloud
 3. **Agent Configuration** - Set defaults for models and resources
@@ -216,6 +236,7 @@ The setup wizard will guide you through:
 ## 🔧 API Configuration
 
 ### Cloudflare API (Optional)
+
 For live Cloudflare statistics, set your API token:
 
 ```bash
@@ -224,6 +245,7 @@ export CF_TOKEN="your_cloudflare_token_here"
 ```
 
 ### Railway CLI (Optional)
+
 Install Railway CLI for project status:
 
 ```bash
@@ -244,14 +266,14 @@ railway login
 
 ## 🎭 Which Dashboard Should I Use?
 
-| Use Case | Dashboard | Command |
-|----------|-----------|---------|
-| Quick status check | Basic | `./blackroad-dashboard.sh` |
-| Detailed overview | Live Monitor | `./blackroad-live-dashboard.sh` |
-| Active monitoring | Full System | `./blackroad-full-system.sh --watch` |
-| SSH + Live APIs | **ULTIMATE** ⚡ | `./blackroad-ultimate.sh --watch` |
-| Fun/retro vibes | Windows 95 | `./blackroad-os95.sh --boot` |
-| Agent inspection | Agent Detail | `./agent-detail.sh "Lucidia Prime" --watch` |
+| Use Case           | Dashboard       | Command                                     |
+| ------------------ | --------------- | ------------------------------------------- |
+| Quick status check | Basic           | `./blackroad-dashboard.sh`                  |
+| Detailed overview  | Live Monitor    | `./blackroad-live-dashboard.sh`             |
+| Active monitoring  | Full System     | `./blackroad-full-system.sh --watch`        |
+| SSH + Live APIs    | **ULTIMATE** ⚡ | `./blackroad-ultimate.sh --watch`           |
+| Fun/retro vibes    | Windows 95      | `./blackroad-os95.sh --boot`                |
+| Agent inspection   | Agent Detail    | `./agent-detail.sh "Lucidia Prime" --watch` |
 
 ---
 
@@ -266,7 +288,7 @@ railway login
 
 **Created with 💜 for BlackRoad OS**
 
-*Colors: #FF9D00 #FF6B00 #FF0066 #FF006B #D600AA #7700FF #0066FF*
+_Colors: #FF9D00 #FF6B00 #FF0066 #FF006B #D600AA #7700FF #0066FF_
 
 ---
 
@@ -279,6 +301,7 @@ railway login
 This software is NOT for commercial resale. Testing purposes only.
 
 ### 🏢 Enterprise Scale:
+
 - 30,000 AI Agents
 - 30,000 Human Employees
 - CEO: Alexa Amundson

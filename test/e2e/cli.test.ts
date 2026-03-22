@@ -111,7 +111,11 @@ describe('CLI e2e', () => {
     it('should respect BLACKROAD_GATEWAY_URL env var', async () => {
       const { stdout } = await exec('npx', ['tsx', CLI, 'gateway', 'url'], {
         cwd: ROOT,
-        env: { ...process.env, BLACKROAD_GATEWAY_URL: 'http://custom:9000', NO_COLOR: '1' },
+        env: {
+          ...process.env,
+          BLACKROAD_GATEWAY_URL: 'http://custom:9000',
+          NO_COLOR: '1',
+        },
         timeout: 15_000,
       })
       expect(stdout.trim()).toBe('http://custom:9000')

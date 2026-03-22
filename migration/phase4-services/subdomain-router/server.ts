@@ -12,22 +12,22 @@
  * RUNS ON OCTAVIA
  */
 
-import { Hono } from 'hono';
-import { cors } from 'hono/cors';
-import { serve } from '@hono/node-server';
-import { KVNamespace } from '../adapters/kv-adapter.js';
-import { D1Database } from '../adapters/d1-adapter.js';
+import { Hono } from 'hono'
+import { cors } from 'hono/cors'
+import { serve } from '@hono/node-server'
+import { KVNamespace } from '../adapters/kv-adapter.js'
+import { D1Database } from '../adapters/d1-adapter.js'
 
-const app = new Hono();
+const app = new Hono()
 
 // Adapters
-const CACHE = new KVNamespace('CACHE');
-const IDENTITIES = new KVNamespace('IDENTITIES');
-const API_KEYS = new KVNamespace('API_KEYS');
-const RATE_LIMIT = new KVNamespace('RATE_LIMIT');
-const DB = new D1Database('blackroad_os_main');
+const CACHE = new KVNamespace('CACHE')
+const IDENTITIES = new KVNamespace('IDENTITIES')
+const API_KEYS = new KVNamespace('API_KEYS')
+const RATE_LIMIT = new KVNamespace('RATE_LIMIT')
+const DB = new D1Database('blackroad_os_main')
 
-app.use('*', cors());
+app.use('*', cors())
 
 // ─── Brand Constants ───
 const BRAND = {
@@ -37,130 +37,274 @@ const BRAND = {
   hotPink: '#FF1D6C',
   electricBlue: '#2979FF',
   violet: '#9C27B0',
-  gradient: 'linear-gradient(135deg, #F5A623 0%, #FF1D6C 38.2%, #9C27B0 61.8%, #2979FF 100%)',
-};
+  gradient:
+    'linear-gradient(135deg, #F5A623 0%, #FF1D6C 38.2%, #9C27B0 61.8%, #2979FF 100%)',
+}
 
 // ─── Subdomain → Emoji + Title Map ───
-const SUBDOMAIN_INFO: Record<string, { emoji: string; title: string; description: string }> = {
-  os: { emoji: '🖥️', title: 'Operating System', description: 'The sovereign AI operating system' },
-  ai: { emoji: '🤖', title: 'AI Platform', description: 'Multi-model AI inference and orchestration' },
-  agents: { emoji: '🕵️', title: 'Agent Hub', description: '30,000 autonomous AI agents' },
-  api: { emoji: '⚡', title: 'API Gateway', description: 'RESTful API for all BlackRoad services' },
-  status: { emoji: '📊', title: 'System Status', description: 'Real-time infrastructure status' },
-  docs: { emoji: '📚', title: 'Documentation', description: 'Guides, tutorials, and API reference' },
-  console: { emoji: '🎮', title: 'Console', description: 'Admin console and management' },
-  dashboard: { emoji: '📈', title: 'Dashboard', description: 'Metrics and monitoring' },
-  chat: { emoji: '💬', title: 'Chat', description: 'Agent communication interface' },
-  playground: { emoji: '🎪', title: 'Playground', description: 'Interactive AI sandbox' },
-  marketplace: { emoji: '🏪', title: 'Marketplace', description: 'Agent templates and packs' },
-  roadmap: { emoji: '🗺️', title: 'Roadmap', description: 'Product roadmap and vision' },
-  changelog: { emoji: '📝', title: 'Changelog', description: 'Version history and updates' },
-  security: { emoji: '🔒', title: 'Security', description: 'Security policies and audit' },
+const SUBDOMAIN_INFO: Record<
+  string,
+  { emoji: string; title: string; description: string }
+> = {
+  os: {
+    emoji: '🖥️',
+    title: 'Operating System',
+    description: 'The sovereign AI operating system',
+  },
+  ai: {
+    emoji: '🤖',
+    title: 'AI Platform',
+    description: 'Multi-model AI inference and orchestration',
+  },
+  agents: {
+    emoji: '🕵️',
+    title: 'Agent Hub',
+    description: '30,000 autonomous AI agents',
+  },
+  api: {
+    emoji: '⚡',
+    title: 'API Gateway',
+    description: 'RESTful API for all BlackRoad services',
+  },
+  status: {
+    emoji: '📊',
+    title: 'System Status',
+    description: 'Real-time infrastructure status',
+  },
+  docs: {
+    emoji: '📚',
+    title: 'Documentation',
+    description: 'Guides, tutorials, and API reference',
+  },
+  console: {
+    emoji: '🎮',
+    title: 'Console',
+    description: 'Admin console and management',
+  },
+  dashboard: {
+    emoji: '📈',
+    title: 'Dashboard',
+    description: 'Metrics and monitoring',
+  },
+  chat: {
+    emoji: '💬',
+    title: 'Chat',
+    description: 'Agent communication interface',
+  },
+  playground: {
+    emoji: '🎪',
+    title: 'Playground',
+    description: 'Interactive AI sandbox',
+  },
+  marketplace: {
+    emoji: '🏪',
+    title: 'Marketplace',
+    description: 'Agent templates and packs',
+  },
+  roadmap: {
+    emoji: '🗺️',
+    title: 'Roadmap',
+    description: 'Product roadmap and vision',
+  },
+  changelog: {
+    emoji: '📝',
+    title: 'Changelog',
+    description: 'Version history and updates',
+  },
+  security: {
+    emoji: '🔒',
+    title: 'Security',
+    description: 'Security policies and audit',
+  },
   careers: { emoji: '👥', title: 'Careers', description: 'Join the team' },
-  store: { emoji: '🛍️', title: 'Store', description: 'Hardware and software store' },
-  search: { emoji: '🔍', title: 'Search', description: 'Search across all services' },
-  terminal: { emoji: '💻', title: 'Terminal', description: 'Web-based terminal' },
-  world: { emoji: '🌍', title: 'World', description: '3D metaverse visualization' },
+  store: {
+    emoji: '🛍️',
+    title: 'Store',
+    description: 'Hardware and software store',
+  },
+  search: {
+    emoji: '🔍',
+    title: 'Search',
+    description: 'Search across all services',
+  },
+  terminal: {
+    emoji: '💻',
+    title: 'Terminal',
+    description: 'Web-based terminal',
+  },
+  world: {
+    emoji: '🌍',
+    title: 'World',
+    description: '3D metaverse visualization',
+  },
   admin: { emoji: '⚙️', title: 'Admin', description: 'System administration' },
-  analytics: { emoji: '📉', title: 'Analytics', description: 'Traffic and usage analytics' },
-  network: { emoji: '🌐', title: 'Network', description: 'Network topology and mesh' },
-  prism: { emoji: '💎', title: 'Prism Console', description: 'Enterprise management' },
-  brand: { emoji: '🎨', title: 'Brand', description: 'Design system and assets' },
+  analytics: {
+    emoji: '📉',
+    title: 'Analytics',
+    description: 'Traffic and usage analytics',
+  },
+  network: {
+    emoji: '🌐',
+    title: 'Network',
+    description: 'Network topology and mesh',
+  },
+  prism: {
+    emoji: '💎',
+    title: 'Prism Console',
+    description: 'Enterprise management',
+  },
+  brand: {
+    emoji: '🎨',
+    title: 'Brand',
+    description: 'Design system and assets',
+  },
   design: { emoji: '✏️', title: 'Design', description: 'UI/UX design system' },
   edge: { emoji: '🔮', title: 'Edge', description: 'Edge computing services' },
-  data: { emoji: '🗃️', title: 'Data', description: 'Data management and pipelines' },
-  finance: { emoji: '💰', title: 'Finance', description: 'Financial tools and analytics' },
-  quantum: { emoji: '⚛️', title: 'Quantum', description: 'Quantum computing interface' },
+  data: {
+    emoji: '🗃️',
+    title: 'Data',
+    description: 'Data management and pipelines',
+  },
+  finance: {
+    emoji: '💰',
+    title: 'Finance',
+    description: 'Financial tools and analytics',
+  },
+  quantum: {
+    emoji: '⚛️',
+    title: 'Quantum',
+    description: 'Quantum computing interface',
+  },
   blog: { emoji: '✍️', title: 'Blog', description: 'News and articles' },
-  dev: { emoji: '🛠️', title: 'Developer', description: 'Developer tools and SDKs' },
+  dev: {
+    emoji: '🛠️',
+    title: 'Developer',
+    description: 'Developer tools and SDKs',
+  },
   about: { emoji: 'ℹ️', title: 'About', description: 'About BlackRoad OS' },
-  help: { emoji: '❓', title: 'Help', description: 'Support and documentation' },
+  help: {
+    emoji: '❓',
+    title: 'Help',
+    description: 'Support and documentation',
+  },
   products: { emoji: '📦', title: 'Products', description: 'Product catalog' },
-  pitstop: { emoji: '🏁', title: 'Pitstop', description: 'Portal and quick links' },
-  blockchain: { emoji: '⛓️', title: 'Blockchain', description: 'RoadChain and crypto' },
-  compliance: { emoji: '✅', title: 'Compliance', description: 'Regulatory compliance' },
-  hardware: { emoji: '🔧', title: 'Hardware', description: 'IoT and device management' },
+  pitstop: {
+    emoji: '🏁',
+    title: 'Pitstop',
+    description: 'Portal and quick links',
+  },
+  blockchain: {
+    emoji: '⛓️',
+    title: 'Blockchain',
+    description: 'RoadChain and crypto',
+  },
+  compliance: {
+    emoji: '✅',
+    title: 'Compliance',
+    description: 'Regulatory compliance',
+  },
+  hardware: {
+    emoji: '🔧',
+    title: 'Hardware',
+    description: 'IoT and device management',
+  },
   ide: { emoji: '📝', title: 'IDE', description: 'Web IDE and code editor' },
-};
+}
 
 // ─── Rate Limiting ───
 app.use('*', async (c, next) => {
-  const ip = c.req.header('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
-  const key = `rate:${ip}`;
-  const current = await RATE_LIMIT.get(key);
-  const count = current ? parseInt(current) : 0;
+  const ip = c.req.header('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown'
+  const key = `rate:${ip}`
+  const current = await RATE_LIMIT.get(key)
+  const count = current ? parseInt(current) : 0
 
   if (count >= 500) {
-    return c.json({ error: 'Rate limit exceeded' }, 429);
+    return c.json({ error: 'Rate limit exceeded' }, 429)
   }
 
-  await RATE_LIMIT.put(key, (count + 1).toString(), { expirationTtl: 60 });
-  await next();
-});
+  await RATE_LIMIT.put(key, (count + 1).toString(), { expirationTtl: 60 })
+  await next()
+})
 
 // ─── Request ID ───
 app.use('*', async (c, next) => {
-  const requestId = `br-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
-  c.header('X-Request-ID', requestId);
-  await next();
-});
+  const requestId = `br-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`
+  c.header('X-Request-ID', requestId)
+  await next()
+})
 
 // ─── SEO Routes ───
 app.get('/robots.txt', (c) => {
-  c.header('Content-Type', 'text/plain');
-  return c.text('User-agent: *\nAllow: /\nSitemap: https://blackroad.io/sitemap.xml');
-});
+  c.header('Content-Type', 'text/plain')
+  return c.text(
+    'User-agent: *\nAllow: /\nSitemap: https://blackroad.io/sitemap.xml',
+  )
+})
 
 app.get('/sitemap.xml', (c) => {
-  const subs = Object.keys(SUBDOMAIN_INFO);
-  const entries = subs.map(s =>
-    `  <url><loc>https://${s}.blackroad.io/</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>`
-  ).join('\n');
-  c.header('Content-Type', 'application/xml');
-  return c.text(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${entries}\n</urlset>`);
-});
+  const subs = Object.keys(SUBDOMAIN_INFO)
+  const entries = subs
+    .map(
+      (s) =>
+        `  <url><loc>https://${s}.blackroad.io/</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>`,
+    )
+    .join('\n')
+  c.header('Content-Type', 'application/xml')
+  return c.text(
+    `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${entries}\n</urlset>`,
+  )
+})
 
 // ─── Health ───
-app.get('/health', (c) => c.json({
-  status: 'healthy',
-  service: 'subdomain-router',
-  source: 'self-hosted',
-  subdomains: Object.keys(SUBDOMAIN_INFO).length,
-  timestamp: new Date().toISOString(),
-}));
+app.get('/health', (c) =>
+  c.json({
+    status: 'healthy',
+    service: 'subdomain-router',
+    source: 'self-hosted',
+    subdomains: Object.keys(SUBDOMAIN_INFO).length,
+    timestamp: new Date().toISOString(),
+  }),
+)
 
 // ─── Main Router ───
 app.get('*', async (c) => {
-  const host = c.req.header('host') || '';
-  const subdomain = host.split('.')[0].toLowerCase();
+  const host = c.req.header('host') || ''
+  const subdomain = host.split('.')[0].toLowerCase()
 
   // If it's the main domain, redirect or serve root
   if (subdomain === 'blackroad' || subdomain === 'www' || !host.includes('.')) {
-    return c.redirect('https://blackroad.io', 301);
+    return c.redirect('https://blackroad.io', 301)
   }
 
   const info = SUBDOMAIN_INFO[subdomain] || {
     emoji: '🌌',
     title: subdomain.charAt(0).toUpperCase() + subdomain.slice(1),
     description: `BlackRoad ${subdomain} service`,
-  };
+  }
 
   // Track analytics
   try {
     await DB.prepare(
-      'INSERT INTO analytics (subdomain, ts, path, ip) VALUES (?, ?, ?, ?)'
-    ).bind(subdomain, Date.now(), c.req.path, c.req.header('x-forwarded-for') || 'unknown').run();
+      'INSERT INTO analytics (subdomain, ts, path, ip) VALUES (?, ?, ?, ?)',
+    )
+      .bind(
+        subdomain,
+        Date.now(),
+        c.req.path,
+        c.req.header('x-forwarded-for') || 'unknown',
+      )
+      .run()
   } catch {
     // Analytics failure is non-critical
   }
 
-  return c.html(renderSubdomainPage(subdomain, info));
-});
+  return c.html(renderSubdomainPage(subdomain, info))
+})
 
 // ─── Render Branded Page ───
 function renderSubdomainPage(
   subdomain: string,
-  info: { emoji: string; title: string; description: string }
+  info: { emoji: string; title: string; description: string },
 ): string {
   return `<!DOCTYPE html>
 <html lang="en">
@@ -216,15 +360,15 @@ footer{position:fixed;bottom:0;left:0;right:0;text-align:center;padding:var(--sp
 </div>
 <footer>&copy; ${new Date().getFullYear()} BlackRoad OS, Inc. BlackRoad OS — Pave Tomorrow.</footer>
 </body>
-</html>`;
+</html>`
 }
 
 // ─── Start ───
-const PORT = parseInt(process.env.PORT || '4000');
-console.log(`[subdomain-router] Starting on port ${PORT}`);
+const PORT = parseInt(process.env.PORT || '4000')
+console.log(`[subdomain-router] Starting on port ${PORT}`)
 
 serve({ fetch: app.fetch, port: PORT }, (info) => {
-  console.log(`[subdomain-router] Listening on http://0.0.0.0:${info.port}`);
-});
+  console.log(`[subdomain-router] Listening on http://0.0.0.0:${info.port}`)
+})
 
-export default app;
+export default app

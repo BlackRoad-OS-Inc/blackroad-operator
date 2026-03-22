@@ -49,12 +49,12 @@ src/
 
 ```typescript
 interface Todo {
-  id: string;        // UUID
-  text: string;      // Todo text
-  completed: boolean;
+  id: string // UUID
+  text: string // Todo text
+  completed: boolean
 }
 
-type Filter = 'all' | 'active' | 'completed';
+type Filter = 'all' | 'active' | 'completed'
 ```
 
 ## Acceptance Criteria

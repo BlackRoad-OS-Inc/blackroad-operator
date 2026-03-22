@@ -4,17 +4,22 @@ description: Create and manage datasets on Hugging Face Hub. Supports initializi
 ---
 
 # Overview
+
 This skill provides tools to manage datasets on the Hugging Face Hub with a focus on creation, configuration, content management, and SQL-based data manipulation. It is designed to complement the existing Hugging Face MCP server by providing dataset editing and querying capabilities.
 
 ## Integration with HF MCP Server
+
 - **Use HF MCP Server for**: Dataset discovery, search, and metadata retrieval
 - **Use This Skill for**: Dataset creation, content editing, SQL queries, data transformation, and structured data formatting
 
 # Version
+
 2.1.0
 
 # Dependencies
+
 # This skill uses PEP 723 scripts with inline dependency management
+
 # Scripts auto-install requirements when run with: uv run scripts/script_name.py
 
 - uv (Python package manager)
@@ -23,12 +28,15 @@ This skill provides tools to manage datasets on the Hugging Face Hub with a focu
 # Core Capabilities
 
 ## 1. Dataset Lifecycle Management
+
 - **Initialize**: Create new dataset repositories with proper structure
 - **Configure**: Store detailed configuration including system prompts and metadata
 - **Stream Updates**: Add rows efficiently without downloading entire datasets
 
 ## 2. SQL-Based Dataset Querying (NEW)
+
 Query any Hugging Face dataset using DuckDB SQL via `scripts/sql_manager.py`:
+
 - **Direct Queries**: Run SQL on datasets using the `hf://` protocol
 - **Schema Discovery**: Describe dataset structure and column types
 - **Data Sampling**: Get random samples for exploration
@@ -37,7 +45,9 @@ Query any Hugging Face dataset using DuckDB SQL via `scripts/sql_manager.py`:
 - **Export & Push**: Save results locally or push to new Hub repos
 
 ## 3. Multi-Format Dataset Support
+
 Supports diverse dataset types through template system:
+
 - **Chat/Conversational**: Chat templating, multi-turn dialogues, tool usage examples
 - **Text Classification**: Sentiment analysis, intent detection, topic classification
 - **Question-Answering**: Reading comprehension, factual QA, knowledge bases
@@ -46,6 +56,7 @@ Supports diverse dataset types through template system:
 - **Custom Formats**: Flexible schema definition for specialized needs
 
 ## 4. Quality Assurance Features
+
 - **JSON Validation**: Ensures data integrity during uploads
 - **Batch Processing**: Efficient handling of large datasets
 - **Error Recovery**: Graceful handling of upload failures and conflicts
@@ -55,13 +66,14 @@ Supports diverse dataset types through template system:
 The skill includes two Python scripts that use PEP 723 inline dependency management:
 
 > **All paths are relative to the directory containing this SKILL.md
-file.**
+> file.**
 > Scripts are run with: `uv run scripts/script_name.py [arguments]`
 
 - `scripts/dataset_manager.py` - Dataset creation and management
 - `scripts/sql_manager.py` - SQL-based dataset querying and transformation
 
 ### Prerequisites
+
 - `uv` package manager installed
 - `HF_TOKEN` environment variable must be set with a Write-access token
 
@@ -116,6 +128,7 @@ SELECT regexp_replace(question, '\n', '') AS cleaned FROM data
 ## Common Operations
 
 ### 1. Explore Dataset Structure
+
 ```bash
 # Get schema
 uv run scripts/sql_manager.py describe --dataset "cais/mmlu"
@@ -128,6 +141,7 @@ uv run scripts/sql_manager.py histogram --dataset "cais/mmlu" --column "subject"
 ```
 
 ### 2. Filter and Transform
+
 ```bash
 # Complex filtering with SQL
 uv run scripts/sql_manager.py query \
@@ -144,6 +158,7 @@ uv run scripts/sql_manager.py transform \
 ```
 
 ### 3. Create Subsets and Push to Hub
+
 ```bash
 # Query and push to new dataset
 uv run scripts/sql_manager.py query \
@@ -162,6 +177,7 @@ uv run scripts/sql_manager.py transform \
 ```
 
 ### 4. Export to Local Files
+
 ```bash
 # Export to Parquet
 uv run scripts/sql_manager.py export \
@@ -179,6 +195,7 @@ uv run scripts/sql_manager.py export \
 ```
 
 ### 5. Working with Dataset Configs/Splits
+
 ```bash
 # Specify config (subset)
 uv run scripts/sql_manager.py query \
@@ -200,10 +217,12 @@ uv run scripts/sql_manager.py query \
 ```
 
 ### 6. Raw SQL with Full Paths
+
 For complex queries or joining datasets:
+
 ```bash
 uv run scripts/sql_manager.py raw --sql "
-  SELECT a.*, b.* 
+  SELECT a.*, b.*
   FROM 'hf://datasets/dataset1@~parquet/default/train/*.parquet' a
   JOIN 'hf://datasets/dataset2@~parquet/default/train/*.parquet' b
   ON a.id = b.id
@@ -259,11 +278,13 @@ sql.close()
 ## HF Path Format
 
 DuckDB uses the `hf://` protocol to access datasets:
+
 ```
 hf://datasets/{dataset_id}@{revision}/{config}/{split}/*.parquet
 ```
 
 Examples:
+
 - `hf://datasets/cais/mmlu@~parquet/default/train/*.parquet`
 - `hf://datasets/ibm/duorc@~parquet/ParaphraseRC/test/*.parquet`
 
@@ -278,7 +299,7 @@ regexp_replace(col, '\n', '')     -- Regex replace
 regexp_matches(col, 'pattern')    -- Regex match
 LOWER(col), UPPER(col)           -- Case conversion
 
--- Array functions  
+-- Array functions
 choices[0]                        -- Array indexing (0-based)
 array_length(choices)             -- Array length
 unnest(choices)                   -- Expand array to rows
@@ -302,6 +323,7 @@ ROW_NUMBER() OVER (PARTITION BY col ORDER BY col2)
 ### Recommended Workflow
 
 **1. Discovery (Use HF MCP Server):**
+
 ```python
 # Use HF MCP tools to find existing datasets
 search_datasets("conversational AI training")
@@ -309,6 +331,7 @@ get_dataset_details("username/dataset-name")
 ```
 
 **2. Creation (Use This Skill):**
+
 ```bash
 # Initialize new dataset
 uv run scripts/dataset_manager.py init --repo_id "your-username/dataset-name" [--private]
@@ -318,6 +341,7 @@ uv run scripts/dataset_manager.py config --repo_id "your-username/dataset-name" 
 ```
 
 **3. Content Management (Use This Skill):**
+
 ```bash
 # Quick setup with any template
 uv run scripts/dataset_manager.py quick_setup \
@@ -334,12 +358,13 @@ uv run scripts/dataset_manager.py add_rows \
 ### Template-Based Data Structures
 
 **1. Chat Template (`--template chat`)**
+
 ```json
 {
   "messages": [
-    {"role": "user", "content": "Natural user request"},
-    {"role": "assistant", "content": "Response with tool usage"},
-    {"role": "tool", "content": "Tool response", "tool_call_id": "call_123"}
+    { "role": "user", "content": "Natural user request" },
+    { "role": "assistant", "content": "Response with tool usage" },
+    { "role": "tool", "content": "Tool response", "tool_call_id": "call_123" }
   ],
   "scenario": "Description of use case",
   "complexity": "simple|intermediate|advanced"
@@ -347,16 +372,18 @@ uv run scripts/dataset_manager.py add_rows \
 ```
 
 **2. Classification Template (`--template classification`)**
+
 ```json
 {
   "text": "Input text to be classified",
   "label": "classification_label",
   "confidence": 0.95,
-  "metadata": {"domain": "technology", "language": "en"}
+  "metadata": { "domain": "technology", "language": "en" }
 }
 ```
 
 **3. QA Template (`--template qa`)**
+
 ```json
 {
   "question": "What is the question being asked?",
@@ -368,6 +395,7 @@ uv run scripts/dataset_manager.py add_rows \
 ```
 
 **4. Completion Template (`--template completion`)**
+
 ```json
 {
   "prompt": "The beginning text or context",
@@ -378,15 +406,20 @@ uv run scripts/dataset_manager.py add_rows \
 ```
 
 **5. Tabular Template (`--template tabular`)**
+
 ```json
 {
   "columns": [
-    {"name": "feature1", "type": "numeric", "description": "First feature"},
-    {"name": "target", "type": "categorical", "description": "Target variable"}
+    { "name": "feature1", "type": "numeric", "description": "First feature" },
+    {
+      "name": "target",
+      "type": "categorical",
+      "description": "Target variable"
+    }
   ],
   "data": [
-    {"feature1": 123, "target": "class_a"},
-    {"feature1": 456, "target": "class_b"}
+    { "feature1": 123, "target": "class_a" },
+    { "feature1": 456, "target": "class_b" }
   ]
 }
 ```
@@ -394,6 +427,7 @@ uv run scripts/dataset_manager.py add_rows \
 ### Advanced System Prompt Template
 
 For high-quality training data generation:
+
 ```text
 You are an AI assistant expert at using MCP tools effectively.
 
@@ -415,6 +449,7 @@ You are an AI assistant expert at using MCP tools effectively.
 The skill includes diverse training examples beyond just MCP usage:
 
 **Available Example Sets:**
+
 - `training_examples.json` - MCP tool usage examples (debugging, project setup, database analysis)
 - `diverse_training_examples.json` - Broader scenarios including:
   - **Educational Chat** - Explaining programming concepts, tutorials
@@ -425,6 +460,7 @@ The skill includes diverse training examples beyond just MCP usage:
   - **Conversational Support** - Problem-solving, technical discussions
 
 **Using Different Example Sets:**
+
 ```bash
 # Add MCP-focused examples
 uv run scripts/dataset_manager.py add_rows --repo_id "your-username/dataset-name" \
@@ -442,16 +478,19 @@ uv run scripts/dataset_manager.py add_rows --repo_id "your-username/dataset-name
 ### Commands Reference
 
 **List Available Templates:**
+
 ```bash
 uv run scripts/dataset_manager.py list_templates
 ```
 
 **Quick Setup (Recommended):**
+
 ```bash
 uv run scripts/dataset_manager.py quick_setup --repo_id "your-username/dataset-name" --template classification
 ```
 
 **Manual Setup:**
+
 ```bash
 # Initialize repository
 uv run scripts/dataset_manager.py init --repo_id "your-username/dataset-name" [--private]
@@ -467,11 +506,13 @@ uv run scripts/dataset_manager.py add_rows \
 ```
 
 **View Dataset Statistics:**
+
 ```bash
 uv run scripts/dataset_manager.py stats --repo_id "your-username/dataset-name"
 ```
 
 ### Error Handling
+
 - **Repository exists**: Script will notify and continue with configuration
 - **Invalid JSON**: Clear error message with parsing details
 - **Network issues**: Automatic retry for transient failures
@@ -482,6 +523,7 @@ uv run scripts/dataset_manager.py stats --repo_id "your-username/dataset-name"
 # Combined Workflow Examples
 
 ## Example 1: Create Training Subset from Existing Dataset
+
 ```bash
 # 1. Explore the source dataset
 uv run scripts/sql_manager.py describe --dataset "cais/mmlu"
@@ -496,6 +538,7 @@ uv run scripts/sql_manager.py query \
 ```
 
 ## Example 2: Transform and Reshape Data
+
 ```bash
 # Transform MMLU to QA format with correct answers extracted
 uv run scripts/sql_manager.py query \
@@ -505,6 +548,7 @@ uv run scripts/sql_manager.py query \
 ```
 
 ## Example 3: Merge Multiple Dataset Splits
+
 ```bash
 # Export multiple splits and combine
 uv run scripts/sql_manager.py export \
@@ -514,6 +558,7 @@ uv run scripts/sql_manager.py export \
 ```
 
 ## Example 4: Quality Filtering
+
 ```bash
 # Filter for high-quality examples
 uv run scripts/sql_manager.py query \
@@ -523,6 +568,7 @@ uv run scripts/sql_manager.py query \
 ```
 
 ## Example 5: Create Custom Training Dataset
+
 ```bash
 # 1. Query source data
 uv run scripts/sql_manager.py export \

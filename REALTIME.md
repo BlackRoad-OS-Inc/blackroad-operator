@@ -27,12 +27,12 @@
 
 BlackRoad OS real-time features enable:
 
-| Feature | Latency | Use Case |
-|---------|---------|----------|
-| **WebSockets** | <10ms | Bidirectional agent chat |
-| **SSE** | <50ms | Dashboard updates |
-| **Streaming** | First token <100ms | LLM responses |
-| **Presence** | <1s | Agent online status |
+| Feature        | Latency            | Use Case                 |
+| -------------- | ------------------ | ------------------------ |
+| **WebSockets** | <10ms              | Bidirectional agent chat |
+| **SSE**        | <50ms              | Dashboard updates        |
+| **Streaming**  | First token <100ms | LLM responses            |
+| **Presence**   | <1s                | Agent online status      |
 
 ### Real-Time Architecture
 
@@ -261,97 +261,97 @@ async def handle_message(conn: Connection, data: dict):
 ```typescript
 // client/websocket.ts
 class BlackRoadWebSocket {
-  private ws: WebSocket | null = null;
-  private reconnectAttempts = 0;
-  private maxReconnects = 5;
-  private handlers: Map<string, Function[]> = new Map();
+  private ws: WebSocket | null = null
+  private reconnectAttempts = 0
+  private maxReconnects = 5
+  private handlers: Map<string, Function[]> = new Map()
 
   constructor(
     private url: string,
-    private clientId: string
+    private clientId: string,
   ) {}
 
   connect(): Promise<void> {
     return new Promise((resolve, reject) => {
-      this.ws = new WebSocket(`${this.url}/ws/${this.clientId}`);
+      this.ws = new WebSocket(`${this.url}/ws/${this.clientId}`)
 
       this.ws.onopen = () => {
-        console.log('WebSocket connected');
-        this.reconnectAttempts = 0;
-        this.startHeartbeat();
-        resolve();
-      };
+        console.log('WebSocket connected')
+        this.reconnectAttempts = 0
+        this.startHeartbeat()
+        resolve()
+      }
 
       this.ws.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        this.handleMessage(data);
-      };
+        const data = JSON.parse(event.data)
+        this.handleMessage(data)
+      }
 
       this.ws.onclose = () => {
-        console.log('WebSocket disconnected');
-        this.attemptReconnect();
-      };
+        console.log('WebSocket disconnected')
+        this.attemptReconnect()
+      }
 
       this.ws.onerror = (error) => {
-        console.error('WebSocket error:', error);
-        reject(error);
-      };
-    });
+        console.error('WebSocket error:', error)
+        reject(error)
+      }
+    })
   }
 
   subscribe(room: string): void {
-    this.send({ type: 'subscribe', room });
+    this.send({ type: 'subscribe', room })
   }
 
   unsubscribe(room: string): void {
-    this.send({ type: 'unsubscribe', room });
+    this.send({ type: 'unsubscribe', room })
   }
 
   sendMessage(room: string, content: any): void {
-    this.send({ type: 'message', room, content });
+    this.send({ type: 'message', room, content })
   }
 
   on(event: string, handler: Function): void {
     if (!this.handlers.has(event)) {
-      this.handlers.set(event, []);
+      this.handlers.set(event, [])
     }
-    this.handlers.get(event)!.push(handler);
+    this.handlers.get(event)!.push(handler)
   }
 
   private send(data: any): void {
     if (this.ws?.readyState === WebSocket.OPEN) {
-      this.ws.send(JSON.stringify(data));
+      this.ws.send(JSON.stringify(data))
     }
   }
 
   private handleMessage(data: any): void {
-    const handlers = this.handlers.get(data.type) || [];
-    handlers.forEach(h => h(data));
+    const handlers = this.handlers.get(data.type) || []
+    handlers.forEach((h) => h(data))
   }
 
   private startHeartbeat(): void {
     setInterval(() => {
-      this.send({ type: 'ping' });
-    }, 30000);
+      this.send({ type: 'ping' })
+    }, 30000)
   }
 
   private attemptReconnect(): void {
     if (this.reconnectAttempts < this.maxReconnects) {
-      this.reconnectAttempts++;
-      const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts), 30000);
-      setTimeout(() => this.connect(), delay);
+      this.reconnectAttempts++
+      const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts), 30000)
+      setTimeout(() => this.connect(), delay)
     }
   }
 }
 
 // Usage
-const ws = new BlackRoadWebSocket('wss://api.blackroad.io', 'client-123');
-await ws.connect();
+const ws = new BlackRoadWebSocket('wss://api.blackroad.io', 'client-123')
+await ws.connect()
 
-ws.subscribe('agents:LUCIDIA');
+ws.subscribe('agents:LUCIDIA')
 ws.on('message', (data) => {
-  console.log('Received:', data);
-});
+  console.log('Received:', data)
+})
 ```
 
 ---
@@ -458,65 +458,68 @@ async def broadcast_event(event: str, data: dict):
 ```typescript
 // client/sse.ts
 class BlackRoadSSE {
-  private eventSource: EventSource | null = null;
-  private handlers: Map<string, Function[]> = new Map();
+  private eventSource: EventSource | null = null
+  private handlers: Map<string, Function[]> = new Map()
 
-  constructor(private url: string, private clientId: string) {}
+  constructor(
+    private url: string,
+    private clientId: string,
+  ) {}
 
   connect(): void {
-    this.eventSource = new EventSource(`${this.url}/events/${this.clientId}`);
+    this.eventSource = new EventSource(`${this.url}/events/${this.clientId}`)
 
     this.eventSource.onopen = () => {
-      console.log('SSE connected');
-    };
+      console.log('SSE connected')
+    }
 
     this.eventSource.onerror = (error) => {
-      console.error('SSE error:', error);
+      console.error('SSE error:', error)
       // Auto-reconnects built into EventSource
-    };
+    }
 
     // Listen for all events
     this.eventSource.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      this.emit('message', data);
-    };
+      const data = JSON.parse(event.data)
+      this.emit('message', data)
+    }
   }
 
   on(event: string, handler: Function): void {
     if (!this.handlers.has(event)) {
-      this.handlers.set(event, []);
+      this.handlers.set(event, [])
     }
-    this.handlers.get(event)!.push(handler);
+    this.handlers.get(event)!.push(handler)
 
     // Add EventSource listener for typed events
     this.eventSource?.addEventListener(event, (e: MessageEvent) => {
-      const data = JSON.parse(e.data);
-      handler(data);
-    });
+      const data = JSON.parse(e.data)
+      handler(data)
+    })
   }
 
   private emit(event: string, data: any): void {
-    const handlers = this.handlers.get(event) || [];
-    handlers.forEach(h => h(data));
+    const handlers = this.handlers.get(event) || []
+    handlers.forEach((h) => h(data))
   }
 
   disconnect(): void {
-    this.eventSource?.close();
-    this.eventSource = null;
+    this.eventSource?.close()
+    this.eventSource = null
   }
 }
 
 // Usage
-const sse = new BlackRoadSSE('https://api.blackroad.io', 'client-123');
-sse.connect();
+const sse = new BlackRoadSSE('https://api.blackroad.io', 'client-123')
+sse.connect()
 
 sse.on('agent.status', (data) => {
-  console.log('Agent status:', data);
-});
+  console.log('Agent status:', data)
+})
 
 sse.on('task.progress', (data) => {
-  updateProgressBar(data.progress);
-});
+  updateProgressBar(data.progress)
+})
 ```
 
 ---
@@ -1289,7 +1292,7 @@ metadata:
   name: blackroad-websocket
 spec:
   type: LoadBalancer
-  sessionAffinity: ClientIP  # Sticky sessions
+  sessionAffinity: ClientIP # Sticky sessions
   sessionAffinityConfig:
     clientIP:
       timeoutSeconds: 3600
@@ -1334,26 +1337,26 @@ class ClusteredPubSub:
 
 ### WebSocket Message Types
 
-| Type | Direction | Description |
-|------|-----------|-------------|
-| `ping` | Client→Server | Keepalive |
-| `pong` | Server→Client | Keepalive response |
-| `subscribe` | Client→Server | Join room |
-| `unsubscribe` | Client→Server | Leave room |
-| `message` | Bidirectional | Chat message |
-| `agent.invoke` | Client→Server | Call agent |
-| `agent.response` | Server→Client | Agent response |
-| `error` | Server→Client | Error message |
+| Type             | Direction     | Description        |
+| ---------------- | ------------- | ------------------ |
+| `ping`           | Client→Server | Keepalive          |
+| `pong`           | Server→Client | Keepalive response |
+| `subscribe`      | Client→Server | Join room          |
+| `unsubscribe`    | Client→Server | Leave room         |
+| `message`        | Bidirectional | Chat message       |
+| `agent.invoke`   | Client→Server | Call agent         |
+| `agent.response` | Server→Client | Agent response     |
+| `error`          | Server→Client | Error message      |
 
 ### SSE Event Types
 
-| Event | Description |
-|-------|-------------|
-| `connected` | Initial connection |
-| `agent.status` | Agent status change |
-| `task.progress` | Task progress update |
-| `task.completed` | Task finished |
-| `alert` | System alert |
+| Event            | Description          |
+| ---------------- | -------------------- |
+| `connected`      | Initial connection   |
+| `agent.status`   | Agent status change  |
+| `task.progress`  | Task progress update |
+| `task.completed` | Task finished        |
+| `alert`          | System alert         |
 
 ---
 
@@ -1367,4 +1370,4 @@ class ClusteredPubSub:
 
 ---
 
-*Ride the Road. Pave Tomorrow.*
+_Ride the Road. Pave Tomorrow._

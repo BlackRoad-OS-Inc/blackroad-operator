@@ -182,6 +182,7 @@ ls -lt "$SESSION_DIR"/*.jsonl | head -5
 **Problem**: Skill not found when running headless tests
 
 **Solutions**:
+
 1. Ensure you're running FROM the superpowers directory: `cd /path/to/superpowers && tests/...`
 2. Check `~/.claude/settings.json` has `"superpowers@superpowers-dev": true` in `enabledPlugins`
 3. Verify skill exists in `skills/` directory
@@ -191,6 +192,7 @@ ls -lt "$SESSION_DIR"/*.jsonl | head -5
 **Problem**: Claude blocked from writing files or accessing directories
 
 **Solutions**:
+
 1. Use `--permission-mode bypassPermissions` flag
 2. Use `--add-dir /path/to/temp/dir` to grant access to test directories
 3. Check file permissions on test directories
@@ -200,6 +202,7 @@ ls -lt "$SESSION_DIR"/*.jsonl | head -5
 **Problem**: Test takes too long and times out
 
 **Solutions**:
+
 1. Increase timeout: `timeout 1800 claude ...` (30 minutes)
 2. Check for infinite loops in skill logic
 3. Review subagent task complexity
@@ -209,6 +212,7 @@ ls -lt "$SESSION_DIR"/*.jsonl | head -5
 **Problem**: Can't find session transcript after test run
 
 **Solutions**:
+
 1. Check the correct project directory in `~/.claude/projects/`
 2. Use `find ~/.claude/projects -name "*.jsonl" -mmin -60` to find recent sessions
 3. Verify test actually ran (check for errors in test output)
@@ -295,7 +299,7 @@ Session transcripts are JSONL (JSON Lines) files where each line is a JSON objec
       "cache_read_input_tokens": 24989
     },
     "prompt": "You are implementing Task 1...",
-    "content": [{"type": "text", "text": "..."}]
+    "content": [{ "type": "text", "text": "..." }]
   }
 }
 ```

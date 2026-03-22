@@ -1,24 +1,24 @@
-'use client';
+'use client'
 
-import { useEffect, useMemo, useRef, useState } from 'react';
-import type { ChatMessage } from '@/lib/types';
+import { useEffect, useMemo, useRef, useState } from 'react'
+import type { ChatMessage } from '@/lib/types'
 
 interface GlobalChatPanelProps {
-  messages: ChatMessage[];
-  connected: boolean;
-  demoMode: boolean;
-  totalAgents: number;
-  onSend: (message: string) => void | Promise<void>;
+  messages: ChatMessage[]
+  connected: boolean
+  demoMode: boolean
+  totalAgents: number
+  onSend: (message: string) => void | Promise<void>
 }
 
-type FilterTab = 'all' | 'broadcast' | 'direct' | 'system';
+type FilterTab = 'all' | 'broadcast' | 'direct' | 'system'
 
 const FILTERS: Array<{ key: FilterTab; label: string }> = [
   { key: 'all', label: 'All' },
   { key: 'broadcast', label: 'Broadcasts' },
   { key: 'direct', label: 'Direct' },
   { key: 'system', label: 'System' },
-];
+]
 
 export default function GlobalChatPanel({
   messages,
@@ -27,44 +27,56 @@ export default function GlobalChatPanel({
   totalAgents,
   onSend,
 }: GlobalChatPanelProps) {
-  const [input, setInput] = useState('');
-  const [tab, setTab] = useState<FilterTab>('all');
-  const [sending, setSending] = useState(false);
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const endRef = useRef<HTMLDivElement>(null);
+  const [input, setInput] = useState('')
+  const [tab, setTab] = useState<FilterTab>('all')
+  const [sending, setSending] = useState(false)
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const endRef = useRef<HTMLDivElement>(null)
 
   const filtered = useMemo(() => {
-    if (tab === 'all') return messages;
-    if (tab === 'broadcast') return messages.filter((message) => message.scope === 'broadcast');
-    if (tab === 'direct') return messages.filter((message) => message.scope === 'direct');
-    return messages.filter((message) => message.role === 'system');
-  }, [messages, tab]);
+    if (tab === 'all') return messages
+    if (tab === 'broadcast')
+      return messages.filter((message) => message.scope === 'broadcast')
+    if (tab === 'direct')
+      return messages.filter((message) => message.scope === 'direct')
+    return messages.filter((message) => message.role === 'system')
+  }, [messages, tab])
 
   useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
-  }, [filtered.length]);
+    endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
+  }, [filtered.length])
 
   const handleSend = async () => {
-    const text = input.trim();
-    if (!text || sending) return;
-    setSending(true);
+    const text = input.trim()
+    if (!text || sending) return
+    setSending(true)
     try {
-      await onSend(text);
-      setInput('');
+      await onSend(text)
+      setInput('')
     } finally {
-      setSending(false);
+      setSending(false)
     }
-  };
+  }
 
   return (
     <div>
       <div className="flex items-center justify-between mb-3">
-        <h2 className="font-pixel text-sm flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+        <h2
+          className="font-pixel text-sm flex items-center gap-2"
+          style={{ color: 'var(--text-primary)' }}
+        >
           <span>📣</span>
           <span>Team Chat</span>
         </h2>
-        <div className="text-[10px] font-mono" style={{ color: 'var(--text-secondary)' }}>
-          {connected ? `${totalAgents} targets live` : demoMode ? 'Demo mode' : 'Offline'}
+        <div
+          className="text-[10px] font-mono"
+          style={{ color: 'var(--text-secondary)' }}
+        >
+          {connected
+            ? `${totalAgents} targets live`
+            : demoMode
+              ? 'Demo mode'
+              : 'Offline'}
         </div>
       </div>
 
@@ -82,8 +94,14 @@ export default function GlobalChatPanel({
               onClick={() => setTab(filter.key)}
               className="text-[10px] font-mono px-2 py-1 rounded-md transition-colors"
               style={{
-                backgroundColor: tab === filter.key ? 'var(--accent-primary)20' : 'transparent',
-                color: tab === filter.key ? 'var(--accent-primary)' : 'var(--text-secondary)',
+                backgroundColor:
+                  tab === filter.key
+                    ? 'var(--accent-primary)20'
+                    : 'transparent',
+                color:
+                  tab === filter.key
+                    ? 'var(--accent-primary)'
+                    : 'var(--text-secondary)',
                 border: `1px solid ${tab === filter.key ? 'var(--accent-primary)40' : 'transparent'}`,
               }}
             >
@@ -99,7 +117,10 @@ export default function GlobalChatPanel({
           {filtered.length === 0 && (
             <div className="text-center py-8">
               <span className="text-2xl block mb-2">💬</span>
-              <p className="text-xs font-mono" style={{ color: 'var(--text-secondary)' }}>
+              <p
+                className="text-xs font-mono"
+                style={{ color: 'var(--text-secondary)' }}
+              >
                 Broadcast to every primary agent and watch replies land here.
               </p>
             </div>
@@ -110,28 +131,43 @@ export default function GlobalChatPanel({
               key={message.id}
               className="rounded-lg px-3 py-2"
               style={{
-                backgroundColor: message.role === 'user'
-                  ? 'var(--accent-primary)18'
-                  : message.role === 'system'
-                    ? 'var(--bg-secondary)'
-                    : 'rgba(255,255,255,0.03)',
+                backgroundColor:
+                  message.role === 'user'
+                    ? 'var(--accent-primary)18'
+                    : message.role === 'system'
+                      ? 'var(--bg-secondary)'
+                      : 'rgba(255,255,255,0.03)',
                 border: '1px solid var(--border)',
               }}
             >
               <div className="flex items-center justify-between gap-2 mb-1">
-                <span className="text-[10px] font-mono" style={{ color: 'var(--text-secondary)' }}>
+                <span
+                  className="text-[10px] font-mono"
+                  style={{ color: 'var(--text-secondary)' }}
+                >
                   {message.agentEmoji} {message.agentName}
                 </span>
-                <span className="text-[9px] font-mono" style={{ color: 'var(--text-secondary)' }}>
+                <span
+                  className="text-[9px] font-mono"
+                  style={{ color: 'var(--text-secondary)' }}
+                >
                   {new Date(message.timestamp).toLocaleTimeString()}
                 </span>
               </div>
-              <p className="text-xs whitespace-pre-wrap break-words" style={{ color: 'var(--text-primary)' }}>
+              <p
+                className="text-xs whitespace-pre-wrap break-words"
+                style={{ color: 'var(--text-primary)' }}
+              >
                 {message.content}
               </p>
-              <div className="mt-1 text-[9px] font-mono" style={{ color: 'var(--text-secondary)' }}>
+              <div
+                className="mt-1 text-[9px] font-mono"
+                style={{ color: 'var(--text-secondary)' }}
+              >
                 {message.scope.toUpperCase()}
-                {message.targetIds?.length ? ` • ${message.targetIds.length} target${message.targetIds.length === 1 ? '' : 's'}` : ''}
+                {message.targetIds?.length
+                  ? ` • ${message.targetIds.length} target${message.targetIds.length === 1 ? '' : 's'}`
+                  : ''}
               </div>
             </div>
           ))}
@@ -144,8 +180,8 @@ export default function GlobalChatPanel({
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                void handleSend();
+                e.preventDefault()
+                void handleSend()
               }
             }}
             rows={2}
@@ -163,5 +199,5 @@ export default function GlobalChatPanel({
         </div>
       </div>
     </div>
-  );
+  )
 }

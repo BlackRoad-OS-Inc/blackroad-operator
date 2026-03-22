@@ -33,7 +33,9 @@ describe('GatewayClient', () => {
     it('should throw on non-ok response', async () => {
       vi.stubGlobal(
         'fetch',
-        vi.fn().mockResolvedValue({ ok: false, status: 500, statusText: 'Error' }),
+        vi
+          .fn()
+          .mockResolvedValue({ ok: false, status: 500, statusText: 'Error' }),
       )
       const client = new GatewayClient()
       await expect(client.get('/v1/health')).rejects.toThrow(
@@ -71,7 +73,11 @@ describe('GatewayClient', () => {
     it('should throw on 404', async () => {
       vi.stubGlobal(
         'fetch',
-        vi.fn().mockResolvedValue({ ok: false, status: 404, statusText: 'Not Found' }),
+        vi.fn().mockResolvedValue({
+          ok: false,
+          status: 404,
+          statusText: 'Not Found',
+        }),
       )
       const client = new GatewayClient()
       await expect(client.get('/v1/missing')).rejects.toThrow(
@@ -101,7 +107,11 @@ describe('GatewayClient', () => {
     it('should throw on non-ok POST response', async () => {
       vi.stubGlobal(
         'fetch',
-        vi.fn().mockResolvedValue({ ok: false, status: 422, statusText: 'Unprocessable' }),
+        vi.fn().mockResolvedValue({
+          ok: false,
+          status: 422,
+          statusText: 'Unprocessable',
+        }),
       )
       const client = new GatewayClient()
       await expect(client.post('/v1/invoke', {})).rejects.toThrow(

@@ -1,11 +1,11 @@
 # .github/workflows/autonomous-dependency-manager.yml
 # Intelligent dependency management with bundled updates
 
-name: "Autonomous Dependency Manager"
+name: 'Autonomous Dependency Manager'
 
 on:
   schedule:
-    - cron: '0 3 * * 1'  # Every Monday at 3 AM
+    - cron: '0 3 * * 1' # Every Monday at 3 AM
   workflow_dispatch:
     inputs:
       update_type:
@@ -14,10 +14,10 @@ on:
         default: 'safe'
         type: choice
         options:
-          - safe          # Patch versions only
-          - minor         # Minor + patch
-          - major         # All updates (risky)
-          - security      # Security updates only
+          - safe # Patch versions only
+          - minor # Minor + patch
+          - major # All updates (risky)
+          - security # Security updates only
 
 permissions:
   contents: write
@@ -32,7 +32,7 @@ jobs:
   # Analyze Current State
   # ============================================
   analyze:
-    name: "Analyze Dependencies"
+    name: 'Analyze Dependencies'
     runs-on: ubuntu-latest
     outputs:
       has_npm: ${{ steps.detect.outputs.npm }}
@@ -80,7 +80,7 @@ jobs:
   # Update npm Dependencies
   # ============================================
   update-npm:
-    name: "Update npm Dependencies"
+    name: 'Update npm Dependencies'
     needs: analyze
     if: needs.analyze.outputs.has_npm == 'true'
     runs-on: ubuntu-latest
@@ -193,7 +193,7 @@ jobs:
   # Update Python Dependencies
   # ============================================
   update-python:
-    name: "Update Python Dependencies"
+    name: 'Update Python Dependencies'
     needs: analyze
     if: needs.analyze.outputs.has_python == 'true'
     runs-on: ubuntu-latest
@@ -270,7 +270,7 @@ jobs:
   # Report Summary
   # ============================================
   report:
-    name: "Generate Report"
+    name: 'Generate Report'
     needs: [analyze, update-npm, update-python]
     if: always()
     runs-on: ubuntu-latest

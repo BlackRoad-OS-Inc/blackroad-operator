@@ -45,14 +45,14 @@ Skills are **modular capabilities** that extend what agents can do. Think of the
 
 ### Skill Categories
 
-| Category | Description | Examples |
-|----------|-------------|----------|
-| **Code** | Execute and analyze code | `code-runner`, `linter`, `formatter` |
-| **Data** | Process and transform data | `csv-parser`, `json-transformer`, `aggregator` |
-| **Web** | Interact with the internet | `web-scraper`, `api-client`, `search` |
-| **Infrastructure** | Manage systems | `docker`, `kubernetes`, `terraform` |
-| **Communication** | Send messages | `email`, `slack`, `discord` |
-| **Storage** | Manage files | `file-manager`, `s3`, `database` |
+| Category           | Description                | Examples                                       |
+| ------------------ | -------------------------- | ---------------------------------------------- |
+| **Code**           | Execute and analyze code   | `code-runner`, `linter`, `formatter`           |
+| **Data**           | Process and transform data | `csv-parser`, `json-transformer`, `aggregator` |
+| **Web**            | Interact with the internet | `web-scraper`, `api-client`, `search`          |
+| **Infrastructure** | Manage systems             | `docker`, `kubernetes`, `terraform`            |
+| **Communication**  | Send messages              | `email`, `slack`, `discord`                    |
+| **Storage**        | Manage files               | `file-manager`, `s3`, `database`               |
 
 ---
 
@@ -189,7 +189,7 @@ resources:
 
 # Dependencies
 dependencies:
-  python: ">=3.10"
+  python: '>=3.10'
   packages:
     - requests>=2.28.0
     - pyyaml>=6.0
@@ -816,6 +816,7 @@ blackroad-skills install git+https://github.com/user/my-skill
 Skills can be installed directly from the Claude mobile app. See the full walkthrough in [MOBILE_SKILL_INSTALL.md](MOBILE_SKILL_INSTALL.md).
 
 **Quick steps:**
+
 1. Download the `.skill` file to your phone
 2. Open Claude app → **Settings** → **Skills**
 3. Tap **+** / **Install** and select the file
@@ -859,13 +860,13 @@ await registry.install("code-analyzer")
 
 ### Popular Skills
 
-| Skill | Category | Downloads | Description |
-|-------|----------|-----------|-------------|
-| `code-runner` | Code | 50K | Execute code in sandboxed environment |
-| `web-scraper` | Web | 35K | Scrape and parse web pages |
-| `sql-query` | Database | 28K | Execute SQL queries safely |
-| `git-ops` | DevOps | 22K | Git operations and analysis |
-| `image-gen` | AI | 18K | Generate images with AI |
+| Skill         | Category | Downloads | Description                           |
+| ------------- | -------- | --------- | ------------------------------------- |
+| `code-runner` | Code     | 50K       | Execute code in sandboxed environment |
+| `web-scraper` | Web      | 35K       | Scrape and parse web pages            |
+| `sql-query`   | Database | 28K       | Execute SQL queries safely            |
+| `git-ops`     | DevOps   | 22K       | Git operations and analysis           |
+| `image-gen`   | AI       | 18K       | Generate images with AI               |
 
 ---
 
@@ -972,29 +973,29 @@ class MySkill(Skill):
 
 ```typescript
 // skill.ts
-import { Skill, SkillContext, SkillResult } from '@blackroad/skills-sdk';
+import { Skill, SkillContext, SkillResult } from '@blackroad/skills-sdk'
 
 export class MySkill extends Skill {
-  name = 'my-skill';
-  version = '1.0.0';
+  name = 'my-skill'
+  version = '1.0.0'
 
   async execute(ctx: SkillContext): Promise<SkillResult> {
-    const { input } = ctx.params;
+    const { input } = ctx.params
 
     if (!input) {
-      throw new SkillError('input is required');
+      throw new SkillError('input is required')
     }
 
-    const result = await this.process(input);
+    const result = await this.process(input)
 
     return {
       success: true,
-      data: { result }
-    };
+      data: { result },
+    }
   }
 
   private async process(input: string): Promise<string> {
-    return input.toUpperCase();
+    return input.toUpperCase()
   }
 }
 ```
@@ -1019,4 +1020,4 @@ export class MySkill extends Skill {
 
 ---
 
-*Last updated: 2026-02-05*
+_Last updated: 2026-02-05_

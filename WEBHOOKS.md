@@ -28,13 +28,13 @@
 
 BlackRoad OS uses an event-driven architecture to enable:
 
-| Capability | Description |
-|------------|-------------|
-| **Real-time** | Instant notifications on state changes |
-| **Decoupled** | Services don't need direct connections |
-| **Scalable** | Handle millions of events per second |
-| **Auditable** | Complete history of system activity |
-| **Extensible** | Integrate any external service |
+| Capability     | Description                            |
+| -------------- | -------------------------------------- |
+| **Real-time**  | Instant notifications on state changes |
+| **Decoupled**  | Services don't need direct connections |
+| **Scalable**   | Handle millions of events per second   |
+| **Auditable**  | Complete history of system activity    |
+| **Extensible** | Integrate any external service         |
 
 ### Event Flow
 
@@ -128,45 +128,45 @@ class Event:
 events:
   # Agent lifecycle
   agent:
-    spawned: "Agent created and initialized"
-    started: "Agent began processing"
-    stopped: "Agent gracefully stopped"
-    failed: "Agent encountered fatal error"
-    heartbeat: "Agent health ping"
+    spawned: 'Agent created and initialized'
+    started: 'Agent began processing'
+    stopped: 'Agent gracefully stopped'
+    failed: 'Agent encountered fatal error'
+    heartbeat: 'Agent health ping'
 
   # Task management
   task:
-    created: "New task queued"
-    assigned: "Task assigned to agent"
-    started: "Task execution began"
-    progress: "Task progress update"
-    completed: "Task finished successfully"
-    failed: "Task failed with error"
-    cancelled: "Task manually cancelled"
-    timeout: "Task exceeded time limit"
+    created: 'New task queued'
+    assigned: 'Task assigned to agent'
+    started: 'Task execution began'
+    progress: 'Task progress update'
+    completed: 'Task finished successfully'
+    failed: 'Task failed with error'
+    cancelled: 'Task manually cancelled'
+    timeout: 'Task exceeded time limit'
 
   # Memory operations
   memory:
-    stored: "New memory created"
-    retrieved: "Memory accessed"
-    updated: "Memory modified"
-    archived: "Memory moved to cold storage"
-    deleted: "Memory permanently removed"
+    stored: 'New memory created'
+    retrieved: 'Memory accessed'
+    updated: 'Memory modified'
+    archived: 'Memory moved to cold storage'
+    deleted: 'Memory permanently removed'
 
   # System events
   system:
-    startup: "BlackRoad OS starting"
-    shutdown: "BlackRoad OS stopping"
-    config_changed: "Configuration updated"
-    health_check: "System health report"
-    alert: "System alert triggered"
+    startup: 'BlackRoad OS starting'
+    shutdown: 'BlackRoad OS stopping'
+    config_changed: 'Configuration updated'
+    health_check: 'System health report'
+    alert: 'System alert triggered'
 
   # Security events
   security:
-    auth_success: "Successful authentication"
-    auth_failure: "Failed authentication"
-    permission_denied: "Access denied"
-    anomaly_detected: "Suspicious activity"
+    auth_success: 'Successful authentication'
+    auth_failure: 'Failed authentication'
+    permission_denied: 'Access denied'
+    anomaly_detected: 'Suspicious activity'
 ```
 
 ---
@@ -190,7 +190,7 @@ webhooks:
   - id: monitoring-system
     url: https://monitoring.blackroad.io/webhooks/events
     events:
-      - "*"  # All events
+      - '*' # All events
     enabled: true
     secret: ${WEBHOOK_SECRET_MONITORING}
     headers:
@@ -214,7 +214,7 @@ webhooks:
       - agent.failed
       - task.completed
     enabled: true
-    transform: discord  # Use Discord message format
+    transform: discord # Use Discord message format
 ```
 
 ### Webhook Management API
@@ -481,57 +481,53 @@ async def handle_system_alert(event: dict):
 
 ```javascript
 // webhooks/receiver.js
-const express = require('express');
-const crypto = require('crypto');
+const express = require('express')
+const crypto = require('crypto')
 
-const app = express();
-const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET;
+const app = express()
+const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET
 
 // Raw body for signature verification
-app.use('/webhooks', express.raw({ type: 'application/json' }));
+app.use('/webhooks', express.raw({ type: 'application/json' }))
 
 function verifySignature(payload, signature) {
-    const expected = 'sha256=' + crypto
-        .createHmac('sha256', WEBHOOK_SECRET)
-        .update(payload)
-        .digest('hex');
-    return crypto.timingSafeEqual(
-        Buffer.from(signature),
-        Buffer.from(expected)
-    );
+  const expected =
+    'sha256=' +
+    crypto.createHmac('sha256', WEBHOOK_SECRET).update(payload).digest('hex')
+  return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected))
 }
 
 app.post('/webhooks/blackroad', (req, res) => {
-    const signature = req.headers['x-blackroad-signature'];
+  const signature = req.headers['x-blackroad-signature']
 
-    if (!signature || !verifySignature(req.body, signature)) {
-        return res.status(401).json({ error: 'Invalid signature' });
-    }
+  if (!signature || !verifySignature(req.body, signature)) {
+    return res.status(401).json({ error: 'Invalid signature' })
+  }
 
-    const event = JSON.parse(req.body);
-    console.log(`Received event: ${event.type}`);
+  const event = JSON.parse(req.body)
+  console.log(`Received event: ${event.type}`)
 
-    // Process event asynchronously
-    processEvent(event).catch(console.error);
+  // Process event asynchronously
+  processEvent(event).catch(console.error)
 
-    // Respond immediately
-    res.json({ received: true });
-});
+  // Respond immediately
+  res.json({ received: true })
+})
 
 async function processEvent(event) {
-    switch (event.type) {
-        case 'task.completed':
-            await notifySlack(`Task ${event.data.task_id} completed!`);
-            break;
-        case 'agent.failed':
-            await createPagerDutyIncident(event);
-            break;
-        default:
-            console.log(`Unhandled: ${event.type}`);
-    }
+  switch (event.type) {
+    case 'task.completed':
+      await notifySlack(`Task ${event.data.task_id} completed!`)
+      break
+    case 'agent.failed':
+      await createPagerDutyIncident(event)
+      break
+    default:
+      console.log(`Unhandled: ${event.type}`)
+  }
 }
 
-app.listen(3000, () => console.log('Webhook receiver running on :3000'));
+app.listen(3000, () => console.log('Webhook receiver running on :3000'))
 ```
 
 ---
@@ -600,13 +596,13 @@ webhooks:
     allowed_ips:
       - 10.0.0.0/8
       - 192.168.0.0/16
-      - 203.0.113.0/24  # BlackRoad edge servers
+      - 203.0.113.0/24 # BlackRoad edge servers
 
     # Require HTTPS
     require_https: true
 
     # Maximum payload size
-    max_payload_bytes: 1048576  # 1MB
+    max_payload_bytes: 1048576 # 1MB
 
     # Rate limiting
     rate_limit:
@@ -1313,22 +1309,22 @@ webhooks:
 
 ### Headers Sent
 
-| Header | Description |
-|--------|-------------|
-| `X-BlackRoad-Signature` | HMAC-SHA256 signature |
-| `X-BlackRoad-Timestamp` | Unix timestamp |
-| `X-BlackRoad-Event-Type` | Event type |
-| `X-BlackRoad-Event-ID` | Unique event ID |
-| `Content-Type` | `application/json` |
+| Header                   | Description           |
+| ------------------------ | --------------------- |
+| `X-BlackRoad-Signature`  | HMAC-SHA256 signature |
+| `X-BlackRoad-Timestamp`  | Unix timestamp        |
+| `X-BlackRoad-Event-Type` | Event type            |
+| `X-BlackRoad-Event-ID`   | Unique event ID       |
+| `Content-Type`           | `application/json`    |
 
 ### Status Codes
 
-| Code | Meaning |
-|------|---------|
-| 2xx | Success, delivery confirmed |
-| 4xx | Client error, no retry |
-| 5xx | Server error, will retry |
-| Timeout | Will retry with backoff |
+| Code    | Meaning                     |
+| ------- | --------------------------- |
+| 2xx     | Success, delivery confirmed |
+| 4xx     | Client error, no retry      |
+| 5xx     | Server error, will retry    |
+| Timeout | Will retry with backoff     |
 
 ---
 
@@ -1342,4 +1338,4 @@ webhooks:
 
 ---
 
-*Ride the Road. Pave Tomorrow.*
+_Ride the Road. Pave Tomorrow._

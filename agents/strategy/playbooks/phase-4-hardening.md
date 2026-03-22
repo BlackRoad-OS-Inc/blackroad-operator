@@ -17,8 +17,9 @@ The final quality gauntlet. The Reality Checker defaults to "NEEDS WORK" — you
 ## Critical Mindset
 
 > **The Reality Checker's default verdict is NEEDS WORK.**
-> 
+>
 > This is not pessimism — it's realism. Production readiness requires:
+>
 > - Complete user journeys working end-to-end
 > - Cross-device consistency (desktop, tablet, mobile)
 > - Performance under load (not just happy path)
@@ -32,6 +33,7 @@ The final quality gauntlet. The Reality Checker defaults to "NEEDS WORK" — you
 ### Step 1: Evidence Collection (Day 1-2, All Parallel)
 
 #### 📸 Evidence Collector — Comprehensive Visual Evidence
+
 ```
 Activate Evidence Collector for comprehensive system evidence on [PROJECT].
 
@@ -60,6 +62,7 @@ Timeline: 2 days
 ```
 
 #### 🔌 API Tester — Full API Regression
+
 ```
 Activate API Tester for complete API regression on [PROJECT].
 
@@ -84,6 +87,7 @@ Timeline: 2 days
 ```
 
 #### ⚡ Performance Benchmarker — Load Testing
+
 ```
 Activate Performance Benchmarker for load testing on [PROJECT].
 
@@ -111,6 +115,7 @@ Timeline: 2 days
 ```
 
 #### ⚖️ Legal Compliance Checker — Final Compliance Audit
+
 ```
 Activate Legal Compliance Checker for final compliance audit on [PROJECT].
 
@@ -141,6 +146,7 @@ Timeline: 2 days
 ### Step 2: Analysis (Day 3-4, Parallel, after Step 1)
 
 #### 📊 Test Results Analyzer — Quality Metrics Aggregation
+
 ```
 Activate Test Results Analyzer for quality metrics aggregation on [PROJECT].
 
@@ -166,6 +172,7 @@ Timeline: 1 day
 ```
 
 #### 🔄 Workflow Optimizer — Process Efficiency Review
+
 ```
 Activate Workflow Optimizer for process efficiency review on [PROJECT].
 
@@ -185,6 +192,7 @@ Timeline: 1 day
 ```
 
 #### 🏗️ Infrastructure Maintainer — Production Readiness Check
+
 ```
 Activate Infrastructure Maintainer for production readiness on [PROJECT].
 
@@ -216,6 +224,7 @@ Timeline: 1 day
 ### Step 3: Final Judgment (Day 5-7, Sequential)
 
 #### 🔍 Reality Checker — THE FINAL VERDICT
+
 ```
 Activate Reality Checker for final integration testing on [PROJECT].
 
@@ -256,25 +265,27 @@ Default: NEEDS WORK unless proven otherwise
 
 ## Quality Gate — THE FINAL GATE
 
-| # | Criterion | Threshold | Evidence Required |
-|---|-----------|-----------|-------------------|
-| 1 | User journeys complete | All critical paths working end-to-end | Reality Checker screenshots |
-| 2 | Cross-device consistency | Desktop + Tablet + Mobile all working | Responsive screenshots |
-| 3 | Performance certified | P95 < 200ms, LCP < 2.5s, uptime > 99.9% | Performance Benchmarker report |
-| 4 | Security validated | Zero critical vulnerabilities | Security scan + compliance report |
-| 5 | Compliance certified | All regulatory requirements met | Legal Compliance Checker report |
-| 6 | Specification compliance | 100% of spec requirements implemented | Point-by-point verification |
-| 7 | Infrastructure ready | Production environment validated | Infrastructure Maintainer report |
+| #   | Criterion                | Threshold                               | Evidence Required                 |
+| --- | ------------------------ | --------------------------------------- | --------------------------------- |
+| 1   | User journeys complete   | All critical paths working end-to-end   | Reality Checker screenshots       |
+| 2   | Cross-device consistency | Desktop + Tablet + Mobile all working   | Responsive screenshots            |
+| 3   | Performance certified    | P95 < 200ms, LCP < 2.5s, uptime > 99.9% | Performance Benchmarker report    |
+| 4   | Security validated       | Zero critical vulnerabilities           | Security scan + compliance report |
+| 5   | Compliance certified     | All regulatory requirements met         | Legal Compliance Checker report   |
+| 6   | Specification compliance | 100% of spec requirements implemented   | Point-by-point verification       |
+| 7   | Infrastructure ready     | Production environment validated        | Infrastructure Maintainer report  |
 
 ## Gate Decision
 
 **Sole authority**: Reality Checker
 
 ### If READY (proceed to Phase 5):
+
 ```markdown
 ## Phase 4 → Phase 5 Handoff Package
 
 ### For Launch Team:
+
 - Reality Checker certification report
 - Performance certification
 - Compliance certification
@@ -282,27 +293,32 @@ Default: NEEDS WORK unless proven otherwise
 - Known limitations (if any)
 
 ### For Growth Hacker:
+
 - Product ready for users
 - Feature list for marketing messaging
 - Performance data for credibility
 
 ### For DevOps Automator:
+
 - Production deployment approved
 - Blue-green deployment plan
 - Rollback procedures confirmed
 ```
 
 ### If NEEDS WORK (return to Phase 3):
+
 ```markdown
 ## Phase 4 → Phase 3 Return Package
 
 ### Fix List (from Reality Checker):
+
 1. [Critical Issue 1]: [Description + evidence + fix instruction]
 2. [Critical Issue 2]: [Description + evidence + fix instruction]
 3. [High Issue 1]: [Description + evidence + fix instruction]
-...
+   ...
 
 ### Process:
+
 - Issues enter Dev↔QA loop (Phase 3 mechanics)
 - Each fix must pass Evidence Collector QA
 - When all fixes complete → Return to Phase 4 Step 3
@@ -312,14 +328,17 @@ Default: NEEDS WORK unless proven otherwise
 ```
 
 ### If NOT READY (return to Phase 1/2):
+
 ```markdown
 ## Phase 4 → Phase 1/2 Return Package
 
 ### Architectural Issues Identified:
+
 1. [Fundamental Issue]: [Why it can't be fixed in Phase 3]
 2. [Structural Problem]: [What needs to change at architecture level]
 
 ### Recommended Action:
+
 - [ ] Revise system architecture (Phase 1)
 - [ ] Rebuild foundation (Phase 2)
 - [ ] Descope and redefine (Phase 1)
@@ -329,4 +348,4 @@ Default: NEEDS WORK unless proven otherwise
 
 ---
 
-*Phase 4 is complete when the Reality Checker issues a READY verdict with overwhelming evidence. NEEDS WORK is the expected first-pass result — it means the system is working but needs polish.*
+_Phase 4 is complete when the Reality Checker issues a READY verdict with overwhelming evidence. NEEDS WORK is the expected first-pass result — it means the system is working but needs polish._

@@ -1,37 +1,53 @@
-"use client";
+'use client'
 
-import React from 'react';
-import type { Achievement } from '@/lib/achievements';
+import React from 'react'
+import type { Achievement } from '@/lib/achievements'
 
 interface AchievementListProps {
-  achievements: Achievement[];
-  filter?: 'all' | 'unlocked' | 'locked' | 'productivity' | 'collaboration' | 'social' | 'special';
+  achievements: Achievement[]
+  filter?:
+    | 'all'
+    | 'unlocked'
+    | 'locked'
+    | 'productivity'
+    | 'collaboration'
+    | 'social'
+    | 'special'
 }
 
-export default function AchievementList({ achievements, filter = 'all' }: AchievementListProps) {
+export default function AchievementList({
+  achievements,
+  filter = 'all',
+}: AchievementListProps) {
   // Filter achievements
-  const filtered = achievements.filter(a => {
-    if (filter === 'all') return true;
-    if (filter === 'unlocked') return a.unlocked;
-    if (filter === 'locked') return !a.unlocked;
-    return a.category === filter;
-  });
+  const filtered = achievements.filter((a) => {
+    if (filter === 'all') return true
+    if (filter === 'unlocked') return a.unlocked
+    if (filter === 'locked') return !a.unlocked
+    return a.category === filter
+  })
 
   // Get tier color
   const getTierColor = (tier: string) => {
     switch (tier) {
-      case 'bronze': return '#CD7F32';
-      case 'silver': return '#C0C0C0';
-      case 'gold': return '#FFD700';
-      case 'platinum': return '#E5E4E2';
-      case 'diamond': return '#B9F2FF';
-      default: return '#808080';
+      case 'bronze':
+        return '#CD7F32'
+      case 'silver':
+        return '#C0C0C0'
+      case 'gold':
+        return '#FFD700'
+      case 'platinum':
+        return '#E5E4E2'
+      case 'diamond':
+        return '#B9F2FF'
+      default:
+        return '#808080'
     }
-  };
+  }
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-      {filtered.map(achievement => (
+      {filtered.map((achievement) => (
         <div
           key={achievement.id}
           className={`p-3 sm:p-4 rounded-xl border-2 transition-all touch-manipulation ${
@@ -55,11 +71,11 @@ export default function AchievementList({ achievements, filter = 'all' }: Achiev
               </span>
             </div>
           </div>
-          
+
           <p className="text-sm text-[var(--text-secondary)] mb-3">
             {achievement.description}
           </p>
-          
+
           {/* Progress Bar */}
           <div className="mb-2">
             <div className="flex justify-between text-xs text-[var(--text-secondary)] mb-1">
@@ -76,12 +92,13 @@ export default function AchievementList({ achievements, filter = 'all' }: Achiev
               />
             </div>
           </div>
-          
+
           {/* XP Reward */}
           {achievement.unlocked && (
             <div className="flex items-center justify-between text-xs">
               <span className="text-[var(--text-secondary)]">
-                Unlocked! {new Date(achievement.unlockedAt!).toLocaleDateString()}
+                Unlocked!{' '}
+                {new Date(achievement.unlockedAt!).toLocaleDateString()}
               </span>
               <span className="font-bold text-[var(--accent-primary)]">
                 +{achievement.xpReward} XP
@@ -91,5 +108,5 @@ export default function AchievementList({ achievements, filter = 'all' }: Achiev
         </div>
       ))}
     </div>
-  );
+  )
 }

@@ -1,46 +1,51 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react'
 
 interface ChatMessage {
-  id: string;
-  agentId: string;
-  agentName: string;
-  agentEmoji: string;
-  agentType: 'main' | 'subagent' | 'acp';
-  content: string;
-  timestamp: number;
-  sessionId?: string;
+  id: string
+  agentId: string
+  agentName: string
+  agentEmoji: string
+  agentType: 'main' | 'subagent' | 'acp'
+  content: string
+  timestamp: number
+  sessionId?: string
 }
 
 interface UseAgentChatOptions {
-  isActive: boolean;
-  gatewayUrl?: string;
+  isActive: boolean
+  gatewayUrl?: string
 }
 
-export function useAgentChat({ isActive, gatewayUrl = 'ws://127.0.0.1:18789' }: UseAgentChatOptions) {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [connectedAgents, setConnectedAgents] = useState<any[]>([]);
-  const wsRef = useRef<WebSocket | null>(null);
-  const sessionIdRef = useRef<string | null>(null);
+export function useAgentChat({
+  isActive,
+  gatewayUrl = 'ws://127.0.0.1:18789',
+}: UseAgentChatOptions) {
+  const [messages, setMessages] = useState<ChatMessage[]>([])
+  const [connectedAgents, setConnectedAgents] = useState<any[]>([])
+  const wsRef = useRef<WebSocket | null>(null)
+  const sessionIdRef = useRef<string | null>(null)
 
   // Connect to Gateway WebSocket
   useEffect(() => {
-    if (!isActive) return;
+    if (!isActive) return
 
-    const ws = new WebSocket(gatewayUrl);
-    wsRef.current = ws;
+    const ws = new WebSocket(gatewayUrl)
+    wsRef.current = ws
 
     ws.onopen = () => {
-      console.log('[AgentChat] Connected to Gateway');
+      console.log('[AgentChat] Connected to Gateway')
       // Subscribe to chat events
-      ws.send(JSON.stringify({
-        type: 'subscribe',
-        channel: 'chat'
-      }));
-    };
+      ws.send(
+        JSON.stringify({
+          type: 'subscribe',
+          channel: 'chat',
+        }),
+      )
+    }
 
     ws.onmessage = (event) => {
       try {
-        const data = JSON.parse(event.data);
+        const data = JSON.parse(event.data)
         if (data.type === 'chat_message' || data.type === 'chat.event') {
           const newMessage: ChatMessage = {
             id: data.id || `msg-${Date.now()}`,
@@ -51,41 +56,41 @@ export function useAgentChat({ isActive, gatewayUrl = 'ws://127.0.0.1:18789' }: 
             content: data.content || data.message || '',
             timestamp: data.timestamp || Date.now(),
             sessionId: data.sessionId,
-          };
-          setMessages(prev => [...prev, newMessage]);
+          }
+          setMessages((prev) => [...prev, newMessage])
         }
       } catch (e) {
-        console.error('[AgentChat] Parse error:', e);
+        console.error('[AgentChat] Parse error:', e)
       }
-    };
+    }
 
     ws.onerror = (error) => {
-      console.error('[AgentChat] WebSocket error:', error);
-    };
+      console.error('[AgentChat] WebSocket error:', error)
+    }
 
     ws.onclose = () => {
-      console.log('[AgentChat] Disconnected');
+      console.log('[AgentChat] Disconnected')
       // Auto-reconnect after 3 seconds
       setTimeout(() => {
         if (isActive && wsRef.current === ws) {
           // Trigger reconnection via useEffect dependency
         }
-      }, 3000);
-    };
+      }, 3000)
+    }
 
     return () => {
       if (ws.readyState === WebSocket.OPEN) {
-        ws.close();
+        ws.close()
       }
-      wsRef.current = null;
-    };
-  }, [isActive, gatewayUrl]);
+      wsRef.current = null
+    }
+  }, [isActive, gatewayUrl])
 
   // Send message to Gateway
   const sendMessage = useCallback(async (content: string, agentId?: string) => {
     if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
-      console.error('[AgentChat] Not connected');
-      return;
+      console.error('[AgentChat] Not connected')
+      return
     }
 
     const message = {
@@ -94,31 +99,33 @@ export function useAgentChat({ isActive, gatewayUrl = 'ws://127.0.0.1:18789' }: 
       agentId: agentId || 'user',
       timestamp: Date.now(),
       sessionId: sessionIdRef.current,
-    };
+    }
 
-    wsRef.current.send(JSON.stringify(message));
-  }, []);
+    wsRef.current.send(JSON.stringify(message))
+  }, [])
 
   // Start meeting session
   const startMeeting = useCallback(() => {
-    sessionIdRef.current = `meeting-${Date.now()}`;
-    setMessages([{
-      id: 'system-1',
-      agentId: 'system',
-      agentName: 'System',
-      agentEmoji: '🤖',
-      agentType: 'main',
-      content: 'Meeting started! Connected to OpenClaw Gateway.',
-      timestamp: Date.now(),
-    }]);
-  }, []);
+    sessionIdRef.current = `meeting-${Date.now()}`
+    setMessages([
+      {
+        id: 'system-1',
+        agentId: 'system',
+        agentName: 'System',
+        agentEmoji: '🤖',
+        agentType: 'main',
+        content: 'Meeting started! Connected to OpenClaw Gateway.',
+        timestamp: Date.now(),
+      },
+    ])
+  }, [])
 
   // End meeting session
   const endMeeting = useCallback(() => {
-    sessionIdRef.current = null;
-    setMessages([]);
-    setConnectedAgents([]);
-  }, []);
+    sessionIdRef.current = null
+    setMessages([])
+    setConnectedAgents([])
+  }, [])
 
   return {
     messages,
@@ -127,12 +134,12 @@ export function useAgentChat({ isActive, gatewayUrl = 'ws://127.0.0.1:18789' }: 
     startMeeting,
     endMeeting,
     isConnected: wsRef.current?.readyState === WebSocket.OPEN,
-  };
+  }
 }
 
 // Helper: Detect agent type from session key
 function getAgentType(sessionKey: string): 'main' | 'subagent' | 'acp' {
-  if (sessionKey.includes(':acp:')) return 'acp';
-  if (sessionKey.includes(':subagent:')) return 'subagent';
-  return 'main';
+  if (sessionKey.includes(':acp:')) return 'acp'
+  if (sessionKey.includes(':subagent:')) return 'subagent'
+  return 'main'
 }

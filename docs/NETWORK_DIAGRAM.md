@@ -49,11 +49,13 @@ WireGuard Mesh: 10.8.0.0/24
 ```
 
 ## Compute
+
 - 2x Hailo-8 AI accelerators = 52 TOPS (Alice + Cecilia)
 - 5x Raspberry Pi 5 (8GB each) = 40GB RAM
 - 2x DigitalOcean droplets (NYC)
 
 ## Storage
+
 - Alice: 15GB SD (gateway, light)
 - Cecilia: 457GB NVMe (AI models, MinIO)
 - Octavia: 64GB SD (Gitea, containers)
@@ -61,4 +63,5 @@ WireGuard Mesh: 10.8.0.0/24
 - Lucidia: 64GB SD (web apps)
 
 ---
-*Proprietary — BlackRoad OS, Inc. All rights reserved.*
+
+_Proprietary — BlackRoad OS, Inc. All rights reserved._

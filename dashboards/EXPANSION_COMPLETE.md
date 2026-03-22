@@ -80,13 +80,16 @@
 ## 🎯 Quick Start
 
 ### The Launcher (EASIEST!)
+
 ```bash
 cd ~/blackroad-dashboards
 ./br-dashboards.sh
 ```
+
 Choose from all 17 dashboards in one menu!
 
 ### Direct Launch
+
 ```bash
 # Master Control - THE hub
 ./blackroad-master-control.sh
@@ -108,7 +111,9 @@ Choose from all 17 dashboards in one menu!
 ```
 
 ### Shell Aliases (RECOMMENDED!)
+
 Add to `~/.bashrc` or `~/.zshrc`:
+
 ```bash
 alias brd='~/blackroad-dashboards/br-dashboards.sh'
 alias br-control='~/blackroad-dashboards/blackroad-master-control.sh'
@@ -127,6 +132,7 @@ Then just type: `brd`, `br-crypto`, `br-agents`, etc.
 ## ⭐ NEW Dashboard Features
 
 ### 1. Crypto Portfolio Live
+
 ```
 Real-Time Tracking:
 • BTC: 0.1 BTC ≈ $4,500
@@ -143,6 +149,7 @@ Features:
 ```
 
 ### 2. Memory System Visualization
+
 ```
 PS-SHA∞ Features:
 • Hash chain visualization (Genesis → Current)
@@ -154,6 +161,7 @@ PS-SHA∞ Features:
 ```
 
 ### 3. Agent Network Map
+
 ```
 Agent Topology:
 • Coordinator Layer: Lucidia Prime, Cecilia
@@ -170,6 +178,7 @@ Features:
 ```
 
 ### 4. Services & Ports Map
+
 ```
 Network Endpoints:
 • Port 8080 Cadillac (origin agent)
@@ -183,6 +192,7 @@ All 47 endpoints monitored!
 ```
 
 ### 5. System Metrics Live
+
 ```
 Real-Time Monitoring:
 • CPU usage with colored meters
@@ -199,46 +209,54 @@ Refreshes every 2 seconds!
 
 ## 📊 Dashboard Comparison Matrix
 
-| Dashboard | Focus | Devices | Auto-Refresh | Interactive | NEW |
-|-----------|-------|---------|--------------|-------------|-----|
-| Master Control ⚡ | Everything | 5 | ✅ 5s | ✅ Full | ❌ |
-| Cosmic Lottery ∞ | Probability | 5 | ✅ 5s | ✅ Yes | ❌ |
-| Pi Fleet 🥧 | Raspberry Pi | 4 | ✅ 5s | ❌ No | ❌ |
-| Cloudflare ☁️ | Edge Network | 1 | ✅ 5s | ❌ No | ❌ |
-| GitHub 🐙 | Repos/Orgs | 0 | ✅ 5s | ❌ No | ❌ |
-| Railway 🚂 | Deployments | 0 | ✅ 5s | ❌ No | ❌ |
-| **Crypto Portfolio** ₿ | **Crypto** | **0** | **✅ 5s** | **✅ Yes** | **✅ YES** |
-| **Memory System** ∞ | **PS-SHA∞** | **0** | **✅ 5s** | **❌ No** | **✅ YES** |
-| **Agent Network** 🤖 | **AI Agents** | **0** | **✅ 5s** | **❌ No** | **✅ YES** |
-| **Services/Ports** 🔌 | **Endpoints** | **5** | **✅ 5s** | **❌ No** | **✅ YES** |
-| **System Metrics** 📊 | **Performance** | **5** | **✅ 2s** | **❌ No** | **✅ YES** |
+| Dashboard              | Focus           | Devices | Auto-Refresh | Interactive | NEW        |
+| ---------------------- | --------------- | ------- | ------------ | ----------- | ---------- |
+| Master Control ⚡      | Everything      | 5       | ✅ 5s        | ✅ Full     | ❌         |
+| Cosmic Lottery ∞       | Probability     | 5       | ✅ 5s        | ✅ Yes      | ❌         |
+| Pi Fleet 🥧            | Raspberry Pi    | 4       | ✅ 5s        | ❌ No       | ❌         |
+| Cloudflare ☁️          | Edge Network    | 1       | ✅ 5s        | ❌ No       | ❌         |
+| GitHub 🐙              | Repos/Orgs      | 0       | ✅ 5s        | ❌ No       | ❌         |
+| Railway 🚂             | Deployments     | 0       | ✅ 5s        | ❌ No       | ❌         |
+| **Crypto Portfolio** ₿ | **Crypto**      | **0**   | **✅ 5s**    | **✅ Yes**  | **✅ YES** |
+| **Memory System** ∞    | **PS-SHA∞**     | **0**   | **✅ 5s**    | **❌ No**   | **✅ YES** |
+| **Agent Network** 🤖   | **AI Agents**   | **0**   | **✅ 5s**    | **❌ No**   | **✅ YES** |
+| **Services/Ports** 🔌  | **Endpoints**   | **5**   | **✅ 5s**    | **❌ No**   | **✅ YES** |
+| **System Metrics** 📊  | **Performance** | **5**   | **✅ 2s**    | **❌ No**   | **✅ YES** |
 
 ---
 
 ## 🎯 Use Cases
 
 ### For Daily Monitoring
+
 👉 **Master Control** - See everything at once
 
 ### For Crypto Trading
+
 👉 **Crypto Portfolio Live** - Track your BTC/ETH/SOL in real-time
 
 ### For Agent Development
+
 👉 **Agent Network Map** - Understand your 104 agents
 
 ### For Memory Analysis
+
 👉 **Memory System Viz** - See PS-SHA∞ hash chains
 
 ### For Service Management
+
 👉 **Services/Ports Map** - Monitor all 47 endpoints
 
 ### For Performance Tuning
+
 👉 **System Metrics Live** - Real-time CPU/RAM/Disk
 
 ### For Infrastructure Deep Dive
+
 👉 Device-specific dashboards (Pi, Cloudflare, GitHub, Railway)
 
 ### For Fun & Demo
+
 👉 **Cosmic Lottery** or **Windows 95** - Wow factor!
 
 ---
@@ -246,6 +264,7 @@ Refreshes every 2 seconds!
 ## 📈 Statistics
 
 ### Total Coverage
+
 - **17 Dashboards** (11 new, 6 classic)
 - **5 Network Devices** (4 Pi + 1 DigitalOcean)
 - **16 Cloudflare Zones**
@@ -260,6 +279,7 @@ Refreshes every 2 seconds!
 - **$20.7K Crypto Portfolio**
 
 ### Infrastructure Monitored
+
 ```
 Network:     5 devices
 Cloud:       Cloudflare (16 zones) + Railway (12 projects) + DigitalOcean
@@ -275,7 +295,9 @@ Memory:      PS-SHA∞ with 1.2K+ entries
 ## 🌟 What Makes This System Special?
 
 ### Complete Coverage
+
 Every aspect of your infrastructure is monitored:
+
 - ✅ Physical devices (Raspberry Pis, DigitalOcean)
 - ✅ Cloud services (Cloudflare, Railway)
 - ✅ Code repositories (GitHub)
@@ -286,6 +308,7 @@ Every aspect of your infrastructure is monitored:
 - ✅ System performance (CPU/RAM/Disk)
 
 ### Beautiful Terminal UI
+
 - 24-bit RGB colors
 - Unicode box drawing
 - Sparkline graphs
@@ -294,6 +317,7 @@ Every aspect of your infrastructure is monitored:
 - Consistent BlackRoad branding
 
 ### Real-Time Everything
+
 - Auto-refresh (2-5 seconds)
 - Live ping/curl checks
 - Dynamic stats
@@ -301,6 +325,7 @@ Every aspect of your infrastructure is monitored:
 - Real network traffic
 
 ### Zero Dependencies
+
 - Pure bash scripts
 - No npm packages
 - No Python libraries
@@ -312,16 +337,19 @@ Every aspect of your infrastructure is monitored:
 ## 🚀 Next Level Features
 
 ### Interactive Dashboards
+
 - Master Control has drill-down navigation
 - Crypto Portfolio shows live price changes
 - System Metrics has colored warning meters
 
 ### Multi-Device Support
+
 - Monitor 5 network devices simultaneously
 - Track Raspberry Pi fleet
 - Watch DigitalOcean droplet
 
 ### Specialized Views
+
 - Crypto focus for traders
 - Agent focus for AI devs
 - Service focus for DevOps
@@ -371,6 +399,7 @@ All 17 dashboards use the official colors:
 ## 🔮 Future Enhancements
 
 Potential additions:
+
 - [ ] Real crypto price APIs (CoinGecko/CoinMarketCap)
 - [ ] GitHub API integration (live PR/issue counts)
 - [ ] Railway API integration (real deployment stats)
@@ -385,31 +414,20 @@ Potential additions:
 ## 🎯 The Complete Dashboard Arsenal
 
 **Infrastructure Monitoring:**
+
 1. Master Control - Everything
 2. Pi Fleet - Raspberry Pis
 3. Cloudflare - Edge network
 4. Services/Ports - All endpoints
 5. System Metrics - Performance
 
-**Development & Code:**
-6. GitHub - Repos & orgs
-7. Railway - Deployments
-8. Memory System - PS-SHA∞
+**Development & Code:** 6. GitHub - Repos & orgs 7. Railway - Deployments 8. Memory System - PS-SHA∞
 
-**AI & Agents:**
-9. Agent Network - 104 agents
-10. Agent Detail - Deep inspection
+**AI & Agents:** 9. Agent Network - 104 agents 10. Agent Detail - Deep inspection
 
-**Finance & Fun:**
-11. Crypto Portfolio - Live tracking
-12. Cosmic Lottery - Probability engine
+**Finance & Fun:** 11. Crypto Portfolio - Live tracking 12. Cosmic Lottery - Probability engine
 
-**Classic Views:**
-13. Basic Dashboard
-14. Live Monitor
-15. Full System
-16. ULTIMATE Edition
-17. Windows 95
+**Classic Views:** 13. Basic Dashboard 14. Live Monitor 15. Full System 16. ULTIMATE Edition 17. Windows 95
 
 ---
 
@@ -421,6 +439,6 @@ Your BlackRoad OS infrastructure is now **completely visible** from the command 
 
 **Created with 💜 for BlackRoad OS**
 
-*Now featuring 17 terminal dashboards for total infrastructure mastery!*
+_Now featuring 17 terminal dashboards for total infrastructure mastery!_
 
 **Colors:** #FF9D00 #FF6B00 #FF0066 #FF006B #D600AA #7700FF #0066FF #FFD700 #00FF64

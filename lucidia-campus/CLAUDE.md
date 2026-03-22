@@ -37,18 +37,21 @@ lucidia-campus/
 ## Key Architecture
 
 ### Campus Data Bridge
+
 - Node.js WebSocket server on olympia (Pi 4B)
 - Subscribes to NATS topics, relays payloads to Unity clients
 - Port 9100 (WebSocket), managed by PM2
 - Target: < 10MB RAM footprint
 
 ### Unity Client
+
 - URP (Universal Render Pipeline) for cross-platform rendering
 - NativeWebSocket for bridge connection
 - LOD system: full models (< 50 tiles), sprites (50-100), dots (> 100)
 - 1,000 agent NPCs with NATS-driven presence updates
 
 ### Six Campus Zones
+
 1. Central Plaza — fountain with Z-framework hologram, community board
 2. Knowledge Quarter — Research Library (3 floors), Memory Vault Archive (underground)
 3. Development District — Labs 1-6, Testing Sandbox

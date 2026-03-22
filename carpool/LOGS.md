@@ -1,23 +1,26 @@
 # [LOGS] System Logs
 
 ## Log Levels
-| Level | Symbol | Use |
-|-------|--------|-----|
-| DEBUG | 🔍 | Detailed tracing |
-| INFO | ℹ️ | Normal operations |
-| WARN | ⚠️ | Potential issues |
-| ERROR | ❌ | Failures |
-| FATAL | 💀 | System critical |
+
+| Level | Symbol | Use               |
+| ----- | ------ | ----------------- |
+| DEBUG | 🔍     | Detailed tracing  |
+| INFO  | ℹ️     | Normal operations |
+| WARN  | ⚠️     | Potential issues  |
+| ERROR | ❌     | Failures          |
+| FATAL | 💀     | System critical   |
 
 ## Log Files
-| File | Content |
-|------|---------|
+
+| File              | Content           |
+| ----------------- | ----------------- |
 | `logs/system.log` | System operations |
-| `logs/agents.log` | Agent activity |
-| `logs/tasks.log` | Task processing |
-| `logs/errors.log` | Error tracking |
+| `logs/agents.log` | Agent activity    |
+| `logs/tasks.log`  | Task processing   |
+| `logs/errors.log` | Error tracking    |
 
 ## Recent Logs
+
 ```
 [INFO] 2026-02-18T04:35:00Z Carpool initialized
 [INFO] 2026-02-18T04:35:01Z Loading agent states...
@@ -29,6 +32,7 @@
 ```
 
 ## Log Commands
+
 ```bash
 # View recent logs
 tail -50 carpool/logs/system.log

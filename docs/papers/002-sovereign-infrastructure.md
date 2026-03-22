@@ -21,13 +21,13 @@ BlackRoad OS, Inc. was incorporated in Delaware in 2025. One founder. One shareh
 
 Total hardware cost: approximately $500.
 
-| Node | Device | CPU | RAM | Role | IP |
-|------|--------|-----|-----|------|-----|
-| Alice | Raspberry Pi 400 | Quad A72 | 4GB | Gateway, DNS, Qdrant | 192.168.4.49 |
-| Cecilia | Raspberry Pi 5 | Quad A76 | 8GB | AI inference, embeddings, MinIO | 192.168.4.96 |
-| Octavia | Raspberry Pi 5 | Quad A76 | 8GB | Gitea, NATS, Docker Swarm | 192.168.4.101 |
-| Aria | Raspberry Pi 5 | Quad A76 | 8GB | Portainer, Headscale | 192.168.4.98 |
-| Lucidia | Raspberry Pi 5 | Quad A76 | 8GB | Web apps, GitHub Actions | 192.168.4.38 |
+| Node    | Device           | CPU      | RAM | Role                            | IP            |
+| ------- | ---------------- | -------- | --- | ------------------------------- | ------------- |
+| Alice   | Raspberry Pi 400 | Quad A72 | 4GB | Gateway, DNS, Qdrant            | 192.168.4.49  |
+| Cecilia | Raspberry Pi 5   | Quad A76 | 8GB | AI inference, embeddings, MinIO | 192.168.4.96  |
+| Octavia | Raspberry Pi 5   | Quad A76 | 8GB | Gitea, NATS, Docker Swarm       | 192.168.4.101 |
+| Aria    | Raspberry Pi 5   | Quad A76 | 8GB | Portainer, Headscale            | 192.168.4.98  |
+| Lucidia | Raspberry Pi 5   | Quad A76 | 8GB | Web apps, GitHub Actions        | 192.168.4.38  |
 
 Two Hailo-8 AI accelerators. 26 TOPS each. 52 TOPS total. One on Cecilia, one on Octavia.
 
@@ -42,6 +42,7 @@ That's the entire data center. It sits on a desk in Minnesota.
 Everything below was tested live during a single session. Not "works in theory." Works right now.
 
 ### Fleet Communication
+
 - **NATS v2.12.3** on Octavia (Docker Swarm). JetStream enabled.
 - **4 out of 5 nodes connected** via `blackroad-nats-agent.py` systemd service.
 - Heartbeats every 30 seconds. Ping/status commands return in under 4 seconds.
@@ -57,20 +58,24 @@ Pong: cecilia (57.3°C)
 Aria failed to connect because pip is locked under the `blackroad` user (no sudo). Four out of five is operational.
 
 ### AI Inference
+
 - **Ollama** on Cecilia: 15 models loaded. llama3.2:3b, qwen3:8b, deepseek-coder:1.3b, codellama:7b, cece:latest, nomic-embed-text, and 9 more.
 - **Response test**: asked "What is 2+2?" via Cecilia's Ollama API. Got "Four." in under 2 seconds.
 - **Embedding test**: nomic-embed-text produces 768-dimensional vectors. Verified at 1.74 seconds per embedding from Mac to Cecilia.
 
 ### Vector Search (RAG)
+
 - **Qdrant** on Alice (port 6333). Collection `blackroad-code`.
 - **27,973 vectors indexed** out of 32,297 code chunks (86.6%) at time of verification. Indexer running continuously in background.
 - **Semantic search works**: query "authentication gateway" returns relevant files from blackroad-operating-system/agents/categories/engineering/ and blackroad-os-prism-enterprise/api/auth.py with scores above 0.6.
 
 ### Git Hosting
+
 - **Gitea** on Octavia (port 3100, Docker). 207 repositories across 7 organizations.
 - **GitHub is the mirror**. Gitea is primary. `downstream-sync.sh` pushes changes from the operator repo to 17 GitHub organizations. 47 repos synced in one run.
 
 ### Self-Hosted Services
+
 - **PowerDNS** on Lucidia (Docker). Authoritative DNS with admin panel on port 9192.
 - **MinIO** on Cecilia (port 9000). S3-compatible object storage. Health check passes.
 - **Pi-hole** on Alice. DNS-level ad blocking for the entire LAN.
@@ -81,17 +86,20 @@ Aria failed to connect because pip is locked under the `blackroad` user (no sudo
 - **RoadNet** WiFi mesh. 5 access points. SSID: RoadNet. Password: BlackRoad2026. One AP per Pi.
 
 ### Monitoring
+
 - **br doctor**: full system diagnostic. Checks SSH to all 5 nodes, Ollama, Qdrant, NATS, Gitea, Cloudflare tunnels, memory system, FTS5 index. Scored output. Takes about 30 seconds.
 - **stats-blackroad** Cloudflare Worker + KV. Fleet stats collected every 5 minutes via cron.
 - **Power monitoring**: `/opt/blackroad/power-monitor.sh` on all nodes. Cron every 5 minutes. Logs to `/var/log/blackroad-power.log`.
 - **Autonomy scripts**: heartbeat every 1 minute, self-heal every 5 minutes on Cecilia and Octavia.
 
 ### AI Skills
+
 - **75 skills** across 8 Python modules. All compile. All pass functional tests.
 - Modules: agentic (1-8), generation (9-16), orchestration (17-24), knowledge (25-32), multimodal (33-40), frontier (41-50), agi (51-60), creative (61-75).
 - Includes: Chain-of-Thought, ReAct, Tree-of-Thought, model routing, PII detection, prompt injection defense, semantic caching, federated inference, causal reasoning, world models, biological intelligence, empathic reasoning, storytelling, value alignment, and 60 more.
 
 ### Websites
+
 - **30 static sites** in the operator repo under `websites/`.
 - **20 root domains** on Cloudflare. 95+ Pages projects.
 - All sites have: BR road logo (favicon, og:image, apple-touch-icon), ecosystem footer with 9 cross-links, "Pave Tomorrow." tagline.
@@ -99,6 +107,7 @@ Aria failed to connect because pip is locked under the `blackroad` user (no sudo
 - **research.blackroad.io** deployed with experiment results.
 
 ### Search
+
 - **repo-search**: CLI tool searching 383 repos across 3 GitHub orgs. Categorized into 13 groups.
 - **RAG search**: `rag search "query"` does semantic vector search across 27K+ code chunks.
 - **FTS5 memory index**: 156,675 entries across 228 SQLite databases.
@@ -118,15 +127,15 @@ Aria failed to connect because pip is locked under the `blackroad` user (no sudo
 
 ## 5. What It Cost
 
-| Item | Monthly Cost |
-|------|-------------|
-| Cloudflare (free plan) | $0 |
-| DigitalOcean (2 droplets) | ~$18 |
-| Google Drive (backup) | $0 (included with account) |
-| GitHub (free tier + enterprise trial) | $0 |
-| Electricity (5 Pis + router + switch) | ~$5 |
-| Internet (home broadband) | Already paying for it |
-| **Total monthly** | **~$23** |
+| Item                                  | Monthly Cost               |
+| ------------------------------------- | -------------------------- |
+| Cloudflare (free plan)                | $0                         |
+| DigitalOcean (2 droplets)             | ~$18                       |
+| Google Drive (backup)                 | $0 (included with account) |
+| GitHub (free tier + enterprise trial) | $0                         |
+| Electricity (5 Pis + router + switch) | ~$5                        |
+| Internet (home broadband)             | Already paying for it      |
+| **Total monthly**                     | **~$23**                   |
 
 Initial hardware was approximately $500 (5 Pis, cases, power supplies, SD cards, NVMe, 2 Hailo-8s, switch, cables).
 
@@ -136,22 +145,22 @@ No VC. No seed round. No angel investors. No cloud compute bills. $800.
 
 ## 6. The Software Stack
 
-| Layer | Tool | Why |
-|-------|------|-----|
-| OS | Raspberry Pi OS (Bookworm/Bullseye) | Free. ARM native. |
-| Container | Docker 29.2.1 | Free. Runs everything. |
-| Orchestration | Docker Swarm | Already in Docker. No K8s overhead. |
-| Git | Gitea | Self-hosted. 207 repos. Zero cost. |
-| AI | Ollama | Run any model locally. No API keys. |
-| Embeddings | nomic-embed-text | 768 dimensions. Runs on a Pi. |
-| Vector DB | Qdrant | Rust. Fast. Runs on a Pi. |
-| Message Bus | NATS | Lightweight. JetStream. Runs everywhere. |
-| DNS | PowerDNS + Pi-hole | Authoritative + ad blocking. |
-| Object Storage | MinIO | S3-compatible. On Cecilia. |
-| CDN | Cloudflare + nginx | Free tier handles everything. |
-| VPN | WireGuard + Headscale | Encrypted mesh. Self-hosted. |
-| Monitoring | Custom shell scripts | br doctor, stats API, power monitor. |
-| Memory | SQLite + FTS5 | 228 databases. 156K entries. Zero cost. |
+| Layer          | Tool                                | Why                                      |
+| -------------- | ----------------------------------- | ---------------------------------------- |
+| OS             | Raspberry Pi OS (Bookworm/Bullseye) | Free. ARM native.                        |
+| Container      | Docker 29.2.1                       | Free. Runs everything.                   |
+| Orchestration  | Docker Swarm                        | Already in Docker. No K8s overhead.      |
+| Git            | Gitea                               | Self-hosted. 207 repos. Zero cost.       |
+| AI             | Ollama                              | Run any model locally. No API keys.      |
+| Embeddings     | nomic-embed-text                    | 768 dimensions. Runs on a Pi.            |
+| Vector DB      | Qdrant                              | Rust. Fast. Runs on a Pi.                |
+| Message Bus    | NATS                                | Lightweight. JetStream. Runs everywhere. |
+| DNS            | PowerDNS + Pi-hole                  | Authoritative + ad blocking.             |
+| Object Storage | MinIO                               | S3-compatible. On Cecilia.               |
+| CDN            | Cloudflare + nginx                  | Free tier handles everything.            |
+| VPN            | WireGuard + Headscale               | Encrypted mesh. Self-hosted.             |
+| Monitoring     | Custom shell scripts                | br doctor, stats API, power monitor.     |
+| Memory         | SQLite + FTS5                       | 228 databases. 156K entries. Zero cost.  |
 
 Every tool is free or open source. The entire stack runs without a credit card.
 
@@ -178,6 +187,7 @@ Three textbooks were read in this session:
 3. **Reddi, "Introduction to Machine Learning Systems" (Harvard, Jan 2026)** — ML systems engineering IS biology running backwards through silicon.
 
 From these, the equation `1 + n = 1/n` was analyzed and found to contain:
+
 - A conservation law: `gap(n) + gap(-n) = 2`
 - A connection to growth: `(1 + 1/n)^n`
 - A Ramanujan orbit: `-1/12 ↔ -12`
@@ -202,6 +212,7 @@ These aren't aspirational. They're in the code. Every RAG response includes the 
 ## 10. What's Next
 
 The 90-day plan (from the Master Execution Plan):
+
 1. One working vertical end-to-end (Education / Lucidia Platform)
 2. Auth flow (Clerk integration)
 3. Live dashboard connected to real fleet APIs
@@ -212,7 +223,7 @@ The road isn't made. It's remembered.
 
 ---
 
-*BlackRoad OS, Inc.*
-*Minnesota, USA*
-*$800 total investment. 5 Pis. 75 AI skills. 27K vectors. 383 repos. 1 founder.*
-*Pave Tomorrow.*
+_BlackRoad OS, Inc._
+_Minnesota, USA_
+_$800 total investment. 5 Pis. 75 AI skills. 27K vectors. 383 repos. 1 founder._
+_Pave Tomorrow._

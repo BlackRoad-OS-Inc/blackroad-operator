@@ -16,15 +16,15 @@ This is not a pitch deck. This is running infrastructure.
 
 ### 7 Nodes, All Online
 
-| Node | Hardware | Role | What's Running |
-|------|----------|------|---------------|
-| **Alice** (.49) | Pi 4 | Gateway | nginx (37 sites), PostgreSQL, Redis, Qdrant, Pi-hole, RoundTrip, 11 systemd services |
-| **Cecilia** (.96) | Pi 5 + NVMe | AI Engine | Ollama (4 models), MinIO (S3), PostgreSQL, InfluxDB, Hailo-8 (26 TOPS) |
-| **Octavia** (.101) | Pi 5 | Architect | Gitea (239 repos), Docker (6 containers), NATS, 228 Ollama models |
-| **Aria** (.98) | Pi 5 | Interface | Docker/Portainer, nginx, Ollama, monitoring |
-| **Lucidia** (.38) | Pi 5 | Dreamer | Ollama (6 models), nginx, 334 web apps, RoundTrip, GitHub Actions runners |
-| **Gematria** | DO droplet | Edge Router | Caddy (114 domains), 279 websites, Ollama, 68 days uptime |
-| **Anastasia** | DO droplet | Cloud Edge | Caddy (36 domains), Docker, 21 domain sites, 84 days uptime |
+| Node               | Hardware    | Role        | What's Running                                                                       |
+| ------------------ | ----------- | ----------- | ------------------------------------------------------------------------------------ |
+| **Alice** (.49)    | Pi 4        | Gateway     | nginx (37 sites), PostgreSQL, Redis, Qdrant, Pi-hole, RoundTrip, 11 systemd services |
+| **Cecilia** (.96)  | Pi 5 + NVMe | AI Engine   | Ollama (4 models), MinIO (S3), PostgreSQL, InfluxDB, Hailo-8 (26 TOPS)               |
+| **Octavia** (.101) | Pi 5        | Architect   | Gitea (239 repos), Docker (6 containers), NATS, 228 Ollama models                    |
+| **Aria** (.98)     | Pi 5        | Interface   | Docker/Portainer, nginx, Ollama, monitoring                                          |
+| **Lucidia** (.38)  | Pi 5        | Dreamer     | Ollama (6 models), nginx, 334 web apps, RoundTrip, GitHub Actions runners            |
+| **Gematria**       | DO droplet  | Edge Router | Caddy (114 domains), 279 websites, Ollama, 68 days uptime                            |
+| **Anastasia**      | DO droplet  | Cloud Edge  | Caddy (36 domains), Docker, 21 domain sites, 84 days uptime                          |
 
 **52 TOPS** of edge AI inference. **279 websites**. **239 Gitea repos**. **WireGuard mesh connecting everything**. All self-hosted. $12/month in cloud costs.
 
@@ -33,6 +33,7 @@ This is not a pitch deck. This is running infrastructure.
 Not vaporware. Real repos with real code:
 
 **Road Fleet** — 13 sovereign forks replacing every external dependency:
+
 - **RoadCode** (Gitea) replaces GitHub
 - **RoundTrip** replaces Slack/Discord
 - **CarPool** (NATS) replaces message buses
@@ -48,6 +49,7 @@ Not vaporware. Real repos with real code:
 - **GuardRail** replaces cloud firewalls
 
 **Road Products** — 36 platform services:
+
 - **RoadPay** — Billing ($29 Rider / $99 Paver / $299 Enterprise)
 - **RoadChain** — Layer-1 blockchain (secp256k1, Python-native)
 - **RoadCoin** — Creator micropayments
@@ -67,35 +69,37 @@ Not vaporware. Real repos with real code:
 
 All serving from self-hosted infrastructure:
 
-| Domain | Vertical |
-|--------|----------|
-| blackroad.io | Master platform index |
-| blackroad.company | Corporate HQ |
-| blackroad.me | Creator profiles |
-| blackroad.network | Infrastructure dashboard |
-| blackroad.systems | Fleet management |
-| blackroadai.com | AI platform |
-| blackroadinc.us | US corporate (Delaware C-Corp) |
-| blackroadqi.com | Quantum Intelligence |
-| blackroadquantum.com/.info/.net/.shop/.store | Quantum computing (5 domains) |
-| lucidia.earth | Creator platform |
-| lucidia.studio | Creative tools |
-| lucidiaqi.com | Lucidia QI |
-| roadchain.io | Blockchain |
-| roadcoin.io | Creator payments |
-| blackboxprogramming.io | Developer tools |
+| Domain                                       | Vertical                       |
+| -------------------------------------------- | ------------------------------ |
+| blackroad.io                                 | Master platform index          |
+| blackroad.company                            | Corporate HQ                   |
+| blackroad.me                                 | Creator profiles               |
+| blackroad.network                            | Infrastructure dashboard       |
+| blackroad.systems                            | Fleet management               |
+| blackroadai.com                              | AI platform                    |
+| blackroadinc.us                              | US corporate (Delaware C-Corp) |
+| blackroadqi.com                              | Quantum Intelligence           |
+| blackroadquantum.com/.info/.net/.shop/.store | Quantum computing (5 domains)  |
+| lucidia.earth                                | Creator platform               |
+| lucidia.studio                               | Creative tools                 |
+| lucidiaqi.com                                | Lucidia QI                     |
+| roadchain.io                                 | Blockchain                     |
+| roadcoin.io                                  | Creator payments               |
+| blackboxprogramming.io                       | Developer tools                |
 
 ---
 
 ## The Pain Points (Backed by Research)
 
 ### 1. Search is broken
+
 - **42% of users** find search engines less useful than before
 - **1,271 AI-generated content farms** polluting results
 - Google earned $237.8B in ad revenue — incentive is monetization, not quality
 - Users add "reddit" to searches to find human content
 
 ### 2. Education is failing
+
 - **40% of 4th graders** below basic reading level
 - **60% of parents** cannot help with homework
 - IXL Math: **no significant difference** in achievement (sometimes negative)
@@ -103,23 +107,27 @@ All serving from self-hosted infrastructure:
 - Private tutoring costs $40-100+/hour — unaffordable for most
 
 ### 3. Content creation is trapped
+
 - Ideas take 5 seconds, production takes weeks
 - Adobe demands months of learning, costs $52.99/month
 - AI video tools: 20-second max clips, physics errors, $200/month
 - **38% of new creator ventures** are faceless — tools don't support this
 
 ### 4. AI assistants fail at the basics
+
 - Claude and Gemini start every conversation blank — no memory
 - **Stanford found 75% hallucination rate** on legal precedents
 - ChatGPT trains on your conversations unless you opt out
 - **64% of customers** prefer companies NOT use AI for service
 
 ### 5. Privacy is a business model, not a bug
+
 - **$270B data brokerage industry** — 4,000+ companies
 - Acxiom has data on **2.6 billion individuals** with 10,000+ traits each
 - Data brokers sell lists of people with anorexia/depression for $79/1,000
 
 ### 6. Every tool is a subscription trap
+
 - Users manage **10+ separate tools**, each with its own learning curve
 - $20-200/month accumulated across subscriptions
 - No context transfers between platforms
@@ -130,6 +138,7 @@ All serving from self-hosted infrastructure:
 ## How BlackRoad Solves This
 
 ### Sovereign Infrastructure
+
 You own the hardware. You own the data. You own the compute.
 
 ```
@@ -144,12 +153,15 @@ Internet → Gematria (Caddy TLS) → WireGuard mesh → Pi fleet
 No AWS. No Google Cloud. No Azure. Five Pis and two $6/month droplets.
 
 ### Unified Platform, Not 10 Apps
+
 One login. One memory system. One data layer. Everything talks to everything.
 
 Search results feed into your learning context. AI tutors remember every session (1,648 journal entries, hash-chained). Content creation tools know what you're teaching. Privacy isn't a feature — it's the architecture.
 
 ### Cross-Session Memory (What Others Can't Do)
+
 BlackRoad's memory system has:
+
 - **1,648 journal entries** — hash-chained for integrity
 - **248 codex solutions** — searchable knowledge base
 - **50 patterns, 30 best practices, 26 anti-patterns**
@@ -158,6 +170,7 @@ BlackRoad's memory system has:
 - All persisted locally. No cloud. No training on your data.
 
 ### Economics That Work
+
 - **$20-50/month** replaces $52.99 Adobe + $20 AI tools + $149 Brilliant + $40-100/hr tutoring
 - **90%+ creator revenue share** (vs YouTube's 55%, Spotify's 30%)
 - **$12/month infrastructure cost** for 7 nodes serving 279 websites
@@ -200,6 +213,7 @@ Intelligent turtles all the way down. Every org has a `RoadCode` repo with the s
 ### The Operator
 
 `blackroad-operator` is the brain. 400+ shell scripts. 100+ tools. It:
+
 - Syncs code downstream to all 15 orgs
 - Deploys websites to Gematria
 - Audits the fleet (SSH all Pis, report status)
@@ -210,10 +224,12 @@ Intelligent turtles all the way down. Every org has a `RoadCode` repo with the s
 ### Google Drive Integration
 
 Two accounts feeding content:
+
 - **alexa@blackroad.io** — Corporate docs (13 folders), Pi backups, workspace, product catalog
 - **amundsonalexa@gmail.com** — Company templates, personal archives
 
 ### Gitea Primary, GitHub Mirror
+
 - **Gitea on Octavia** (239 repos, 8 orgs) — primary git host
 - **GitHub** (16 orgs, 400+ repos) — public mirror
 - `sync-downstream --push` keeps them in sync
@@ -229,6 +245,7 @@ BlackRoad OS is built on the **Amundson Framework**:
 The Amundson-Grünwald constant **A_G ≈ 1.24433** governs the convergence ratio. 536/536 tests passed across 4 Pis.
 
 This isn't decoration. The math runs through the infrastructure:
+
 - **1/(2e)** is the irreducible latency gap in mesh routing
 - **Ternary logic** (1 = arrived, 0 = waiting, -1 = cancel pending) reduces redundant network traffic
 - Bitcoin block mining experiments correlate mathematical constants to hash patterns
@@ -238,6 +255,7 @@ This isn't decoration. The math runs through the infrastructure:
 ## Company
 
 **BlackRoad OS, Inc.**
+
 - Delaware C-Corp (formed November 17, 2025)
 - EIN: 41-2663817 | File #: 10405914
 - Registered Agent: Legalinc Corporate Services Inc.
@@ -253,6 +271,7 @@ $600B+ total addressable market across interconnected domains. The problems aren
 Google can't build privacy-first search (ad model). Adobe can't simplify (complexity is the business). OpenAI can't do persistent memory (stateless API architecture). Khan Academy can't fix education (research shows their approach doesn't work).
 
 BlackRoad can because we started from different assumptions:
+
 1. You should own your infrastructure
 2. Your AI should remember you
 3. Your tools should talk to each other
@@ -263,4 +282,4 @@ BlackRoad can because we started from different assumptions:
 
 ---
 
-*BlackRoad OS, Inc. — PROPRIETARY. All rights reserved.*
+_BlackRoad OS, Inc. — PROPRIETARY. All rights reserved._

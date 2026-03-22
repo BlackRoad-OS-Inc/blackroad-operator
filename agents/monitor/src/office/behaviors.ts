@@ -2,19 +2,24 @@
 // Behavior → Zone + Animation Mapping
 // ============================================================================
 
-import type { AgentBehavior, CharacterAnim, ZoneId, Particle } from '@/lib/types';
+import type {
+  AgentBehavior,
+  CharacterAnim,
+  ZoneId,
+  Particle,
+} from '@/lib/types'
 
 export interface BehaviorMapping {
   /** Target zone (or '_own_desk' for the agent's assigned desk) */
-  zone: ZoneId | '_own_desk';
+  zone: ZoneId | '_own_desk'
   /** Animation to play once at the zone */
-  anim: CharacterAnim;
+  anim: CharacterAnim
   /** Optional speech bubble text */
-  bubble?: string;
+  bubble?: string
   /** Particle effect to spawn */
-  particle?: Particle['type'];
+  particle?: Particle['type']
   /** Priority: higher means agent moves faster */
-  priority: number;
+  priority: number
 }
 
 export const BEHAVIOR_MAP: Record<AgentBehavior, BehaviorMapping> = {
@@ -146,10 +151,10 @@ export const BEHAVIOR_MAP: Record<AgentBehavior, BehaviorMapping> = {
     particle: 'lightning',
     priority: 3,
   },
-};
+}
 
 /** Get the actual zone ID for a behavior, resolving '_own_desk' */
 export function resolveZone(behavior: AgentBehavior, deskZone: ZoneId): ZoneId {
-  const mapping = BEHAVIOR_MAP[behavior];
-  return mapping.zone === '_own_desk' ? deskZone : mapping.zone;
+  const mapping = BEHAVIOR_MAP[behavior]
+  return mapping.zone === '_own_desk' ? deskZone : mapping.zone
 }

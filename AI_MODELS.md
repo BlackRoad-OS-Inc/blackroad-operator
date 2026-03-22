@@ -61,14 +61,14 @@ BlackRoad OS supports a hybrid model strategy:
 
 ### Model Selection Matrix
 
-| Use Case | Recommended | Fallback | Cost |
-|----------|-------------|----------|------|
-| Quick chat | llama3.2:1b | phi3:mini | Free |
-| Code generation | codellama:7b | claude-sonnet-4-5 | Free/$$ |
-| Deep analysis | claude-opus-4-5 | mistral:7b | $$$/Free |
-| Embeddings | nomic-embed-text | text-embedding-3-small | Free/$ |
-| Vision | llava:7b | gpt-4o | Free/$$ |
-| Edge/Pi | llama3.2:1b | qwen2:0.5b | Free |
+| Use Case        | Recommended      | Fallback               | Cost     |
+| --------------- | ---------------- | ---------------------- | -------- |
+| Quick chat      | llama3.2:1b      | phi3:mini              | Free     |
+| Code generation | codellama:7b     | claude-sonnet-4-5      | Free/$$  |
+| Deep analysis   | claude-opus-4-5  | mistral:7b             | $$$/Free |
+| Embeddings      | nomic-embed-text | text-embedding-3-small | Free/$   |
+| Vision          | llava:7b         | gpt-4o                 | Free/$$  |
+| Edge/Pi         | llama3.2:1b      | qwen2:0.5b             | Free     |
 
 ---
 
@@ -87,7 +87,7 @@ models:
   code_specialized:
     - codellama (7b, 13b, 34b)
     - deepseek-coder (6.7b, 33b)
-    - claude-sonnet-4-5  # Excellent at code
+    - claude-sonnet-4-5 # Excellent at code
     - gpt-4o
 
   reasoning:
@@ -293,7 +293,7 @@ deepseek-coder:
     - Repository-level tasks
 
   benchmark_scores:
-    humaneval: 73.8%  # 6.7b
+    humaneval: 73.8% # 6.7b
     mbpp: 65.4%
 
   ollama_commands:
@@ -579,7 +579,7 @@ local_embeddings:
     dimensions: 384
     size: 45MB
     performance: good
-    note: "Very small, fast"
+    note: 'Very small, fast'
     ollama: ollama pull all-minilm
 
 usage_example:
@@ -616,7 +616,7 @@ cloud_embeddings:
     - name: voyage-large-2
       dimensions: 1024
       pricing: $0.12/M tokens
-      note: "Great for code"
+      note: 'Great for code'
 ```
 
 ---
@@ -625,38 +625,38 @@ cloud_embeddings:
 
 ### Code Models
 
-| Model | Size | Best For | License |
-|-------|------|----------|---------|
-| codellama:7b | 3.8GB | General coding | Llama 2 |
-| codellama:34b | 19GB | Complex code | Llama 2 |
-| deepseek-coder:6.7b | 3.8GB | Multi-file | MIT |
-| starcoder2:7b | 4GB | Code completion | BigCode |
-| codegemma:7b | 5GB | Code + chat | Gemma |
+| Model               | Size  | Best For        | License |
+| ------------------- | ----- | --------------- | ------- |
+| codellama:7b        | 3.8GB | General coding  | Llama 2 |
+| codellama:34b       | 19GB  | Complex code    | Llama 2 |
+| deepseek-coder:6.7b | 3.8GB | Multi-file      | MIT     |
+| starcoder2:7b       | 4GB   | Code completion | BigCode |
+| codegemma:7b        | 5GB   | Code + chat     | Gemma   |
 
 ### Math Models
 
-| Model | Size | Capability |
-|-------|------|------------|
-| wizardmath:7b | 4GB | Math reasoning |
-| mathstral:7b | 4GB | Advanced math |
-| deepseek-math:7b | 4GB | Math problems |
+| Model            | Size | Capability     |
+| ---------------- | ---- | -------------- |
+| wizardmath:7b    | 4GB  | Math reasoning |
+| mathstral:7b     | 4GB  | Advanced math  |
+| deepseek-math:7b | 4GB  | Math problems  |
 
 ### Vision Models
 
-| Model | Size | Capability |
-|-------|------|------------|
-| llava:7b | 4.7GB | Image understanding |
-| llava:13b | 8GB | Better vision |
-| bakllava:7b | 4.7GB | Better at OCR |
-| moondream:1.8b | 1.7GB | Tiny vision model |
+| Model          | Size  | Capability          |
+| -------------- | ----- | ------------------- |
+| llava:7b       | 4.7GB | Image understanding |
+| llava:13b      | 8GB   | Better vision       |
+| bakllava:7b    | 4.7GB | Better at OCR       |
+| moondream:1.8b | 1.7GB | Tiny vision model   |
 
 ### Uncensored Models
 
-| Model | Size | Note |
-|-------|------|------|
-| dolphin-mistral:7b | 4.1GB | Uncensored Mistral |
-| nous-hermes:7b | 4.1GB | Open instruction |
-| openhermes:7b | 4.1GB | Community fine-tune |
+| Model              | Size  | Note                |
+| ------------------ | ----- | ------------------- |
+| dolphin-mistral:7b | 4.1GB | Uncensored Mistral  |
+| nous-hermes:7b     | 4.1GB | Open instruction    |
+| openhermes:7b      | 4.1GB | Community fine-tune |
 
 ---
 
@@ -670,13 +670,13 @@ hardware_recommendations:
     primary: llama3.2:1b
     backup: qwen2:0.5b
     embedding: all-minilm
-    notes: "Use swap, expect ~10 tok/s"
+    notes: 'Use swap, expect ~10 tok/s'
 
   raspberry_pi_8gb:
     primary: llama3.2:1b
     secondary: phi3:mini
     embedding: nomic-embed-text
-    notes: "Can run 3B models slowly"
+    notes: 'Can run 3B models slowly'
 
   macbook_air_m1_8gb:
     primary: llama3.2:3b
@@ -835,7 +835,7 @@ mistral:7b             █████████████████░░
 
 ```yaml
 cost_scenarios:
-  light_usage:  # 100K tokens/day
+  light_usage: # 100K tokens/day
     local_only: $0
     hybrid:
       local: 80%
@@ -845,7 +845,7 @@ cost_scenarios:
       model: gpt-4o-mini
       cost: ~$15/month
 
-  moderate_usage:  # 1M tokens/day
+  moderate_usage: # 1M tokens/day
     local_only: $0 (+ electricity)
     hybrid:
       local: 70%
@@ -855,7 +855,7 @@ cost_scenarios:
       model: claude-sonnet-4-5
       cost: ~$500/month
 
-  heavy_usage:  # 10M tokens/day
+  heavy_usage: # 10M tokens/day
     local_only: $0 (+ hardware)
     hybrid:
       local: 90%
@@ -939,15 +939,15 @@ models:
       fallback: gpt-4o-mini
 
     PRISM:
-      primary: llama3.2:1b  # Fast analytics
+      primary: llama3.2:1b # Fast analytics
       embedding: nomic-embed-text
 
     ECHO:
-      primary: phi3:mini  # Memory summarization
+      primary: phi3:mini # Memory summarization
       embedding: nomic-embed-text
 
     CIPHER:
-      primary: llama3.2:1b  # Security scanning
+      primary: llama3.2:1b # Security scanning
       fallback: mistral:7b
 
   # Fallback chain
@@ -1113,14 +1113,14 @@ ollama show <model>
 
 ### Model Quick Picks
 
-| Need | Model | Why |
-|------|-------|-----|
-| Fastest | qwen2:0.5b | Tiny but capable |
-| Best free | mistral:7b | Great quality |
-| Best code | codellama:7b | Specialized |
-| Best vision | llava:7b | Multimodal |
-| Best overall | claude-sonnet-4-5 | Balance |
-| Best reasoning | claude-opus-4-5 | Deep thought |
+| Need           | Model             | Why              |
+| -------------- | ----------------- | ---------------- |
+| Fastest        | qwen2:0.5b        | Tiny but capable |
+| Best free      | mistral:7b        | Great quality    |
+| Best code      | codellama:7b      | Specialized      |
+| Best vision    | llava:7b          | Multimodal       |
+| Best overall   | claude-sonnet-4-5 | Balance          |
+| Best reasoning | claude-opus-4-5   | Deep thought     |
 
 ---
 
@@ -1134,4 +1134,4 @@ ollama show <model>
 
 ---
 
-*Ride the Road. Pave Tomorrow.*
+_Ride the Road. Pave Tomorrow._

@@ -3,6 +3,7 @@
 This document provides practical examples for both methods of adding evaluations to HuggingFace model cards.
 
 ## Table of Contents
+
 1. [Setup](#setup)
 2. [Method 1: Extract from README](#method-1-extract-from-readme)
 3. [Method 2: Import from Artificial Analysis](#method-2-import-from-artificial-analysis)
@@ -24,6 +25,7 @@ cp examples/.env.example .env
 ```
 
 Your `.env` file should contain:
+
 ```env
 HF_TOKEN=hf_your_write_token_here
 AA_API_KEY=aa_your_api_key_here  # Optional for AA imports
@@ -81,12 +83,12 @@ Your model README should contain tables like:
 ```markdown
 ## Evaluation Results
 
-| Benchmark     | Score |
-|---------------|-------|
-| MMLU          | 85.2  |
-| HumanEval     | 72.5  |
-| GSM8K         | 91.3  |
-| HellaSwag     | 88.9  |
+| Benchmark | Score |
+| --------- | ----- |
+| MMLU      | 85.2  |
+| HumanEval | 72.5  |
+| GSM8K     | 91.3  |
+| HellaSwag | 88.9  |
 ```
 
 ## Method 2: Import from Artificial Analysis
@@ -138,6 +140,7 @@ uv run artificial_analysis_to_hub.py \
 4. Or check their [API documentation](https://artificialanalysis.ai/api)
 
 Common examples:
+
 - Anthropic: `--creator-slug "anthropic" --model-name "claude-sonnet-4"`
 - OpenAI: `--creator-slug "openai" --model-name "gpt-4-turbo"`
 - Meta: `--creator-slug "meta" --model-name "llama-3-70b"`
@@ -145,6 +148,7 @@ Common examples:
 ## Standalone vs Integrated
 
 ### Standalone Script Features
+
 - ✓ Simple, single-purpose
 - ✓ Can run via `uv run` from URL
 - ✓ Minimal dependencies
@@ -155,6 +159,7 @@ Common examples:
 **Use when:** You only need AA imports and want a simple script.
 
 ### Integrated Script Features
+
 - ✓ Both README extraction AND AA import
 - ✓ Validation and show commands
 - ✓ Dry-run preview mode
@@ -268,8 +273,8 @@ Set up automatic evaluation updates using GitHub Actions.
 name: Update Evaluations Weekly
 on:
   schedule:
-    - cron: '0 0 * * 0'  # Every Sunday
-  workflow_dispatch:  # Manual trigger
+    - cron: '0 0 * * 0' # Every Sunday
+  workflow_dispatch: # Manual trigger
 
 jobs:
   update:
@@ -316,6 +321,7 @@ uv run scripts/evaluation_manager.py validate \
 ### View in HuggingFace UI
 
 After updating, visit:
+
 ```
 https://huggingface.co/your-username/your-model
 ```
@@ -373,6 +379,7 @@ uv run scripts/evaluation_manager.py import-aa --help
 ```
 
 For issues or questions, consult:
+
 - `../SKILL.md` - Complete documentation
 - `../README.md` - Troubleshooting guide
 - `../QUICKSTART.md` - Quick start guide

@@ -16,14 +16,14 @@ All original code remains under its original license. New code, modifications, a
 
 ## BlackRoad Integration
 
-| Field | Value |
-|-------|-------|
-| **Library** | World Library |
-| **Category** | agents |
+| Field        | Value                                                   |
+| ------------ | ------------------------------------------------------- |
+| **Library**  | World Library                                           |
+| **Category** | agents                                                  |
 | **Upstream** | [obra/superpowers](https://github.com/obra/superpowers) |
-| **License** | MIT (original) |
-| **Added** | 2026-03-15 |
-| **Status** | Integrated |
+| **License**  | MIT (original)                                          |
+| **Added**    | 2026-03-15                                              |
+| **Status**   | Integrated                                              |
 
 ## About BlackRoad OS
 
@@ -34,4 +34,4 @@ BlackRoad OS is sovereign AI infrastructure — local-first, privacy-respecting,
 
 ---
 
-*BlackRoad OS, Inc. — Pave Tomorrow.*
+_BlackRoad OS, Inc. — Pave Tomorrow._

@@ -129,15 +129,18 @@ When a new session starts (`session.started` event):
    - Include skill directories for each
 
 3. **Inject tool mapping instructions**
+
    ```markdown
    **Tool Mapping for OpenCode:**
    When skills reference tools you don't have, substitute:
+
    - `TodoWrite` → `update_plan`
    - `Task` with subagents → Use OpenCode subagent system (@mention)
    - `Skill` tool → `use_skill` custom tool
    - Read, Write, Edit, Bash → Your native equivalents
 
    **Skill directories contain:**
+
    - Supporting scripts (run with bash)
    - Additional documentation (read with read tool)
    - Utilities specific to that skill
@@ -151,24 +154,27 @@ When a new session starts (`session.started` event):
 
 ```javascript
 // .opencode/plugin/superpowers.js
-const skillsCore = require('../../lib/skills-core');
-const path = require('path');
-const fs = require('fs');
-const { z } = require('zod');
+const skillsCore = require('../../lib/skills-core')
+const path = require('path')
+const fs = require('fs')
+const { z } = require('zod')
 
 export const SuperpowersPlugin = async ({ client, directory, $ }) => {
-  const superpowersDir = path.join(process.env.HOME, '.config/opencode/superpowers');
-  const personalDir = path.join(process.env.HOME, '.config/opencode/skills');
+  const superpowersDir = path.join(
+    process.env.HOME,
+    '.config/opencode/superpowers',
+  )
+  const personalDir = path.join(process.env.HOME, '.config/opencode/skills')
 
   return {
     'session.started': async () => {
-      const usingSuperpowers = await readSkill('using-superpowers');
-      const skillsList = await findAllSkills();
-      const toolMapping = getToolMappingInstructions();
+      const usingSuperpowers = await readSkill('using-superpowers')
+      const skillsList = await findAllSkills()
+      const toolMapping = getToolMappingInstructions()
 
       return {
-        context: `${usingSuperpowers}\n\n${skillsList}\n\n${toolMapping}`
-      };
+        context: `${usingSuperpowers}\n\n${skillsList}\n\n${toolMapping}`,
+      }
     },
 
     tools: [
@@ -176,11 +182,11 @@ export const SuperpowersPlugin = async ({ client, directory, $ }) => {
         name: 'use_skill',
         description: 'Load and read a specific skill',
         schema: z.object({
-          skill_name: z.string()
+          skill_name: z.string(),
         }),
         execute: async ({ skill_name }) => {
           // Implementation using skillsCore
-        }
+        },
       },
       {
         name: 'find_skills',
@@ -188,11 +194,11 @@ export const SuperpowersPlugin = async ({ client, directory, $ }) => {
         schema: z.object({}),
         execute: async () => {
           // Implementation using skillsCore
-        }
-      }
-    ]
-  };
-};
+        },
+      },
+    ],
+  }
+}
 ```
 
 ## File Structure

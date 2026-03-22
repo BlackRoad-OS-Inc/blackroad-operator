@@ -91,48 +91,48 @@ src/
 
 ### 2.1 Core Councilors (Always Present)
 
-| Role | Model | Responsibility | Personality |
-|------|-------|----------------|-------------|
-| **Speaker** | bailian/qwen3.5-plus | Facilitates discussion, keeps focus | Charismatic, organized |
-| **Technocrat** | bailian/glm-5 | Technical feasibility, implementation details | Analytical, precise |
-| **Ethicist** | bailian/qwen3.5-plus | Moral implications, safety, alignment | Thoughtful, cautious |
-| **Pragmatist** | bailian/MiniMax-M2.5 | Practical concerns, resource allocation | Realistic, efficient |
+| Role           | Model                | Responsibility                                | Personality            |
+| -------------- | -------------------- | --------------------------------------------- | ---------------------- |
+| **Speaker**    | bailian/qwen3.5-plus | Facilitates discussion, keeps focus           | Charismatic, organized |
+| **Technocrat** | bailian/glm-5        | Technical feasibility, implementation details | Analytical, precise    |
+| **Ethicist**   | bailian/qwen3.5-plus | Moral implications, safety, alignment         | Thoughtful, cautious   |
+| **Pragmatist** | bailian/MiniMax-M2.5 | Practical concerns, resource allocation       | Realistic, efficient   |
 
 ### 2.2 Specialist Councilors (On-Demand)
 
-| Role | Model | Trigger Condition |
-|------|-------|-------------------|
-| **Skeptic** | bailian/qwen3.5-plus | High-risk decisions |
-| **Sentinel** | lmstudio/vulnllm-r-7b | Security-sensitive topics |
-| **Economist** | bailian/MiniMax-M2.5 | Budget/resource discussions |
-| **Legal** | bailian/qwen3.5-plus | Compliance/regulatory issues |
-| **User Advocate** | bailian/kimi-k2.5 | User experience decisions |
-| **Researcher** | bailian/MiniMax-M2.5 | Deep investigation needed |
-| **Optimizer** | bailian/glm-5 | Performance optimization |
-| **Innovator** | bailian/qwen3.5-plus | Creative problem-solving |
+| Role              | Model                 | Trigger Condition            |
+| ----------------- | --------------------- | ---------------------------- |
+| **Skeptic**       | bailian/qwen3.5-plus  | High-risk decisions          |
+| **Sentinel**      | lmstudio/vulnllm-r-7b | Security-sensitive topics    |
+| **Economist**     | bailian/MiniMax-M2.5  | Budget/resource discussions  |
+| **Legal**         | bailian/qwen3.5-plus  | Compliance/regulatory issues |
+| **User Advocate** | bailian/kimi-k2.5     | User experience decisions    |
+| **Researcher**    | bailian/MiniMax-M2.5  | Deep investigation needed    |
+| **Optimizer**     | bailian/glm-5         | Performance optimization     |
+| **Innovator**     | bailian/qwen3.5-plus  | Creative problem-solving     |
 
 ### 2.3 Councilor Configuration
 
 ```typescript
 interface CouncilorConfig {
-  id: string;                    // Unique identifier
-  role: CouncilorRole;           // Role type
-  name: string;                  // Display name
-  emoji: string;                 // Visual identifier
-  model: string;                 // Assigned AI model
-  personality: Personality;      // Behavioral traits
-  expertise: string[];           // Domain expertise tags
-  votingWeight: number;          // Vote influence (default: 1.0)
-  isActive: boolean;             // Currently participating
-  avatarUrl?: string;            // Optional avatar image
+  id: string // Unique identifier
+  role: CouncilorRole // Role type
+  name: string // Display name
+  emoji: string // Visual identifier
+  model: string // Assigned AI model
+  personality: Personality // Behavioral traits
+  expertise: string[] // Domain expertise tags
+  votingWeight: number // Vote influence (default: 1.0)
+  isActive: boolean // Currently participating
+  avatarUrl?: string // Optional avatar image
 }
 
 interface Personality {
-  openness: number;              // 0-1: Willingness to consider new ideas
-  conscientiousness: number;     // 0-1: Attention to detail
-  agreeableness: number;         // 0-1: Tendency toward agreement
-  neuroticism: number;           // 0-1: Risk aversion
-  assertiveness: number;         // 0-1: Confidence in positions
+  openness: number // 0-1: Willingness to consider new ideas
+  conscientiousness: number // 0-1: Attention to detail
+  agreeableness: number // 0-1: Tendency toward agreement
+  neuroticism: number // 0-1: Risk aversion
+  assertiveness: number // 0-1: Confidence in positions
 }
 ```
 
@@ -154,7 +154,7 @@ const CORE_COUNCILORS: CouncilorConfig[] = [
       assertiveness: 0.85,
     },
     expertise: ['facilitation', 'synthesis', 'strategy'],
-    votingWeight: 1.5,  // Tie-breaking vote
+    votingWeight: 1.5, // Tie-breaking vote
     isActive: true,
   },
   {
@@ -208,7 +208,7 @@ const CORE_COUNCILORS: CouncilorConfig[] = [
     votingWeight: 1.0,
     isActive: true,
   },
-];
+]
 ```
 
 ---
@@ -236,35 +236,42 @@ const CORE_COUNCILORS: CouncilorConfig[] = [
 ### 3.2 Detailed Phase Breakdown
 
 #### Phase 1: Opening (Speaker-led)
+
 **Duration:** 2-3 minutes  
 **Goal:** Frame the topic, establish context
 
 **Actions:**
+
 1. Speaker states the proposal/question clearly
 2. Speaker provides relevant background/context
 3. Speaker defines success criteria
 4. Speaker assigns initial positions (optional)
 
 #### Phase 2: Debate (All Councilors)
+
 **Duration:** 5-10 minutes  
 **Goal:** Explore all perspectives, surface concerns
 
 **Actions:**
+
 1. Each councilor presents initial analysis (1-2 min each)
 2. Cross-examination and questions
 3. Evidence presentation (data, logs, research)
 4. Counter-arguments and rebuttals
 
 **Turn-Taking Protocol:**
+
 - Round 1: Opening statements (ordered by role)
 - Round 2: Rebuttals (dynamic, moderated by Speaker)
 - Round 3: Final statements (reverse order)
 
 #### Phase 3: Refinement (Collaborative)
+
 **Duration:** 3-5 minutes  
 **Goal:** Find common ground, propose compromises
 
 **Actions:**
+
 1. Speaker identifies areas of agreement
 2. Councilors propose modifications/compromises
 3. Technocrat assesses feasibility of compromises
@@ -272,21 +279,25 @@ const CORE_COUNCILORS: CouncilorConfig[] = [
 5. Pragmatist evaluates resource impact
 
 #### Phase 4: Voting (All Councilors)
+
 **Duration:** 2 minutes  
 **Goal:** Reach formal decision
 
 **Voting Options:**
+
 - ✅ YES (approve as-is)
-- ✅ YES* (approve with conditions)
+- ✅ YES\* (approve with conditions)
 - ⏸ ABSTAIN (neutral, no strong opinion)
-- ❌ NO* (reject, but open to compromise)
+- ❌ NO\* (reject, but open to compromise)
 - ❌ NO (reject, fundamental objection)
 
 #### Phase 5: Resolution (Speaker)
+
 **Duration:** 1 minute  
 **Goal:** Announce decision, next steps
 
 **Outcomes:**
+
 - **APPROVED**: Decision implemented
 - **APPROVED with CONDITIONS**: Specific requirements must be met
 - **DEFERRED**: More information needed, re-convene later
@@ -303,19 +314,19 @@ type DeliberationPhase =
   | 'refinement'
   | 'voting'
   | 'resolution'
-  | 'closed';
+  | 'closed'
 
 interface DeliberationState {
-  phase: DeliberationPhase;
-  topic: string;
-  startTime: number;
-  lastActivity: number;
-  currentSpeaker?: string;
-  votes: Vote[];
-  arguments: Argument[];
-  evidence: EvidenceItem[];
-  consensus: number;  // 0-100%
-  outcome?: Decision;
+  phase: DeliberationPhase
+  topic: string
+  startTime: number
+  lastActivity: number
+  currentSpeaker?: string
+  votes: Vote[]
+  arguments: Argument[]
+  evidence: EvidenceItem[]
+  consensus: number // 0-100%
+  outcome?: Decision
 }
 ```
 
@@ -327,46 +338,51 @@ interface DeliberationState {
 
 ```typescript
 interface ConsensusConfig {
-  threshold: number;           // Minimum agreement % (default: 0.75)
-  vetoPower: string[];         // Roles with veto rights (e.g., ['Ethicist'])
-  quorum: number;              // Minimum voters required (default: 0.5)
-  timeout: number;             // Max deliberation time in ms
+  threshold: number // Minimum agreement % (default: 0.75)
+  vetoPower: string[] // Roles with veto rights (e.g., ['Ethicist'])
+  quorum: number // Minimum voters required (default: 0.5)
+  timeout: number // Max deliberation time in ms
 }
 
 function calculateConsensus(votes: Vote[], weights: number[]): number {
-  const totalWeight = weights.reduce((sum, w) => sum + w, 0);
+  const totalWeight = weights.reduce((sum, w) => sum + w, 0)
   const yesWeight = votes
-    .filter(v => v.choice === 'YES' || v.choice === 'YES_CONDITIONAL')
-    .reduce((sum, v, i) => sum + (weights[i] ?? 1), 0);
-  
-  return yesWeight / totalWeight;
+    .filter((v) => v.choice === 'YES' || v.choice === 'YES_CONDITIONAL')
+    .reduce((sum, v, i) => sum + (weights[i] ?? 1), 0)
+
+  return yesWeight / totalWeight
 }
 
-function hasConsensus(state: DeliberationState, config: ConsensusConfig): boolean {
-  const participation = state.votes.length / config.quorum;
-  if (participation < config.quorum) return false;
-  
+function hasConsensus(
+  state: DeliberationState,
+  config: ConsensusConfig,
+): boolean {
+  const participation = state.votes.length / config.quorum
+  if (participation < config.quorum) return false
+
   const consensus = calculateConsensus(
     state.votes,
-    state.votes.map(v => getCouncilorWeight(v.councilorId))
-  );
-  
+    state.votes.map((v) => getCouncilorWeight(v.councilorId)),
+  )
+
   // Check for vetoes
-  const hasVeto = state.votes.some(v => 
-    v.choice === 'NO_HARD' && 
-    config.vetoPower.includes(getCouncilorRole(v.councilorId))
-  );
-  
-  if (hasVeto) return false;
-  
-  return consensus >= config.threshold;
+  const hasVeto = state.votes.some(
+    (v) =>
+      v.choice === 'NO_HARD' &&
+      config.vetoPower.includes(getCouncilorRole(v.councilorId)),
+  )
+
+  if (hasVeto) return false
+
+  return consensus >= config.threshold
 }
 ```
 
 ### 4.2 Consensus Visualization
 
 Dynamic suggestions when consensus stalls:
-- Speaker: "Technocrat and Pragmatist agree. Ethicist, what conditions would move you toward YES*?"
+
+- Speaker: "Technocrat and Pragmatist agree. Ethicist, what conditions would move you toward YES\*?"
 - Pragmatist: "Could we propose a phased rollout to address risk concerns?"
 
 ### 4.3 Bridge-Building Strategies
@@ -387,46 +403,46 @@ When consensus stalls, the system suggests:
 
 ```typescript
 type VoteChoice =
-  | 'YES'              // Full approval
-  | 'YES_CONDITIONAL'  // Approval with stated conditions
-  | 'ABSTAIN'          // No strong opinion
-  | 'NO_CONDITIONAL'   // Rejection, open to compromise
-  | 'NO_HARD';         // Fundamental objection (veto-capable)
+  | 'YES' // Full approval
+  | 'YES_CONDITIONAL' // Approval with stated conditions
+  | 'ABSTAIN' // No strong opinion
+  | 'NO_CONDITIONAL' // Rejection, open to compromise
+  | 'NO_HARD' // Fundamental objection (veto-capable)
 
 interface Vote {
-  id: string;
-  councilorId: string;
-  councilorRole: string;
-  choice: VoteChoice;
-  reasoning: string;
-  conditions?: string[];      // For conditional votes
-  timestamp: number;
-  edited?: boolean;
-  weight: number;             // Voting weight
+  id: string
+  councilorId: string
+  councilorRole: string
+  choice: VoteChoice
+  reasoning: string
+  conditions?: string[] // For conditional votes
+  timestamp: number
+  edited?: boolean
+  weight: number // Voting weight
 }
 ```
 
 ### 5.2 Voting Rules
 
-| Rule | Description |
-|------|-------------|
-| **Simple Majority** | >50% YES votes (routine decisions) |
-| **Supermajority** | ≥75% YES votes (major decisions) |
-| **Unanimity** | 100% YES or YES* (critical decisions) |
-| **Veto Power** | Ethicist can veto on ethical grounds |
-| **Quorum** | ≥50% of councilors must vote |
-| **Time Limit** | 2 minutes to cast vote after call |
+| Rule                | Description                            |
+| ------------------- | -------------------------------------- |
+| **Simple Majority** | >50% YES votes (routine decisions)     |
+| **Supermajority**   | ≥75% YES votes (major decisions)       |
+| **Unanimity**       | 100% YES or YES\* (critical decisions) |
+| **Veto Power**      | Ethicist can veto on ethical grounds   |
+| **Quorum**          | ≥50% of councilors must vote           |
+| **Time Limit**      | 2 minutes to cast vote after call      |
 
 ### 5.3 Decision Matrix
 
-| Vote Result | Outcome |
-|-------------|---------|
-| 100% YES/YES* | ✅ UNANIMOUS APPROVAL (implement now) |
-| 75-99% YES | ✅ APPROVED (standard implementation) |
-| 50-74% YES | ⚠️ CONDITIONAL (address concerns first) |
-| <50% YES | ❌ REJECTED (revise and resubmit) |
-| Any NO_HARD | ❌ VETOED (fundamental blocker) |
-| No Quorum | ⏸ DEFERRED (reconvene with full council) |
+| Vote Result    | Outcome                                  |
+| -------------- | ---------------------------------------- |
+| 100% YES/YES\* | ✅ UNANIMOUS APPROVAL (implement now)    |
+| 75-99% YES     | ✅ APPROVED (standard implementation)    |
+| 50-74% YES     | ⚠️ CONDITIONAL (address concerns first)  |
+| <50% YES       | ❌ REJECTED (revise and resubmit)        |
+| Any NO_HARD    | ❌ VETOED (fundamental blocker)          |
+| No Quorum      | ⏸ DEFERRED (reconvene with full council) |
 
 ---
 
@@ -449,6 +465,7 @@ POST   /api/council/config           // Update council configuration
 ### 6.2 Gateway Integration
 
 The council system integrates with OpenClaw Gateway using:
+
 - `sessions.spawn` - Create councilor sub-agent sessions
 - `chat.send` - Councilor communication
 - `chat.history` - Retrieve deliberation transcripts
@@ -457,6 +474,7 @@ The council system integrates with OpenClaw Gateway using:
 ### 6.3 Component Integration
 
 Add to existing dashboard:
+
 - CouncilChamber modal component
 - Council button in navbar
 - Event streaming via existing gateway connection
@@ -467,6 +485,7 @@ Add to existing dashboard:
 ## 7. Implementation Priority
 
 ### Phase 1: Foundation (Week 1-2)
+
 - [ ] Create council type definitions
 - [ ] Build CouncilChamber component shell
 - [ ] Implement basic API routes (convene, get, close)
@@ -474,6 +493,7 @@ Add to existing dashboard:
 - [ ] Add council button to navbar
 
 ### Phase 2: Core Features (Week 3-4)
+
 - [ ] Implement deliberation state machine
 - [ ] Build RoundTable visualization
 - [ ] Create argument submission system
@@ -481,6 +501,7 @@ Add to existing dashboard:
 - [ ] Add consensus calculation
 
 ### Phase 3: Integration (Week 5-6)
+
 - [ ] Connect to OpenClaw gateway
 - [ ] Spawn councilor sub-agents
 - [ ] Implement event streaming
@@ -488,6 +509,7 @@ Add to existing dashboard:
 - [ ] Build transcript viewer
 
 ### Phase 4: Polish (Week 7-8)
+
 - [ ] Add animations and visual effects
 - [ ] Implement evidence board
 - [ ] Build deliberation history
@@ -498,13 +520,13 @@ Add to existing dashboard:
 
 ## 8. Success Metrics
 
-| Metric | Target | Measurement |
-|--------|--------|-------------|
-| **Deliberation Quality** | >80% user satisfaction | Post-deliberation surveys |
-| **Consensus Rate** | >70% decisions reach consensus | Analytics tracking |
-| **Response Time** | <2s for UI updates | Performance monitoring |
-| **Agent Coordination** | <5% communication errors | Error logging |
-| **User Engagement** | >3 deliberations/week | Usage analytics |
+| Metric                   | Target                         | Measurement               |
+| ------------------------ | ------------------------------ | ------------------------- |
+| **Deliberation Quality** | >80% user satisfaction         | Post-deliberation surveys |
+| **Consensus Rate**       | >70% decisions reach consensus | Analytics tracking        |
+| **Response Time**        | <2s for UI updates             | Performance monitoring    |
+| **Agent Coordination**   | <5% communication errors       | Error logging             |
+| **User Engagement**      | >3 deliberations/week          | Usage analytics           |
 
 ---
 

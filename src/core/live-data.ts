@@ -68,12 +68,10 @@ export interface ServiceProbe {
 }
 
 // Keep a previous CPU sample so we can compute utilization from deltas
-let previousCpuSample:
-  | {
-      idle: number
-      total: number
-    }
-  | null = null
+let previousCpuSample: {
+  idle: number
+  total: number
+} | null = null
 
 function sampleCpuTimes(): { idle: number; total: number } {
   const cpus = os.cpus()
@@ -124,11 +122,15 @@ function getMemory(): MemoryMetrics {
   let swapTotalMB = 0
   let swapUsedMB = 0
   try {
-    const meminfo = execSync('cat /proc/meminfo 2>/dev/null', { encoding: 'utf8', timeout: 2000 })
+    const meminfo = execSync('cat /proc/meminfo 2>/dev/null', {
+      encoding: 'utf8',
+      timeout: 2000,
+    })
     const swapTotal = meminfo.match(/SwapTotal:\s+(\d+)/)
     const swapFree = meminfo.match(/SwapFree:\s+(\d+)/)
     if (swapTotal) swapTotalMB = Math.round(parseInt(swapTotal[1]) / 1024)
-    if (swapFree && swapTotal) swapUsedMB = swapTotalMB - Math.round(parseInt(swapFree[1]) / 1024)
+    if (swapFree && swapTotal)
+      swapUsedMB = swapTotalMB - Math.round(parseInt(swapFree[1]) / 1024)
   } catch {
     // swap info unavailable
   }
@@ -144,15 +146,30 @@ function getMemory(): MemoryMetrics {
 
 function getDisk(): DiskMetrics {
   try {
-    const df = execSync('df -BG / 2>/dev/null | tail -1', { encoding: 'utf8', timeout: 2000 })
+    const df = execSync('df -BG / 2>/dev/null | tail -1', {
+      encoding: 'utf8',
+      timeout: 2000,
+    })
     const parts = df.trim().split(/\s+/)
     const totalGB = parseInt(parts[1]) || 0
     const usedGB = parseInt(parts[2]) || 0
     const availableGB = parseInt(parts[3]) || 0
     const usagePercent = parseInt(parts[4]) || 0
-    return { totalGB, usedGB, availableGB, usagePercent, mountPoint: parts[5] ?? '/' }
+    return {
+      totalGB,
+      usedGB,
+      availableGB,
+      usagePercent,
+      mountPoint: parts[5] ?? '/',
+    }
   } catch {
-    return { totalGB: 0, usedGB: 0, availableGB: 0, usagePercent: 0, mountPoint: '/' }
+    return {
+      totalGB: 0,
+      usedGB: 0,
+      availableGB: 0,
+      usagePercent: 0,
+      mountPoint: '/',
+    }
   }
 }
 
@@ -170,7 +187,10 @@ function getNetwork(): NetworkMetrics {
   }
   let openConnections = 0
   try {
-    const out = execSync('ss -tun state established 2>/dev/null | wc -l', { encoding: 'utf8', timeout: 2000 })
+    const out = execSync('ss -tun state established 2>/dev/null | wc -l', {
+      encoding: 'utf8',
+      timeout: 2000,
+    })
     openConnections = Math.max(0, parseInt(out.trim()) - 1)
   } catch {
     // not available
@@ -183,9 +203,25 @@ function getProcesses(): ProcessMetrics {
   let nodeProcesses = 0
   let pythonProcesses = 0
   try {
-    total = parseInt(execSync('ps aux 2>/dev/null | wc -l', { encoding: 'utf8', timeout: 2000 }).trim()) - 1
-    nodeProcesses = parseInt(execSync('ps aux 2>/dev/null | grep -c "[n]ode"', { encoding: 'utf8', timeout: 2000 }).trim())
-    pythonProcesses = parseInt(execSync('ps aux 2>/dev/null | grep -c "[p]ython"', { encoding: 'utf8', timeout: 2000 }).trim())
+    total =
+      parseInt(
+        execSync('ps aux 2>/dev/null | wc -l', {
+          encoding: 'utf8',
+          timeout: 2000,
+        }).trim(),
+      ) - 1
+    nodeProcesses = parseInt(
+      execSync('ps aux 2>/dev/null | grep -c "[n]ode"', {
+        encoding: 'utf8',
+        timeout: 2000,
+      }).trim(),
+    )
+    pythonProcesses = parseInt(
+      execSync('ps aux 2>/dev/null | grep -c "[p]ython"', {
+        encoding: 'utf8',
+        timeout: 2000,
+      }).trim(),
+    )
   } catch {
     // process listing unavailable
   }
@@ -226,7 +262,11 @@ export function collectSystemMetrics(): SystemMetrics {
   }
 }
 
-export async function probeService(name: string, url: string, timeoutMs: number = 5000): Promise<ServiceProbe> {
+export async function probeService(
+  name: string,
+  url: string,
+  timeoutMs: number = 5000,
+): Promise<ServiceProbe> {
   const start = Date.now()
   try {
     const controller = new AbortController()
@@ -237,16 +277,37 @@ export async function probeService(name: string, url: string, timeoutMs: number 
     if (res.ok) {
       return { name, url, status: 'up', latencyMs }
     }
-    return { name, url, status: 'degraded', latencyMs, error: `HTTP ${res.status}` }
+    return {
+      name,
+      url,
+      status: 'degraded',
+      latencyMs,
+      error: `HTTP ${res.status}`,
+    }
   } catch (err) {
-    return { name, url, status: 'down', latencyMs: Date.now() - start, error: String(err) }
+    return {
+      name,
+      url,
+      status: 'down',
+      latencyMs: Date.now() - start,
+      error: String(err),
+    }
   }
 }
 
 export async function probeAllServices(): Promise<ServiceProbe[]> {
   const services = [
-    { name: 'Gateway', url: (process.env['BLACKROAD_GATEWAY_URL'] ?? 'http://127.0.0.1:8787') + '/v1/health' },
-    { name: 'Ollama', url: (process.env['OLLAMA_URL'] ?? 'http://localhost:11434') + '/api/tags' },
+    {
+      name: 'Gateway',
+      url:
+        (process.env['BLACKROAD_GATEWAY_URL'] ?? 'http://127.0.0.1:8787') +
+        '/v1/health',
+    },
+    {
+      name: 'Ollama',
+      url:
+        (process.env['OLLAMA_URL'] ?? 'http://localhost:11434') + '/api/tags',
+    },
     { name: 'GitHub API', url: 'https://api.github.com' },
   ]
 

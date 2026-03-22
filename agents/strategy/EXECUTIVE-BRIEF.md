@@ -28,22 +28,22 @@ The Agency comprises specialized AI agents across 9 divisions — engineering, d
 
 ## 4. WHAT NEXUS DELIVERS
 
-| Deliverable | Description |
-|-------------|-------------|
-| **Master Strategy** | 800+ line operational doctrine covering all agents across 7 phases |
-| **Phase Playbooks** (7) | Step-by-step activation sequences with agent prompts, timelines, and quality gates |
-| **Activation Prompts** | Ready-to-use prompt templates for every agent in every pipeline role |
-| **Handoff Templates** (7) | Standardized formats for QA pass/fail, escalation, phase gates, sprints, incidents |
+| Deliverable               | Description                                                                                         |
+| ------------------------- | --------------------------------------------------------------------------------------------------- |
+| **Master Strategy**       | 800+ line operational doctrine covering all agents across 7 phases                                  |
+| **Phase Playbooks** (7)   | Step-by-step activation sequences with agent prompts, timelines, and quality gates                  |
+| **Activation Prompts**    | Ready-to-use prompt templates for every agent in every pipeline role                                |
+| **Handoff Templates** (7) | Standardized formats for QA pass/fail, escalation, phase gates, sprints, incidents                  |
 | **Scenario Runbooks** (4) | Pre-built configurations for Startup MVP, Enterprise Feature, Marketing Campaign, Incident Response |
-| **Quick-Start Guide** | 5-minute guide to activating any NEXUS mode |
+| **Quick-Start Guide**     | 5-minute guide to activating any NEXUS mode                                                         |
 
 ## 5. THREE DEPLOYMENT MODES
 
-| Mode | Agents | Timeline | Use Case |
-|------|--------|----------|----------|
-| **NEXUS-Full** | All | 12-24 weeks | Complete product lifecycle |
-| **NEXUS-Sprint** | 15-25 | 2-6 weeks | Feature or MVP build |
-| **NEXUS-Micro** | 5-10 | 1-5 days | Targeted task execution |
+| Mode             | Agents | Timeline    | Use Case                   |
+| ---------------- | ------ | ----------- | -------------------------- |
+| **NEXUS-Full**   | All    | 12-24 weeks | Complete product lifecycle |
+| **NEXUS-Sprint** | 15-25  | 2-6 weeks   | Feature or MVP build       |
+| **NEXUS-Micro**  | 5-10   | 1-5 days    | Targeted task execution    |
 
 ## 6. RECOMMENDATIONS
 
@@ -92,4 +92,4 @@ strategy/
 
 ---
 
-*NEXUS: 9 Divisions. 7 Phases. One Unified Strategy.*
+_NEXUS: 9 Divisions. 7 Phases. One Unified Strategy._

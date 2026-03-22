@@ -28,13 +28,13 @@
 
 BlackRoad OS federation enables:
 
-| Capability | Description |
-|------------|-------------|
+| Capability       | Description                   |
+| ---------------- | ----------------------------- |
 | **Global Scale** | 30K+ agents across continents |
-| **Geo-locality** | Run agents near data/users |
-| **Redundancy** | Survive regional failures |
-| **Sovereignty** | Data stays in region |
-| **Hybrid** | Mix cloud + edge + on-prem |
+| **Geo-locality** | Run agents near data/users    |
+| **Redundancy**   | Survive regional failures     |
+| **Sovereignty**  | Data stays in region          |
+| **Hybrid**       | Mix cloud + edge + on-prem    |
 
 ### Federation Topology
 
@@ -233,7 +233,7 @@ cluster:
   # Taints to restrict scheduling
   taints:
     - key: gpu-only
-      value: "true"
+      value: 'true'
       effect: NoSchedule
 
   # Control plane connection
@@ -355,7 +355,7 @@ dns:
               priority: 2
 
         # Agent discovery
-        - name: "*.agents"
+        - name: '*.agents'
           type: SRV
           ttl: 30
           # Dynamically resolved based on agent location
@@ -1421,20 +1421,20 @@ migration_duration = Histogram(
 ```yaml
 # dashboards/federation.yaml
 dashboard:
-  title: "BlackRoad Federation Overview"
+  title: 'BlackRoad Federation Overview'
 
   panels:
-    - title: "Cluster Map"
+    - title: 'Cluster Map'
       type: geomap
       query: |
         blackroad_federation_cluster_health{} * on(cluster_id)
         group_left(latitude, longitude) blackroad_cluster_location{}
 
-    - title: "Agents by Cluster"
+    - title: 'Agents by Cluster'
       type: piechart
       query: sum by (cluster_id) (blackroad_federation_cluster_agents{})
 
-    - title: "Cross-Cluster Latency"
+    - title: 'Cross-Cluster Latency'
       type: heatmap
       query: |
         histogram_quantile(0.99,
@@ -1443,7 +1443,7 @@ dashboard:
           )
         )
 
-    - title: "Replication Lag"
+    - title: 'Replication Lag'
       type: timeseries
       query: blackroad_federation_replication_lag_seconds{}
       thresholds:
@@ -1486,10 +1486,11 @@ blackroad failover status
 
 ### Runbooks
 
-```markdown
+````markdown
 ## Cluster Failure Runbook
 
 ### Symptoms
+
 - Cluster health shows OFFLINE
 - Agents in cluster unreachable
 - Cross-cluster latency spikes
@@ -1501,13 +1502,16 @@ blackroad failover status
    blackroad federation status
    blackroad cluster health <cluster-name>
    ```
+````
 
 2. **Check if automatic failover triggered**
+
    ```bash
    blackroad failover status
    ```
 
 3. **If manual intervention needed**
+
    ```bash
    # Drain failed cluster
    blackroad cluster drain <cluster-name>
@@ -1517,6 +1521,7 @@ blackroad failover status
    ```
 
 4. **Verify agent recovery**
+
    ```bash
    blackroad agent list --status running
    ```
@@ -1525,6 +1530,7 @@ blackroad failover status
    - Review logs for root cause
    - Update monitoring thresholds if needed
    - Document in incident report
+
 ```
 
 ---
@@ -1561,3 +1567,4 @@ blackroad failover status
 ---
 
 *Ride the Road. Pave Tomorrow.*
+```

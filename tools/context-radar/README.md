@@ -9,22 +9,26 @@ Context Radar is an intelligent file monitoring system that learns your work pat
 ## Features
 
 ### 🔍 Smart File Suggestions
+
 - Automatically detects files you often work on together
 - Identifies test files related to source code
 - Finds documentation related to code modules
 - Shows connection strength based on access patterns
 
 ### 🤖 Agent Recommendations
+
 - Suggests the best agent for your current task
 - Based on file types and naming patterns
 - Learns from your usage over time
 
 ### 📊 Context Analysis
+
 - Visualizes your recent work activity
 - Shows relationship strength between files
 - Creates "context bundles" for common workflows
 
 ### 📦 Context Bundles
+
 - Save groups of related files
 - Quick access to frequently used file sets
 - Perfect for complex features or bug fixes
@@ -68,6 +72,7 @@ br radar bundles
 ## Commands
 
 ### Daemon Control
+
 ```bash
 br radar daemon start    # Start file watching
 br radar daemon stop     # Stop daemon
@@ -76,6 +81,7 @@ br radar daemon status   # Check status & stats
 ```
 
 ### Suggestions
+
 ```bash
 br radar suggest [file] [limit]   # Get file suggestions
 br radar agent [context]          # Get agent suggestion
@@ -84,12 +90,14 @@ br radar context                  # Show recent activity
 ```
 
 ### Context Bundles
+
 ```bash
 br radar bundle <name> <files...>  # Create bundle
 br radar bundles                   # List all bundles
 ```
 
 ### Database
+
 ```bash
 br radar db stats                 # Show database statistics
 br radar db recent [limit]        # Show recent activity
@@ -128,6 +136,7 @@ tools/context-radar/
 ## Examples
 
 ### Example 1: Working on an API
+
 ```bash
 $ cd ~/project/api
 $ br radar smart
@@ -144,6 +153,7 @@ Analyzing: api
 ```
 
 ### Example 2: Finding Related Files
+
 ```bash
 $ br radar suggest ./src/users.py
 

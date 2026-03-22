@@ -7,98 +7,126 @@
 ## 📊 FEATURE OVERVIEW
 
 ### 1. **Context Radar** 🎯
+
 Smart workspace monitoring with AI-powered file suggestions
+
 - `br radar daemon` - Background file watching
 - `br radar suggest` - Context-aware file recommendations
 - `br radar agent` - AI agent selection
 - SQLite tracking of file changes and patterns
 
 ### 2. **Git Integration** 🤖
+
 AI-enhanced Git workflows
+
 - `br git commit` - AI-generated commit messages
 - `br git branch` - Smart branch naming
 - `br git review` - Pre-commit code review
 - `br git status` - Enhanced status with insights
 
 ### 3. **Snippet Manager** 💾
+
 Code snippet library with tagging
+
 - `br snippet save` - Save reusable code
 - `br snippet get` - Quick retrieval
 - `br snippet search` - Full-text search
 - `br snippet tags` - Organize by tags
 
 ### 4. **Pair Programming** 🤝
+
 AI pair programming assistant
+
 - `br pair start` - Interactive coding sessions
 - `br pair ask` - Real-time Q&A
 - `br pair review` - Code review with AI
 - `br pair suggest` - Smart suggestions
 
 ### 5. **API Tester** 🌐
+
 HTTP client with history
+
 - `br api get/post` - Make HTTP requests
 - `br api save` - Save endpoints
 - `br api list` - Endpoint library
 - `br api gen` - Generate code (curl/JS/Python/Go)
 
 ### 6. **Task Runner** ⚡
+
 Auto-detect and run project tasks
+
 - `br run` - Smart task detection
 - Supports: npm, make, cargo, go, poetry
 - Interactive task selection
 - History tracking
 
 ### 7. **Quick Notes** 📝
+
 Developer note system
+
 - `br note add` - Create notes
 - `br note list` - Browse notes
 - `br note search` - Full-text search
 - Markdown support
 
 ### 8. **Project Init** 🎯
+
 Project scaffolding templates
+
 - `br init node` - Node.js projects
 - `br init python` - Python projects
 - `br init go` - Go projects
 - `br init rust` - Rust projects
 
 ### 9. **Log Parser** 🔍
+
 Colorized log analysis
+
 - `br logs <file>` - Parse and highlight
 - Error highlighting
 - Pattern detection
 - Stack trace formatting
 
 ### 10. **Performance Monitor** ⏱️
+
 Command timing and statistics
+
 - `br perf time <cmd>` - Time commands
 - `br perf stats` - View statistics
 - `br perf compare` - Compare runs
 - SQLite tracking
 
 ### 11. **Dependency Helper** 📦
+
 Multi-language dependency management
+
 - `br deps check` - Check for updates
 - `br deps install` - Install dependencies
 - `br deps outdated` - Find outdated packages
 - Supports: npm, pip, cargo, go
 
 ### 12. **Session Manager** 💾
+
 Workspace state persistence
+
 - `br session save` - Save current state
 - `br session load` - Restore state
 - `br session list` - Browse sessions
 - Tracks: git branch, files, notes
 
 ### 13. **Deploy Manager** ☁️
+
 Multi-platform deployment
+
 - `br deploy detect` - Auto-detect platforms
 - `br deploy quick` - One-command deploy
 - Supports: Vercel, Netlify, Heroku, Docker, Railway
 - Deployment history tracking
 
 ### 14. **Docker Manager** 🐳
+
 Container and image management
+
 - `br docker ps` - List containers
 - `br docker start/stop` - Control containers
 - `br docker logs` - View logs
@@ -107,7 +135,9 @@ Container and image management
 - `br docker clean` - Resource cleanup
 
 ### 15. **Database Client** 💾
+
 Multi-database connection manager
+
 - `br db add` - Save connections
 - `br db connect` - Interactive client
 - `br db query` - Execute queries
@@ -115,7 +145,9 @@ Multi-database connection manager
 - Supports: PostgreSQL, MySQL, SQLite, MongoDB
 
 ### 16. **Environment Manager** 🔐
+
 .env file management
+
 - `br env init` - Create .env files
 - `br env list` - List variables (masks secrets)
 - `br env set/get` - Manage variables
@@ -124,7 +156,9 @@ Multi-database connection manager
 - `br env diff` - Compare env files
 
 ### 17. **File Finder** 🔍
+
 Advanced file search with bookmarks
+
 - `br find search` - Find by name
 - `br find content` - Search file contents
 - `br find type` - Find by extension
@@ -138,6 +172,7 @@ Advanced file search with bookmarks
 ## 🗄️ DATABASES
 
 **7 SQLite databases** for persistent storage:
+
 1. `context-radar.db` - File watching and suggestions
 2. `git-integration.db` - Git history and patterns
 3. `snippet-manager.db` - Code snippets
@@ -153,6 +188,7 @@ Advanced file search with bookmarks
 ## 🎨 ARCHITECTURE
 
 ### Design Principles
+
 - **Modular**: Each feature is a standalone zsh script
 - **Consistent**: All tools use same color scheme and patterns
 - **Persistent**: SQLite for reliable data storage
@@ -160,6 +196,7 @@ Advanced file search with bookmarks
 - **Zero-config**: Works out of the box
 
 ### File Structure
+
 ```
 blackroad/
 ├── br                           # Main CLI dispatcher
@@ -185,6 +222,7 @@ blackroad/
 ```
 
 ### Color Coding
+
 - 🟢 **GREEN**: Success messages
 - 🔴 **RED**: Errors
 - 🔵 **BLUE**: Information
@@ -234,6 +272,7 @@ br perf time npm test      # Measure performance
 ## 🐛 KNOWN ISSUES & FIXES
 
 ### Fixed During Development
+
 1. **macOS head incompatibility**: `head -n -2` doesn't work on macOS
    - Fixed with manual line counting
 2. **Delimiter parsing**: `|||` caused issues with data containing those chars
@@ -248,6 +287,7 @@ br perf time npm test      # Measure performance
 ## 💡 FUTURE IDEAS
 
 Potential additions:
+
 - `br test` - Test runner with coverage
 - `br docs` - Documentation generator
 - `br cloud` - Cloud resource manager
@@ -262,6 +302,7 @@ Potential additions:
 ## 🎯 PHILOSOPHY
 
 BlackRoad CLI embodies:
+
 - **Speed**: Fast, efficient workflows
 - **Intelligence**: AI-powered assistance
 - **Simplicity**: Easy to use, hard to break

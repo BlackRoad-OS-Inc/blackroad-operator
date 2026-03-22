@@ -24,11 +24,11 @@ BlackRoad skills (`.skill` files) can be installed directly from your phone usin
 
 ## Prerequisites
 
-| Requirement | Details |
-|-------------|---------|
+| Requirement    | Details                                                      |
+| -------------- | ------------------------------------------------------------ |
 | **Claude App** | Latest version from App Store (iOS) or Google Play (Android) |
-| **Skill File** | A `.skill` file downloaded to your device |
-| **Account** | Signed-in Claude account |
+| **Skill File** | A `.skill` file downloaded to your device                    |
+| **Account**    | Signed-in Claude account                                     |
 
 ---
 
@@ -124,11 +124,11 @@ The Skills settings UI may not be fully available on all mobile app versions. If
 
 ### Skill File Won't Open
 
-| Issue | Solution |
-|-------|----------|
-| File not recognized | Ensure the file extension is `.skill` |
-| Download incomplete | Re-download the file and check file size |
-| Permission denied | Move the file to a location the app can access (e.g., Downloads) |
+| Issue               | Solution                                                         |
+| ------------------- | ---------------------------------------------------------------- |
+| File not recognized | Ensure the file extension is `.skill`                            |
+| Download incomplete | Re-download the file and check file size                         |
+| Permission denied   | Move the file to a location the app can access (e.g., Downloads) |
 
 ### Skill Installed but Not Working
 
@@ -165,11 +165,11 @@ You need an internet connection for the initial installation (to register the sk
 
 ### Where can I find skills to install?
 
-| Source | URL |
-|--------|-----|
+| Source             | URL                                    |
+| ------------------ | -------------------------------------- |
 | BlackRoad Registry | `https://registry.blackroad.io/skills` |
-| CLI Search | `blackroad-skills search "keyword"` |
-| GitHub | Check BlackRoad-OS organization repos |
+| CLI Search         | `blackroad-skills search "keyword"`    |
+| GitHub             | Check BlackRoad-OS organization repos  |
 
 ### Is this my first skill install?
 
@@ -186,4 +186,4 @@ If you've never installed a skill before, the steps above are all you need. The 
 
 ---
 
-*Last updated: 2026-02-28*
+_Last updated: 2026-02-28_

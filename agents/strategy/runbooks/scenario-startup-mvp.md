@@ -11,34 +11,37 @@ You're building a startup MVP — a new product that needs to validate product-m
 ## Agent Roster
 
 ### Core Team (Always Active)
-| Agent | Role |
-|-------|------|
-| Agents Orchestrator | Pipeline controller |
+
+| Agent                  | Role                    |
+| ---------------------- | ----------------------- |
+| Agents Orchestrator    | Pipeline controller     |
 | Senior Project Manager | Spec-to-task conversion |
-| Sprint Prioritizer | Backlog management |
-| UX Architect | Technical foundation |
-| Frontend Developer | UI implementation |
-| Backend Architect | API and database |
-| DevOps Automator | CI/CD and deployment |
-| Evidence Collector | QA for every task |
-| Reality Checker | Final quality gate |
+| Sprint Prioritizer     | Backlog management      |
+| UX Architect           | Technical foundation    |
+| Frontend Developer     | UI implementation       |
+| Backend Architect      | API and database        |
+| DevOps Automator       | CI/CD and deployment    |
+| Evidence Collector     | QA for every task       |
+| Reality Checker        | Final quality gate      |
 
 ### Growth Team (Activated Week 3+)
-| Agent | Role |
-|-------|------|
-| Growth Hacker | Acquisition strategy |
-| Content Creator | Launch content |
-| Social Media Strategist | Social campaign |
+
+| Agent                   | Role                 |
+| ----------------------- | -------------------- |
+| Growth Hacker           | Acquisition strategy |
+| Content Creator         | Launch content       |
+| Social Media Strategist | Social campaign      |
 
 ### Support Team (As Needed)
-| Agent | Role |
-|-------|------|
-| Brand Guardian | Brand identity |
-| Analytics Reporter | Metrics and dashboards |
-| Rapid Prototyper | Quick validation experiments |
-| AI Engineer | If product includes AI features |
-| Performance Benchmarker | Load testing before launch |
-| Infrastructure Maintainer | Production setup |
+
+| Agent                     | Role                            |
+| ------------------------- | ------------------------------- |
+| Brand Guardian            | Brand identity                  |
+| Analytics Reporter        | Metrics and dashboards          |
+| Rapid Prototyper          | Quick validation experiments    |
+| AI Engineer               | If product includes AI features |
+| Performance Benchmarker   | Load testing before launch      |
+| Infrastructure Maintainer | Production setup                |
 
 ## Week-by-Week Execution
 
@@ -125,30 +128,30 @@ Week 6: Optimize
 
 ## Key Decisions
 
-| Decision Point | When | Who Decides |
-|---------------|------|-------------|
-| Go/No-Go on concept | End of Day 2 | Studio Producer |
-| Architecture approval | End of Day 4 | Senior Project Manager |
-| Feature scope for MVP | Sprint planning | Sprint Prioritizer |
-| Production readiness | Week 4 Day 5 | Reality Checker |
-| Launch timing | After Reality Checker READY | Studio Producer |
+| Decision Point        | When                        | Who Decides            |
+| --------------------- | --------------------------- | ---------------------- |
+| Go/No-Go on concept   | End of Day 2                | Studio Producer        |
+| Architecture approval | End of Day 4                | Senior Project Manager |
+| Feature scope for MVP | Sprint planning             | Sprint Prioritizer     |
+| Production readiness  | Week 4 Day 5                | Reality Checker        |
+| Launch timing         | After Reality Checker READY | Studio Producer        |
 
 ## Success Criteria
 
-| Metric | Target |
-|--------|--------|
-| Time to live product | ≤ 6 weeks |
-| Core features complete | 100% of MVP scope |
-| First users onboarded | Within 48 hours of launch |
-| System uptime | > 99% in first week |
+| Metric                  | Target                          |
+| ----------------------- | ------------------------------- |
+| Time to live product    | ≤ 6 weeks                       |
+| Core features complete  | 100% of MVP scope               |
+| First users onboarded   | Within 48 hours of launch       |
+| System uptime           | > 99% in first week             |
 | User feedback collected | ≥ 50 responses in first 2 weeks |
 
 ## Common Pitfalls & Mitigations
 
-| Pitfall | Mitigation |
-|---------|-----------|
-| Scope creep during build | Sprint Prioritizer enforces MoSCoW — "Won't" means won't |
-| Over-engineering for scale | Rapid Prototyper mindset — validate first, scale later |
-| Skipping QA for speed | Evidence Collector runs on EVERY task — no exceptions |
-| Launching without monitoring | Infrastructure Maintainer sets up monitoring in Week 1 |
-| No feedback mechanism | Analytics + feedback collection built into Sprint 1 |
+| Pitfall                      | Mitigation                                               |
+| ---------------------------- | -------------------------------------------------------- |
+| Scope creep during build     | Sprint Prioritizer enforces MoSCoW — "Won't" means won't |
+| Over-engineering for scale   | Rapid Prototyper mindset — validate first, scale later   |
+| Skipping QA for speed        | Evidence Collector runs on EVERY task — no exceptions    |
+| Launching without monitoring | Infrastructure Maintainer sets up monitoring in Week 1   |
+| No feedback mechanism        | Analytics + feedback collection built into Sprint 1      |

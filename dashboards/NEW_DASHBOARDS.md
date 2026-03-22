@@ -7,6 +7,7 @@
 ## 🌌 New Dashboards
 
 ### 1. **blackroad-cosmic-lottery.sh** - The Probability Engine ∞
+
 The ultimate cosmic lottery simulator with quantum computing visualization.
 
 ```bash
@@ -14,6 +15,7 @@ The ultimate cosmic lottery simulator with quantum computing visualization.
 ```
 
 **Features:**
+
 - ∞ **Quantum Computing Grid** - Watch all 5 devices compute parallel universes
 - 🎲 **Live Lottery Draws** - Auto-generating winning numbers every 5 seconds
 - 📊 **Probability Analysis** - Real-time odds calculations
@@ -27,6 +29,7 @@ The ultimate cosmic lottery simulator with quantum computing visualization.
 ---
 
 ### 2. **device-raspberry-pi.sh** - Pi Fleet Monitor 🥧
+
 Dedicated dashboard for all 4 Raspberry Pi devices.
 
 ```bash
@@ -34,6 +37,7 @@ Dedicated dashboard for all 4 Raspberry Pi devices.
 ```
 
 **Features:**
+
 - 📊 **4-Device Grid** - Lucidia Prime, BlackRoad Pi, Lucidia Alt, iPhone Koder
 - 🌡️ **Live Stats** - CPU, RAM, Temperature monitoring
 - 🔄 **Auto-Refresh** - Updates every 5 seconds
@@ -46,6 +50,7 @@ Dedicated dashboard for all 4 Raspberry Pi devices.
 ---
 
 ### 3. **device-cloudflare.sh** - Cloudflare Infrastructure ☁️
+
 Complete Cloudflare monitoring dashboard.
 
 ```bash
@@ -53,6 +58,7 @@ Complete Cloudflare monitoring dashboard.
 ```
 
 **Features:**
+
 - 🌐 **16 DNS Zones** - Live status for all domains
 - 📄 **8 Pages Projects** - Deployment IDs and status
 - 🗄️ **8 KV Namespaces** - Key counts and storage stats
@@ -66,6 +72,7 @@ Complete Cloudflare monitoring dashboard.
 ---
 
 ### 4. **device-github.sh** - GitHub Infrastructure 🐙
+
 Monitor all 15 GitHub organizations and 66 repositories.
 
 ```bash
@@ -73,6 +80,7 @@ Monitor all 15 GitHub organizations and 66 repositories.
 ```
 
 **Features:**
+
 - 🏢 **15 Organizations** - Complete org structure
 - 📦 **66 Repositories** - All repos with star counts
 - 📊 **Activity Metrics** - Commits, PRs, issues, stars, forks
@@ -85,6 +93,7 @@ Monitor all 15 GitHub organizations and 66 repositories.
 ---
 
 ### 5. **device-railway.sh** - Railway Deployments 🚂
+
 Monitor all 12+ Railway projects and deployments.
 
 ```bash
@@ -92,6 +101,7 @@ Monitor all 12+ Railway projects and deployments.
 ```
 
 **Features:**
+
 - 🚀 **12+ Projects** - All active Railway services
 - 📊 **Deployment Stats** - 847 lifetime deploys
 - 💻 **Resource Usage** - CPU, memory, network I/O
@@ -104,6 +114,7 @@ Monitor all 12+ Railway projects and deployments.
 ---
 
 ### 6. **blackroad-master-control.sh** - MASTER CONTROL CENTER ⚡
+
 The ultimate unified dashboard - ALL systems in one view!
 
 ```bash
@@ -111,6 +122,7 @@ The ultimate unified dashboard - ALL systems in one view!
 ```
 
 **Features:**
+
 - 🌐 **ALL DEVICES** - 5 network devices in one grid
 - ☁️ **CLOUDFLARE** - 16 zones, 8 Pages, 8 KV, 1 D1
 - 🐙 **GITHUB** - 15 orgs, 66 repos
@@ -121,6 +133,7 @@ The ultimate unified dashboard - ALL systems in one view!
 - 🔗 **SSH MENU** - Quick SSH access (press 's')
 
 **Interactive Controls:**
+
 - `1` - Jump to Pi Fleet dashboard
 - `2` - Jump to Cloudflare dashboard
 - `3` - Jump to GitHub dashboard (coming soon)
@@ -134,26 +147,28 @@ The ultimate unified dashboard - ALL systems in one view!
 
 ## 🎨 Dashboard Matrix
 
-| Dashboard | Focus | Devices | Auto-Refresh | Interactive |
-|-----------|-------|---------|--------------|-------------|
-| **Master Control** ⚡ | Everything | 5 | ✅ 5s | ✅ Full |
-| Cosmic Lottery ∞ | Probability | 5 | ✅ 5s | ✅ Yes |
-| Pi Fleet 🥧 | Raspberry Pi | 4 | ✅ 5s | ❌ No |
-| Cloudflare ☁️ | Edge Network | 1 | ✅ 5s | ❌ No |
-| GitHub 🐙 | Repos/Orgs | 0 | ✅ 5s | ❌ No |
-| Railway 🚂 | Deployments | 0 | ✅ 5s | ❌ No |
+| Dashboard             | Focus        | Devices | Auto-Refresh | Interactive |
+| --------------------- | ------------ | ------- | ------------ | ----------- |
+| **Master Control** ⚡ | Everything   | 5       | ✅ 5s        | ✅ Full     |
+| Cosmic Lottery ∞      | Probability  | 5       | ✅ 5s        | ✅ Yes      |
+| Pi Fleet 🥧           | Raspberry Pi | 4       | ✅ 5s        | ❌ No       |
+| Cloudflare ☁️         | Edge Network | 1       | ✅ 5s        | ❌ No       |
+| GitHub 🐙             | Repos/Orgs   | 0       | ✅ 5s        | ❌ No       |
+| Railway 🚂            | Deployments  | 0       | ✅ 5s        | ❌ No       |
 
 ---
 
 ## 🚀 Quick Start
 
 ### Run Master Control (RECOMMENDED)
+
 ```bash
 cd ~/blackroad-dashboards
 ./blackroad-master-control.sh
 ```
 
 ### Run Individual Dashboards
+
 ```bash
 # Cosmic lottery simulator
 ./blackroad-cosmic-lottery.sh
@@ -176,20 +191,26 @@ cd ~/blackroad-dashboards
 ## 🎯 Use Cases
 
 ### For Daily Monitoring
+
 👉 **Use:** `blackroad-master-control.sh`
+
 - See everything at once
 - Jump to detailed views as needed
 - Quick SSH access
 
 ### For Infrastructure Deep Dive
+
 👉 **Use:** Device-specific dashboards
+
 - `device-raspberry-pi.sh` - When managing Pi cluster
 - `device-cloudflare.sh` - When configuring edge network
 - `device-github.sh` - When reviewing repos
 - `device-railway.sh` - When deploying services
 
 ### For Fun & Demo
+
 👉 **Use:** `blackroad-cosmic-lottery.sh`
+
 - Show off your infrastructure
 - Watch quantum probability computing
 - Simulate infinite parallel universes
@@ -202,6 +223,7 @@ cd ~/blackroad-dashboards
 **You now have:**
 
 ### Existing Dashboards (6)
+
 1. `blackroad-dashboard.sh` - Basic
 2. `blackroad-live-dashboard.sh` - Live Monitor
 3. `blackroad-full-system.sh` - Enhanced
@@ -210,6 +232,7 @@ cd ~/blackroad-dashboards
 6. `agent-detail.sh` - Agent Detail Viewer
 
 ### NEW Dashboards (6)
+
 7. `blackroad-master-control.sh` - **MASTER CONTROL CENTER** ⚡
 8. `blackroad-cosmic-lottery.sh` - **COSMIC LOTTERY** ∞
 9. `device-raspberry-pi.sh` - **Pi Fleet Monitor** 🥧
@@ -241,14 +264,18 @@ All dashboards use the official BlackRoad colors:
 ## 💡 Pro Tips
 
 ### 1. Run Master Control on Startup
+
 Add to `~/.bashrc` or `~/.zshrc`:
+
 ```bash
 alias br-control='~/blackroad-dashboards/blackroad-master-control.sh'
 alias br-lottery='~/blackroad-dashboards/blackroad-cosmic-lottery.sh'
 ```
 
 ### 2. SSH Keys Required
+
 For quick SSH access, make sure you have keys configured:
+
 ```bash
 ssh-copy-id lucidia@192.168.4.38
 ssh-copy-id pi@192.168.4.64
@@ -257,13 +284,17 @@ ssh-copy-id root@159.65.43.12
 ```
 
 ### 3. Cloudflare API (Optional)
+
 For live Cloudflare stats in Ultimate dashboard:
+
 ```bash
 export CF_TOKEN="your_cloudflare_token"
 ```
 
 ### 4. Railway CLI (Optional)
+
 For Railway dashboard integration:
+
 ```bash
 npm install -g @railway/cli
 railway login
@@ -274,24 +305,28 @@ railway login
 ## 🌟 What Makes These Special?
 
 ### Real-Time Everything
+
 - All dashboards auto-refresh every 5 seconds
 - Live network checks via ping/curl
 - Dynamic sparklines and progress bars
 - Actual system metrics (uptime, load, etc.)
 
 ### Device-Specific Intelligence
+
 - Each dashboard knows its domain
 - Raspberry Pi dashboard knows all 4 Pis
 - Cloudflare dashboard knows all 16 zones
 - GitHub dashboard knows all 15 orgs
 
 ### Beautiful Terminal UI
+
 - 24-bit RGB color support
 - Unicode box drawing characters
 - Animated elements (pulsing indicators)
 - Consistent BlackRoad branding
 
 ### Production Ready
+
 - Safe ping/curl with timeouts
 - Graceful fallbacks for offline devices
 - No external dependencies (pure bash)
@@ -302,6 +337,7 @@ railway login
 ## 🔮 Future Enhancements
 
 Coming soon:
+
 - [ ] Port 8080 Cadillac monitoring
 - [ ] DigitalOcean droplet deep dive
 - [ ] Memory system integration
@@ -316,6 +352,7 @@ Coming soon:
 ## 📝 Architecture
 
 ### Master Control Pattern
+
 ```
 blackroad-master-control.sh (hub)
     ├─> device-raspberry-pi.sh (Pi fleet)
@@ -326,6 +363,7 @@ blackroad-master-control.sh (hub)
 ```
 
 ### Data Flow
+
 1. Master Control runs main loop (5s refresh)
 2. Pings all 5 devices in parallel
 3. Curls all key domains
@@ -337,21 +375,21 @@ blackroad-master-control.sh (hub)
 
 ## 🎭 Which Dashboard Should I Use Now?
 
-| Situation | Dashboard | Why |
-|-----------|-----------|-----|
-| Just checking in | **Master Control** ⚡ | See everything at once |
-| Pi cluster issues | **Pi Fleet** 🥧 | Deep Pi metrics |
-| DNS/CDN changes | **Cloudflare** ☁️ | Zone/Pages/KV/D1 details |
-| Code review day | **GitHub** 🐙 | All repos and activity |
-| Deploy day | **Railway** 🚂 | Deployment stats |
-| Demo/presentation | **Cosmic Lottery** ∞ | Wow factor! |
-| SSH needed | **Ultimate** (existing) | Interactive SSH menu |
-| Retro vibes | **OS95** (existing) | Windows 95 UI |
+| Situation         | Dashboard               | Why                      |
+| ----------------- | ----------------------- | ------------------------ |
+| Just checking in  | **Master Control** ⚡   | See everything at once   |
+| Pi cluster issues | **Pi Fleet** 🥧         | Deep Pi metrics          |
+| DNS/CDN changes   | **Cloudflare** ☁️       | Zone/Pages/KV/D1 details |
+| Code review day   | **GitHub** 🐙           | All repos and activity   |
+| Deploy day        | **Railway** 🚂          | Deployment stats         |
+| Demo/presentation | **Cosmic Lottery** ∞    | Wow factor!              |
+| SSH needed        | **Ultimate** (existing) | Interactive SSH menu     |
+| Retro vibes       | **OS95** (existing)     | Windows 95 UI            |
 
 ---
 
 **Created with 💜 for BlackRoad OS**
 
-*Now featuring 12 terminal dashboards for complete infrastructure control!*
+_Now featuring 12 terminal dashboards for complete infrastructure control!_
 
 **Colors:** #FF9D00 #FF6B00 #FF0066 #FF006B #D600AA #7700FF #0066FF #FFD700

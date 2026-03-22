@@ -22,8 +22,8 @@
  *   ssh pi@192.168.4.89 'cd /home/pi/blackroad-services && npm install && pm2 start ecosystem.config.cjs --only payment-gateway'
  */
 
-const dotenv = require('dotenv');
-dotenv.config();
+const dotenv = require('dotenv')
+dotenv.config()
 
 module.exports = {
   apps: [
@@ -120,4 +120,4 @@ module.exports = {
       watch: false,
     },
   ],
-};
+}

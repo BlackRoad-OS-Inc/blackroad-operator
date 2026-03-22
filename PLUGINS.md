@@ -28,13 +28,13 @@
 
 BlackRoad OS uses a plugin system to:
 
-| Benefit | Description |
-|---------|-------------|
+| Benefit           | Description                               |
+| ----------------- | ----------------------------------------- |
 | **Extensibility** | Add new capabilities without core changes |
-| **Modularity** | Install only what you need |
-| **Community** | Share and reuse functionality |
-| **Isolation** | Plugins run in sandboxed environments |
-| **Hot-reload** | Update plugins without restarts |
+| **Modularity**    | Install only what you need                |
+| **Community**     | Share and reuse functionality             |
+| **Isolation**     | Plugins run in sandboxed environments     |
+| **Hot-reload**    | Update plugins without restarts           |
 
 ### Plugin Ecosystem
 
@@ -100,8 +100,8 @@ my-plugin/
 # plugin.yaml
 name: my-awesome-plugin
 version: 1.2.0
-description: "An awesome plugin that does amazing things"
-author: "Your Name <you@example.com>"
+description: 'An awesome plugin that does amazing things'
+author: 'Your Name <you@example.com>'
 license: MIT
 homepage: https://github.com/you/my-awesome-plugin
 
@@ -114,30 +114,30 @@ tags:
 
 # Compatibility
 blackroad:
-  min_version: "2.0.0"
-  max_version: "3.0.0"
+  min_version: '2.0.0'
+  max_version: '3.0.0'
 
 # Dependencies
 dependencies:
   - name: httpx
-    version: ">=0.24.0"
+    version: '>=0.24.0'
   - name: pydantic
-    version: ">=2.0.0"
+    version: '>=2.0.0'
 
 # Plugin dependencies
 plugin_dependencies:
   - name: core-utils
-    version: ">=1.0.0"
+    version: '>=1.0.0'
 
 # Entry point
 entry_point: src.main:MyAwesomePlugin
 
 # Permissions required
 permissions:
-  - network          # HTTP requests
-  - filesystem:read  # Read files
-  - secrets:read     # Read secrets
-  - agents:spawn     # Spawn sub-agents
+  - network # HTTP requests
+  - filesystem:read # Read files
+  - secrets:read # Read secrets
+  - agents:spawn # Spawn sub-agents
 
 # Configuration schema
 config_schema:
@@ -145,7 +145,7 @@ config_schema:
   properties:
     api_key:
       type: string
-      description: "API key for external service"
+      description: 'API key for external service'
       secret: true
     max_retries:
       type: integer
@@ -165,10 +165,10 @@ hooks:
 # Exported tools
 tools:
   - name: awesome_search
-    description: "Search for awesome things"
+    description: 'Search for awesome things'
     handler: src.tools:awesome_search
   - name: awesome_process
-    description: "Process awesome data"
+    description: 'Process awesome data'
     handler: src.tools:awesome_process
 ```
 
@@ -1436,18 +1436,18 @@ blackroad plugin test <path>
 
 ### Plugin Manifest Fields
 
-| Field | Required | Description |
-|-------|----------|-------------|
-| `name` | Yes | Plugin identifier |
-| `version` | Yes | Semantic version |
-| `description` | Yes | Short description |
-| `author` | Yes | Author email |
-| `entry_point` | Yes | Main class path |
-| `permissions` | No | Required permissions |
-| `dependencies` | No | Python dependencies |
-| `config_schema` | No | Configuration schema |
-| `tools` | No | Exported tools |
-| `hooks` | No | Lifecycle hooks |
+| Field           | Required | Description          |
+| --------------- | -------- | -------------------- |
+| `name`          | Yes      | Plugin identifier    |
+| `version`       | Yes      | Semantic version     |
+| `description`   | Yes      | Short description    |
+| `author`        | Yes      | Author email         |
+| `entry_point`   | Yes      | Main class path      |
+| `permissions`   | No       | Required permissions |
+| `dependencies`  | No       | Python dependencies  |
+| `config_schema` | No       | Configuration schema |
+| `tools`         | No       | Exported tools       |
+| `hooks`         | No       | Lifecycle hooks      |
 
 ---
 
@@ -1461,4 +1461,4 @@ blackroad plugin test <path>
 
 ---
 
-*Ride the Road. Pave Tomorrow.*
+_Ride the Road. Pave Tomorrow._

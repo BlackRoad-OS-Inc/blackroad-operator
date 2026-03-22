@@ -33,14 +33,14 @@ Performance is critical for BlackRoad OS to handle **30,000 concurrent agents** 
 
 ### Key Metrics
 
-| Metric | Target | Critical |
-|--------|--------|----------|
-| API Latency (P50) | <50ms | <200ms |
-| API Latency (P99) | <200ms | <1s |
-| Agent Response | <500ms | <2s |
-| Memory Search | <100ms | <500ms |
-| Task Throughput | >1000/min | >100/min |
-| Error Rate | <0.1% | <1% |
+| Metric            | Target    | Critical |
+| ----------------- | --------- | -------- |
+| API Latency (P50) | <50ms     | <200ms   |
+| API Latency (P99) | <200ms    | <1s      |
+| Agent Response    | <500ms    | <2s      |
+| Memory Search     | <100ms    | <500ms   |
+| Task Throughput   | >1000/min | >100/min |
+| Error Rate        | <0.1%     | <1%      |
 
 ---
 
@@ -68,11 +68,11 @@ Performance is critical for BlackRoad OS to handle **30,000 concurrent agents** 
 ### By Scale
 
 | Agents | Tasks/min | Memory Ops/s | API Requests/s |
-|--------|-----------|--------------|----------------|
-| 100 | 500 | 1,000 | 100 |
-| 1,000 | 2,000 | 5,000 | 500 |
-| 10,000 | 10,000 | 20,000 | 2,000 |
-| 30,000 | 30,000 | 50,000 | 5,000 |
+| ------ | --------- | ------------ | -------------- |
+| 100    | 500       | 1,000        | 100            |
+| 1,000  | 2,000     | 5,000        | 500            |
+| 10,000 | 10,000    | 20,000       | 2,000          |
+| 30,000 | 30,000    | 50,000       | 5,000          |
 
 ---
 
@@ -921,6 +921,7 @@ benchmark(lambda: deserialize(serialized))
 
 ```markdown
 ## Before Deployment
+
 - [ ] All queries have indexes
 - [ ] Connection pools configured
 - [ ] Caching enabled
@@ -929,12 +930,14 @@ benchmark(lambda: deserialize(serialized))
 - [ ] Load tested at 2x expected traffic
 
 ## Monitoring
+
 - [ ] Latency alerts configured
 - [ ] Error rate alerts configured
 - [ ] Resource usage alerts configured
 - [ ] Dashboards set up
 
 ## Optimization
+
 - [ ] Profiled hot paths
 - [ ] Batching where possible
 - [ ] Async everywhere
@@ -943,15 +946,15 @@ benchmark(lambda: deserialize(serialized))
 
 ### Common Optimizations
 
-| Problem | Solution |
-|---------|----------|
-| Slow queries | Add indexes, optimize SQL |
-| High memory | Use streaming, generators |
-| Connection exhaustion | Connection pooling |
-| Slow API | Caching, batching |
-| CPU bound | Worker processes |
-| Network latency | Keep-alive, HTTP/2 |
+| Problem               | Solution                  |
+| --------------------- | ------------------------- |
+| Slow queries          | Add indexes, optimize SQL |
+| High memory           | Use streaming, generators |
+| Connection exhaustion | Connection pooling        |
+| Slow API              | Caching, batching         |
+| CPU bound             | Worker processes          |
+| Network latency       | Keep-alive, HTTP/2        |
 
 ---
 
-*Last updated: 2026-02-05*
+_Last updated: 2026-02-05_

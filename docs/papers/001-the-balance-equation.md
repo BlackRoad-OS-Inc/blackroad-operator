@@ -227,5 +227,5 @@ The balance point doesn't need a Greek letter. The growth constant doesn't need 
 
 ---
 
-*BlackRoad OS, Inc.*
-*Pave Tomorrow.*
+_BlackRoad OS, Inc._
+_Pave Tomorrow._

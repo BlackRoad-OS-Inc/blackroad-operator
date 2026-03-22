@@ -592,13 +592,13 @@ vercel promote <deployment-url>
 
 ### Common Issues
 
-| Issue | Solution |
-|-------|----------|
-| Wrangler auth failed | `wrangler login` |
-| Railway timeout | Increase healthcheck timeout |
-| Vercel build failed | Check build logs |
-| Pi offline | Check network/power |
+| Issue                | Solution                     |
+| -------------------- | ---------------------------- |
+| Wrangler auth failed | `wrangler login`             |
+| Railway timeout      | Increase healthcheck timeout |
+| Vercel build failed  | Check build logs             |
+| Pi offline           | Check network/power          |
 
 ---
 
-*Last updated: 2026-02-05*
+_Last updated: 2026-02-05_

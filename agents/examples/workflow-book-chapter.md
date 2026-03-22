@@ -8,8 +8,8 @@ Use this workflow when an author has voice notes, fragments, or strategic notes,
 
 ## Agent Used
 
-| Agent | Role |
-|-------|------|
+| Agent          | Role                                                                                                 |
+| -------------- | ---------------------------------------------------------------------------------------------------- |
 | Book Co-Author | Converts source material into a versioned chapter draft with editorial notes and next-step questions |
 
 ## Example Activation

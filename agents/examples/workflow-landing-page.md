@@ -8,12 +8,12 @@ You need a landing page for a new product launch. It needs to look great, conver
 
 ## Agent Team
 
-| Agent | Role in this workflow |
-|-------|---------------------|
-| Content Creator | Write the copy |
-| UI Designer | Design the layout and component specs |
-| Frontend Developer | Build it |
-| Growth Hacker | Optimize for conversion |
+| Agent              | Role in this workflow                 |
+| ------------------ | ------------------------------------- |
+| Content Creator    | Write the copy                        |
+| UI Designer        | Design the layout and component specs |
+| Frontend Developer | Build it                              |
+| Growth Hacker      | Optimize for conversion               |
 
 ## The Workflow
 
@@ -102,14 +102,14 @@ Give me specific changes, not general advice.
 
 ## Timeline
 
-| Time | Activity | Agent |
-|------|----------|-------|
-| 9:00 | Copy + design kick off (parallel) | Content Creator + UI Designer |
-| 11:00 | Build starts | Frontend Developer |
-| 14:00 | First version ready | — |
-| 14:30 | Conversion review | Growth Hacker |
-| 15:30 | Apply feedback | Frontend Developer |
-| 16:30 | Ship | Deploy to Vercel/Netlify |
+| Time  | Activity                          | Agent                         |
+| ----- | --------------------------------- | ----------------------------- |
+| 9:00  | Copy + design kick off (parallel) | Content Creator + UI Designer |
+| 11:00 | Build starts                      | Frontend Developer            |
+| 14:00 | First version ready               | —                             |
+| 14:30 | Conversion review                 | Growth Hacker                 |
+| 15:30 | Apply feedback                    | Frontend Developer            |
+| 16:30 | Ship                              | Deploy to Vercel/Netlify      |
 
 ## Key Patterns
 

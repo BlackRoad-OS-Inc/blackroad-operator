@@ -5,17 +5,17 @@
  */
 
 export interface PricingTier {
-  id: string;
-  name: string;
-  priceMonthly: number;
-  priceYearly: number;
-  features: string[];
-  agentLimit: number;
-  trialDays: number;
-  stripePriceEnvMonthly: string;
-  stripePriceEnvYearly: string;
-  cta: string;
-  popular?: boolean;
+  id: string
+  name: string
+  priceMonthly: number
+  priceYearly: number
+  features: string[]
+  agentLimit: number
+  trialDays: number
+  stripePriceEnvMonthly: string
+  stripePriceEnvYearly: string
+  cta: string
+  popular?: boolean
 }
 
 export const PRICING: PricingTier[] = [
@@ -100,17 +100,18 @@ export const PRICING: PricingTier[] = [
     stripePriceEnvYearly: '',
     cta: 'Contact Sales',
   },
-];
+]
 
 export function getTier(id: string): PricingTier | undefined {
-  return PRICING.find((t) => t.id === id);
+  return PRICING.find((t) => t.id === id)
 }
 
 export function getStripePriceId(
   tier: PricingTier,
   period: 'monthly' | 'yearly',
 ): string {
-  const envKey = period === 'yearly' ? tier.stripePriceEnvYearly : tier.stripePriceEnvMonthly;
-  if (!envKey) return '';
-  return process.env[envKey] || '';
+  const envKey =
+    period === 'yearly' ? tier.stripePriceEnvYearly : tier.stripePriceEnvMonthly
+  if (!envKey) return ''
+  return process.env[envKey] || ''
 }

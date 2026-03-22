@@ -1,13 +1,13 @@
-"use client";
+'use client'
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef } from 'react'
 
 export default function SessionLog({ entries }: { entries: string[] }) {
-  const endRef = useRef<HTMLDivElement>(null);
+  const endRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [entries]);
+    endRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [entries])
 
   return (
     <div className="bg-[#0d0d0d] rounded-xl border border-[var(--border)] font-mono text-xs overflow-hidden">
@@ -17,7 +17,9 @@ export default function SessionLog({ entries }: { entries: string[] }) {
       </div>
       <div className="p-3 max-h-48 overflow-y-auto space-y-0.5">
         {entries.length === 0 && (
-          <span className="text-[var(--text-secondary)]">Waiting for activity...</span>
+          <span className="text-[var(--text-secondary)]">
+            Waiting for activity...
+          </span>
         )}
         {entries.map((line, i) => (
           <div key={i} className="text-[var(--text-secondary)] leading-5">
@@ -28,5 +30,5 @@ export default function SessionLog({ entries }: { entries: string[] }) {
         <div ref={endRef} />
       </div>
     </div>
-  );
+  )
 }

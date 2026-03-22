@@ -7,6 +7,7 @@
 ## Overview
 
 The Achievement System gamifies agent interactions by rewarding users with:
+
 - **Achievements** - Unlockable milestones
 - **XP & Levels** - Progress from level 1 to 100
 - **Leaderboards** - Compete with other agents
@@ -21,6 +22,7 @@ The Achievement System gamifies agent interactions by rewarding users with:
 **10+ achievements** across 4 categories:
 
 #### Productivity
+
 - **First Steps** (Bronze) - Send your first 100 tokens
 - **Token Master** (Silver) - Send 10,000 tokens
 - **Productivity Guru** (Gold) - Send 100,000 tokens
@@ -28,24 +30,28 @@ The Achievement System gamifies agent interactions by rewarding users with:
 - **Task Master** (Gold) - Complete 100 tasks
 
 #### Collaboration
+
 - **Team Player** (Bronze) - Attend your first meeting
 - **Meeting Regular** (Silver) - Attend 10 meetings
 - **Collaborator** (Gold) - Send 100 messages in meetings
 
 #### Social
+
 - **Social Butterfly** (Silver) - Interact with 5 different agents
 
 #### Special
+
 - **Early Adopter** (Diamond) - Use AgentMonitor on day 1
 
 #### Achievement Tiers
-| Tier | Color | XP Reward |
-|------|-------|-----------|
-| Bronze | #CD7F32 | 50-100 XP |
-| Silver | #C0C0C0 | 150-200 XP |
-| Gold | #FFD700 | 400-500 XP |
+
+| Tier     | Color   | XP Reward   |
+| -------- | ------- | ----------- |
+| Bronze   | #CD7F32 | 50-100 XP   |
+| Silver   | #C0C0C0 | 150-200 XP  |
+| Gold     | #FFD700 | 400-500 XP  |
 | Platinum | #E5E4E2 | 750-1000 XP |
-| Diamond | #B9F2FF | 1000+ XP |
+| Diamond  | #B9F2FF | 1000+ XP    |
 
 ---
 
@@ -54,34 +60,38 @@ The Achievement System gamifies agent interactions by rewarding users with:
 **Level Progression:** 1 → 100
 
 #### XP Sources
-| Activity | XP Earned |
-|----------|-----------|
-| Send 100 tokens | +10 XP |
-| Complete task | +50 XP |
-| Attend meeting | +25 XP |
-| Send message | +5 XP |
-| Daily login | +100 XP |
+
+| Activity           | XP Earned  |
+| ------------------ | ---------- |
+| Send 100 tokens    | +10 XP     |
+| Complete task      | +50 XP     |
+| Attend meeting     | +25 XP     |
+| Send message       | +5 XP      |
+| Daily login        | +100 XP    |
 | Unlock achievement | 50-1000 XP |
 
 #### Level Titles
-| Level | Title | Badge |
-|-------|-------|-------|
-| 1-4 | Novice | 🔰 |
-| 5-9 | Apprentice | ⭐ |
-| 10-14 | Journeyman | 🥉 |
-| 15-19 | Expert | 🥈 |
-| 20-24 | Master | 🥇 |
-| 25-29 | Grand Master | 🏆 |
-| 30-39 | Legend | 🌟 |
-| 40-49 | Mythic | 💎 |
-| 50+ | Ascended | 👑 |
+
+| Level | Title        | Badge |
+| ----- | ------------ | ----- |
+| 1-4   | Novice       | 🔰    |
+| 5-9   | Apprentice   | ⭐    |
+| 10-14 | Journeyman   | 🥉    |
+| 15-19 | Expert       | 🥈    |
+| 20-24 | Master       | 🥇    |
+| 25-29 | Grand Master | 🏆    |
+| 30-39 | Legend       | 🌟    |
+| 40-49 | Mythic       | 💎    |
+| 50+   | Ascended     | 👑    |
 
 #### XP Curve
+
 ```typescript
 XP for level = 100 × 1.5^(level - 1)
 ```
 
 Example:
+
 - Level 1 → 2: 100 XP
 - Level 10 → 11: 3,844 XP
 - Level 50 → 51: 593,745,762 XP
@@ -91,6 +101,7 @@ Example:
 ### 3. Leaderboards 🏅
 
 **6 Leaderboard Categories:**
+
 1. **Total XP** - Top agents by XP earned
 2. **Tokens Sent** - Most tokens sent
 3. **Tasks Completed** - Most tasks finished
@@ -99,11 +110,13 @@ Example:
 6. **Highest Level** - Highest level reached
 
 **Time Periods:**
+
 - Weekly
 - Monthly
 - All-time
 
 **Rank Badges:**
+
 - 🥇 1st Place
 - 🥈 2nd Place
 - 🥉 3rd Place
@@ -114,6 +127,7 @@ Example:
 ### 4. Performance Metrics 📊
 
 **Tracked Metrics:**
+
 - Tokens sent/received
 - Tasks completed
 - Meetings attended
@@ -122,6 +136,7 @@ Example:
 - Productivity score (0-100%)
 
 **Productivity Score:**
+
 - 90-100%: Excellent 🟢
 - 70-89%: Good 🟡
 - 0-69%: Needs Improvement 🔴
@@ -193,9 +208,9 @@ createLeaderboard(agents, category, period)
 
 ```typescript
 interface AchievementState {
-  achievements: Achievement[];
-  totalXP: number;
-  unlockedCount: number;
+  achievements: Achievement[]
+  totalXP: number
+  unlockedCount: number
 }
 ```
 
@@ -203,11 +218,11 @@ interface AchievementState {
 
 ```typescript
 interface XPState {
-  currentXP: number;
-  level: number;
-  progressToNextLevel: number;
-  totalXP: number;
-  xpHistory: XPEntry[];
+  currentXP: number
+  level: number
+  progressToNextLevel: number
+  totalXP: number
+  xpHistory: XPEntry[]
 }
 ```
 
@@ -215,12 +230,12 @@ interface XPState {
 
 ```typescript
 interface LeaderboardEntry {
-  rank: number;
-  agentId: string;
-  agentName: string;
-  agentEmoji: string;
-  value: number;
-  badge?: string;
+  rank: number
+  agentId: string
+  agentName: string
+  agentEmoji: string
+  value: number
+  badge?: string
 }
 ```
 
@@ -251,12 +266,12 @@ Edit `src/lib/xp.ts`:
 
 ```typescript
 export const XP_REWARDS = {
-  per_100_tokens: 10,  // Change this
+  per_100_tokens: 10, // Change this
   per_task_completed: 50,
   per_meeting_attended: 25,
   per_message_sent: 5,
   daily_login: 100,
-};
+}
 ```
 
 ### Changing Level Curve
@@ -265,7 +280,7 @@ Edit `src/lib/xp.ts`:
 
 ```typescript
 export function getXPForLevel(level: number): number {
-  return Math.floor(100 * Math.pow(1.5, level - 1));
+  return Math.floor(100 * Math.pow(1.5, level - 1))
   // Change 1.5 to adjust difficulty
 }
 ```
@@ -285,16 +300,19 @@ export function getXPForLevel(level: number): number {
 ## Troubleshooting
 
 ### Achievements not unlocking?
+
 - Check if requirements are met
 - Refresh the page
 - Check browser console for errors
 
 ### XP not increasing?
+
 - Verify activities are being tracked
 - Check systemStats in dashboard
 - Refresh the page
 
 ### Leaderboard not updating?
+
 - Wait for next refresh cycle
 - Verify agent data is being collected
 - Check network tab for API calls

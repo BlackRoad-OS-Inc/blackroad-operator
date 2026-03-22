@@ -300,6 +300,6 @@ That is mathematics. Everything else is administration.
 
 ---
 
-*BlackRoad OS, Inc.*
-*Minnesota, 2026*
-*Pave Tomorrow.*
+_BlackRoad OS, Inc._
+_Minnesota, 2026_
+_Pave Tomorrow._

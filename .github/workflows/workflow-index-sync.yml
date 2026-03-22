@@ -37,7 +37,7 @@ jobs:
             const workflowIdLabel = issue.labels.find(l => 
               l.name.match(/^(WF|SEC|INF|EXP|FIX)-\d{8}-[A-Z]{3}-\d{4}$/)
             );
-            
+
             const workflowId = workflowIdLabel 
               ? workflowIdLabel.name 
               : null;
@@ -100,20 +100,20 @@ jobs:
         run: |
           ENTRY='${{ steps.metadata.outputs.entry }}'
           WORKFLOW_ID='${{ steps.metadata.outputs.workflow_id }}'
-          
+
           # Create index file if it doesn't exist
           touch .blackroad/workflow-index.jsonl
-          
+
           # Check if entry already exists (by ID)
           if grep -q "\"id\":\"$WORKFLOW_ID\"" .blackroad/workflow-index.jsonl; then
             # Update existing entry (remove old, append new)
             grep -v "\"id\":\"$WORKFLOW_ID\"" .blackroad/workflow-index.jsonl > .blackroad/workflow-index.tmp
             mv .blackroad/workflow-index.tmp .blackroad/workflow-index.jsonl
           fi
-          
+
           # Append new entry
           echo "$ENTRY" >> .blackroad/workflow-index.jsonl
-          
+
           echo "✅ Updated workflow index: $WORKFLOW_ID"
 
       - name: Update sync timestamp
@@ -126,9 +126,9 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          
+
           git add .blackroad/workflow-index.jsonl .blackroad/last-sync.txt
-          
+
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else

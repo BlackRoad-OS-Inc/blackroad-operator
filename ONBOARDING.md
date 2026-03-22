@@ -21,13 +21,13 @@ BlackRoad OS is a **30,000 agent orchestration platform** that enables sovereign
 
 ### Core Concepts
 
-| Concept | Description |
-|---------|-------------|
-| **Agent** | Autonomous AI worker (LUCIDIA, ALICE, etc.) |
-| **Task** | Work unit assigned to an agent |
-| **Memory** | Persistent knowledge storage |
-| **CeCe** | Dynamic task planner (Conscious Emergent Collaborative Entity) |
-| **Trinity** | Traffic light system (greenlight/yellowlight/redlight) |
+| Concept     | Description                                                    |
+| ----------- | -------------------------------------------------------------- |
+| **Agent**   | Autonomous AI worker (LUCIDIA, ALICE, etc.)                    |
+| **Task**    | Work unit assigned to an agent                                 |
+| **Memory**  | Persistent knowledge storage                                   |
+| **CeCe**    | Dynamic task planner (Conscious Emergent Collaborative Entity) |
+| **Trinity** | Traffic light system (greenlight/yellowlight/redlight)         |
 
 ### Agent Types
 
@@ -304,20 +304,20 @@ gh pr create --title "Fix typo in README" --body "Fixed spelling error"
 
 ### Must Read (Day 1)
 
-| Document | Purpose | Time |
-|----------|---------|------|
-| CLAUDE.md | AI assistant guidance | 15 min |
-| ARCHITECTURE.md | System design | 20 min |
-| CONTRIBUTING.md | How to contribute | 10 min |
+| Document        | Purpose               | Time   |
+| --------------- | --------------------- | ------ |
+| CLAUDE.md       | AI assistant guidance | 15 min |
+| ARCHITECTURE.md | System design         | 20 min |
+| CONTRIBUTING.md | How to contribute     | 10 min |
 
 ### Recommended (Week 1)
 
-| Document | Purpose | Time |
-|----------|---------|------|
-| PLANNING.md | Development plans | 15 min |
-| ROADMAP.md | Feature timeline | 10 min |
-| SECURITY.md | Security policies | 10 min |
-| DEPLOYMENT.md | How to deploy | 20 min |
+| Document      | Purpose           | Time   |
+| ------------- | ----------------- | ------ |
+| PLANNING.md   | Development plans | 15 min |
+| ROADMAP.md    | Feature timeline  | 10 min |
+| SECURITY.md   | Security policies | 10 min |
+| DEPLOYMENT.md | How to deploy     | 20 min |
 
 ### Deep Dive (Month 1)
 
@@ -364,23 +364,24 @@ docker compose up -d
 
 ### Resources
 
-| Resource | URL |
-|----------|-----|
-| Documentation | docs.blackroad.io |
+| Resource      | URL                                             |
+| ------------- | ----------------------------------------------- |
+| Documentation | docs.blackroad.io                               |
 | GitHub Issues | github.com/blackboxprogramming/blackroad/issues |
-| Discord | discord.gg/blackroad |
+| Discord       | discord.gg/blackroad                            |
 
 ### Contacts
 
-| Role | Contact |
-|------|---------|
-| General | blackroad.systems@gmail.com |
-| Alexa | blackroad@gmail.com |
-| Security | security@blackroad.io |
+| Role     | Contact                     |
+| -------- | --------------------------- |
+| General  | blackroad.systems@gmail.com |
+| Alexa    | blackroad@gmail.com         |
+| Security | security@blackroad.io       |
 
 ### FAQ
 
 **Q: Why is Ollama not connecting?**
+
 ```bash
 # Check if running
 curl http://localhost:11434/api/tags
@@ -390,6 +391,7 @@ ollama serve
 ```
 
 **Q: How do I reset my environment?**
+
 ```bash
 # Clean install
 rm -rf node_modules
@@ -398,6 +400,7 @@ npm install
 ```
 
 **Q: Where are the agent logs?**
+
 ```bash
 # View logs
 ./logs.sh
@@ -426,4 +429,4 @@ Congratulations! You now have:
 
 ---
 
-*Welcome to BlackRoad OS! 🖤🛣️*
+_Welcome to BlackRoad OS! 🖤🛣️_

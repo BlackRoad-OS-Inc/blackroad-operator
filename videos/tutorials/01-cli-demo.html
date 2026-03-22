@@ -1,180 +1,407 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=1920,height=1080">
-<title>BlackRoad CLI — Tutorial</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-html,body{width:1920px;height:1080px;overflow:hidden;background:#000;color:#fff;font-family:'Space Grotesk',sans-serif}
-.scene{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;opacity:0;transition:opacity .6s}
-.scene.active{opacity:1}
-.mono{font-family:'JetBrains Mono',monospace}
-.grad{background:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.grad-line{height:3px;border-radius:2px;background:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF)}
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920,height=1080" />
+    <title>BlackRoad CLI — Tutorial</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: #000;
+        color: #fff;
+        font-family: 'Space Grotesk', sans-serif;
+      }
+      .scene {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        opacity: 0;
+        transition: opacity 0.6s;
+      }
+      .scene.active {
+        opacity: 1;
+      }
+      .mono {
+        font-family: 'JetBrains Mono', monospace;
+      }
+      .grad {
+        background: linear-gradient(
+          90deg,
+          #ff6b2b,
+          #ff2255,
+          #cc00aa,
+          #8844ff,
+          #4488ff,
+          #00d4ff
+        );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      .grad-line {
+        height: 3px;
+        border-radius: 2px;
+        background: linear-gradient(
+          90deg,
+          #ff6b2b,
+          #ff2255,
+          #cc00aa,
+          #8844ff,
+          #4488ff,
+          #00d4ff
+        );
+      }
 
-/* Terminal window */
-.term-window{width:1400px;background:#0a0a0a;border:1px solid rgba(255,255,255,.1);border-radius:12px;overflow:hidden}
-.term-bar{height:40px;background:rgba(255,255,255,.03);border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;padding:0 16px;gap:8px}
-.term-dot{width:12px;height:12px;border-radius:50%}
-.term-dot.r{background:#ff5f57}.term-dot.y{background:#febc2e}.term-dot.g{background:#28c840}
-.term-title{flex:1;text-align:center;font-family:'JetBrains Mono',monospace;font-size:12px;color:rgba(255,255,255,.3)}
-.term-body{padding:28px 32px;font-family:'JetBrains Mono',monospace;font-size:16px;line-height:1.9;min-height:500px;overflow:hidden}
-.term-body .prompt{color:#8844FF}
-.term-body .cmd{color:#fff}
-.term-body .output{color:rgba(255,255,255,.5)}
-.term-body .success{color:#22c55e}
-.term-body .error{color:#ef4444}
-.term-body .info{color:#4488FF}
-.term-body .pink{color:#FF2255}
-.term-body .dim{color:rgba(255,255,255,.2)}
+      /* Terminal window */
+      .term-window {
+        width: 1400px;
+        background: #0a0a0a;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        overflow: hidden;
+      }
+      .term-bar {
+        height: 40px;
+        background: rgba(255, 255, 255, 0.03);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        display: flex;
+        align-items: center;
+        padding: 0 16px;
+        gap: 8px;
+      }
+      .term-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+      }
+      .term-dot.r {
+        background: #ff5f57;
+      }
+      .term-dot.y {
+        background: #febc2e;
+      }
+      .term-dot.g {
+        background: #28c840;
+      }
+      .term-title {
+        flex: 1;
+        text-align: center;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.3);
+      }
+      .term-body {
+        padding: 28px 32px;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 16px;
+        line-height: 1.9;
+        min-height: 500px;
+        overflow: hidden;
+      }
+      .term-body .prompt {
+        color: #8844ff;
+      }
+      .term-body .cmd {
+        color: #fff;
+      }
+      .term-body .output {
+        color: rgba(255, 255, 255, 0.5);
+      }
+      .term-body .success {
+        color: #22c55e;
+      }
+      .term-body .error {
+        color: #ef4444;
+      }
+      .term-body .info {
+        color: #4488ff;
+      }
+      .term-body .pink {
+        color: #ff2255;
+      }
+      .term-body .dim {
+        color: rgba(255, 255, 255, 0.2);
+      }
 
-.tline{opacity:0;transform:translateY(5px);transition:all .3s}
-.tline.show{opacity:1;transform:translateY(0)}
-</style>
-</head>
-<body>
-
-<!-- SCENE 1: Title -->
-<div class="scene" id="s1">
-  <div class="mono" style="font-size:13px;letter-spacing:.3em;color:rgba(255,255,255,.3);margin-bottom:16px">TUTORIAL</div>
-  <div style="font-size:56px;font-weight:700">The <span class="grad">br</span> CLI</div>
-  <div class="grad-line" style="width:150px;margin-top:24px"></div>
-  <div style="font-size:18px;color:rgba(255,255,255,.4);margin-top:20px">90 tools. One command.</div>
-</div>
-
-<!-- SCENE 2: br status -->
-<div class="scene" id="s2">
-  <div class="term-window">
-    <div class="term-bar">
-      <div class="term-dot r"></div><div class="term-dot y"></div><div class="term-dot g"></div>
-      <div class="term-title">blackroad@alexandria — zsh</div>
+      .tline {
+        opacity: 0;
+        transform: translateY(5px);
+        transition: all 0.3s;
+      }
+      .tline.show {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- SCENE 1: Title -->
+    <div class="scene" id="s1">
+      <div
+        class="mono"
+        style="
+          font-size: 13px;
+          letter-spacing: 0.3em;
+          color: rgba(255, 255, 255, 0.3);
+          margin-bottom: 16px;
+        "
+      >
+        TUTORIAL
+      </div>
+      <div style="font-size: 56px; font-weight: 700">
+        The <span class="grad">br</span> CLI
+      </div>
+      <div class="grad-line" style="width: 150px; margin-top: 24px"></div>
+      <div
+        style="
+          font-size: 18px;
+          color: rgba(255, 255, 255, 0.4);
+          margin-top: 20px;
+        "
+      >
+        90 tools. One command.
+      </div>
     </div>
-    <div class="term-body" id="term1"></div>
-  </div>
-</div>
 
-<!-- SCENE 3: br deploy -->
-<div class="scene" id="s3">
-  <div class="term-window">
-    <div class="term-bar">
-      <div class="term-dot r"></div><div class="term-dot y"></div><div class="term-dot g"></div>
-      <div class="term-title">blackroad@alexandria — deploy</div>
+    <!-- SCENE 2: br status -->
+    <div class="scene" id="s2">
+      <div class="term-window">
+        <div class="term-bar">
+          <div class="term-dot r"></div>
+          <div class="term-dot y"></div>
+          <div class="term-dot g"></div>
+          <div class="term-title">blackroad@alexandria — zsh</div>
+        </div>
+        <div class="term-body" id="term1"></div>
+      </div>
     </div>
-    <div class="term-body" id="term2"></div>
-  </div>
-</div>
 
-<!-- SCENE 4: br agents -->
-<div class="scene" id="s4">
-  <div class="term-window">
-    <div class="term-bar">
-      <div class="term-dot r"></div><div class="term-dot y"></div><div class="term-dot g"></div>
-      <div class="term-title">blackroad@alexandria — agents</div>
+    <!-- SCENE 3: br deploy -->
+    <div class="scene" id="s3">
+      <div class="term-window">
+        <div class="term-bar">
+          <div class="term-dot r"></div>
+          <div class="term-dot y"></div>
+          <div class="term-dot g"></div>
+          <div class="term-title">blackroad@alexandria — deploy</div>
+        </div>
+        <div class="term-body" id="term2"></div>
+      </div>
     </div>
-    <div class="term-body" id="term3"></div>
-  </div>
-</div>
 
-<!-- SCENE 5: CTA -->
-<div class="scene" id="s5">
-  <div style="font-size:48px;font-weight:700" class="grad">90 tools. Zero friction.</div>
-  <div style="font-size:20px;color:rgba(255,255,255,.3);margin-top:24px;font-family:'JetBrains Mono',monospace">github.com/blackboxprogramming/BlackRoad-Operating-System</div>
-</div>
+    <!-- SCENE 4: br agents -->
+    <div class="scene" id="s4">
+      <div class="term-window">
+        <div class="term-bar">
+          <div class="term-dot r"></div>
+          <div class="term-dot y"></div>
+          <div class="term-dot g"></div>
+          <div class="term-title">blackroad@alexandria — agents</div>
+        </div>
+        <div class="term-body" id="term3"></div>
+      </div>
+    </div>
 
-<script>
-function typeTerminal(id, lines, charDelay = 30) {
-  const el = document.getElementById(id);
-  el.innerHTML = '';
-  let totalDelay = 0;
+    <!-- SCENE 5: CTA -->
+    <div class="scene" id="s5">
+      <div style="font-size: 48px; font-weight: 700" class="grad">
+        90 tools. Zero friction.
+      </div>
+      <div
+        style="
+          font-size: 20px;
+          color: rgba(255, 255, 255, 0.3);
+          margin-top: 24px;
+          font-family: 'JetBrains Mono', monospace;
+        "
+      >
+        github.com/blackboxprogramming/BlackRoad-Operating-System
+      </div>
+    </div>
 
-  lines.forEach(line => {
-    const div = document.createElement('div');
-    div.className = 'tline';
+    <script>
+      function typeTerminal(id, lines, charDelay = 30) {
+        const el = document.getElementById(id)
+        el.innerHTML = ''
+        let totalDelay = 0
 
-    if (line.type === 'input') {
-      totalDelay += 200;
-      const promptSpan = `<span class="prompt">blackroad@alexandria</span> <span class="dim">~ $</span> `;
-      div.innerHTML = promptSpan;
-      el.appendChild(div);
-      setTimeout(() => div.classList.add('show'), totalDelay);
+        lines.forEach((line) => {
+          const div = document.createElement('div')
+          div.className = 'tline'
 
-      // Type each character
-      const chars = line.text.split('');
-      chars.forEach((char, ci) => {
-        totalDelay += charDelay;
-        setTimeout(() => {
-          div.innerHTML = promptSpan + `<span class="cmd">${line.text.slice(0, ci + 1)}</span><span class="dim" style="animation:blink .7s step-end infinite">_</span>`;
-        }, totalDelay);
-      });
-      totalDelay += 400; // Pause after typing
-      setTimeout(() => {
-        div.innerHTML = promptSpan + `<span class="cmd">${line.text}</span>`;
-      }, totalDelay);
-    } else {
-      totalDelay += line.delay || 80;
-      div.innerHTML = `<span class="${line.type || 'output'}">${line.text}</span>`;
-      el.appendChild(div);
-      setTimeout(() => div.classList.add('show'), totalDelay);
-    }
-  });
-}
+          if (line.type === 'input') {
+            totalDelay += 200
+            const promptSpan = `<span class="prompt">blackroad@alexandria</span> <span class="dim">~ $</span> `
+            div.innerHTML = promptSpan
+            el.appendChild(div)
+            setTimeout(() => div.classList.add('show'), totalDelay)
 
-const scenes = document.querySelectorAll('.scene');
-const durations = [3500, 8000, 7000, 7000, 4000];
-let cur = 0;
+            // Type each character
+            const chars = line.text.split('')
+            chars.forEach((char, ci) => {
+              totalDelay += charDelay
+              setTimeout(() => {
+                div.innerHTML =
+                  promptSpan +
+                  `<span class="cmd">${line.text.slice(0, ci + 1)}</span><span class="dim" style="animation:blink .7s step-end infinite">_</span>`
+              }, totalDelay)
+            })
+            totalDelay += 400 // Pause after typing
+            setTimeout(() => {
+              div.innerHTML =
+                promptSpan + `<span class="cmd">${line.text}</span>`
+            }, totalDelay)
+          } else {
+            totalDelay += line.delay || 80
+            div.innerHTML = `<span class="${line.type || 'output'}">${line.text}</span>`
+            el.appendChild(div)
+            setTimeout(() => div.classList.add('show'), totalDelay)
+          }
+        })
+      }
 
-function show(i) {
-  if (i >= scenes.length) return;
-  scenes.forEach(s => s.classList.remove('active'));
-  scenes[i].classList.add('active');
+      const scenes = document.querySelectorAll('.scene')
+      const durations = [3500, 8000, 7000, 7000, 4000]
+      let cur = 0
 
-  if (i === 1) typeTerminal('term1', [
-    { type: 'input', text: 'br status --fleet' },
-    { type: 'output', text: '' },
-    { type: 'pink', text: '  ━━━ BlackRoad Fleet Status ━━━', delay: 200 },
-    { type: 'output', text: '' },
-    { type: 'success', text: '  ✓ Alice      192.168.4.49    Pi 400   65 routes     online' },
-    { type: 'success', text: '  ✓ Cecilia    192.168.4.96    Pi 5     Hailo-8       online' },
-    { type: 'success', text: '  ✓ Octavia    192.168.4.100   Pi 5     1TB NVMe      online' },
-    { type: 'error', text: '  ✗ Aria       192.168.4.98    Pi 5     Portainer     offline' },
-    { type: 'success', text: '  ✓ Lucidia    192.168.4.38    Pi 5     334 apps      online' },
-    { type: 'output', text: '' },
-    { type: 'info', text: '  Fleet: 4/5 online │ 52 TOPS │ WireGuard mesh active' },
-  ]);
+      function show(i) {
+        if (i >= scenes.length) return
+        scenes.forEach((s) => s.classList.remove('active'))
+        scenes[i].classList.add('active')
 
-  if (i === 2) typeTerminal('term2', [
-    { type: 'input', text: 'br deploy blackboard --production' },
-    { type: 'output', text: '' },
-    { type: 'info', text: '  ▸ Building blackboard worker...', delay: 300 },
-    { type: 'output', text: '  ▸ Uploading 73.45 KiB (gzip: 17.91 KiB)', delay: 400 },
-    { type: 'output', text: '  ▸ Migrating D1 database (89 queries)...', delay: 400 },
-    { type: 'success', text: '  ✓ Migration applied (10 tables, 40+ indexes)', delay: 300 },
-    { type: 'output', text: '  ▸ Deploying to Cloudflare Workers...', delay: 500 },
-    { type: 'success', text: '  ✓ Deployed to bb.blackroad.io', delay: 300 },
-    { type: 'output', text: '' },
-    { type: 'success', text: '  BlackBoard v2 live │ 200+ data points per visitor' },
-  ]);
+        if (i === 1)
+          typeTerminal('term1', [
+            { type: 'input', text: 'br status --fleet' },
+            { type: 'output', text: '' },
+            {
+              type: 'pink',
+              text: '  ━━━ BlackRoad Fleet Status ━━━',
+              delay: 200,
+            },
+            { type: 'output', text: '' },
+            {
+              type: 'success',
+              text: '  ✓ Alice      192.168.4.49    Pi 400   65 routes     online',
+            },
+            {
+              type: 'success',
+              text: '  ✓ Cecilia    192.168.4.96    Pi 5     Hailo-8       online',
+            },
+            {
+              type: 'success',
+              text: '  ✓ Octavia    192.168.4.100   Pi 5     1TB NVMe      online',
+            },
+            {
+              type: 'error',
+              text: '  ✗ Aria       192.168.4.98    Pi 5     Portainer     offline',
+            },
+            {
+              type: 'success',
+              text: '  ✓ Lucidia    192.168.4.38    Pi 5     334 apps      online',
+            },
+            { type: 'output', text: '' },
+            {
+              type: 'info',
+              text: '  Fleet: 4/5 online │ 52 TOPS │ WireGuard mesh active',
+            },
+          ])
 
-  if (i === 3) typeTerminal('term3', [
-    { type: 'input', text: 'br agents list' },
-    { type: 'output', text: '' },
-    { type: 'pink', text: '  ━━━ Agent Registry ━━━', delay: 200 },
-    { type: 'output', text: '' },
-    { type: 'output', text: '  <span class="info">Octavia</span>    The Architect    systems design, strategy        <span class="success">active</span>' },
-    { type: 'output', text: '  <span class="info">Lucidia</span>    The Dreamer      creative, vision, memory        <span class="success">active</span>' },
-    { type: 'output', text: '  <span class="info">Alice</span>      The Operator     DevOps, automation, routing     <span class="success">active</span>' },
-    { type: 'output', text: '  <span class="info">Aria</span>       The Interface    frontend, UX, design            <span class="error">offline</span>' },
-    { type: 'output', text: '  <span class="info">Shellfish</span>  The Hacker       security, exploits, recon       <span class="success">active</span>' },
-    { type: 'output', text: '  <span class="info">Cecilia</span>    The Voice        TTS, NLP, conversation          <span class="success">active</span>' },
-    { type: 'output', text: '' },
-    { type: 'info', text: '  14 agents registered │ 5/6 active │ load balanced' },
-  ]);
+        if (i === 2)
+          typeTerminal('term2', [
+            { type: 'input', text: 'br deploy blackboard --production' },
+            { type: 'output', text: '' },
+            {
+              type: 'info',
+              text: '  ▸ Building blackboard worker...',
+              delay: 300,
+            },
+            {
+              type: 'output',
+              text: '  ▸ Uploading 73.45 KiB (gzip: 17.91 KiB)',
+              delay: 400,
+            },
+            {
+              type: 'output',
+              text: '  ▸ Migrating D1 database (89 queries)...',
+              delay: 400,
+            },
+            {
+              type: 'success',
+              text: '  ✓ Migration applied (10 tables, 40+ indexes)',
+              delay: 300,
+            },
+            {
+              type: 'output',
+              text: '  ▸ Deploying to Cloudflare Workers...',
+              delay: 500,
+            },
+            {
+              type: 'success',
+              text: '  ✓ Deployed to bb.blackroad.io',
+              delay: 300,
+            },
+            { type: 'output', text: '' },
+            {
+              type: 'success',
+              text: '  BlackBoard v2 live │ 200+ data points per visitor',
+            },
+          ])
 
-  setTimeout(() => show(i + 1), durations[i]);
-}
-show(0);
-</script>
-</body>
+        if (i === 3)
+          typeTerminal('term3', [
+            { type: 'input', text: 'br agents list' },
+            { type: 'output', text: '' },
+            { type: 'pink', text: '  ━━━ Agent Registry ━━━', delay: 200 },
+            { type: 'output', text: '' },
+            {
+              type: 'output',
+              text: '  <span class="info">Octavia</span>    The Architect    systems design, strategy        <span class="success">active</span>',
+            },
+            {
+              type: 'output',
+              text: '  <span class="info">Lucidia</span>    The Dreamer      creative, vision, memory        <span class="success">active</span>',
+            },
+            {
+              type: 'output',
+              text: '  <span class="info">Alice</span>      The Operator     DevOps, automation, routing     <span class="success">active</span>',
+            },
+            {
+              type: 'output',
+              text: '  <span class="info">Aria</span>       The Interface    frontend, UX, design            <span class="error">offline</span>',
+            },
+            {
+              type: 'output',
+              text: '  <span class="info">Shellfish</span>  The Hacker       security, exploits, recon       <span class="success">active</span>',
+            },
+            {
+              type: 'output',
+              text: '  <span class="info">Cecilia</span>    The Voice        TTS, NLP, conversation          <span class="success">active</span>',
+            },
+            { type: 'output', text: '' },
+            {
+              type: 'info',
+              text: '  14 agents registered │ 5/6 active │ load balanced',
+            },
+          ])
+
+        setTimeout(() => show(i + 1), durations[i])
+      }
+      show(0)
+    </script>
+  </body>
 </html>

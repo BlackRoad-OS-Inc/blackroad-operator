@@ -10,15 +10,23 @@ import type {
   ThemeName,
   AgentAvatar,
   OwnerAvatar,
-} from './types';
+} from './types'
 
-export type { DashboardConfig, AgentConfig, OwnerConfig, GatewayConfig, ThemeName, AgentAvatar, OwnerAvatar };
+export type {
+  DashboardConfig,
+  AgentConfig,
+  OwnerConfig,
+  GatewayConfig,
+  ThemeName,
+  AgentAvatar,
+  OwnerAvatar,
+}
 
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
 
-export const MAX_AGENTS = 6;
+export const MAX_AGENTS = 6
 
 export const AGENT_COLOR_PALETTE = [
   '#4FC3F7', // blue
@@ -27,10 +35,22 @@ export const AGENT_COLOR_PALETTE = [
   '#AB47BC', // purple
   '#FFCA28', // yellow
   '#EF5350', // red
-];
+]
 
-export const AVATAR_OPTIONS: AgentAvatar[] = ['glasses', 'hoodie', 'suit', 'casual', 'robot', 'cat', 'dog'];
-export const OWNER_AVATAR_OPTIONS: OwnerAvatar[] = ['boss', 'casual', 'creative'];
+export const AVATAR_OPTIONS: AgentAvatar[] = [
+  'glasses',
+  'hoodie',
+  'suit',
+  'casual',
+  'robot',
+  'cat',
+  'dog',
+]
+export const OWNER_AVATAR_OPTIONS: OwnerAvatar[] = [
+  'boss',
+  'casual',
+  'creative',
+]
 
 // ---------------------------------------------------------------------------
 // Defaults
@@ -39,19 +59,37 @@ export const OWNER_AVATAR_OPTIONS: OwnerAvatar[] = ['boss', 'casual', 'creative'
 export const DEFAULT_GATEWAY: GatewayConfig = {
   url: 'http://localhost:18789',
   token: '',
-};
+}
 
 export const DEFAULT_OWNER: OwnerConfig = {
   name: 'Boss',
   emoji: '👔',
   avatar: 'boss',
-};
+}
 
 export const DEFAULT_AGENTS: AgentConfig[] = [
-  { id: 'main', name: 'Claude', emoji: '⚡', color: '#4FC3F7', avatar: 'glasses' },
-  { id: 'agent-2', name: 'GPT', emoji: '🔥', color: '#FF7043', avatar: 'hoodie' },
-  { id: 'agent-3', name: 'Gemini', emoji: '🌟', color: '#66BB6A', avatar: 'suit' },
-];
+  {
+    id: 'main',
+    name: 'Claude',
+    emoji: '⚡',
+    color: '#4FC3F7',
+    avatar: 'glasses',
+  },
+  {
+    id: 'agent-2',
+    name: 'GPT',
+    emoji: '🔥',
+    color: '#FF7043',
+    avatar: 'hoodie',
+  },
+  {
+    id: 'agent-3',
+    name: 'Gemini',
+    emoji: '🌟',
+    color: '#66BB6A',
+    avatar: 'suit',
+  },
+]
 
 export const DEFAULT_CONFIG: DashboardConfig = {
   agents: DEFAULT_AGENTS,
@@ -60,13 +98,13 @@ export const DEFAULT_CONFIG: DashboardConfig = {
   theme: 'default',
   connected: false,
   demoMode: false,
-};
+}
 
 // ---------------------------------------------------------------------------
 // localStorage Persistence
 // ---------------------------------------------------------------------------
 
-const STORAGE_KEY = 'agent-dashboard-config';
+const STORAGE_KEY = 'agent-dashboard-config'
 
 function cloneConfig(config: DashboardConfig): DashboardConfig {
   return {
@@ -76,16 +114,16 @@ function cloneConfig(config: DashboardConfig): DashboardConfig {
     theme: config.theme,
     connected: config.connected,
     demoMode: config.demoMode,
-  };
+  }
 }
 
 /** Load config from localStorage, falling back to defaults */
 export function loadConfig(): DashboardConfig {
-  if (typeof window === 'undefined') return cloneConfig(DEFAULT_CONFIG);
+  if (typeof window === 'undefined') return cloneConfig(DEFAULT_CONFIG)
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return applyUrlParams(cloneConfig(DEFAULT_CONFIG));
-    const parsed = JSON.parse(raw) as Partial<DashboardConfig>;
+    const raw = localStorage.getItem(STORAGE_KEY)
+    if (!raw) return applyUrlParams(cloneConfig(DEFAULT_CONFIG))
+    const parsed = JSON.parse(raw) as Partial<DashboardConfig>
     const config: DashboardConfig = {
       agents: Array.isArray(parsed.agents)
         ? parsed.agents.slice(0, MAX_AGENTS).map((agent) => ({ ...agent }))
@@ -95,47 +133,51 @@ export function loadConfig(): DashboardConfig {
       theme: parsed.theme ?? DEFAULT_CONFIG.theme,
       connected: false,
       demoMode: parsed.demoMode ?? false,
-    };
-    return applyUrlParams(config);
+    }
+    return applyUrlParams(config)
   } catch {
-    return applyUrlParams(cloneConfig(DEFAULT_CONFIG));
+    return applyUrlParams(cloneConfig(DEFAULT_CONFIG))
   }
 }
 
 /** Save config to localStorage */
 export function saveConfig(config: DashboardConfig): void {
-  if (typeof window === 'undefined') return;
+  if (typeof window === 'undefined') return
   const serializable = {
     agents: config.agents,
     owner: config.owner,
     gateway: config.gateway,
     theme: config.theme,
     demoMode: config.demoMode,
-  };
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(serializable));
+  }
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(serializable))
 }
 
 /** Clear stored config */
 export function clearConfig(): void {
-  if (typeof window === 'undefined') return;
-  localStorage.removeItem(STORAGE_KEY);
+  if (typeof window === 'undefined') return
+  localStorage.removeItem(STORAGE_KEY)
 }
 
 /** Export config as JSON string */
 export function exportConfig(config: DashboardConfig): string {
-  return JSON.stringify({
-    agents: config.agents,
-    owner: config.owner,
-    gateway: config.gateway,
-    theme: config.theme,
-  }, null, 2);
+  return JSON.stringify(
+    {
+      agents: config.agents,
+      owner: config.owner,
+      gateway: config.gateway,
+      theme: config.theme,
+    },
+    null,
+    2,
+  )
 }
 
 /** Import config from JSON string */
 export function importConfig(json: string): DashboardConfig | null {
   try {
-    const parsed = JSON.parse(json);
-    if (!parsed.agents || !parsed.owner) return null;
+    const parsed = JSON.parse(json)
+    if (!parsed.agents || !parsed.owner) return null
     return {
       agents: parsed.agents.map((agent: AgentConfig) => ({ ...agent })),
       owner: { ...parsed.owner },
@@ -143,9 +185,9 @@ export function importConfig(json: string): DashboardConfig | null {
       theme: parsed.theme ?? 'default',
       connected: false,
       demoMode: false,
-    };
+    }
   } catch {
-    return null;
+    return null
   }
 }
 
@@ -154,52 +196,71 @@ export function importConfig(json: string): DashboardConfig | null {
 // ---------------------------------------------------------------------------
 
 function applyUrlParams(config: DashboardConfig): DashboardConfig {
-  if (typeof window === 'undefined') return config;
+  if (typeof window === 'undefined') return config
   try {
-    const params = new URLSearchParams(window.location.search);
-    const gateway = params.get('gateway');
-    const token = params.get('token');
+    const params = new URLSearchParams(window.location.search)
+    const gateway = params.get('gateway')
+    const token = params.get('token')
     if (gateway) {
-      config.gateway.url = gateway;
-      config.demoMode = false;
+      config.gateway.url = gateway
+      config.demoMode = false
     }
     if (token) {
-      config.gateway.token = token;
+      config.gateway.token = token
     }
   } catch {
     // ignore
   }
-  return config;
+  return config
 }
 
 // ---------------------------------------------------------------------------
 // Mutation helpers (return new config objects for React state)
 // ---------------------------------------------------------------------------
 
-export function updateGateway(config: DashboardConfig, gw: Partial<GatewayConfig>): DashboardConfig {
-  return { ...config, gateway: { ...config.gateway, ...gw } };
+export function updateGateway(
+  config: DashboardConfig,
+  gw: Partial<GatewayConfig>,
+): DashboardConfig {
+  return { ...config, gateway: { ...config.gateway, ...gw } }
 }
 
-export function updateOwner(config: DashboardConfig, owner: Partial<OwnerConfig>): DashboardConfig {
-  return { ...config, owner: { ...config.owner, ...owner } };
+export function updateOwner(
+  config: DashboardConfig,
+  owner: Partial<OwnerConfig>,
+): DashboardConfig {
+  return { ...config, owner: { ...config.owner, ...owner } }
 }
 
-export function updateTheme(config: DashboardConfig, theme: ThemeName): DashboardConfig {
-  return { ...config, theme };
+export function updateTheme(
+  config: DashboardConfig,
+  theme: ThemeName,
+): DashboardConfig {
+  return { ...config, theme }
 }
 
-export function addAgent(config: DashboardConfig, agent: AgentConfig): DashboardConfig {
-  if (config.agents.length >= MAX_AGENTS) return config;
-  return { ...config, agents: [...config.agents, agent] };
+export function addAgent(
+  config: DashboardConfig,
+  agent: AgentConfig,
+): DashboardConfig {
+  if (config.agents.length >= MAX_AGENTS) return config
+  return { ...config, agents: [...config.agents, agent] }
 }
 
-export function removeAgent(config: DashboardConfig, id: string): DashboardConfig {
-  return { ...config, agents: config.agents.filter(a => a.id !== id) };
+export function removeAgent(
+  config: DashboardConfig,
+  id: string,
+): DashboardConfig {
+  return { ...config, agents: config.agents.filter((a) => a.id !== id) }
 }
 
-export function updateAgent(config: DashboardConfig, id: string, patch: Partial<AgentConfig>): DashboardConfig {
+export function updateAgent(
+  config: DashboardConfig,
+  id: string,
+  patch: Partial<AgentConfig>,
+): DashboardConfig {
   return {
     ...config,
-    agents: config.agents.map(a => (a.id === id ? { ...a, ...patch } : a)),
-  };
+    agents: config.agents.map((a) => (a.id === id ? { ...a, ...patch } : a)),
+  }
 }

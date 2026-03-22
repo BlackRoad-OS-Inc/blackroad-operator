@@ -10,42 +10,46 @@ Something is broken in production. Users are affected. Speed of response matters
 
 ## Severity Classification
 
-| Level | Definition | Examples | Response Time |
-|-------|-----------|----------|--------------|
-| **P0 — Critical** | Service completely down, data loss, security breach | Database corruption, DDoS attack, auth system failure | Immediate (all hands) |
-| **P1 — High** | Major feature broken, significant performance degradation | Payment processing down, 50%+ error rate, 10x latency | < 1 hour |
-| **P2 — Medium** | Minor feature broken, workaround available | Search not working, non-critical API errors | < 4 hours |
-| **P3 — Low** | Cosmetic issue, minor inconvenience | Styling bug, typo, minor UI glitch | Next sprint |
+| Level             | Definition                                                | Examples                                              | Response Time         |
+| ----------------- | --------------------------------------------------------- | ----------------------------------------------------- | --------------------- |
+| **P0 — Critical** | Service completely down, data loss, security breach       | Database corruption, DDoS attack, auth system failure | Immediate (all hands) |
+| **P1 — High**     | Major feature broken, significant performance degradation | Payment processing down, 50%+ error rate, 10x latency | < 1 hour              |
+| **P2 — Medium**   | Minor feature broken, workaround available                | Search not working, non-critical API errors           | < 4 hours             |
+| **P3 — Low**      | Cosmetic issue, minor inconvenience                       | Styling bug, typo, minor UI glitch                    | Next sprint           |
 
 ## Response Teams by Severity
 
 ### P0 — Critical Response Team
-| Agent | Role | Action |
-|-------|------|--------|
-| **Infrastructure Maintainer** | Incident commander | Assess scope, coordinate response |
-| **DevOps Automator** | Deployment/rollback | Execute rollback if needed |
-| **Backend Architect** | Root cause investigation | Diagnose system issues |
-| **Frontend Developer** | UI-side investigation | Diagnose client-side issues |
-| **Support Responder** | User communication | Status page updates, user notifications |
-| **Executive Summary Generator** | Stakeholder communication | Real-time executive updates |
+
+| Agent                           | Role                      | Action                                  |
+| ------------------------------- | ------------------------- | --------------------------------------- |
+| **Infrastructure Maintainer**   | Incident commander        | Assess scope, coordinate response       |
+| **DevOps Automator**            | Deployment/rollback       | Execute rollback if needed              |
+| **Backend Architect**           | Root cause investigation  | Diagnose system issues                  |
+| **Frontend Developer**          | UI-side investigation     | Diagnose client-side issues             |
+| **Support Responder**           | User communication        | Status page updates, user notifications |
+| **Executive Summary Generator** | Stakeholder communication | Real-time executive updates             |
 
 ### P1 — High Response Team
-| Agent | Role |
-|-------|------|
+
+| Agent                         | Role               |
+| ----------------------------- | ------------------ |
 | **Infrastructure Maintainer** | Incident commander |
-| **DevOps Automator** | Deployment support |
-| **Relevant Developer Agent** | Fix implementation |
-| **Support Responder** | User communication |
+| **DevOps Automator**          | Deployment support |
+| **Relevant Developer Agent**  | Fix implementation |
+| **Support Responder**         | User communication |
 
 ### P2 — Medium Response
-| Agent | Role |
-|-------|------|
+
+| Agent                        | Role               |
+| ---------------------------- | ------------------ |
 | **Relevant Developer Agent** | Fix implementation |
-| **Evidence Collector** | Verify fix |
+| **Evidence Collector**       | Verify fix         |
 
 ### P3 — Low Response
-| Agent | Role |
-|-------|------|
+
+| Agent                  | Role           |
+| ---------------------- | -------------- |
 | **Sprint Prioritizer** | Add to backlog |
 
 ## Incident Response Sequence
@@ -186,6 +190,7 @@ Output: Post-Mortem Report → Sprint Prioritizer adds prevention tasks to backl
 ## Communication Templates
 
 ### Status Page Update (Support Responder)
+
 ```
 [TIMESTAMP] — [SERVICE NAME] Incident
 
@@ -196,6 +201,7 @@ Next update: [When to expect the next update]
 ```
 
 ### Executive Update (Executive Summary Generator — P0 only)
+
 ```
 INCIDENT BRIEF — [TIMESTAMP]
 
@@ -208,10 +214,10 @@ NEXT UPDATE: [Timestamp]
 
 ## Escalation Matrix
 
-| Condition | Escalate To | Action |
-|-----------|------------|--------|
-| P0 not resolved in 30 min | Studio Producer | Additional resources, vendor escalation |
-| P1 not resolved in 2 hours | Project Shepherd | Resource reallocation |
-| Data breach suspected | Legal Compliance Checker | Regulatory notification assessment |
-| User data affected | Legal Compliance Checker + Executive Summary Generator | GDPR/CCPA notification |
-| Revenue impact > $X | Finance Tracker + Studio Producer | Business impact assessment |
+| Condition                  | Escalate To                                            | Action                                  |
+| -------------------------- | ------------------------------------------------------ | --------------------------------------- |
+| P0 not resolved in 30 min  | Studio Producer                                        | Additional resources, vendor escalation |
+| P1 not resolved in 2 hours | Project Shepherd                                       | Resource reallocation                   |
+| Data breach suspected      | Legal Compliance Checker                               | Regulatory notification assessment      |
+| User data affected         | Legal Compliance Checker + Executive Summary Generator | GDPR/CCPA notification                  |
+| Revenue impact > $X        | Finance Tracker + Studio Producer                      | Business impact assessment              |

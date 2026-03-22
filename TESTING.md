@@ -76,20 +76,20 @@ class TestAgent:
 
 ```typescript
 // tests/unit/agent.test.ts
-import { describe, it, expect } from 'vitest';
-import { Agent } from '../src/agent';
+import { describe, it, expect } from 'vitest'
+import { Agent } from '../src/agent'
 
 describe('Agent', () => {
   it('should create agent with valid config', () => {
-    const agent = new Agent({ name: 'TEST', type: 'worker' });
-    expect(agent.name).toBe('TEST');
-    expect(agent.status).toBe('initialized');
-  });
+    const agent = new Agent({ name: 'TEST', type: 'worker' })
+    expect(agent.name).toBe('TEST')
+    expect(agent.status).toBe('initialized')
+  })
 
   it('should throw error with invalid config', () => {
-    expect(() => new Agent({ name: '' })).toThrow('Invalid config');
-  });
-});
+    expect(() => new Agent({ name: '' })).toThrow('Invalid config')
+  })
+})
 ```
 
 ### Integration Tests
@@ -130,31 +130,31 @@ Test complete user workflows.
 
 ```typescript
 // tests/e2e/agent-workflow.spec.ts
-import { test, expect } from '@playwright/test';
+import { test, expect } from '@playwright/test'
 
 test.describe('Agent Workflow', () => {
   test('user can create and assign task to agent', async ({ page }) => {
     // Login
-    await page.goto('/login');
-    await page.fill('[name="email"]', 'test@example.com');
-    await page.fill('[name="password"]', 'password');
-    await page.click('button[type="submit"]');
+    await page.goto('/login')
+    await page.fill('[name="email"]', 'test@example.com')
+    await page.fill('[name="password"]', 'password')
+    await page.click('button[type="submit"]')
 
     // Navigate to agents
-    await page.click('text=Agents');
-    await expect(page).toHaveURL('/agents');
+    await page.click('text=Agents')
+    await expect(page).toHaveURL('/agents')
 
     // Create task
-    await page.click('text=New Task');
-    await page.fill('[name="title"]', 'Test Task');
-    await page.selectOption('[name="agent"]', 'ALICE');
-    await page.click('text=Create');
+    await page.click('text=New Task')
+    await page.fill('[name="title"]', 'Test Task')
+    await page.selectOption('[name="agent"]', 'ALICE')
+    await page.click('text=Create')
 
     // Verify task created
-    await expect(page.locator('text=Test Task')).toBeVisible();
-    await expect(page.locator('text=Assigned to ALICE')).toBeVisible();
-  });
-});
+    await expect(page.locator('text=Test Task')).toBeVisible()
+    await expect(page.locator('text=Assigned to ALICE')).toBeVisible()
+  })
+})
 ```
 
 ---
@@ -265,18 +265,18 @@ def test_agent_calls_external_api():
 ```
 
 ```typescript
-import { vi } from 'vitest';
+import { vi } from 'vitest'
 
 test('agent calls external API', async () => {
-  const mockFetch = vi.fn().mockResolvedValue({ status: 'ok' });
-  vi.stubGlobal('fetch', mockFetch);
+  const mockFetch = vi.fn().mockResolvedValue({ status: 'ok' })
+  vi.stubGlobal('fetch', mockFetch)
 
-  const agent = new Agent({ name: 'TEST' });
-  const result = await agent.fetchExternalData();
+  const agent = new Agent({ name: 'TEST' })
+  const result = await agent.fetchExternalData()
 
-  expect(mockFetch).toHaveBeenCalledOnce();
-  expect(result.status).toBe('ok');
-});
+  expect(mockFetch).toHaveBeenCalledOnce()
+  expect(result.status).toBe('ok')
+})
 ```
 
 ### Parameterized Tests
@@ -308,13 +308,13 @@ def test_agent_capabilities(agent_type, expected_capabilities):
 
 ### Coverage Targets
 
-| Component | Minimum | Target |
-|-----------|---------|--------|
-| Core Logic | 80% | 90% |
-| API Endpoints | 70% | 85% |
-| Agents | 75% | 90% |
-| Memory | 80% | 95% |
-| Utils | 90% | 95% |
+| Component     | Minimum | Target |
+| ------------- | ------- | ------ |
+| Core Logic    | 80%     | 90%    |
+| API Endpoints | 70%     | 85%    |
+| Agents        | 75%     | 90%    |
+| Memory        | 80%     | 95%    |
+| Utils         | 90%     | 95%    |
 
 ### Generate Coverage Report
 
@@ -703,4 +703,4 @@ def db():
 
 ---
 
-*Last updated: 2026-02-05*
+_Last updated: 2026-02-05_

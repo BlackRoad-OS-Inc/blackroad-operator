@@ -10,6 +10,7 @@ Train object detection, image classification, and SAM/SAM2 segmentation models o
 ## When to Use This Skill
 
 Use this skill when users want to:
+
 - Fine-tune object detection models (D-FINE, RT-DETR v2, DETR, YOLOS) on cloud GPUs or local
 - Fine-tune image classification models (timm: MobileNetV3, MobileViT, ResNet, ViT/DINOv3, or any Transformers classifier) on cloud GPUs or local
 - Fine-tune SAM or SAM2 models for segmentation / image matting using bbox or point prompts
@@ -27,6 +28,7 @@ Use this skill when users want to:
 ## Local Script Execution
 
 Helper scripts use PEP 723 inline dependencies. Run them with `uv run`:
+
 ```bash
 uv run scripts/dataset_inspector.py --dataset username/dataset-name --split train
 uv run scripts/estimate_cost.py --help
@@ -37,12 +39,14 @@ uv run scripts/estimate_cost.py --help
 Before starting any training job, verify:
 
 ### Account & Authentication
+
 - Hugging Face Account with [Pro](https://hf.co/pro), [Team](https://hf.co/enterprise), or [Enterprise](https://hf.co/enterprise) plan (Jobs require paid plan)
 - Authenticated login: Check with `hf_whoami()` (tool) or `hf auth whoami` (terminal)
 - Token has **write** permissions
 - **MUST pass token in job secrets** — see directive #3 below for syntax (MCP tool vs Python API)
 
 ### Dataset Requirements — Object Detection
+
 - Dataset must exist on Hub
 - Annotations must use the `objects` column with `bbox`, `category` (and optionally `area`) sub-fields
 - Bboxes can be in **xywh (COCO)** or **xyxy (Pascal VOC)** format — auto-detected and converted
@@ -51,6 +55,7 @@ Before starting any training job, verify:
 - **ALWAYS validate unknown datasets** before GPU training (see Dataset Validation section)
 
 ### Dataset Requirements — Image Classification
+
 - Dataset must exist on Hub
 - Must have an **`image` column** (PIL images) and a **`label` column** (integer class IDs or strings)
 - The label column can be `ClassLabel` type (with names) or plain integers/strings — strings are auto-remapped
@@ -58,6 +63,7 @@ Before starting any training job, verify:
 - **ALWAYS validate unknown datasets** before GPU training (see Dataset Validation section)
 
 ### Dataset Requirements — SAM/SAM2 Segmentation
+
 - Dataset must exist on Hub
 - Must have an **`image` column** (PIL images) and a **`mask` column** (binary ground-truth segmentation mask)
 - Must have a **prompt** — either:
@@ -69,6 +75,7 @@ Before starting any training job, verify:
 - **ALWAYS validate unknown datasets** before GPU training (see Dataset Validation section)
 
 ### Critical Settings
+
 - **Timeout must exceed expected training time** — Default 30min is TOO SHORT. See directive #6 for recommended values.
 - **Hub push must be enabled** — `push_to_hub=True`, `hub_model_id="username/model-name"`, token in `secrets`
 
@@ -81,6 +88,7 @@ Before starting any training job, verify:
 ### Running the Inspector
 
 **Option 1: Via HF Jobs (recommended — avoids local SSL/dependency issues):**
+
 ```python
 hf_jobs("uv", {
     "script": "path/to/dataset_inspector.py",
@@ -89,11 +97,13 @@ hf_jobs("uv", {
 ```
 
 **Option 2: Locally:**
+
 ```bash
 uv run scripts/dataset_inspector.py --dataset username/dataset-name --split train
 ```
 
 **Option 3: Via `HfApi().run_uv_job()` (if hf_jobs MCP unavailable):**
+
 ```python
 from huggingface_hub import HfApi
 api = HfApi()
@@ -216,13 +226,14 @@ print(f"Job ID: {job_info.id}")
 
 **Critical differences between the two methods:**
 
-| | `hf_jobs` MCP tool | `HfApi().run_uv_job()` |
-|---|---|---|
-| `script` param | Python code string or URL (NOT local paths) | File path to `.py` file (NOT content) |
-| Token in secrets | `"$HF_TOKEN"` (auto-replaced) | `get_token()` (actual token value) |
-| Timeout format | String (`"4h"`) | Seconds (`14400`) |
+|                  | `hf_jobs` MCP tool                          | `HfApi().run_uv_job()`                |
+| ---------------- | ------------------------------------------- | ------------------------------------- |
+| `script` param   | Python code string or URL (NOT local paths) | File path to `.py` file (NOT content) |
+| Token in secrets | `"$HF_TOKEN"` (auto-replaced)               | `get_token()` (actual token value)    |
+| Timeout format   | String (`"4h"`)                             | Seconds (`14400`)                     |
 
 **Rules for both methods:**
+
 - The training script MUST include PEP 723 inline metadata with dependencies
 - Do NOT use `image` or `command` parameters (those belong to `run_job()`, not `run_uv_job()`)
 
@@ -243,7 +254,7 @@ If you write a custom script, you MUST include this token injection before the `
 
 - Do NOT call `login()` in custom scripts unless replicating the full pattern from `scripts/object_detection_training.py`
 - Do NOT rely on implicit token resolution (`hub_token=None`) — unreliable in Jobs
-- See the `hugging-face-jobs` skill → *Token Usage Guide* for full details
+- See the `hugging-face-jobs` skill → _Token Usage Guide_ for full details
 
 ### 3. JobInfo attribute
 
@@ -301,12 +312,12 @@ Required flags for SAM/SAM2 segmentation:
 
 Default 30 min is TOO SHORT for object detection. Set minimum 2-4 hours. Add 30% buffer for model loading, preprocessing, and Hub push.
 
-| Scenario | Timeout |
-|----------|---------|
-| Quick test (100-200 images, 5-10 epochs) | 1h |
-| Development (500-1K images, 15-20 epochs) | 2-3h |
-| Production (1K-5K images, 30 epochs) | 4-6h |
-| Large dataset (5K+ images) | 6-12h |
+| Scenario                                  | Timeout |
+| ----------------------------------------- | ------- |
+| Quick test (100-200 images, 5-10 epochs)  | 1h      |
+| Development (500-1K images, 15-20 epochs) | 2-3h    |
+| Production (1K-5K images, 30 epochs)      | 4-6h    |
+| Large dataset (5K+ images)                | 6-12h   |
 
 ### 6. Trackio monitoring
 
@@ -318,14 +329,14 @@ Dashboard at: `https://huggingface.co/spaces/{username}/trackio`
 
 ### Recommended object detection models
 
-| Model | Params | Use case |
-|-------|--------|----------|
-| `ustc-community/dfine-small-coco` | 10.4M | Best starting point — fast, cheap, SOTA quality |
-| `PekingU/rtdetr_v2_r18vd` | 20.2M | Lightweight real-time detector |
-| `ustc-community/dfine-large-coco` | 31.4M | Higher accuracy, still efficient |
-| `PekingU/rtdetr_v2_r50vd` | 43M | Strong real-time baseline |
-| `ustc-community/dfine-xlarge-obj365` | 63.5M | Best accuracy (pretrained on Objects365) |
-| `PekingU/rtdetr_v2_r101vd` | 76M | Largest RT-DETR v2 variant |
+| Model                                | Params | Use case                                        |
+| ------------------------------------ | ------ | ----------------------------------------------- |
+| `ustc-community/dfine-small-coco`    | 10.4M  | Best starting point — fast, cheap, SOTA quality |
+| `PekingU/rtdetr_v2_r18vd`            | 20.2M  | Lightweight real-time detector                  |
+| `ustc-community/dfine-large-coco`    | 31.4M  | Higher accuracy, still efficient                |
+| `PekingU/rtdetr_v2_r50vd`            | 43M    | Strong real-time baseline                       |
+| `ustc-community/dfine-xlarge-obj365` | 63.5M  | Best accuracy (pretrained on Objects365)        |
+| `PekingU/rtdetr_v2_r101vd`           | 76M    | Largest RT-DETR v2 variant                      |
 
 Start with `ustc-community/dfine-small-coco` for fast iteration. Move to D-FINE Large or RT-DETR v2 R50 for better accuracy.
 
@@ -333,26 +344,26 @@ Start with `ustc-community/dfine-small-coco` for fast iteration. Move to D-FINE 
 
 All `timm/` models work out of the box via `AutoModelForImageClassification` (loaded as `TimmWrapperForImageClassification`). See [references/timm_trainer.md](references/timm_trainer.md) for details.
 
-| Model | Params | Use case |
-|-------|--------|----------|
-| `timm/mobilenetv3_small_100.lamb_in1k` | 2.5M | Ultra-lightweight — mobile/edge, fastest training |
-| `timm/mobilevit_s.cvnets_in1k` | 5.6M | Mobile transformer — good accuracy/speed trade-off |
-| `timm/resnet50.a1_in1k` | 25.6M | Strong CNN baseline — reliable, well-studied |
-| `timm/vit_base_patch16_dinov3.lvd1689m` | 86.6M | Best accuracy — DINOv3 self-supervised ViT |
+| Model                                   | Params | Use case                                           |
+| --------------------------------------- | ------ | -------------------------------------------------- |
+| `timm/mobilenetv3_small_100.lamb_in1k`  | 2.5M   | Ultra-lightweight — mobile/edge, fastest training  |
+| `timm/mobilevit_s.cvnets_in1k`          | 5.6M   | Mobile transformer — good accuracy/speed trade-off |
+| `timm/resnet50.a1_in1k`                 | 25.6M  | Strong CNN baseline — reliable, well-studied       |
+| `timm/vit_base_patch16_dinov3.lvd1689m` | 86.6M  | Best accuracy — DINOv3 self-supervised ViT         |
 
 Start with `timm/mobilenetv3_small_100.lamb_in1k` for fast iteration. Move to `timm/resnet50.a1_in1k` or `timm/vit_base_patch16_dinov3.lvd1689m` for better accuracy.
 
 ### Recommended SAM/SAM2 segmentation models
 
-| Model | Params | Use case |
-|-------|--------|----------|
-| `facebook/sam2.1-hiera-tiny` | 38.9M | Fastest SAM2 — good for quick experiments |
-| `facebook/sam2.1-hiera-small` | 46.0M | Best starting point — good quality/speed balance |
-| `facebook/sam2.1-hiera-base-plus` | 80.8M | Higher capacity for complex segmentation |
-| `facebook/sam2.1-hiera-large` | 224.4M | Best SAM2 accuracy — requires more VRAM |
-| `facebook/sam-vit-base` | 93.7M | Original SAM — ViT-B backbone |
-| `facebook/sam-vit-large` | 312.3M | Original SAM — ViT-L backbone |
-| `facebook/sam-vit-huge` | 641.1M | Original SAM — ViT-H, best SAM v1 accuracy |
+| Model                             | Params | Use case                                         |
+| --------------------------------- | ------ | ------------------------------------------------ |
+| `facebook/sam2.1-hiera-tiny`      | 38.9M  | Fastest SAM2 — good for quick experiments        |
+| `facebook/sam2.1-hiera-small`     | 46.0M  | Best starting point — good quality/speed balance |
+| `facebook/sam2.1-hiera-base-plus` | 80.8M  | Higher capacity for complex segmentation         |
+| `facebook/sam2.1-hiera-large`     | 224.4M | Best SAM2 accuracy — requires more VRAM          |
+| `facebook/sam-vit-base`           | 93.7M  | Original SAM — ViT-B backbone                    |
+| `facebook/sam-vit-large`          | 312.3M | Original SAM — ViT-L backbone                    |
+| `facebook/sam-vit-huge`           | 641.1M | Original SAM — ViT-H, best SAM v1 accuracy       |
 
 Start with `facebook/sam2.1-hiera-small` for fast iteration. SAM2 models are generally more efficient than SAM v1 at similar quality. Only the mask decoder is trained by default (vision and prompt encoders are frozen).
 
@@ -522,6 +533,7 @@ print(f"Job ID: {job_info.id}")
 ## Checking job status
 
 **MCP tool (if available):**
+
 ```
 hf_jobs("ps")                                   # List all jobs
 hf_jobs("logs", {"job_id": "your-job-id"})      # View logs
@@ -529,6 +541,7 @@ hf_jobs("inspect", {"job_id": "your-job-id"})   # Job details
 ```
 
 **Python API fallback:**
+
 ```python
 from huggingface_hub import HfApi
 api = HfApi()
@@ -540,24 +553,31 @@ api.get_job(job_id="your-job-id")                # Job details
 ## Common failure modes
 
 ### OOM (CUDA out of memory)
+
 Reduce `per_device_train_batch_size` (try 4, then 2), reduce `IMAGE_SIZE`, or upgrade hardware.
 
 ### Dataset format errors
+
 Run `scripts/dataset_inspector.py` first. The training script auto-detects xyxy vs xywh, converts string categories to integer IDs, and adds `image_id` if missing. Ensure `objects.bbox` contains 4-value coordinate lists in absolute pixels and `objects.category` contains either integer IDs or string labels.
 
 ### Hub push failures (401)
+
 Verify: (1) job secrets include token (see directive #2), (2) script sets `training_args.hub_token` BEFORE creating the `Trainer`, (3) `push_to_hub=True` is set, (4) correct `hub_model_id`, (5) token has write permissions.
 
 ### Job timeout
+
 Increase timeout (see directive #5 table), reduce epochs/dataset, or use checkpoint strategy with `hub_strategy="every_save"`.
 
 ### KeyError: 'test' (missing test split)
+
 The object detection training script handles this gracefully — it falls back to the `validation` split. Ensure you're using the latest `scripts/object_detection_training.py`.
 
 ### Single-class dataset: "iteration over a 0-d tensor"
+
 `torchmetrics.MeanAveragePrecision` returns scalar (0-d) tensors for per-class metrics when there's only one class. The template `scripts/object_detection_training.py` handles this by calling `.unsqueeze(0)` on these tensors. Ensure you're using the latest template.
 
 ### Poor detection performance (mAP < 0.15)
+
 Increase epochs (30-50), ensure 500+ images, check per-class mAP for imbalanced classes, try different learning rates (1e-5 to 1e-4), increase image size.
 
 For comprehensive troubleshooting: see [references/reliability_principles.md](references/reliability_principles.md)

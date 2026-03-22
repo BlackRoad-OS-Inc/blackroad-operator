@@ -54,6 +54,7 @@
 - ✨ Gemini
 
 **Features:**
+
 - 5/5 connections (fully mesh networked)
 - Live data flow visualization
 - Context sharing at 2.3 MB/s
@@ -76,6 +77,7 @@
 
 **Cross-Session Access:**
 Every AI session (Claude, ChatGPT, Grok, Gemini, etc.) has FULL access to:
+
 - Clone repos
 - Push changes
 - Pull updates
@@ -99,7 +101,9 @@ Every AI session (Claude, ChatGPT, Grok, Gemini, etc.) has FULL access to:
 **Local:** MacBook Pro, iPhone, all local files
 
 ### Access Matrix:
+
 Every session has ✓✓ (full read/write) to:
+
 - GitHub repositories
 - All servers (SSH, SCP, remote execution)
 - Cloud services (API, deploy, configure)
@@ -113,6 +117,7 @@ Every session has ✓✓ (full read/write) to:
 ## 🖥️ Infrastructure
 
 ### Servers (5 Total):
+
 1. **Lucidia Prime** - 192.168.4.38 (Raspberry Pi)
 2. **BlackRoad Pi** - 192.168.4.64 (Raspberry Pi)
 3. **Lucidia Alt** - 192.168.4.99 (Raspberry Pi)
@@ -120,6 +125,7 @@ Every session has ✓✓ (full read/write) to:
 5. **Codex Infinity** - 159.65.43.12 (DigitalOcean Droplet)
 
 ### Cloud Services:
+
 - **Cloudflare:** 16 zones, 8 Pages, 8 KV, 1 D1
 - **Railway:** 12+ projects
 - **GitHub:** 15 orgs, 66 repos
@@ -129,16 +135,19 @@ Every session has ✓✓ (full read/write) to:
 ## 🚀 Quick Start
 
 ### Main Launcher:
+
 ```bash
 ./blackroad-os.sh
 ```
 
 ### Beautiful OS (Recommended):
+
 ```bash
 ./blackroad-beautiful-os.sh --watch
 ```
 
 ### Standalone Tools:
+
 ```bash
 ./test-ai-network.sh          # AI Model Network
 ./github-repo-network.sh      # GitHub Repos
@@ -211,6 +220,7 @@ blackroad-dashboards/
 **Complete transparency across all systems.**
 
 The BlackRoad OS dashboard suite provides UNIVERSAL ACCESS to:
+
 - All code repositories
 - All servers and infrastructure
 - All AI models

@@ -43,12 +43,8 @@ All contributions MUST follow the BlackRoad Brand System:
 ### Required Colors
 
 ```css
---amber: #F5A623
---hot-pink: #FF1D6C      /* Primary Brand Color */
---electric-blue: #2979FF
---violet: #9C27B0
---black: #000000
---white: #FFFFFF
+--amber: #f5a623 --hot-pink: #ff1d6c /* Primary Brand Color */
+  --electric-blue: #2979ff --violet: #9c27b0 --black: #000000 --white: #ffffff;
 ```
 
 ### Forbidden Colors (DO NOT USE)
@@ -60,30 +56,29 @@ All contributions MUST follow the BlackRoad Brand System:
 Use Golden Ratio (φ = 1.618):
 
 ```css
---space-xs: 8px      /* Base */
---space-sm: 13px     /* 8 × φ */
---space-md: 21px     /* 13 × φ */
---space-lg: 34px     /* 21 × φ */
---space-xl: 55px     /* 34 × φ */
---space-2xl: 89px    /* 55 × φ */
---space-3xl: 144px   /* 89 × φ */
+--space-xs: 8px /* Base */ --space-sm: 13px /* 8 × φ */ --space-md: 21px
+  /* 13 × φ */ --space-lg: 34px /* 21 × φ */ --space-xl: 55px /* 34 × φ */
+  --space-2xl: 89px /* 55 × φ */ --space-3xl: 144px /* 89 × φ */;
 ```
 
 ### Typography
 
 ```css
-font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+font-family:
+  -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
 line-height: 1.618; /* Golden Ratio */
 ```
 
 ### Gradients
 
 ```css
-background: linear-gradient(135deg,
+background: linear-gradient(
+  135deg,
   var(--amber) 0%,
-  var(--hot-pink) 38.2%,    /* Golden Ratio */
-  var(--violet) 61.8%,      /* Golden Ratio */
-  var(--electric-blue) 100%);
+  var(--hot-pink) 38.2%,
+  /* Golden Ratio */ var(--violet) 61.8%,
+  /* Golden Ratio */ var(--electric-blue) 100%
+);
 ```
 
 ## 🔄 Development Process

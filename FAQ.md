@@ -67,12 +67,14 @@ See [ONBOARDING.md](ONBOARDING.md) for the complete guide.
 ### What are the system requirements?
 
 **Minimum:**
+
 - 8GB RAM
 - 4 CPU cores
 - 20GB disk space
 - macOS, Linux, or WSL2
 
 **Recommended:**
+
 - 16GB+ RAM
 - 8+ CPU cores
 - 100GB+ SSD
@@ -101,14 +103,14 @@ ollama serve &
 
 ### What agents are available?
 
-| Agent | Type | Specialty |
-|-------|------|-----------|
-| **LUCIDIA** | Reasoning | Philosophical analysis |
-| **ALICE** | Worker | Task execution |
-| **OCTAVIA** | Operations | DevOps, technical |
-| **PRISM** | Analysis | Pattern recognition |
-| **ECHO** | Memory | Knowledge management |
-| **CIPHER** | Security | Protection, scanning |
+| Agent       | Type       | Specialty              |
+| ----------- | ---------- | ---------------------- |
+| **LUCIDIA** | Reasoning  | Philosophical analysis |
+| **ALICE**   | Worker     | Task execution         |
+| **OCTAVIA** | Operations | DevOps, technical      |
+| **PRISM**   | Analysis   | Pattern recognition    |
+| **ECHO**    | Memory     | Knowledge management   |
+| **CIPHER**  | Security   | Protection, scanning   |
 
 ### Can I create custom agents?
 
@@ -184,6 +186,7 @@ curl -X POST "https://api.blackroad.io/v1/memory/search" \
 ### Can agents share memory?
 
 Yes, through permission levels:
+
 - **Private** - Only the owner
 - **Team** - Specific agents
 - **Organization** - All agents
@@ -202,13 +205,13 @@ Yes, through permission levels:
 
 ### What cloud providers does BlackRoad support?
 
-| Provider | Use Case |
-|----------|----------|
-| **Cloudflare** | Edge, Workers, KV, D1, R2 |
-| **Railway** | GPU inference, services |
-| **Vercel** | Web apps, serverless |
-| **DigitalOcean** | VMs, persistent storage |
-| **AWS/GCP/Azure** | Enterprise deployments |
+| Provider          | Use Case                  |
+| ----------------- | ------------------------- |
+| **Cloudflare**    | Edge, Workers, KV, D1, R2 |
+| **Railway**       | GPU inference, services   |
+| **Vercel**        | Web apps, serverless      |
+| **DigitalOcean**  | VMs, persistent storage   |
+| **AWS/GCP/Azure** | Enterprise deployments    |
 
 ### Can I run BlackRoad locally?
 
@@ -224,6 +227,7 @@ ollama serve           # LLM inference
 ### What about Raspberry Pi support?
 
 Full support for Raspberry Pi 4/5:
+
 - LED matrix displays
 - Holographic projections
 - Local Ollama inference (Pi 5)
@@ -256,13 +260,13 @@ cloudflared tunnel run blackroad
 
 ### What languages does BlackRoad use?
 
-| Component | Language |
-|-----------|----------|
-| Web App | TypeScript (Next.js) |
-| CLI | Rust (planned), Node.js (current) |
-| Agents | Python (FastAPI) |
-| Workers | TypeScript |
-| Tools | Python, Bash |
+| Component | Language                          |
+| --------- | --------------------------------- |
+| Web App   | TypeScript (Next.js)              |
+| CLI       | Rust (planned), Node.js (current) |
+| Agents    | Python (FastAPI)                  |
+| Workers   | TypeScript                        |
+| Tools     | Python, Bash                      |
 
 ### How do I contribute?
 
@@ -376,6 +380,7 @@ See [SECURITY.md](SECURITY.md) for full policy.
 ### Is there a bug bounty?
 
 Coming Q2 2026. Rewards:
+
 - Critical: $1,000 - $5,000
 - High: $500 - $1,000
 - Medium: $100 - $500
@@ -389,10 +394,10 @@ Coming Q2 2026. Rewards:
 
 The core platform is free and open source. Premium features:
 
-| Tier | Price | Agents | Support |
-|------|-------|--------|---------|
-| Free | $0 | 100 | Community |
-| Pro | $49/mo | 5,000 | Email |
+| Tier       | Price  | Agents    | Support   |
+| ---------- | ------ | --------- | --------- |
+| Free       | $0     | 100       | Community |
+| Pro        | $49/mo | 5,000     | Email     |
 | Enterprise | Custom | Unlimited | Dedicated |
 
 ### What license does BlackRoad use?
@@ -408,6 +413,7 @@ Yes! MIT license allows commercial use. Attribution appreciated.
 ### How do I get enterprise support?
 
 Contact blackroad.systems@gmail.com for:
+
 - Dedicated support
 - Custom development
 - On-premise deployment
@@ -424,4 +430,4 @@ Contact blackroad.systems@gmail.com for:
 
 ---
 
-*Last updated: 2026-02-05*
+_Last updated: 2026-02-05_

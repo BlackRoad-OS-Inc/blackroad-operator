@@ -5,6 +5,7 @@ I built a sovereign AI operating system that runs on 5 Raspberry Pis with Hailo-
 The problem I'm solving: 60% of parents can't help their kids with homework. Current AI tutors (ChatGPT, etc.) forget everything between sessions. My 8-year-old niece has to re-explain her math level every time. BlackRoad OS remembers.
 
 Tech stack:
+
 - 5 Raspberry Pi nodes (Alice, Cecilia, Octavia, Aria, Lucidia)
 - 2x Hailo-8 AI accelerators (52 TOPS)
 - Ollama for local inference (227+ models)
@@ -14,6 +15,7 @@ Tech stack:
 - Total cost: $150/month
 
 What I built (all self-hosted):
+
 - AI tutoring with adaptive learning
 - Video/design/music creation suite
 - Semantic search across everything

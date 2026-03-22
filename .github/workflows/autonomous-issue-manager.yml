@@ -1,7 +1,7 @@
 # .github/workflows/autonomous-issue-manager.yml
 # Autonomous issue creation, triage, and management
 
-name: "Autonomous Issue Manager"
+name: 'Autonomous Issue Manager'
 
 on:
   issues:
@@ -9,9 +9,9 @@ on:
   issue_comment:
     types: [created]
   schedule:
-    - cron: '0 9 * * *'  # Daily at 9 AM - stale check
+    - cron: '0 9 * * *' # Daily at 9 AM - stale check
   workflow_run:
-    workflows: ["Autonomous Orchestrator", "Autonomous Self-Healer"]
+    workflows: ['Autonomous Orchestrator', 'Autonomous Self-Healer']
     types: [completed]
     conclusions: [failure]
   workflow_dispatch:
@@ -41,7 +41,7 @@ jobs:
   # Smart Issue Triage
   # ============================================
   triage:
-    name: "Smart Triage"
+    name: 'Smart Triage'
     if: github.event_name == 'issues' && github.event.action == 'opened'
     runs-on: ubuntu-latest
 
@@ -197,7 +197,7 @@ jobs:
   # Stale Issue Cleanup
   # ============================================
   stale-cleanup:
-    name: "Stale Cleanup"
+    name: 'Stale Cleanup'
     if: github.event_name == 'schedule' || github.event.inputs.action == 'cleanup_stale'
     runs-on: ubuntu-latest
 
@@ -275,7 +275,7 @@ jobs:
   # Auto-Create Issues from Failures
   # ============================================
   failure-issue:
-    name: "Create Failure Issue"
+    name: 'Create Failure Issue'
     if: github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'failure'
     runs-on: ubuntu-latest
 
@@ -349,7 +349,7 @@ jobs:
   # Generate Report
   # ============================================
   report:
-    name: "Generate Issue Report"
+    name: 'Generate Issue Report'
     if: github.event.inputs.action == 'generate_report'
     runs-on: ubuntu-latest
 

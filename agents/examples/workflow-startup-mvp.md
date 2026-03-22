@@ -8,15 +8,15 @@ You're building a SaaS MVP — a team retrospective tool for remote teams. You h
 
 ## Agent Team
 
-| Agent | Role in this workflow |
-|-------|---------------------|
-| Sprint Prioritizer | Break the project into weekly sprints |
-| UX Researcher | Validate the idea with quick user interviews |
-| Backend Architect | Design the API and data model |
-| Frontend Developer | Build the React app |
-| Rapid Prototyper | Get the first version running fast |
-| Growth Hacker | Plan launch strategy while building |
-| Reality Checker | Gate each milestone before moving on |
+| Agent              | Role in this workflow                        |
+| ------------------ | -------------------------------------------- |
+| Sprint Prioritizer | Break the project into weekly sprints        |
+| UX Researcher      | Validate the idea with quick user interviews |
+| Backend Architect  | Design the API and data model                |
+| Frontend Developer | Build the React app                          |
+| Rapid Prototyper   | Get the first version running fast           |
+| Growth Hacker      | Plan launch strategy while building          |
+| Reality Checker    | Gate each milestone before moving on         |
 
 ## The Workflow
 

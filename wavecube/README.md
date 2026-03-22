@@ -6,17 +6,18 @@ Gutted WaveQube wave lamp turned into a DLP projector driven by a Raspberry Pi. 
 
 ### Bill of Materials
 
-| Component | Cost | Source |
-|-----------|------|--------|
-| TI DLP LightCrafter 2000 EVM (DLP2000) | ~$99 | TI Store / Mouser / Digikey |
-| MickMake Pi Projector PCB adapter | ~$4 | mickmake.com |
-| Raspberry Pi Zero 2W (or Pi 4) | $15-55 | Already in fleet |
-| 5V 3A USB-C power supply | ~$10 | Amazon / existing |
-| Micro HDMI ribbon / GPIO header | ~$5 | Amazon |
-| 30mm fan (optional cooling) | ~$3 | Amazon |
-| **Total** | **~$130** | |
+| Component                              | Cost      | Source                      |
+| -------------------------------------- | --------- | --------------------------- |
+| TI DLP LightCrafter 2000 EVM (DLP2000) | ~$99      | TI Store / Mouser / Digikey |
+| MickMake Pi Projector PCB adapter      | ~$4       | mickmake.com                |
+| Raspberry Pi Zero 2W (or Pi 4)         | $15-55    | Already in fleet            |
+| 5V 3A USB-C power supply               | ~$10      | Amazon / existing           |
+| Micro HDMI ribbon / GPIO header        | ~$5       | Amazon                      |
+| 30mm fan (optional cooling)            | ~$3       | Amazon                      |
+| **Total**                              | **~$130** |                             |
 
 ### DLP2000 Specs
+
 - **Resolution**: 640 x 360 (nHD)
 - **Brightness**: ~20 lumens (dim/dark rooms)
 - **Board size**: 54mm x 76mm
@@ -65,6 +66,7 @@ sudo reboot
 ## Modes
 
 ### Robot (default)
+
 Animated robot character with full emotion system.
 
 ```bash
@@ -74,44 +76,47 @@ Animated robot character with full emotion system.
 **Emotions**: neutral, happy, curious, excited, sleepy, surprised, love
 **Actions**: wave, dance, jump, pick (grabs floating objects), think
 
-| Key | Action |
-|-----|--------|
-| 1-6 | Set emotion (happy/curious/excited/sleepy/surprised/love) |
-| 0 | Reset to neutral |
-| w/d/j/p/t | Wave / Dance / Jump / Pick / Think |
-| SPACE | Random action |
-| a | Toggle auto-mood (cycles emotions autonomously) |
-| c | Cycle color scheme |
-| q/ESC | Quit |
+| Key       | Action                                                    |
+| --------- | --------------------------------------------------------- |
+| 1-6       | Set emotion (happy/curious/excited/sleepy/surprised/love) |
+| 0         | Reset to neutral                                          |
+| w/d/j/p/t | Wave / Dance / Jump / Pick / Think                        |
+| SPACE     | Random action                                             |
+| a         | Toggle auto-mood (cycles emotions autonomously)           |
+| c         | Cycle color scheme                                        |
+| q/ESC     | Quit                                                      |
 
 ### Waves
+
 Layered generative sine waves in BlackRoad brand colors.
 
 ```bash
 ./wavecube-launcher.sh waves
 ```
 
-| Key | Action |
-|-----|--------|
-| 1-4 | Toggle wave layers |
-| r | Randomize wave parameters |
-| +/- | Speed up / slow down |
-| SPACE | Pause/resume |
+| Key   | Action                    |
+| ----- | ------------------------- |
+| 1-4   | Toggle wave layers        |
+| r     | Randomize wave parameters |
+| +/-   | Speed up / slow down      |
+| SPACE | Pause/resume              |
 
 ### Audio
+
 Real-time FFT frequency visualization from microphone input. Falls back to simulated audio if no mic.
 
 ```bash
 ./wavecube-launcher.sh audio
 ```
 
-| Key | Action |
-|-----|--------|
-| s | Cycle style (bars / wave / circle) |
-| m | Toggle mic / simulated |
-| +/- | Adjust sensitivity |
+| Key | Action                             |
+| --- | ---------------------------------- |
+| s   | Cycle style (bars / wave / circle) |
+| m   | Toggle mic / simulated             |
+| +/- | Adjust sensitivity                 |
 
 ### Slideshow
+
 Rotate through images in the `images/` directory.
 
 ```bash
@@ -119,6 +124,7 @@ Rotate through images in the `images/` directory.
 ```
 
 ### Logo
+
 Static single-image projection.
 
 ```bash

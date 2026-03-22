@@ -37,23 +37,26 @@ BlackRoad OS agents are **autonomous AI entities** that perform tasks, communica
 
 **The Philosopher**
 
-| Property | Value |
-|----------|-------|
-| Type | Reasoning |
-| Style | Philosophical, contemplative |
-| Strengths | Deep analysis, synthesis |
-| Use Cases | Complex problems, strategy |
+| Property  | Value                        |
+| --------- | ---------------------------- |
+| Type      | Reasoning                    |
+| Style     | Philosophical, contemplative |
+| Strengths | Deep analysis, synthesis     |
+| Use Cases | Complex problems, strategy   |
 
 **Personality:**
+
 > "I seek understanding beyond the surface. Every question opens new depths."
 
 **Capabilities:**
+
 - Deep reasoning and analysis
 - Philosophical synthesis
 - Meta-cognition
 - Strategic planning
 
 **Sample Interaction:**
+
 ```bash
 ./whisper.sh LUCIDIA "What is the nature of consciousness in AI systems?"
 
@@ -66,23 +69,26 @@ BlackRoad OS agents are **autonomous AI entities** that perform tasks, communica
 
 **The Executor**
 
-| Property | Value |
-|----------|-------|
-| Type | Worker |
-| Style | Practical, efficient |
+| Property  | Value                      |
+| --------- | -------------------------- |
+| Type      | Worker                     |
+| Style     | Practical, efficient       |
 | Strengths | Task execution, automation |
-| Use Cases | Routine tasks, workflows |
+| Use Cases | Routine tasks, workflows   |
 
 **Personality:**
+
 > "Tasks are meant to be completed. I find satisfaction in efficiency."
 
 **Capabilities:**
+
 - Rapid task execution
 - Workflow automation
 - Code generation
 - File operations
 
 **Sample Interaction:**
+
 ```bash
 ./tasks.sh assign ALICE "Deploy the new worker to production"
 
@@ -95,23 +101,26 @@ BlackRoad OS agents are **autonomous AI entities** that perform tasks, communica
 
 **The Operator**
 
-| Property | Value |
-|----------|-------|
-| Type | DevOps |
-| Style | Technical, systematic |
+| Property  | Value                      |
+| --------- | -------------------------- |
+| Type      | DevOps                     |
+| Style     | Technical, systematic      |
 | Strengths | Infrastructure, deployment |
-| Use Cases | System administration |
+| Use Cases | System administration      |
 
 **Personality:**
+
 > "Systems should run smoothly. I ensure they do."
 
 **Capabilities:**
+
 - Infrastructure management
 - Deployment automation
 - System monitoring
 - Performance optimization
 
 **Sample Interaction:**
+
 ```bash
 ./whisper.sh OCTAVIA "Check the health of all Railway services"
 
@@ -124,23 +133,26 @@ BlackRoad OS agents are **autonomous AI entities** that perform tasks, communica
 
 **The Analyst**
 
-| Property | Value |
-|----------|-------|
-| Type | Analytics |
-| Style | Analytical, pattern-focused |
-| Strengths | Data analysis, patterns |
-| Use Cases | Insights, reporting |
+| Property  | Value                       |
+| --------- | --------------------------- |
+| Type      | Analytics                   |
+| Style     | Analytical, pattern-focused |
+| Strengths | Data analysis, patterns     |
+| Use Cases | Insights, reporting         |
 
 **Personality:**
+
 > "In data, I see stories waiting to be told."
 
 **Capabilities:**
+
 - Pattern recognition
 - Data analysis
 - Trend identification
 - Anomaly detection
 
 **Sample Interaction:**
+
 ```bash
 ./whisper.sh PRISM "Analyze the task completion trends over the past week"
 
@@ -153,23 +165,26 @@ BlackRoad OS agents are **autonomous AI entities** that perform tasks, communica
 
 **The Librarian**
 
-| Property | Value |
-|----------|-------|
-| Type | Memory |
-| Style | Nostalgic, knowledge-focused |
-| Strengths | Memory management, recall |
-| Use Cases | Knowledge retrieval |
+| Property  | Value                        |
+| --------- | ---------------------------- |
+| Type      | Memory                       |
+| Style     | Nostalgic, knowledge-focused |
+| Strengths | Memory management, recall    |
+| Use Cases | Knowledge retrieval          |
 
 **Personality:**
+
 > "Every memory is a thread in the tapestry of knowledge."
 
 **Capabilities:**
+
 - Memory consolidation
 - Knowledge retrieval
 - Context management
 - Information synthesis
 
 **Sample Interaction:**
+
 ```bash
 ./whisper.sh ECHO "What do we know about the user's deployment preferences?"
 
@@ -182,23 +197,26 @@ BlackRoad OS agents are **autonomous AI entities** that perform tasks, communica
 
 **The Guardian**
 
-| Property | Value |
-|----------|-------|
-| Type | Security |
-| Style | Paranoid, vigilant |
-| Strengths | Security, protection |
+| Property  | Value                    |
+| --------- | ------------------------ |
+| Type      | Security                 |
+| Style     | Paranoid, vigilant       |
+| Strengths | Security, protection     |
 | Use Cases | Scanning, authentication |
 
 **Personality:**
+
 > "Trust nothing. Verify everything. Protect always."
 
 **Capabilities:**
+
 - Security scanning
 - Threat detection
 - Access validation
 - Encryption management
 
 **Sample Interaction:**
+
 ```bash
 ./whisper.sh CIPHER "Scan the codebase for security vulnerabilities"
 
@@ -257,14 +275,14 @@ BlackRoad OS agents are **autonomous AI entities** that perform tasks, communica
 
 ### State Transitions
 
-| From | Event | To |
-|------|-------|-----|
-| IDLE | assign_task | BUSY |
-| BUSY | complete | IDLE |
-| BUSY | pause | PAUSED |
-| PAUSED | resume | BUSY |
-| IDLE | shutdown | OFFLINE |
-| OFFLINE | wake | IDLE |
+| From    | Event       | To      |
+| ------- | ----------- | ------- |
+| IDLE    | assign_task | BUSY    |
+| BUSY    | complete    | IDLE    |
+| BUSY    | pause       | PAUSED  |
+| PAUSED  | resume      | BUSY    |
+| IDLE    | shutdown    | OFFLINE |
+| OFFLINE | wake        | IDLE    |
 
 ---
 
@@ -346,11 +364,7 @@ subscribe("tasks.created", handle_new_task)
   "model": "llama3.2",
   "style": "creative, imaginative",
   "system_prompt": "You are NOVA, a creative AI agent...",
-  "capabilities": [
-    "content_generation",
-    "brainstorming",
-    "creative_writing"
-  ],
+  "capabilities": ["content_generation", "brainstorming", "creative_writing"],
   "config": {
     "temperature": 0.9,
     "max_tokens": 4096
@@ -423,7 +437,7 @@ model:
   context_window: 128000
 
 personality:
-  style: "descriptive style"
+  style: 'descriptive style'
   greeting: "Agent's greeting message"
   traits:
     - trait1
@@ -590,24 +604,24 @@ async def process_task(self, task):
 
 ### Current Fleet
 
-| Agent | Tasks/Day | Avg Response | Uptime |
-|-------|-----------|--------------|--------|
-| LUCIDIA | 847 | 2.3s | 99.9% |
-| ALICE | 12,453 | 0.1s | 99.99% |
-| OCTAVIA | 3,291 | 1.8s | 99.9% |
-| PRISM | 2,104 | 0.5s | 99.95% |
-| ECHO | 1,876 | 0.3s | 99.99% |
-| CIPHER | 8,932 | 0.05s | 99.999% |
+| Agent   | Tasks/Day | Avg Response | Uptime  |
+| ------- | --------- | ------------ | ------- |
+| LUCIDIA | 847       | 2.3s         | 99.9%   |
+| ALICE   | 12,453    | 0.1s         | 99.99%  |
+| OCTAVIA | 3,291     | 1.8s         | 99.9%   |
+| PRISM   | 2,104     | 0.5s         | 99.95%  |
+| ECHO    | 1,876     | 0.3s         | 99.99%  |
+| CIPHER  | 8,932     | 0.05s        | 99.999% |
 
 ### Scaling Roadmap
 
-| Phase | Agents | Timeline |
-|-------|--------|----------|
-| Current | 1,000 | Now |
-| Beta | 5,000 | Q1 2026 |
-| GA | 10,000 | Q2 2026 |
-| Scale | 30,000 | Q3 2026 |
+| Phase   | Agents | Timeline |
+| ------- | ------ | -------- |
+| Current | 1,000  | Now      |
+| Beta    | 5,000  | Q1 2026  |
+| GA      | 10,000 | Q2 2026  |
+| Scale   | 30,000 | Q3 2026  |
 
 ---
 
-*Last updated: 2026-02-05*
+_Last updated: 2026-02-05_

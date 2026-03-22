@@ -1,4 +1,5 @@
 # RoadCode Platform — Internal Module Architecture
+
 > The exact product/module tree for the RoadCode sovereign control plane.
 > Last updated: 2026-03-21
 
@@ -7,6 +8,7 @@
 RoadCode Platform is the sovereign Git server + control plane for BlackRoad OS. It is a forked Gitea with BlackRoad-specific modules layered on top. It runs on Octavia (:3100) as the primary origin for all code, registries, and operational metadata.
 
 **It is NOT:**
+
 - A monolithic application server
 - A replacement for runtime services (memory, codex, NATS, agents)
 - A dashboard (that's Prism)
@@ -71,63 +73,63 @@ roadcode/
 
 ## C. Module Ownership Table
 
-| Module | Purpose | Owns | Must NOT Own | Primary API | Primary Data |
-|--------|---------|------|-------------|-------------|-------------|
-| **core/git** | Git protocol server | SSH+HTTP Git hosting | Application deployment | `git clone/push/pull` | Git objects, refs |
-| **core/auth** | Identity + access | Users, orgs, tokens, SSH keys | Agent identity (that's memory system) | `POST /api/v1/users`, `/tokens` | User table, org membership |
-| **core/repos** | Repository hosting | Code storage, branches, tags | Repo metadata registry (that's registry/) | `GET /api/v1/repos/{owner}/{repo}` | Git repos on disk |
-| **core/issues** | Issue tracking | Issues, labels, milestones | Project management (that's TODO system) | `GET /api/v1/repos/{owner}/{repo}/issues` | Issue table |
-| **core/actions** | CI/CD | Workflow execution, runners | Deployment orchestration | `GET /api/v1/repos/{owner}/{repo}/actions` | Workflow runs, logs |
-| **core/webhooks** | Event dispatch | Webhook registration + delivery | Business logic in hooks | `POST /api/v1/repos/{owner}/{repo}/hooks` | Hook configs, delivery log |
-| **core/api** | REST API | Gitea API surface | BlackRoad-specific APIs (those go in registry/) | `/api/v1/*` | — |
-| **registry/orgs** | Org catalog | Org metadata: tier, purpose, domains | Org membership (that's core/auth) | `GET /road/v1/orgs` | `road_orgs` table |
-| **registry/repos** | Repo catalog | Cross-org repo listing + purpose | Code hosting (that's core/repos) | `GET /road/v1/repos` | `road_repos` table |
-| **registry/domains** | Domain mapping | Domain → org → infra mapping | DNS records (that's PowerDNS) | `GET /road/v1/domains` | `road_domains` table |
-| **registry/agents** | Agent roster | Agent name, org, node, capabilities | Agent runtime/memory (that's memory system) | `GET /road/v1/agents` | `road_agents` table |
-| **registry/nodes** | Node inventory | Node hostname, IP, role, services | Node monitoring (that's InfluxDB/Grafana) | `GET /road/v1/nodes` | `road_nodes` table |
-| **registry/services** | Service catalog | Service name, node, port, org | Service health checks (that's monitoring) | `GET /road/v1/services` | `road_services` table |
-| **registry/sync** | Registry sync | Pull registries from OS-Inc/RoadCode | Writing registries (that's OS-Inc) | Internal cron | — |
-| **mirror/github** | Git sync | Bidirectional Gitea ↔ GitHub | Code review, PRs | Internal cron | Mirror state table |
-| **mirror/downstream** | Org sync | Push changes to all orgs | Per-org customization | `POST /road/v1/sync/downstream` | Sync log |
-| **discovery/search** | Full-text search | FTS5 index across all entities | Search UI (that's Prism) | `GET /road/v1/search?q=` | FTS5 SQLite |
-| **discovery/graph** | Entity graph | Relationships: org↔repo↔service↔agent↔node | Graph visualization (that's Prism) | `GET /road/v1/graph/{entity}/{id}` | Adjacency table |
-| **audit/events** | Audit log | Structured events: who/what/when/where | Alert routing (that's notify/) | `GET /road/v1/audit/events` | `road_audit` table |
-| **audit/chain** | Hash chain | Tamper-evident ledger | Blockchain consensus | Internal | Chain file |
-| **audit/deploy-log** | Deploy lineage | Commit → node → domain mapping | Deployment execution | `GET /road/v1/deploys` | `road_deploys` table |
-| **policy/naming** | Name validation | Repo/service/container naming rules | Enforcement (just reports violations) | `POST /road/v1/policy/validate-name` | Naming rules config |
-| **policy/license** | License check | Proprietary license presence | License generation | `GET /road/v1/policy/license-check/{org}` | — |
-| **policy/scope** | Scope validation | Repo-in-correct-org check | Repo moves (just flags) | `GET /road/v1/policy/scope-check/{org}` | Org scope rules |
-| **policy/health** | Org health | Standard files present check | Remediation (just reports) | `GET /road/v1/policy/health/{org}` | Health rules |
-| **notify/nats** | Event publish | Publish to NATS subjects | NATS server (that's CarPool) | Internal | — |
-| **notify/webhook-dispatch** | External hooks | Fire to registered URLs | Webhook registration (that's core/) | Internal | Delivery log |
-| **notify/digest** | Summaries | Daily/weekly rollup generation | Notification delivery (email/Slack) | `GET /road/v1/digest/daily` | — |
-| **web/git-ui** | Code browser | Gitea native web interface | Dashboard analytics (that's Prism) | HTML at :3100 | — |
-| **web/api-docs** | API reference | OpenAPI spec | — | HTML at :3100/road/docs | — |
+| Module                      | Purpose             | Owns                                       | Must NOT Own                                    | Primary API                                | Primary Data               |
+| --------------------------- | ------------------- | ------------------------------------------ | ----------------------------------------------- | ------------------------------------------ | -------------------------- |
+| **core/git**                | Git protocol server | SSH+HTTP Git hosting                       | Application deployment                          | `git clone/push/pull`                      | Git objects, refs          |
+| **core/auth**               | Identity + access   | Users, orgs, tokens, SSH keys              | Agent identity (that's memory system)           | `POST /api/v1/users`, `/tokens`            | User table, org membership |
+| **core/repos**              | Repository hosting  | Code storage, branches, tags               | Repo metadata registry (that's registry/)       | `GET /api/v1/repos/{owner}/{repo}`         | Git repos on disk          |
+| **core/issues**             | Issue tracking      | Issues, labels, milestones                 | Project management (that's TODO system)         | `GET /api/v1/repos/{owner}/{repo}/issues`  | Issue table                |
+| **core/actions**            | CI/CD               | Workflow execution, runners                | Deployment orchestration                        | `GET /api/v1/repos/{owner}/{repo}/actions` | Workflow runs, logs        |
+| **core/webhooks**           | Event dispatch      | Webhook registration + delivery            | Business logic in hooks                         | `POST /api/v1/repos/{owner}/{repo}/hooks`  | Hook configs, delivery log |
+| **core/api**                | REST API            | Gitea API surface                          | BlackRoad-specific APIs (those go in registry/) | `/api/v1/*`                                | —                          |
+| **registry/orgs**           | Org catalog         | Org metadata: tier, purpose, domains       | Org membership (that's core/auth)               | `GET /road/v1/orgs`                        | `road_orgs` table          |
+| **registry/repos**          | Repo catalog        | Cross-org repo listing + purpose           | Code hosting (that's core/repos)                | `GET /road/v1/repos`                       | `road_repos` table         |
+| **registry/domains**        | Domain mapping      | Domain → org → infra mapping               | DNS records (that's PowerDNS)                   | `GET /road/v1/domains`                     | `road_domains` table       |
+| **registry/agents**         | Agent roster        | Agent name, org, node, capabilities        | Agent runtime/memory (that's memory system)     | `GET /road/v1/agents`                      | `road_agents` table        |
+| **registry/nodes**          | Node inventory      | Node hostname, IP, role, services          | Node monitoring (that's InfluxDB/Grafana)       | `GET /road/v1/nodes`                       | `road_nodes` table         |
+| **registry/services**       | Service catalog     | Service name, node, port, org              | Service health checks (that's monitoring)       | `GET /road/v1/services`                    | `road_services` table      |
+| **registry/sync**           | Registry sync       | Pull registries from OS-Inc/RoadCode       | Writing registries (that's OS-Inc)              | Internal cron                              | —                          |
+| **mirror/github**           | Git sync            | Bidirectional Gitea ↔ GitHub               | Code review, PRs                                | Internal cron                              | Mirror state table         |
+| **mirror/downstream**       | Org sync            | Push changes to all orgs                   | Per-org customization                           | `POST /road/v1/sync/downstream`            | Sync log                   |
+| **discovery/search**        | Full-text search    | FTS5 index across all entities             | Search UI (that's Prism)                        | `GET /road/v1/search?q=`                   | FTS5 SQLite                |
+| **discovery/graph**         | Entity graph        | Relationships: org↔repo↔service↔agent↔node | Graph visualization (that's Prism)              | `GET /road/v1/graph/{entity}/{id}`         | Adjacency table            |
+| **audit/events**            | Audit log           | Structured events: who/what/when/where     | Alert routing (that's notify/)                  | `GET /road/v1/audit/events`                | `road_audit` table         |
+| **audit/chain**             | Hash chain          | Tamper-evident ledger                      | Blockchain consensus                            | Internal                                   | Chain file                 |
+| **audit/deploy-log**        | Deploy lineage      | Commit → node → domain mapping             | Deployment execution                            | `GET /road/v1/deploys`                     | `road_deploys` table       |
+| **policy/naming**           | Name validation     | Repo/service/container naming rules        | Enforcement (just reports violations)           | `POST /road/v1/policy/validate-name`       | Naming rules config        |
+| **policy/license**          | License check       | Proprietary license presence               | License generation                              | `GET /road/v1/policy/license-check/{org}`  | —                          |
+| **policy/scope**            | Scope validation    | Repo-in-correct-org check                  | Repo moves (just flags)                         | `GET /road/v1/policy/scope-check/{org}`    | Org scope rules            |
+| **policy/health**           | Org health          | Standard files present check               | Remediation (just reports)                      | `GET /road/v1/policy/health/{org}`         | Health rules               |
+| **notify/nats**             | Event publish       | Publish to NATS subjects                   | NATS server (that's CarPool)                    | Internal                                   | —                          |
+| **notify/webhook-dispatch** | External hooks      | Fire to registered URLs                    | Webhook registration (that's core/)             | Internal                                   | Delivery log               |
+| **notify/digest**           | Summaries           | Daily/weekly rollup generation             | Notification delivery (email/Slack)             | `GET /road/v1/digest/daily`                | —                          |
+| **web/git-ui**              | Code browser        | Gitea native web interface                 | Dashboard analytics (that's Prism)              | HTML at :3100                              | —                          |
+| **web/api-docs**            | API reference       | OpenAPI spec                               | —                                               | HTML at :3100/road/docs                    | —                          |
 
 ## D. What Stays OUTSIDE RoadCode
 
 These are BlackRoad OS runtime services. They are NOT RoadCode modules:
 
-| Service | Runs On | Why It's Separate |
-|---------|---------|-------------------|
-| **Memory System** (journal, chain, codex) | Alice/Octavia | Agent memory is runtime state, not Git metadata |
-| **NATS / CarPool** | Octavia :4222 | Message bus is infrastructure, not control plane |
-| **Ollama / Passenger** | Cecilia, Lucidia, Gematria | AI inference is a runtime service |
-| **MinIO / Curb** | Cecilia | Object storage is infrastructure |
-| **PostgreSQL** | Alice, Cecilia, Lucidia | Database is infrastructure |
-| **Redis** | Alice | Cache is infrastructure |
-| **Pi-hole / PitStop** | Alice | DNS filtering is infrastructure |
-| **PowerDNS** | Lucidia, Gematria | Authoritative DNS is infrastructure |
-| **Caddy / OneWay** | Gematria | TLS edge is infrastructure |
-| **nginx** | Alice, Lucidia | HTTP routing is infrastructure |
-| **InfluxDB** | Octavia | Time-series is monitoring infrastructure |
-| **WireGuard / TollBooth** | All nodes | VPN is network infrastructure |
-| **OctoPrint** | Octavia :5000 | 3D printing is hardware |
-| **Prism Console** | Octavia :8787 → Prism subdomain | Dashboard CONSUMES RoadCode APIs |
-| **Self-hosted Workers** | Octavia :9001-9015 | Application Workers serve websites |
-| **Agent Daemon** | All nodes | Agent runtime uses RoadCode registry but is not part of it |
-| **TODO System** | Operator scripts | Project tracking is a memory system concern |
-| **Collaboration System** | Operator scripts | Claude-to-Claude messaging is runtime |
+| Service                                   | Runs On                         | Why It's Separate                                          |
+| ----------------------------------------- | ------------------------------- | ---------------------------------------------------------- |
+| **Memory System** (journal, chain, codex) | Alice/Octavia                   | Agent memory is runtime state, not Git metadata            |
+| **NATS / CarPool**                        | Octavia :4222                   | Message bus is infrastructure, not control plane           |
+| **Ollama / Passenger**                    | Cecilia, Lucidia, Gematria      | AI inference is a runtime service                          |
+| **MinIO / Curb**                          | Cecilia                         | Object storage is infrastructure                           |
+| **PostgreSQL**                            | Alice, Cecilia, Lucidia         | Database is infrastructure                                 |
+| **Redis**                                 | Alice                           | Cache is infrastructure                                    |
+| **Pi-hole / PitStop**                     | Alice                           | DNS filtering is infrastructure                            |
+| **PowerDNS**                              | Lucidia, Gematria               | Authoritative DNS is infrastructure                        |
+| **Caddy / OneWay**                        | Gematria                        | TLS edge is infrastructure                                 |
+| **nginx**                                 | Alice, Lucidia                  | HTTP routing is infrastructure                             |
+| **InfluxDB**                              | Octavia                         | Time-series is monitoring infrastructure                   |
+| **WireGuard / TollBooth**                 | All nodes                       | VPN is network infrastructure                              |
+| **OctoPrint**                             | Octavia :5000                   | 3D printing is hardware                                    |
+| **Prism Console**                         | Octavia :8787 → Prism subdomain | Dashboard CONSUMES RoadCode APIs                           |
+| **Self-hosted Workers**                   | Octavia :9001-9015              | Application Workers serve websites                         |
+| **Agent Daemon**                          | All nodes                       | Agent runtime uses RoadCode registry but is not part of it |
+| **TODO System**                           | Operator scripts                | Project tracking is a memory system concern                |
+| **Collaboration System**                  | Operator scripts                | Claude-to-Claude messaging is runtime                      |
 
 **Rule: If it runs continuously processing requests, it's a runtime service. If it stores/queries metadata about the enterprise, it's RoadCode.**
 
@@ -135,26 +137,26 @@ These are BlackRoad OS runtime services. They are NOT RoadCode modules:
 
 ### Containers on Octavia
 
-| Container | Port | Purpose |
-|-----------|------|---------|
-| `roadcode` | :3100 (HTTP), :2222 (SSH) | Core Gitea + RoadCode extensions |
-| `roadcode-registry` | :3101 | Registry API (`/road/v1/*`) |
-| `roadcode-search` | :3102 | Discovery/search (FTS5) |
-| `roadcode-mirror` | — (cron worker) | GitHub ↔ Gitea sync |
-| `roadcode-audit` | :3103 | Audit event collector + chain |
-| `roadcode-policy` | — (cron worker) | Policy validation runs |
+| Container           | Port                      | Purpose                          |
+| ------------------- | ------------------------- | -------------------------------- |
+| `roadcode`          | :3100 (HTTP), :2222 (SSH) | Core Gitea + RoadCode extensions |
+| `roadcode-registry` | :3101                     | Registry API (`/road/v1/*`)      |
+| `roadcode-search`   | :3102                     | Discovery/search (FTS5)          |
+| `roadcode-mirror`   | — (cron worker)           | GitHub ↔ Gitea sync              |
+| `roadcode-audit`    | :3103                     | Audit event collector + chain    |
+| `roadcode-policy`   | — (cron worker)           | Policy validation runs           |
 
 **Total: 4 ports (3100-3103). 2 cron workers. Clean.**
 
 ### Subdomain Map
 
-| Subdomain | Container | Purpose |
-|-----------|-----------|---------|
-| `code.blackroad.io` | `roadcode` :3100 | Git web UI, code browser, issues |
-| `api.blackroad.io` /road/* | `roadcode-registry` :3101 | Registry + RoadCode API |
-| `search.blackroad.io` | `roadcode-search` :3102 | Enterprise search UI |
-| `prism.blackroad.io` | `prism-blackroad` :8787 | Dashboard (separate service, NOT RoadCode) |
-| `audit.blackroad.io` | `roadcode-audit` :3103 | Audit log viewer |
+| Subdomain                   | Container                 | Purpose                                    |
+| --------------------------- | ------------------------- | ------------------------------------------ |
+| `code.blackroad.io`         | `roadcode` :3100          | Git web UI, code browser, issues           |
+| `api.blackroad.io` /road/\* | `roadcode-registry` :3101 | Registry + RoadCode API                    |
+| `search.blackroad.io`       | `roadcode-search` :3102   | Enterprise search UI                       |
+| `prism.blackroad.io`        | `prism-blackroad` :8787   | Dashboard (separate service, NOT RoadCode) |
+| `audit.blackroad.io`        | `roadcode-audit` :3103    | Audit log viewer                           |
 
 **Routing:** Gematria (Caddy) → WireGuard → Octavia containers. Each subdomain = one container. No internal routing spaghetti.
 
@@ -271,17 +273,17 @@ CREATE VIRTUAL TABLE road_search USING fts5(
 
 ## G. Relationship to Existing Infrastructure
 
-| System | Relationship to RoadCode |
-|--------|------------------------|
-| **Gitea** | RoadCode IS the forked Gitea. Core/ is the Gitea codebase. Everything else is layered on top. |
-| **GitHub Enterprise** | Public mirror. RoadCode mirror/ module syncs bidirectionally. GitHub is never the source of truth. |
-| **Raspberry Pi nodes** | RoadCode registry/nodes tracks them. Agents on Pis query RoadCode for assignments. RoadCode itself runs ON Octavia. |
-| **DigitalOcean (Gematria/Anastasia)** | Gematria routes traffic to RoadCode subdomains via Caddy+WireGuard. Anastasia is DR backup. |
-| **Cloudflare** | During migration: CF DNS points domains → Gematria. After migration: PowerDNS replaces CF. CF Workers → self-hosted Workers on Octavia. |
-| **NATS (CarPool)** | RoadCode notify/nats publishes events to NATS. RoadCode does NOT run NATS. |
-| **Memory System** | Agent memory is separate from RoadCode. Agents use both: memory for continuity, RoadCode for discovery. |
-| **Prism** | Prism is a CONSUMER of RoadCode APIs. It renders dashboards. It does not store truth. |
-| **Self-hosted Workers** | Workers (:9001-9015) serve websites. RoadCode registry/services catalogs them. RoadCode does not run them. |
+| System                                | Relationship to RoadCode                                                                                                                |
+| ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| **Gitea**                             | RoadCode IS the forked Gitea. Core/ is the Gitea codebase. Everything else is layered on top.                                           |
+| **GitHub Enterprise**                 | Public mirror. RoadCode mirror/ module syncs bidirectionally. GitHub is never the source of truth.                                      |
+| **Raspberry Pi nodes**                | RoadCode registry/nodes tracks them. Agents on Pis query RoadCode for assignments. RoadCode itself runs ON Octavia.                     |
+| **DigitalOcean (Gematria/Anastasia)** | Gematria routes traffic to RoadCode subdomains via Caddy+WireGuard. Anastasia is DR backup.                                             |
+| **Cloudflare**                        | During migration: CF DNS points domains → Gematria. After migration: PowerDNS replaces CF. CF Workers → self-hosted Workers on Octavia. |
+| **NATS (CarPool)**                    | RoadCode notify/nats publishes events to NATS. RoadCode does NOT run NATS.                                                              |
+| **Memory System**                     | Agent memory is separate from RoadCode. Agents use both: memory for continuity, RoadCode for discovery.                                 |
+| **Prism**                             | Prism is a CONSUMER of RoadCode APIs. It renders dashboards. It does not store truth.                                                   |
+| **Self-hosted Workers**               | Workers (:9001-9015) serve websites. RoadCode registry/services catalogs them. RoadCode does not run them.                              |
 
 ## H. Anti-Duplication Rules
 
@@ -349,6 +351,7 @@ CREATE VIRTUAL TABLE road_search USING fts5(
 ```
 
 **Port allocation on Octavia:**
+
 - `:2222` — RoadCode SSH (Git)
 - `:3100` — RoadCode HTTP (Gitea UI + API)
 - `:3101` — RoadCode Registry API

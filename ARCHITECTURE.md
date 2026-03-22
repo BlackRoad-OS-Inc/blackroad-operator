@@ -194,14 +194,14 @@
 
 ### Agent Types
 
-| Type | Description | Use Case |
-|------|-------------|----------|
+| Type        | Description             | Use Case      |
+| ----------- | ----------------------- | ------------- |
 | **LUCIDIA** | Philosophical reasoning | Deep analysis |
-| **ALICE** | Task execution | Automation |
-| **OCTAVIA** | Technical operations | DevOps |
-| **PRISM** | Pattern analysis | Data insights |
-| **ECHO** | Memory management | Knowledge |
-| **CIPHER** | Security | Protection |
+| **ALICE**   | Task execution          | Automation    |
+| **OCTAVIA** | Technical operations    | DevOps        |
+| **PRISM**   | Pattern analysis        | Data insights |
+| **ECHO**    | Memory management       | Knowledge     |
+| **CIPHER**  | Security                | Protection    |
 
 ### Agent Communication
 
@@ -501,19 +501,19 @@
 
 ### Technology Stack Summary
 
-| Layer | Technology | Purpose |
-|-------|------------|---------|
-| Frontend | Next.js 16, React 19 | Web application |
-| CLI | Rust, Clap | Command line |
-| API Gateway | Cloudflare Workers | Edge routing |
-| Backend | Python, FastAPI | Services |
-| ML Inference | vLLM, PyTorch | Model serving |
-| Database | PostgreSQL | Primary data |
-| Cache | Redis | Session/cache |
-| Vector DB | Pinecone | Embeddings |
-| Object Storage | Cloudflare R2 | Files |
-| Monitoring | Prometheus, Grafana | Observability |
+| Layer          | Technology           | Purpose         |
+| -------------- | -------------------- | --------------- |
+| Frontend       | Next.js 16, React 19 | Web application |
+| CLI            | Rust, Clap           | Command line    |
+| API Gateway    | Cloudflare Workers   | Edge routing    |
+| Backend        | Python, FastAPI      | Services        |
+| ML Inference   | vLLM, PyTorch        | Model serving   |
+| Database       | PostgreSQL           | Primary data    |
+| Cache          | Redis                | Session/cache   |
+| Vector DB      | Pinecone             | Embeddings      |
+| Object Storage | Cloudflare R2        | Files           |
+| Monitoring     | Prometheus, Grafana  | Observability   |
 
 ---
 
-*Last updated: 2026-02-05*
+_Last updated: 2026-02-05_

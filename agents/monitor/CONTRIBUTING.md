@@ -38,13 +38,13 @@ npm run dev
 
 ## Commands
 
-| Command | What it does |
-|---------|-------------|
-| `npm run dev` | Start dev server (http://localhost:3000) |
-| `npm run build` | Production build (standalone) |
-| `npm test` | Run all 91 tests |
-| `npm run lint` | ESLint check |
-| `npx tsc --noEmit` | Type-check without emitting |
+| Command            | What it does                             |
+| ------------------ | ---------------------------------------- |
+| `npm run dev`      | Start dev server (http://localhost:3000) |
+| `npm run build`    | Production build (standalone)            |
+| `npm test`         | Run all 91 tests                         |
+| `npm run lint`     | ESLint check                             |
+| `npx tsc --noEmit` | Type-check without emitting              |
 
 ## Before Submitting a PR
 

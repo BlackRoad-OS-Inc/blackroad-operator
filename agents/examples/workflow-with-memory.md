@@ -46,15 +46,15 @@ Same as the standard workflow: a SaaS team retrospective tool (RetroBoard), 4 we
 
 ## Agent Team
 
-| Agent | Role in this workflow |
-|-------|---------------------|
-| Sprint Prioritizer | Break the project into weekly sprints |
-| UX Researcher | Validate the idea with quick user interviews |
-| Backend Architect | Design the API and data model |
-| Frontend Developer | Build the React app |
-| Rapid Prototyper | Get the first version running fast |
-| Growth Hacker | Plan launch strategy while building |
-| Reality Checker | Gate each milestone before moving on |
+| Agent              | Role in this workflow                        |
+| ------------------ | -------------------------------------------- |
+| Sprint Prioritizer | Break the project into weekly sprints        |
+| UX Researcher      | Validate the idea with quick user interviews |
+| Backend Architect  | Design the API and data model                |
+| Frontend Developer | Build the React app                          |
+| Rapid Prototyper   | Get the first version running fast           |
+| Growth Hacker      | Plan launch strategy while building          |
+| Reality Checker    | Gate each milestone before moving on         |
 
 Each agent has a Memory Integration section in their prompt (see [integrations/mcp-memory/README.md](../integrations/mcp-memory/README.md) for how to add it).
 
@@ -215,14 +215,14 @@ The Backend Architect can see exactly what the Reality Checker flagged, recall i
 
 ## Before and After
 
-| Aspect | Standard Workflow | With Memory |
-|--------|------------------|-------------|
-| **Handoffs** | Copy-paste full output between agents | Agents recall what they need automatically |
-| **Context loss** | Session timeouts lose everything | Memories persist across sessions |
-| **Multi-agent context** | Manually compile context from N agents | Agent searches memory for project tag |
-| **QA failure recovery** | Manually describe what went wrong | Agent recalls feedback + rolls back |
-| **Multi-day projects** | Re-establish context every session | Agent picks up where it left off |
-| **Setup required** | None | Install an MCP memory server |
+| Aspect                  | Standard Workflow                      | With Memory                                |
+| ----------------------- | -------------------------------------- | ------------------------------------------ |
+| **Handoffs**            | Copy-paste full output between agents  | Agents recall what they need automatically |
+| **Context loss**        | Session timeouts lose everything       | Memories persist across sessions           |
+| **Multi-agent context** | Manually compile context from N agents | Agent searches memory for project tag      |
+| **QA failure recovery** | Manually describe what went wrong      | Agent recalls feedback + rolls back        |
+| **Multi-day projects**  | Re-establish context every session     | Agent picks up where it left off           |
+| **Setup required**      | None                                   | Install an MCP memory server               |
 
 ## Key Patterns
 

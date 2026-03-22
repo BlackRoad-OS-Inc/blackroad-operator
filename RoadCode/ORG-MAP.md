@@ -35,46 +35,47 @@ enterprises/blackroad-os (PUBLIC FACE)
 
 ## Domain → Sub-Org Mapping
 
-| Domain | Sub-Org | Vertical |
-|--------|---------|----------|
-| blackroad.company | BlackRoad-Foundation | Corporate |
-| blackroad.io | BlackRoad-OS | Master platform |
-| blackroad.me | BlackRoad-Media | Social/identity |
-| blackroad.network | BlackRoad-Cloud | Infrastructure |
-| blackroad.systems | BlackRoad-Hardware | Fleet management |
-| blackroadai.com | BlackRoad-AI | AI/ML |
-| blackroadinc.us | BlackRoad-Foundation | Corporate/legal |
-| blackroadqi.com | BlackRoad-Labs | Quantum/math |
-| blackroadquantum.com | BlackRoad-Labs | Quantum computing |
-| blackroadquantum.info | BlackRoad-Labs | Research/docs |
-| blackroadquantum.net | BlackRoad-Cloud | Quantum network |
-| blackroadquantum.shop | BlackRoad-Ventures | E-commerce |
-| blackroadquantum.store | BlackRoad-Ventures | E-commerce |
-| lucidia.earth | BlackRoad-AI | Creator platform |
-| lucidia.studio | BlackRoad-Studio | Creative tools |
-| lucidiaqi.com | BlackRoad-AI | AI/quantum |
-| roadchain.io | BlackRoad-Security | Blockchain |
-| roadcoin.io | BlackRoad-Gov | Payments/crypto |
-| blackboxprogramming.io | Blackbox-Enterprises | Dev tools |
+| Domain                 | Sub-Org              | Vertical          |
+| ---------------------- | -------------------- | ----------------- |
+| blackroad.company      | BlackRoad-Foundation | Corporate         |
+| blackroad.io           | BlackRoad-OS         | Master platform   |
+| blackroad.me           | BlackRoad-Media      | Social/identity   |
+| blackroad.network      | BlackRoad-Cloud      | Infrastructure    |
+| blackroad.systems      | BlackRoad-Hardware   | Fleet management  |
+| blackroadai.com        | BlackRoad-AI         | AI/ML             |
+| blackroadinc.us        | BlackRoad-Foundation | Corporate/legal   |
+| blackroadqi.com        | BlackRoad-Labs       | Quantum/math      |
+| blackroadquantum.com   | BlackRoad-Labs       | Quantum computing |
+| blackroadquantum.info  | BlackRoad-Labs       | Research/docs     |
+| blackroadquantum.net   | BlackRoad-Cloud      | Quantum network   |
+| blackroadquantum.shop  | BlackRoad-Ventures   | E-commerce        |
+| blackroadquantum.store | BlackRoad-Ventures   | E-commerce        |
+| lucidia.earth          | BlackRoad-AI         | Creator platform  |
+| lucidia.studio         | BlackRoad-Studio     | Creative tools    |
+| lucidiaqi.com          | BlackRoad-AI         | AI/quantum        |
+| roadchain.io           | BlackRoad-Security   | Blockchain        |
+| roadcoin.io            | BlackRoad-Gov        | Payments/crypto   |
+| blackboxprogramming.io | Blackbox-Enterprises | Dev tools         |
 
 ## Infrastructure Nodes
 
-| Node | IP | Role | Key Services |
-|------|-----|------|-------------|
-| Alice | .49 | Gateway | nginx, PostgreSQL, Redis, Qdrant, Pi-hole, RoundTrip |
-| Cecilia | .96 | AI Engine | Ollama (4 models), MinIO, PostgreSQL, InfluxDB |
-| Octavia | .101 | Architect | Gitea (228 models), Docker, NATS |
-| Aria | .98 | Interface | Docker, Portainer, nginx, Ollama |
-| Lucidia | .38 | Dreamer | Ollama (6 models), nginx, 334 web apps |
-| Gematria | DO | Edge Router | Caddy (114 domains), 279 websites, Ollama |
-| Anastasia | DO | Cloud Edge | Caddy, Docker, Ollama |
+| Node      | IP   | Role        | Key Services                                         |
+| --------- | ---- | ----------- | ---------------------------------------------------- |
+| Alice     | .49  | Gateway     | nginx, PostgreSQL, Redis, Qdrant, Pi-hole, RoundTrip |
+| Cecilia   | .96  | AI Engine   | Ollama (4 models), MinIO, PostgreSQL, InfluxDB       |
+| Octavia   | .101 | Architect   | Gitea (228 models), Docker, NATS                     |
+| Aria      | .98  | Interface   | Docker, Portainer, nginx, Ollama                     |
+| Lucidia   | .38  | Dreamer     | Ollama (6 models), nginx, 334 web apps               |
+| Gematria  | DO   | Edge Router | Caddy (114 domains), 279 websites, Ollama            |
+| Anastasia | DO   | Cloud Edge  | Caddy, Docker, Ollama                                |
 
 ## Google Drive Accounts
 
-| Account | Key Folders |
-|---------|------------|
-| alexa@blackroad.io | BlackRoad OS Inc (13 folders), workspace, Root, Pi backups |
-| amundsonalexa@gmail.com | BlackRoad OS, Templates, personal |
+| Account                 | Key Folders                                                |
+| ----------------------- | ---------------------------------------------------------- |
+| alexa@blackroad.io      | BlackRoad OS Inc (13 folders), workspace, Root, Pi backups |
+| amundsonalexa@gmail.com | BlackRoad OS, Templates, personal                          |
 
 ---
-*BlackRoad OS, Inc. — PROPRIETARY. Pave Tomorrow.*
+
+_BlackRoad OS, Inc. — PROPRIETARY. Pave Tomorrow._

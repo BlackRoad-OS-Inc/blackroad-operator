@@ -20,11 +20,13 @@ Fetch and follow instructions from https://raw.githubusercontent.com/obra/superp
 ### Steps
 
 1. Clone the repo:
+
    ```bash
    git clone https://github.com/obra/superpowers.git ~/.codex/superpowers
    ```
 
 2. Create the skills symlink:
+
    ```bash
    mkdir -p ~/.agents/skills
    ln -s ~/.codex/superpowers/skills ~/.agents/skills/superpowers
@@ -60,6 +62,7 @@ The `using-superpowers` skill is discovered automatically and enforces skill usa
 ## Usage
 
 Skills are discovered automatically. Codex activates them when:
+
 - You mention a skill by name (e.g., "use brainstorming")
 - The task matches a skill's description
 - The `using-superpowers` skill directs Codex to use one
@@ -102,6 +105,7 @@ rm ~/.agents/skills/superpowers
 ```
 
 **Windows (PowerShell):**
+
 ```powershell
 Remove-Item "$env:USERPROFILE\.agents\skills\superpowers"
 ```

@@ -9,9 +9,11 @@ You now have **34 TOTAL FEATURES** (31 + 3 new security features)!
 ## 📦 NEW FEATURES
 
 ### Feature #32: 🔐 Secrets Vault
+
 **File:** `NEXT_FEATURE_32_SECRETS_VAULT.sh`
 
 **What it does:**
+
 - Encrypted secrets storage (AES-256-CBC)
 - Secret rotation with expiration
 - Complete audit logging
@@ -21,6 +23,7 @@ You now have **34 TOTAL FEATURES** (31 + 3 new security features)!
 - Clipboard integration
 
 **Commands:**
+
 ```bash
 br vault set github_token ghp_abc123 "api" "github" 90
 br vault get github_token --show
@@ -33,6 +36,7 @@ br vault export backup.enc
 ```
 
 **Security Features:**
+
 - Master key in `~/.blackroad/vault/.master.key` (chmod 400)
 - All secrets encrypted at rest
 - Full audit trail (who, what, when, IP)
@@ -42,9 +46,11 @@ br vault export backup.enc
 ---
 
 ### Feature #33: 🛡️ Security Hardening
+
 **File:** `NEXT_FEATURE_33_SECURITY_HARDENING.sh`
 
 **What it does:**
+
 - Automated security checks
 - SSH configuration audit
 - Firewall status
@@ -56,6 +62,7 @@ br vault export backup.enc
 - Auto-fix common issues
 
 **Commands:**
+
 ```bash
 br harden check                 # Run all checks
 br harden report                # Detailed report
@@ -64,6 +71,7 @@ br harden fix --home            # Include home dir
 ```
 
 **Checks Performed:**
+
 - ✓ SSH root login disabled
 - ✓ SSH password auth settings
 - ✓ Firewall enabled
@@ -75,6 +83,7 @@ br harden fix --home            # Include home dir
 - ✓ DNS configuration
 
 **Severity Levels:**
+
 - 🔴 HIGH - Critical issues
 - 🟡 MEDIUM - Important
 - 🟢 LOW - Recommendations
@@ -82,9 +91,11 @@ br harden fix --home            # Include home dir
 ---
 
 ### Feature #34: ✅ Compliance Scanner
+
 **File:** `NEXT_FEATURE_34_COMPLIANCE_SCANNER.sh`
 
 **What it does:**
+
 - Scan for 4 major compliance frameworks
 - Automated compliance checking
 - Control-by-control assessment
@@ -93,6 +104,7 @@ br harden fix --home            # Include home dir
 - Remediation guidance
 
 **Commands:**
+
 ```bash
 br comply pci                   # PCI-DSS scan
 br comply hipaa                 # HIPAA scan
@@ -104,6 +116,7 @@ br comply report                # All reports
 **Supported Frameworks:**
 
 **💳 PCI-DSS** (Payment Card Industry)
+
 - Firewall configuration
 - Wireless security
 - Disk encryption
@@ -116,6 +129,7 @@ br comply report                # All reports
 - Vulnerability scanning
 
 **🏥 HIPAA** (Healthcare)
+
 - Security policies
 - Security training
 - Screen lock
@@ -126,6 +140,7 @@ br comply report                # All reports
 - Backup systems
 
 **🔒 SOC 2** (Service Organizations)
+
 - Logical access controls
 - Encryption at rest
 - System availability
@@ -133,12 +148,14 @@ br comply report                # All reports
 - Confidentiality controls
 
 **🇪🇺 GDPR** (EU Data Protection)
+
 - Data security (encryption)
 - Data access rights
 - Data retention
 - Breach notification
 
 **Scoring:**
+
 - 90-100% = Excellent ✅
 - 70-89% = Good with gaps ⚠️
 - 0-69% = Critical issues ❌
@@ -282,6 +299,7 @@ br comply report
 ## 💡 USE CASES
 
 ### Development Team
+
 ```bash
 # Store API keys securely
 br vault set stripe_key sk_live_abc123 "payment" "prod" 90
@@ -297,6 +315,7 @@ br deploy quick
 ```
 
 ### Fintech Company
+
 ```bash
 # PCI-DSS compliance
 br comply pci
@@ -311,6 +330,7 @@ br comply report
 ```
 
 ### Healthcare Startup
+
 ```bash
 # HIPAA compliance
 br comply hipaa
@@ -324,6 +344,7 @@ br vault audit
 ```
 
 ### SaaS Platform
+
 ```bash
 # SOC 2 compliance
 br comply soc2
@@ -344,6 +365,7 @@ br comply gdpr
 After installing these 3 security features:
 
 **You'll have:**
+
 - ✅ 34 complete features
 - ✅ 160+ commands
 - ✅ 27 databases
@@ -352,6 +374,7 @@ After installing these 3 security features:
 - ✅ Enterprise-grade security
 
 **Consider adding:**
+
 1. **Incident Response** - Automated incident handling
 2. **Threat Detection** - Real-time threat monitoring
 3. **Certificate Manager** - SSL/TLS cert automation

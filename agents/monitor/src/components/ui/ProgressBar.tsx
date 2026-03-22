@@ -1,14 +1,14 @@
-"use client";
+'use client'
 
-import React from 'react';
+import React from 'react'
 
 interface ProgressBarProps {
-  value: number;
-  max?: number;
-  label?: string;
-  color?: string;
-  animated?: boolean;
-  showPercentage?: boolean;
+  value: number
+  max?: number
+  label?: string
+  color?: string
+  animated?: boolean
+  showPercentage?: boolean
 }
 
 export default function ProgressBar({
@@ -19,8 +19,8 @@ export default function ProgressBar({
   animated = true,
   showPercentage = true,
 }: ProgressBarProps) {
-  const percentage = Math.min(100, (value / max) * 100);
-  
+  const percentage = Math.min(100, (value / max) * 100)
+
   return (
     <div className="w-full">
       {label && (
@@ -40,5 +40,5 @@ export default function ProgressBar({
         />
       </div>
     </div>
-  );
+  )
 }

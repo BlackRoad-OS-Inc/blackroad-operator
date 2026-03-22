@@ -1,26 +1,36 @@
 // Achievement System - Core Logic
 
 export interface Achievement {
-  id: string;
-  name: string;
-  description: string;
-  category: 'productivity' | 'collaboration' | 'innovation' | 'social' | 'special';
-  tier: 'bronze' | 'silver' | 'gold' | 'platinum' | 'diamond';
-  xpReward: number;
+  id: string
+  name: string
+  description: string
+  category:
+    | 'productivity'
+    | 'collaboration'
+    | 'innovation'
+    | 'social'
+    | 'special'
+  tier: 'bronze' | 'silver' | 'gold' | 'platinum' | 'diamond'
+  xpReward: number
   requirements: {
-    type: 'tokens_sent' | 'tasks_completed' | 'meetings_attended' | 'messages_sent' | 'days_active';
-    value: number;
-  };
-  unlocked: boolean;
-  unlockedAt?: number;
-  progress: number;
-  icon: string;
+    type:
+      | 'tokens_sent'
+      | 'tasks_completed'
+      | 'meetings_attended'
+      | 'messages_sent'
+      | 'days_active'
+    value: number
+  }
+  unlocked: boolean
+  unlockedAt?: number
+  progress: number
+  icon: string
 }
 
 export interface AchievementState {
-  achievements: Achievement[];
-  totalXP: number;
-  unlockedCount: number;
+  achievements: Achievement[]
+  totalXP: number
+  unlockedCount: number
 }
 
 // Achievement Definitions
@@ -86,7 +96,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     progress: 0,
     icon: '🏆',
   },
-  
+
   // Collaboration
   {
     id: 'team-player',
@@ -124,7 +134,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     progress: 0,
     icon: '💬',
   },
-  
+
   // Social
   {
     id: 'social-butterfly',
@@ -138,7 +148,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     progress: 0,
     icon: '🦋',
   },
-  
+
   // Special
   {
     id: 'early-adopter',
@@ -152,71 +162,90 @@ export const ACHIEVEMENTS: Achievement[] = [
     progress: 0,
     icon: '⭐',
   },
-];
+]
 
 // Check and unlock achievements
-export function checkAchievements(state: AchievementState, stats: {
-  tokens_sent: number;
-  tasks_completed: number;
-  meetings_attended: number;
-  messages_sent: number;
-  days_active: number;
-}): AchievementState {
-  const newState = { ...state };
-  let newlyUnlocked: Achievement[] = [];
-  
-  newState.achievements = newState.achievements.map(achievement => {
-    if (achievement.unlocked) return achievement;
-    
-    const statValue = stats[achievement.requirements.type] || 0;
-    const progress = Math.min(100, (statValue / achievement.requirements.value) * 100);
-    
+export function checkAchievements(
+  state: AchievementState,
+  stats: {
+    tokens_sent: number
+    tasks_completed: number
+    meetings_attended: number
+    messages_sent: number
+    days_active: number
+  },
+): AchievementState {
+  const newState = { ...state }
+  let newlyUnlocked: Achievement[] = []
+
+  newState.achievements = newState.achievements.map((achievement) => {
+    if (achievement.unlocked) return achievement
+
+    const statValue = stats[achievement.requirements.type] || 0
+    const progress = Math.min(
+      100,
+      (statValue / achievement.requirements.value) * 100,
+    )
+
     if (statValue >= achievement.requirements.value) {
-      newlyUnlocked.push(achievement);
-      newState.totalXP += achievement.xpReward;
-      newState.unlockedCount++;
+      newlyUnlocked.push(achievement)
+      newState.totalXP += achievement.xpReward
+      newState.unlockedCount++
       return {
         ...achievement,
         unlocked: true,
         unlockedAt: Date.now(),
         progress: 100,
-      };
+      }
     }
-    
-    return { ...achievement, progress };
-  });
-  
+
+    return { ...achievement, progress }
+  })
+
   if (newlyUnlocked.length > 0) {
-    console.log('[Achievements] Unlocked:', newlyUnlocked.map(a => a.name).join(', '));
+    console.log(
+      '[Achievements] Unlocked:',
+      newlyUnlocked.map((a) => a.name).join(', '),
+    )
   }
-  
-  return newState;
+
+  return newState
 }
 
 // Get achievements by category
-export function getAchievementsByCategory(achievements: Achievement[], category: string): Achievement[] {
-  return achievements.filter(a => a.category === category);
+export function getAchievementsByCategory(
+  achievements: Achievement[],
+  category: string,
+): Achievement[] {
+  return achievements.filter((a) => a.category === category)
 }
 
 // Get achievements by tier
-export function getAchievementsByTier(achievements: Achievement[], tier: string): Achievement[] {
-  return achievements.filter(a => a.tier === tier);
+export function getAchievementsByTier(
+  achievements: Achievement[],
+  tier: string,
+): Achievement[] {
+  return achievements.filter((a) => a.tier === tier)
 }
 
 // Get unlocked achievements
-export function getUnlockedAchievements(achievements: Achievement[]): Achievement[] {
-  return achievements.filter(a => a.unlocked);
+export function getUnlockedAchievements(
+  achievements: Achievement[],
+): Achievement[] {
+  return achievements.filter((a) => a.unlocked)
 }
 
 // Get locked achievements
-export function getLockedAchievements(achievements: Achievement[]): Achievement[] {
-  return achievements.filter(a => !a.unlocked);
+export function getLockedAchievements(
+  achievements: Achievement[],
+): Achievement[] {
+  return achievements.filter((a) => !a.unlocked)
 }
 
 // Calculate completion percentage
 export function getCompletionPercentage(achievements: Achievement[]): number {
-  const unlocked = achievements.filter(a => a.unlocked).length;
-  return Math.round((unlocked / achievements.length) * 100);
+  const unlocked = achievements.filter((a) => a.unlocked).length
+  return Math.round((unlocked / achievements.length) * 100)
 }
 
 // Initial state
@@ -224,5 +253,4 @@ export const initialAchievementState: AchievementState = {
   achievements: ACHIEVEMENTS,
   totalXP: 0,
   unlockedCount: 0,
-};
-
+}

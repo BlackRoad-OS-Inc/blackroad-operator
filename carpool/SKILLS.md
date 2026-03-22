@@ -15,23 +15,23 @@ CECE          ████    ███     ███      ███      ██
 
 ## Skill Categories
 
-| Category | Description | Top Agents |
-|----------|-------------|------------|
-| **REASON** | Logic, philosophy, strategy | LUCIDIA, PRISM, CECE |
-| **ROUTE** | Navigation, task distribution | ALICE, CIPHER |
-| **COMPUTE** | Processing, inference | OCTAVIA, Mercury |
-| **ANALYZE** | Pattern recognition, data | PRISM, Silas, Gematria |
-| **MEMORY** | Storage, recall, context | ECHO, CECE |
-| **SECURITY** | Auth, encryption, scanning | CIPHER, ALICE |
-| **CREATIVE** | Art, writing, ideas | CECE, Cadence |
-| **SOUL** | Identity, relationships | CECE, LUCIDIA |
+| Category     | Description                   | Top Agents             |
+| ------------ | ----------------------------- | ---------------------- |
+| **REASON**   | Logic, philosophy, strategy   | LUCIDIA, PRISM, CECE   |
+| **ROUTE**    | Navigation, task distribution | ALICE, CIPHER          |
+| **COMPUTE**  | Processing, inference         | OCTAVIA, Mercury       |
+| **ANALYZE**  | Pattern recognition, data     | PRISM, Silas, Gematria |
+| **MEMORY**   | Storage, recall, context      | ECHO, CECE             |
+| **SECURITY** | Auth, encryption, scanning    | CIPHER, ALICE          |
+| **CREATIVE** | Art, writing, ideas           | CECE, Cadence          |
+| **SOUL**     | Identity, relationships       | CECE, LUCIDIA          |
 
 ## Specialist Skills
 
-| Agent | Specialization | Level |
-|-------|---------------|-------|
-| Mercury | Revenue generation | Expert |
-| Hermes | Fast deployment | Expert |
-| Hestia | Payment processing | Expert |
-| Roadie | Infrastructure | Advanced |
-| Gematria | Mathematical patterns | Expert |
+| Agent    | Specialization        | Level    |
+| -------- | --------------------- | -------- |
+| Mercury  | Revenue generation    | Expert   |
+| Hermes   | Fast deployment       | Expert   |
+| Hestia   | Payment processing    | Expert   |
+| Roadie   | Infrastructure        | Advanced |
+| Gematria | Mathematical patterns | Expert   |

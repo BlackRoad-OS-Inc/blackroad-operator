@@ -93,12 +93,12 @@ BlackRoad OS uses a **hierarchical memory system** inspired by human cognition. 
 
 ### Comparison Table
 
-| Tier | Backend | Latency | TTL | Capacity | Use Case |
-|------|---------|---------|-----|----------|----------|
-| **Working** | Redis | <10ms | 24h | 10GB | Current context |
-| **Episodic** | PostgreSQL | <50ms | 30d | 100GB | Recent history |
-| **Semantic** | Pinecone | <100ms | Forever | Unlimited | Knowledge |
-| **Archival** | R2/S3 | <1s | Forever | Petabyte | Long-term storage |
+| Tier         | Backend    | Latency | TTL     | Capacity  | Use Case          |
+| ------------ | ---------- | ------- | ------- | --------- | ----------------- |
+| **Working**  | Redis      | <10ms   | 24h     | 10GB      | Current context   |
+| **Episodic** | PostgreSQL | <50ms   | 30d     | 100GB     | Recent history    |
+| **Semantic** | Pinecone   | <100ms  | Forever | Unlimited | Knowledge         |
+| **Archival** | R2/S3      | <1s     | Forever | Petabyte  | Long-term storage |
 
 ### When to Use Each Tier
 
@@ -187,13 +187,13 @@ working_memory:
       timeout: 5
 
   ttl:
-    session: 86400      # 24 hours
-    cache: 3600         # 1 hour
-    temp: 300           # 5 minutes
+    session: 86400 # 24 hours
+    cache: 3600 # 1 hour
+    temp: 300 # 5 minutes
 
   limits:
-    max_key_size: 512   # bytes
-    max_value_size: 10485760  # 10MB
+    max_key_size: 512 # bytes
+    max_value_size: 10485760 # 10MB
 ```
 
 ---
@@ -249,14 +249,14 @@ CREATE INDEX idx_episodic_content ON episodic_memories
 
 ### Memory Types
 
-| Type | Description | Example |
-|------|-------------|---------|
-| `conversation` | Chat messages | User asking about deployment |
-| `task_completion` | Finished tasks | "Deployed v1.2.0 to prod" |
-| `decision` | Choices made | "Selected Railway over Vercel" |
-| `observation` | Noted events | "User prefers dark mode" |
-| `feedback` | User reactions | "User approved the PR" |
-| `error` | Failures | "API timeout on /tasks endpoint" |
+| Type              | Description    | Example                          |
+| ----------------- | -------------- | -------------------------------- |
+| `conversation`    | Chat messages  | User asking about deployment     |
+| `task_completion` | Finished tasks | "Deployed v1.2.0 to prod"        |
+| `decision`        | Choices made   | "Selected Railway over Vercel"   |
+| `observation`     | Noted events   | "User prefers dark mode"         |
+| `feedback`        | User reactions | "User approved the PR"           |
+| `error`           | Failures       | "API timeout on /tasks endpoint" |
 
 ### Usage
 
@@ -481,13 +481,13 @@ archival:
 
   retention:
     conversations:
-      min_age: 90d      # Archive after 90 days
+      min_age: 90d # Archive after 90 days
       keep_forever: true
 
     tasks:
       completed:
         min_age: 30d
-        keep_for: 365d  # Delete after 1 year
+        keep_for: 365d # Delete after 1 year
       failed:
         keep_forever: true
 
@@ -806,12 +806,12 @@ print(f"Freed {result.freed_bytes} bytes")
 
 ### Permission Levels
 
-| Level | Description | Access |
-|-------|-------------|--------|
-| `private` | Only owner agent | Read/Write |
-| `team` | Specified agents | Read |
-| `organization` | All org agents | Read |
-| `public` | Any agent | Read |
+| Level          | Description      | Access     |
+| -------------- | ---------------- | ---------- |
+| `private`      | Only owner agent | Read/Write |
+| `team`         | Specified agents | Read       |
+| `organization` | All org agents   | Read       |
+| `public`       | Any agent        | Read       |
 
 ### Sharing Memory
 
@@ -972,7 +972,7 @@ memory:
     user: ${POSTGRES_USER}
     password: ${POSTGRES_PASSWORD}
     pool_size: 20
-    ttl_default: 2592000  # 30 days
+    ttl_default: 2592000 # 30 days
 
   # Semantic Memory (Pinecone)
   semantic:
@@ -1003,9 +1003,9 @@ memory:
   consolidation:
     enabled: true
     schedule:
-      working_to_episodic: "0 * * * *"   # Every hour
-      episodic_to_semantic: "0 0 * * *"  # Daily
-      semantic_to_archival: "0 0 1 * *"  # Monthly
+      working_to_episodic: '0 * * * *' # Every hour
+      episodic_to_semantic: '0 0 * * *' # Daily
+      semantic_to_archival: '0 0 1 * *' # Monthly
 
   # Embedding Settings
   embeddings:
@@ -1107,12 +1107,12 @@ except MemoryNotFoundError:
 
 ### Common Issues
 
-| Issue | Cause | Solution |
-|-------|-------|----------|
-| Slow searches | Index not optimized | Run `./mem.sh optimize` |
-| Memory full | No cleanup | Run `./mem.sh consolidate` |
-| Chain invalid | Corruption | Run `./mem.sh repair` |
-| High latency | Network issues | Check connections |
+| Issue         | Cause               | Solution                   |
+| ------------- | ------------------- | -------------------------- |
+| Slow searches | Index not optimized | Run `./mem.sh optimize`    |
+| Memory full   | No cleanup          | Run `./mem.sh consolidate` |
+| Chain invalid | Corruption          | Run `./mem.sh repair`      |
+| High latency  | Network issues      | Check connections          |
 
 ### Diagnostic Commands
 
@@ -1132,4 +1132,4 @@ except MemoryNotFoundError:
 
 ---
 
-*Last updated: 2026-02-05*
+_Last updated: 2026-02-05_
