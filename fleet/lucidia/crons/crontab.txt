@@ -1,0 +1,9 @@
+* * * * * ~/.blackroad-autonomy/blackroad-pi-autonomy.sh heartbeat >> ~/.blackroad-autonomy/cron.log 2>&1
+*/5 * * * * ~/.blackroad-autonomy/blackroad-pi-autonomy.sh heal >> ~/.blackroad-autonomy/cron.log 2>&1
+@reboot sleep 10 && cloudflared tunnel --config ~/aria-tunnel.yml run  >> ~/cloudflared.log 2>&1
+0 */6 * * * $HOME/.blackroad/gdrive-sync.sh
+@reboot sleep 10 && python3 /home/blackroad/blackroad-server.py > /tmp/brs.log 2>&1 &
+0 * * * * $HOME/bin/rclone sync /home/blackroad gdrive-blackroad:BlackRoad-Pi-Backup --exclude "**/node_modules/**" --exclude "**/.git/**" --log-file /tmp/rclone-sync.log 2>&1
+0 * * * * /opt/blackroad/bin/blackroad-chatter.sh
+*/5 * * * * /opt/blackroad/bin/blackroad-pissed.sh
+@reboot /opt/blackroad/bin/blackroad-boot-hello.sh

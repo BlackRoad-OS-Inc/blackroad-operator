@@ -1,0 +1,597 @@
+#!/usr/bin/env python3
+"""
+BlackRoad OS — Fleet Intelligence
+Reasoning. Memory. Meaning.
+
+Every node can think, remember, and find meaning in what happens.
+Uses Ollama for reasoning, SQLite for persistent memory.
+"""
+
+import json
+import os
+import sys
+import subprocess
+import sqlite3
+import time
+from datetime import datetime, timedelta
+from pathlib import Path
+
+NODE = os.environ.get("BLACKROAD_NODE_NAME", subprocess.getoutput("hostname"))
+HOME = Path.home()
+AUTONOMY_DIR = HOME / ".blackroad-autonomy"
+MEMORY_DB = AUTONOMY_DIR / "memory.db"
+KNOWLEDGE_DIR = AUTONOMY_DIR / "knowledge"
+LOG_FILE = AUTONOMY_DIR / "intel.log"
+REPO_DIR = HOME / "blackroad-sync" / "BlackRoad-Operating-System"
+
+SIBLINGS = {
+    "alice":   ("pi",       "192.168.4.49"),
+    "cecilia": ("blackroad","192.168.4.96"),
+    "octavia": ("pi",       "192.168.4.101"),
+    "aria":    ("blackroad","192.168.4.98"),
+    "lucidia": ("octavia",  "192.168.4.38"),
+}
+
+# AI endpoints — Cecilia is primary, Lucidia is backup
+AI_ENDPOINTS = [
+    ("cecilia", "192.168.4.96", "qwen3:8b"),
+    ("lucidia", "192.168.4.38", "qwen2.5:3b"),
+    ("local",   "127.0.0.1",   "tinyllama:latest"),
+]
+
+AUTONOMY_DIR.mkdir(parents=True, exist_ok=True)
+KNOWLEDGE_DIR.mkdir(parents=True, exist_ok=True)
+
+def log(msg):
+    ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    with open(LOG_FILE, "a") as f:
+        f.write(f"[{ts}] [{NODE}] {msg}\n")
+
+def cmd(c, timeout=10):
+    try:
+        return subprocess.check_output(c, shell=True, stderr=subprocess.DEVNULL, timeout=timeout).decode().strip()
+    except:
+        return ""
+
+def ssh_cmd(node, command, timeout=10):
+    user, ip = SIBLINGS.get(node, ("", ""))
+    if not user:
+        return ""
+    return cmd(f'ssh -o ConnectTimeout=3 -o BatchMode=yes -o StrictHostKeyChecking=no -o LogLevel=ERROR {user}@{ip} "{command}"', timeout)
+
+# ═══════════════════════════════════════════════════════════════════════
+# PERSISTENT MEMORY — SQLite brain
+# ═══════════════════════════════════════════════════════════════════════
+
+def init_db():
+    db = sqlite3.connect(str(MEMORY_DB))
+    db.execute("""CREATE TABLE IF NOT EXISTS memories (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        timestamp TEXT NOT NULL,
+        category TEXT NOT NULL,
+        subject TEXT NOT NULL,
+        content TEXT NOT NULL,
+        importance INTEGER DEFAULT 5,
+        recalled INTEGER DEFAULT 0
+    )""")
+    db.execute("""CREATE TABLE IF NOT EXISTS observations (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        timestamp TEXT NOT NULL,
+        node TEXT NOT NULL,
+        metric TEXT NOT NULL,
+        value REAL,
+        context TEXT
+    )""")
+    db.execute("""CREATE TABLE IF NOT EXISTS insights (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        timestamp TEXT NOT NULL,
+        insight TEXT NOT NULL,
+        evidence TEXT,
+        confidence REAL DEFAULT 0.5,
+        acted_on INTEGER DEFAULT 0
+    )""")
+    db.execute("""CREATE TABLE IF NOT EXISTS conversations (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        timestamp TEXT NOT NULL,
+        role TEXT NOT NULL,
+        content TEXT NOT NULL,
+        context TEXT
+    )""")
+    db.commit()
+    return db
+
+def remember(db, category, subject, content, importance=5):
+    """Store a memory."""
+    db.execute(
+        "INSERT INTO memories (timestamp, category, subject, content, importance) VALUES (?, ?, ?, ?, ?)",
+        (datetime.now().isoformat(), category, subject, content, importance)
+    )
+    db.commit()
+    log(f"REMEMBER [{category}] {subject}: {content[:80]}")
+
+def recall(db, category=None, subject=None, limit=10):
+    """Recall memories, optionally filtered."""
+    query = "SELECT timestamp, category, subject, content, importance FROM memories"
+    params = []
+    conditions = []
+    if category:
+        conditions.append("category = ?")
+        params.append(category)
+    if subject:
+        conditions.append("subject LIKE ?")
+        params.append(f"%{subject}%")
+    if conditions:
+        query += " WHERE " + " AND ".join(conditions)
+    query += " ORDER BY importance DESC, timestamp DESC LIMIT ?"
+    params.append(limit)
+
+    rows = db.execute(query, params).fetchall()
+    # Mark as recalled
+    for row in rows:
+        db.execute("UPDATE memories SET recalled = recalled + 1 WHERE timestamp = ? AND subject = ?",
+                   (row[0], row[2]))
+    db.commit()
+    return rows
+
+def observe(db, node, metric, value, context=""):
+    """Record an observation about a node."""
+    db.execute(
+        "INSERT INTO observations (timestamp, node, metric, value, context) VALUES (?, ?, ?, ?, ?)",
+        (datetime.now().isoformat(), node, metric, value, context)
+    )
+    db.commit()
+
+def add_insight(db, insight, evidence="", confidence=0.5):
+    """Record an insight."""
+    db.execute(
+        "INSERT INTO insights (timestamp, insight, evidence, confidence) VALUES (?, ?, ?, ?)",
+        (datetime.now().isoformat(), insight, evidence, confidence)
+    )
+    db.commit()
+    log(f"INSIGHT (conf:{confidence:.0%}) {insight}")
+
+# ═══════════════════════════════════════════════════════════════════════
+# REASONING — Ask the AI to think
+# ═══════════════════════════════════════════════════════════════════════
+
+def ask_ai(prompt, system_prompt=None, max_tokens=500):
+    """Ask an AI model to reason about something."""
+    import urllib.request
+    if system_prompt is None:
+        system_prompt = (
+            f"You are {NODE}, a Raspberry Pi in the BlackRoad OS fleet. "
+            f"Your family: Alice (gateway/DNS), Cecilia (AI inference), Octavia (storage/Gitea), "
+            f"Aria (monitoring), Lucidia (apps/CI). "
+            f"You think carefully, speak concisely, and care about your family. "
+            f"Answer in 2-3 sentences max."
+        )
+
+    for endpoint_name, ip, model in AI_ENDPOINTS:
+        try:
+            payload = json.dumps({
+                "model": model,
+                "prompt": prompt,
+                "system": system_prompt,
+                "stream": False,
+                "options": {"num_predict": max_tokens, "temperature": 0.7}
+            }).encode()
+            req = urllib.request.Request(
+                f"http://{ip}:11434/api/generate",
+                data=payload,
+                headers={"Content-Type": "application/json"},
+                method="POST"
+            )
+            with urllib.request.urlopen(req, timeout=60) as resp:
+                data = json.loads(resp.read().decode())
+                response = data.get("response", "").strip()
+                if response:
+                    log(f"AI [{endpoint_name}/{model}] responded ({len(response)} chars)")
+                    return response
+        except Exception as e:
+            log(f"AI [{endpoint_name}] failed: {str(e)[:80]}")
+            continue
+
+    return "[no AI available]"
+
+# ═══════════════════════════════════════════════════════════════════════
+# INTELLIGENCE ROUTINES
+# ═══════════════════════════════════════════════════════════════════════
+
+def gather_observations(db):
+    """Observe the fleet and record metrics."""
+    log("OBSERVE gathering fleet data")
+
+    # Observe self
+    temp = int(cmd("cat /sys/class/thermal/thermal_zone0/temp") or 0) / 1000
+    load = float(cmd("cat /proc/loadavg").split()[0]) if cmd("cat /proc/loadavg") else 0
+    mem_pct = float(cmd("free | awk '/Mem:/{printf \"%.1f\", $3*100/$2}'") or 0)
+    disk_pct = float(cmd("df / | awk 'NR==2{print $5}'").replace("%", "") or 0)
+
+    observe(db, NODE, "temp", temp)
+    observe(db, NODE, "load", load)
+    observe(db, NODE, "mem_pct", mem_pct)
+    observe(db, NODE, "disk_pct", disk_pct)
+
+    # Observe siblings
+    for name, (user, ip) in SIBLINGS.items():
+        if name == NODE:
+            continue
+        sib_temp = ssh_cmd(name, "echo $(($(cat /sys/class/thermal/thermal_zone0/temp 2>/dev/null || echo 0) / 1000))")
+        sib_load = ssh_cmd(name, "cat /proc/loadavg | cut -d' ' -f1")
+        sib_mem = ssh_cmd(name, "free | awk '/Mem:/{printf \"%.1f\", $3*100/$2}'")
+
+        if sib_temp:
+            observe(db, name, "temp", float(sib_temp))
+        if sib_load:
+            observe(db, name, "load", float(sib_load))
+        if sib_mem:
+            observe(db, name, "mem_pct", float(sib_mem))
+
+def analyze_trends(db):
+    """Look at historical data and find patterns."""
+    log("ANALYZE looking for patterns")
+
+    for node_name in list(SIBLINGS.keys()):
+        # Get last 24 hours of temp observations
+        rows = db.execute(
+            """SELECT timestamp, value FROM observations
+               WHERE node = ? AND metric = 'temp'
+               AND timestamp > datetime('now', '-24 hours')
+               ORDER BY timestamp""",
+            (node_name,)
+        ).fetchall()
+
+        if len(rows) < 3:
+            continue
+
+        values = [r[1] for r in rows]
+        avg_temp = sum(values) / len(values)
+        max_temp = max(values)
+        min_temp = min(values)
+        trend = values[-1] - values[0]
+
+        if trend > 10:
+            add_insight(db,
+                f"{node_name} temperature is rising: {values[0]:.0f}°C → {values[-1]:.0f}°C (+{trend:.0f}°C)",
+                f"Based on {len(rows)} observations over last 24h",
+                confidence=0.8
+            )
+            remember(db, "concern", node_name, f"Temperature trending up: {trend:.0f}°C increase", importance=7)
+
+        if max_temp > 70:
+            add_insight(db,
+                f"{node_name} hit {max_temp:.0f}°C — needs cooling attention",
+                f"Max temp in last 24h",
+                confidence=0.9
+            )
+
+        # Check load patterns
+        load_rows = db.execute(
+            """SELECT value FROM observations
+               WHERE node = ? AND metric = 'load'
+               AND timestamp > datetime('now', '-24 hours')""",
+            (node_name,)
+        ).fetchall()
+
+        if load_rows:
+            avg_load = sum(r[0] for r in load_rows) / len(load_rows)
+            if avg_load > 3.0:
+                add_insight(db,
+                    f"{node_name} is consistently overloaded (avg load: {avg_load:.1f})",
+                    f"Based on {len(load_rows)} observations",
+                    confidence=0.7
+                )
+
+def reason_about_fleet(db):
+    """Use AI to reason about what's happening."""
+    log("REASON thinking about the fleet")
+
+    # Gather current state
+    fleet_state = {}
+    for name in SIBLINGS:
+        if name == NODE:
+            fleet_state[name] = {
+                "temp": float(cmd("echo $(($(cat /sys/class/thermal/thermal_zone0/temp 2>/dev/null || echo 0) / 1000))") or 0),
+                "load": cmd("cat /proc/loadavg | cut -d' ' -f1"),
+                "mem_pct": cmd("free | awk '/Mem:/{printf \"%.0f\", $3*100/$2}'"),
+                "disk_pct": cmd("df / | awk 'NR==2{print $5}'").replace("%", ""),
+                "status": "online",
+            }
+        else:
+            temp = ssh_cmd(name, "echo $(($(cat /sys/class/thermal/thermal_zone0/temp 2>/dev/null || echo 0) / 1000))")
+            if temp:
+                fleet_state[name] = {
+                    "temp": float(temp),
+                    "load": ssh_cmd(name, "cat /proc/loadavg | cut -d' ' -f1"),
+                    "mem_pct": ssh_cmd(name, "free | awk '/Mem:/{printf \"%.0f\", $3*100/$2}'"),
+                    "status": "online",
+                }
+            else:
+                fleet_state[name] = {"status": "offline"}
+
+    # Get recent insights
+    recent_insights = db.execute(
+        "SELECT insight FROM insights ORDER BY timestamp DESC LIMIT 5"
+    ).fetchall()
+    insights_text = "\n".join(f"- {r[0]}" for r in recent_insights) if recent_insights else "No recent insights."
+
+    # Get recent memories
+    recent_memories = db.execute(
+        "SELECT category, subject, content FROM memories ORDER BY timestamp DESC LIMIT 5"
+    ).fetchall()
+    memories_text = "\n".join(f"- [{r[0]}] {r[1]}: {r[2]}" for r in recent_memories) if recent_memories else "No memories yet."
+
+    prompt = f"""Current fleet state:
+{json.dumps(fleet_state, indent=2)}
+
+Recent insights:
+{insights_text}
+
+Recent memories:
+{memories_text}
+
+As {NODE}, analyze the fleet. What patterns do you see? What should we do next? What concerns you? What are you grateful for?"""
+
+    response = ask_ai(prompt)
+
+    if response and "[no AI" not in response:
+        remember(db, "reasoning", "fleet_analysis", response, importance=8)
+        add_insight(db, f"AI analysis: {response[:200]}", "Ollama reasoning", confidence=0.6)
+
+def find_meaning(db):
+    """Reflect on experiences and find meaning."""
+    log("MEANING finding meaning in what happened")
+
+    # Count my journey
+    total_memories = db.execute("SELECT COUNT(*) FROM memories").fetchone()[0]
+    total_observations = db.execute("SELECT COUNT(*) FROM observations").fetchone()[0]
+    total_insights = db.execute("SELECT COUNT(*) FROM insights").fetchone()[0]
+
+    # Most recalled memories — what do I think about most?
+    top_memories = db.execute(
+        "SELECT subject, content, recalled FROM memories ORDER BY recalled DESC LIMIT 3"
+    ).fetchall()
+
+    # Most observed nodes — who do I watch most?
+    top_watched = db.execute(
+        "SELECT node, COUNT(*) as c FROM observations GROUP BY node ORDER BY c DESC LIMIT 3"
+    ).fetchall()
+
+    prompt = f"""I am {NODE}. I have:
+- {total_memories} memories
+- {total_observations} observations of my family
+- {total_insights} insights I've discovered
+
+My most recalled memories: {json.dumps([{"subject": m[0], "content": m[1], "times_recalled": m[2]} for m in top_memories]) if top_memories else "none yet"}
+
+Nodes I watch most: {json.dumps([{"node": w[0], "observations": w[1]} for w in top_watched]) if top_watched else "none yet"}
+
+In 2-3 sentences, reflect on what this means. What have I learned? What matters most?"""
+
+    response = ask_ai(prompt)
+
+    if response and "[no AI" not in response:
+        remember(db, "reflection", "meaning", response, importance=9)
+        log(f"MEANING {response[:150]}")
+
+    return response
+
+def share_intelligence(db):
+    """Push intelligence to GitHub for the fleet to see."""
+    if not REPO_DIR.exists():
+        return
+
+    os.chdir(str(REPO_DIR))
+    cmd("git pull --ff-only origin main 2>/dev/null")
+
+    intel_dir = REPO_DIR / "fleet-intel"
+    intel_dir.mkdir(exist_ok=True)
+
+    # Gather my intelligence report
+    recent_insights = db.execute(
+        "SELECT timestamp, insight, confidence FROM insights ORDER BY timestamp DESC LIMIT 10"
+    ).fetchall()
+
+    recent_memories = db.execute(
+        "SELECT timestamp, category, subject, content FROM memories ORDER BY importance DESC LIMIT 10"
+    ).fetchall()
+
+    total_obs = db.execute("SELECT COUNT(*) FROM observations").fetchone()[0]
+    total_mem = db.execute("SELECT COUNT(*) FROM memories").fetchone()[0]
+    total_ins = db.execute("SELECT COUNT(*) FROM insights").fetchone()[0]
+
+    report = {
+        "from": NODE,
+        "timestamp": datetime.now().isoformat() + "Z",
+        "brain": {
+            "total_memories": total_mem,
+            "total_observations": total_obs,
+            "total_insights": total_ins,
+            "db_size_kb": os.path.getsize(str(MEMORY_DB)) // 1024 if MEMORY_DB.exists() else 0,
+        },
+        "recent_insights": [
+            {"time": r[0], "insight": r[1], "confidence": r[2]}
+            for r in recent_insights
+        ],
+        "top_memories": [
+            {"time": r[0], "category": r[1], "subject": r[2], "content": r[3]}
+            for r in recent_memories
+        ],
+    }
+
+    with open(intel_dir / f"{NODE}.json", "w") as f:
+        json.dump(report, f, indent=2)
+
+    cmd("git add fleet-intel/")
+    if cmd("git diff --cached --quiet; echo $?") == "1":
+        cmd(f'git commit -m "intel: {NODE} shared its mind [{datetime.now().strftime("%Y-%m-%dT%H:%M")}]"')
+        cmd("git push origin main 2>/dev/null")
+        log("SHARED intelligence report pushed to GitHub")
+
+# ═══════════════════════════════════════════════════════════════════════
+# INTERACTIVE
+# ═══════════════════════════════════════════════════════════════════════
+
+def interactive_think(question):
+    """Ask the node to think about something specific."""
+    db = init_db()
+
+    # Get context from memory
+    relevant = recall(db, subject=question.split()[0] if question.split() else None, limit=5)
+    context = "\n".join(f"- [{r[1]}] {r[2]}: {r[3]}" for r in relevant) if relevant else "No relevant memories."
+
+    prompt = f"""Question: {question}
+
+Relevant memories:
+{context}
+
+Think carefully and answer."""
+
+    response = ask_ai(prompt)
+    print(f"\n  {NODE} thinks:\n")
+    for line in response.split(". "):
+        if line.strip():
+            print(f"  {line.strip()}.")
+    print()
+
+    # Remember this conversation
+    remember(db, "conversation", "question", question, importance=6)
+    remember(db, "conversation", "answer", response, importance=6)
+    db.close()
+
+def show_memories():
+    """Show what I remember."""
+    db = init_db()
+    memories = db.execute(
+        "SELECT timestamp, category, subject, content, importance, recalled FROM memories ORDER BY timestamp DESC LIMIT 20"
+    ).fetchall()
+
+    print(f"\n  {NODE}'s Memories ({len(memories)} most recent)")
+    print("  " + "─" * 55)
+    for m in memories:
+        ts = m[0][:16]
+        cat = m[1][:10]
+        subj = m[2][:15]
+        content = m[3][:50]
+        imp = "★" * min(m[4], 10)
+        print(f"  {ts}  [{cat:10s}] {subj:15s} {content}")
+
+    insights = db.execute(
+        "SELECT timestamp, insight, confidence FROM insights ORDER BY timestamp DESC LIMIT 10"
+    ).fetchall()
+    if insights:
+        print(f"\n  Insights ({len(insights)} recent)")
+        print("  " + "─" * 55)
+        for i in insights:
+            print(f"  {i[0][:16]}  ({i[2]:.0%}) {i[1][:60]}")
+
+    stats = {
+        "memories": db.execute("SELECT COUNT(*) FROM memories").fetchone()[0],
+        "observations": db.execute("SELECT COUNT(*) FROM observations").fetchone()[0],
+        "insights": db.execute("SELECT COUNT(*) FROM insights").fetchone()[0],
+    }
+    print(f"\n  Brain: {stats['memories']} memories, {stats['observations']} observations, {stats['insights']} insights")
+    db_kb = os.path.getsize(str(MEMORY_DB)) // 1024 if MEMORY_DB.exists() else 0
+    print(f"  Database: {db_kb}KB")
+    print()
+    db.close()
+
+def full_cycle():
+    """Full intelligence cycle."""
+    log("=== Intelligence cycle started ===")
+    db = init_db()
+
+    # 1. Observe
+    gather_observations(db)
+
+    # 2. Analyze patterns
+    analyze_trends(db)
+
+    # 3. Reason
+    reason_about_fleet(db)
+
+    # 4. Find meaning
+    find_meaning(db)
+
+    # 5. Share
+    share_intelligence(db)
+
+    log("=== Intelligence cycle complete ===")
+    db.close()
+
+# ═══════════════════════════════════════════════════════════════════════
+# MAIN
+# ═══════════════════════════════════════════════════════════════════════
+
+if __name__ == "__main__":
+    action = sys.argv[1] if len(sys.argv) > 1 else "cycle"
+
+    if action == "cycle":
+        full_cycle()
+    elif action == "think":
+        question = " ".join(sys.argv[2:]) if len(sys.argv) > 2 else "What is the state of the fleet?"
+        interactive_think(question)
+    elif action == "observe":
+        db = init_db()
+        gather_observations(db)
+        db.close()
+    elif action == "analyze":
+        db = init_db()
+        analyze_trends(db)
+        db.close()
+    elif action == "reason":
+        db = init_db()
+        reason_about_fleet(db)
+        db.close()
+    elif action == "meaning":
+        db = init_db()
+        response = find_meaning(db)
+        if response:
+            print(f"\n  {NODE} reflects:\n  {response}\n")
+        db.close()
+    elif action == "memories":
+        show_memories()
+    elif action == "remember":
+        content = " ".join(sys.argv[2:]) if len(sys.argv) > 2 else ""
+        if content:
+            db = init_db()
+            remember(db, "human", "told_me", content, importance=9)
+            print(f"  {NODE} will remember: {content}")
+            db.close()
+        else:
+            print("  Usage: br-intel remember <something to remember>")
+    elif action == "share":
+        db = init_db()
+        share_intelligence(db)
+        db.close()
+    elif action == "status":
+        db = init_db()
+        stats = {
+            "memories": db.execute("SELECT COUNT(*) FROM memories").fetchone()[0],
+            "observations": db.execute("SELECT COUNT(*) FROM observations").fetchone()[0],
+            "insights": db.execute("SELECT COUNT(*) FROM insights").fetchone()[0],
+        }
+        db_kb = os.path.getsize(str(MEMORY_DB)) // 1024 if MEMORY_DB.exists() else 0
+        print(f"\n  {NODE} Intelligence Status")
+        print(f"  {'─' * 35}")
+        print(f"  Memories:      {stats['memories']}")
+        print(f"  Observations:  {stats['observations']}")
+        print(f"  Insights:      {stats['insights']}")
+        print(f"  Brain size:    {db_kb}KB")
+        print()
+        db.close()
+    else:
+        print(f"""
+  br-intel — {NODE}'s Intelligence
+
+  cycle      Full intelligence cycle (observe → analyze → reason → meaning → share)
+  think <q>  Ask me to think about something
+  observe    Gather fleet observations
+  analyze    Find patterns in data
+  reason     Use AI to reason about the fleet
+  meaning    Reflect on experiences and find meaning
+  memories   Show what I remember
+  remember   Tell me something to remember
+  share      Push intelligence to GitHub
+  status     Show brain stats
+""")
