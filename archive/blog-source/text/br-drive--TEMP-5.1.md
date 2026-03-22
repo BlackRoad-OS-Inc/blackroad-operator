@@ -1,0 +1,171 @@
+# TEMP 5.1
+
+**Source:** br-drive
+
+---
+
+JOUR 4251
+
+Psychology of Advertising 5.1 Attitudes (Cont.)
+
+Recap Thursday
+
+● What are attitudes?
+
+○ Evaluative response
+
+○ Directed to an attitude object
+
+○ Derived from 3 classes of info: cognitive, affective, behavioral ● Self-perception theory
+
+● Explicit versus implicit attitudes
+
+○ And how to measure them
+
+Why do people hold attitudes?
+
+Attitudes will help consumers to separate good from bad.  Decide whether to approach or avoid something.
+
+Different functions can drive attitudes.
+
+Understanding the purpose of a consumer’s attitude is an imperative step  toward changing an attitude.
+
+Function theory
+
+Adjustment function
+
+Maximize rewards and minimize penalties
+
+Value-expressive function
+
+Reflect values that are important to them or that they perceive as socially  important to others
+
+Ego-defensive function
+
+Protect our self-esteem
+
+Knowledge function
+
+Need frames of reference for understanding the world; help us organize a  chaotic world
+
+● Adjustment function
+
+● Value-expressive function
+
+● Ego-defensive function
+
+● Knowledge function
+
+Assignment #3 - attitudes
+
+For this assignment, you need to find two ads for the same product category  (not necessarily the same brand) that are trying to appeal to two different  functions.
+
+In a report (double-spaced, approx. 500-750 words), respond to the following  items:
+
+1. Briefly describe the two advertisements you selected. Remember, they  should be in the same product category, but they should appeal to  different functions.
+
+2. For each advertisement, briefly describe which functions (one for each)  you think each ad is appealing to and why.
+
+3. Which functional appeal do you think is more effective in this product  category. Why?
+
+DEADLINE: March 5, 2:30 pm (before class starts)
+
+Are attitudes stable or do they change?
+
+‘Attitude strength’
+
+The stability of attitudes
+
+Four attributes of strong attitudes:
+
+1. Strong attitudes have higher stability over time 2. Greater impact on behavior
+
+3. Greater influence on information processing 4. Greater resistance to persuasion
+
+Determinants of attitude strength
+
+● Accessibility
+
+● Importance
+
+● Knowledge
+
+● Certainty
+
+● Ambivalence
+
+Accessibility
+
+How easy or quickly an attitude can be retrieved from memory Node: activated easily
+
+More accessible =
+
+● Stronger influence on information processing ● Stronger influence on behavior
+
+Example: Brand awareness
+
+Measure through response time. Accessible takes less time.
+
+Attitude importance
+
+How important it is to you personally How concerned you are about it How relevant the attitude object is to you.
+
+Attitude knowledge
+
+How much information you have about the issue
+
+Should be able to better evaluate the information presented
+
+Attitude certainty
+
+Confidence individuals have in the validity or correctness of their own  attitude.
+
+Ambivalence
+
+State in which an individual gives an attitude object equivalently strong  positive or negative evaluation.
+
+In other words, we like and hate at the same time. You find yourself torn… Not the same as neutral!
+
+Less predictive of behavior.
+
+Ambivalence
+
+How positive?
+
+How negative?
+
+How ambivalence could help persuasion
+
+Easier to change through persuasion, but also evidence to the contrary.
+
+1. If you have a two-sided argument and recipient must formulate  opinion.
+
+2. They will work harder to do so (effortful), elaborate more. 3. Elaboration (extended processing) is associated with high levels of  persuasion
+
+4. Thus, more elaboration more persuasion (see studies in book)
+
+Determinants of attitude strength
+
+In sum...
+
+● Accessibility
+
+● Importance
+
+● Knowledge
+
+● Certainty
+
+● Ambivalence
+
+What’s next?
+
+● Continue reading Chapter 4 (attitudes)
+
+○ Submit reading response by Feb 20 before class starts
+
+● We will have a review session next week
+
+○ Submit review question #1 by Feb 20 (Part of participant points) ○ About content of class - what needs additional explanation?
+
+● Assignment #3 (attitude) due by March 5 before class starts

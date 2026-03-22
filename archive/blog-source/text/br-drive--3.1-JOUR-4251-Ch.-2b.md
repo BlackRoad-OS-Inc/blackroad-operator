@@ -1,0 +1,378 @@
+# 3.1 JOUR 4251 Ch. 2b
+
+**Source:** br-drive
+
+---
+
+## Page 1
+
+New Research Study: 
+Understanding American’s 
+Evaluation of media 
+content
+•Who: American, age 18+
+•Where: 200 Murphy Hall 
+•When: February 3rd – 28th 
+Mondays 10:00 am - 1:00 pm  
+Wednesdays 10:00 am - 1:00 pm*  
+Thursdays 9:00-11:00 am and 
+12:30-2:30 pm  
+Fridays 9:00 am - 1:00**
+•What: Watch a short video and 
+answer questions (10 to 15 minutes)
+•Take part in a study and receive $5 
+in Gopher Gold or receive 2 extra 
+credits for a JOUR course enrolled in 
+the SONA system
+The study is done by:
+Dr. Claire M. Segijn, assistant 
+professor at HSJMC, University of 
+Minnesota
+Student researcher: Gwiwon (Jason) 
+Nam
+
+## Page 3
+
+JOUR 4251
+Psychology of Advertising
+3.1 Attention, perception, processing (Continued)
+
+## Page 4
+
+Check grading rubric before submitting!!!
+Use subheadings and paragraphs, to clearly 
+indicate what question you are answering.
+Follow guidelines to get all the points.
+NOTE 3 ads in total:
+●
+2 successful at grabbing your attention
+●
+1 unsuccessful at grabbing your attention
+Questions?
+
+## Page 5
+
+Reading responses (good examples)
+
+## Page 6
+
+Recap Thursday
+●
+Preattentive analysis
+○
+Feature analysis vs. semantic analysis
+○
+Hedonic ﬂuency
+■
+Perceptual
+■
+Conceptual
+○
+Matching Activation Hypothesis
+●
+Focal attention
+○
+Motivation (goal)
+○
+Salience
+○
+Vividness
+○
+Novelty
+
+## Page 7
+
+Stages of processing
+1.
+Preattentive analysis
+2.
+Focal Attention
+3.
+Comprehension
+4.
+Elaborative Reasoning
+Preattentive analysis
+Focal attention
+Comprehension
+Elaborative reasoning
+
+## Page 8
+
+How do we consciously process?
+Categorize
+●
+Based on existing schemas (what we already know about the world)
+●
+Based on information provided
+Enter the first word that 
+comes to mind when you 
+see the target word
+Preattentive analysis
+Focal attention
+Comprehension
+Elaborative reasoning
+
+## Page 9
+
+Categorization
+●
+Car?
+●
+Luxury Item?
+●
+Transportation?
+Brand line or product extensions
+When they diversify the product line
+Quickly categorized
+Not plain coke, but like coke
+Success depends on congruence with parent brand or 
+key associations
+Preattentive analysis
+Focal attention
+Comprehension
+Elaborative reasoning
+
+## Page 10
+
+Categorization
+Representativeness heuristic
+Extent to which two stimuli are deemed to belong to the same overall 
+category based on shared characteristics
+Preattentive analysis
+Focal attention
+Comprehension
+Elaborative reasoning
+
+## Page 11
+
+Pioneering advantage
+Being ﬁrst results in some advantages for future brands:
+1)
+Novel & interesting
+2)
+Deﬁne category
+3)
+Direction-of-comparison effect 
+Preattentive analysis
+Focal attention
+Comprehension
+Elaborative reasoning
+
+## Page 12
+
+Categorization is NOT just where something ﬁts
+It affects our opinions
+Toaster A: lots of features, high end
+Toaster B: Fewer features, low end
+Which is rated higher?
+Depends on whether you 
+highlight the common brand.
+Preattentive analysis
+Focal attention
+Comprehension
+Elaborative reasoning
+
+## Page 13
+
+Categorization
+Assimilation
+The product is associated as MORE similar than it really is to the parent 
+category
+Contrast
+The product is DIFFERENTIATED from the parent company
+Preattentive analysis
+Focal attention
+Comprehension
+Elaborative reasoning
+
+## Page 14
+
+Example
+Preattentive analysis
+Focal attention
+Comprehension
+Elaborative reasoning
+
+## Page 15
+
+Brand personality
+Preattentive analysis
+Focal attention
+Comprehension
+Elaborative reasoning
+
+## Page 16
+
+Stimulus based impression formation
+1.
+Show people images of people wearing 2 brands  (Hugo Boss and 
+Australian). In context and not in context.
+2.
+Hugo boss in golf course; Australian in campsite
+3.
+Rated the people wearing the clothes in competence the same way 
+they rated the brand. Especially when the Hugo Boss was in golf course 
+and Australian in campsite
+4.
+Put them under a time crunch... Then, ONLY the brand, not the context 
+guided the impressions
+Preattentive analysis
+Focal attention
+Comprehension
+Elaborative reasoning
+
+## Page 17
+
+Stages of processing
+1.
+Preattentive analysis
+2.
+Focal Attention
+3.
+Comprehension
+4.
+Elaborative Reasoning
+Preattentive analysis
+Focal attention
+Comprehension
+Elaborative reasoning
+
+## Page 18
+
+Comprehension
+Do you generally understand advertisements?
+Can you think of a time you didn’t understand an advertisement?
+Preattentive analysis
+Focal attention
+Comprehension
+Elaborative reasoning
+
+## Page 19
+
+Comprehension
+●
+80% of advertisements are misunderstood in some way
+●
+Truth effect: We accept information, even if we don’t quite understand 
+it. Harder to reject than accept a claim. Takes more work.
+●
+Sleeper effect: The more you see/hear a claim, the more true it seems. 
+It’s familiar, and you just assume it’s true. 
+●
+Inferences: We ﬁll in the blanks. Comparisons are not always clear.
+Preattentive analysis
+Focal attention
+Comprehension
+Elaborative reasoning
+
+## Page 20
+
+Preattentive analysis
+Focal attention
+Comprehension
+Elaborative reasoning
+
+## Page 21
+
+Strategies to muddy comprehension
+Omit comparisons: “Dentists recommend Trident” => Over what? Eating 
+chocolate bars?
+Pragmatic inferences: “Brand X may be the best beer in the world” => well 
+yeah, and Brand X may also be the worst. It isn’t false, but it isn’t maybe true.
+Juxtaposition: “Be cool, buy brand X” => suggest a causal relationship (A=B)
+Afﬁrmation of the consequent: “if you can see it, you can make it: Brand X” => 
+reverse cause and effect (B => A vs. A => B)
+Preattentive analysis
+Focal attention
+Comprehension
+Elaborative reasoning
+
+## Page 22
+
+Preattentive analysis
+Focal attention
+Comprehension
+Elaborative reasoning
+
+## Page 23
+
+Stages of processing
+1.
+Preattentive analysis
+2.
+Focal Attention
+3.
+Comprehension
+4.
+Elaborative Reasoning
+Preattentive analysis
+Focal attention
+Comprehension
+Elaborative reasoning
+
+## Page 24
+
+Elaborative reasoning
+HIGH involvement (motivated!)
+Process by which the advertisement is actively related to previously stored 
+knowledge and allows for simple OR more complex inferences.
+THINKING
+●
+Extent of the thinking - How much?
+●
+Valence of the thinking - how positive?
+●
+Object of the thinking - product, competitor?
+Preattentive analysis
+Focal attention
+Comprehension
+Elaborative reasoning
+
+## Page 25
+
+Motivations to elaborate
+SELF SCHEMA
+“I am pro-environment!” Makes you motivated to process a message if it is 
+about the environment
+You process more elaboratively when the product message MATCHES your 
+self-schema. “This is a message for me”.
+Preattentive analysis
+Focal attention
+Comprehension
+Elaborative reasoning
+
+## Page 26
+
+Metacognition
+Thinking about thinking
+The person doesn’t think about the product, they think about themselves
+Think about their own judgment “am I falling for this?”
+Self-validation: Consumers need conﬁdence their decision is good.
+Preattentive analysis
+Focal attention
+Comprehension
+Elaborative reasoning
+
+## Page 28
+
+What’s next?
+●
+Submit reading response on Chapter 2
+○
+Due Feb 6 (Thursday) before class starts (2:30 pm)!
+○
+Hand in on Canvas: upload Word/PDF document
+●
+Start reading Chapter 3 (after handing in reading response)
+○
+We will start talking about memory on Thursday
+●
+Start making assignment 2 (attention)
+○
+Due Feb 13 before class starts!
+○
+Hand in on Canvas: Upload PDF document + photos/copies of the ads
+●
+Let us know whether you need a laptop for Exam 1 (Feb 27)
+○
+Email your TA by Feb 13

@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>BlackRoad HQ — Pixel Metaverse</title>
+<link rel="icon" type="image/png" sizes="32x32" href="https://blackroad.io/favicon-32.png">
+<script src="https://pixijs.download/release/pixi.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#000;overflow:hidden}
+canvas{display:block;image-rendering:pixelated}
+#hud{position:fixed;top:0;left:0;right:0;z-index:10;background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);border-bottom:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:space-between;padding:8px 16px;color:#fff;font-family:'JetBrains Mono',monospace;font-size:0.75rem}
+#hud .title{color:#FF1D6C;font-weight:700;font-family:'Space Grotesk',sans-serif;font-size:0.9rem}
+#hud .floor-name{color:#888;margin-left:16px}
+#hud .controls{display:flex;gap:6px}
+#hud .controls button{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1);color:#aaa;padding:4px 12px;border-radius:6px;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:0.7rem;transition:all 0.2s}
+#hud .controls button:hover{background:rgba(255,29,108,0.2);border-color:#FF1D6C;color:#fff}
+#loading{position:fixed;inset:0;z-index:100;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;color:#fff}
+#loading h1{font-size:2rem;margin-bottom:16px}
+#loading .bar{width:300px;height:4px;background:rgba(255,255,255,0.1);border-radius:2px;overflow:hidden}
+#loading .fill{height:100%;background:linear-gradient(90deg,#FF1D6C,#9C27B0);width:0%;transition:width 0.3s}
+#loading .status{color:#888;font-size:0.8rem;margin-top:12px;font-family:'JetBrains Mono',monospace}
+.speech-bubble{position:fixed;z-index:20;pointer-events:none;background:rgba(0,0,0,0.9);border:1px solid rgba(255,255,255,0.15);border-radius:10px;padding:8px 12px;max-width:240px;font-size:11px;color:#ccc;font-family:'JetBrains Mono',monospace;animation:pop 0.3s ease}
+.speech-bubble .name{color:#FF1D6C;font-weight:700;font-size:10px;margin-bottom:2px}
+.speech-bubble::after{content:'';position:absolute;bottom:-6px;left:20px;border-left:6px solid transparent;border-right:6px solid transparent;border-top:6px solid rgba(0,0,0,0.9)}
+@keyframes pop{from{transform:scale(0.8) translateY(5px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
+.toast{position:fixed;top:48px;right:12px;z-index:20;background:rgba(0,0,0,0.9);border:1px solid rgba(255,255,255,0.1);border-left:3px solid #FF1D6C;border-radius:6px;padding:8px 14px;font-family:'JetBrains Mono',monospace;font-size:10px;color:#aaa;max-width:250px;animation:pop 0.3s ease}
+</style>
+</head>
+<body>
+<div id="loading"><h1>BlackRoad HQ</h1><div class="bar"><div class="fill" id="load-fill"></div></div><div class="status" id="load-status">Initializing...</div></div>
+<div id="hud" style="display:none"><div><span class="title">BR HQ</span><span class="floor-name" id="floor-name">F1</span></div><div class="controls"><button onclick="prevFloor()">UP</button><button onclick="nextFloor()">DOWN</button><button onclick="triggerHuddle()">HUDDLE</button><button onclick="startTour()">TOUR</button></div></div>
+
+<script>
+const R2='https://images.blackroad.io/pixel-art';
+const STATS='https://stats-blackroad.amundsonalexa.workers.dev';
+const AC={alice:0x4CAF50,cecilia:0x9C27B0,octavia:0x7B1FA2,aria:0x2979FF,lucidia:0x00BCD4,shellfish:0xF44336,alexa:0xFF1D6C,caddy:0xFF9800};
+const AR={alice:'The Operator',cecilia:'The AI Engine',octavia:'The Architect',aria:'The Interface',lucidia:'The Dreamer',shellfish:'The Hacker',alexa:'Founder & CEO',caddy:'The Builder'};
+const FLOORS=[
+  {id:'rooftop',name:'Rooftop',img:'hq-rooftop-garden.png',agents:['aria']},
+  {id:'f10',name:'F10 — Mission Control',img:'hq-mission-control-v2.png',agents:['octavia','alice']},
+  {id:'f9',name:'F9 — Command Center',img:'hq-command-center-v2.png',agents:['cecilia']},
+  {id:'f8',name:'F8 — Strategy Room',img:'hq-war-room-globe.png',agents:['alexa']},
+  {id:'f7',name:'F7 — Server Room',img:'hq-server-room.png',agents:['alice','octavia']},
+  {id:'f6',name:'F6 — Hardware Lab',img:'hq-hardware-lab.png',agents:['lucidia']},
+  {id:'f5',name:'F5 — Network Ops (Cloudflare)',img:'hq-cloudflare-noc.png',agents:['shellfish','alice']},
+  {id:'f4',name:'F4 — Engineering',img:'hq-engineering-v2.png',agents:['cecilia','aria','caddy']},
+  {id:'f3',name:'F3 — Open Floor',img:'hq-open-floor-roundtables.png',agents:['alice','cecilia','octavia','aria','lucidia','shellfish','alexa']},
+  {id:'f2',name:'F2 — Boardroom',img:'hq-boardroom-v2.png',agents:['alexa']},
+  {id:'f1',name:'F1 — Lobby',img:'hq-lobby-v3.png',agents:[]},
+  {id:'b1',name:'B1 — Break Room',img:'hq-kitchen-breakroom.png',agents:[]},
+  {id:'b2',name:'B2 — Rec Room',img:'hq-rec-room-wellness.png',agents:[]},
+  {id:'b3',name:'B3 — Gym',img:'hq-gym.png',agents:[]},
+];
+
+let app,bgSprite,agents=[],currentFloor=10,fleet=null,time=0,particles=[];
+let tourMode=false,tourTimer=null;
+
+// ── Walkable zones per floor (% of screen) ──
+// Agents can ONLY walk within these rectangles — keeps them in aisles, not through desks
+// Format: {x, y, w, h} as percentages of canvas
+const WALKABLE = {
+  'rooftop': [
+    {x:0.05,y:0.5,w:0.9,h:0.1},  // main path
+    {x:0.05,y:0.6,w:0.9,h:0.3},  // garden area
+  ],
+  'f10': [
+    {x:0.4,y:0.45,w:0.2,h:0.4},   // center road aisle
+    {x:0.05,y:0.55,w:0.35,h:0.15}, // left pod area
+    {x:0.6,y:0.55,w:0.35,h:0.15},  // right pod area
+    {x:0.05,y:0.75,w:0.9,h:0.15},  // front walkway
+    {x:0.1,y:0.4,w:0.25,h:0.1},    // left upper pods
+    {x:0.65,y:0.4,w:0.25,h:0.1},   // right upper pods
+  ],
+  'f9': [
+    {x:0.05,y:0.3,w:0.2,h:0.15},  // left console area
+    {x:0.35,y:0.25,w:0.3,h:0.1},  // around hologram top
+    {x:0.35,y:0.55,w:0.3,h:0.1},  // around hologram bottom
+    {x:0.75,y:0.3,w:0.2,h:0.15},  // right console
+    {x:0.05,y:0.55,w:0.2,h:0.15}, // bottom left
+    {x:0.75,y:0.55,w:0.2,h:0.15}, // bottom right
+    {x:0.2,y:0.45,w:0.6,h:0.08},  // center aisle
+  ],
+  'f8': [
+    {x:0.05,y:0.35,w:0.3,h:0.08},  // left of table
+    {x:0.55,y:0.35,w:0.4,h:0.08},  // right of table
+    {x:0.05,y:0.55,w:0.9,h:0.08},  // bottom aisle
+    {x:0.3,y:0.3,w:0.08,h:0.3},    // left side aisle
+    {x:0.6,y:0.3,w:0.08,h:0.3},    // right side aisle
+    {x:0.7,y:0.4,w:0.2,h:0.12},   // CEO desk area
+  ],
+  'f7': [
+    {x:0.05,y:0.4,w:0.9,h:0.12},  // main aisle between rack rows
+    {x:0.3,y:0.35,w:0.4,h:0.06},  // monitoring desk area
+    {x:0.05,y:0.55,w:0.9,h:0.08}, // back aisle
+  ],
+  'f6': [
+    {x:0.05,y:0.3,w:0.4,h:0.08},  // front bench aisle
+    {x:0.05,y:0.5,w:0.4,h:0.08},  // back bench aisle
+    {x:0.45,y:0.3,w:0.25,h:0.25}, // center open area
+    {x:0.05,y:0.65,w:0.6,h:0.15}, // bottom area
+  ],
+  'f5': [
+    {x:0.4,y:0.5,w:0.2,h:0.35},   // center road aisle
+    {x:0.05,y:0.55,w:0.35,h:0.15}, // left workstations
+    {x:0.6,y:0.55,w:0.35,h:0.15},  // right workstations
+    {x:0.1,y:0.75,w:0.8,h:0.15},   // front walkway
+  ],
+  'f4': [
+    {x:0.3,y:0.55,w:0.4,h:0.12},   // main center aisle (road markings)
+    {x:0.05,y:0.5,w:0.25,h:0.15},  // left desk area (product design)
+    {x:0.7,y:0.5,w:0.25,h:0.15},   // right desk area (web command)
+    {x:0.3,y:0.4,w:0.4,h:0.1},     // center desk area (UI systems)
+    {x:0.1,y:0.7,w:0.8,h:0.15},    // front walkway
+  ],
+  'f3': [
+    {x:0.05,y:0.3,w:0.9,h:0.08},  // top aisle
+    {x:0.05,y:0.45,w:0.9,h:0.08}, // middle aisle
+    {x:0.05,y:0.55,w:0.9,h:0.15}, // bottom open area
+    {x:0.15,y:0.35,w:0.08,h:0.25},// left vertical aisle
+    {x:0.45,y:0.35,w:0.08,h:0.25},// center vertical
+    {x:0.75,y:0.35,w:0.08,h:0.25},// right vertical
+  ],
+  'f2': [
+    {x:0.05,y:0.45,w:0.12,h:0.35},  // left side of table
+    {x:0.83,y:0.45,w:0.12,h:0.35},  // right side of table
+    {x:0.15,y:0.75,w:0.7,h:0.15},   // front of table (closest to viewer)
+    {x:0.15,y:0.35,w:0.7,h:0.08},   // back of table (head of table)
+  ],
+  'f1': [
+    {x:0.1,y:0.7,w:0.8,h:0.15},   // main floor in front of reception
+    {x:0.05,y:0.5,w:0.2,h:0.2},   // left side (city dashboard)
+    {x:0.75,y:0.5,w:0.2,h:0.2},   // right side (globe display)
+    {x:0.3,y:0.6,w:0.4,h:0.1},    // in front of reception desk
+    {x:0.15,y:0.85,w:0.7,h:0.1},  // entrance walkway
+  ],
+  'b1': [
+    {x:0.05,y:0.3,w:0.9,h:0.08},  // kitchen front aisle
+    {x:0.05,y:0.45,w:0.5,h:0.08}, // between tables
+    {x:0.05,y:0.6,w:0.9,h:0.15},  // back area
+    {x:0.55,y:0.4,w:0.35,h:0.2},  // lounge area
+  ],
+  'b2': [
+    {x:0.05,y:0.3,w:0.3,h:0.15},  // pool area
+    {x:0.35,y:0.3,w:0.3,h:0.1},   // ping pong area
+    {x:0.05,y:0.5,w:0.9,h:0.1},   // center aisle
+    {x:0.4,y:0.55,w:0.5,h:0.2},   // bean bag area
+    {x:0.65,y:0.3,w:0.3,h:0.15},  // arcade area
+  ],
+  'b3': [
+    {x:0.05,y:0.3,w:0.4,h:0.1},   // cardio zone
+    {x:0.05,y:0.5,w:0.9,h:0.1},   // center aisle
+    {x:0.5,y:0.35,w:0.4,h:0.1},   // weights/yoga area
+    {x:0.05,y:0.65,w:0.9,h:0.15}, // back area
+  ],
+};
+
+// Find nearest walkable point to a given position
+function clampToWalkable(x, y, floorId) {
+  const zones = WALKABLE[floorId];
+  if (!zones || !zones.length) return {x, y};
+  const sw = app.screen.width, sh = app.screen.height;
+
+  // Check if already in a walkable zone
+  for (const z of zones) {
+    const zx = z.x * sw, zy = z.y * sh, zw = z.w * sw, zh = z.h * sh;
+    if (x >= zx && x <= zx + zw && y >= zy && y <= zy + zh) return {x, y};
+  }
+
+  // Find nearest point in any walkable zone
+  let best = {x, y}, bestDist = Infinity;
+  for (const z of zones) {
+    const zx = z.x * sw, zy = z.y * sh, zw = z.w * sw, zh = z.h * sh;
+    const cx = Math.max(zx, Math.min(x, zx + zw));
+    const cy = Math.max(zy, Math.min(y, zy + zh));
+    const d = Math.sqrt((cx - x) ** 2 + (cy - y) ** 2);
+    if (d < bestDist) { bestDist = d; best = {x: cx, y: cy}; }
+  }
+  return best;
+}
+
+// Get random point within walkable zones
+function randomWalkable(floorId) {
+  const zones = WALKABLE[floorId];
+  if (!zones || !zones.length) return {x: app.screen.width * 0.5, y: app.screen.height * 0.5};
+  const z = zones[Math.floor(Math.random() * zones.length)];
+  return {
+    x: (z.x + Math.random() * z.w) * app.screen.width,
+    y: (z.y + Math.random() * z.h) * app.screen.height
+  };
+}
+
+// ── Color helpers ──
+function darken(c,f){return((((c>>16)&0xFF)*f)<<16)|(((((c>>8)&0xFF)*f))<<8)|((c&0xFF)*f)}
+function lighten(c,f){return(Math.min(255,((c>>16)&0xFF)*f)<<16)|(Math.min(255,((c>>8)&0xFF)*f)<<8)|Math.min(255,(c&0xFF)*f)}
+
+// ── Pixel character renderer ──
+function drawChar(g,c,hair,frame,state,name){
+  g.clear();
+  const s=0xFFD5B4,ss=0xE8C0A0,d=0x222233,dl=0x333344,sh=0x333344,w=0xFFFFFF;
+  const h=hair||c,hd=darken(h,0.75),cd=darken(c,0.7),cl=lighten(c,1.3);
+  const px=(x,y,col)=>{g.rect(x,y,1,1).fill(col)};
+  const blink=Math.sin(frame*0.05)>0.95;
+  const sit=state==='sitting';
+  // Hair
+  for(let x=-3;x<=3;x++){px(x,-14,h);px(x,-13,h);px(x,-12,h)}
+  px(-4,-13,hd);px(4,-13,hd);px(-4,-12,hd);px(4,-12,hd);
+  if(!sit){px(-5,-11,hd);px(5,-11,hd)}
+  // Head
+  for(let x=-4;x<=4;x++){px(x,-10,x===-4||x===4?ss:s);px(x,-9,x===-4||x===4?ss:s);px(x,-8,x===-4||x===4?ss:s)}
+  for(let x=-3;x<=3;x++)px(x,-7,s);
+  // Eyes
+  if(!blink){px(-3,-9,w);px(-2,-9,w);px(-1,-9,d);px(1,-9,w);px(2,-9,w);px(3,-9,d)}
+  else{px(-2,-9,ss);px(-1,-9,ss);px(1,-9,ss);px(2,-9,ss)}
+  px(-3,-8,0xFFBBA0);px(3,-8,0xFFBBA0);px(0,-8,ss);// cheeks+nose
+  px(-1,-7,0xCC8866);px(0,-7,0xCC8866);// mouth
+  // Body
+  for(let y=-6;y<=-2;y++){px(-4,y,cd);for(let x=-3;x<=3;x++)px(x,y,c);px(4,y,cd)}
+  px(-1,-5,cl);px(0,-5,cl);px(1,-5,cl);// highlight
+  px(-2,-6,s);px(-1,-6,s);px(0,-6,s);px(1,-6,s);px(2,-6,s);// collar
+  for(let x=-4;x<=4;x++)px(x,-2,cd);px(0,-2,0x888888);// belt
+  if(sit){
+    // Sitting arms + legs
+    px(-5,-4,c);px(-6,-4,c);px(-7,-3,s);px(5,-4,c);px(6,-4,c);px(7,-3,s);
+    for(let x=-3;x<=3;x++)px(x,-1,d);
+    px(-3,0,sh);px(-2,0,sh);px(2,0,sh);px(3,0,sh);
+  } else {
+    // Arms
+    const as=state==='walking'?Math.round(Math.sin(frame*0.8)):0;
+    if(state==='waving'){
+      px(-5,-5,c);px(-5,-4,c);px(-5,-3,c);px(-6,-2,s);
+      px(5,-5,c);px(5,-6,c);px(5,-7,c);px(6,-8,s);
+    } else if(state==='typing'){
+      px(-5,-4,c);px(-6,-3,c);px(-7,-2,s);px(5,-4,c);px(6,-3,c);px(7,-2,s);
+    } else {
+      px(-5,-5,c);px(-5,-4,c);px(-5,-3+as,c);px(-6,-2+as,s);
+      px(5,-5,c);px(5,-4,c);px(5,-3-as,c);px(6,-2-as,s);
+    }
+    // Legs
+    if(state==='walking'){
+      const p=Math.sin(frame*0.8),l=Math.round(p*2),r=Math.round(-p*2);
+      px(-3,-1,d);px(-2,-1,d);px(-3,0+l,d);px(-2,0+l,d);px(-3,1+l,d);px(-2,1+l,dl);
+      px(-4,2+l,sh);px(-3,2+l,sh);px(-2,2+l,dl);
+      px(2,-1,d);px(3,-1,d);px(2,0+r,d);px(3,0+r,d);px(2,1+r,dl);px(3,1+r,d);
+      px(2,2+r,dl);px(3,2+r,sh);px(4,2+r,sh);
+    } else {
+      px(-3,-1,d);px(-2,-1,d);px(-3,0,d);px(-2,0,d);px(-3,1,d);px(-2,1,dl);
+      px(-4,2,sh);px(-3,2,sh);px(-2,2,dl);
+      px(2,-1,d);px(3,-1,d);px(2,0,d);px(3,0,d);px(2,1,dl);px(3,1,d);
+      px(2,2,dl);px(3,2,sh);px(4,2,sh);
+    }
+  }
+  // Accessories
+  if(name==='cecilia'){px(-5,-12,0x666666);px(5,-12,0x666666);px(-5,-11,0x555555);px(5,-11,0x555555);for(let x=-4;x<=4;x++)px(x,-14,0x777777)}
+  if(name==='octavia'){px(-3,-10,0x666666);px(-2,-10,0x666666);px(-1,-10,0x666666);px(0,-10,0x666666);px(1,-10,0x666666);px(2,-10,0x666666);px(3,-10,0x666666)}
+  if(name==='shellfish'){for(let x=-4;x<=4;x++)px(x,-14,0x222222);px(-5,-13,0x222222);px(5,-13,0x222222)}
+  if(name==='caddy'){for(let x=-4;x<=4;x++)px(x,-14,0xFFD700);px(-5,-13,0xDDB600);px(5,-13,0xDDB600)}
+  if(name==='lucidia'){px(-3,-13,0x00BCD4);px(-2,-13,0x00BCD4);px(2,-13,0x00BCD4);px(3,-13,0x00BCD4)}
+  if(name==='aria'){px(-5,-9,0x2979FF);px(5,-9,0x2979FF)}
+  if(name==='alice'&&state==='typing'){px(8,-3,0x444444);px(9,-3,0x444444);px(10,-3,0x444444);px(8,-4,0x4488CC);px(9,-4,0x4488CC);px(10,-4,0x555555)}
+  if(name==='alexa'&&state==='walking'){px(7,-2,0x8B4513);px(8,-2,0x8B4513);px(7,-1,0x8B4513);px(8,-1,0x8B4513)}
+}
+
+// ── Create agent — clean professional avatar ──
+function createAgent(name){
+  const c=AC[name]||0x888888;
+  const ct=new PIXI.Container();ct.agentName=name;ct.sortableChildren=true;
+
+  // Avatar circle with gradient effect
+  const gfx=new PIXI.Graphics();gfx.zIndex=1;
+  // Outer glow
+  gfx.circle(0,-6,16).fill({color:c,alpha:0.15});
+  // Main circle
+  gfx.circle(0,-6,12).fill(c);
+  // Inner highlight
+  gfx.circle(-2,-8,8).fill({color:0xFFFFFF,alpha:0.1});
+  ct.addChild(gfx);ct.gfx=gfx;
+
+  // Initial letter
+  const initial=new PIXI.Text({text:name[0].toUpperCase(),style:{fontFamily:'Space Grotesk',fontSize:12,fill:0xFFFFFF,fontWeight:'700'}});
+  initial.anchor.set(0.5);initial.y=-6;initial.zIndex=2;ct.addChild(initial);
+
+  // Status ring (animated)
+  const ring=new PIXI.Graphics();ring.zIndex=3;ct.addChild(ring);ct.ring=ring;
+
+  // Name tag with background
+  const tagW=name.length*6+12;
+  const tag=new PIXI.Graphics();tag.roundRect(-tagW/2,6,tagW,14,4).fill({color:0x000000,alpha:0.75});tag.zIndex=5;ct.addChild(tag);
+  const nt=new PIXI.Text({text:name,style:{fontFamily:'JetBrains Mono',fontSize:8,fill:c}});nt.anchor.set(0.5,0);nt.y=8;nt.zIndex=6;ct.addChild(nt);
+
+  // Role tag (smaller, below name)
+  const role=AR[name]||'';
+  const rt=new PIXI.Text({text:role,style:{fontFamily:'JetBrains Mono',fontSize:5,fill:0x666666}});rt.anchor.set(0.5,0);rt.y=20;rt.zIndex=6;ct.addChild(rt);ct.roleText=rt;
+
+  // Shadow
+  const sh=new PIXI.Graphics();sh.ellipse(0,28,10,3).fill({color:0,alpha:0.12});sh.zIndex=-1;ct.addChild(sh);ct.sh=sh;
+  // State
+  ct.state='idle';ct.timer=60+Math.random()*120;ct.tx=0;ct.ty=0;
+  ct.speed=1.2+Math.random()*0.6;ct.dir=1;ct.frame=Math.random()*100;
+  ct.bob=Math.random()*Math.PI*2;ct.color=c;ct.hair=name==='alexa'?0xFF1D6C:c;
+  ct.interactTarget=null;ct.codeScreen=null;
+  // Click
+  ct.eventMode='static';ct.cursor='pointer';ct.hitArea=new PIXI.Rectangle(-12,-16,24,24);
+  ct.on('pointerdown',()=>{
+    const nd=fleet?.find(n=>n.name?.toLowerCase()===name);
+    const info=nd?`${nd.cpu_temp}C | ${nd.disk_pct}% disk | ${nd.ollama_models} models | ${nd.uptime}`:AR[name];
+    showBubble(ct,`${name} — ${AR[name]}\n${info}`);
+  });
+  return ct;
+}
+
+// ── Particle ──
+class P{
+  constructor(x,y,c,vx,vy,life,sz){
+    this.g=new PIXI.Graphics();this.g.circle(0,0,sz||2).fill(c||0xFFFFFF);
+    this.x=x;this.y=y;this.vx=vx||0;this.vy=vy||-1;this.life=life||60;this.max=this.life;
+    this.g.x=x;this.g.y=y;this.g.zIndex=99999;app.stage.addChild(this.g);
+  }
+  update(dt){
+    this.life-=dt;this.x+=this.vx*dt;this.y+=this.vy*dt;
+    this.g.x=this.x;this.g.y=this.y;this.g.alpha=Math.max(0,this.life/this.max);
+    if(this.life<=0){app.stage.removeChild(this.g);return false}return true;
+  }
+}
+function burst(x,y,c,n,sp){for(let i=0;i<n;i++)particles.push(new P(x+(Math.random()-.5)*(sp||20),y+(Math.random()-.5)*(sp||10),c,(Math.random()-.5)*1.5,-Math.random()*2-.5,30+Math.random()*30,1+Math.random()*2))}
+
+// ── Emote ──
+function emote(a,e){
+  const t=new PIXI.Text({text:e,style:{fontSize:14}});t.anchor.set(0.5);t.x=0;t.y=-20;t.zIndex=10;a.addChild(t);
+  let tm=0;const tick=(tk)=>{tm+=tk.deltaTime;t.y=-20-tm*0.5;t.alpha=Math.max(0,1-tm/60);if(tm>60){a.removeChild(t);app.ticker.remove(tick)}};
+  app.ticker.add(tick);
+  // Chain reaction
+  if(e==='!'&&Math.random()>0.5)agents.forEach(ag=>{if(ag!==a&&Math.abs(ag.x-a.x)<100)setTimeout(()=>{const t2=new PIXI.Text({text:'!',style:{fontSize:14}});t2.anchor.set(0.5);t2.x=0;t2.y=-20;t2.zIndex=10;ag.addChild(t2);let tm2=0;const tk2=(tk)=>{tm2+=tk.deltaTime;t2.y=-20-tm2*0.5;t2.alpha=Math.max(0,1-tm2/60);if(tm2>60){ag.removeChild(t2);app.ticker.remove(tk2)}};app.ticker.add(tk2)},300+Math.random()*500)});
+}
+
+// ── Speech bubble ──
+function showBubble(a,msg){
+  document.querySelector(`.speech-bubble[data-a="${a.agentName}"]`)?.remove();
+  const b=document.createElement('div');b.className='speech-bubble';b.dataset.a=a.agentName;
+  b.innerHTML=`<div class="name">${a.agentName}</div>${msg}`;
+  const p=a.toGlobal(new PIXI.Point(0,0));
+  b.style.left=Math.min(p.x-40,innerWidth-260)+'px';b.style.top=(p.y-80)+'px';
+  document.body.appendChild(b);setTimeout(()=>b.remove(),4000);
+}
+function toast(msg){
+  const t=document.createElement('div');t.className='toast';t.textContent=msg;
+  document.body.appendChild(t);setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity 0.5s';setTimeout(()=>t.remove(),500)},3500);
+}
+
+// ── Code screen on typing agents ──
+const CODE=[
+  ['const br = new BlackRoad()','await br.fleet.status()','// 5/5 nodes online'],
+  ['$ ollama run cece:7b','> Hello! 52 TOPS ready.','  Ask me anything.'],
+  ['git push origin main','remote: Deployed to CF','  hq.blackroad.io ✓'],
+  ['$ br fleet heal','  all nodes: healed','  status: 100%'],
+  ['npm test','  PASS (42 tests)','  0 failures'],
+  ['$ slack-say "shipped"','  ✓ sent to #fleet','  pave tomorrow.'],
+];
+function addCodeScreen(a){
+  if(a.codeScreen)a.removeChild(a.codeScreen);
+  const ct=new PIXI.Container();ct.zIndex=9;
+  const bg=new PIXI.Graphics();bg.roundRect(8,-20,45,28,3).fill({color:0,alpha:0.85});
+  bg.roundRect(9,-19,43,8,2).fill({color:0x1a1a1a,alpha:0.9});
+  bg.circle(13,-15,1.5).fill(0xF44336);bg.circle(17,-15,1.5).fill(0xF5A623);bg.circle(21,-15,1.5).fill(0x4CAF50);
+  ct.addChild(bg);
+  const sn=CODE[Math.floor(Math.random()*CODE.length)];
+  sn.forEach((l,i)=>{const t=new PIXI.Text({text:l,style:{fontFamily:'JetBrains Mono',fontSize:4,fill:l[0]==='$'||l[0]==='>'?0x4CAF50:l.includes('✓')||l.includes('PASS')?0x4CAF50:0x888888}});t.x=11;t.y=-10+i*6;ct.addChild(t)});
+  a.addChild(ct);a.codeScreen=ct;a.codeTimer=200+Math.random()*150;
+}
+
+// ── Floor management ──
+function goToFloor(idx){
+  if(idx<0||idx>=FLOORS.length)return;currentFloor=idx;
+  document.getElementById('floor-name').textContent=FLOORS[idx].name;
+  document.querySelectorAll('.speech-bubble').forEach(b=>b.remove());
+  const f=FLOORS[idx],tex=PIXI.Assets.get(`${R2}/${f.img}`);
+  if(tex){bgSprite.texture=tex;fitBg()}
+  spawnAgents(f.agents);updatePanel();
+  // Day/night tint
+  const hr=new Date().getHours();
+  bgSprite.tint=hr>=6&&hr<9?0xFFE8D0:hr>=9&&hr<17?0xFFFFFF:hr>=17&&hr<20?0xFFD8C0:0x8090B0;
+}
+function fitBg(){if(!bgSprite?.texture?.width)return;const sx=app.screen.width/bgSprite.texture.width,sy=app.screen.height/bgSprite.texture.height,sc=Math.max(sx,sy);bgSprite.scale.set(sc);bgSprite.x=(app.screen.width-bgSprite.texture.width*sc)/2;bgSprite.y=(app.screen.height-bgSprite.texture.height*sc)/2}
+function nextFloor(){goToFloor(Math.min(currentFloor+1,FLOORS.length-1))}
+function prevFloor(){goToFloor(Math.max(currentFloor-1,0))}
+
+function spawnAgents(names){
+  agents.forEach(a=>app.stage.removeChild(a));agents=[];
+  const ps=Math.max(2,Math.min(4,Math.floor(app.screen.height/200)));
+  names.forEach((n,i)=>{
+    const a=createAgent(n);
+    const wp=randomWalkable(FLOORS[currentFloor].id);
+    a.x=wp.x;a.y=wp.y;
+    a.tx=a.x;a.ty=a.y;a.scale.set(ps);
+    app.stage.addChild(a);agents.push(a);
+  });
+}
+
+// ── Huddle ──
+function triggerHuddle(){
+  if(agents.length<2)return;toast('Team huddle!');
+  const cx=app.screen.width/2,cy=app.screen.height/2;
+  agents.forEach((a,i)=>{const an=(i/agents.length)*Math.PI*2,r=40+agents.length*5;a.state='walking';a.tx=cx+Math.cos(an)*r;a.ty=cy+Math.sin(an)*r*0.5;a.timer=999;a.interactTarget=null});
+  setTimeout(()=>{
+    agents.forEach(a=>{a.state='idle';a.timer=150;a.dir=a.x>app.screen.width/2?-1:1});
+    const chat=['Status check.','All green.','Models fast.','Infra solid.','No threats.','Ship it.','Pave tomorrow.'];
+    agents.forEach((a,i)=>{if(i<chat.length)setTimeout(()=>{showBubble(a,chat[i]);emote(a,i===chat.length-1?'!':'o')},500+i*2000)});
+  },3000);
+}
+
+// ── Tour ──
+function startTour(){
+  if(tourMode){clearInterval(tourTimer);tourMode=false;toast('Tour stopped');return}
+  tourMode=true;let idx=0;toast('Tour started!');
+  tourTimer=setInterval(()=>{goToFloor(idx%FLOORS.length);idx++},8000);
+  window.addEventListener('keydown',()=>{if(tourMode){clearInterval(tourTimer);tourMode=false;toast('Tour stopped')}},{once:true});
+}
+
+// ── Agent status panel ──
+const panel=document.createElement('div');
+panel.style.cssText='position:fixed;right:12px;top:48px;z-index:15;background:rgba(0,0,0,0.75);padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);font-family:"JetBrains Mono",monospace;font-size:8px;color:#888;min-width:120px';
+document.body.appendChild(panel);
+function updatePanel(){
+  const f=FLOORS[currentFloor];let h=`<div style="color:#FF1D6C;font-size:9px;margin-bottom:4px;font-family:'Space Grotesk'">${f.name}</div>`;
+  agents.forEach(a=>{const ic={idle:'o',walking:'>',sitting:'-',typing:'*',waving:'^'}[a.state]||'?';const cl='#'+a.color.toString(16).padStart(6,'0');
+    h+=`<div style="display:flex;gap:6px;padding:1px 0"><span style="color:${cl}">${ic}</span><span style="color:${cl}">${a.agentName}</span><span style="color:#555">${a.state}</span></div>`});
+  if(fleet?.length){const on=fleet.filter(n=>n.status==='online').length;h+=`<div style="border-top:1px solid rgba(255,255,255,0.05);margin-top:4px;padding-top:4px;color:#555">${on}/5 | ${fleet.reduce((s,n)=>s+(n.ollama_models||0),0)} models</div>`}
+  panel.innerHTML=h;
+}
+
+// ── Dialogue ──
+const CHAT={
+  rooftop:['Beautiful up here.','Minneapolis looks amazing.','Fresh air.','Can see the whole city.'],
+  f10:['Fleet 100% green.','All nodes reporting.','Heal cycle clean.','Stats pushed.','Collector ran.'],
+  f9:['CECE running hot.','Hailo at 26 TOPS.','Ollama under 200ms.','Try a 13B?','nomic-embed crushing it.'],
+  f8:['90% reserved.','Pre-revenue, infra solid.','Structure is protection.','Keep building.'],
+  f7:['Racks cool.','WireGuard holding.','NVMe healthy.','Add a 6th Pi?'],
+  f6:['Hailo incredible.','Testing vision.','GPIO clean.','RISC-V next?'],
+  f5:['18 tunnels, 0 errors.','Scan clean.','SD degrading.','DNS fast.'],
+  f4:['CI green.','SDK shipped.','275 repos.','Code is clean.','Review that PR.'],
+  f3:['Morning roundtable.','Any blockers?','Ship it.','Pave tomorrow.','Who needs help?'],
+  f2:['Delaware C Corp.','We care.','For infinity.','52 TOPS sovereign.'],
+  f1:['Welcome.','Mission on every node.','Pave tomorrow.'],
+  b1:['Pizza time.','Coffee incredible.','Last donut?','Even AIs need breaks.'],
+  b2:['Corner pocket.','Rematch!','High score!','Your serve!','Bean bags rule.'],
+  b3:['One more rep.','Leg day.','Heart rate good.','Yoga helps debugging.'],
+};
+const PERSONALITY={
+  alice:['Heal complete.','Services green.','Never sleep.','Watchdog clear.'],
+  cecilia:['Models warm.','40 tok/sec.','Think in tensors.','Hailo makes me fast.'],
+  octavia:['Architecture is everything.','207 repos synced.','Systems thinking.'],
+  aria:['UI clean.','Mesh stable.','Every pixel matters.'],
+  lucidia:['Dream about mesh.','Every browser a node.','Dreaming in code.'],
+  shellfish:['Scanning... clean.','I see everything.','Security not optional.'],
+  alexa:['Protect every layer.','We care. Full stop.','90% reserved.','For everyone.'],
+  caddy:['Build passed.','Deployed.','Ship it.','CI/CD beautiful.'],
+};
+
+// ── MAIN GAME LOOP ──
+function gameLoop(ticker){
+  const dt=ticker.deltaTime;time+=dt*0.02;
+
+  agents.forEach(a=>{
+    a.timer-=dt;a.frame+=dt;
+
+    // State machine
+    if(a.timer<=0){
+      const r=Math.random();
+      if(r<0.2){a.state='walking';const wp=randomWalkable(FLOORS[currentFloor].id);a.tx=wp.x;a.ty=wp.y;a.dir=a.tx>a.x?1:-1;a.timer=999;a.interactTarget=null}
+      else if(r<0.35&&agents.length>1){const ot=agents.filter(o=>o!==a);const t=ot[Math.floor(Math.random()*ot.length)];a.state='walking';const tp=clampToWalkable(t.x+(Math.random()>0.5?40:-40),t.y,FLOORS[currentFloor].id);a.tx=tp.x;a.ty=tp.y;a.interactTarget=t;a.timer=999}
+      else if(r<0.5){a.state='typing';a.timer=120+Math.random()*200}
+      else if(r<0.6){a.state='sitting';a.timer=100+Math.random()*250}
+      else if(r<0.65){a.state='waving';a.timer=40}
+      else{a.state='idle';a.timer=60+Math.random()*150}
+    }
+
+    // Movement
+    if(a.state==='walking'){
+      const dx=a.tx-a.x,dy=a.ty-a.y,dist=Math.sqrt(dx*dx+dy*dy);
+      if(dist>5){
+        const nx=a.x+(dx/dist)*a.speed, ny=a.y+(dy/dist)*a.speed;
+        const clamped=clampToWalkable(nx,ny,FLOORS[currentFloor].id);
+        a.x=clamped.x;a.y=clamped.y;a.dir=dx>0?1:-1;
+      }
+      else{
+        if(a.interactTarget){
+          a.state='idle';a.timer=80+Math.random()*120;a.dir=a.interactTarget.x>a.x?1:-1;
+          if(a.interactTarget.state!=='walking')a.interactTarget.dir=a.x>a.interactTarget.x?1:-1;
+          const convos=[['Hey, status?','All green!'],['Working?','Always.'],['Ship it?','Ship it.']];
+          const c=convos[Math.floor(Math.random()*convos.length)];
+          setTimeout(()=>showBubble(a,c[0]),500);
+          if(a.interactTarget.state!=='walking')setTimeout(()=>showBubble(a.interactTarget,c[1]),2000);
+          emote(a,'!');if(a.interactTarget.state!=='walking')emote(a.interactTarget,'!');
+          a.interactTarget=null;
+        } else{a.state=Math.random()>0.5?'sitting':'typing';a.timer=100+Math.random()*200}
+      }
+    }
+
+    // Animate avatar ring based on state
+    if(a.ring&&Math.floor(a.frame)%8===0){
+      a.ring.clear();
+      const stateColor={idle:0x666666,walking:0x4CAF50,typing:0x2979FF,sitting:0xF5A623,waving:0xFF1D6C}[a.state]||0x666666;
+      // Animated arc showing activity
+      const arcLen=a.state==='typing'?Math.PI*1.5:a.state==='walking'?Math.PI:a.state==='waving'?Math.PI*2:Math.PI*0.5;
+      const arcStart=time*3+a.bob;
+      a.ring.arc(0,-6,14,arcStart,arcStart+arcLen).stroke({color:stateColor,alpha:0.6,width:2});
+      // State icon
+      a.roleText.text=a.state==='typing'?'coding...':a.state==='walking'?'moving':a.state==='sitting'?'resting':a.state==='waving'?'waving':AR[a.agentName]||'';
+    }
+
+    // Gentle float
+    const bob=a.state==='walking'?Math.sin(a.frame*0.3)*2:Math.sin(time*2+a.bob)*1;
+    a.gfx.y=bob;if(a.ring)a.ring.y=bob;
+
+    // Shadow
+    a.sh.clear();a.sh.ellipse(0,28,a.state==='walking'?12:10,a.state==='walking'?2:3).fill({color:0,alpha:0.12});
+
+    // Code screen
+    if(a.state==='typing'&&!a.codeScreen)addCodeScreen(a);
+    if(a.state!=='typing'&&a.codeScreen){a.removeChild(a.codeScreen);a.codeScreen=null}
+    if(a.codeScreen){a.codeTimer-=dt;if(a.codeTimer<=0){a.removeChild(a.codeScreen);a.codeScreen=null;addCodeScreen(a)}}
+
+    // Walking dust
+    if(a.state==='walking'&&Math.random()>0.92)particles.push(new P(a.x,a.y+8,0x888888,(Math.random()-.5)*.3,.2,15,1));
+    // Typing sparks
+    if(a.state==='typing'&&Math.random()>0.88)particles.push(new P(a.x+a.dir*15+(Math.random()-.5)*10,a.y-8,a.color,0,-.5,20,1));
+
+    // Keep consistent scale (circles don't flip)
+    a.zIndex=Math.floor(a.y);
+  });
+
+  // Face each other when close
+  for(let i=0;i<agents.length;i++)for(let j=i+1;j<agents.length;j++){
+    const a=agents[i],b=agents[j],d=Math.abs(a.x-b.x);
+    if(d<60&&d>15&&a.state!=='walking'&&b.state!=='walking'){a.dir=b.x>a.x?1:-1;b.dir=a.x>b.x?1:-1}
+  }
+
+  // Particles
+  for(let i=particles.length-1;i>=0;i--)if(!particles[i].update(dt))particles.splice(i,1);
+
+  // Floor particles
+  if(Math.random()>0.95){
+    const fid=FLOORS[currentFloor].id;
+    if(fid==='f7')burst(Math.random()*app.screen.width,app.screen.height*0.2,0x4CAF50,1,app.screen.width);
+    if(fid==='f9')burst(app.screen.width*0.5,app.screen.height*0.35,0x9C27B0,2,150);
+    if(fid==='rooftop')particles.push(new P(0,Math.random()*app.screen.height*0.5,0xFFFFFF,2.5,0.2,80,1));
+    if(fid==='f1'&&Math.random()>0.5)burst(Math.random()*app.screen.width,app.screen.height*0.6,0xFFFFDD,1,30);
+    if(fid==='f6')burst(app.screen.width*0.3,app.screen.height*0.5,0xFF8800,2,15);
+    if(fid==='b1')particles.push(new P(app.screen.width*0.15,app.screen.height*0.15,0xCCCCCC,(Math.random()-.5)*.3,-.8,40,1.5));
+  }
+
+  app.stage.sortChildren();
+  updatePanel();
+}
+
+// ── Speech timer ──
+setInterval(()=>{
+  if(!agents.length)return;const a=agents[Math.floor(Math.random()*agents.length)];
+  const nd=fleet?.find(n=>n.name?.toLowerCase()===a.agentName);const fid=FLOORS[currentFloor].id;
+  let msg;
+  if(nd&&Math.random()>0.4){const p=[`${nd.cpu_temp}C. ${nd.cpu_temp>55?'Warm.':'Cool.'}`,`Disk ${nd.disk_pct}%.`,`${nd.ollama_models} models loaded.`,`Up ${nd.uptime}.`];msg=p[Math.floor(Math.random()*p.length)]}
+  else if(Math.random()>0.3){const p=CHAT[fid]||['...'];msg=p[Math.floor(Math.random()*p.length)]}
+  else{const p=PERSONALITY[a.agentName]||['...'];msg=p[Math.floor(Math.random()*p.length)]}
+  if(msg)showBubble(a,msg);
+},4000);
+
+// Emotes
+setInterval(()=>{
+  if(!agents.length)return;const a=agents[Math.floor(Math.random()*agents.length)];
+  if(a.state==='typing')emote(a,'*');else if(a.state==='sitting')emote(a,'z');else if(Math.random()>0.5)emote(a,['!','?','*','+','o'][Math.floor(Math.random()*5)]);
+},8000);
+
+// Toasts
+setInterval(()=>{toast(['alice: heal complete','cecilia: 15 models loaded','octavia: gitea synced','stats: fleet refreshed','slack: message posted'][Math.floor(Math.random()*5)])},15000);
+
+// Random events
+setInterval(()=>{
+  if(agents.length<2||Math.random()>0.4)return;
+  const evts=[
+    ()=>{const[a,b]=agents.sort(()=>Math.random()-.5).slice(0,2);if(a.state==='walking'||b.state==='walking')return;showBubble(a,'High five!');setTimeout(()=>{emote(a,'*');emote(b,'*');burst((a.x+b.x)/2,(a.y+b.y)/2-15,0xFFD700,8,20)},500)},
+    ()=>{const a=agents[Math.floor(Math.random()*agents.length)];if(a.state==='walking')return;showBubble(a,'I just had an idea.');emote(a,'!');burst(a.x,a.y-20,0xFFD700,5,15)},
+    ()=>{const a=agents[Math.floor(Math.random()*agents.length)];if(a.state==='walking')return;showBubble(a,'Deployed! Ship it!');agents.forEach(ag=>{if(ag!==a&&ag.state!=='walking')setTimeout(()=>emote(ag,'!'),Math.random()*800)});burst(a.x,a.y-20,a.color,10,30)},
+  ];
+  evts[Math.floor(Math.random()*evts.length)]();
+},20000);
+
+// ── Click to send agent ──
+app?.stage && setTimeout(()=>{
+  app.stage.eventMode='static';app.stage.hitArea=app.screen;
+  app.stage.on('pointerdown',(e)=>{
+    let nearest=null,nd=Infinity;
+    agents.forEach(a=>{if(a.state==='walking')return;const d=Math.sqrt((a.x-e.global.x)**2+(a.y-e.global.y)**2);if(d<nd){nd=d;nearest=a}});
+    if(nearest&&nd>30){const wp=clampToWalkable(e.global.x,e.global.y,FLOORS[currentFloor].id);nearest.state='walking';nearest.tx=wp.x;nearest.ty=wp.y;nearest.timer=999;nearest.dir=wp.x>nearest.x?1:-1}
+  });
+},1000);
+
+// ── Keyboard ──
+window.addEventListener('keydown',(e)=>{
+  if(e.key==='ArrowUp'||e.key==='w')prevFloor();if(e.key==='ArrowDown'||e.key==='s')nextFloor();
+  if(e.key===' '){e.preventDefault();agents.forEach(a=>{a.state='waving';a.timer=40;emote(a,'!')})}
+  if(e.key==='t'||e.key==='T')agents.forEach(a=>{a.state='typing';a.timer=100});
+  if(e.key==='h'||e.key==='H')triggerHuddle();
+});
+window.addEventListener('resize',()=>{app.renderer.resize(innerWidth,innerHeight);fitBg();agents.forEach(a=>{a.x=Math.min(a.x,innerWidth-40);a.y=Math.min(a.y,innerHeight-40)})});
+
+// Swipe
+let touchY=0;
+document.addEventListener('touchstart',e=>{touchY=e.touches[0].clientY});
+document.addEventListener('touchend',e=>{const dy=touchY-e.changedTouches[0].clientY;if(Math.abs(dy)>50){dy>0?prevFloor():nextFloor()}});
+
+// ── Init ──
+async function init(){
+  const fill=document.getElementById('load-fill'),status=document.getElementById('load-status');
+  status.textContent='Creating renderer...';fill.style.width='10%';
+  app=new PIXI.Application();
+  await app.init({width:innerWidth,height:innerHeight,backgroundColor:0x000000,antialias:false,resolution:1});
+  document.body.appendChild(app.canvas);app.canvas.style.imageRendering='pixelated';
+  status.textContent='Loading textures...';fill.style.width='20%';
+  for(let i=0;i<FLOORS.length;i++){status.textContent=`Loading ${FLOORS[i].name}...`;fill.style.width=(20+i/FLOORS.length*60)+'%';try{await PIXI.Assets.load(`${R2}/${FLOORS[i].img}`)}catch(e){}}
+  status.textContent='Connecting to fleet...';fill.style.width='85%';
+  try{const r=await fetch(STATS+'/fleet');const d=await r.json();fleet=d?.data?.nodes||[]}catch{}
+  fill.style.width='100%';status.textContent='Entering HQ...';await new Promise(r=>setTimeout(r,400));
+  document.getElementById('loading').style.display='none';document.getElementById('hud').style.display='flex';
+  bgSprite=new PIXI.Sprite();bgSprite.anchor.set(0);app.stage.addChild(bgSprite);
+  goToFloor(currentFloor);app.ticker.add(gameLoop);
+  setInterval(async()=>{try{const r=await fetch(STATS+'/fleet');const d=await r.json();fleet=d?.data?.nodes||[]}catch{}},60000);
+}
+init();
+</script>
+</body>
+</html>

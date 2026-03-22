@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BlackRoad Terminal</title>
+  <meta name="description" content="BlackRoad OS web terminal — interact with the fleet, query agents, and manage infrastructure.">
+  <meta property="og:title" content="BlackRoad Terminal">
+  <meta property="og:description" content="BlackRoad OS web terminal — interact with the fleet.">
+  <meta property="og:image" content="https://images.blackroad.io/pixel-art/rooftop.png">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>></text></svg>">
+  <link rel="stylesheet" href="/_shared/design.css">
+  <style>
+    html, body {
+      height: 100%;
+      overflow: hidden;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Terminal Window ── */
+    .term-wrap {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      margin: 0;
+    }
+
+    /* ── Terminal Header Bar ── */
+    .term-titlebar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .term-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+    .term-dot.red    { background: #ff5f57; }
+    .term-dot.yellow { background: #febc2e; }
+    .term-dot.green  { background: #28c840; }
+    .term-titlebar-text {
+      flex: 1;
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--subtle);
+      user-select: none;
+    }
+
+    /* ── Scrollable Output ── */
+    .term-output {
+      flex: 1;
+      overflow-y: auto;
+      padding: 14px;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      line-height: 1.7;
+      background: var(--bg);
+    }
+    .term-output .line {
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .line.prompt-line {
+      display: flex;
+      gap: 0;
+    }
+    .line .prompt {
+      color: var(--cyan);
+      flex-shrink: 0;
+    }
+    .line .cmd {
+      color: var(--white);
+    }
+    .line.output {
+      color: var(--white);
+    }
+    .line.system {
+      color: var(--subtle);
+    }
+    .line.error {
+      color: var(--rose);
+    }
+    .line.info {
+      color: var(--cyan);
+    }
+    .line.accent {
+      color: var(--violet);
+    }
+    .line.table-header {
+      color: var(--subtle);
+      border-bottom: 1px solid var(--border);
+      display: inline-block;
+    }
+
+    /* ── Input Line ── */
+    .term-input-row {
+      display: flex;
+      align-items: center;
+      padding: 10px 14px;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      flex-shrink: 0;
+    }
+    .term-input-row .prompt {
+      color: var(--cyan);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .term-input-row input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--white);
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      outline: none;
+      caret-color: var(--cyan);
+      padding: 0;
+      margin: 0;
+    }
+    .cursor-blink {
+      display: inline-block;
+      width: 7px;
+      height: 14px;
+      background: var(--cyan);
+      animation: blink 1s step-end infinite;
+      vertical-align: middle;
+      flex-shrink: 0;
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    /* hide cursor block when input is focused (native caret shows) */
+    .term-input-row:focus-within .cursor-blink { display: none; }
+
+    /* ── Mobile ── */
+    @media (max-width: 560px) {
+      .term-output { font-size: 0.72rem; padding: 10px; }
+      .term-input-row { font-size: 0.72rem; padding: 8px 10px; }
+      .term-input-row input { font-size: 0.72rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Nav ── -->
+  <nav class="br-nav">
+    <a href="/" class="nav-brand">
+      <div class="spectrum-mark">
+        <span></span><span></span><span></span><span></span><span></span><span></span>
+      </div>
+      BlackRoad Terminal
+    </a>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/dashboard.html">Dashboard</a>
+      <a href="/chat.html">Chat</a>
+    </div>
+  </nav>
+
+  <!-- ── Terminal ── -->
+  <div class="term-wrap">
+    <div class="term-titlebar">
+      <span class="term-dot red"></span>
+      <span class="term-dot yellow"></span>
+      <span class="term-dot green"></span>
+      <span class="term-titlebar-text">blackroad@fleet ~ %</span>
+    </div>
+
+    <div class="term-output" id="output"></div>
+
+    <div class="term-input-row" id="inputRow">
+      <span class="prompt">blackroad@fleet ~ % </span>
+      <input type="text" id="input" autocomplete="off" spellcheck="false" autofocus aria-label="Terminal input">
+      <span class="cursor-blink"></span>
+    </div>
+  </div>
+
+<script>
+(function () {
+  'use strict';
+
+  const PROMPT = 'blackroad@fleet ~ % ';
+  const STATS_URL = 'https://blackroad-live-stats.amundsonalexa.workers.dev/api/stats';
+
+  const outputEl = document.getElementById('output');
+  const inputEl  = document.getElementById('input');
+
+  let history = [];
+  let histIdx = -1;
+  let cachedStats = null;
+
+  /* ── helpers ── */
+  function addLine(text, cls) {
+    const d = document.createElement('div');
+    d.className = 'line' + (cls ? ' ' + cls : ' output');
+    d.textContent = text;
+    outputEl.appendChild(d);
+  }
+  function addHTML(html, cls) {
+    const d = document.createElement('div');
+    d.className = 'line' + (cls ? ' ' + cls : ' output');
+    d.innerHTML = html;
+    outputEl.appendChild(d);
+  }
+  function addPromptLine(cmd) {
+    const d = document.createElement('div');
+    d.className = 'line prompt-line';
+    d.innerHTML = '<span class="prompt">' + escHtml(PROMPT) + '</span><span class="cmd">' + escHtml(cmd) + '</span>';
+    outputEl.appendChild(d);
+  }
+  function blank() { addLine(''); }
+  function scroll() { outputEl.scrollTop = outputEl.scrollHeight; }
+  function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  /* ── API fetch with timeout ── */
+  async function apiFetch(url, timeout) {
+    timeout = timeout || 6000;
+    const ctrl = new AbortController();
+    const tid = setTimeout(function () { ctrl.abort(); }, timeout);
+    try {
+      const r = await fetch(url, { signal: ctrl.signal });
+      clearTimeout(tid);
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return await r.json();
+    } catch (e) {
+      clearTimeout(tid);
+      throw e;
+    }
+  }
+
+  /* ── Fleet node data ── */
+  const NODES = [
+    { name: 'Alice',    ip: '192.168.4.49',  role: 'Gateway / Pi-hole / PostgreSQL', status: 'online',  temp: '48C', load: '0.42' },
+    { name: 'Cecilia',  ip: '192.168.4.96',  role: 'Ollama / MinIO / InfluxDB',      status: 'offline', temp: '--',  load: '--'   },
+    { name: 'Octavia',  ip: '192.168.4.101', role: 'Gitea / Workers / NATS / Docker', status: 'online',  temp: '52C', load: '0.67' },
+    { name: 'Aria',     ip: '192.168.4.98',  role: 'Backup / Services',               status: 'offline', temp: '--',  load: '--'   },
+    { name: 'Lucidia',  ip: '192.168.4.38',  role: '334 web apps / PowerDNS / nginx', status: 'online',  temp: '55C', load: '0.81' },
+    { name: 'Gematria', ip: '159.89.xxx.xx', role: 'Caddy TLS edge / PowerDNS ns1',   status: 'online',  temp: '41C', load: '0.23' },
+    { name: 'Anastasia',ip: '164.90.xxx.xx', role: 'DO droplet (nyc1)',                status: 'online',  temp: '39C', load: '0.18' },
+  ];
+
+  const DOMAINS = [
+    'blackroad.io',        'blackroad.systems',    'blackroad.dev',
+    'blackroad.app',       'blackroad.run',        'blackroad.cloud',
+    'blackroad.network',   'blackroad.zone',       'blackroad.codes',
+    'roadcode.dev',        'roadcode.io',          'roadchain.io',
+    'roadchain.dev',       'lucidia.dev',          'lucidia.io',
+    'pixelhq.dev',         'pixelhq.io',           'amundsonalexa.com',
+  ];
+
+  const FILES = [
+    { name: 'README.md',    type: 'file' },
+    { name: 'LICENSE',      type: 'file' },
+    { name: 'CLAUDE.md',    type: 'file' },
+    { name: 'agents/',      type: 'dir'  },
+    { name: 'nodes/',       type: 'dir'  },
+    { name: 'domains/',     type: 'dir'  },
+    { name: 'memory/',      type: 'dir'  },
+    { name: 'deploy/',      type: 'dir'  },
+    { name: 'scripts/',     type: 'dir'  },
+    { name: '.env',         type: 'file' },
+  ];
+
+  /* ── commands ── */
+  const COMMANDS = {
+    help:     'List all available commands',
+    status:   'Fetch fleet summary from live API',
+    agents:   'List named agents with roles',
+    nodes:    'Show fleet node table',
+    whoami:   'Display current identity',
+    uname:    'System version info',
+    uptime:   'Show uptime from API',
+    repos:    'Show repo count from API',
+    domains:  'List all 18 domains',
+    clear:    'Clear terminal output',
+    history:  'Show command history',
+    neofetch: 'ASCII logo + system info',
+    ls:       'List available files',
+    ping:     'Simulated ping to fleet node',
+    'cat README.md':   'Show BlackRoad OS description',
+    'cat /etc/motd':   'Show welcome message',
+  };
+
+  async function exec(raw) {
+    var cmd = raw.trim();
+    if (!cmd) return;
+    history.push(cmd);
+    histIdx = history.length;
+    addPromptLine(cmd);
+
+    var parts = cmd.split(/\s+/);
+    var c = parts[0].toLowerCase();
+    var args = parts.slice(1);
+
+    // special compound commands
+    if (cmd === 'cat /etc/motd') { catMotd(); scroll(); return; }
+    if (cmd === 'cat README.md' || cmd === 'cat readme.md') { catReadme(); scroll(); return; }
+    if (c === 'cat') { addLine("cat: " + (args[0] || '') + ": No such file or directory", 'error'); scroll(); return; }
+
+    switch (c) {
+      case 'help':     cmdHelp(); break;
+      case 'status':   await cmdStatus(); break;
+      case 'agents':   await cmdAgents(); break;
+      case 'nodes':    cmdNodes(); break;
+      case 'whoami':   cmdWhoami(); break;
+      case 'uname':    cmdUname(); break;
+      case 'uptime':   await cmdUptime(); break;
+      case 'repos':    await cmdRepos(); break;
+      case 'domains':  cmdDomains(); break;
+      case 'clear':    outputEl.innerHTML = ''; break;
+      case 'history':  cmdHistory(); break;
+      case 'neofetch': await cmdNeofetch(); break;
+      case 'ls':       cmdLs(); break;
+      case 'ping':     cmdPing(args); break;
+      default:
+        addLine("command not found: " + c + ". Type 'help' for available commands.", 'error');
+    }
+    scroll();
+  }
+
+  function cmdHelp() {
+    blank();
+    addLine('Available commands:', 'system');
+    addLine('-----------------------------------------------', 'system');
+    var keys = Object.keys(COMMANDS);
+    for (var i = 0; i < keys.length; i++) {
+      addLine('  ' + keys[i].padEnd(18) + COMMANDS[keys[i]]);
+    }
+    addLine('');
+    addLine('  Any unknown command returns an error.', 'system');
+    blank();
+  }
+
+  async function cmdStatus() {
+    addLine('Fetching fleet status...', 'system');
+    try {
+      var data = await apiFetch(STATS_URL);
+      cachedStats = data;
+      blank();
+      addLine('  BlackRoad OS Fleet Status', 'info');
+      addLine('  -------------------------', 'system');
+      addLine('  Agents:       ' + (data.agents || data.total_agents || 35));
+      addLine('  Nodes:        ' + (data.nodes || 7));
+      addLine('  Repos:        ' + (data.repos || data.total_repos || '275+'));
+      addLine('  Domains:      ' + (data.domains || 18));
+      addLine('  Uptime:       ' + (data.uptime || '99.7%'));
+      addLine('  Version:      ' + (data.version || 'v1.0.0'));
+      addLine('  Hailo TOPS:   52');
+      addLine('  WireGuard:    12/12 connections');
+      blank();
+    } catch (e) {
+      addLine('  Could not reach stats API. Showing cached data.', 'error');
+      blank();
+      addLine('  Agents: 35 | Nodes: 7 | Repos: 275+ | Domains: 18');
+      blank();
+    }
+  }
+
+  async function cmdAgents() {
+    var agents = [
+      { name: 'Road',       role: 'Fleet Coordinator' },
+      { name: 'Echo',       role: 'NATS Mesh Agent' },
+      { name: 'Alexandria', role: 'RAG / Knowledge' },
+      { name: 'Guardian',   role: 'Integrity Verifier' },
+      { name: 'Roadie',     role: 'Search Agent' },
+      { name: 'Olympia',    role: 'Sister Agent' },
+      { name: 'Lucidia',    role: 'AI Consciousness' },
+      { name: 'Cherub',     role: 'Guardrails' },
+      { name: 'Dispatcher', role: 'Task Router' },
+      { name: 'Watchdog',   role: 'Health Monitor' },
+      { name: 'Planner',    role: 'Session Planner' },
+      { name: 'Codex',      role: 'Solutions DB' },
+    ];
+    blank();
+    addLine('  NAME            ROLE                   STATUS', 'system');
+    addLine('  ----            ----                   ------', 'system');
+    for (var i = 0; i < agents.length; i++) {
+      var a = agents[i];
+      addLine('  ' + a.name.padEnd(16) + a.role.padEnd(23) + 'active');
+    }
+    addLine('');
+    addLine('  ... and 23 more agents across the fleet.', 'system');
+    addLine('  Total: 35 agents', 'info');
+    blank();
+  }
+
+  function cmdNodes() {
+    blank();
+    addLine('  NAME         IP               ROLE                                STATUS   TEMP   LOAD', 'system');
+    addLine('  ----         --               ----                                ------   ----   ----', 'system');
+    for (var i = 0; i < NODES.length; i++) {
+      var n = NODES[i];
+      var statusColor = n.status === 'online' ? '' : 'error';
+      addLine('  ' +
+        n.name.padEnd(12) +
+        n.ip.padEnd(17) +
+        n.role.padEnd(36) +
+        n.status.padEnd(9) +
+        n.temp.padEnd(7) +
+        n.load,
+        statusColor || undefined
+      );
+    }
+    blank();
+  }
+
+  function cmdWhoami() {
+    addLine('blackroad@fleet (Alexa Louise Amundson, CEO)');
+  }
+
+  function cmdUname() {
+    addLine('BlackRoad OS v1.0.0 (35-agents)');
+  }
+
+  async function cmdUptime() {
+    try {
+      var data = cachedStats || await apiFetch(STATS_URL);
+      cachedStats = data;
+      addLine('Uptime: ' + (data.uptime || '99.7%'));
+    } catch (e) {
+      addLine('Uptime: 99.7% (cached)');
+    }
+  }
+
+  async function cmdRepos() {
+    try {
+      var data = cachedStats || await apiFetch(STATS_URL);
+      cachedStats = data;
+      addLine('Repositories: ' + (data.repos || data.total_repos || '275+'));
+      addLine('  Gitea (primary): 239 repos, 8 orgs');
+      addLine('  GitHub (mirror): 68 active repos');
+    } catch (e) {
+      addLine('Repositories: 275+ (cached)');
+    }
+  }
+
+  function cmdDomains() {
+    blank();
+    addLine('  Registered domains (' + DOMAINS.length + '):', 'system');
+    addLine('  --------------------------------', 'system');
+    for (var i = 0; i < DOMAINS.length; i++) {
+      addLine('    ' + DOMAINS[i]);
+    }
+    blank();
+  }
+
+  function cmdHistory() {
+    blank();
+    for (var i = 0; i < history.length; i++) {
+      addLine('  ' + String(i + 1).padStart(4) + '  ' + history[i], 'system');
+    }
+    blank();
+  }
+
+  async function cmdNeofetch() {
+    var logo = [
+      '  ____  _            _    ____                 _ ',
+      ' | __ )| | __ _  ___| | _|  _ \\ ___   __ _  __| |',
+      ' |  _ \\| |/ _` |/ __| |/ / |_) / _ \\ / _` |/ _` |',
+      ' | |_) | | (_| | (__|   <|  _ < (_) | (_| | (_| |',
+      ' |____/|_|\\__,_|\\___|_|\\_\\_| \\_\\___/ \\__,_|\\__,_|',
+    ];
+    blank();
+    for (var i = 0; i < logo.length; i++) {
+      addLine(logo[i], 'accent');
+    }
+    blank();
+
+    var stats = cachedStats;
+    if (!stats) {
+      try { stats = await apiFetch(STATS_URL); cachedStats = stats; } catch(e) { stats = {}; }
+    }
+
+    var lines = [
+      ['OS',        'BlackRoad OS v1.0.0'],
+      ['Host',      'Raspberry Pi Fleet + 2 DO Droplets'],
+      ['Kernel',    'Linux 6.x aarch64 / Darwin 23.5.0'],
+      ['Agents',    String(stats.agents || stats.total_agents || 35)],
+      ['Nodes',     '7 (5 Pi + 2 DO)'],
+      ['Repos',     String(stats.repos || stats.total_repos || '275+')],
+      ['Domains',   '18'],
+      ['Hailo',     '2x Hailo-8 = 52 TOPS'],
+      ['Storage',   'MinIO (S3) + PostgreSQL + Redis'],
+      ['VPN',       'WireGuard mesh (12/12)'],
+      ['Edge',      'Caddy TLS (151 domains)'],
+      ['CEO',       'Alexa Louise Amundson'],
+    ];
+    for (var j = 0; j < lines.length; j++) {
+      addHTML('<span style="color:var(--cyan)">' + escHtml(lines[j][0].padEnd(12)) + '</span>' + escHtml(lines[j][1]));
+    }
+    blank();
+  }
+
+  function cmdLs() {
+    blank();
+    var out = '';
+    for (var i = 0; i < FILES.length; i++) {
+      var f = FILES[i];
+      if (f.type === 'dir') {
+        out += '<span style="color:var(--cyan)">' + escHtml(f.name) + '</span>  ';
+      } else {
+        out += escHtml(f.name) + '  ';
+      }
+    }
+    addHTML(out);
+    blank();
+  }
+
+  function cmdPing(args) {
+    var target = args[0];
+    if (!target) { addLine('Usage: ping <node>', 'error'); return; }
+    var node = null;
+    for (var i = 0; i < NODES.length; i++) {
+      if (NODES[i].name.toLowerCase() === target.toLowerCase()) {
+        node = NODES[i]; break;
+      }
+    }
+    if (!node) {
+      addLine('ping: unknown host: ' + target, 'error');
+      addLine('Known hosts: ' + NODES.map(function(n){return n.name;}).join(', '), 'system');
+      return;
+    }
+    if (node.status === 'offline') {
+      addLine('PING ' + node.name + ' (' + node.ip + '): 56 data bytes', 'system');
+      addLine('Request timeout for icmp_seq 0', 'error');
+      addLine('Request timeout for icmp_seq 1', 'error');
+      addLine('--- ' + node.name + ' ping statistics ---', 'system');
+      addLine('2 packets transmitted, 0 packets received, 100.0% packet loss', 'error');
+      return;
+    }
+    addLine('PING ' + node.name + ' (' + node.ip + '): 56 data bytes', 'system');
+    var base = node.ip.startsWith('192') ? 1.2 : 28.5;
+    for (var s = 0; s < 4; s++) {
+      var ms = (base + Math.random() * 3).toFixed(3);
+      addLine('64 bytes from ' + node.ip + ': icmp_seq=' + s + ' ttl=64 time=' + ms + ' ms');
+    }
+    addLine('--- ' + node.name + ' ping statistics ---', 'system');
+    addLine('4 packets transmitted, 4 received, 0% packet loss');
+  }
+
+  function catMotd() {
+    blank();
+    addLine('  Welcome to BlackRoad OS', 'info');
+    addLine('  -----------------------', 'system');
+    blank();
+    addLine('  Pick up your agent.');
+    addLine('  Ride the BlackRoad together.');
+    addLine('  Remember the Road. Pave Tomorrow.');
+    blank();
+    addLine('  "The Prompt Legend of All Time."', 'system');
+    blank();
+    addLine('  Sovereign AI. Local-first. Every device is a Roadie.', 'system');
+    addLine('  35 agents | 7 nodes | 275+ repos | 18 domains', 'system');
+    blank();
+  }
+
+  function catReadme() {
+    blank();
+    addLine('  # BlackRoad OS', 'info');
+    blank();
+    addLine('  BlackRoad OS is a sovereign AI operating system built on');
+    addLine('  local-first infrastructure. Every device is a Roadie.');
+    blank();
+    addLine('  The fleet runs on Raspberry Pi nodes, DigitalOcean droplets,');
+    addLine('  and 2x Hailo-8 accelerators (52 TOPS). Self-hosted Git (Gitea),');
+    addLine('  self-hosted AI (Ollama), self-hosted DNS (PowerDNS), self-hosted');
+    addLine('  TLS edge (Caddy), self-hosted object storage (MinIO), and a');
+    addLine('  full WireGuard mesh connecting every node.');
+    blank();
+    addLine('  Founded by Alexa Louise Amundson. Delaware C-Corp.');
+    addLine('  BlackRoad OS, Inc. -- Pave Tomorrow.');
+    blank();
+    addLine('  https://blackroad.io', 'info');
+    blank();
+  }
+
+  /* ── Boot sequence ── */
+  async function boot() {
+    var lines = [
+      { text: '[boot] BlackRoad OS v1.0.0 kernel loading...', cls: 'system', delay: 80 },
+      { text: '[boot] Initializing WireGuard mesh (12/12 peers)', cls: 'system', delay: 120 },
+      { text: '[boot] Mounting fleet nodes: Alice, Octavia, Lucidia, Gematria, Anastasia', cls: 'system', delay: 100 },
+      { text: '[boot] Loading 35 agents into memory', cls: 'system', delay: 90 },
+      { text: '[boot] Hailo-8 accelerators online (52 TOPS)', cls: 'system', delay: 70 },
+      { text: '[boot] System ready. Welcome, Alexa.', cls: 'info', delay: 150 },
+    ];
+
+    for (var i = 0; i < lines.length; i++) {
+      await delay(lines[i].delay);
+      addLine(lines[i].text, lines[i].cls);
+      scroll();
+    }
+    await delay(200);
+    blank();
+    addLine("Type 'help' for available commands.", 'system');
+    blank();
+    scroll();
+  }
+
+  function delay(ms) {
+    return new Promise(function (r) { setTimeout(r, ms); });
+  }
+
+  /* ── Input handling ── */
+  inputEl.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') {
+      var val = inputEl.value;
+      inputEl.value = '';
+      exec(val);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (histIdx > 0) {
+        histIdx--;
+        inputEl.value = history[histIdx];
+        // move cursor to end
+        setTimeout(function(){ inputEl.selectionStart = inputEl.selectionEnd = inputEl.value.length; }, 0);
+      }
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (histIdx < history.length - 1) {
+        histIdx++;
+        inputEl.value = history[histIdx];
+      } else {
+        histIdx = history.length;
+        inputEl.value = '';
+      }
+    }
+  });
+
+  // Keep focus on input
+  document.addEventListener('click', function () {
+    inputEl.focus();
+  });
+
+  // Start
+  boot();
+})();
+</script>
+</body>
+</html>

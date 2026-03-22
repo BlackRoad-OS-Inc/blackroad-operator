@@ -1,0 +1,733 @@
+import { useCallback, useRef, useEffect, useState } from 'react';
+import type { EditorState } from '../office/editor/editorState.js';
+import { EditTool, TileType } from '../office/types.js';
+import type { FloorColor, EditTool as EditToolType } from '../office/types.js';
+import { FURNITURE_CATALOG } from '../office/layout/furnitureCatalog.js';
+import type { SpriteData } from '../office/types.js';
+import {
+  getItemsByType,
+  getItemById,
+  getTilesetMetadataImage,
+  areAssetsReady,
+} from '../office/sprites/assetLoader.js';
+import type { ItemType } from '../office/sprites/assetLoader.js';
+
+// ─── Props ─────────────────────────────────────────────────────
+export interface EditorToolbarProps {
+  editorState: EditorState;
+  isEditMode: boolean;
+  onToolChange: (tool: EditToolType) => void;
+  onTileTypeChange: (type: TileType) => void;
+  onFloorColorChange: (color: FloorColor) => void;
+  onWallColorChange: (color: FloorColor) => void;
+  onFurnitureTypeChange: (type: string) => void;
+  onSave: () => void;
+  onReset: () => void;
+  onUndo: () => void;
+  onRedo: () => void;
+  onDeleteSelected: () => void;
+  onRotateSelected: () => void;
+  canUndo: boolean;
+  canRedo: boolean;
+  isDirty: boolean;
+  hasSelection: boolean;
+  onExpandGrid?: (direction: 'left' | 'right' | 'up' | 'down') => void;
+}
+
+// ─── Constants ─────────────────────────────────────────────────
+const TOOLBAR_WIDTH = 220;
+const BG = '#1e1e1e';
+const BG_SECTION = '#252526';
+const BORDER = '#3c3c3c';
+const TEXT = '#cccccc';
+const TEXT_DIM = '#888888';
+const ACCENT = '#0078d4';
+const ACCENT_HOVER = '#1a8fff';
+const DANGER = '#c83232';
+
+const TOOL_DEFS: { tool: EditToolType; icon: string; label: string }[] = [
+  { tool: EditTool.SELECT, icon: '◎', label: 'Select' },
+  { tool: EditTool.TILE_PAINT, icon: '▦', label: 'Floor' },
+  { tool: EditTool.WALL_PAINT, icon: '▥', label: 'Wall' },
+  { tool: EditTool.FURNITURE_PLACE, icon: '♜', label: 'Furniture' },
+  { tool: EditTool.ERASE, icon: '✕', label: 'Erase' },
+  { tool: EditTool.EYEDROPPER, icon: '⊙', label: 'Eyedrop' },
+];
+
+const FLOOR_TYPES: { type: TileType; label: string }[] = [
+  { type: TileType.FLOOR_1, label: '1' },
+  { type: TileType.FLOOR_2, label: '2' },
+  { type: TileType.FLOOR_3, label: '3' },
+  { type: TileType.FLOOR_4, label: '4' },
+  { type: TileType.FLOOR_5, label: '5' },
+  { type: TileType.FLOOR_6, label: '6' },
+  { type: TileType.FLOOR_7, label: '7' },
+];
+
+// Map TileType floor values to tileset-metadata item IDs for previews
+const FLOOR_TYPE_TO_ITEM: Record<number, string> = {
+  [TileType.FLOOR_1]: 'floor_wood',
+  [TileType.FLOOR_2]: 'floor_blue_diamond',
+  [TileType.FLOOR_3]: 'floor_wood',
+  [TileType.FLOOR_4]: 'floor_blue_diamond',
+  [TileType.FLOOR_5]: 'floor_wood',
+  [TileType.FLOOR_6]: 'floor_blue_diamond',
+  [TileType.FLOOR_7]: 'floor_wood',
+};
+
+// Placeable item categories from tileset-metadata.json
+const PLACEABLE_CATEGORIES: { type: ItemType; label: string }[] = [
+  { type: 'furniture', label: 'Furniture' },
+  { type: 'electronics', label: 'Electronics' },
+  { type: 'appliance', label: 'Appliances' },
+  { type: 'decoration', label: 'Decorations' },
+];
+
+// ─── Styles ────────────────────────────────────────────────────
+const styles = {
+  root: {
+    position: 'absolute' as const,
+    top: 0,
+    left: 0,
+    bottom: 48, // above BottomToolbar
+    width: `${TOOLBAR_WIDTH}px`,
+    background: BG,
+    borderRight: `1px solid ${BORDER}`,
+    overflowY: 'auto' as const,
+    overflowX: 'hidden' as const,
+    zIndex: 60,
+    fontFamily: 'var(--vscode-font-family, "Segoe UI", sans-serif)',
+    fontSize: '12px',
+    color: TEXT,
+    userSelect: 'none' as const,
+    scrollbarWidth: 'thin' as const,
+    scrollbarColor: `${BORDER} ${BG}`,
+  },
+
+  section: {
+    padding: '8px',
+    borderBottom: `1px solid ${BORDER}`,
+  },
+
+  sectionLabel: {
+    fontSize: '10px',
+    fontWeight: 600 as const,
+    textTransform: 'uppercase' as const,
+    color: TEXT_DIM,
+    marginBottom: '6px',
+    letterSpacing: '0.5px',
+  },
+
+  toolGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(3, 1fr)',
+    gap: '3px',
+  },
+
+  toolBtn: (active: boolean) => ({
+    display: 'flex',
+    flexDirection: 'column' as const,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    padding: '6px 2px',
+    background: active ? ACCENT : BG_SECTION,
+    color: active ? '#ffffff' : TEXT,
+    border: `1px solid ${active ? ACCENT : BORDER}`,
+    borderRadius: '3px',
+    cursor: 'pointer',
+    fontSize: '14px',
+    lineHeight: '1',
+    gap: '2px',
+    transition: 'background 0.1s',
+  }),
+
+  toolLabel: {
+    fontSize: '9px',
+    opacity: 0.8,
+  },
+
+  floorGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(7, 1fr)',
+    gap: '3px',
+  },
+
+  floorBtn: (active: boolean) => ({
+    width: '100%',
+    aspectRatio: '1',
+    background: active ? ACCENT : BG_SECTION,
+    border: `1px solid ${active ? ACCENT : BORDER}`,
+    borderRadius: '2px',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    color: active ? '#fff' : TEXT,
+    fontSize: '10px',
+    fontWeight: 600 as const,
+  }),
+
+  sliderRow: {
+    display: 'flex',
+    alignItems: 'center' as const,
+    gap: '6px',
+    marginBottom: '4px',
+  },
+
+  sliderLabel: {
+    width: '14px',
+    fontSize: '10px',
+    color: TEXT_DIM,
+    flexShrink: 0,
+    textAlign: 'right' as const,
+  },
+
+  slider: {
+    flex: 1,
+    height: '4px',
+    accentColor: ACCENT,
+    cursor: 'pointer',
+  },
+
+  sliderValue: {
+    width: '28px',
+    fontSize: '10px',
+    color: TEXT_DIM,
+    textAlign: 'right' as const,
+    flexShrink: 0,
+  },
+
+  checkRow: {
+    display: 'flex',
+    alignItems: 'center' as const,
+    gap: '6px',
+    marginTop: '4px',
+  },
+
+  furnitureGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(2, 1fr)',
+    gap: '3px',
+  },
+
+  furnitureBtn: (active: boolean) => ({
+    display: 'flex',
+    flexDirection: 'column' as const,
+    alignItems: 'center' as const,
+    padding: '4px',
+    background: active ? ACCENT : BG_SECTION,
+    border: `1px solid ${active ? ACCENT : BORDER}`,
+    borderRadius: '3px',
+    cursor: 'pointer',
+    color: active ? '#fff' : TEXT,
+    gap: '2px',
+  }),
+
+  actionRow: {
+    display: 'flex',
+    gap: '3px',
+    flexWrap: 'wrap' as const,
+  },
+
+  actionBtn: (disabled: boolean, danger?: boolean) => ({
+    flex: '1 1 45%',
+    padding: '5px 4px',
+    background: disabled ? '#333' : danger ? DANGER : BG_SECTION,
+    color: disabled ? '#666' : '#fff',
+    border: `1px solid ${disabled ? '#444' : danger ? DANGER : BORDER}`,
+    borderRadius: '3px',
+    cursor: disabled ? 'default' : 'pointer',
+    fontSize: '11px',
+    fontWeight: 500 as const,
+    textAlign: 'center' as const,
+    opacity: disabled ? 0.5 : 1,
+  }),
+
+  saveBtn: (dirty: boolean) => ({
+    flex: '1 1 100%',
+    padding: '6px 4px',
+    background: dirty ? '#0e639c' : BG_SECTION,
+    color: dirty ? '#fff' : TEXT_DIM,
+    border: `1px solid ${dirty ? ACCENT : BORDER}`,
+    borderRadius: '3px',
+    cursor: 'pointer',
+    fontSize: '11px',
+    fontWeight: 600 as const,
+    textAlign: 'center' as const,
+  }),
+
+  expandSection: {
+    display: 'flex',
+    justifyContent: 'center' as const,
+    alignItems: 'center' as const,
+    gap: '2px',
+  },
+
+  expandBtn: {
+    padding: '3px 8px',
+    background: BG_SECTION,
+    color: TEXT,
+    border: `1px solid ${BORDER}`,
+    borderRadius: '2px',
+    cursor: 'pointer',
+    fontSize: '11px',
+  },
+};
+
+// ─── Sprite Preview (tiny canvas) ──────────────────────────────
+function SpritePreview({ sprite, size = 24 }: { sprite: SpriteData; size?: number }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const cvs = canvasRef.current;
+    if (!cvs || !sprite.length) return;
+    const ctx = cvs.getContext('2d');
+    if (!ctx) return;
+
+    const rows = sprite.length;
+    const cols = sprite[0]?.length ?? 0;
+    if (cols === 0) return;
+
+    cvs.width = cols;
+    cvs.height = rows;
+    ctx.clearRect(0, 0, cols, rows);
+    ctx.imageSmoothingEnabled = false;
+
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const color = sprite[r][c];
+        if (color && color !== '') {
+          ctx.fillStyle = color;
+          ctx.fillRect(c, r, 1, 1);
+        }
+      }
+    }
+  }, [sprite]);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      style={{
+        width: `${size}px`,
+        height: `${size}px`,
+        imageRendering: 'pixelated',
+      }}
+    />
+  );
+}
+
+// ─── Tileset Item Preview (canvas from PNG spritesheet) ────────
+function TilesetItemPreview({ itemId, size = 28 }: { itemId: string; size?: number }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const cvs = canvasRef.current;
+    if (!cvs) return;
+    const ctx = cvs.getContext('2d');
+    if (!ctx) return;
+
+    const image = getTilesetMetadataImage();
+    const item = getItemById(itemId);
+    if (!image || !item) {
+      cvs.width = size;
+      cvs.height = size;
+      ctx.fillStyle = '#333';
+      ctx.fillRect(0, 0, size, size);
+      ctx.fillStyle = '#888';
+      ctx.font = '8px monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('?', size / 2, size / 2);
+      return;
+    }
+
+    const { x, y, width, height } = item.bounds;
+    cvs.width = width;
+    cvs.height = height;
+    ctx.imageSmoothingEnabled = false;
+    ctx.clearRect(0, 0, width, height);
+    ctx.drawImage(image, x, y, width, height, 0, 0, width, height);
+  }, [itemId, size]);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      style={{
+        width: `${size}px`,
+        height: `${size}px`,
+        imageRendering: 'pixelated',
+      }}
+    />
+  );
+}
+
+/** Format a tileset metadata item ID into a human-readable label */
+function formatItemLabel(id: string): string {
+  return id
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, c => c.toUpperCase());
+}
+
+// ─── Color Sliders ─────────────────────────────────────────────
+function ColorSliders({
+  label,
+  color,
+  onChange,
+}: {
+  label: string;
+  color: FloorColor;
+  onChange: (c: FloorColor) => void;
+}) {
+  const handleChange = useCallback(
+    (field: keyof FloorColor, value: number | boolean) => {
+      onChange({ ...color, [field]: value });
+    },
+    [color, onChange]
+  );
+
+  return (
+    <div>
+      <div style={styles.sectionLabel}>{label}</div>
+
+      <div style={styles.sliderRow}>
+        <span style={styles.sliderLabel}>H</span>
+        <input
+          type="range"
+          min={0}
+          max={360}
+          value={color.h}
+          onChange={(e) => handleChange('h', Number(e.target.value))}
+          style={styles.slider}
+        />
+        <span style={styles.sliderValue}>{color.h}</span>
+      </div>
+
+      <div style={styles.sliderRow}>
+        <span style={styles.sliderLabel}>S</span>
+        <input
+          type="range"
+          min={0}
+          max={100}
+          value={color.s}
+          onChange={(e) => handleChange('s', Number(e.target.value))}
+          style={styles.slider}
+        />
+        <span style={styles.sliderValue}>{color.s}</span>
+      </div>
+
+      <div style={styles.sliderRow}>
+        <span style={styles.sliderLabel}>B</span>
+        <input
+          type="range"
+          min={-100}
+          max={100}
+          value={color.b}
+          onChange={(e) => handleChange('b', Number(e.target.value))}
+          style={styles.slider}
+        />
+        <span style={styles.sliderValue}>{color.b}</span>
+      </div>
+
+      <div style={styles.sliderRow}>
+        <span style={styles.sliderLabel}>C</span>
+        <input
+          type="range"
+          min={-100}
+          max={100}
+          value={color.c}
+          onChange={(e) => handleChange('c', Number(e.target.value))}
+          style={styles.slider}
+        />
+        <span style={styles.sliderValue}>{color.c}</span>
+      </div>
+
+      <div style={styles.checkRow}>
+        <input
+          type="checkbox"
+          checked={!!color.colorize}
+          onChange={(e) => handleChange('colorize', e.target.checked)}
+          id={`colorize-${label}`}
+        />
+        <label htmlFor={`colorize-${label}`} style={{ fontSize: '10px', color: TEXT_DIM, cursor: 'pointer' }}>
+          Colorize
+        </label>
+      </div>
+    </div>
+  );
+}
+
+// ─── Main Component ────────────────────────────────────────────
+export function EditorToolbar({
+  editorState,
+  isEditMode,
+  onToolChange,
+  onTileTypeChange,
+  onFloorColorChange,
+  onWallColorChange,
+  onFurnitureTypeChange,
+  onSave,
+  onReset,
+  onUndo,
+  onRedo,
+  onDeleteSelected,
+  onRotateSelected,
+  canUndo,
+  canRedo,
+  isDirty,
+  hasSelection,
+  onExpandGrid,
+}: EditorToolbarProps) {
+  // Force re-render when tileset assets become available
+  const [_assetTick, setAssetTick] = useState(0);
+  useEffect(() => {
+    if (areAssetsReady()) return;
+    const interval = setInterval(() => {
+      if (areAssetsReady()) {
+        setAssetTick(t => t + 1);
+        clearInterval(interval);
+      }
+    }, 500);
+    return () => clearInterval(interval);
+  }, []);
+
+  if (!isEditMode) return null;
+
+  const activeTool = editorState.tool;
+  const showFloorOptions = activeTool === EditTool.TILE_PAINT;
+  const showWallOptions = activeTool === EditTool.WALL_PAINT;
+  const showFurnitureOptions = activeTool === EditTool.FURNITURE_PLACE;
+
+  // Gather tileset metadata items for each placeable category
+  const metadataCategories = PLACEABLE_CATEGORIES.map(cat => ({
+    ...cat,
+    items: getItemsByType(cat.type),
+  })).filter(cat => cat.items.length > 0);
+
+  return (
+    <div style={styles.root}>
+      {/* ── Tool Buttons ── */}
+      <div style={styles.section}>
+        <div style={styles.sectionLabel}>Tools</div>
+        <div style={styles.toolGrid}>
+          {TOOL_DEFS.map(({ tool, icon, label }) => (
+            <button
+              key={tool}
+              style={styles.toolBtn(activeTool === tool)}
+              onClick={() => onToolChange(tool)}
+              title={label}
+            >
+              <span>{icon}</span>
+              <span style={styles.toolLabel}>{label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Floor Pattern Selector (with tile previews) ── */}
+      {showFloorOptions && (
+        <div style={styles.section}>
+          <div style={styles.sectionLabel}>Floor Pattern</div>
+          <div style={styles.floorGrid}>
+            {FLOOR_TYPES.map(({ type, label }) => {
+              const itemId = FLOOR_TYPE_TO_ITEM[type];
+              return (
+                <button
+                  key={type}
+                  style={styles.floorBtn(editorState.tileType === type)}
+                  onClick={() => onTileTypeChange(type)}
+                  title={`Floor ${label}${itemId ? ` (${formatItemLabel(itemId)})` : ''}`}
+                >
+                  {itemId ? (
+                    <TilesetItemPreview itemId={itemId} size={22} />
+                  ) : (
+                    label
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* ── Floor Color ── */}
+      {showFloorOptions && (
+        <div style={styles.section}>
+          <ColorSliders
+            label="Floor Color"
+            color={editorState.floorColor}
+            onChange={onFloorColorChange}
+          />
+        </div>
+      )}
+
+      {/* ── Wall Tile Preview ── */}
+      {showWallOptions && (
+        <div style={styles.section}>
+          <div style={styles.sectionLabel}>Wall Tile</div>
+          <div style={styles.furnitureGrid}>
+            {getItemsByType('wall').map(item => (
+              <button
+                key={item.id}
+                style={styles.furnitureBtn(true)}
+                title={formatItemLabel(item.id)}
+              >
+                <TilesetItemPreview itemId={item.id} size={28} />
+                <span style={{ fontSize: '9px' }}>{formatItemLabel(item.id)}</span>
+              </button>
+            ))}
+            {getItemsByType('wall').length === 0 && (
+              <div style={{ fontSize: '10px', color: TEXT_DIM, padding: '4px' }}>
+                Wall (single type)
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ── Wall Color ── */}
+      {showWallOptions && (
+        <div style={styles.section}>
+          <ColorSliders
+            label="Wall Color"
+            color={editorState.wallColor}
+            onChange={onWallColorChange}
+          />
+        </div>
+      )}
+
+      {/* ── Legacy Furniture Catalog ── */}
+      {showFurnitureOptions && (
+        <div style={styles.section}>
+          <div style={styles.sectionLabel}>Furniture</div>
+          <div style={styles.furnitureGrid}>
+            {FURNITURE_CATALOG.map((entry) => (
+              <button
+                key={entry.type}
+                style={styles.furnitureBtn(editorState.furnitureType === entry.type)}
+                onClick={() => onFurnitureTypeChange(entry.type)}
+                title={entry.label}
+              >
+                <SpritePreview sprite={entry.sprite} size={28} />
+                <span style={{ fontSize: '9px' }}>{entry.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── Tileset Metadata Categories (Electronics, Appliances, Decorations, etc.) ── */}
+      {showFurnitureOptions && metadataCategories.map(cat => (
+        <div key={cat.type} style={styles.section}>
+          <div style={styles.sectionLabel}>{cat.label}</div>
+          <div style={styles.furnitureGrid}>
+            {cat.items.map(item => (
+              <button
+                key={item.id}
+                style={styles.furnitureBtn(editorState.furnitureType === item.id)}
+                onClick={() => onFurnitureTypeChange(item.id)}
+                title={formatItemLabel(item.id)}
+              >
+                <TilesetItemPreview itemId={item.id} size={28} />
+                <span style={{ fontSize: '9px' }}>{formatItemLabel(item.id)}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      ))}
+
+      {/* ── Selection Actions ── */}
+      {hasSelection && (
+        <div style={styles.section}>
+          <div style={styles.sectionLabel}>Selection</div>
+          <div style={styles.actionRow}>
+            <button
+              style={styles.actionBtn(false, true)}
+              onClick={onDeleteSelected}
+              title="Delete (Del)"
+            >
+              Delete
+            </button>
+            <button
+              style={styles.actionBtn(false)}
+              onClick={onRotateSelected}
+              title="Rotate (R)"
+            >
+              Rotate
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Grid Expand ── */}
+      {onExpandGrid && (
+        <div style={styles.section}>
+          <div style={styles.sectionLabel}>Expand Grid</div>
+          <div style={styles.expandSection}>
+            <button style={styles.expandBtn} onClick={() => onExpandGrid('left')} title="Expand Left">←</button>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+              <button style={styles.expandBtn} onClick={() => onExpandGrid('up')} title="Expand Up">↑</button>
+              <button style={styles.expandBtn} onClick={() => onExpandGrid('down')} title="Expand Down">↓</button>
+            </div>
+            <button style={styles.expandBtn} onClick={() => onExpandGrid('right')} title="Expand Right">→</button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Actions ── */}
+      <div style={styles.section}>
+        <div style={styles.sectionLabel}>Actions</div>
+        <div style={styles.actionRow}>
+          <button style={styles.saveBtn(isDirty)} onClick={onSave}>
+            {isDirty ? '● Save Layout' : 'Save Layout'}
+          </button>
+          <button
+            style={styles.actionBtn(!canUndo)}
+            onClick={canUndo ? onUndo : undefined}
+            title="Undo (Ctrl+Z)"
+          >
+            Undo
+          </button>
+          <button
+            style={styles.actionBtn(!canRedo)}
+            onClick={canRedo ? onRedo : undefined}
+            title="Redo (Ctrl+Y)"
+          >
+            Redo
+          </button>
+          <button
+            style={styles.actionBtn(false, true)}
+            onClick={onReset}
+            title="Reset to last save"
+          >
+            Reset
+          </button>
+        </div>
+      </div>
+
+      {/* ── Keyboard Shortcuts ── */}
+      <div style={{ ...styles.section, borderBottom: 'none' }}>
+        <div style={styles.sectionLabel}>Shortcuts</div>
+        <div style={{ fontSize: '10px', color: TEXT_DIM, lineHeight: '1.6' }}>
+          <div><kbd style={kbdStyle}>Del</kbd> Delete selected</div>
+          <div><kbd style={kbdStyle}>R</kbd> Rotate selected</div>
+          <div><kbd style={kbdStyle}>Ctrl+Z</kbd> Undo</div>
+          <div><kbd style={kbdStyle}>Ctrl+Y</kbd> Redo</div>
+          <div><kbd style={kbdStyle}>Esc</kbd> Deselect / Exit</div>
+          <div><kbd style={kbdStyle}>Space+Drag</kbd> Pan</div>
+          <div><kbd style={kbdStyle}>Ctrl+Scroll</kbd> Zoom</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const kbdStyle: React.CSSProperties = {
+  display: 'inline-block',
+  padding: '0 3px',
+  background: '#333',
+  border: '1px solid #555',
+  borderRadius: '2px',
+  fontSize: '9px',
+  fontFamily: 'monospace',
+  marginRight: '4px',
+};
