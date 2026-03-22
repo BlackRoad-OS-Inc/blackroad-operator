@@ -1,0 +1,19 @@
+[Unit]
+Description=BlackRoad Edge Agent
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Restart=always
+RestartSec=5
+Environment=GATEWAY_URL=${GATEWAY_URL}
+Environment=AGENT_ID=${AGENT_ID}
+ExecStart=/usr/bin/docker run --rm --name edge-agent \
+  --net=host \
+  -e GATEWAY_URL=${GATEWAY_URL} \
+  -e AGENT_ID=${AGENT_ID} \
+  ghcr.io/<org>/edge-agent:latest
+ExecStop=/usr/bin/docker stop edge-agent
+
+[Install]
+WantedBy=multi-user.target

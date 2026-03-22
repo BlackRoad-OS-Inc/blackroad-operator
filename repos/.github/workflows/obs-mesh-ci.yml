@@ -1,0 +1,36 @@
+name: Observability Mesh CI
+
+on:
+  push:
+    branches:
+      - main
+      - 'codex/**'
+  pull_request:
+    paths:
+      - 'packages/obs-mesh/**'
+      - 'packages/correlation-engine/**'
+      - 'packages/obs-gateway/**'
+      - 'packages/blackroadctl/**'
+      - 'docs/rfc/0008-observability-mesh-contract.md'
+      - 'docs/rfc/0009-correlation-engine.md'
+      - 'docs/guides/obs-mesh-getting-started.md'
+      - 'sites/blackroad/src/pages/ops/ObservabilityTimeline.jsx'
+      - 'sites/blackroad/src/components/EventRow.jsx'
+      - '.github/workflows/obs-mesh-ci.yml'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+      - uses: actions/setup-node@b39b52d1213e96004bfcb1c61a8a6fa8ab84f3e8 # v4
+        with:
+          node-version: 18
+      - run: npx tsc -p packages/obs-mesh/tsconfig.json
+      - run: npx tsc -p packages/correlation-engine/tsconfig.json
+      - run: npx tsc -p packages/obs-gateway/tsconfig.json
+      - run: node --test packages/obs-mesh/dist/tests/envelope.spec.js
+      - run: node --test packages/correlation-engine/dist/correlation-engine/tests/joins.spec.js
+      - run: node --test packages/obs-gateway/dist/obs-gateway/tests/schema.contract.spec.js
+      - run: node scripts/guardrails/log_scan_stub.js
+

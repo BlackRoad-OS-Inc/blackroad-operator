@@ -1,0 +1,116 @@
+package sys
+
+import (
+	"image"
+	"slices"
+
+	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
+	"github.com/mlange-42/ark/ecs"
+	"github.com/mlange-42/tiny-world/game/math"
+	"github.com/mlange-42/tiny-world/game/res"
+	"github.com/mlange-42/tiny-world/game/util"
+)
+
+type mouse struct {
+	X int
+	Y int
+}
+
+// PanAndZoom system.
+type PanAndZoom struct {
+	PanButton        ebiten.MouseButton
+	ZoomInKey        rune
+	ZoomOutKey       rune
+	KeyboardPanSpeed int
+
+	MinZoom float64
+	MaxZoom float64
+
+	mouseStart mouse
+
+	view    ecs.Resource[res.View]
+	screen  ecs.Resource[res.Screen]
+	bounds  ecs.Resource[res.WorldBounds]
+	terrain ecs.Resource[res.Terrain]
+	mouse   ecs.Resource[res.Mouse]
+	ui      ecs.Resource[res.UI]
+
+	inputChars []rune
+}
+
+// Initialize the system
+func (s *PanAndZoom) Initialize(world *ecs.World) {
+	s.view = ecs.NewResource[res.View](world)
+	s.screen = s.screen.New(world)
+	s.bounds = ecs.NewResource[res.WorldBounds](world)
+	s.terrain = ecs.NewResource[res.Terrain](world)
+	s.mouse = ecs.NewResource[res.Mouse](world)
+	s.ui = ecs.NewResource[res.UI](world)
+}
+
+// Update the system
+func (s *PanAndZoom) Update(world *ecs.World) {
+	x, y := ebiten.CursorPosition()
+	mouseInside := s.mouse.Get().IsInside
+	mouseInside = mouseInside && !s.ui.Get().MouseInside(x, y)
+
+	view := s.view.Get()
+	screen := s.screen.Get()
+	bounds := s.bounds.Get()
+
+	if mouseInside && inpututil.IsMouseButtonJustPressed(s.PanButton) {
+		s.mouseStart.X, s.mouseStart.Y = ebiten.CursorPosition()
+		return
+	}
+
+	if mouseInside && ebiten.IsMouseButtonPressed(s.PanButton) {
+		view.X -= int(float64(x-s.mouseStart.X) / view.Zoom)
+		view.Y -= int(float64(y-s.mouseStart.Y) / view.Zoom)
+
+		s.mouseStart.X, s.mouseStart.Y = x, y
+	}
+
+	panSpeed := math.MaxInt(int(float64(s.KeyboardPanSpeed)/view.Zoom), 1)
+	if ebiten.IsKeyPressed(ebiten.KeyRight) || ebiten.IsKeyPressed(ebiten.KeyD) {
+		view.X += panSpeed
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyLeft) || ebiten.IsKeyPressed(ebiten.KeyA) {
+		view.X -= panSpeed
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyUp) || ebiten.IsKeyPressed(ebiten.KeyW) {
+		view.Y -= panSpeed
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyDown) ||
+		(ebiten.IsKeyPressed(ebiten.KeyS) && !ebiten.IsKeyPressed(ebiten.KeyControl)) {
+		view.Y += panSpeed
+	}
+
+	_, dy := ebiten.Wheel()
+	mx, my := view.ScreenToGlobal(x, y)
+
+	s.inputChars = ebiten.AppendInputChars(s.inputChars)
+	if ((mouseInside && dy > 0) || slices.Contains(s.inputChars, s.ZoomInKey)) && view.Zoom < s.MaxZoom {
+		view.Zoom *= 2
+		view.X += (mx - view.X) / 2
+		view.Y += (my - view.Y) / 2
+	}
+	if ((mouseInside && dy < 0) || slices.Contains(s.inputChars, s.ZoomOutKey)) && view.Zoom > s.MinZoom {
+		view.Zoom /= 2
+		view.X -= (mx - view.X)
+		view.Y -= (my - view.Y)
+	}
+
+	s.inputChars = s.inputChars[:0]
+
+	glBounds := view.BoundsToGlobal(bounds)
+	center := image.Pt(view.ScreenToGlobal(screen.Width/2, screen.Height/2))
+	if !center.In(glBounds) {
+		center := util.Clamp(glBounds, center)
+		view.X = center.X - int(float64(screen.Width/2)/view.Zoom)
+		view.Y = center.Y - int(float64(screen.Height/2)/view.Zoom)
+	}
+}
+
+// Finalize the system
+func (s *PanAndZoom) Finalize(world *ecs.World) {}

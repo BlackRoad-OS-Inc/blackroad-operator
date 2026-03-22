@@ -1,0 +1,89 @@
+version: 1
+kind: device-identity-rotation-policy
+metadata:
+  name: field-agent-defaults
+  description: >-
+    Baseline rotation policy for Raspberry Pi / Jetson field agents using KERI controllers
+    with StatusList2021 backed verifiable credentials.
+  owner: platform-identity
+spec:
+  cadence:
+    max_age: P30D               # rotate at least every 30 days
+    max_signed_artifacts: 10000 # or earlier if this many artifacts were signed
+    drift_grace: P15D           # block operations once keys are older than 45 days
+  witnesses:
+    minimum_required: 2
+    allowed:
+      - did:keri:BBcEnrolledWitness1
+      - did:keri:BBcEnrolledWitness2
+    quorum_failure_action: fail-closed
+  controllers:
+    allowed_algorithms:
+      - Ed25519
+      - Blake3_256
+    recovery:
+      escrow:
+        enabled: true
+        custodians: 2
+        storage: sealed-envelope
+  credentials:
+    required:
+      - type: DeviceEnrollmentCredential
+        issuer_dids:
+          - did:keri:BaseHubController
+        status_list: /identity/status/statuslist-2021.json
+      - type: SensorCalibrationCredential
+        issuer_dids:
+          - did:keri:CalibrationOffice
+        status_list: /identity/status/statuslist-2021.json
+    optional:
+      - type: MissionCapabilityCredential
+        issuer_dids:
+          - did:keri:MissionControl
+  automation:
+    rotation_window:
+      start_cron: "0 2 * * *"    # check daily at 02:00
+      max_parallel: 5
+    tasks:
+      - name: schedule-key-rotation
+        command: |-
+          bash -lc '
+            IFS="," read -ra _witnesses <<< "${KERIA_WITNESS_AIDS:-}"
+            cmd=(kli rotate --name "${KERI_NAME:-field-agent}")
+            for witness in "${_witnesses[@]}"; do
+              if [ -n "$witness" ]; then
+                cmd+=(--witness "$witness")
+              fi
+            done
+            "${cmd[@]}"
+          '
+        when:
+          any:
+            - condition: key_age_exceeds
+              value: P30D
+            - condition: signed_artifacts_exceeds
+              value: 10000
+      - name: sync-status-list
+        command: systemctl start statuslist-refresh.service
+        when:
+          any:
+            - condition: hours_since_status_sync_exceeds
+              value: PT24H
+  enforcement:
+    deny_operations_if:
+      - missing_required_credentials
+      - key_state_stale
+      - status_list_out_of_date
+    observability:
+      metrics:
+        - name: identity.rotation.age_days
+          type: gauge
+        - name: identity.credentials.revocation_gaps
+          type: gauge
+      alerts:
+        - name: identity-rotation-overdue
+          severity: high
+          condition:
+            metric: identity.rotation.age_days
+            threshold: 45
+            comparison: ">="

@@ -1,0 +1,16 @@
+---
+- name: Install Docker
+  shell: "curl -fsSL https://get.docker.com | sh"
+- name: Enable docker
+  service:
+    name: docker
+    state: started
+    enabled: yes
+- name: Install tailscale (optional)
+  when: tailscale.enable
+  shell: "curl -fsSL https://tailscale.com/install.sh | sh && tailscale up --auth-key {{ tailscale.auth_key }}"
+- name: Tune cgroup/system
+  copy:
+    dest: /boot/firmware/cmdline.txt
+    content: "cgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory"
+    backup: yes

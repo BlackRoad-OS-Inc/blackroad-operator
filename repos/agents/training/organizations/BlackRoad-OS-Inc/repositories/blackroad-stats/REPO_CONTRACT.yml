@@ -1,0 +1,27 @@
+repo:
+  name: blackroad-stats
+  org: BlackRoad-OS-Inc
+  type: worker
+  languages: [javascript, bash]
+  url: https://github.com/BlackRoad-OS-Inc/blackroad-stats
+
+ownership:
+  owner: blackboxprogramming
+  codeowners: ["@blackboxprogramming"]
+  license: proprietary
+
+policies:
+  inherits: ["coding", "collaboration", "safety", "issues", "pr-review", "docs"]
+  additional:
+    - "Collector must handle offline nodes gracefully"
+    - "Never expose SSH keys or internal IPs in Worker responses"
+    - "KV writes must include timestamp for staleness detection"
+
+certification:
+  required_level: 2
+  modules: ["fundamentals", "infrastructure", "workers"]
+
+deployment:
+  target: cloudflare-workers + mac-cron
+  command: "npx wrangler deploy (Worker) + crontab (collector)"
+  health_check: "curl https://stats-blackroad.amundsonalexa.workers.dev/fleet"

@@ -1,0 +1,100 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://blackroad.io/schemas/attest/manifest.json",
+  "title": "AttestationManifest",
+  "type": "object",
+  "required": [
+    "version",
+    "bundle",
+    "inputs",
+    "model",
+    "policy",
+    "decisions",
+    "timestamps",
+    "hashes",
+    "signatures"
+  ],
+  "properties": {
+    "version": {
+      "type": "string"
+    },
+    "bundle": {
+      "type": "object",
+      "required": ["id", "hash", "artifacts"],
+      "properties": {
+        "id": { "type": "string" },
+        "hash": { "type": "string" },
+        "artifacts": {
+          "type": "object",
+          "required": ["manifest", "report"],
+          "properties": {
+            "manifest": { "type": "string" },
+            "report": { "type": "string" }
+          }
+        }
+      }
+    },
+    "inputs": {
+      "type": "object"
+    },
+    "model": {
+      "type": "object",
+      "required": ["name", "promptHash"],
+      "properties": {
+        "name": { "type": "string" },
+        "prompt": { "type": "string" },
+        "promptHash": { "type": "string" }
+      }
+    },
+    "policy": {
+      "type": "object",
+      "required": ["name", "version"],
+      "properties": {
+        "name": { "type": "string" },
+        "version": { "type": "string" }
+      }
+    },
+    "decisions": {
+      "type": "object"
+    },
+    "timestamps": {
+      "type": "object",
+      "required": ["evaluatedAt", "bundledAt"],
+      "properties": {
+        "evaluatedAt": { "type": "string", "format": "date-time" },
+        "bundledAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "hashes": {
+      "type": "object",
+      "required": ["inputs", "prompt"],
+      "properties": {
+        "inputs": { "type": "string" },
+        "prompt": { "type": "string" }
+      }
+    },
+    "signatures": {
+      "type": "object",
+      "required": ["ed25519"],
+      "properties": {
+        "ed25519": {
+          "type": "object",
+          "required": ["publicKey", "signature", "signedAt"],
+          "properties": {
+            "publicKey": { "type": "string" },
+            "signature": { "type": "string" },
+            "signedAt": { "type": "string", "format": "date-time" }
+          }
+        },
+        "pqc": {
+          "type": "object",
+          "properties": {
+            "mode": { "type": "string" },
+            "algorithm": { "type": "string" },
+            "signature": { "type": "string" }
+          }
+        }
+      }
+    }
+  }
+}

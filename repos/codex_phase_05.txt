@@ -1,0 +1,295 @@
+⸻
+
+type: codex-prompt
+id: phase-5
+slug: phase-5
+title: "Phase V — Lucidia Ledger Codex"
+summary: "Compliance ledger architecture and ops codex for Lucidia/BlackRoad Formation Phase V."
+owner: "blackroad"
+tags: ["codex","lucidia","ledger","compliance","audit"]
+model_hint: "Codex"
+temperature: 0
+updated: "2025-11-22"
+version: "1.0.0"
+canonical_repo: "blackboxprogramming/blackroad-prism-console"
+copy_filename: "codex_phase_05.txt"
+
+Here’s Phase V — Lucidia Ledger Codex. Paste this into Codex.
+
+⸻
+
+Phase V — Lucidia Ledger Codex (Hybrid compliance ledger with append-only anchoring and runbook)
+
+```yaml
+# === LUCIDIA LEDGER CODEX ===
+# Phase V of the BlackRoad Formation Series
+# Author: Alexa Louise Amundson | November 2025
+# Purpose: Immutable, queryable evidence ledger for filings, advice, comms, and internal actions.
+
+codex:
+  title: "Lucidia-Ledger"
+  version: "5.0"
+  priority: "Mission Critical"
+  timezone: "America/Chicago"
+
+# ---------------------------
+# 1) LEDGER ARCHITECTURE
+# ---------------------------
+architecture:
+  type: "Hybrid ledger (append-only) with off-chain storage anchors"
+  write_model: "Append-only journal with per-record hash chain"
+  hash_algorithm: "SHA-512"
+  signature_scheme: "OpenPGP detached signatures (ed25519 preferred)"
+  anchors:
+    - "Primary: Encrypted PostgreSQL (WAL archived)"
+    - "Secondary: GitHub private repo (commit-signed manifests)"
+    - "Tertiary: Cold archive (air-gapped Pi cluster, AES-256)"
+  retention_policy:
+    advisory_and_filing: "7 years"
+    system_events: "5 years (unless cited in audit)"
+  clock_sync:
+    source: "NTP pool; monotonic fallback"
+    skew_tolerance_seconds: 2
+
+# ---------------------------
+# 2) DATA MODEL (RECORD)
+# ---------------------------
+record_schema:
+  required_fields:
+    - id: "UUID v7 (timestamp-first)"
+    - timestamp_utc: "RFC3339"
+    - entity: ["BlackRoad", "Lucidia"]
+    - agent: ["Guardian", "Athena", "Cadillac", "Human-CCO", "Human-Rep"]
+    - action_type:
+        enum: ["FILING", "ADVISORY", "CLIENT_COMM", "TRADE_NOTE",
+               "CE_EVENT", "SYSTEM_EVENT", "POLICY_UPDATE"]
+    - payload_ref:
+        description: "URI or storage key to immutable artifact; never stores PII inline"
+        example: "s3://lucidia-vault/adv/2025Q4/adv2a_v3.pdf#sha512=..."
+    - content_hash: "sha512(base64)"
+    - prev_hash: "sha512 of previous record (or GENESIS)"
+    - signatures:
+        - key_id: "PGP fingerprint"
+        - sig_hex: "detached signature hex"
+        - role: ["Athena_Key","Guardian_Key","Cadillac_Key","CCO_Master_Key"]
+    - status: ["PENDING","VALIDATED","AUDITED","REDACTED"]
+  pii_policy:
+    rule: "PII never inside record body; artifacts encrypted; references only"
+    encryption: "AES-256-GCM per file; key escrow via CCO_Master_Key + split secret"
+
+# ---------------------------
+# 3) COMMAND SCHEMA (API)
+# ---------------------------
+api:
+  base: "/ledger/v1"
+  auth: "mTLS + PGP key-bound JWT"
+  endpoints:
+    - method: "POST"
+      path: "/append"
+      desc: "Append new record (agent/human)."
+      request:
+        - entity
+        - agent
+        - action_type
+        - payload_ref
+        - content_hash
+        - prev_hash
+        - signatures
+      responses:
+        201: { id, timestamp_utc, chain_hash }
+        409: { error: "prev_hash mismatch" }
+        422: { error: "signature invalid | schema error" }
+    - method: "GET"
+      path: "/query"
+      desc: "Query by time range, entity, agent, action_type."
+      params: [since, until, entity, agent, action_type, limit, cursor]
+      responses:
+        200: { items: [record], next_cursor }
+    - method: "GET"
+      path: "/verify/{id}"
+      desc: "Verify single record hash + detached signatures."
+      responses:
+        200: { id, integrity: "OK|MISMATCH", signature_status: "OK|FAIL", chain_ok: true|false }
+    - method: "POST"
+      path: "/audit/snapshot"
+      desc: "Generate signed CSV + manifest for auditors (quarterly or on-demand)."
+      body: { period_start, period_end }
+      responses:
+        202: { job_id }
+    - method: "GET"
+      path: "/audit/jobs/{job_id}"
+      responses:
+        200: { status: "RUNNING|DONE|FAILED", outputs: [uris] }
+
+# ---------------------------
+# 4) ACCESS CONTROL & ROLES
+# ---------------------------
+access_control:
+  roles:
+    - id: "CCO"
+      perms: ["append","query","verify","audit","key_rotate","redact_request"]
+      signer: "CCO_Master_Key"
+    - id: "Guardian"
+      perms: ["append","query","verify","audit"]
+      signer: "Guardian_Key"
+    - id: "Athena"
+      perms: ["append","query","verify"]
+      signer: "Athena_Key"
+    - id: "Cadillac"
+      perms: ["append","query","verify","audit"]
+      signer: "Cadillac_Key"
+    - id: "ReadOnly-Auditor"
+      perms: ["query","verify","audit"]
+      signer: "Auditor_Key"
+  policy:
+    - "No record visible without proof-of-need (case-ID or regulator ID)."
+    - "All API usage double-logged (request log + ledger event)."
+    - "Least-privilege enforced; rotate tokens every 24h."
+
+# ---------------------------
+# 5) SIGNING & VERIFICATION
+# ---------------------------
+signing:
+  policy:
+    - "AI outputs (Athena) require co-sign by CCO_Master_Key or Human-Rep before VALIDATED."
+    - "FILING records: Guardian signs; CCO co-signs before AUDITED."
+    - "CLIENT_COMM: Cadillac signs; when advice, Athena+CCO dual-sign."
+  rotation:
+    AI_keys: "Quarterly"
+    CCO_key: "Annually"
+    emergency_rekey: "Immediate on compromise; re-anchoring manifests emitted"
+
+verification_pipeline:
+  steps:
+    - "Recompute sha512(content) vs content_hash"
+    - "Verify prev_hash continuity"
+    - "Verify signatures (PGP trust)"
+    - "Mark record status: VALIDATED"
+    - "Weekly chain fold-hash → anchor to secondary + tertiary stores"
+
+# ---------------------------
+# 6) REDACTION & PRIVACY
+# ---------------------------
+redaction_protocol:
+  rule: "No destructive deletion; use tombstoning."
+  flow:
+    - "Request: CCO raises redact_request(id, reason, legal_basis)"
+    - "Guardian evaluates PII scope / legal mandate"
+    - "On approval: redact pointer only → replace payload_ref with tombstone URI"
+    - "Write new REDACTED record chaining prev_hash"
+  audit_trail:
+    - "All redactions must produce a public manifest entry with legal basis (non-PII)."
+
+# ---------------------------
+# 7) MIGRATION & BACKFILL
+# ---------------------------
+migration:
+  sources:
+    - "Historical filings (SOS, FINRA, IARD, NIPR)"
+    - "Email/Comms archives"
+    - "ADV brochures & client docs"
+  policy:
+    - "Backfill ingests generate content_hash + artifact encryption"
+    - "Preserve original timestamps in payload metadata; ledger timestamp shows ingest time"
+    - "Flag backfilled entries for auditors"
+
+# ---------------------------
+# 8) MONITORING & ALERTS
+# ---------------------------
+monitoring:
+  watchers:
+    - "Ledger tamper watchdog (hash drift)"
+    - "Stale AI advisories > 24h without co-sign"
+    - "Filing due dates vs. ledger evidence (BOI, ADV, CE)"
+  alerts:
+    critical: ["CHAIN_BREAK", "SIGNATURE_FAIL"]
+    high: ["FILING_PAST_DUE", "UNSIGNED_ADVICE"]
+    medium: ["BACKUP_LAG_24H"]
+  integration:
+    - "Slack/Signal internal"
+    - "Email to CCO + outside counsel for critical"
+
+# ---------------------------
+# 9) SAMPLE RECORDS
+# ---------------------------
+samples:
+  - id: "017-2025Q4-0001"
+    timestamp_utc: "2025-11-22T17:39:03Z"
+    entity: "Lucidia"
+    agent: "Guardian"
+    action_type: "FILING"
+    payload_ref: "vault://fincen/boi/lucidia_2025-11-22.json#sha512=..."
+    content_hash: "b3e4...ab"
+    prev_hash: "GENESIS"
+    signatures:
+      - { key_id: "Guardian_Key", sig_hex: "deadbeef..." }
+      - { key_id: "CCO_Master_Key", sig_hex: "c0ffee..." }
+    status: "AUDITED"
+  - id: "017-2025Q4-0002"
+    timestamp_utc: "2025-11-23T02:10:44Z"
+    entity: "Lucidia"
+    agent: "Athena"
+    action_type: "ADVISORY"
+    payload_ref: "vault://adv2a/client123/plan_v1.pdf#sha512=..."
+    content_hash: "99aa...ff"
+    prev_hash: "b3e4...ab"
+    signatures:
+      - { key_id: "Athena_Key", sig_hex: "aa55..." }
+      - { key_id: "CCO_Master_Key", sig_hex: "bb66..." }
+    status: "VALIDATED"
+
+# ---------------------------
+# 10) TEST CASES
+# ---------------------------
+tests:
+  - name: "Chain continuity"
+    expect: "Every record prev_hash == sha512(prev_record)"
+  - name: "Signature validation"
+    expect: "All signatures in trust graph; reject UNKNOWN keys"
+  - name: "Redaction tombstone"
+    expect: "Redacted payload_ref replaced; REDACTED record chained; audit manifest exists"
+  - name: "Backfill markers"
+    expect: "Backfilled=true flagged; ingest timestamp ≠ original artifact timestamp"
+  - name: "Co-sign enforcement"
+    expect: "ADVISORY must have Athena+CCO; else UNSIGNED_ADVICE alert"
+
+# ---------------------------
+# 11) RUNBOOK (OPS)
+# ---------------------------
+runbook:
+  daily:
+    - "Verify last-24h records: signatures + chain"
+    - "Backup snapshot → Secondary + Tertiary"
+  weekly:
+    - "Fold-hash anchor; publish signed manifest to GitHub private repo"
+    - "CE/filing due-date scan"
+  monthly:
+    - "Key-usage audit; rotate AI keys if threshold reached"
+    - "Pen-test schedule verification"
+  incident_response:
+    - chain_break:
+        steps:
+          - "Freeze appends; snapshot current DB"
+          - "Rebuild from last good anchor"
+          - "Open incident ticket; notify CCO & counsel"
+    - key_compromise:
+        steps:
+          - "Revoke key; rotate; re-sign future entries"
+          - "Emit public manifest; document affected range"
+    - data_leak:
+        steps:
+          - "Activate BCP; notify regulators as required; engage forensics"
+          - "Review redaction/tombstone coverage"
+
+# ---------------------------
+# 12) SUCCESS CRITERIA
+# ---------------------------
+success:
+  - "0 chain breaks; 100% signature pass"
+  - "Audit snapshot ready < 48h notice"
+  - "No PII in records; artifacts encrypted"
+  - "All advisory outputs dual-signed within 24h"
+  - "Quarterly evidence packet delivered within 3 days of period end"
+
+# === END OF CODEX ===
+```

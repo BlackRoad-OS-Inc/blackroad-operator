@@ -1,0 +1,355 @@
+name: "🔍 Flaky Test Quarantine System"
+
+# Maintains a quarantine list of flaky tests
+# Runs quarantined tests separately to prevent blocking PRs
+# Auto-removes tests that consistently pass
+
+on:
+  schedule:
+    # Daily review of quarantined tests
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Action to perform'
+        required: true
+        type: choice
+        options:
+          - 'validate'
+          - 'add'
+          - 'remove'
+          - 'report'
+      test_path:
+        description: 'Test path (for add/remove)'
+        required: false
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  manage-quarantine:
+    name: "🔍 Manage Quarantine List"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+        with:
+          token: ${{ secrets.BOT_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@b39b52d1213e96004bfcb1c61a8a6fa8ab84f3e8 # v4
+        with:
+          node-version: '20'
+
+      - name: Setup Python
+        uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5
+        with:
+          python-version: '3.11'
+
+      - name: Initialize quarantine database
+        id: init
+        run: |
+          # Create quarantine database if doesn't exist
+          mkdir -p .github/quarantine
+          if [ ! -f .github/quarantine/flaky-tests.json ]; then
+            echo '{
+              "version": "1.0",
+              "last_updated": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'",
+              "tests": {}
+            }' > .github/quarantine/flaky-tests.json
+          fi
+
+          # Create quarantine script
+          cat > .github/quarantine/manager.js << 'EOF'
+          const fs = require('fs');
+          const path = require('path');
+
+          const DB_PATH = path.join(__dirname, 'flaky-tests.json');
+
+          function loadDB() {
+            if (!fs.existsSync(DB_PATH)) {
+              return { version: '1.0', last_updated: new Date().toISOString(), tests: {} };
+            }
+            return JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
+          }
+
+          function saveDB(db) {
+            db.last_updated = new Date().toISOString();
+            fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
+          }
+
+          function addTest(testPath, reason = 'flaky behavior detected') {
+            const db = loadDB();
+            if (!db.tests[testPath]) {
+              db.tests[testPath] = {
+                added: new Date().toISOString(),
+                reason,
+                failures: 1,
+                consecutive_passes: 0,
+                last_run: null,
+                history: []
+              };
+            } else {
+              db.tests[testPath].failures += 1;
+              db.tests[testPath].consecutive_passes = 0;
+            }
+            saveDB(db);
+            return db.tests[testPath];
+          }
+
+          function removeTest(testPath) {
+            const db = loadDB();
+            if (db.tests[testPath]) {
+              delete db.tests[testPath];
+              saveDB(db);
+              return true;
+            }
+            return false;
+          }
+
+          function recordResult(testPath, passed) {
+            const db = loadDB();
+            if (db.tests[testPath]) {
+              db.tests[testPath].last_run = new Date().toISOString();
+              db.tests[testPath].history.push({
+                timestamp: new Date().toISOString(),
+                passed
+              });
+
+              if (passed) {
+                db.tests[testPath].consecutive_passes += 1;
+              } else {
+                db.tests[testPath].consecutive_passes = 0;
+                db.tests[testPath].failures += 1;
+              }
+
+              // Auto-remove if 10 consecutive passes
+              if (db.tests[testPath].consecutive_passes >= 10) {
+                console.log(`✅ Auto-removing ${testPath} - 10 consecutive passes`);
+                delete db.tests[testPath];
+              }
+
+              saveDB(db);
+            }
+          }
+
+          function listTests() {
+            const db = loadDB();
+            return Object.keys(db.tests).map(testPath => ({
+              path: testPath,
+              ...db.tests[testPath]
+            }));
+          }
+
+          const action = process.argv[2];
+          const testPath = process.argv[3];
+          const reason = process.argv[4];
+
+          switch (action) {
+            case 'add':
+              console.log(JSON.stringify(addTest(testPath, reason)));
+              break;
+            case 'remove':
+              console.log(removeTest(testPath) ? 'Removed' : 'Not found');
+              break;
+            case 'record':
+              const passed = process.argv[4] === 'true';
+              recordResult(testPath, passed);
+              break;
+            case 'list':
+              console.log(JSON.stringify(listTests(), null, 2));
+              break;
+            default:
+              console.error('Unknown action:', action);
+              process.exit(1);
+          }
+          EOF
+
+      - name: Load quarantine list
+        id: load
+        run: |
+          QUARANTINE_LIST=$(node .github/quarantine/manager.js list)
+          echo "quarantine_list<<EOF" >> $GITHUB_OUTPUT
+          echo "$QUARANTINE_LIST" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+          COUNT=$(echo "$QUARANTINE_LIST" | jq 'length')
+          echo "quarantine_count=$COUNT" >> $GITHUB_OUTPUT
+
+      - name: Run quarantined tests
+        id: run_quarantine
+        if: steps.load.outputs.quarantine_count > 0
+        continue-on-error: true
+        run: |
+          echo "🔍 Running ${{ steps.load.outputs.quarantine_count }} quarantined tests..."
+
+          QUARANTINE_TESTS=$(echo '${{ steps.load.outputs.quarantine_list }}' | jq -r '.[].path')
+
+          # Install dependencies
+          npm ci || npm install
+          pip install -r requirements-dev.txt 2>/dev/null || true
+
+          # Run each quarantined test 10 times
+          echo "results<<EOF" >> $GITHUB_OUTPUT
+          for test in $QUARANTINE_TESTS; do
+            echo "Testing: $test"
+            PASSES=0
+            FAILURES=0
+
+            for run in {1..10}; do
+              if echo "$test" | grep -q "\.test\."; then
+                # Jest/Vitest test
+                if npm test -- --testPathPattern="$test" --runInBand; then
+                  PASSES=$((PASSES + 1))
+                else
+                  FAILURES=$((FAILURES + 1))
+                fi
+              elif echo "$test" | grep -q "\.py"; then
+                # Pytest test
+                if pytest "$test" -v; then
+                  PASSES=$((PASSES + 1))
+                else
+                  FAILURES=$((FAILURES + 1))
+                fi
+              fi
+            done
+
+            echo "$test: $PASSES passes, $FAILURES failures" >> $GITHUB_OUTPUT
+
+            # Record results
+            if [ $FAILURES -eq 0 ]; then
+              node .github/quarantine/manager.js record "$test" true
+            else
+              node .github/quarantine/manager.js record "$test" false
+            fi
+          done
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Generate report
+        id: report
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const quarantineList = JSON.parse('${{ steps.load.outputs.quarantine_list }}' || '[]');
+            const results = `${{ steps.run_quarantine.outputs.results }}`;
+
+            let report = '## 🔍 Flaky Test Quarantine Report\n\n';
+            report += `**Date:** ${new Date().toISOString()}\n`;
+            report += `**Tests in Quarantine:** ${quarantineList.length}\n\n`;
+
+            if (quarantineList.length === 0) {
+              report += '✅ No tests currently in quarantine!\n';
+            } else {
+              report += '### Quarantined Tests\n\n';
+              report += '| Test | Added | Failures | Consecutive Passes | Last Run |\n';
+              report += '|------|-------|----------|-------------------|----------|\n';
+
+              for (const test of quarantineList) {
+                const addedDate = new Date(test.added).toLocaleDateString();
+                const lastRun = test.last_run ? new Date(test.last_run).toLocaleDateString() : 'Never';
+                report += `| \`${test.path}\` | ${addedDate} | ${test.failures} | ${test.consecutive_passes} | ${lastRun} |\n`;
+              }
+
+              report += '\n### Test Results (10 runs each)\n\n';
+              if (results) {
+                report += '```\n' + results + '\n```\n';
+              }
+
+              report += '\n### Actions Required\n\n';
+              const staleTests = quarantineList.filter(t =>
+                t.consecutive_passes >= 10
+              );
+              const persistentTests = quarantineList.filter(t =>
+                t.failures > 20 && t.consecutive_passes === 0
+              );
+
+              if (staleTests.length > 0) {
+                report += '✅ **Auto-removed** (10+ consecutive passes):\n';
+                staleTests.forEach(t => report += `- ${t.path}\n`);
+              }
+
+              if (persistentTests.length > 0) {
+                report += '\n⚠️ **Needs Investigation** (20+ failures, never passing):\n';
+                persistentTests.forEach(t => report += `- ${t.path}\n`);
+              }
+            }
+
+            core.summary.addRaw(report).write();
+
+            // Create/update issue
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: 'flaky-quarantine-report',
+              state: 'open'
+            });
+
+            const issueBody = report + '\n\n---\n*Auto-generated by Flaky Test Quarantine workflow*';
+
+            if (issues.length === 0) {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: '🔍 Flaky Test Quarantine Report',
+                body: issueBody,
+                labels: ['flaky-quarantine-report', 'automated', 'testing']
+              });
+            } else {
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issues[0].number,
+                body: issueBody
+              });
+            }
+
+      - name: Commit quarantine updates
+        run: |
+          git config user.name "${{ secrets.BOT_USER || 'blackroad-bot' }}"
+          git config user.email "${{ secrets.BOT_USER || 'blackroad-bot' }}@users.noreply.github.com"
+
+          if [[ -n $(git status --porcelain .github/quarantine/) ]]; then
+            git add .github/quarantine/
+            git commit -m "chore: update flaky test quarantine database [skip ci]"
+            git push
+          fi
+
+  manual-add:
+    name: "➕ Add Test to Quarantine"
+    if: github.event.inputs.action == 'add' && github.event.inputs.test_path != ''
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+        with:
+          token: ${{ secrets.BOT_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Add to quarantine
+        run: |
+          node .github/quarantine/manager.js add "${{ github.event.inputs.test_path }}" "Manually added via workflow"
+          git config user.name "blackroad-bot"
+          git config user.email "blackroad-bot@users.noreply.github.com"
+          git add .github/quarantine/
+          git commit -m "chore: add ${{ github.event.inputs.test_path }} to quarantine [skip ci]"
+          git push
+
+  manual-remove:
+    name: "➖ Remove Test from Quarantine"
+    if: github.event.inputs.action == 'remove' && github.event.inputs.test_path != ''
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+        with:
+          token: ${{ secrets.BOT_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Remove from quarantine
+        run: |
+          node .github/quarantine/manager.js remove "${{ github.event.inputs.test_path }}"
+          git config user.name "blackroad-bot"
+          git config user.email "blackroad-bot@users.noreply.github.com"
+          git add .github/quarantine/
+          git commit -m "chore: remove ${{ github.event.inputs.test_path }} from quarantine [skip ci]"
+          git push

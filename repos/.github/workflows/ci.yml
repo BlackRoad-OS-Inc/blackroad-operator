@@ -1,0 +1,72 @@
+name: CI
+
+on:
+    push:
+        branches: ["main", "master"]
+    pull_request:
+        branches: ["main", "master"]
+
+jobs:
+    build-and-test:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Cache NuGet packages
+              uses: actions/cache@v4
+              with:
+                  path: ~/.nuget/packages
+                  key: nuget-packages-${{ runner.os }}-${{ hashFiles('**/*.csproj') }}
+                  restore-keys: |
+                      nuget-packages-${{ runner.os }}-
+
+            - name: Setup .NET
+              uses: actions/setup-dotnet@v4
+              with:
+                  dotnet-version: "9.0.x"
+
+            - name: Restore
+              run: dotnet restore
+
+            - name: Install dotnet-format
+              run: |
+                  dotnet tool install -g dotnet-format --version 8.*
+                  export PATH="$HOME/.dotnet/tools:$PATH"
+
+            - name: Check code formatting
+              run: |
+                  export PATH="$HOME/.dotnet/tools:$PATH"
+                  dotnet format --verify-no-changes
+
+            - name: Build
+              run: dotnet build --configuration Release --no-restore
+
+            - name: Test
+              run: dotnet test --no-build --verbosity normal --collect:"XPlat Code Coverage" --results-directory ./TestResults
+
+            - name: Upload test results
+              uses: actions/upload-artifact@v4
+              with:
+                  name: test-results
+                  path: TestResults
+
+            - name: Install reportgenerator
+              run: |
+                  dotnet tool install -g dotnet-reportgenerator-globaltool --version 5.* || true
+                  export PATH="$HOME/.dotnet/tools:$PATH"
+
+            - name: Generate coverage report (HTML)
+              run: |
+                  export PATH="$HOME/.dotnet/tools:$PATH"
+                  REPORTS=$(ls TestResults/**/coverage.cobertura.xml 2>/dev/null || true)
+                  if [ -n "$REPORTS" ]; then
+                    dotnet reportgenerator -reports:"TestResults/**/coverage.cobertura.xml" -targetdir:coverage-report -reporttypes:Html
+                  else
+                    echo "No coverage report found to convert"
+                  fi
+
+            - name: Upload coverage report
+              uses: actions/upload-artifact@v4
+              with:
+                  name: coverage-report
+                  path: coverage-report

@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "BlackRoad OS infrastructure specs and rate-limit mitigation strategies",
+  "updated": "2026-02-27T00:00:00Z",
+  "local_inference": {
+    "description": "Raspberry Pi 5 clusters for local LLM inference — replaces centralized API calls",
+    "proxy_env": "GH_COPILOT_OVERRIDE_PROXY_URL",
+    "proxy_url": "http://raspberrypi.local:4000",
+    "components": [
+      {
+        "component": "Compute Node",
+        "spec": "Raspberry Pi 5 (8GB LPDDR4X)",
+        "role": "General Purpose Inference and Control"
+      },
+      {
+        "component": "Inference Accelerator",
+        "spec": "Raspberry Pi AI Hat 2 (40 TOPS)",
+        "role": "Dedicated INT8 LLM Processing"
+      },
+      {
+        "component": "Network Layer",
+        "spec": "Gigabit Ethernet with PoE+ HAT",
+        "role": "Synchronized Node Communication"
+      },
+      {
+        "component": "Storage",
+        "spec": "NVMe SSD (M.2 Interface, 256GB+)",
+        "role": "Model Weights and Agent Memory"
+      },
+      {
+        "component": "Software Stack",
+        "spec": "LiteLLM Proxy / Ollama / llama.cpp",
+        "role": "API Hosting and Load Balancing"
+      }
+    ]
+  },
+  "rate_limit_mitigation": [
+    {
+      "provider": "GitHub Copilot",
+      "limit": "RPM / Token Exhaustion",
+      "mitigation": "Redirect to local Raspberry Pi LiteLLM proxy"
+    },
+    {
+      "provider": "Hugging Face Hub",
+      "limit": "IP-based Rate Limit",
+      "mitigation": "Rotate HF_TOKEN or use authenticated SSH keys"
+    },
+    {
+      "provider": "Google Drive",
+      "limit": "Individual User Quota",
+      "mitigation": "Use Shared Drives with GSA Content Manager role"
+    },
+    {
+      "provider": "DigitalOcean API",
+      "limit": "Concurrent Build Limits",
+      "mitigation": "Queue tasks via Layer 7 Orchestration"
+    },
+    {
+      "provider": "Salesforce API",
+      "limit": "Daily API Request Cap",
+      "mitigation": "Batch updates via Data Cloud Streaming Transforms"
+    }
+  ]
+}

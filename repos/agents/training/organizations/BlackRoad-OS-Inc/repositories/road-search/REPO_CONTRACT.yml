@@ -1,0 +1,27 @@
+repo:
+  name: road-search
+  org: BlackRoad-OS-Inc
+  type: worker
+  languages: [javascript, sql]
+  url: https://github.com/BlackRoad-OS-Inc/road-search
+
+ownership:
+  owner: blackboxprogramming
+  codeowners: ["@blackboxprogramming"]
+  license: proprietary
+
+policies:
+  inherits: ["coding", "collaboration", "safety", "issues", "pr-review", "docs"]
+  additional:
+    - "Index mutations require authentication"
+    - "FTS5 schema changes must be tested with existing data"
+    - "AI answer generation must include source attribution"
+
+certification:
+  required_level: 2
+  modules: ["fundamentals", "workers"]
+
+deployment:
+  target: cloudflare-workers
+  command: "npx wrangler deploy"
+  health_check: "curl https://search.blackroad.io/api/stats"

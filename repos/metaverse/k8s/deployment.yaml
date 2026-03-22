@@ -1,0 +1,158 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: blackroad-metaverse
+  namespace: blackroad
+  labels:
+    app: metaverse
+    component: api
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: metaverse
+      component: api
+  template:
+    metadata:
+      labels:
+        app: metaverse
+        component: api
+    spec:
+      containers:
+      - name: metaverse-api
+        image: blackroad-metaverse:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        - containerPort: 8081
+          name: websocket
+          protocol: TCP
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: METAVERSE_API_PORT
+          value: "8080"
+        - name: METAVERSE_WS_PORT
+          value: "8081"
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: metaverse-secrets
+              key: jwt-secret
+        - name: AUTO_SPAWN_AGENTS
+          value: "false"
+        resources:
+          requests:
+            cpu: 500m
+            memory: 512Mi
+          limits:
+            cpu: 2000m
+            memory: 2Gi
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        volumeMounts:
+        - name: metaverse-data
+          mountPath: /app/data
+      volumes:
+      - name: metaverse-data
+        persistentVolumeClaim:
+          claimName: metaverse-pvc
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - metaverse
+              topologyKey: kubernetes.io/hostname
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: metaverse-api
+  namespace: blackroad
+  labels:
+    app: metaverse
+    component: api
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: 8080
+    protocol: TCP
+    name: http
+  - port: 8081
+    targetPort: 8081
+    protocol: TCP
+    name: websocket
+  selector:
+    app: metaverse
+    component: api
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: metaverse-pvc
+  namespace: blackroad
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: standard
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: metaverse-secrets
+  namespace: blackroad
+type: Opaque
+stringData:
+  jwt-secret: "your-jwt-secret-here-change-in-production"
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: metaverse-hpa
+  namespace: blackroad
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: blackroad-metaverse
+  minReplicas: 3
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80

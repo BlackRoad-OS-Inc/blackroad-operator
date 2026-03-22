@@ -1,0 +1,30 @@
+[Unit]
+Description=BlackRoad PatentNet Daily Anchor
+After=network-online.target
+Wants=network-online.target
+# Maximum 3 restart attempts within 5 minutes
+StartLimitBurst=3
+StartLimitIntervalSec=300
+
+[Service]
+Type=oneshot
+# Logging to journal with structured output
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=patent-anchor
+
+# Main anchor command with timeout
+ExecStart=/usr/bin/curl -fsS -m 300 -X POST http://127.0.0.1:4000/api/patent/anchor/daily
+
+# Restart policy for transient failures
+Restart=on-failure
+RestartSec=60
+
+# Security hardening
+PrivateTmp=true
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+
+# Environment
+Environment="TERM=xterm"

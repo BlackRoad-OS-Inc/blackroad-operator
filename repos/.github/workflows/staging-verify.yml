@@ -1,0 +1,47 @@
+name: Staging Verify
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: URLs under test
+        run: |
+          echo "API_BASE=${API_BASE:=https://staging.api.yourdomain}" >> $GITHUB_ENV
+          echo "WEB_BASE=${WEB_BASE:=https://staging.web.yourdomain}" >> $GITHUB_ENV
+
+      - name: Latency SLOs
+        run: |
+          t_start=$(date +%s%N); curl -fsS "$API_BASE/health" -o /dev/null; t_end=$(date +%s%N)
+          p95=$(( (t_end - t_start)/1000000 ))
+          echo "p95(ms)=$p95"
+          [ $p95 -lt 500 ] || { echo "❌ P95 >= 500ms"; exit 1; }
+
+      - name: Error-rate sanity (5xx < 0.1%)
+        run: |
+          fails=0; total=50
+          for i in $(seq 1 $total); do curl -fsS "$API_BASE/health" -o /dev/null || fails=$((fails+1)); done
+          export fails total
+          rate=$(python - <<'PY'
+            import os
+            f = int(os.getenv('fails', 0))
+            t = int(os.getenv('total', 1))
+            print((f / t) * 100)
+PY
+          )
+          echo "error_rate(%)=$rate"
+          awk "BEGIN {exit !($rate < 0.1)}" || { echo "❌ error_rate >= 0.1%"; exit 1; }
+
+      - name: Web is up
+        run: curl -fsS "${WEB_BASE}/healthz" -o /dev/null
+
+      - name: LLM evals
+        run: |
+          pip install requests
+          python ops/run_llm_eval.py

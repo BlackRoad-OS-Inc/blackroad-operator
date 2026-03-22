@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: llm-healthwatch
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: {{ .Values.healthwatch.replicas }}
+  selector:
+    matchLabels:
+      app: llm-healthwatch
+  template:
+    metadata:
+      labels:
+        app: llm-healthwatch
+    spec:
+      containers:
+        - name: healthwatch
+          image: {{ .Values.image.healthwatch | quote }}
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: WINDOW_MS
+              value: "300000"
+            - name: P95_SLO_MS
+              value: "1200"
+            - name: ERROR_RATE_SLO
+              value: "0.02"
+            - name: ERROR_RATE_AMBER
+              value: "0.05"
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            periodSeconds: 30
+          resources: {{- toYaml .Values.healthwatch.resources | nindent 12 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: llm-healthwatch
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    app: llm-healthwatch
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080

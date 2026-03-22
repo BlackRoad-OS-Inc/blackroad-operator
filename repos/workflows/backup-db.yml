@@ -1,0 +1,44 @@
+# BlackRoad OS — Pave Tomorrow.
+# Daily D1 database backups
+name: Backup Databases
+
+on:
+  schedule:
+    - cron: '0 4 * * *'
+  workflow_dispatch:
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - run: npm install -g wrangler
+
+      - name: Export D1 databases
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          DATABASES=(
+            "tollbooth:29a255f5-a449-485c-90e6-38b7e4bd934d"
+            "road-search:cfd5c94b-6742-4daf-ac13-59c859be3a8f"
+            "index-blackroad:71e74110-3cc6-4b72-953b-569d42ed0844"
+          )
+
+          DATE=$(date +%Y-%m-%d)
+          mkdir -p backups
+
+          for db_entry in "${DATABASES[@]}"; do
+            IFS=':' read -r name id <<< "$db_entry"
+            echo "Exporting $name ($id)..."
+            wrangler d1 export "$name" --output="backups/${name}-${DATE}.sql" 2>/dev/null || \
+              echo "Warning: Failed to export $name"
+          done
+
+          ls -la backups/
+          echo "Backup complete: $(date)"

@@ -1,0 +1,85 @@
+name: Daily KPI Collection
+
+on:
+  schedule:
+    - cron: '0 6 * * *'  # 6 AM UTC = midnight CST
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install GitHub CLI
+        run: |
+          type -p curl >/dev/null || sudo apt-get install curl -y
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+          sudo apt-get update && sudo apt-get install gh -y
+
+      - name: Collect GitHub KPIs
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: bash collectors/github.sh
+
+      - name: Generate daily aggregate
+        run: |
+          source lib/common.sh
+          python3 -c "
+          import json, glob, os
+          today = '$(date +%Y-%m-%d)'
+          data_dir = 'data'
+          os.makedirs(f'{data_dir}/daily', exist_ok=True)
+          snapshots = {}
+          for f in glob.glob(f'{data_dir}/snapshots/{today}-*.json'):
+              source = os.path.basename(f).replace(f'{today}-', '').replace('.json', '')
+              with open(f) as fh:
+                  snapshots[source] = json.load(fh)
+          gh = snapshots.get('github', {})
+          daily = {
+              'date': today,
+              'collected_at': '$(date -u +%Y-%m-%dT%H:%M:%SZ)',
+              'summary': {
+                  'commits_today': gh.get('commits', {}).get('today', 0),
+                  'prs_open': gh.get('pull_requests', {}).get('open', 0),
+                  'prs_merged_today': gh.get('pull_requests', {}).get('merged_today', 0),
+                  'prs_merged_total': gh.get('pull_requests', {}).get('merged_total', 0),
+                  'repos_github': gh.get('repos', {}).get('total', 0),
+                  'repos_gitea': 0,
+                  'repos_total': gh.get('repos', {}).get('total', 0),
+                  'fleet_online': 0, 'fleet_total': 4,
+                  'autonomy_score': 0, 'total_loc': 0,
+                  'docker_containers': 0, 'ollama_models': 0,
+                  'avg_temp_c': 0, 'failed_units': 0, 'throttled_nodes': []
+              },
+              'sources': snapshots
+          }
+          with open(f'{data_dir}/daily/{today}.json', 'w') as f:
+              json.dump(daily, f, indent=2)
+          "
+
+      - name: Generate markdown report
+        run: bash reports/markdown-report.sh
+
+      - name: Post to Slack
+        if: ${{ secrets.SLACK_WEBHOOK_URL != '' }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: bash reports/slack-notify.sh
+
+      - name: Commit data
+        run: |
+          git config user.name "BlackRoad KPI Bot"
+          git config user.email "kpi@blackroad.io"
+          git add data/ LATEST.md
+          git diff --staged --quiet || git commit -m "kpi: daily collection $(date +%Y-%m-%d)"
+          git push

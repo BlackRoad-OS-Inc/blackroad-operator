@@ -1,0 +1,71 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "qlm-lab"
+version = "0.1.0"
+description = "Quantum Language Model laboratory"
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [{ name = "Quantum Lab", email = "labs@example.com" }]
+dependencies = [
+    "fastapi>=0.110,<0.116",
+    "pydantic>=2.6,<3",
+    "numpy>=1.26,<3",
+    "sympy>=1.12,<2",
+    "matplotlib>=3.8,<4",
+    "pyyaml>=6.0,<7",
+    "nbformat>=5.10,<6",
+    "nbconvert>=7.8,<8",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-cov",
+    "mypy",
+    "ruff",
+]
+qiskit = ["qiskit", "qiskit-aer", "qiskit-ibm-runtime"]
+viz = ["matplotlib"]
+dependencies = [
+    "fastapi>=0.110",
+    "matplotlib",
+    "numpy",
+    "pyyaml",
+    "sympy",
+]
+
+[project.optional-dependencies]
+qiskit = [
+    "qiskit",
+    "qiskit-aer",
+]
+viz = [
+    "matplotlib",
+]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project.urls]
+Homepage = "https://example.com/quantum-lab"
+
+[tool.pytest.ini_options]
+pythonpath = ["qlm_lab"]
+addopts = "-q --cov=qlm_lab --cov-report=term-missing --cov-fail-under=85"
+testpaths = ["tests"]
+
+[tool.mypy]
+python_version = "3.11"
+ignore_missing_imports = true
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["qlm_lab*"]

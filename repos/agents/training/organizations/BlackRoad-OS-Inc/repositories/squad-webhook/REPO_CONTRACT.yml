@@ -1,0 +1,28 @@
+repo:
+  name: squad-webhook
+  org: BlackRoad-OS-Inc
+  type: worker
+  languages: [javascript]
+  url: https://github.com/BlackRoad-OS-Inc/squad-webhook
+
+ownership:
+  owner: blackboxprogramming
+  codeowners: ["@blackboxprogramming"]
+  license: proprietary
+
+policies:
+  inherits: ["coding", "collaboration", "safety", "issues", "pr-review", "docs"]
+  additional:
+    - "Webhook secret must be verified on every request (HMAC)"
+    - "Agent responses must be professional and helpful"
+    - "Never post comments containing secrets or internal IPs"
+    - "GitHub token must only exist in Worker secrets"
+
+certification:
+  required_level: 3
+  modules: ["fundamentals", "workers", "agents"]
+
+deployment:
+  target: cloudflare-workers
+  command: "npx wrangler deploy"
+  health_check: "curl https://squad-webhook.amundsonalexa.workers.dev"

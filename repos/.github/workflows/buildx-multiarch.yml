@@ -1,0 +1,26 @@
+name: buildx
+
+on:
+  push:
+    paths:
+      - "infra/hardware/gateway/**"
+
+jobs:
+  build-gateway:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@c47758b77c9736f4b2ef4073d4d51994fabfe349 # v3
+      - uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_PAT }}
+      - name: Build & Push
+        uses: docker/build-push-action@v6
+        with:
+          context: infra/hardware/gateway
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: ghcr.io/${{ github.repository_owner }}/island-gateway:latest

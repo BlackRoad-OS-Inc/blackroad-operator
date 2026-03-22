@@ -1,0 +1,25 @@
+---
+- name: Update apt
+  apt:
+    update_cache: yes
+- name: Install base pkgs
+  apt:
+    name:
+      - curl
+      - git
+      - htop
+      - fail2ban
+    state: present
+- name: Create users
+  user:
+    name: "{{ item.name }}"
+    groups: "{{ item.groups | join(',') }}"
+    append: yes
+    shell: /bin/bash
+  loop: "{{ users }}"
+- name: SSH hardening
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^PasswordAuthentication'
+    line: 'PasswordAuthentication no'
+  notify: Restart ssh

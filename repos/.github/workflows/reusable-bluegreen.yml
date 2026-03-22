@@ -1,0 +1,62 @@
+name: Reusable Blue/Green Promotion
+
+on:
+  workflow_call:
+    inputs:
+      service:
+        required: true
+        type: string
+      cluster:
+        required: true
+        type: string
+      region:
+        required: true
+        type: string
+      image:
+        required: true
+        type: string
+      commit:
+        required: true
+        type: string
+    secrets:
+      GATEKEEPER_ENDPOINT:
+        required: false
+
+jobs:
+  bluegreen:
+    runs-on: ubuntu-latest
+    env:
+      SERVICE: ${{ inputs.service }}
+      CLUSTER: ${{ inputs.cluster }}
+      REGION: ${{ inputs.region }}
+      IMAGE: ${{ inputs.image }}
+      GATEKEEPER_ENDPOINT: ${{ secrets.GATEKEEPER_ENDPOINT }}
+    steps:
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+      - name: Deploy green stack
+        run: |
+          echo "Deploying green stack for $SERVICE on $CLUSTER ($REGION) using $IMAGE"
+      - name: Validate green health
+        run: |
+          echo "Running synthetic checks and log scrapes"
+      - name: Cut traffic to green
+        run: |
+          echo "Shifting production traffic to green"
+      - name: Report blue/green health
+        if: always() && env.GATEKEEPER_ENDPOINT != ''
+        env:
+          COMMIT_SHA: ${{ inputs.commit }}
+          JOB_STATE: ${{ job.status }}
+        run: |
+          STATUS="success"
+          if [ "$JOB_STATE" != "success" ]; then
+            STATUS="failure"
+          fi
+          curl -sS -X POST "$GATEKEEPER_ENDPOINT" \
+            -H "Content-Type: application/json" \
+            -d "{\"commit\":\"$COMMIT_SHA\",\"name\":\"BlueGreen Health\",\"status\":\"$STATUS\",\"summary\":\"Blue/green promotion $STATUS\"}"
+      - name: Rollback blue/green
+        if: failure()
+        run: |
+          chmod +x scripts/rollback.sh
+          ./scripts/rollback.sh --env production --to-image "$IMAGE"

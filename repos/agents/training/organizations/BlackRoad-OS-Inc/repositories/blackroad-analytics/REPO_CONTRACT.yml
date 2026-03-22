@@ -1,0 +1,27 @@
+repo:
+  name: blackroad-analytics
+  org: BlackRoad-OS-Inc
+  type: worker
+  languages: [javascript, sql]
+  url: https://github.com/BlackRoad-OS-Inc/blackroad-analytics
+
+ownership:
+  owner: blackboxprogramming
+  codeowners: ["@blackboxprogramming"]
+  license: proprietary
+
+policies:
+  inherits: ["coding", "collaboration", "safety", "issues", "pr-review", "docs"]
+  additional:
+    - "Never store PII (no raw IPs, no cookies with user identity)"
+    - "D1 migrations must be backward-compatible"
+    - "CORS must allow all BlackRoad domains"
+
+certification:
+  required_level: 2
+  modules: ["fundamentals", "workers"]
+
+deployment:
+  target: cloudflare-workers
+  command: "npx wrangler deploy"
+  health_check: "curl https://analytics-blackroad.amundsonalexa.workers.dev"

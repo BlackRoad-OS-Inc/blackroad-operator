@@ -1,0 +1,56 @@
+# Provider definitions for AI canary probes and health classification.
+#
+# Each provider includes the HTTP request template used by the minute canary,
+# SLO expectations for the rolling 5 minute window, and the fallback mapping
+# consumed by the gateway circuit breaker.
+providers:
+  - name: openai-primary
+    description: "Primary OpenAI GPT-4o-mini deployment"
+    canary:
+      url: "https://api.openai.com/v1/chat/completions"
+      method: POST
+      timeout_seconds: 10
+      headers:
+        Authorization: "Bearer ${OPENAI_API_KEY}"
+        Content-Type: "application/json"
+      body:
+        model: "gpt-4o-mini"
+        max_tokens: 8
+        messages:
+          - role: "user"
+            content: "BlackRoad Prism sentinel ping"
+    expectations:
+      max_tokens: 32
+      max_latency_ms: 1200
+    slo:
+      p95_ms: 1200
+      error_rate: 0.02
+      amber_error_rate: 0.05
+      minimum_samples: 20
+      half_open_ratio: 0.2
+    fallback: azure-fallback
+  - name: azure-fallback
+    description: "Fallback Azure-hosted GPT-4o-mini deployment"
+    canary:
+      url: "${FALLBACK_CANARY_URL}"
+      method: POST
+      timeout_seconds: 10
+      headers:
+        Authorization: "Bearer ${FALLBACK_API_KEY}"
+        Content-Type: "application/json"
+      body:
+        model: "${FALLBACK_MODEL}"
+        max_tokens: 8
+        messages:
+          - role: "user"
+            content: "BlackRoad Prism sentinel ping"
+    expectations:
+      max_tokens: 32
+      max_latency_ms: 1500
+    slo:
+      p95_ms: 1500
+      error_rate: 0.03
+      amber_error_rate: 0.06
+      minimum_samples: 10
+      half_open_ratio: 0.5
+    fallback: null

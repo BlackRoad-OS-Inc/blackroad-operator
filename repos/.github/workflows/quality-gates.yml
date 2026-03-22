@@ -1,0 +1,71 @@
+name: quality-gates
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+    branches: [main, master]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  pulse-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify Quick Pulse checklist
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const core = require('@actions/core');
+            const body = context.payload.pull_request.body || "";
+            const required = [
+              "No secrets in code/logs/configs",
+              "Least-privilege access in agents/pipelines",
+              "SBOM/deps reviewed; issues triaged",
+              "All suites green (link to run)",
+              "Auth/perm edge cases covered",
+              "Rollback path described",
+              "Change size/blast radius acknowledged",
+              "Sequence: migrations/flags → deploy → post-checks",
+              "Approvals gathered; freeze windows honored"
+            ];
+            const unchecked = [];
+            for (const item of required) {
+              const escaped = item.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+              const uncheckedPattern = new RegExp(`- \\[ \\] ${escaped}`);
+              const checkedPattern = new RegExp(`- \\[[xX]\\] ${escaped}`);
+              if (uncheckedPattern.test(body) || !checkedPattern.test(body)) {
+                unchecked.push(item);
+              }
+            }
+            if (unchecked.length) {
+              core.setFailed(`Quick Pulse items still unchecked or missing:\n- ${unchecked.join("\n- ")}`);
+            }
+
+  security:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+      - name: Gitleaks (secret scan)
+        uses: gitleaks/gitleaks-action@v2
+        with:
+          args: detect --no-banner --redact
+
+  tests:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+      - name: Setup Node
+        uses: actions/setup-node@b39b52d1213e96004bfcb1c61a8a6fa8ab84f3e8 # v4
+        with:
+          node-version: '20'
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Run tests
+        run: npm test -- --runInBand

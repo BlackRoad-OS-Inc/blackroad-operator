@@ -1,0 +1,22 @@
+[Unit]
+Description=BlackRoad Ollama Bridge
+Description=Ollama bridge (Node proxy to Ollama)
+After=network.target
+
+[Service]
+Type=simple
+Environment=NODE_NO_WARNINGS=1
+Environment=OLLAMA_URL=http://127.0.0.1:11434/v1
+WorkingDirectory=/srv/blackroad-api
+ExecStart=/usr/bin/node /srv/blackroad-api/ollama-bridge.js
+Restart=always
+RestartSec=3
+WorkingDirectory=/srv/ollama-bridge
+EnvironmentFile=-/etc/default/ollama-bridge
+ExecStartPre=/usr/local/bin/bridge_ready.sh || true
+ExecStart=/usr/bin/env node server.js
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target

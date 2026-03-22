@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  llm:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+      - "9090:9090"
+    environment:
+      - LLM_DEFAULT_PROVIDER=echo
+      - LLM_REDIS_URL=redis://redis:6379/0
+      - LLM_CACHE_ENABLED=true
+      - LLM_LOG_LEVEL=info
+    depends_on:
+      - redis
+    networks:
+      - prism
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - prism
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    networks:
+      - prism
+    restart: unless-stopped
+    volumes:
+      - ollama_data:/root/.ollama
+
+networks:
+  prism:
+    driver: bridge
+
+volumes:
+  ollama_data:

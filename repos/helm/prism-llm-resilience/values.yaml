@@ -1,0 +1,28 @@
+namespace: prism
+
+image:
+  healthwatch: ghcr.io/blackroad-prism/llm-healthwatch:latest
+  gateway: ghcr.io/blackroad-prism/llm-gateway:latest
+
+canary:
+  image: python:3.11-slim
+  schedule: "*/1 * * * *"
+  expectations:
+    maxP95Ms: 1200
+    maxTokens: 32
+  extraEnv: []
+  resources: {}
+
+healthwatch:
+  replicas: 1
+  resources: {}
+
+gateway:
+  replicas: 1
+  resources: {}
+  halfOpenRatio: 0.2
+  halfOpenSuccesses: 5
+
+incidentLog:
+  size: 1Gi
+  storageClassName: null

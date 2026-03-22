@@ -1,0 +1,35 @@
+[project]
+name = "svc-template-fastapi"
+version = "0.1.0"
+description = "Production-ready FastAPI service template"
+authors = [{name = "Blackroad Platform"}]
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi>=0.110.0",
+  "uvicorn[standard]>=0.27.0",
+  "structlog>=24.1.0",
+  "pydantic-settings>=2.2.1",
+  "prometheus-client>=0.20.0",
+  "httpx>=0.27.0",
+  "opentelemetry-sdk>=1.24.0",
+  "opentelemetry-exporter-otlp-proto-http>=1.24.0",
+  "opentelemetry-instrumentation-fastapi>=0.45b0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=7.4.0",
+  "pytest-asyncio>=0.21.1",
+]
+
+[tool.pytest.ini_options]
+addopts = "-q"
+pythonpath = ["app"]
+
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["app*"]

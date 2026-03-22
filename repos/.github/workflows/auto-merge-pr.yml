@@ -1,0 +1,281 @@
+name: "🤖 Auto-Merge PR"
+
+# Automatically merges PRs that pass all checks
+# Requires: All CI green, 1+ approval, no conflicts
+
+on:
+  pull_request_review:
+    types: [submitted]
+  check_suite:
+    types: [completed]
+  pull_request:
+    types: [labeled, unlabeled, synchronize]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR number to attempt auto-merge'
+        required: true
+
+permissions:
+  contents: write
+  pull-requests: write
+  checks: read
+
+jobs:
+  auto-merge:
+    name: "🤖 Auto-Merge Check"
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'pull_request_review' && github.event.review.state == 'approved') ||
+      (github.event_name == 'check_suite' && github.event.check_suite.conclusion == 'success') ||
+      (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'automerge'))
+    steps:
+      - name: Get PR info
+        id: pr_info
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            let prNumber;
+
+            if ('${{ github.event_name }}' === 'workflow_dispatch') {
+              prNumber = '${{ github.event.inputs.pr_number }}';
+            } else if (context.payload.pull_request) {
+              prNumber = context.payload.pull_request.number;
+            } else if (context.payload.check_suite?.pull_requests?.length > 0) {
+              prNumber = context.payload.check_suite.pull_requests[0].number;
+            }
+
+            if (!prNumber) {
+              core.setFailed('No PR number found');
+              return;
+            }
+
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber
+            });
+
+            core.setOutput('pr_number', prNumber);
+            core.setOutput('head_ref', pr.head.ref);
+            core.setOutput('base_ref', pr.base.ref);
+            core.setOutput('mergeable', pr.mergeable);
+            core.setOutput('draft', pr.draft);
+
+      - name: Check auto-merge eligibility
+        id: check
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const prNumber = ${{ steps.pr_info.outputs.pr_number }};
+
+            // Get PR details
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber
+            });
+
+            // Check criteria
+            const checks = {
+              not_draft: !pr.draft,
+              no_do_not_merge_label: !pr.labels.some(l => l.name === 'do-not-merge'),
+              no_wip_label: !pr.labels.some(l => l.name === 'WIP'),
+              no_hold_label: !pr.labels.some(l => l.name === 'on-hold'),
+              mergeable: pr.mergeable === true,
+              not_merged: !pr.merged
+            };
+
+            // Check approvals
+            const { data: reviews } = await github.rest.pulls.listReviews({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber
+            });
+
+            const latestReviews = {};
+            reviews.forEach(review => {
+              latestReviews[review.user.login] = review.state;
+            });
+
+            const approvals = Object.values(latestReviews).filter(state => state === 'APPROVED').length;
+            const changesRequested = Object.values(latestReviews).some(state => state === 'CHANGES_REQUESTED');
+
+            checks.has_approval = approvals >= 1;
+            checks.no_changes_requested = !changesRequested;
+
+            // Check CI status
+            const { data: checkRuns } = await github.rest.checks.listForRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: pr.head.sha
+            });
+
+            const requiredChecks = ['test', 'lint', 'build', 'ci'];
+            const checkStatuses = {};
+
+            checkRuns.check_runs.forEach(run => {
+              const checkName = run.name.toLowerCase();
+              if (requiredChecks.some(req => checkName.includes(req))) {
+                checkStatuses[run.name] = run.conclusion;
+              }
+            });
+
+            const allChecksPass = Object.values(checkStatuses).every(status =>
+              status === 'success' || status === 'skipped' || status === null
+            );
+            const anyChecksFailed = Object.values(checkStatuses).some(status =>
+              status === 'failure' || status === 'cancelled'
+            );
+
+            checks.all_checks_pass = allChecksPass && !anyChecksFailed;
+
+            // Check if has automerge label or renovate bot
+            checks.has_automerge_label = pr.labels.some(l => l.name === 'automerge');
+            checks.is_renovate = pr.user.login === 'renovate[bot]' || pr.user.login === 'renovate-bot';
+            checks.is_dependabot = pr.user.login === 'dependabot[bot]';
+
+            // Determine eligibility
+            const isBot = checks.is_renovate || checks.is_dependabot;
+            const eligible = (
+              checks.not_draft &&
+              checks.no_do_not_merge_label &&
+              checks.no_wip_label &&
+              checks.no_hold_label &&
+              checks.mergeable &&
+              checks.not_merged &&
+              checks.all_checks_pass &&
+              checks.no_changes_requested &&
+              (checks.has_approval || isBot) &&  // Bots can auto-merge without approval
+              (checks.has_automerge_label || isBot)
+            );
+
+            core.setOutput('eligible', eligible ? 'true' : 'false');
+            core.setOutput('checks', JSON.stringify(checks, null, 2));
+            core.setOutput('approvals', approvals);
+
+            // Generate report
+            let report = '## 🤖 Auto-Merge Eligibility Check\n\n';
+            report += '| Criterion | Status |\n';
+            report += '|-----------|--------|\n';
+            report += `| Not Draft | ${checks.not_draft ? '✅' : '❌'} |\n`;
+            report += `| No "do-not-merge" label | ${checks.no_do_not_merge_label ? '✅' : '❌'} |\n`;
+            report += `| No "WIP" label | ${checks.no_wip_label ? '✅' : '❌'} |\n`;
+            report += `| No "on-hold" label | ${checks.no_hold_label ? '✅' : '❌'} |\n`;
+            report += `| Mergeable (no conflicts) | ${checks.mergeable ? '✅' : '❌'} |\n`;
+            report += `| Not already merged | ${checks.not_merged ? '✅' : '❌'} |\n`;
+            report += `| All checks pass | ${checks.all_checks_pass ? '✅' : '❌'} |\n`;
+            report += `| Has approval (${approvals}) | ${checks.has_approval || isBot ? '✅' : '❌'} ${isBot ? '(bot)' : ''} |\n`;
+            report += `| No changes requested | ${checks.no_changes_requested ? '✅' : '❌'} |\n`;
+            report += `| Has automerge label or bot | ${checks.has_automerge_label || isBot ? '✅' : '❌'} |\n`;
+            report += '\n';
+
+            if (eligible) {
+              report += '✅ **Eligible for auto-merge!**\n';
+            } else {
+              report += '❌ **Not eligible for auto-merge**\n\n';
+              report += 'Missing requirements:\n';
+              Object.entries(checks).forEach(([key, value]) => {
+                if (!value && key !== 'is_renovate' && key !== 'is_dependabot') {
+                  report += `- ${key}\n`;
+                }
+              });
+            }
+
+            core.summary.addRaw(report).write();
+
+      - name: Enable auto-merge
+        if: steps.check.outputs.eligible == 'true'
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const prNumber = ${{ steps.pr_info.outputs.pr_number }};
+
+            try {
+              // Enable auto-merge using GraphQL
+              const { data: pr } = await github.rest.pulls.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber
+              });
+
+              const mutation = `
+                mutation EnableAutoMerge($pullRequestId: ID!, $mergeMethod: PullRequestMergeMethod!) {
+                  enablePullRequestAutoMerge(input: {pullRequestId: $pullRequestId, mergeMethod: $mergeMethod}) {
+                    pullRequest {
+                      autoMergeRequest {
+                        enabledAt
+                      }
+                    }
+                  }
+                }
+              `;
+
+              const variables = {
+                pullRequestId: pr.node_id,
+                mergeMethod: 'SQUASH'  // or 'MERGE', 'REBASE'
+              };
+
+              await github.graphql(mutation, variables);
+
+              console.log('✅ Auto-merge enabled successfully');
+
+              // Comment on PR
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                body: '🤖 Auto-merge has been enabled for this PR. It will be automatically merged when all requirements are met.\n\n*To cancel auto-merge, add the `do-not-merge` label or disable it in the PR settings.*'
+              });
+
+            } catch (error) {
+              console.error('Failed to enable auto-merge:', error);
+
+              // Fallback: Try direct merge
+              try {
+                await github.rest.pulls.merge({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: prNumber,
+                  merge_method: 'squash'
+                });
+
+                console.log('✅ PR merged successfully (direct merge fallback)');
+              } catch (mergeError) {
+                console.error('Failed to merge PR:', mergeError);
+                throw mergeError;
+              }
+            }
+
+      - name: Report ineligibility
+        if: steps.check.outputs.eligible == 'false'
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const prNumber = ${{ steps.pr_info.outputs.pr_number }};
+            const checks = JSON.parse('${{ steps.check.outputs.checks }}');
+
+            // Only comment if PR has automerge label (to avoid spam)
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber
+            });
+
+            if (pr.labels.some(l => l.name === 'automerge')) {
+              let reasons = [];
+              if (!checks.all_checks_pass) reasons.push('⏳ Waiting for all checks to pass');
+              if (!checks.has_approval) reasons.push('👥 Needs at least 1 approval');
+              if (!checks.mergeable) reasons.push('⚠️ Has merge conflicts');
+              if (checks.no_changes_requested === false) reasons.push('🔄 Changes requested');
+
+              if (reasons.length > 0) {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: prNumber,
+                  body: `🤖 Auto-merge is pending:\n\n${reasons.map(r => `- ${r}`).join('\n')}\n\n*This PR will be auto-merged when all requirements are met.*`
+                });
+              }
+            }

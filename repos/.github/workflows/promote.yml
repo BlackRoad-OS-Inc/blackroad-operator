@@ -1,0 +1,57 @@
+name: Promote
+on:
+  workflow_dispatch:
+    inputs:
+      staging_run_id:
+        description: "Workflow run ID of a successful Staging Verify execution"
+        required: true
+        type: string
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Ensure staging verification passed
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const runIdInput = process.env.STAGING_RUN_ID;
+            if (!runIdInput) {
+              core.setFailed('Provide the staging_run_id input from a successful Staging Verify workflow run.');
+              return;
+            }
+
+            const runId = Number(runIdInput);
+            if (Number.isNaN(runId) || runId <= 0) {
+              core.setFailed(`Invalid staging_run_id: ${runIdInput}`);
+              return;
+            }
+
+            const { data } = await github.rest.actions.getWorkflowRun({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: runId,
+            });
+
+            if (data.name !== 'Staging Verify') {
+              core.setFailed(`Run ${runId} is for workflow "${data.name}", expected "Staging Verify".`);
+              return;
+            }
+
+            if (data.conclusion !== 'success') {
+              core.setFailed(`Staging Verify run ${runId} is not successful (status: ${data.status}, conclusion: ${data.conclusion}).`);
+            }
+        env:
+          STAGING_RUN_ID: ${{ github.event.inputs.staging_run_id }}
+
+      - name: Canary 10%
+        run: kubectl apply -k infra/k8s/overlays/prod-canary
+
+      - name: Pause & watch
+        run: |
+          sleep 120
+          curl -fsS https://api.yourdomain/health -o /dev/null
+
+      - name: Full promote
+        run: kubectl apply -k infra/k8s/overlays/prod

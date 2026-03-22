@@ -1,0 +1,109 @@
+name: Re-run Tests on All Merged PRs
+
+on:
+  workflow_dispatch:
+    inputs:
+      since_days:
+        description: 'Re-run tests for PRs merged in the last N days'
+        required: false
+        default: '7'
+      dry_run:
+        description: 'Dry run (just list PRs, dont trigger workflows)'
+        required: false
+        default: 'false'
+
+jobs:
+  find-merged-prs:
+    runs-on: ubuntu-latest
+    outputs:
+      prs: ${{ steps.find.outputs.prs }}
+    steps:
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+
+      - name: Find merged PRs
+        id: find
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SINCE_DAYS: ${{ inputs.since_days }}
+        run: |
+          since_date=$(date -d "$SINCE_DAYS days ago" +%Y-%m-%d)
+          echo "Finding merged PRs since $since_date..."
+
+          # Get merged PRs
+          prs=$(gh pr list \
+            --state merged \
+            --limit 1000 \
+            --json number,mergedAt,headRefName,title \
+            --jq "map(select(.mergedAt > \"$since_date\")) | .[].number")
+
+          # Convert to JSON array
+          pr_array=$(echo "$prs" | jq -R -s -c 'split("\n") | map(select(length > 0))')
+
+          echo "Found PRs: $pr_array"
+          echo "prs=$pr_array" >> $GITHUB_OUTPUT
+
+  rerun-tests:
+    needs: find-merged-prs
+    if: needs.find-merged-prs.outputs.prs != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        pr: ${{ fromJson(needs.find-merged-prs.outputs.prs) }}
+      max-parallel: 5
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+
+      - name: Get PR details
+        id: pr
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ matrix.pr }}
+        run: |
+          pr_data=$(gh pr view $PR_NUMBER --json headRefName,headRefOid,title)
+          branch=$(echo "$pr_data" | jq -r '.headRefName')
+          sha=$(echo "$pr_data" | jq -r '.headRefOid')
+          title=$(echo "$pr_data" | jq -r '.title')
+
+          echo "branch=$branch" >> $GITHUB_OUTPUT
+          echo "sha=$sha" >> $GITHUB_OUTPUT
+          echo "title=$title" >> $GITHUB_OUTPUT
+
+      - name: Trigger test workflows
+        if: inputs.dry_run == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ matrix.pr }}
+          SHA: ${{ steps.pr.outputs.sha }}
+        run: |
+          echo "Triggering tests for PR #$PR_NUMBER (SHA: $SHA)"
+
+          # Trigger various test workflows
+          gh workflow run tests.yml --ref main -f sha=$SHA -f pr=$PR_NUMBER || true
+          gh workflow run test-ci.yml --ref main -f sha=$SHA -f pr=$PR_NUMBER || true
+
+          echo "✓ Triggered test workflows for PR #$PR_NUMBER"
+
+      - name: Dry run output
+        if: inputs.dry_run == 'true'
+        env:
+          PR_NUMBER: ${{ matrix.pr }}
+          TITLE: ${{ steps.pr.outputs.title }}
+          SHA: ${{ steps.pr.outputs.sha }}
+        run: |
+          echo "Would trigger tests for:"
+          echo "  PR: #$PR_NUMBER"
+          echo "  Title: $TITLE"
+          echo "  SHA: $SHA"
+
+  summary:
+    needs: [find-merged-prs, rerun-tests]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Summary
+        run: |
+          echo "### Test Re-run Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Found PRs: ${{ needs.find-merged-prs.outputs.prs }}" >> $GITHUB_STEP_SUMMARY
+          echo "Status: ${{ needs.rerun-tests.result }}" >> $GITHUB_STEP_SUMMARY

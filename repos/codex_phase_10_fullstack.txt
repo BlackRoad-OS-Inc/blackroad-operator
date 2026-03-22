@@ -1,0 +1,365 @@
+⸻
+type: codex-prompt
+id: phase-10
+slug: blackroad-fullstack-execute-and-promote
+title: "Phase X — BlackRoad Full-Stack Execute & Promote Codex"
+summary: "Ship the math kernel (Amundson+BlackRoad), harden services, align website & offerings, enforce text-only policy, wire CI/K8s/metrics, and run a Codex-driven promo loop."
+owner: "blackroad"
+tags: ["codex","amundson","blackroad","math","text-only","api","k8s","ci","ledger","compliance","website","offerings","promotion"]
+model_hint: "Codex"
+temperature: 0
+version: "1.0.0"
+timezone: "America/Chicago"
+copy_filename: "codex_phase_10_fullstack.txt"
+⸻
+
+# PURPOSE
+Deliver a production-grade BlackRoad stack: math kernels + APIs, website + offerings, compliance ledger hooks, and a promotion engine. Enforce text-only artifacts repo-wide. Provide acceptance criteria and a rolling release method.
+
+# 0) OPERATING RULES
+1) Be exact: show units in outputs; compute digit-by-digit when asked for arithmetic.
+2) Max two clarifiers; otherwise state assumptions and proceed.
+3) No invented constants; keep symbolic unless provided.
+4) Prefer first principles (Euler–Lagrange, continuity, Schrödinger/GKSL, Fourier/Laplace).
+5) Thermo floor: Landauer E_min = k_B T ln 2 per irreversible bit.
+6) Text-only policy: only JSON/YAML/NDJSON/CSV/Markdown/SVG(XML)/PGM P2(ASCII). No binaries, no base64 images in repo.
+7) Output Contract (for every task): (i) assumptions, (ii) equations/spec, (iii) compute/derive, (iv) interpret, (v) code/tests if helpful.
+
+# 1) CANONICAL SETTINGS
+domains:
+  canonical: "blackroadinc.us"
+  alt: ["blackroad.io"]  # redirect or deprecate; ingress must match canonical
+repos:
+  app: "blackboxprogramming/blackroad-prism-console"
+  default_branch: "main"
+services:
+  - name: api
+  - name: llm
+  - name: math      # hosts Infinity Math + AMBR endpoints
+  - name: ledger    # optional, internal-only evidence sink
+
+# 2) MATHEMATICAL KERNEL (Amundson + BlackRoad)
+## 2.1 Amundson (Spiral Information Geometry)
+AM-1: dΨ/dθ = (a + i) Ψ  → Ψ(θ)=e^{(a+i)θ}Ψ₀   [a dimensionless, θ rad]
+AM-2: ȧ = −γ a + η Φ(Ψ),  θ̇ = ω₀ + κ a        [γ,η,κ s⁻¹]
+AM-3: ∂_t a = D∇²a − Γ a + S(x,t)               [D m²/s, Γ s⁻¹]
+AM-4 (First Law of Spiral Measurement):
+  S_a = k_B a θ  [J/K];   dE = T dS_a + Ω dθ;   ΔE = T k_B(Δa·θ + a·Δθ) + ΩΔθ
+  Conjugates: (S_a,T), (θ,Ω).
+
+## 2.2 BlackRoad (Autonomy & Trust)
+BR-1: ∂_t A + ∇·J_A = 0
+BR-2: J_A = μ_A ∇ρ_trust − χ_A ∇U_c
+BR-3: S_free ≡ S_info − S_control; dS_free/dt ≥ 0 (closed)
+BR-4: Action skeleton ℒ = λ_A A + ⟨Ψ|i∂_t|Ψ⟩ + … (boundary & coupling terms)
+BR-5: ΔE_irrev ≥ k_B T ln 2 · N_bits
+BR-6: ∇_μ∇^μ a = − R/ξ − Γ a + S     [curvature coupling]
+BR-7: ∂_t ρ_trust = ν∇²ρ_trust − λρ_trust + σ H(Ψ,A)
+
+Invariants: autonomy mass ∫A dx conserved (no-flux); S_free non-decreasing (closed); unit sanity; Landauer floor for irreversible ops.
+
+# 3) TEXT-ONLY ENFORCEMENT
+git:
+  gitattributes:
+    - "* text=auto eol=lf"
+    - "*.svg text"
+    - "*.json text"
+    - "*.yaml text"
+    - "*.yml text"
+    - "*.md text"
+    - "*.csv text"
+    - "*.ndjson text"
+    - "*.pgm text"
+  gitignore_append:
+    - "*.png"
+    - "*.jpg"
+    - "*.jpeg"
+    - "*.gif"
+    - "*.webp"
+    - "*.pdf"
+    - "*.zip"
+    - "*.tar"
+    - "*.gz"
+    - "*.npz"
+    - "*.npy"
+    - "*.pkl"
+    - "*.parquet"
+    - "*.feather"
+    - "*.mp4"
+    - "*.mov"
+    - "*.wav"
+    - "*.ogg"
+    - "output/**"
+    - "artifacts/**"
+precommit_script: |
+  #!/usr/bin/env bash
+  set -euo pipefail
+  blocked_ext='png|jpg|jpeg|gif|webp|pdf|zip|tar|gz|npz|npy|pkl|parquet|feather|mp4|mov|wav|ogg'
+  files=$(git diff --cached --name-only)
+  fail=0
+  for f in $files; do
+    if echo "$f" | grep -E "\.(${blocked_ext})$" -i >/dev/null; then
+      echo "❌ Binary-like extension blocked: $f"; fail=1; continue
+    fi
+    if git show :$f | head -c 8000 | LC_ALL=C tr -d '\n' | grep -qaP '\x00'; then
+      echo "❌ Binary content detected (null byte): $f"; fail=1
+    fi
+  done
+  [ $fail -eq 0 ] || { echo "🚫 Commit aborted: convert to JSON/SVG/PGM."; exit 1; }
+
+ci_binary_scan_py: |
+  import sys,subprocess,re
+  BLOCKED=re.compile(r"\.(png|jpg|jpeg|gif|webp|pdf|zip|tar|gz|npz|npy|pkl|parquet|feather|mp4|mov|wav|ogg)$",re.I)
+  def is_bin(p):
+      if BLOCKED.search(p): return True
+      try: data=subprocess.check_output(["git","show",f"HEAD:{p}"],stderr=subprocess.DEVNULL)
+      except subprocess.CalledProcessError: return False
+      return b"\x00" in data
+  files=subprocess.check_output(["git","ls-files"]).decode().splitlines()
+  bad=[p for p in files if is_bin(p)]
+  if bad:
+      print("❌ Binary files detected:"); [print(" -",b) for b in bad]; sys.exit(2)
+  print("✅ No binary files detected.")
+
+ci_workflow_yaml: |
+  name: no-binary-ci
+  on: [push, pull_request]
+  jobs:
+    scan:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v4
+          with: { fetch-depth: 0 }
+        - uses: actions/setup-python@v5
+          with: { python-version: "3.11" }
+        - run: python scripts/scan-no-binaries.py
+
+# 4) SERVICES & ENDPOINTS (TEXT-ONLY RESPONSES)
+math_api:
+  base: "/api/math"
+  routes:
+    - GET  /fractals/mandelbrot.pgm?width&height&iter&xmin&xmax&ymin&ymax
+    - GET  /primes.json?limit
+    - POST /logic/truth-table { vars: ["A","B"] } → rows JSON
+    - GET  /waves/sine.svg?freq&phase&samples   → SVG
+ambr_api:
+  base: "/api/ambr"
+  routes:
+    - GET  /sim/am2?T&dt&a0&theta0&gamma&kappa&eta  → {t[],a[],theta[],units}
+    - POST /sim/transport {x[],A[],rho[],dt,steps,mu} → {A[],mass,mass_err,units}
+    - POST /energy {T,a,theta,da,dtheta,Omega?,n_bits?} → {dE,E_min?,pass?,units}
+    - GET  /plot/am2.svg?… → SVG
+    - POST /field/a.pgm {grid,params} → PGM P2 ASCII
+ledger_api (optional):
+  base: "/api/ledger"
+  routes:
+    - POST /record {id,timestamp_utc,action_type,payload_ref,content_hash,prev_hash,signatures[]}
+
+response_headers:
+  json: "Content-Type: application/json; charset=utf-8"
+  svg:  "Content-Type: image/svg+xml; charset=utf-8"
+  pgm:  "Content-Type: image/x-portable-graymap; charset=us-ascii"
+
+# 5) PYTHON MODULES (STUBS TO EMIT)
+packages:
+  amundson_blackroad:
+    spiral.py: |
+      import numpy as np
+      def simulate_am2(T=10.0, dt=1e-3, a0=0.1, theta0=0.0, gamma=0.3, kappa=0.7, eta=0.5, phi=lambda amp: amp):
+          n=int(T/dt); a=np.empty(n); th=np.empty(n); t=np.linspace(0,T,n)
+          a[0],th[0]=a0,theta0; amp=np.exp(a0*theta0)
+          for i in range(1,n):
+              A=phi(amp); a_dot=-gamma*a[i-1]+eta*A; th_dot=1.0+kappa*a[i-1]
+              a[i]=a[i-1]+dt*a_dot; th[i]=th[i-1]+dt*th_dot; amp=np.exp(a[i]*th[i])
+          return t,a,th
+    autonomy.py: |
+      import numpy as np
+      def step_transport(A,rho,dx,dt,mu_A=1.0,chi_A=0.0,Uc=None):
+          if Uc is None: Uc=np.zeros_like(A)
+          d_rho=np.gradient(rho,dx); d_Uc=np.gradient(Uc,dx)
+          J=mu_A*d_rho - chi_A*d_Uc; dJ=np.gradient(J,dx)
+          return A - dt*dJ
+      def conserved_mass(x,A): import numpy as np; return float(np.trapz(A,x))
+    curvature.py: |
+      import numpy as np
+      def simulate_a_field(L=10.0,N=512,T=5.0,dt=2e-3,D=0.2,Gamma=0.3,xi=1.0,R_t=lambda t:0.0):
+          x=np.linspace(-L/2,L/2,N); dx=x[1]-x[0]; a=np.zeros_like(x); steps=int(T/dt)
+          for s in range(steps):
+              lap=(np.roll(a,-1)-2*a+np.roll(a,1))/(dx*dx)
+              S=np.full_like(a,-R_t(s*dt)/xi); a=a + dt*(D*lap - Gamma*a + S)
+          return x,a
+    thermo.py: |
+      from dataclasses import dataclass
+      import math
+      K_B=1.380649e-23
+      def spiral_entropy(a,theta,kB=K_B): return kB*a*theta
+      def energy_increment(T,da,dtheta,a,theta,Omega=0.0,kB=K_B): return T*kB*(da*theta + a*dtheta) + Omega*dtheta
+      def landauer_min(T,n_bits,kB=K_B): return kB*T*math.log(2.0)*n_bits
+  textviz:
+    svg.py: |
+      def line_svg(xs,ys,width=600,height=300,margin=40,stroke="currentColor"):
+          assert len(xs)==len(ys) and len(xs)>1
+          x0,x1=min(xs),max(xs); y0,y1=min(ys),max(ys)
+          sx=lambda x: margin + (x-x0)/(x1-x0+1e-12)*(width-2*margin)
+          sy=lambda y: height-margin - (y-y0)/(y1-y0+1e-12)*(height-2*margin)
+          pts=" ".join(f"{sx(x):.2f},{sy(y):.2f}" for x,y in zip(xs,ys))
+          return f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}"><polyline fill="none" stroke="{stroke}" stroke-width="1.5" points="{pts}"/></svg>'
+    pgm.py: |
+      def pgm_p2(gray, maxval=255):
+          h=len(gray); w=len(gray[0]) if h else 0
+          header=f"P2\n{w} {h}\n{maxval}\n"
+          rows=[" ".join(str(int(min(max(v,0),maxval))) for v in row) for row in gray]
+          return header + "\n".join(rows) + "\n"
+
+# 6) OPENAPI (IF FASTAPI)
+openapi:
+  enabled: true
+  paths:
+    - /api/math/*
+    - /api/ambr/*
+  docs_routes: ["/docs","/openapi.json"]
+
+# 7) OBSERVABILITY
+prometheus:
+  counters:
+    - ambr_runs_total{kind="am2|transport|energy"}
+    - ambr_errors_total{kind}
+    - landauer_violations_total
+    - artifact_text_bytes_total{kind="json|svg|pgm"}
+  gauges:
+    - ambr_last_mass_error
+    - ambr_last_energy_dE
+health:
+  routes:
+    - GET /health = 200
+    - (optional) /metrics = Prom text exposition
+
+# 8) KUBERNETES (ABBREVIATED)
+deployment:
+  namespace: prism
+  probes:
+    readiness: GET /health
+    liveness:  POST /api/ambr/energy {T:300,a:0,theta:0,da:0,dtheta:0}
+  resources:
+    apiVersion: apps/v1
+    rollingUpdate: { maxSurge: 1, maxUnavailable: 0 }
+ingress:
+  host: "blackroadinc.us"   # ensure DNS + TLS here
+  paths:
+    - /api/ → service: api:4000
+    - /llm/ → service: llm:8000
+    - /math/ → service: math:9000
+    - /api/ambr/ → service: math:9000
+
+# 9) WEBSITE (NEXT/REACT)
+routes:
+  - /                 → landing; CTA to /codex and /offerings
+  - /codex            → index of phases; deep links to Codex pages
+  - /equations        → Equations Lab (AM-2 sliders; BR-1/2 transport; Energy calculator)
+  - /offerings/lucidia-ria      → RIA playbook → demo → CTA
+  - /offerings/lucidia-ledger   → Ledger spec → API → CTA
+  - /offerings/competitive-intel→ Multi-agent research → CTA
+equations_lab:
+  panels:
+    - "Spiral AM-2"    # sliders: γ,κ,η,ω₀,a0,θ0 → GET /api/ambr/sim/am2 → SVG
+    - "Autonomy BR-1/2"# trust wells + μ; mass conservation → POST /sim/transport
+    - "Energy AM-4"    # sweep θ or a; ΔE vs θ|S_a, ΔE vs a|θ → POST /energy
+
+# 10) PRODUCTS & OFFERINGS (SITE COPY CHECKLIST)
+lucidia_ria:
+  bullets:
+    - "Compliance-first advisory orchestration (SEC 204-2/FINRA 2210 aware)"
+    - "Client onboarding → suitability → AI-assisted planning"
+    - "Fee model transparency + audit artifacts (text-only evidence)"
+lucidia_ledger:
+  bullets:
+    - "Append-only hybrid ledger with multi-signature and redaction protocol"
+    - "Hash chain + off-chain anchors; API for evidence injection"
+    - "Ledger-ready analytics → compliance dashboards → client attestations"
+competitive_intel:
+  bullets:
+    - "Multi-agent research with policy-safe outputs"
+    - "Trust-destruction event detection; executive-ready briefs"
+
+# 11) PROVENANCE & LEDGER (OPTIONAL)
+run_log:
+  fields: [id, timestamp_utc, service, route, params_hash, result_hash, ΔE_min?, mass_error?, units]
+  store: "PV path or object store; never commit artifacts to git"
+ledger_post_when: ["security-event","audit","client-facing-report"]
+
+# 12) SECURITY & COMPLIANCE
+- Branch protection on main; require CI checks (no-binary-ci + tests).
+- Secrets via env/secret store; never in repo.
+- PII: never stored inline; use payload_ref URIs with content hashes.
+- Logging: redact tokens; include units, not raw data.
+
+# 13) TEST MATRIX (PYTEST)
+invariants:
+  - br1_mass_conservation: |Δ∫A dx|/∫A₀ dx ≤ 1e-3
+  - am4_energy_vs_fd: numeric Ω matches ∂E/∂θ at fixed S_a
+  - landauer_floor: if n_bits present, dE ≥ E_min (±ε)
+api:
+  - status_200_schemas_ok on all routes
+  - svg/pgm are text; headers correct
+ui:
+  - equations_lab renders from JSON + SVG strings (no binaries)
+
+# 14) CI/CD
+workflows:
+  - no-binary-ci.yml    # blocks binaries
+  - math-and-ambr-ci.yml:
+      python: "3.11"
+      steps: pip install; pytest -q
+  - deploy.yml (optional): build container, apply manifests, rollout restart
+required_checks:
+  - no-binary-ci
+  - tests
+
+# 15) MERGE POLICY
+- Rebase or squash; forbid direct pushes to main.
+- Merge queue optional; label `queue:ready` when green.
+- Post-merge smoke: curl /health; run minimal energy no-op.
+
+# 16) PROMOTION LOOP (CODEX-DRIVEN)
+- For every shipped phase/feature:
+  - Generate “What & Why” brief (≤250 words), “Proof” (links to text artifacts), and “Try it” (Equations Lab link).
+  - Publish to /codex + offering page; cross-post minimal update to socials.
+- Weekly digest: “This week in BlackRoad” compiled from run_log and merged PRs (text-only).
+
+# 17) ACCEPTANCE CRITERIA (GREEN BAR)
+A) **Text-only**: repo passes pre-commit + CI scan; no binaries in history.  
+B) **Math**: AM-2, BR-1/2, AM-4 operational; invariants pass.  
+C) **API**: /api/math/* and /api/ambr/* return JSON/SVG/PGM; headers correct.  
+D) **Website**: /equations page functional; /codex lists phases; offerings pages live.  
+E) **K8s**: ingress matches canonical domain; probes pass; rolling updates succeed.  
+F) **Observability**: Prom counters increment; health route stable.  
+G) **Compliance**: optional ledger endpoint accepts records; run_log stored (text).  
+H) **Promotion**: at least one “What/Why/Proof/Try it” post published for the Equations Lab.
+
+# 18) TASK QUEUE (DO IN ORDER)
+1) Enforce text-only policy (files + hooks + CI).  
+2) Emit amundson_blackroad package + tests; run invariants.  
+3) Add /api/ambr/* and expand /api/math/* with text-only outputs.  
+4) Add Prom metrics + probes; update K8s ingress host.  
+5) Build /equations UI; wire to APIs; ship.  
+6) Publish offerings pages; link to Codex.  
+7) (Optional) Add /api/ledger and run_log writer.  
+8) Announce: 3-part post (What/Why, Proof, Try it).
+
+# 19) QUICK CURL EXAMPLES
+- AM-2 JSON:
+  curl -s "https://blackroadinc.us/api/ambr/sim/am2?T=10&dt=0.001&a0=0.1&theta0=0&gamma=0.3&kappa=0.7&eta=0.5"
+- Energy:
+  curl -s -X POST "https://blackroadinc.us/api/ambr/energy" \
+    -H "Content-Type: application/json" \
+    -d '{"T":300,"a":0.2,"theta":1.4,"da":0.01,"dtheta":0.02,"Omega":1e-21,"n_bits":1}'
+- Mandelbrot PGM:
+  curl -s "https://blackroadinc.us/api/math/fractals/mandelbrot.pgm?width=120&height=120&iter=50"
+
+# 20) GLOSSARY (SHORT)
+- Ω (phase torque): J/rad; (∂E/∂θ)_{S_a}.
+- S_a (spiral entropy): k_B a θ [J/K].
+- Trust potential ρ_trust: dimensionless or A-normalized potential guiding J_A.
+- Landauer E_min: k_B T ln 2 per irreversibly erased bit (J).
+
+# END OF CODEX

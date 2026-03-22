@@ -1,0 +1,368 @@
+name: "🔧 Build Cache Recovery"
+
+# Detects and recovers from build cache corruption
+# Automatically invalidates cache and rebuilds on failure
+
+on:
+  workflow_run:
+    workflows: ["CI (deterministic + flakes + caches)", "Test CI"]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      force_invalidate:
+        description: 'Force invalidate all caches'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  actions: write
+  pull-requests: write
+
+jobs:
+  detect-cache-corruption:
+    name: "🔍 Detect Cache Issues"
+    if: |
+      github.event.workflow_run.conclusion == 'failure' ||
+      github.event.inputs.force_invalidate == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      cache_corrupted: ${{ steps.analyze.outputs.cache_corrupted }}
+      corruption_type: ${{ steps.analyze.outputs.corruption_type }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+
+      - name: Analyze build logs
+        id: analyze
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const runId = context.payload.workflow_run?.id;
+            if (!runId) {
+              core.setOutput('cache_corrupted', 'false');
+              return;
+            }
+
+            // Get job logs
+            const { data: jobs } = await github.rest.actions.listJobsForWorkflowRun({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: runId
+            });
+
+            const failedJobs = jobs.jobs.filter(job => job.conclusion === 'failure');
+            let cacheIssues = 0;
+            let corruptionType = 'none';
+
+            // Check for cache-related errors in logs
+            const cacheErrorPatterns = [
+              /cache.*corrupt/i,
+              /ENOENT.*node_modules/i,
+              /cannot find module/i,
+              /lockfile.*mismatch/i,
+              /EINTEGRITY/i,
+              /tar.*invalid/i,
+              /buildx.*cache.*error/i,
+              /docker.*layer.*failed/i
+            ];
+
+            for (const job of failedJobs) {
+              try {
+                const logs = await github.rest.actions.downloadJobLogsForWorkflowRun({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  job_id: job.id
+                });
+
+                const logText = logs.data || '';
+
+                // Check each pattern
+                for (const pattern of cacheErrorPatterns) {
+                  if (pattern.test(logText)) {
+                    cacheIssues++;
+                    if (/node_modules|lockfile|EINTEGRITY/.test(logText)) {
+                      corruptionType = 'npm_cache';
+                    } else if (/docker|buildx/.test(logText)) {
+                      corruptionType = 'docker_cache';
+                    } else if (/pip|python/.test(logText)) {
+                      corruptionType = 'pip_cache';
+                    } else {
+                      corruptionType = 'generic';
+                    }
+                    break;
+                  }
+                }
+              } catch (error) {
+                console.log(`Could not analyze logs for job ${job.id}`);
+              }
+            }
+
+            const isCacheCorrupted = cacheIssues > 0 || '${{ github.event.inputs.force_invalidate }}' === 'true';
+            core.setOutput('cache_corrupted', isCacheCorrupted ? 'true' : 'false');
+            core.setOutput('corruption_type', corruptionType);
+
+            console.log(`Cache corruption detected: ${isCacheCorrupted}, Type: ${corruptionType}`);
+
+  recover-npm-cache:
+    name: "🔧 Recover NPM Cache"
+    needs: detect-cache-corruption
+    if: |
+      needs.detect-cache-corruption.outputs.cache_corrupted == 'true' &&
+      (needs.detect-cache-corruption.outputs.corruption_type == 'npm_cache' ||
+       needs.detect-cache-corruption.outputs.corruption_type == 'generic')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - name: Clear NPM cache
+        run: |
+          echo "🔧 Clearing NPM cache..."
+          npm cache clean --force
+
+      - name: Remove node_modules
+        run: |
+          echo "🗑️ Removing node_modules..."
+          find . -name "node_modules" -type d -prune -exec rm -rf {} +
+
+      - name: Setup Node.js
+        uses: actions/setup-node@b39b52d1213e96004bfcb1c61a8a6fa8ab84f3e8 # v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Reinstall dependencies
+        run: |
+          echo "📦 Reinstalling dependencies..."
+          rm -f package-lock.json
+          npm install
+          npm ci
+
+      - name: Verify installation
+        id: verify
+        continue-on-error: true
+        run: |
+          echo "✅ Verifying installation..."
+          npm run build || echo "Build verification failed"
+          npm run lint || echo "Lint verification failed"
+
+      - name: Invalidate GitHub Actions cache
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            // Delete all npm caches for this repo
+            try {
+              const caches = await github.rest.actions.getActionsCacheList({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                key: 'node-'
+              });
+
+              for (const cache of caches.data.actions_caches) {
+                await github.rest.actions.deleteActionsCacheById({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  cache_id: cache.id
+                });
+                console.log(`Deleted cache: ${cache.key}`);
+              }
+            } catch (error) {
+              console.log('Could not delete caches:', error.message);
+            }
+
+  recover-docker-cache:
+    name: "🐳 Recover Docker Cache"
+    needs: detect-cache-corruption
+    if: |
+      needs.detect-cache-corruption.outputs.cache_corrupted == 'true' &&
+      (needs.detect-cache-corruption.outputs.corruption_type == 'docker_cache' ||
+       needs.detect-cache-corruption.outputs.corruption_type == 'generic')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Clear Docker build cache
+        run: |
+          echo "🔧 Clearing Docker build cache..."
+          docker builder prune -af --filter "until=24h"
+
+      - name: Invalidate GitHub Actions Docker cache
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            try {
+              const caches = await github.rest.actions.getActionsCacheList({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                key: 'buildx-'
+              });
+
+              for (const cache of caches.data.actions_caches) {
+                await github.rest.actions.deleteActionsCacheById({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  cache_id: cache.id
+                });
+                console.log(`Deleted Docker cache: ${cache.key}`);
+              }
+            } catch (error) {
+              console.log('Could not delete Docker caches:', error.message);
+            }
+
+      - name: Rebuild with fresh cache
+        run: |
+          echo "🔨 Rebuilding Docker images..."
+          docker build --no-cache -t test-build .
+
+  recover-pip-cache:
+    name: "🐍 Recover Python Cache"
+    needs: detect-cache-corruption
+    if: |
+      needs.detect-cache-corruption.outputs.cache_corrupted == 'true' &&
+      needs.detect-cache-corruption.outputs.corruption_type == 'pip_cache'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+
+      - name: Setup Python
+        uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5
+        with:
+          python-version: '3.11'
+
+      - name: Clear pip cache
+        run: |
+          echo "🔧 Clearing pip cache..."
+          pip cache purge
+
+      - name: Reinstall dependencies
+        run: |
+          echo "📦 Reinstalling Python dependencies..."
+          if [ -f requirements.txt ]; then
+            pip install --no-cache-dir -r requirements.txt
+          fi
+          if [ -f requirements-dev.txt ]; then
+            pip install --no-cache-dir -r requirements-dev.txt
+          fi
+
+      - name: Invalidate GitHub Actions pip cache
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            try {
+              const caches = await github.rest.actions.getActionsCacheList({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                key: 'pip-'
+              });
+
+              for (const cache of caches.data.actions_caches) {
+                await github.rest.actions.deleteActionsCacheById({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  cache_id: cache.id
+                });
+                console.log(`Deleted pip cache: ${cache.key}`);
+              }
+            } catch (error) {
+              console.log('Could not delete pip caches:', error.message);
+            }
+
+  retry-workflow:
+    name: "🔄 Retry Original Workflow"
+    needs: [detect-cache-corruption, recover-npm-cache, recover-docker-cache, recover-pip-cache]
+    if: |
+      always() &&
+      needs.detect-cache-corruption.outputs.cache_corrupted == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger workflow rerun
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const runId = context.payload.workflow_run?.id;
+            if (!runId) {
+              console.log('No workflow run ID available');
+              return;
+            }
+
+            try {
+              await github.rest.actions.reRunWorkflow({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                run_id: runId
+              });
+              console.log('✅ Triggered workflow rerun after cache recovery');
+            } catch (error) {
+              console.log('⚠️ Could not trigger rerun:', error.message);
+            }
+
+  report-recovery:
+    name: "📊 Recovery Report"
+    needs: [detect-cache-corruption, recover-npm-cache, recover-docker-cache, recover-pip-cache, retry-workflow]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate report
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const cacheCorrupted = '${{ needs.detect-cache-corruption.outputs.cache_corrupted }}' === 'true';
+            const corruptionType = '${{ needs.detect-cache-corruption.outputs.corruption_type }}';
+
+            let report = '## 🔧 Build Cache Recovery Report\n\n';
+
+            if (!cacheCorrupted) {
+              report += '✅ No cache corruption detected.\n';
+            } else {
+              report += `⚠️ **Cache corruption detected:** ${corruptionType}\n\n`;
+              report += '### Recovery Actions Taken:\n\n';
+
+              if (corruptionType.includes('npm') || corruptionType === 'generic') {
+                report += '- ✅ Cleared NPM cache\n';
+                report += '- ✅ Removed node_modules\n';
+                report += '- ✅ Reinstalled dependencies\n';
+                report += '- ✅ Invalidated GitHub Actions NPM cache\n';
+              }
+
+              if (corruptionType.includes('docker') || corruptionType === 'generic') {
+                report += '- ✅ Cleared Docker build cache\n';
+                report += '- ✅ Invalidated GitHub Actions Docker cache\n';
+                report += '- ✅ Rebuilt images without cache\n';
+              }
+
+              if (corruptionType.includes('pip')) {
+                report += '- ✅ Cleared pip cache\n';
+                report += '- ✅ Reinstalled Python dependencies\n';
+                report += '- ✅ Invalidated GitHub Actions pip cache\n';
+              }
+
+              report += '\n### Next Steps:\n';
+              report += '- 🔄 Original workflow has been retriggered\n';
+              report += '- 📊 Monitor next run for success\n';
+              report += '- 🔍 If issues persist, manual investigation required\n';
+            }
+
+            await core.summary.addRaw(report).write();
+
+            // Comment on PR if exists
+            if (context.payload.workflow_run?.pull_requests?.length > 0) {
+              const prNumber = context.payload.workflow_run.pull_requests[0].number;
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                body: report + '\n\n*Auto-generated by Build Cache Recovery workflow*'
+              });
+            }

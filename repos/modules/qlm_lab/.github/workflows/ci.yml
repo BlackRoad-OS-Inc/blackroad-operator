@@ -1,0 +1,51 @@
+name: qlm_lab
+on: [push, pull_request]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install -e modules/qlm_lab[qiskit] pytest pytest-cov ruff mypy jupyter nbconvert
+      - run: pytest --cov=qlm_lab.tools.quantum_np --cov-report=term --cov-report=json:coverage.json modules/qlm_lab/tests
+      - run: python -m qlm_lab.demos.demo_bell
+      - run: make -C modules/qlm_lab demo_toolcaller
+      - run: make -C modules/qlm_lab demo_toolformer
+      - run: make -C modules/qlm_lab demo_rag
+      - name: Write coverage summary
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from qlm_lab.tools import quantum_np as Q
+
+          data = json.loads(Path('coverage.json').read_text())
+          file_key = 'modules/qlm_lab/qlm_lab/tools/quantum_np.py'
+          percent = data['files'][file_key]['summary']['percent_covered'] / 100.0
+          artifacts_dir = Path('modules/qlm_lab/artifacts')
+          artifacts_dir.mkdir(exist_ok=True)
+          rag_path = artifacts_dir / 'rag_topk.json'
+          citations = []
+          if rag_path.exists():
+              citations = json.loads(rag_path.read_text(encoding='utf-8'))
+          payload = {
+              'coverage': {'qlm_lab/tools/quantum_np.py': round(percent, 4)},
+              'metrics': {'chsh': Q.chsh_value_phi_plus()},
+              'artifacts': {'count': len(list(artifacts_dir.glob('*')))},
+              'policy': {'allow_network': False},
+          }
+          out = Path('prism/ci/qlm_lab.coverage.json')
+          out.parent.mkdir(parents=True, exist_ok=True)
+          out.write_text(json.dumps(payload, indent=2))
+          rag_out = Path('prism/ci/qlm_lab.rag.json')
+          rag_out.write_text(json.dumps({'citations': {'count': len(citations)}}, indent=2))
+          PY
+      - run: make -C modules/qlm_lab lint
+      - run: make -C modules/qlm_lab test
+      - run: make -C modules/qlm_lab demo
+      - run: make -C modules/qlm_lab gate
+      - uses: actions/upload-artifact@v4
+        with:
+          name: qlm_lab-artifacts
+          path: modules/qlm_lab/artifacts/

@@ -1,0 +1,176 @@
+name: Reusable BlackRoad Org Deploy
+
+# This workflow is callable by any repo in the BlackRoad-OS-Inc organization.
+# Usage from a calling workflow:
+#
+#   jobs:
+#     deploy:
+#       uses: BlackRoad-OS/blackroad-os-prism-enterprise/.github/workflows/reusable-blackroad-org-deploy.yml@main
+#       with:
+#         environment: production
+#         service: my-service
+#       secrets: inherit
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: 'Target deployment environment'
+        type: string
+        required: false
+        default: 'production'
+      service:
+        description: 'Service/app name to deploy'
+        type: string
+        required: false
+        default: ''
+      image_tag:
+        description: 'Docker image tag to deploy'
+        type: string
+        required: false
+        default: 'latest'
+      org:
+        description: 'BlackRoad organization slug (defaults to BlackRoad-OS-Inc)'
+        type: string
+        required: false
+        default: 'BlackRoad-OS-Inc'
+    secrets:
+      BR_DEPLOY_URL:
+        description: 'BlackRoad deployment API endpoint'
+        required: false
+      BR_DEPLOY_SECRET:
+        description: 'BlackRoad deployment secret'
+        required: false
+      DROPLET_IP:
+        description: 'Target droplet / server IP'
+        required: false
+      DROPLET_SSH_KEY:
+        description: 'SSH private key for the target server'
+        required: false
+      STRIPE_SECRET_KEY:
+        description: 'Stripe secret key (passed through to deployed service)'
+        required: false
+      CLERK_SECRET_KEY:
+        description: 'Clerk secret key (passed through to deployed service)'
+        required: false
+
+jobs:
+  # ── Phase 1: validate & announce ─────────────────────────────────────────
+  pre-deploy:
+    name: Pre-deploy checks
+    runs-on: ubuntu-latest
+    outputs:
+      deploy_sha: ${{ steps.meta.outputs.sha }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Collect metadata
+        id: meta
+        run: |
+          echo "sha=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+          echo "repo=${{ github.repository }}" >> "$GITHUB_OUTPUT"
+          echo "org=${{ inputs.org }}" >> "$GITHUB_OUTPUT"
+
+      - name: Announce deployment start
+        run: |
+          echo "🚀 Deploying ${{ inputs.service || github.repository }} @ ${{ steps.meta.outputs.sha }}"
+          echo "   Environment : ${{ inputs.environment }}"
+          echo "   Image tag   : ${{ inputs.image_tag }}"
+          echo "   Org         : ${{ inputs.org }}"
+
+  # ── Phase 2: deploy via BlackRoad deploy API (if configured) ─────────────
+  deploy-api:
+    name: Trigger BlackRoad deploy API
+    runs-on: ubuntu-latest
+    needs: pre-deploy
+    # Runs when the BR_DEPLOY_URL input is explicitly provided by the caller
+    if: inputs.org != ''
+    steps:
+      - name: Trigger deploy
+        env:
+          BR_DEPLOY_URL: ${{ secrets.BR_DEPLOY_URL }}
+          BR_DEPLOY_SECRET: ${{ secrets.BR_DEPLOY_SECRET }}
+        run: |
+          if [ -z "$BR_DEPLOY_URL" ] || [ -z "$BR_DEPLOY_SECRET" ]; then
+            echo "⚠️  BR_DEPLOY_URL or BR_DEPLOY_SECRET not set — skipping deploy API call"
+            exit 0
+          fi
+          curl -fsSL -X POST "$BR_DEPLOY_URL/deploy" \
+            -H "Authorization: Bearer $BR_DEPLOY_SECRET" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "repo": "${{ github.repository }}",
+              "sha": "${{ needs.pre-deploy.outputs.deploy_sha }}",
+              "service": "${{ inputs.service }}",
+              "environment": "${{ inputs.environment }}",
+              "imageTag": "${{ inputs.image_tag }}",
+              "org": "${{ inputs.org }}"
+            }' || echo "⚠️  Deploy API not reachable — skipping"
+
+  # ── Phase 3: SSH deploy (fallback when no deploy API) ────────────────────
+  deploy-ssh:
+    name: SSH deploy to droplet
+    runs-on: ubuntu-latest
+    needs: pre-deploy
+    # Always attempt; the step inside guards on secret presence
+    if: inputs.org != ''
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy via SSH
+        env:
+          DROPLET_IP: ${{ secrets.DROPLET_IP }}
+          DROPLET_SSH_KEY: ${{ secrets.DROPLET_SSH_KEY }}
+        run: |
+          if [ -z "$DROPLET_IP" ] || [ -z "$DROPLET_SSH_KEY" ]; then
+            echo "⚠️  DROPLET_IP or DROPLET_SSH_KEY not set — skipping SSH deploy"
+            exit 0
+          fi
+        # Uses appleboy/ssh-action when secrets are set
+      - name: SSH to target
+        if: env.DROPLET_IP != '' && env.DROPLET_SSH_KEY != ''
+        uses: appleboy/ssh-action@v1.0.0
+        env:
+          DROPLET_IP: ${{ secrets.DROPLET_IP }}
+          DROPLET_SSH_KEY: ${{ secrets.DROPLET_SSH_KEY }}
+        with:
+          host: ${{ secrets.DROPLET_IP }}
+          username: root
+          key: ${{ secrets.DROPLET_SSH_KEY }}
+          script: |
+            SERVICE="${{ inputs.service }}"
+            REPO_DIR="/opt/blackroad/${SERVICE:-app}"
+            if [ ! -d "$REPO_DIR" ]; then
+              git clone "https://github.com/${{ github.repository }}.git" "$REPO_DIR"
+            fi
+            cd "$REPO_DIR"
+            git fetch origin ${{ github.ref_name }}
+            git reset --hard origin/${{ github.ref_name }}
+            [ -f .env.example ] && [ ! -f .env ] && cp .env.example .env
+            docker compose pull 2>/dev/null || true
+            docker compose up -d --build --remove-orphans
+            docker image prune -f
+
+  # ── Phase 4: post-deploy smoke test ──────────────────────────────────────
+  smoke-test:
+    name: Smoke test
+    runs-on: ubuntu-latest
+    needs: [deploy-api, deploy-ssh]
+    if: always() && (needs.deploy-api.result == 'success' || needs.deploy-ssh.result == 'success')
+    steps:
+      - name: Health check
+        env:
+          STAGING_URL: ${{ secrets.STAGING_URL }}
+          SERVICE: ${{ inputs.service }}
+        run: |
+          TARGET="${STAGING_URL:-https://${SERVICE:-app}.blackroad.io}"
+          for i in 1 2 3; do
+            STATUS=$(curl -o /dev/null -s -w "%{http_code}" "$TARGET/health" || echo "000")
+            if [ "$STATUS" = "200" ]; then
+              echo "✅ Health check passed ($STATUS)"
+              exit 0
+            fi
+            echo "⏳ Attempt $i — status $STATUS, retrying in 15s…"
+            sleep 15
+          done
+          echo "⚠️  Health check did not return 200 — please verify manually"

@@ -1,0 +1,28 @@
+repo:
+  name: blackroad-agents
+  org: BlackRoad-OS-Inc
+  type: agent-definitions
+  languages: [bash, json, modelfile]
+  url: https://github.com/BlackRoad-OS-Inc/blackroad-agents
+
+ownership:
+  owner: blackboxprogramming
+  codeowners: ["@blackboxprogramming"]
+  license: proprietary
+
+policies:
+  inherits: ["coding", "collaboration", "safety", "issues", "pr-review", "docs"]
+  additional:
+    - "Modelfiles must include a clear system prompt describing the agent's role"
+    - "Coordination scripts must be idempotent"
+    - "Agent definitions must not embed API keys or secrets"
+    - "New agents must be registered in directory-structure.json"
+
+certification:
+  required_level: 3
+  modules: ["fundamentals", "agents", "coding-standards"]
+
+deployment:
+  target: pi-fleet (Ollama on Cecilia/Octavia)
+  command: "ollama create <agent> -f modelfiles/<agent>.Modelfile"
+  health_check: "ollama list"

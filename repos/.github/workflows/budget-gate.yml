@@ -1,0 +1,21 @@
+# .github/workflows/budget-gate.yml
+name: budget-gate
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+jobs:
+  check-budgets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+      - name: Ensure KPIs present (compute if missing)
+        run: |
+          if [ ! -f data/kpis/latest.json ]; then
+            if [ -f data/timemachine/index.json ]; then
+              node tools/kpis/compute.js data/timemachine/index.json > data/kpis/latest.json
+            else
+              echo "No index found; skipping compute."
+            fi
+          fi
+      - name: Budget checks
+        run: node tools/policies/check_budgets.js data/kpis/latest.json

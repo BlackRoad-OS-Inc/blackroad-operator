@@ -1,0 +1,111 @@
+name: Branch Cleanup
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Set true to preview (default: true)"
+        required: false
+        default: "true"
+  schedule:
+    - cron: "17 3 * * *"  # nightly 03:17 UTC
+
+permissions:
+  contents: write
+  pull-requests: read
+  issues: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Validate token permissions
+        env:
+          GH_TOKEN: ${{ secrets.BRANCH_CLEANUP_TOKEN || secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Checking GitHub CLI authentication..."
+          gh auth status || (echo "❌ No auth - check BRANCH_CLEANUP_TOKEN secret" && exit 1)
+          echo "✓ Authentication successful"
+
+      - name: Run cleanup (dry-run)
+        if: ${{ github.event.inputs.dry_run == 'true' || github.event_name == 'schedule' }}
+        env:
+          BRANCH_CLEANUP_TOKEN: ${{ secrets.BRANCH_CLEANUP_TOKEN || secrets.GITHUB_TOKEN }}
+        run: |
+          echo "🔍 Running in DRY-RUN mode..."
+          npx tsx tools/branch-cleanup/cleanup.ts --dry-run
+
+      - name: Run cleanup (live)
+        if: ${{ github.event.inputs.dry_run == 'false' }}
+        env:
+          BRANCH_CLEANUP_TOKEN: ${{ secrets.BRANCH_CLEANUP_TOKEN || secrets.GITHUB_TOKEN }}
+        run: |
+          echo "🚀 Running LIVE cleanup..."
+          npx tsx tools/branch-cleanup/cleanup.ts
+
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: branch-cleanup-reports-${{ github.run_number }}
+          path: ops/reports/branch-cleanup/**
+          retention-days: 90
+
+      - name: Comment on workflow run
+        if: always() && github.event_name == 'workflow_dispatch'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            // Find latest report
+            const reportsDir = 'ops/reports/branch-cleanup';
+            if (!fs.existsSync(reportsDir)) {
+              console.log('No reports directory found');
+              return;
+            }
+
+            const dirs = fs.readdirSync(reportsDir).sort().reverse();
+            if (dirs.length === 0) {
+              console.log('No report directories found');
+              return;
+            }
+
+            const latestDir = path.join(reportsDir, dirs[0]);
+            const summaryPath = path.join(latestDir, 'summary.txt');
+
+            if (!fs.existsSync(summaryPath)) {
+              console.log('No summary file found');
+              return;
+            }
+
+            const summary = fs.readFileSync(summaryPath, 'utf8');
+
+            const comment = `## Branch Cleanup Report
+
+            \`\`\`
+            ${summary}
+            \`\`\`
+
+            📎 Full reports available in workflow artifacts.
+            `;
+
+            // This would post to the workflow run, but we'll just log it
+            console.log(comment);

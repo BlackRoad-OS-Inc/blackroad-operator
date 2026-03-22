@@ -1,0 +1,17 @@
+---
+- name: Install chromium
+  apt:
+    name:
+      - chromium-browser
+      - unclutter
+      - xserver-xorg-legacy
+    state: present
+- name: Install kiosk service
+  copy:
+    src: ../../systemd/kiosk-browser.service
+    dest: /etc/systemd/system/kiosk-browser.service
+- name: Enable kiosk
+  systemd:
+    name: kiosk-browser.service
+    state: started
+    enabled: yes

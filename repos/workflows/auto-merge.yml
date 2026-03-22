@@ -1,0 +1,31 @@
+# BlackRoad OS — Pave Tomorrow.
+# Auto-merge PRs from trusted authors when approved
+name: Auto Merge
+
+on:
+  pull_request_review:
+    types: [submitted]
+
+jobs:
+  auto-merge:
+    if: github.event.review.state == 'approved'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check trusted author
+        id: check
+        run: |
+          TRUSTED="blackroad alice lucidia-agent cecilia cece aria eve meridian sentinel"
+          AUTHOR="${{ github.event.pull_request.user.login }}"
+          if echo "$TRUSTED" | grep -qw "$AUTHOR"; then
+            echo "trusted=true" >> $GITHUB_OUTPUT
+          else
+            echo "trusted=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Merge PR
+        if: steps.check.outputs.trusted == 'true'
+        run: |
+          curl -s -X POST "${{ github.server_url }}/api/v1/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/merge" \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{"Do": "merge", "merge_message_field": "Auto-merged by BlackRoad CI"}'

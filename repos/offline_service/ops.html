@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Offline Policy Ops</title>
+    <style>
+      body {
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        margin: 2rem auto;
+        max-width: 720px;
+        line-height: 1.6;
+        color: #172b4d;
+      }
+      h1 {
+        margin-bottom: 0.25rem;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 1rem;
+        margin: 1.5rem 0;
+      }
+      .card {
+        border: 1px solid #d9e2ec;
+        border-radius: 8px;
+        padding: 1rem;
+        background: #f8fafc;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+      }
+      .card strong {
+        display: block;
+        font-size: 1.25rem;
+      }
+      pre {
+        background: #0f172a;
+        color: #e2e8f0;
+        padding: 1rem;
+        border-radius: 8px;
+        overflow-x: auto;
+      }
+      footer {
+        font-size: 0.85rem;
+        color: #64748b;
+        margin-top: 2rem;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Offline Policy Service</h1>
+    <p>
+      Snapshot of policy evaluation activity. Metrics refresh every 10 seconds.
+    </p>
+    <div class="grid">
+      <div class="card">
+        <span>Policy Pass</span>
+        <strong id="metric-pass">0</strong>
+      </div>
+      <div class="card">
+        <span>Policy Warn</span>
+        <strong id="metric-warn">0</strong>
+      </div>
+      <div class="card">
+        <span>Policy Fail</span>
+        <strong id="metric-fail">0</strong>
+      </div>
+      <div class="card">
+        <span>Attest OK</span>
+        <strong id="metric-attest-ok">0</strong>
+      </div>
+      <div class="card">
+        <span>Attest Fail</span>
+        <strong id="metric-attest-fail">0</strong>
+      </div>
+      <div class="card">
+        <span>Remediations</span>
+        <strong id="metric-remediation">0</strong>
+      </div>
+    </div>
+    <section>
+      <h2>Raw Metrics</h2>
+      <pre id="raw-json">{}</pre>
+    </section>
+    <footer>
+      Metrics served from <code>/api/policy/metrics</code>. Updated <span id="last-updated">never</span>.
+    </footer>
+    <script>
+      async function refresh() {
+        try {
+          const response = await fetch('/api/policy/metrics');
+          if (!response.ok) {
+            throw new Error('HTTP ' + response.status);
+          }
+          const payload = await response.json();
+          updateCards(payload);
+          document.getElementById('raw-json').textContent = JSON.stringify(payload, null, 2);
+          document.getElementById('last-updated').textContent = new Date().toLocaleTimeString();
+        } catch (err) {
+          document.getElementById('raw-json').textContent = 'Error loading metrics: ' + err.message;
+        }
+      }
+
+      function updateCards(data) {
+        const { policy = {}, attest = {}, remediation = {} } = data;
+        document.getElementById('metric-pass').textContent = policy.pass ?? 0;
+        document.getElementById('metric-warn').textContent = policy.warn ?? 0;
+        document.getElementById('metric-fail').textContent = policy.fail ?? 0;
+        document.getElementById('metric-attest-ok').textContent = attest.ok ?? 0;
+        document.getElementById('metric-attest-fail').textContent = attest.fail ?? 0;
+        document.getElementById('metric-remediation').textContent = remediation.total ?? 0;
+      }
+
+      refresh();
+      setInterval(refresh, 10_000);
+    </script>
+  </body>
+</html>

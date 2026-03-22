@@ -1,0 +1,257 @@
+name: "🔏 Enforce Commit Signing"
+
+# Enforces that all commits must be cryptographically signed
+# Blocks PRs with unsigned commits
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches:
+      - main
+      - master
+
+permissions:
+  contents: read
+  pull-requests: write
+  statuses: write
+  checks: write
+
+jobs:
+  check-signatures:
+    name: "🔏 Verify All Commits Signed"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Install GPG tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq gnupg2
+
+      - name: Check commit signatures
+        id: check
+        run: |
+          echo "🔏 Checking commit signatures..."
+
+          # Get commits to check
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BASE="${{ github.event.pull_request.base.sha }}"
+            HEAD="${{ github.event.pull_request.head.sha }}"
+            COMMITS=$(git rev-list $BASE..$HEAD)
+          else
+            COMMITS=$(git rev-list -n 10 HEAD)
+          fi
+
+          TOTAL_COMMITS=$(echo "$COMMITS" | wc -l)
+          SIGNED_COMMITS=0
+          UNSIGNED_COMMITS=0
+          UNSIGNED_LIST=""
+
+          echo "📋 Checking $TOTAL_COMMITS commit(s)..."
+          echo ""
+
+          for commit in $COMMITS; do
+            SHORT_SHA=$(git rev-parse --short "$commit")
+            AUTHOR=$(git log -1 --format="%an" "$commit")
+            MESSAGE=$(git log -1 --format="%s" "$commit")
+
+            echo "Checking: $SHORT_SHA - $MESSAGE"
+
+            if git verify-commit "$commit" 2>/dev/null; then
+              echo "  ✅ Signed"
+              SIGNED_COMMITS=$((SIGNED_COMMITS + 1))
+
+              # Get signer info
+              SIGNER=$(git show --show-signature --format="%GS" "$commit" 2>/dev/null | head -1 || echo "Unknown")
+              echo "  🔑 Signer: $SIGNER"
+            else
+              echo "  ❌ UNSIGNED"
+              UNSIGNED_COMMITS=$((UNSIGNED_COMMITS + 1))
+              UNSIGNED_LIST="${UNSIGNED_LIST}$'\n'- \`$SHORT_SHA\` by $AUTHOR: $MESSAGE"
+            fi
+            echo ""
+          done
+
+          echo "total=$TOTAL_COMMITS" >> $GITHUB_OUTPUT
+          echo "signed=$SIGNED_COMMITS" >> $GITHUB_OUTPUT
+          echo "unsigned=$UNSIGNED_COMMITS" >> $GITHUB_OUTPUT
+
+          # Save unsigned list for comment
+          echo "$UNSIGNED_LIST" > /tmp/unsigned-commits.txt
+
+          echo "=========================================="
+          echo "Summary:"
+          echo "  Total commits: $TOTAL_COMMITS"
+          echo "  ✅ Signed: $SIGNED_COMMITS"
+          echo "  ❌ Unsigned: $UNSIGNED_COMMITS"
+          echo "=========================================="
+
+          if [ $UNSIGNED_COMMITS -gt 0 ]; then
+            echo ""
+            echo "❌ UNSIGNED COMMITS DETECTED - BLOCKING"
+            exit 1
+          else
+            echo ""
+            echo "✅ All commits are properly signed"
+          fi
+
+      - name: Comment on unsigned commits
+        if: failure() && github.event.pull_request.number
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const unsignedList = fs.readFileSync('/tmp/unsigned-commits.txt', 'utf8').trim();
+
+            const body = `## 🔏 Commit Signature Verification Failed
+
+            ❌ **This PR contains unsigned commits and cannot be merged.**
+
+            **Summary:**
+            - Total commits: ${{ steps.check.outputs.total }}
+            - ✅ Signed: ${{ steps.check.outputs.signed }}
+            - ❌ Unsigned: ${{ steps.check.outputs.unsigned }}
+
+            **Unsigned commits:**
+            ${unsignedList}
+
+            ---
+
+            ### 📚 How to sign your commits:
+
+            #### Setup GPG signing (one-time):
+            \`\`\`bash
+            # Generate GPG key
+            gpg --full-generate-key
+
+            # List keys and copy the key ID
+            gpg --list-secret-keys --keyid-format=long
+
+            # Configure Git to use your key
+            git config --global user.signingkey YOUR_KEY_ID
+            git config --global commit.gpgsign true
+
+            # Add GPG key to GitHub
+            gpg --armor --export YOUR_KEY_ID
+            # Paste output to: GitHub → Settings → SSH and GPG keys
+            \`\`\`
+
+            #### For these commits:
+            \`\`\`bash
+            # Option 1: Amend the last commit with signature
+            git commit --amend --no-edit -S
+
+            # Option 2: Rebase and sign all commits
+            git rebase --exec 'git commit --amend --no-edit -n -S' -i ${{ github.event.pull_request.base.sha }}
+
+            # Force push (carefully!)
+            git push --force-with-lease
+            \`\`\`
+
+            #### Alternative: SSH signing (GitHub supports this!)
+            \`\`\`bash
+            # Use your existing SSH key
+            git config --global gpg.format ssh
+            git config --global user.signingkey ~/.ssh/id_ed25519.pub
+            git config --global commit.gpgsign true
+            \`\`\`
+
+            ---
+
+            **🔐 Security Policy:** All commits must be cryptographically signed to ensure authenticity and integrity.`;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body: body
+            });
+
+            // Add label
+            try {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                labels: ['unsigned-commits', 'requires-signature']
+              });
+            } catch (error) {
+              console.log('Could not add labels:', error.message);
+            }
+
+      - name: Comment on success
+        if: success() && github.event.pull_request.number
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const body = `## 🔏 Commit Signature Verification Passed
+
+            ✅ **All commits are properly signed**
+
+            **Summary:**
+            - Total commits: ${{ steps.check.outputs.total }}
+            - ✅ Signed: ${{ steps.check.outputs.signed }}
+            - ❌ Unsigned: 0
+
+            🔐 All commits have been cryptographically verified and are authentic.`;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body: body
+            });
+
+            // Remove blocking labels if they exist
+            try {
+              await github.rest.issues.removeLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                name: 'unsigned-commits'
+              });
+            } catch (error) {
+              // Label might not exist
+            }
+
+            try {
+              await github.rest.issues.removeLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                name: 'requires-signature'
+              });
+            } catch (error) {
+              // Label might not exist
+            }
+
+      - name: Set commit status
+        if: always()
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const success = '${{ steps.check.outcome }}' === 'success';
+            const unsigned = parseInt('${{ steps.check.outputs.unsigned }}' || '0');
+
+            const state = success ? 'success' : 'failure';
+            const description = success
+              ? `✅ All ${{ steps.check.outputs.total }} commit(s) signed`
+              : `❌ ${unsigned} unsigned commit(s) detected`;
+
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: context.payload.pull_request?.head.sha || context.sha,
+              state: state,
+              context: 'Commit Signature Enforcement',
+              description: description,
+              target_url: `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`
+            });

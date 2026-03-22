@@ -1,0 +1,86 @@
+const sharedGlobals = {
+  AbortController: 'readonly',
+  Buffer: 'readonly',
+  clearImmediate: 'readonly',
+  clearInterval: 'readonly',
+  clearTimeout: 'readonly',
+  console: 'readonly',
+  exports: 'readonly',
+  fetch: 'readonly',
+  global: 'readonly',
+  module: 'readonly',
+  process: 'readonly',
+  require: 'readonly',
+  setImmediate: 'readonly',
+  setInterval: 'readonly',
+  setTimeout: 'readonly',
+  URL: 'readonly',
+  URLSearchParams: 'readonly',
+  window: 'readonly',
+  document: 'readonly',
+  navigator: 'readonly',
+  FormData: 'readonly',
+  Headers: 'readonly',
+  Request: 'readonly',
+  Response: 'readonly',
+};
+
+const testGlobals = {
+  after: 'readonly',
+  afterAll: 'readonly',
+  afterEach: 'readonly',
+  before: 'readonly',
+  beforeAll: 'readonly',
+  beforeEach: 'readonly',
+  describe: 'readonly',
+  expect: 'readonly',
+  it: 'readonly',
+  jest: 'readonly',
+  test: 'readonly',
+};
+
+module.exports = {
+  root: true,
+  ignorePatterns: [
+    'node_modules/',
+    'dist/',
+    'build/',
+    'coverage/',
+    '.github/',
+    '.tools/',
+    'public/vendor/',
+    'var/',
+    '_trash/',
+  ],
+  overrides: [
+    {
+      files: ['**/*.{js,cjs,mjs,jsx}'],
+      env: { es2022: true, node: true },
+      parserOptions: {
+        ecmaVersion: 2022,
+        sourceType: 'module',
+        ecmaFeatures: { jsx: true },
+      },
+      globals: sharedGlobals,
+      rules: {
+        'no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+        'no-undef': 'warn',
+      },
+    },
+    {
+      files: [
+        'srv/blackroad-api/**/*.js',
+        'scripts/**/*.js',
+        'services/**/*.js',
+        'srv/**/*.js',
+      ],
+      parserOptions: { sourceType: 'commonjs' },
+    },
+    {
+      files: ['tests/**/*.js', '**/*.test.js'],
+      env: { es2022: true, node: true, jest: true },
+      parserOptions: { ecmaVersion: 2022, sourceType: 'commonjs' },
+      globals: { ...sharedGlobals, ...testGlobals },
+    },
+  ],
+};

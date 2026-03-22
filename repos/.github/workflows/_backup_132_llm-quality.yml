@@ -1,0 +1,35 @@
+name: LLM Quality (flag-aware)
+on:
+  pull_request:
+  workflow_dispatch: {}
+permissions:
+  contents: read
+  actions: read
+  checks: write
+  pull-requests: write
+jobs:
+  flags:
+    uses: ./.github/workflows/flags.yml
+  eval:
+    needs: flags
+    if: needs.flags.outputs.ai_tools == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - name: Run evaluator
+        run: |
+          node .github/tools/llm/prompt-eval.js
+          node .github/tools/llm/hallucination-check.js
+      - name: Upload artifacts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: llm-eval
+          path: artifacts/llm-eval
+  note:
+    needs: flags
+    if: needs.flags.outputs.ai_tools != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "AI tools disabled via feature flags; skipping eval." >> $GITHUB_STEP_SUMMARY

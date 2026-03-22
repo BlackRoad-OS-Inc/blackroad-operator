@@ -1,0 +1,36 @@
+#!/bin/bash
+# RoadChain Commit Signing — SHA-2048 identity hash in every commit trailer
+# Install: git config --global core.hooksPath ~/.roadchain-hooks
+# This replaces GPG signing with BlackRoad's sovereign SHA-2048 identity system.
+#
+# Copyright (c) 2024-2026 BlackRoad OS, Inc. All Rights Reserved.
+
+source ~/roadchain-identity.sh 2>/dev/null
+
+COMMIT_MSG_FILE="$1"
+
+# Read current message
+msg=$(cat "$COMMIT_MSG_FILE")
+
+# Skip if already has RoadChain hash
+if echo "$msg" | grep -q "RoadChain-SHA2048:"; then
+    exit 0
+fi
+
+# Compute SHA-2048 of the commit content
+commit_data="$(git diff --cached --stat 2>/dev/null)${msg}$(date +%s)"
+hash=$(sha2048_compute "$commit_data")
+short_id=$(sha2048_short "$hash")
+
+# Get identity
+identity_name="${ROADCHAIN_IDENTITY:-alexa}"
+provider="${ROADCHAIN_PROVIDER:-sovereign}"
+
+# Append RoadChain trailer
+cat > "$COMMIT_MSG_FILE" <<EOF
+${msg}
+
+RoadChain-SHA2048: ${short_id}
+RoadChain-Identity: ${identity_name}@${provider}
+RoadChain-Full: ${hash}
+EOF

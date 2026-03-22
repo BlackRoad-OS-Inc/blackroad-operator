@@ -1,0 +1,159 @@
+name: Origin Campus
+slug: origin_campus
+engine: unity
+version: 0.1.0
+description: >-
+  First-pass campus layout inspired by the Ellis-Island arrival flow.
+  Establishes the Harbor spawn, Registry Hall identity checks, QLM Dome
+  proofs, Sandbox Parcels, Archive Walk, and RoadView Tower analytics.
+defaults:
+  wait: 0.75
+  easing: smooth
+layers:
+  - label: Initialize harbor and registry
+    topic: sim/environment
+    payload:
+      scene_asset: Origin_Campus.unity
+      skybox: dawn_harbor
+      spawn_point:
+        position: [0.0, 1.6, -12.0]
+        facing: [0.0, 0.0, 1.0]
+      ambient_score: "harbor_strings"
+      signage:
+        - location: harbor
+          copy: "Welcome to Origin Campus — claim a pedestal to begin."
+        - location: registry
+          copy: "Present your temporary visa chip to receive your profile."
+  - label: Define key zones
+    topic: sim/environment/zones
+    payload:
+      zones:
+        - id: harbor
+          name: Harbor
+          anchor:
+            position: [0.0, 0.0, -10.0]
+            scale: [6.0, 1.0, 6.0]
+          cues:
+            lighting: "soft_morning"
+            effects: ["mist", "signal_lights"]
+        - id: registry-hall
+          name: Registry Hall
+          anchor:
+            position: [4.5, 0.0, -2.0]
+            scale: [4.0, 1.0, 6.0]
+          cues:
+            lighting: "warm_brass"
+            soundtrack: "ledger_percussion"
+        - id: qlm-dome
+          name: QLM Dome
+          anchor:
+            position: [0.0, 0.0, 6.5]
+            scale: [8.0, 1.0, 8.0]
+          cues:
+            lighting: "prism_caustics"
+            soundtrack: "quantum_resonance"
+        - id: sandbox-parcels
+          name: Sandbox Parcels
+          anchor:
+            position: [-9.5, 0.0, 8.0]
+            scale: [12.0, 1.0, 10.0]
+          cues:
+            lighting: "sunset_gold"
+            soundtrack: "maker_lofi"
+        - id: archive-walk
+          name: Archive Walk
+          anchor:
+            position: [7.5, 0.0, 10.0]
+            scale: [6.5, 1.0, 4.0]
+          cues:
+            lighting: "cool_archive"
+            effects: ["hologram_panels"]
+        - id: roadview-tower
+          name: RoadView Tower
+          anchor:
+            position: [2.5, 0.0, 15.0]
+            scale: [5.0, 6.0, 5.0]
+          cues:
+            lighting: "analytics_glow"
+            soundtrack: "telemetry_ambient"
+  - label: Configure QLM pedestals
+    topic: sim/interactives
+    payload:
+      pedestals:
+        - id: chsh-demo
+          zone: qlm-dome
+          task_queue: "qlm:bell_chsh"
+          preview_asset: "artifacts/chsh_preview.png"
+          success_stamp: "visa:bell"
+          failure_hint: "Target S between 2.4 and 2.8."
+        - id: grover-demo
+          zone: qlm-dome
+          task_queue: "qlm:grover"
+          preview_asset: "artifacts/grover_preview.png"
+          success_stamp: "visa:grover"
+          failure_hint: "Check iteration count vs marked states."
+        - id: codeforge-demo
+          zone: qlm-dome
+          task_queue: "qlm:codeforge"
+          preview_asset: "artifacts/code_preview.png"
+          success_stamp: "visa:code"
+          failure_hint: "Unit tests must compile before spawn."
+  - label: Parcel scaffolding
+    topic: sim/parcels
+    payload:
+      claim_mode: visa_required
+      plots:
+        - id: parcel-a1
+          anchor:
+            position: [-11.0, 0.0, 6.0]
+            rotation: [0.0, 45.0, 0.0]
+            scale: [3.0, 1.0, 3.0]
+          kit: "starter_greenhouse"
+        - id: parcel-b2
+          anchor:
+            position: [-8.0, 0.0, 10.5]
+            rotation: [0.0, 15.0, 0.0]
+            scale: [3.5, 1.0, 3.5]
+          kit: "analysis_lab"
+        - id: parcel-c3
+          anchor:
+            position: [-5.5, 0.0, 7.5]
+            rotation: [0.0, -20.0, 0.0]
+            scale: [4.0, 1.0, 3.0]
+          kit: "teaching_stage"
+      roadcoin_rewards:
+        proof_build: 12
+        proof_learn: 8
+        proof_teach: 10
+  - label: Evidence displays
+    topic: sim/evidence
+    payload:
+      boards:
+        - id: lineage-board
+          zone: archive-walk
+          source: "evidence:lineage/latest"
+          layout: "timeline"
+        - id: compliance-board
+          zone: archive-walk
+          source: "evidence:rego/passes"
+          layout: "heatmap"
+      feeds:
+        - id: tower-dashboard
+          zone: roadview-tower
+          widgets:
+            - type: "timeseries"
+              source: "telemetry:qlm/success_rate"
+            - type: "leaderboard"
+              source: "economy:roadcoin"
+  - label: Modding entry points
+    topic: sim/modding
+    payload:
+      importer: blender_unity_simple
+      submission_portal: "https://origin-cms.local/submit"
+      validation_rules:
+        - "enforce_scale:1"
+        - "origin_at_ground"
+        - "lod_required"
+      agent_hooks:
+        annotate_tool: "qlm:parcel_annotator"
+        repair_tool: "qlm:parcel_repair"

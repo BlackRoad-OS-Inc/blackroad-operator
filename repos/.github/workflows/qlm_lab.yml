@@ -1,0 +1,133 @@
+name: QLM Lab Quality Gates
+
+on:
+  push:
+    paths:
+      - 'modules/qlm_lab/**'
+      - 'prism/policies/gates/**'
+      - 'prism/ci/**'
+      - 'ops/gates/check_qlm_lab.sh'
+      - '.github/workflows/qlm_lab.yml'
+  pull_request:
+    paths:
+      - 'modules/qlm_lab/**'
+      - 'prism/policies/gates/**'
+      - 'prism/ci/**'
+      - 'ops/gates/check_qlm_lab.sh'
+      - '.github/workflows/qlm_lab.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+  attestations: write
+  actions: read
+
+jobs:
+  qlm-lab:
+    name: Validate QLM Lab
+    runs-on: ubuntu-latest
+    env:
+      PYTHON_VERSION: '3.11'
+      NODE_VERSION: '20'
+      WORKING_DIR: modules/qlm_lab
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+
+      - name: Set up Python
+        uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Upgrade pip and install tooling
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r ${WORKING_DIR}/requirements-dev.txt
+          pip install -e ${WORKING_DIR}[qiskit]
+          pip install coverage cyclonedx-bom pip-audit sigstore
+
+      - name: Install Node.js
+        uses: actions/setup-node@b39b52d1213e96004bfcb1c61a8a6fa8ab84f3e8 # v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install Node dependencies (frontend simulation only)
+        working-directory: frontend
+        run: |
+          npm install
+        continue-on-error: true
+
+      - name: Run Ruff lint
+        run: ruff check ${WORKING_DIR}/qlm_lab
+
+      - name: Run mypy
+        run: mypy ${WORKING_DIR}/qlm_lab
+
+      - name: Run unit tests with coverage
+        run: |
+          pytest ${WORKING_DIR}/tests --cov=qlm_lab --cov-report=xml --cov-report=term
+
+      - name: Execute Bell demo
+        run: make -C ${WORKING_DIR} demo
+
+      - name: Execute tool caller demo
+        run: make -C ${WORKING_DIR} demo_toolcaller
+
+      - name: Execute toolformer prompt demo
+        run: make -C ${WORKING_DIR} demo_toolformer
+
+      - name: Execute RAG demo
+        run: make -C ${WORKING_DIR} demo_rag
+
+      - name: Generate gate payloads
+        run: python ${WORKING_DIR}/scripts/make_gate_input.py
+
+      - name: Generate Python SBOM (CycloneDX)
+        run: |
+          mkdir -p artifacts/sbom
+          cyclonedx-py -j -o artifacts/sbom/qlm_lab-python.cdx.json --spec-version 1.4
+
+      - name: Generate Node SBOM (CycloneDX)
+        working-directory: frontend
+        run: |
+          mkdir -p ../artifacts/sbom
+          npx @cyclonedx/cyclonedx-npm --output ../artifacts/sbom/frontend-node.cdx.json --format json
+        continue-on-error: true
+
+      - name: Create Sigstore provenance bundle
+        if: ${{ always() }}
+        run: |
+          mkdir -p artifacts/provenance
+          sigstore attest --predicate-type https://slsa.dev/provenance/v1 \
+            --predicate ${WORKING_DIR}/artifacts/lineage.jsonl \
+            --bundle artifacts/provenance/qlm_lab.sigstore.json \
+            --no-upload
+        continue-on-error: true
+
+      - name: Run pip-audit
+        run: pip-audit
+        continue-on-error: true
+
+      - name: Run npm audit (omit dev)
+        working-directory: frontend
+        run: npm audit --omit=dev
+        continue-on-error: true
+
+      - name: Check secret hygiene
+        run: bash ops/security/check_env_secrets.sh
+
+      - name: Evaluate Rego gates
+        run: bash ops/gates/check_qlm_lab.sh
+
+      - name: Upload QLM Lab artifacts
+        uses: actions/upload-artifact@26f96dfa697d77e81fd5907df203aa23a56210a8 # v4
+        with:
+          name: qlm-lab-artifacts
+          path: |
+            modules/qlm_lab/artifacts/
+            prism/ci/qlm_lab.coverage.json
+            prism/ci/qlm_lab.rag.json
+            artifacts/sbom/
+            artifacts/provenance/
+          if-no-files-found: warn

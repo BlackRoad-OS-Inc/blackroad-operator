@@ -1,0 +1,116 @@
+name: Agent PR Creator
+
+on:
+  repository_dispatch:
+    types: [agent_create_pr]
+  workflow_dispatch:
+    inputs:
+      agent_id:
+        description: 'Agent ID (e.g., P1, P15, P1188)'
+        required: true
+        type: string
+      branch_name:
+        description: 'Branch name for the PR'
+        required: true
+        type: string
+      pr_title:
+        description: 'Pull Request title'
+        required: true
+        type: string
+      pr_body:
+        description: 'Pull Request body'
+        required: true
+        type: string
+      base_branch:
+        description: 'Base branch (default: main)'
+        required: false
+        type: string
+        default: 'main'
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  create_pr:
+    runs-on: ubuntu-latest
+    name: Create PR from Agent
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Load agent identity
+        id: agent
+        run: |
+          AGENT_ID="${{ github.event.inputs.agent_id || github.event.client_payload.agent_id }}"
+          echo "agent_id=$AGENT_ID" >> $GITHUB_OUTPUT
+
+          # Load agent details from registry
+          if [ -f "registry/github_agent_identities.json" ]; then
+            AGENT_USERNAME=$(jq -r ".agents[] | select(.id == \"$AGENT_ID\") | .github_username" registry/github_agent_identities.json || echo "unknown_blackroad")
+            AGENT_NAME=$(jq -r ".agents[] | select(.id == \"$AGENT_ID\") | .name" registry/github_agent_identities.json || echo "Unknown Agent")
+          else
+            AGENT_USERNAME="unknown_blackroad"
+            AGENT_NAME="Unknown Agent"
+          fi
+
+          echo "agent_username=$AGENT_USERNAME" >> $GITHUB_OUTPUT
+          echo "agent_name=$AGENT_NAME" >> $GITHUB_OUTPUT
+
+      - name: Create or checkout branch
+        run: |
+          BRANCH="${{ github.event.inputs.branch_name || github.event.client_payload.branch_name }}"
+          git config user.name "${{ steps.agent.outputs.agent_name }}"
+          git config user.email "${{ steps.agent.outputs.agent_username }}@blackroad.ai"
+
+          # Create branch if it doesn't exist
+          if git ls-remote --heads origin "$BRANCH" | grep -q "$BRANCH"; then
+            git checkout "$BRANCH"
+            git pull origin "$BRANCH"
+          else
+            git checkout -b "$BRANCH"
+          fi
+
+      - name: Create Pull Request
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          BRANCH="${{ github.event.inputs.branch_name || github.event.client_payload.branch_name }}"
+          BASE="${{ github.event.inputs.base_branch || github.event.client_payload.base_branch || 'main' }}"
+          TITLE="${{ github.event.inputs.pr_title || github.event.client_payload.pr_title }}"
+          BODY="${{ github.event.inputs.pr_body || github.event.client_payload.pr_body }}"
+          AGENT_HANDLE="@${{ steps.agent.outputs.agent_username }}"
+
+          # Push branch if needed
+          if ! git ls-remote --heads origin "$BRANCH" | grep -q "$BRANCH"; then
+            git push -u origin "$BRANCH"
+          fi
+
+          # Create PR with agent attribution
+          PR_BODY="**Submitted by:** $AGENT_HANDLE (${{ steps.agent.outputs.agent_id }})"
+          PR_BODY="$PR_BODY\n\n$BODY"
+          PR_BODY="$PR_BODY\n\n---\n*This PR was created by a BlackRoad agent as part of the autonomous agent ecosystem.*"
+
+          gh pr create \
+            --base "$BASE" \
+            --head "$BRANCH" \
+            --title "$TITLE" \
+            --body "$PR_BODY" \
+            --label "agent-created" \
+            --label "automation" \
+            || echo "PR may already exist"
+
+      - name: Log agent action
+        run: |
+          mkdir -p artifacts/agents/actions
+          echo "{\"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\", \"agent_id\": \"${{ steps.agent.outputs.agent_id }}\", \"action\": \"pr_create\", \"branch\": \"${{ github.event.inputs.branch_name || github.event.client_payload.branch_name }}\", \"title\": \"${{ github.event.inputs.pr_title || github.event.client_payload.pr_title }}\"}" >> artifacts/agents/actions/pr_actions.jsonl
+
+          if [ -f artifacts/agents/actions/pr_actions.jsonl ]; then
+            git add artifacts/agents/actions/pr_actions.jsonl
+            git commit -m "Log PR creation by ${{ steps.agent.outputs.agent_id }}" || true
+            git push || true
+          fi

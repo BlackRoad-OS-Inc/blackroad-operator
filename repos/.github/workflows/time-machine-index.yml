@@ -1,0 +1,30 @@
+# .github/workflows/time-machine-index.yml
+name: time-machine-index
+on:
+  schedule:
+    - cron: "11 3 * * *"
+  workflow_dispatch: {}
+jobs:
+  index:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+      - name: Build index
+        run: |
+          python3 --version
+          python3 tools/timemachine/index.py \
+            --lh sites/blackroad/public/metrics/lh.json \
+            --ci sites/blackroad/public/metrics/ci.json \
+            --k6 logs/perf/k6_summary.json \
+            --runmeta run_meta.json \
+            --alerts data/aiops/alerts.jsonl \
+            --runtime logs/runtime \
+            --agents agents/lineage \
+            --out data/timemachine/index.json
+      - name: Commit index
+        run: |
+          git config user.name "prism-bot"
+          git config user.email "bot@blackroad.io"
+          git add data/timemachine/index.json
+          git commit -m "chore(tm): refresh index" || echo "no changes"
+          git push || true

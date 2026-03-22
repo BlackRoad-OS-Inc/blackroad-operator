@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://blackroad.io/schemas/quantum-copilot/manifest.json",
+  "title": "Quantum Secure Compliance Manifest",
+  "type": "object",
+  "required": [
+    "manifest_id",
+    "created_at",
+    "policy_version",
+    "service_version",
+    "pqc_enabled",
+    "rule_results",
+    "policy_files",
+    "input_fingerprint",
+    "prompt_hash",
+    "metadata"
+  ],
+  "properties": {
+    "manifest_id": { "type": "string" },
+    "created_at": { "type": "string", "format": "date-time" },
+    "policy_version": { "type": "string" },
+    "service_version": { "type": "string" },
+    "pqc_enabled": { "type": "boolean" },
+    "rule_results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["rule_id", "passed", "severity", "title"],
+        "properties": {
+          "rule_id": { "type": "string" },
+          "passed": { "type": "boolean" },
+          "severity": { "type": "string" },
+          "title": { "type": "string" },
+          "rationale": { "type": "string" },
+          "citation": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "policy_files": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "input_fingerprint": { "type": "string" },
+    "prompt_hash": { "type": "string" },
+    "metadata": {
+      "type": "object",
+      "required": ["advisor_email", "representative_id"],
+      "properties": {
+        "advisor_email": { "type": "string" },
+        "representative_id": { "type": "string" }
+      }
+    }
+  },
+  "additionalProperties": false
+}

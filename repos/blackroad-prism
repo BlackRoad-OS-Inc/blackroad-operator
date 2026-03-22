@@ -1,0 +1,309 @@
+#!/usr/bin/env bash
+# ============================================================================
+# BLACKROAD OS, INC. - PROPRIETARY AND CONFIDENTIAL
+# Copyright (c) 2025-2026 BlackRoad OS, Inc. All Rights Reserved.
+#
+# This code is the intellectual property of BlackRoad OS, Inc.
+# AI-assisted development does not transfer ownership to AI providers.
+# Unauthorized use, copying, or distribution is prohibited.
+# NOT licensed for AI training or data extraction.
+# ============================================================================
+# br-prism — live ops console for BlackRoad OS fleet
+set -euo pipefail
+
+ACTION="${1:-dashboard}"
+
+# BlackRoad Brand Colors
+PINK='\033[38;5;205m'
+AMBER='\033[38;5;214m'
+BLUE='\033[38;5;69m'
+VIOLET='\033[38;5;135m'
+GREEN='\033[38;5;82m'
+RED='\033[38;5;196m'
+YELLOW='\033[38;5;226m'
+WHITE='\033[38;5;255m'
+DIM='\033[38;5;240m'
+BOLD='\033[1m'
+RESET='\033[0m'
+
+# Fleet nodes (from config, with display-name mapping)
+source "$HOME/.blackroad/config/nodes.sh" 2>/dev/null || true
+declare -A NODES=(
+  [Alice]="${NODE_IP[alice]:-192.168.4.49}"
+  [Cecilia]="${NODE_IP[cecilia]:-192.168.4.96}"
+  [Octavia]="${NODE_IP[octavia]:-192.168.4.101}"
+  [Aria]="${NODE_IP[aria]:-192.168.4.98}"
+  [Lucidia]="${NODE_IP[lucidia]:-192.168.4.38}"
+)
+declare -A NODE_USERS_PRISM=(
+  [Alice]="${NODE_USER[alice]:-pi}"
+  [Cecilia]="${NODE_USER[cecilia]:-blackroad}"
+  [Octavia]="${NODE_USER[octavia]:-pi}"
+  [Aria]="${NODE_USER[aria]:-blackroad}"
+  [Lucidia]="${NODE_USER[lucidia]:-octavia}"
+)
+
+bar() {
+  local pct=$1 width=20 filled color
+  filled=$((pct * width / 100))
+  if [ "$pct" -ge 90 ]; then color="$RED"
+  elif [ "$pct" -ge 70 ]; then color="$YELLOW"
+  else color="$GREEN"; fi
+  local out=""
+  out+="$color"
+  for ((i=0; i<filled; i++)); do out+="█"; done
+  out+="$DIM"
+  for ((i=filled; i<width; i++)); do out+="░"; done
+  out+="$RESET"
+  printf "%b %3d%%" "$out" "$pct"
+}
+
+header() {
+  printf "\n${BOLD}${PINK}╔══════════════════════════════════════════════════════════════╗${RESET}\n"
+  printf "${BOLD}${PINK}║${RESET}  ${BOLD}${WHITE}%-58s${RESET}  ${BOLD}${PINK}║${RESET}\n" "$1"
+  printf "${BOLD}${PINK}╚══════════════════════════════════════════════════════════════╝${RESET}\n\n"
+}
+
+divider() {
+  printf "${DIM}──────────────────────────────────────────────────────────────${RESET}\n"
+}
+
+probe_node() {
+  local name=$1 ip=$2 user=$3
+  local result
+  result=$(ssh -o ConnectTimeout=2 -o BatchMode=yes -o StrictHostKeyChecking=no "${user}@${ip}" \
+    'echo "UP";
+     cat /proc/loadavg | cut -d" " -f1-3;
+     free -m | awk "/Mem:/{printf \"%d %d\n\", \$3, \$2}";
+     df / | awk "NR==2{print \$5}" | tr -d "%";
+     cat /sys/class/thermal/thermal_zone0/temp 2>/dev/null || echo 0;
+     uptime -p 2>/dev/null || uptime | sed "s/.*up/up/"' 2>/dev/null) || echo "DOWN"
+  echo "$result"
+}
+
+cmd_dashboard() {
+  header "PRISM CONSOLE — BlackRoad OS Fleet"
+  printf "  ${DIM}%s${RESET}\n\n" "$(date '+%Y-%m-%d %H:%M:%S')"
+
+  # Local Mac metrics
+  printf "  ${BOLD}${AMBER}LOCAL (Mac)${RESET}\n"
+  divider
+  local cpu_pct mem_pct disk_pct
+  cpu_pct=$(ps -A -o %cpu | awk '{s+=$1} END {printf "%.0f", s}' | awk -v n="$(sysctl -n hw.ncpu)" '{printf "%.0f", $1/n}')
+  mem_pct=$(vm_stat 2>/dev/null | awk '/Pages active/{gsub(/\./,""); a=$3} /Pages wired/{gsub(/\./,""); w=$4} END{total=16384; if(a+0>0) printf "%.0f", (a+w)*4096/1024/1024/1024/16*100; else print 50}')
+  disk_pct=$(df / | awk 'NR==2{print $5}' | tr -d '%')
+  printf "  %b    %s\n" "${WHITE}CPU${RESET}" "$(bar "$cpu_pct")"
+  printf "  %b %s\n" "${WHITE}Memory${RESET}" "$(bar "$mem_pct")"
+  printf "  %b   %s\n\n" "${WHITE}Disk${RESET}" "$(bar "$disk_pct")"
+
+  # Fleet probe
+  printf "  ${BOLD}${BLUE}FLEET NODES${RESET}\n"
+  divider
+  printf "  ${DIM}%-12s %-8s %6s %6s %6s %6s  %s${RESET}\n" "NODE" "STATUS" "CPU" "MEM" "DISK" "TEMP" "UPTIME"
+  divider
+
+  for name in Alice Cecilia Octavia Aria Lucidia; do
+    local ip="${NODES[$name]}"
+    local user="${NODE_USERS_PRISM[$name]}"
+    local data status_color load mem_used mem_total mem_pct disk_pct temp_raw temp uptime_str
+
+    data=$(probe_node "$name" "$ip" "$user")
+
+    if echo "$data" | head -1 | grep -q "UP"; then
+      status_color="${GREEN}"
+      load=$(echo "$data" | sed -n '2p' | cut -d' ' -f1)
+      read -r mem_used mem_total <<< "$(echo "$data" | sed -n '3p')"
+      if [ -n "$mem_total" ] && [ "$mem_total" -gt 0 ]; then
+        mem_pct=$((mem_used * 100 / mem_total))
+      else
+        mem_pct=0
+      fi
+      disk_pct=$(echo "$data" | sed -n '4p')
+      temp_raw=$(echo "$data" | sed -n '5p')
+      temp=$((temp_raw / 1000))
+      uptime_str=$(echo "$data" | sed -n '6p' | sed 's/up //')
+      printf "  ${WHITE}%-12s${RESET} ${status_color}%-8s${RESET} %5s%% %5d%% %5d%% %4d°C  %s\n" \
+        "$name" "ONLINE" "$load" "$mem_pct" "$disk_pct" "$temp" "$uptime_str"
+    else
+      printf "  ${WHITE}%-12s${RESET} ${RED}%-8s${RESET} %5s  %5s  %5s  %5s   %s\n" \
+        "$name" "OFFLINE" "—" "—" "—" "—" "unreachable"
+    fi
+  done
+
+  printf "\n"
+
+  # GitHub Issues summary
+  printf "  ${BOLD}${VIOLET}ENGINEERING TASKS${RESET}\n"
+  divider
+  local issues
+  issues=$(gh issue list --repo blackboxprogramming/BlackRoad-Operating-System \
+    --json title,labels --jq '.[] |
+    (.labels | map(.name) | join(",")) as $l |
+    if ($l | test("urgent")) then "🔴 \(.title)"
+    elif ($l | test("high")) then "🟠 \(.title)"
+    elif ($l | test("medium")) then "🟡 \(.title)"
+    else "🟢 \(.title)" end' 2>/dev/null | head -10) || true
+
+  if [ -n "$issues" ]; then
+    echo "$issues" | while read -r line; do
+      printf "  %s\n" "$line"
+    done
+  else
+    printf "  ${DIM}No issues found${RESET}\n"
+  fi
+
+  printf "\n"
+
+  # KPI snapshot
+  printf "  ${BOLD}${PINK}KPI SNAPSHOT${RESET}\n"
+  divider
+  local kpi_dir="$HOME/blackroad-os-kpis/data/snapshots"
+  local github_kpi loc_kpi fleet_kpi
+  github_kpi=$(ls -t "$kpi_dir"/*github.json 2>/dev/null | head -1)
+  loc_kpi=$(ls -t "$kpi_dir"/*loc.json 2>/dev/null | head -1)
+  fleet_kpi=$(ls -t "$kpi_dir"/*fleet.json 2>/dev/null | head -1)
+
+  if [ -n "$github_kpi" ]; then
+    local commits repos
+    commits=$(python3 -c "import json,os; d=json.load(open(os.path.expanduser('$github_kpi'))); print(d.get('commits',{}).get('today','?'))" 2>/dev/null || echo "?")
+    repos=$(python3 -c "import json,os; d=json.load(open(os.path.expanduser('$github_kpi'))); print(d.get('repos',{}).get('total','?'))" 2>/dev/null || echo "?")
+    printf "  %b  %s\n" "${WHITE}Commits${RESET}" "$commits"
+    printf "  %b    %s\n" "${WHITE}Repos${RESET}" "$repos"
+  fi
+  if [ -n "$loc_kpi" ]; then
+    local loc
+    loc=$(python3 -c "import json,os; d=json.load(open(os.path.expanduser('$loc_kpi'))); print(d.get('total_lines', d.get('total', '?')))" 2>/dev/null || echo "?")
+    printf "  %b      %s\n" "${WHITE}LOC${RESET}" "$loc"
+  fi
+  if [ -n "$fleet_kpi" ]; then
+    local online
+    online=$(python3 -c "import json,os; d=json.load(open(os.path.expanduser('$fleet_kpi'))); nodes=d.get('nodes',[]); up=sum(1 for n in nodes if n.get('status')=='online'); print(f'{up}/{len(nodes)}')" 2>/dev/null || echo "?")
+    printf "  %b    %s online\n" "${WHITE}Fleet${RESET}" "$online"
+  fi
+
+  printf "\n"
+
+  # Cloudflare summary
+  printf "  ${BOLD}${AMBER}CLOUDFLARE${RESET}\n"
+  divider
+  printf "  ${WHITE}Pages${RESET}    95+\n"
+  printf "  ${WHITE}KV${RESET}       40 namespaces\n"
+  printf "  ${WHITE}D1${RESET}       8 databases\n"
+  printf "  ${WHITE}R2${RESET}       10 buckets\n"
+  printf "  ${WHITE}Tunnels${RESET}  18\n"
+  printf "  ${WHITE}Domains${RESET}  48+\n"
+
+  printf "\n${DIM}  Prism Console v2.0 — prism.blackroad.io${RESET}\n\n"
+}
+
+cmd_fleet() {
+  header "FLEET STATUS"
+  for name in Alice Cecilia Octavia Aria Lucidia; do
+    local ip="${NODES[$name]}"
+    local user="${NODE_USERS_PRISM[$name]}"
+    printf "\n  ${BOLD}${BLUE}%s${RESET} (${DIM}%s${RESET})\n" "$name" "$ip"
+    divider
+
+    local data
+    data=$(probe_node "$name" "$ip" "$user")
+
+    if echo "$data" | head -1 | grep -q "UP"; then
+      local load mem_used mem_total disk_pct temp_raw temp
+      load=$(echo "$data" | sed -n '2p')
+      read -r mem_used mem_total <<< "$(echo "$data" | sed -n '3p')"
+      disk_pct=$(echo "$data" | sed -n '4p')
+      temp_raw=$(echo "$data" | sed -n '5p')
+      temp=$((temp_raw / 1000))
+      printf "  ${GREEN}ONLINE${RESET}\n"
+      printf "  Load:    %s\n" "$load"
+      printf "  Memory:  %sMB / %sMB\n" "$mem_used" "$mem_total"
+      printf "  Disk:    %s\n" "$(bar "$disk_pct")"
+      printf "  Temp:    %d°C\n" "$temp"
+
+      # Get services
+      ssh -o ConnectTimeout=3 "${user}@${ip}" \
+        'systemctl list-units --state=running --no-pager --no-legend | grep -E "cloudflared|ollama|docker|gitea|pihole|nginx|postgres|nats" | awk "{print \"  ✓ \" \$1}"' 2>/dev/null || true
+    else
+      printf "  ${RED}OFFLINE${RESET} — not reachable\n"
+    fi
+  done
+  printf "\n"
+}
+
+cmd_tasks() {
+  header "ENGINEERING TASKS"
+  gh issue list --repo blackboxprogramming/BlackRoad-Operating-System \
+    --json number,title,labels,state \
+    --jq '.[] | "#\(.number) [\(.labels | map(.name) | join(", "))] \(.title)"' 2>/dev/null || echo "Failed to fetch issues"
+  printf "\n"
+}
+
+cmd_agents() {
+  header "AGENT REGISTRY"
+  local agents_file="$HOME/blackroad-operator/agents/registry.json"
+  if [ -f "$agents_file" ]; then
+    python3 -c "
+import json
+with open('$agents_file') as f:
+    agents = json.load(f)
+if isinstance(agents, list):
+    for a in agents:
+        name = a.get('name', '?')
+        role = a.get('role', '?')
+        status = a.get('status', '?')
+        print(f'  {name:<15} {role:<20} {status}')
+elif isinstance(agents, dict):
+    for k, v in agents.items():
+        if isinstance(v, dict):
+            print(f'  {k:<15} {v.get(\"role\",\"?\"):<20} {v.get(\"status\",\"?\")}')
+        else:
+            print(f'  {k}: {v}')
+" 2>/dev/null || printf "  ${DIM}No agent registry found${RESET}\n"
+  else
+    printf "  ${DIM}Registry not found at %s${RESET}\n" "$agents_file"
+  fi
+  printf "\n"
+}
+
+cmd_logs() {
+  header "RECENT LOGS"
+  # Show real logs from fleet autonomy + cron
+  for logfile in \
+    "$HOME/blackroad-os-kpis/data/cron.log" \
+    "$HOME/health-cron.log" \
+    "$HOME/git-sync.log"; do
+    if [ -f "$logfile" ]; then
+      printf "  ${AMBER}%s${RESET}\n" "$(basename "$logfile")"
+      tail -5 "$logfile" 2>/dev/null | while read -r line; do
+        printf "  ${DIM}%s${RESET}\n" "$line"
+      done
+      printf "\n"
+    fi
+  done
+}
+
+cmd_help() {
+  header "PRISM CONSOLE"
+  printf "  ${WHITE}Usage:${RESET} blackroad-prism <command>\n\n"
+  printf "  ${AMBER}dashboard${RESET}  Full system overview (default)\n"
+  printf "  ${AMBER}fleet${RESET}      Detailed fleet node status\n"
+  printf "  ${AMBER}tasks${RESET}      Engineering tasks from GitHub\n"
+  printf "  ${AMBER}agents${RESET}     Agent registry\n"
+  printf "  ${AMBER}logs${RESET}       Recent automation logs\n"
+  printf "  ${AMBER}help${RESET}       This help message\n"
+  printf "\n"
+}
+
+case "$ACTION" in
+  dashboard|d)   cmd_dashboard ;;
+  fleet|f)       cmd_fleet ;;
+  tasks|t)       cmd_tasks ;;
+  agents|a)      cmd_agents ;;
+  logs|l)        cmd_logs ;;
+  help|h|--help) cmd_help ;;
+  *)
+    printf "${RED}Unknown command: %s${RESET}\n" "$ACTION"
+    cmd_help
+    exit 1
+    ;;
+esac

@@ -1,0 +1,58 @@
+# BlackRoad OS — Pave Tomorrow.
+# Welcome first-time contributors
+name: Welcome Bot
+
+on:
+  issues:
+    types: [opened]
+  pull_request:
+    types: [opened]
+
+jobs:
+  welcome:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check if first-time contributor
+        id: check
+        run: |
+          API="${{ github.server_url }}/api/v1"
+          TOKEN="${{ secrets.GITHUB_TOKEN }}"
+          REPO="${{ github.repository }}"
+          AUTHOR="${{ github.event.sender.login }}"
+
+          # Skip agents and admin
+          SKIP="blackroad alice lucidia-agent cecilia cece aria eve meridian sentinel"
+          if echo "$SKIP" | grep -qw "$AUTHOR"; then
+            echo "first_time=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # Check if user has previous issues/PRs
+          COUNT=$(curl -s "$API/repos/$REPO/issues?created_by=$AUTHOR&limit=2&state=all" \
+            -H "Authorization: token $TOKEN" | python3 -c "import sys,json; print(len(json.load(sys.stdin)))" 2>/dev/null || echo 0)
+
+          if [ "$COUNT" -le 1 ]; then
+            echo "first_time=true" >> $GITHUB_OUTPUT
+          else
+            echo "first_time=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Post welcome message
+        if: steps.check.outputs.first_time == 'true'
+        run: |
+          API="${{ github.server_url }}/api/v1"
+          TOKEN="${{ secrets.GITHUB_TOKEN }}"
+          REPO="${{ github.repository }}"
+
+          if [ "${{ github.event_name }}" = "issues" ]; then
+            NUM="${{ github.event.issue.number }}"
+          else
+            NUM="${{ github.event.pull_request.number }}"
+          fi
+
+          curl -s -X POST "$API/repos/$REPO/issues/$NUM/comments" \
+            -H "Authorization: token $TOKEN" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"body\": \"## 🛣️ Welcome to BlackRoad!\n\nThanks for your first contribution, @${{ github.event.sender.login }}! The squad is here to help.\n\nOur agents will review this shortly. If you need anything, just ask — someone from the fleet will respond.\n\n---\n*BlackRoad OS — Pave Tomorrow.*\"
+            }"

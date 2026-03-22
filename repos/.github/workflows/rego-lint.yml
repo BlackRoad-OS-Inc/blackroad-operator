@@ -1,0 +1,68 @@
+name: Rego Policy Checks
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  rego:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+
+      - name: Install OPA
+        run: |
+          curl -sSL -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64
+          chmod +x opa
+          sudo mv opa /usr/local/bin/opa
+
+      - name: Install Conftest
+        run: |
+          curl -sSL -o conftest.tar.gz https://github.com/open-policy-agent/conftest/releases/download/v0.45.0/conftest_0.45.0_Linux_x86_64.tar.gz
+          tar -xzf conftest.tar.gz
+          sudo mv conftest /usr/local/bin/conftest
+
+      - name: Check policy formatting
+        run: |
+          set -euo pipefail
+          files=$(git ls-files '*.rego')
+          if [ -n "$files" ]; then
+            opa fmt --fail $files
+          else
+            echo "No Rego files found"
+          fi
+
+      - name: Run opa test suite
+        run: |
+          set -euo pipefail
+          policy_dirs=(policies policy prism/policies agents/codex/32-sentinel/policies br-infra-iac/policy)
+          selected=""
+          for dir in "${policy_dirs[@]}"; do
+            if [ -d "$dir" ]; then
+              selected="$selected $dir"
+            fi
+          done
+          if [ -n "${selected// }" ]; then
+            # shellcheck disable=SC2086
+            opa test $selected
+          else
+            echo "No Rego directories to test"
+          fi
+
+      - name: Run conftest checks
+        run: |
+          set -euo pipefail
+          policy_dirs=(policies policy prism/policies)
+          ran=false
+          for dir in "${policy_dirs[@]}"; do
+            if [ -d "$dir" ]; then
+              conftest test "$dir"
+              ran=true
+            fi
+          done
+          if [ "$ran" = false ]; then
+            echo "No policy directories found for conftest"
+          fi

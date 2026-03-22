@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⛏️ BlackRoad Mining Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+            color: #e0e0e0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #00ff88, #00aaff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: #888;
+            font-size: 1.1em;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 25px;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 255, 136, 0.2);
+        }
+
+        .stat-card h3 {
+            font-size: 0.9em;
+            color: #888;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-card .value {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-card .unit {
+            font-size: 1em;
+            color: #666;
+        }
+
+        .stat-card.hashrate .value {
+            color: #00ff88;
+        }
+
+        .stat-card.shares .value {
+            color: #00aaff;
+        }
+
+        .stat-card.rejected .value {
+            color: #ff4444;
+        }
+
+        .stat-card.temp .value {
+            color: #ffaa00;
+        }
+
+        .miners-list {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 40px;
+        }
+
+        .miners-list h2 {
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            color: #00ff88;
+        }
+
+        .miner-row {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .miner-row:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .miner-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .miner-id {
+            font-weight: bold;
+            color: #00ff88;
+            margin-bottom: 5px;
+        }
+
+        .miner-pool {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .miner-stat {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .miner-stat-label {
+            font-size: 0.8em;
+            color: #888;
+            margin-bottom: 3px;
+        }
+
+        .miner-stat-value {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        .status-indicator.active {
+            background: #00ff88;
+            box-shadow: 0 0 10px #00ff88;
+        }
+
+        .status-indicator.stale {
+            background: #ffaa00;
+            box-shadow: 0 0 10px #ffaa00;
+        }
+
+        .status-indicator.offline {
+            background: #ff4444;
+            box-shadow: 0 0 10px #ff4444;
+            animation: none;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .chart-container {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 40px;
+        }
+
+        .chart-container h2 {
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            color: #00aaff;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-size: 1.2em;
+        }
+
+        .last-update {
+            text-align: center;
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 20px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2em;
+            color: #00ff88;
+        }
+
+        @media (max-width: 768px) {
+            .miner-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>⛏️ BlackRoad Mining Dashboard</h1>
+        <p>Real-time XMRig monitoring with Prism Console integration</p>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card hashrate">
+            <h3>Total Hashrate</h3>
+            <div class="value" id="total-hashrate">0.00</div>
+            <div class="unit">H/s</div>
+        </div>
+        <div class="stat-card shares">
+            <h3>Total Shares</h3>
+            <div class="value" id="total-shares">0</div>
+            <div class="unit">accepted</div>
+        </div>
+        <div class="stat-card rejected">
+            <h3>Rejected Rate</h3>
+            <div class="value" id="reject-rate">0.00</div>
+            <div class="unit">%</div>
+        </div>
+        <div class="stat-card temp">
+            <h3>Avg Temperature</h3>
+            <div class="value" id="avg-temp">--</div>
+            <div class="unit">°C</div>
+        </div>
+    </div>
+
+    <div class="miners-list">
+        <h2>Active Miners</h2>
+        <div id="miners-container">
+            <div class="loading">Loading miner data...</div>
+        </div>
+    </div>
+
+    <div class="last-update">
+        Last updated: <span id="last-update">Never</span>
+    </div>
+
+    <script>
+        const API_BASE = window.location.origin;
+        let updateInterval = null;
+
+        async function fetchMinerData() {
+            try {
+                const response = await fetch(`${API_BASE}/api/miners/latest`);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                const data = await response.json();
+                updateDashboard(data);
+            } catch (error) {
+                console.error('Failed to fetch miner data:', error);
+                document.getElementById('miners-container').innerHTML = `
+                    <div class="no-data">
+                        ❌ Failed to fetch data<br>
+                        <small>${error.message}</small>
+                    </div>
+                `;
+            }
+        }
+
+        function updateDashboard(miners) {
+            if (!miners || miners.length === 0) {
+                document.getElementById('miners-container').innerHTML = `
+                    <div class="no-data">
+                        No miner data available<br>
+                        <small>Start the miner bridge to begin collecting data</small>
+                    </div>
+                `;
+                return;
+            }
+
+            // Calculate totals
+            let totalHashrate = 0;
+            let totalShares = 0;
+            let totalRejected = 0;
+            let totalStale = 0;
+            let tempSum = 0;
+            let tempCount = 0;
+
+            miners.forEach(miner => {
+                totalHashrate += miner.hashrate_1m || 0;
+                totalShares += miner.shares_accepted || 0;
+                totalRejected += miner.shares_rejected || 0;
+                totalStale += miner.shares_stale || 0;
+                if (miner.temperature_c) {
+                    tempSum += miner.temperature_c;
+                    tempCount++;
+                }
+            });
+
+            // Update summary stats
+            document.getElementById('total-hashrate').textContent = totalHashrate.toFixed(2);
+            document.getElementById('total-shares').textContent = totalShares.toLocaleString();
+
+            const totalTotal = totalShares + totalRejected + totalStale;
+            const rejectRate = totalTotal > 0 ? ((totalRejected + totalStale) / totalTotal * 100) : 0;
+            document.getElementById('reject-rate').textContent = rejectRate.toFixed(2);
+
+            const avgTemp = tempCount > 0 ? (tempSum / tempCount) : null;
+            document.getElementById('avg-temp').textContent = avgTemp ? avgTemp.toFixed(1) : '--';
+
+            // Render miners list
+            const container = document.getElementById('miners-container');
+            container.innerHTML = miners.map(miner => {
+                const recordedAt = new Date(miner.recorded_at);
+                const age = (Date.now() - recordedAt.getTime()) / 1000; // seconds
+                const status = age < 60 ? 'active' : age < 300 ? 'stale' : 'offline';
+                const statusText = age < 60 ? 'Active' : age < 300 ? 'Stale' : 'Offline';
+
+                return `
+                    <div class="miner-row">
+                        <div class="miner-info">
+                            <div class="miner-id">
+                                <span class="status-indicator ${status}"></span>
+                                ${miner.miner_id}
+                            </div>
+                            <div class="miner-pool">${miner.pool || 'Unknown Pool'}</div>
+                        </div>
+                        <div class="miner-stat">
+                            <div class="miner-stat-label">Hashrate</div>
+                            <div class="miner-stat-value" style="color: #00ff88;">
+                                ${(miner.hashrate_1m || 0).toFixed(2)} H/s
+                            </div>
+                        </div>
+                        <div class="miner-stat">
+                            <div class="miner-stat-label">Shares</div>
+                            <div class="miner-stat-value" style="color: #00aaff;">
+                                ✓ ${miner.shares_accepted || 0}
+                                ${miner.shares_rejected > 0 ? `<span style="color: #ff4444;">✗ ${miner.shares_rejected}</span>` : ''}
+                            </div>
+                        </div>
+                        <div class="miner-stat">
+                            <div class="miner-stat-label">Temperature</div>
+                            <div class="miner-stat-value" style="color: ${
+                                !miner.temperature_c ? '#666' :
+                                miner.temperature_c > 80 ? '#ff4444' :
+                                miner.temperature_c > 70 ? '#ffaa00' : '#00ff88'
+                            };">
+                                ${miner.temperature_c ? `${miner.temperature_c.toFixed(1)}°C` : '--'}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Update timestamp
+            document.getElementById('last-update').textContent = new Date().toLocaleTimeString();
+        }
+
+        // Initial fetch
+        fetchMinerData();
+
+        // Auto-refresh every 15 seconds
+        updateInterval = setInterval(fetchMinerData, 15000);
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (updateInterval) {
+                clearInterval(updateInterval);
+            }
+        });
+    </script>
+</body>
+</html>

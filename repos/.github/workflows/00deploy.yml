@@ -1,0 +1,64 @@
+name: Deploy to Droplet
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+
+      - name: SSH to droplet and deploy
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.DROPLET_IP }}
+          username: root
+          key: ${{ secrets.DROPLET_SSH_KEY }}
+          script: |
+            # Navigate to project directory
+            cd /root/blackroad-prism-console || exit 1
+            # Navigate to project directory or clone if it doesn't exist
+            if [ ! -d "/root/blackroad-prism-console" ]; then
+              cd /root
+              git clone https://github.com/${{ github.repository }}.git blackroad-prism-console
+            fi
+
+            cd /root/blackroad-prism-console
+
+            # Pull latest changes
+            git fetch origin main
+            git reset --hard origin/main
+
+            # Ensure .env file exists (create from example if missing)
+            if [ ! -f .env ]; then
+              echo "Creating .env file from example..."
+              cp .env.example .env
+              echo "WARNING: Please update .env with production values!"
+            fi
+
+            # Stop and remove existing containers
+            docker-compose -f docker-compose.prod.yml down || true
+
+            # Build and start services
+            docker-compose -f docker-compose.prod.yml build --no-cache
+            docker-compose -f docker-compose.prod.yml up -d
+
+            # Show status
+            echo "Deployment complete. Container status:"
+            docker-compose -f docker-compose.prod.yml ps
+            # Stop existing containers
+            docker-compose -f docker-compose.prod.yml down || true
+
+            # Build the Docker image
+            docker build -t ghcr.io/blackroad-prism/blackroad-prism-console:latest .
+
+            # Start services with docker-compose
+            docker-compose -f docker-compose.prod.yml up -d
+
+            # Clean up old images
+            docker image prune -f

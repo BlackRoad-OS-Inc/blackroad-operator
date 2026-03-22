@@ -1,0 +1,21 @@
+name: Support Sync
+on:
+  schedule: [{ cron: "*/30 * * * *" }]
+  workflow_dispatch:
+jobs:
+  support:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+      - uses: actions/setup-node@b39b52d1213e96004bfcb1c61a8a6fa8ab84f3e8 # v4
+        with: { node-version: '20' }
+      - run: npm ci --prefix apps/api
+      - run: npx tsx scripts/support_sync.ts
+        env:
+          JIRA_BASE: ${{ secrets.JIRA_BASE }}
+          JIRA_USER: ${{ secrets.JIRA_USER }}
+          JIRA_TOKEN: ${{ secrets.JIRA_TOKEN }}
+          JIRA_PROJECT: ${{ secrets.JIRA_PROJECT }}
+          LINEAR_TOKEN: ${{ secrets.LINEAR_TOKEN }}
+          LINEAR_TEAM: ${{ secrets.LINEAR_TEAM }}
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}

@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="sandbox">
+  <h1>Advisor Sandbox</h1>
+  {% if lead == 'success' %}
+  <div class="alert success">Thanks for booking a pilot. Load a client profile to run the policy stack.</div>
+  {% endif %}
+  <form class="review-form" method="post" action="/sandbox/review">
+    <div class="form-grid">
+      <label>Advisor email<input type="email" name="advisor_email" required /></label>
+      <label>Representative ID<input type="text" name="representative_id" required /></label>
+      <label>Client name<input type="text" name="client_name" required /></label>
+      <label>Client age<input type="number" name="client_age" value="55" min="18" max="120" required /></label>
+      <label>Net worth band
+        <select name="net_worth_band">
+          <option value="<250k">&lt;250k</option>
+          <option value="250k-1m">250k-1m</option>
+          <option value="1m-5m" selected>1m-5m</option>
+          <option value=">5m">&gt;5m</option>
+        </select>
+      </label>
+      <label>Investment objective
+        <select name="investment_objective">
+          <option value="income">Income</option>
+          <option value="growth" selected>Growth</option>
+          <option value="capital-preservation">Capital preservation</option>
+          <option value="speculation">Speculation</option>
+        </select>
+      </label>
+      <label>Risk tolerance
+        <select name="risk_tolerance">
+          <option value="conservative">Conservative</option>
+          <option value="moderate" selected>Moderate</option>
+          <option value="aggressive">Aggressive</option>
+        </select>
+      </label>
+    </div>
+    <label>Marketing copy / suitability notes
+      <textarea name="marketing_material" rows="6" required>BlackRoad Advisors outlines a thematic equity sleeve that may deliver high yield while highlighting volatility risk and liquidity controls.</textarea>
+    </label>
+    <label>Data sources (one per line)
+      <textarea name="data_sources" rows="3">BlackRock Thematic Outlook 2025
+Morningstar Sector Report</textarea>
+    </label>
+    <label>Advisor notes (optional)
+      <textarea name="advisor_notes" rows="3"></textarea>
+    </label>
+    <label class="checkbox"><input type="checkbox" name="pqc_enabled" /> Enable quantum-secure signature</label>
+    <label>Mode
+      <select name="mode">
+        <option value="suitability">Suitability</option>
+        <option value="marketing" selected>Marketing</option>
+      </select>
+    </label>
+    <button class="btn btn-primary" type="submit">Review submission</button>
+  </form>
+  <aside class="demo-sidebar">
+    <h2>Demo cases</h2>
+    <ul>
+      {% for case in demo_cases %}
+      <li><strong>{{ case.case_id }}</strong>: {{ case.title }}</li>
+      {% endfor %}
+    </ul>
+  </aside>
+</section>
+{% endblock %}

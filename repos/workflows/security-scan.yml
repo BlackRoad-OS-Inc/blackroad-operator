@@ -1,0 +1,38 @@
+name: Security Scan
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '0 6 * * 1'
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Scan for secrets
+        run: |
+          echo "Scanning for potential secrets..."
+          FOUND=0
+          grep -rn 'AKIA\|ghp_\|gho_\|sk_live\|sk_test' \
+            --include='*.js' --include='*.py' --include='*.env' --include='*.sh' \
+            --exclude-dir=node_modules --exclude-dir=.git . && FOUND=1 || true
+          if [ "$FOUND" = "1" ]; then
+            echo "::warning::Potential secrets detected — review above matches"
+          else
+            echo "No secrets detected"
+          fi
+
+      - name: Check npm dependencies
+        if: hashFiles('package.json') != ''
+        run: |
+          npm install --ignore-scripts 2>/dev/null
+          npm audit --audit-level=high || true
+
+      - name: Check Python dependencies
+        if: hashFiles('requirements.txt') != ''
+        run: |
+          pip install safety 2>/dev/null
+          safety check -r requirements.txt || true

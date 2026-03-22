@@ -1,0 +1,15 @@
+name: "Model Deploy to Pi"
+on:
+  push:
+    paths: ["models/**", "Modelfile*"]
+  workflow_dispatch:
+jobs:
+  deploy:
+    runs-on: [self-hosted, blackroad]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Pull and register model
+        run: |
+          if command -v ollama &>/dev/null; then
+            ollama pull ${{ inputs.model || 'llama3.2' }}
+          fi

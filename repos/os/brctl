@@ -1,0 +1,319 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DOCKER_DIR="${SCRIPT_DIR}/docker"
+COMPOSE="docker compose"
+SYSTEMD_SERVICE="blackroad-compose.service"
+KIOSK_SERVICE="blackroad-kiosk.service"
+STACK_NAME="blackroad"
+ENV_FILE="${DOCKER_DIR}/.env"
+ENV_WARNING_SHOWN=0
+
+usage() {
+  cat <<USAGE
+Usage: brctl <command> [args]
+
+Commands:
+  up                Start the docker compose stack
+  down              Stop the stack
+  restart           Restart the stack
+  ps                Show container status
+  logs [service]    Tail logs (defaults to all)
+  status            Summarise stack and systemd status
+  health            Query HTTP health endpoints via Traefik
+  doctor            Run environment diagnostics
+  info              Show version, image tags, and environment info
+  kiosk on|off      Enable/disable kiosk user service
+  version           Show release channel, current tag, and last-good
+  channel           Switch between stable and edge channels
+  upgrade           Upgrade to the latest tagged release
+  rollback          Roll back to the last-known-good release
+  tls on|off        Toggle self-signed TLS mode
+  tunnel on|off     Start/stop Cloudflare Tunnel sidecar
+  url               Print LAN / remote URLs
+  metrics           Print Grafana / Loki hints
+  help              Show this message
+USAGE
+}
+
+require_compose() {
+  if [[ ! -d "${DOCKER_DIR}" ]]; then
+    echo "Docker directory not found at ${DOCKER_DIR}" >&2
+    exit 1
+  fi
+}
+
+load_env() {
+  if [[ -f "${ENV_FILE}" ]]; then
+    set -a
+    # shellcheck disable=SC1090
+    source "${ENV_FILE}"
+    set +a
+  elif [[ ${ENV_WARNING_SHOWN} -eq 0 ]]; then
+    echo "Environment file not found at ${ENV_FILE}; continuing without overrides." >&2
+    ENV_WARNING_SHOWN=1
+  fi
+}
+
+compose_cmd() {
+  (cd "${DOCKER_DIR}" && ${COMPOSE} "$@")
+}
+
+cmd_up() {
+  require_compose
+  compose_cmd up -d --remove-orphans
+}
+
+cmd_down() {
+  require_compose
+  compose_cmd down
+}
+
+cmd_restart() {
+  cmd_down
+  cmd_up
+}
+
+cmd_ps() {
+  require_compose
+  compose_cmd ps
+}
+
+cmd_logs() {
+  require_compose
+  if [[ $# -gt 0 ]]; then
+    compose_cmd logs -f "$1"
+  else
+    compose_cmd logs -f
+  fi
+}
+
+cmd_status() {
+  printf "Systemd status (sudo may be required)\n"
+  systemctl --no-pager status "${SYSTEMD_SERVICE}" 2>/dev/null || echo "systemd status unavailable"
+  echo
+  require_compose
+  compose_cmd ps
+}
+
+cmd_health() {
+  local host="${BLACKROAD_HOST:-localhost}"
+  local endpoints=(
+    "http://${host}/api/health"
+    "http://${host}/health"
+    "http://${host}/autopal/health"
+    "http://${host}/pi-ops/health"
+  )
+
+  for endpoint in "${endpoints[@]}"; do
+    echo "Checking ${endpoint}"
+    if curl -fsS "${endpoint}" >/tmp/brctl_health 2>&1; then
+      echo "  OK"
+    else
+      echo "  FAILED"
+    fi
+  done
+}
+
+cmd_doctor() {
+  echo "Docker: $(docker --version 2>/dev/null || echo missing)"
+  echo "Docker Compose: $(docker compose version 2>/dev/null || echo missing)"
+  echo "Disk usage:"
+  df -h /
+  echo
+  echo "cgroup memory:"
+  if [[ -f /proc/meminfo ]]; then
+    grep -i memtotal /proc/meminfo
+  fi
+  echo
+  echo "Checking required ports"
+  for port in 80 443 1883; do
+    if ss -tulpn | grep -q ":${port} "; then
+      echo "  Port ${port}: in use"
+    else
+      echo "  Port ${port}: available"
+    fi
+  done
+  echo
+  cmd_health || true
+}
+
+cmd_info() {
+  require_compose
+  echo "Stack: ${STACK_NAME}"
+  echo "Repository: $(git -C "${SCRIPT_DIR}/.." rev-parse --short HEAD 2>/dev/null || echo unknown)"
+  echo "Environment file:"
+  if [[ -f "${ENV_FILE}" ]]; then
+    grep -v '^#' "${ENV_FILE}"
+  else
+    echo "  Missing .env (copy from .env.example)"
+  fi
+  echo
+  compose_cmd images
+}
+
+cmd_version() {
+  echo "Channel: $(cat /opt/blackroad/os/releases/channel 2>/dev/null || echo stable)"
+  echo "Current: $(git -C /opt/blackroad describe --tags --abbrev=0 2>/dev/null || git -C /opt/blackroad rev-parse --short HEAD)"
+  echo "LastGood: $(cat /opt/blackroad/os/releases/last-good 2>/dev/null || echo none)"
+}
+
+cmd_channel() {
+  case "${1:-}" in
+    stable|edge)
+      echo "$1" | sudo tee /opt/blackroad/os/releases/channel >/dev/null
+      echo "Channel set to $1"
+      ;;
+    *)
+      echo "Usage: brctl channel {stable|edge}" >&2
+      return 1
+      ;;
+  esac
+}
+
+cmd_kiosk() {
+  if [[ $# -ne 1 ]]; then
+    echo "Usage: brctl kiosk on|off" >&2
+    exit 1
+  fi
+  case "$1" in
+    on)
+      systemctl --user enable --now "${KIOSK_SERVICE}" || echo "Enable kiosk user service manually."
+      ;;
+    off)
+      systemctl --user disable --now "${KIOSK_SERVICE}" || echo "Disable kiosk user service manually."
+      ;;
+    *)
+      echo "Usage: brctl kiosk on|off" >&2
+      exit 1
+      ;;
+  esac
+}
+
+cmd_upgrade() {
+  sudo /opt/blackroad/os/upgrade/upgrade.sh
+}
+
+cmd_rollback() {
+  sudo /opt/blackroad/os/upgrade/rollback.sh
+}
+
+cmd_tls() {
+  if [[ $# -ne 1 ]]; then
+    echo "Usage: brctl tls {on|off}" >&2
+    exit 1
+  fi
+
+  case "$1" in
+    on)
+      sudo sed -i 's/^ENABLE_TLS=.*/ENABLE_TLS=selfsigned/' "${ENV_FILE}" || true
+      load_env
+      echo "TLS set to selfsigned. Generate certs if needed:"
+      echo "  sudo /opt/blackroad/os/tls/generate-selfsigned.sh ${BLACKROAD_DOMAIN:-pi.local}"
+      echo "Restarting stack..."
+      compose_cmd up -d --remove-orphans
+      ;;
+    off)
+      sudo sed -i 's/^ENABLE_TLS=.*/ENABLE_TLS=none/' "${ENV_FILE}" || true
+      load_env
+      echo "TLS disabled. Restarting stack..."
+      compose_cmd up -d --remove-orphans
+      ;;
+    *)
+      echo "Usage: brctl tls {on|off}" >&2
+      exit 1
+      ;;
+  esac
+}
+
+cmd_tunnel() {
+  if [[ $# -ne 1 ]]; then
+    echo "Usage: brctl tunnel {on|off}" >&2
+    exit 1
+  fi
+
+  load_env
+
+  case "$1" in
+    on)
+      if [[ -z "${CF_TUNNEL_TOKEN:-}" ]]; then
+        echo "CF_TUNNEL_TOKEN not set in .env. Edit ${ENV_FILE}" >&2
+        exit 1
+      fi
+      compose_cmd --profile tunnel up -d cloudflared
+      echo "Cloudflare Tunnel started."
+      ;;
+    off)
+      compose_cmd --profile tunnel rm -sf cloudflared || true
+      echo "Cloudflare Tunnel stopped."
+      ;;
+    *)
+      echo "Usage: brctl tunnel {on|off}" >&2
+      exit 1
+      ;;
+  esac
+}
+
+cmd_url() {
+  load_env
+  local ip
+  ip="$(hostname -I | awk '{print $1}')"
+  echo "LAN HTTP:  http://${ip}"
+  if [[ "${ENABLE_TLS:-none}" == "selfsigned" ]]; then
+    echo "LAN HTTPS: https://${BLACKROAD_DOMAIN:-pi.local}  (self-signed)"
+  fi
+  echo "Grafana:   http(s)://${BLACKROAD_DOMAIN:-${ip}}/grafana"
+  echo "If Cloudflare Tunnel is on, use your Cloudflare hostname."
+}
+
+cmd_metrics() {
+  echo "Grafana:    http://$(hostname -I | awk '{print $1}')/grafana  (${GRAFANA_ADMIN_USER:-admin}/${GRAFANA_ADMIN_PASSWORD:-admin})"
+  echo "Loki:       internal at http://loki:3100"
+  echo "Promtail:   scrapes docker logs via docker_sd"
+  echo
+  echo "Sample LogQL:"
+  echo '  {job="docker-logs"} |= "ERROR"'
+  echo '  {service="blackroad-api"} | json | line_format "{{.message}}"'
+}
+
+main() {
+  load_env
+
+  if [[ $# -lt 1 ]]; then
+    usage
+    exit 1
+  fi
+
+  local cmd="$1"
+  shift || true
+
+  case "${cmd}" in
+    up) cmd_up "$@" ;;
+    down) cmd_down "$@" ;;
+    restart) cmd_restart "$@" ;;
+    ps) cmd_ps "$@" ;;
+    logs) cmd_logs "$@" ;;
+    status) cmd_status "$@" ;;
+    health) cmd_health "$@" ;;
+    doctor) cmd_doctor "$@" ;;
+    info) cmd_info "$@" ;;
+    version) cmd_version "$@" ;;
+    channel) cmd_channel "$@" ;;
+    kiosk) cmd_kiosk "$@" ;;
+    tls) cmd_tls "$@" ;;
+    tunnel) cmd_tunnel "$@" ;;
+    url) cmd_url "$@" ;;
+    upgrade) cmd_upgrade "$@" ;;
+    rollback) cmd_rollback "$@" ;;
+    metrics) cmd_metrics "$@" ;;
+    help|-h|--help) usage ;;
+    *)
+      echo "Unknown command: ${cmd}" >&2
+      usage
+      exit 1
+      ;;
+  esac
+}
+
+main "$@"

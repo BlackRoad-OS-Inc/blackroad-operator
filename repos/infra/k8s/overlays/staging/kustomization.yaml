@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+nameSuffix: -staging
+namespace: platform-staging
+resources:
+  - ../../base
+patchesStrategicMerge:
+  - patch-deployment.yaml
+configMapGenerator:
+  - name: app-config
+    literals:
+      - ENVIRONMENT=staging

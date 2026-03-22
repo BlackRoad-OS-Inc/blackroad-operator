@@ -1,0 +1,18 @@
+FROM nvcr.io/nvidia/l4t-pytorch:r35.3.1-pth2.0-py3
+
+ENV PYTHONUNBUFFERED=1
+WORKDIR /app
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        python3-opencv \
+        libgl1 \
+        libglib2.0-0 && \
+    rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt ./
+RUN pip3 install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+CMD ["python3", "-m", "edge_agent"]

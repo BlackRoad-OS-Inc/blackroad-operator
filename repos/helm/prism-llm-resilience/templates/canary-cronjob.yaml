@@ -1,0 +1,44 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: lucidia-llm-canary
+  namespace: {{ .Values.namespace }}
+spec:
+  schedule: {{ .Values.canary.schedule | quote }}
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: canary
+              image: {{ .Values.canary.image | quote }}
+              imagePullPolicy: IfNotPresent
+              command: ["python", "/app/canary.py"]
+              env:
+                - name: PRISM_LUCIDIA_PRIMARY_URL
+                  value: "http://llm.{{ .Values.namespace }}.svc.cluster.local:8000"
+                - name: PRISM_LUCIDIA_PRIMARY_MODEL
+                  value: "lucidia"
+                - name: PRISM_LUCIDIA_FALLBACK_URL
+                  value: "http://ollama-bridge.{{ .Values.namespace }}.svc.cluster.local:4010/api/chat"
+                - name: PRISM_LUCIDIA_FALLBACK_MODEL
+                  value: "lucidia"
+                - name: PRISM_LLM_CANARY_MAX_P95_MS
+                  value: {{ .Values.canary.expectations.maxP95Ms | quote }}
+                - name: PRISM_LLM_CANARY_MAX_TOKENS
+                  value: {{ .Values.canary.expectations.maxTokens | quote }}
+                - name: PRISM_LLM_HEALTHWATCH_URL
+                  value: "http://llm-healthwatch.{{ .Values.namespace }}.svc.cluster.local:8080"
+              envFrom: []
+              volumeMounts:
+                - name: canary-code
+                  mountPath: /app
+              resources: {{- toYaml .Values.canary.resources | nindent 16 }}
+          volumes:
+            - name: canary-code
+              configMap:
+                name: lucidia-llm-canary
+                items:
+                  - key: canary.py
+                    path: canary.py

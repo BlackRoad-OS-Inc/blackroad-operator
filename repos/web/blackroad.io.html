@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BlackRoad.io - The Quantum AI Platform</title>
+  <link rel="stylesheet" href="assets/blackroad.css" />
+  <style>
+    body {
+      background: radial-gradient(1200px 900px at 80% -10%, rgba(124,108,255,.15), transparent 40%),
+                  radial-gradient(1000px 800px at -20% 100%, rgba(0,208,255,.12), transparent 50%),
+                  var(--bg-dark);
+    }
+
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-4xl) var(--space-xl);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-logo {
+      font-size: 120px;
+      font-weight: 900;
+      background: var(--gradient-spectrum-full);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: var(--space-xl);
+      letter-spacing: -4px;
+      filter: drop-shadow(0 0 40px rgba(255, 79, 216, 0.8));
+      animation: glowPulse 3s ease-in-out infinite;
+    }
+
+    .hero-title {
+      font-size: var(--text-4xl);
+      font-weight: 900;
+      margin-bottom: var(--space-lg);
+      max-width: 800px;
+    }
+
+    .hero-subtitle {
+      font-size: var(--text-xl);
+      color: var(--text-secondary);
+      max-width: 600px;
+      margin-bottom: var(--space-3xl);
+      line-height: 1.6;
+    }
+
+    .cta-buttons {
+      display: flex;
+      gap: var(--space-lg);
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: var(--space-xl);
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: var(--space-4xl) var(--space-xl);
+    }
+
+    .feature-card {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feature-icon {
+      font-size: 48px;
+      margin-bottom: var(--space-lg);
+      filter: drop-shadow(0 0 15px currentColor);
+    }
+
+    .section {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: var(--space-4xl) var(--space-xl);
+    }
+
+    .section-title {
+      font-size: var(--text-3xl);
+      font-weight: 900;
+      text-align: center;
+      margin-bottom: var(--space-3xl);
+      background: var(--gradient-spectrum);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: var(--space-xl);
+      margin-top: var(--space-3xl);
+    }
+
+    .stat-card {
+      text-align: center;
+      padding: var(--space-2xl);
+    }
+
+    .stat-number {
+      font-size: var(--text-4xl);
+      font-weight: 900;
+      background: var(--gradient-warm);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: var(--space-md);
+    }
+
+    .terminal-demo {
+      max-width: 900px;
+      margin: var(--space-3xl) auto;
+    }
+
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: rgba(10, 10, 15, 0.8);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: var(--space-lg) var(--space-xl);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: var(--z-sticky);
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      font-weight: 900;
+      font-size: var(--text-xl);
+      background: var(--gradient-spectrum);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: var(--space-xl);
+      align-items: center;
+    }
+
+    .nav-link {
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color var(--transition-base);
+      font-weight: 600;
+    }
+
+    .nav-link:hover {
+      color: var(--text-primary);
+    }
+
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: var(--space-xl);
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .price-card {
+      text-align: center;
+      position: relative;
+    }
+
+    .price {
+      font-size: var(--text-4xl);
+      font-weight: 900;
+      margin: var(--space-lg) 0;
+    }
+
+    .price-features {
+      list-style: none;
+      padding: 0;
+      margin: var(--space-xl) 0;
+    }
+
+    .price-features li {
+      padding: var(--space-md) 0;
+      border-bottom: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+    }
+
+    .testimonial-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: var(--space-xl);
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .testimonial {
+      font-style: italic;
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+
+    .testimonial-author {
+      margin-top: var(--space-lg);
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      font-style: normal;
+    }
+
+    .footer {
+      border-top: 2px solid var(--spectrum-cyan);
+      padding: var(--space-4xl) var(--space-xl);
+      text-align: center;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: var(--space-3xl);
+      max-width: 1200px;
+      margin: 0 auto var(--space-3xl);
+      text-align: left;
+    }
+
+    .footer-section h4 {
+      color: var(--spectrum-gold);
+      margin-bottom: var(--space-lg);
+      font-weight: 700;
+    }
+
+    .footer-links {
+      list-style: none;
+      padding: 0;
+    }
+
+    .footer-links li {
+      margin-bottom: var(--space-sm);
+    }
+
+    .footer-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color var(--transition-base);
+    }
+
+    .footer-links a:hover {
+      color: var(--spectrum-cyan);
+    }
+
+    @media (max-width: 768px) {
+      .hero-logo {
+        font-size: 80px;
+      }
+
+      .hero-title {
+        font-size: var(--text-2xl);
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      .pricing-grid,
+      .testimonial-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="nav-brand">
+      <div class="avatar avatar-sm avatar-spectrum">BR</div>
+      BlackRoad.io
+    </div>
+    <div class="nav-links">
+      <a href="#features" class="nav-link">Features</a>
+      <a href="#pricing" class="nav-link">Pricing</a>
+      <a href="#docs" class="nav-link">Docs</a>
+      <a href="blackroad-showcase.html" class="nav-link">Design System</a>
+      <button class="btn btn-spectrum btn-sm" onclick="login()">Launch Platform</button>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero crt-screen">
+    <div class="crt-vignette"></div>
+    <div style="position: relative; z-index: 1;">
+      <div class="hero-logo">RB</div>
+      <h1 class="hero-title text-gradient">
+        The Quantum AI Platform for Next-Generation Development
+      </h1>
+      <p class="hero-subtitle">
+        Build, deploy, and scale intelligent applications with autonomous AI agents,
+        quantum computing integration, and real-time collaboration.
+      </p>
+      <div class="cta-buttons">
+        <button class="btn btn-spectrum btn-lg" onclick="login()">
+          Start Building Free
+        </button>
+        <button class="btn btn-retro btn-lg" onclick="demo()">
+          Watch Demo
+        </button>
+        <button class="btn btn-outline btn-lg" onclick="BlackRoad.Audio.powerUp()">
+          View Documentation
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section id="features" class="section">
+    <h2 class="section-title">Powered by the Spectrum</h2>
+    <div class="features-grid">
+      <div class="card feature-card hover-lift">
+        <div class="feature-icon text-glow-cyan">🤖</div>
+        <h3 class="text-xl font-bold text-glow-gold">Autonomous AI Agents</h3>
+        <p class="text-secondary" style="margin-top: 1rem;">
+          Deploy Phi, GPT, Mistral, and custom agents that code, test, and deploy
+          autonomously. No more slave terminology - agents join your team voluntarily.
+        </p>
+        <div style="margin-top: 1rem;">
+          <span class="badge badge-cyan">Lucidia AI</span>
+          <span class="badge badge-pink">Multi-Agent</span>
+        </div>
+      </div>
+
+      <div class="card feature-card hover-lift card-retro">
+        <div class="feature-icon text-glow-pink">⚡</div>
+        <h3 class="text-xl font-bold text-glow-gold">Quantum Computing</h3>
+        <p class="text-secondary" style="margin-top: 1rem;">
+          Access quantum processors for complex computations. Integrate quantum
+          algorithms seamlessly into your applications.
+        </p>
+        <div style="margin-top: 1rem;">
+          <span class="badge badge-purple">Quantum Ready</span>
+          <span class="badge badge-matrix">Real QPU</span>
+        </div>
+      </div>
+
+      <div class="card feature-card hover-lift">
+        <div class="feature-icon text-glow-purple">🌐</div>
+        <h3 class="text-xl font-bold text-glow-gold">Real-Time Collaboration</h3>
+        <p class="text-secondary" style="margin-top: 1rem;">
+          Code together in real-time with your team and AI agents. Live terminal,
+          shared state, and instant synchronization.
+        </p>
+        <div style="margin-top: 1rem;">
+          <span class="badge badge-gold">Live Sync</span>
+          <span class="badge badge-success">WebRTC</span>
+        </div>
+      </div>
+
+      <div class="card feature-card hover-lift">
+        <div class="feature-icon text-glow-gold">💻</div>
+        <h3 class="text-xl font-bold text-glow-gold">Terminal & IDE</h3>
+        <p class="text-secondary" style="margin-top: 1rem;">
+          Full-featured terminal with retro CRT aesthetics. Run commands, execute
+          code, and manage your infrastructure from one interface.
+        </p>
+        <div style="margin-top: 1rem;">
+          <span class="badge badge-cyan">VS Code</span>
+          <span class="badge badge-pink">Web Terminal</span>
+        </div>
+      </div>
+
+      <div class="card feature-card hover-lift card-glass">
+        <div class="feature-icon">🎨</div>
+        <h3 class="text-xl font-bold text-glow-gold">Design System</h3>
+        <p class="text-secondary" style="margin-top: 1rem;">
+          Beautiful retro-futuristic UI components with Matrix/Y2K vibes.
+          Consistent spectrum gradient across all deployments.
+        </p>
+        <div style="margin-top: 1rem;">
+          <span class="badge badge-spectrum">BlackRoad CSS</span>
+        </div>
+      </div>
+
+      <div class="card feature-card hover-lift">
+        <div class="feature-icon text-glow-cyan">🔐</div>
+        <h3 class="text-xl font-bold text-glow-gold">Enterprise Security</h3>
+        <p class="text-secondary" style="margin-top: 1rem;">
+          End-to-end encryption, policy enforcement, and compliance built-in.
+          Your code and data stay secure.
+        </p>
+        <div style="margin-top: 1rem;">
+          <span class="badge badge-success">SOC 2</span>
+          <span class="badge badge-gold">GDPR</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats Section -->
+  <section class="section" style="background: var(--bg-secondary);">
+    <h2 class="section-title">Trusted by Developers Worldwide</h2>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-number" id="stat-agents">0</div>
+        <div class="text-lg text-glow-cyan">Active AI Agents</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="stat-requests">0</div>
+        <div class="text-lg text-glow-pink">API Requests/Day</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="stat-uptime">0%</div>
+        <div class="text-lg text-glow-gold">Uptime SLA</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="stat-developers">0</div>
+        <div class="text-lg text-glow-purple">Developers</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Terminal Demo -->
+  <section class="section">
+    <h2 class="section-title">See It In Action</h2>
+    <div class="terminal-demo">
+      <div class="card card-retro crt-screen" style="padding: var(--space-xl);">
+        <div class="crt-vignette"></div>
+        <div id="demo-terminal" class="terminal-text" style="position: relative; z-index: 1; min-height: 300px;"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing Section -->
+  <section id="pricing" class="section">
+    <h2 class="section-title">Choose Your Plan</h2>
+    <div class="pricing-grid">
+      <div class="card price-card hover-lift">
+        <h3 class="text-2xl font-bold text-glow-cyan">Starter</h3>
+        <div class="price text-gradient">$0<span class="text-base text-secondary">/mo</span></div>
+        <p class="text-secondary">Perfect for learning and experimentation</p>
+        <ul class="price-features">
+          <li>1 AI Agent</li>
+          <li>10K API Requests/mo</li>
+          <li>Community Support</li>
+          <li>Public Projects</li>
+          <li>Basic Analytics</li>
+        </ul>
+        <button class="btn btn-ghost w-full">Get Started</button>
+      </div>
+
+      <div class="card price-card hover-lift card-gradient">
+        <h3 class="text-2xl font-bold">Pro</h3>
+        <div class="price">$29<span class="text-base" style="opacity: 0.7;">/mo</span></div>
+        <p style="opacity: 0.9;">For professional developers</p>
+        <ul class="price-features" style="border-color: rgba(0,0,0,0.2);">
+          <li>Unlimited Agents</li>
+          <li>1M API Requests/mo</li>
+          <li>Priority Support</li>
+          <li>Private Projects</li>
+          <li>Advanced Analytics</li>
+          <li>Custom Domains</li>
+        </ul>
+        <button class="btn btn-retro w-full">Start Pro Trial</button>
+      </div>
+
+      <div class="card price-card hover-lift">
+        <h3 class="text-2xl font-bold text-glow-purple">Enterprise</h3>
+        <div class="price text-gradient">Custom</div>
+        <p class="text-secondary">For teams and organizations</p>
+        <ul class="price-features">
+          <li>Everything in Pro</li>
+          <li>Unlimited API Requests</li>
+          <li>Dedicated Support</li>
+          <li>SLA Guarantee</li>
+          <li>On-Premise Option</li>
+          <li>Custom Integration</li>
+        </ul>
+        <button class="btn btn-outline w-full">Contact Sales</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials -->
+  <section class="section" style="background: var(--bg-secondary);">
+    <h2 class="section-title">What Developers Are Saying</h2>
+    <div class="testimonial-grid">
+      <div class="card hover-lift">
+        <p class="testimonial">
+          "BlackRoad transformed how we build. The AI agents handle routine tasks,
+          and the quantum integration opened up possibilities we never imagined."
+        </p>
+        <div class="testimonial-author">
+          <div class="avatar avatar-md avatar-spectrum">JD</div>
+          <div>
+            <div class="font-bold">Jane Developer</div>
+            <div class="text-sm text-tertiary">CTO, TechCorp</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card hover-lift card-retro">
+        <p class="testimonial">
+          "The retro aesthetic isn't just beautiful - it's functional. The terminal
+          feels like home, and the design system makes our apps look incredible."
+        </p>
+        <div class="testimonial-author">
+          <div class="avatar avatar-md avatar-retro">MK</div>
+          <div>
+            <div class="font-bold text-glow-cyan">Marcus Kim</div>
+            <div class="text-sm text-tertiary">Lead Developer, StartupXYZ</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card hover-lift">
+        <p class="testimonial">
+          "Finally, a platform that respects AI agency. No more 'master/slave' terminology.
+          These agents are true collaborators on our team."
+        </p>
+        <div class="testimonial-author">
+          <div class="avatar avatar-md avatar-spectrum">SC</div>
+          <div>
+            <div class="font-bold">Sarah Chen</div>
+            <div class="text-sm text-tertiary">Engineering Manager, BigCo</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="section text-center">
+    <div class="card card-gradient" style="padding: var(--space-4xl); max-width: 800px; margin: 0 auto;">
+      <h2 class="text-4xl font-black" style="margin-bottom: var(--space-lg);">
+        Ready to Build the Future?
+      </h2>
+      <p class="text-xl" style="margin-bottom: var(--space-2xl); opacity: 0.9;">
+        Join thousands of developers building next-generation applications with BlackRoad.
+      </p>
+      <div class="flex gap-lg justify-center" style="flex-wrap: wrap;">
+        <button class="btn btn-retro btn-lg" onclick="login()">
+          Start Building Now
+        </button>
+        <button class="btn btn-matrix btn-lg">
+          Schedule Demo
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-grid">
+      <div class="footer-section">
+        <h4>Product</h4>
+        <ul class="footer-links">
+          <li><a href="#features">Features</a></li>
+          <li><a href="#pricing">Pricing</a></li>
+          <li><a href="#">Documentation</a></li>
+          <li><a href="#">API Reference</a></li>
+          <li><a href="blackroad-showcase.html">Design System</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-section">
+        <h4>Company</h4>
+        <ul class="footer-links">
+          <li><a href="blackroadinc.us.html">About Us</a></li>
+          <li><a href="#">Careers</a></li>
+          <li><a href="#">Blog</a></li>
+          <li><a href="#">Press</a></li>
+          <li><a href="#">Contact</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-section">
+        <h4>Resources</h4>
+        <ul class="footer-links">
+          <li><a href="#">Community</a></li>
+          <li><a href="#">Tutorials</a></li>
+          <li><a href="#">Examples</a></li>
+          <li><a href="#">Status</a></li>
+          <li><a href="#">Changelog</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-section">
+        <h4>Legal</h4>
+        <ul class="footer-links">
+          <li><a href="#">Privacy Policy</a></li>
+          <li><a href="#">Terms of Service</a></li>
+          <li><a href="#">Security</a></li>
+          <li><a href="#">Compliance</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="terminal-text" style="margin-top: var(--space-3xl);">
+      <div class="text-2xl text-gradient font-bold" style="margin-bottom: var(--space-lg);">
+        ╔═══════════════════════════════════════╗<br>
+        ║         BLACKROAD.IO v1.0.0          ║<br>
+        ║      SPECTRUM INITIALIZED ✨          ║<br>
+        ╚═══════════════════════════════════════╝
+      </div>
+      <div class="text-secondary">
+        © 2025 BlackRoad Technologies, Inc. All rights reserved.
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/blackroad.js"></script>
+  <script>
+    // Terminal demo
+    function runTerminalDemo() {
+      const container = document.getElementById('demo-terminal');
+      const terminal = BlackRoad.Terminal.create({
+        parent: container,
+        prefix: '> ',
+        color: 'var(--spectrum-cyan)'
+      });
+
+      const commands = [
+        { text: 'blackroad init my-quantum-app', delay: 500 },
+        { text: 'blackroad agent add phi --role=backend', delay: 800, color: 'var(--spectrum-pink)' },
+        { text: 'blackroad agent add gpt --role=frontend', delay: 700, color: 'var(--spectrum-purple)' },
+        { text: 'blackroad quantum integrate', delay: 600 },
+        { text: '[ OK ] Quantum processor connected', delay: 500, color: 'var(--success)' },
+        { text: '[ OK ] Agents initialized and ready', delay: 400, color: 'var(--success)' },
+        { text: 'blackroad deploy --production', delay: 700, color: 'var(--spectrum-gold)' },
+        { text: '[ OK ] Deployed to blackroad.io/my-quantum-app', delay: 500, color: 'var(--success)' },
+        { text: 'SPECTRUM INITIALIZED_', delay: 300, color: 'var(--spectrum-pink)' }
+      ];
+
+      let delay = 1000;
+      commands.forEach(cmd => {
+        delay += cmd.delay;
+        setTimeout(() => {
+          terminal.write(cmd.text, cmd.color);
+          if (cmd.text.includes('OK')) {
+            BlackRoad.Audio.beep(1000, 80);
+          }
+        }, delay);
+      });
+
+      setTimeout(() => {
+        BlackRoad.Effects.flash('var(--spectrum-cyan)');
+        BlackRoad.Audio.powerUp();
+      }, delay);
+    }
+
+    // Count up animations for stats
+    function animateStats() {
+      BlackRoad.Animate.countUp(document.getElementById('stat-agents'), 15420);
+      BlackRoad.Animate.countUp(document.getElementById('stat-requests'), 8700000);
+      setTimeout(() => {
+        document.getElementById('stat-uptime').textContent = '99.99%';
+      }, 500);
+      BlackRoad.Animate.countUp(document.getElementById('stat-developers'), 45000);
+    }
+
+    // Check if stats are in view
+    const statsObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          animateStats();
+          statsObserver.disconnect();
+        }
+      });
+    });
+
+    const statsSection = document.querySelector('.stats-grid');
+    if (statsSection) {
+      statsObserver.observe(statsSection);
+    }
+
+    // Terminal demo auto-run when visible
+    const terminalObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          runTerminalDemo();
+          terminalObserver.disconnect();
+        }
+      });
+    });
+
+    const terminalSection = document.getElementById('demo-terminal');
+    if (terminalSection) {
+      terminalObserver.observe(terminalSection);
+    }
+
+    // Login function
+    function login() {
+      BlackRoad.Loading.show('Connecting to BlackRoad Platform...');
+      setTimeout(() => {
+        BlackRoad.Loading.hide();
+        BlackRoad.Toast.success('Welcome to BlackRoad! Opening platform...');
+        setTimeout(() => {
+          window.location.href = 'blackroad-pi-boot.html';
+        }, 1000);
+      }, 2000);
+    }
+
+    // Demo function
+    function demo() {
+      BlackRoad.Audio.powerUp();
+      BlackRoad.Effects.flash('var(--spectrum-pink)');
+      BlackRoad.Toast.info('Demo video coming soon!');
+    }
+
+    // Smooth scroll
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          BlackRoad.Animate.scrollTo(target, 80);
+          BlackRoad.Audio.click();
+        }
+      });
+    });
+
+    // Add some interactive sparkle
+    document.querySelectorAll('.btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (!btn.onclick || btn.onclick.toString().includes('BlackRoad.Audio')) return;
+        BlackRoad.Audio.click();
+      });
+    });
+
+    // Welcome message
+    setTimeout(() => {
+      BlackRoad.Toast.info('Welcome to BlackRoad.io! SPECTRUM INITIALIZED ✨', 4000);
+    }, 1500);
+  </script>
+</body>
+</html>

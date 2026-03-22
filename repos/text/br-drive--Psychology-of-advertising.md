@@ -1,0 +1,47 @@
+# Psychology of advertising
+
+**Source:** br-drive
+
+---
+
+● 3 learnings: points that reflect your own thinking about what you feel are the
+
+most important lessons to be learned from each reading.
+
+-Unique selling propositions are summary statements that are impactful and set their
+
+brand apart from the others.
+
+-Experiments include altering one variable and include dependent and independent
+
+variables
+
+-Some advertisements include emotional appeal and some focus more on informational
+
+appeal
+
+● 2 questions: identify issues that you would like to see further discussed in
+
+class
+
+-I would like to see some brain images of how the advertisements affect the brain when
+
+we see alpha vs omega type advertising
+
+-I want to see an example of someone thinking, feeling, and doing. We talk about
+
+applications but we do not visualize it enough I feel.
+
+● 1 application: how could the advertising industry benefit from this
+
+knowledge? What would you do with the knowledge of the reading if you were
+
+working in the advertising industry?
+
+-If someone were in the advertising industry they could be able to look at a target audience and
+
+with the knowledge of the different functions of advertising, and particularily discussing the
+
+emotional and informational aspects, they would be able to gage which strategy is best to
+
+captivate the target audience

@@ -1,0 +1,38 @@
+name: Captions CI
+
+on:
+  push:
+    paths:
+      - 'packages/captioner/**'
+      - 'packages/media-gateway/**'
+      - 'packages/control-plane-sdk/**'
+      - 'packages/blackroadctl/**'
+      - 'docs/rfc/0003-auto-captioning-domain-and-interfaces.md'
+      - 'docs/guides/captions-getting-started.md'
+      - '.github/workflows/captions-ci.yml'
+  pull_request:
+    paths:
+      - 'packages/captioner/**'
+      - 'packages/media-gateway/**'
+      - 'packages/control-plane-sdk/**'
+      - 'packages/blackroadctl/**'
+      - 'docs/rfc/0003-auto-captioning-domain-and-interfaces.md'
+      - 'docs/guides/captions-getting-started.md'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+      - uses: actions/setup-node@b39b52d1213e96004bfcb1c61a8a6fa8ab84f3e8 # v4
+        with:
+          node-version: 20
+      - uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d # v4
+        with:
+          version: 9
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+      - name: Test captioner
+        run: pnpm --filter @blackroad/captioner test
+      - name: Test media gateway
+        run: pnpm --filter @blackroad/media-gateway test

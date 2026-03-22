@@ -1,0 +1,16 @@
+name: SBOM & Attest
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+jobs:
+  sbom:
+    runs-on: ubuntu-latest
+    permissions: { contents: read, packages: write, id-token: write }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: anchore/sbom-action@v0
+        with: { artifact-name: "sbom.spdx.json", path: ".", format: spdx-json, upload-artifact: true }
+      - name: Cosign attest
+        run: |
+          COSIGN_EXPERIMENTAL=1 cosign attest --predicate sbom.spdx.json --type spdx "ghcr.io/${{ github.repository }}/prism:${{ github.sha }}"

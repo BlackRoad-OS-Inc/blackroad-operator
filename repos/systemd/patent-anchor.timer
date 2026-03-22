@@ -1,0 +1,20 @@
+[Unit]
+Description=BlackRoad PatentNet Daily Anchor Timer
+Documentation=https://blackroad.io/docs/patent-anchor
+After=network-online.target
+
+[Timer]
+# Run daily at 23:55:00 UTC
+OnCalendar=*-*-* 23:55:00 UTC
+
+# If system was down when timer should have run, run it on next boot
+Persistent=true
+
+# Add small random delay to avoid exact-time conflicts
+RandomizedDelaySec=60
+
+# Start timer at boot
+OnBootSec=5min
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,267 @@
+name: "🔄 PR Branch Sync"
+
+# Keeps PR branches synchronized with base branch
+# Runs daily and on-demand to prevent branch drift
+
+on:
+  schedule:
+    # Run daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'Specific PR number to sync (leave empty for all open PRs)'
+        required: false
+      force_sync:
+        description: 'Force sync even with conflicts'
+        required: false
+        default: 'false'
+  push:
+    branches:
+      - main
+      - master
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  # Job 1: Discover PRs that need syncing
+  discover:
+    name: "🔍 Discover PRs"
+    runs-on: ubuntu-latest
+    outputs:
+      prs: ${{ steps.get_prs.outputs.prs }}
+    steps:
+      - name: Get open PRs
+        id: get_prs
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const specificPR = '${{ inputs.pr_number }}';
+
+            let prs = [];
+
+            if (specificPR) {
+              // Get specific PR
+              const { data: pr } = await github.rest.pulls.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: specificPR
+              });
+              prs = [pr];
+            } else {
+              // Get all open PRs
+              const { data: allPRs } = await github.rest.pulls.list({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                state: 'open',
+                per_page: 100
+              });
+              prs = allPRs;
+            }
+
+            // Filter and map to what we need
+            const prsToSync = prs
+              .filter(pr => !pr.draft && pr.head.repo) // Skip drafts and PRs from deleted repos
+              .map(pr => ({
+                number: pr.number,
+                head_ref: pr.head.ref,
+                base_ref: pr.base.ref,
+                title: pr.title,
+                updated_at: pr.updated_at
+              }))
+              .slice(0, 50); // Limit to 50 PRs at a time
+
+            console.log(`Found ${prsToSync.length} PRs to check for sync`);
+            core.setOutput('prs', JSON.stringify(prsToSync));
+
+  # Job 2: Sync each PR
+  sync:
+    name: "🔄 Sync PR #${{ matrix.pr.number }}"
+    needs: discover
+    if: needs.discover.outputs.prs != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        pr: ${{ fromJson(needs.discover.outputs.prs) }}
+      max-parallel: 5
+      fail-fast: false
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+        with:
+          ref: ${{ matrix.pr.head_ref }}
+          token: ${{ secrets.BOT_TOKEN || secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Configure git
+        run: |
+          git config user.name "${{ secrets.BOT_USER || 'blackroad-bot' }}"
+          git config user.email "${{ secrets.BOT_USER || 'blackroad-bot' }}@users.noreply.github.com"
+
+      - name: Check if sync needed
+        id: check
+        run: |
+          BASE="${{ matrix.pr.base_ref }}"
+          git fetch origin "$BASE"
+
+          # Get number of commits behind
+          BEHIND=$(git rev-list --count "HEAD..origin/$BASE")
+
+          echo "commits_behind=$BEHIND" >> $GITHUB_OUTPUT
+
+          if [ "$BEHIND" -eq 0 ]; then
+            echo "sync_needed=false" >> $GITHUB_OUTPUT
+            echo "✅ PR #${{ matrix.pr.number }} is up to date"
+          else
+            echo "sync_needed=true" >> $GITHUB_OUTPUT
+            echo "⚠️ PR #${{ matrix.pr.number }} is $BEHIND commits behind $BASE"
+          fi
+
+      - name: Attempt merge
+        id: merge
+        if: steps.check.outputs.sync_needed == 'true'
+        run: |
+          BASE="${{ matrix.pr.base_ref }}"
+
+          # Sanitize BASE: allow only branch names with safe characters
+          if [[ ! "$BASE" =~ ^[A-Za-z0-9._/-]+$ ]]; then
+            echo "❌ Unsafe base branch name detected: '$BASE'. Aborting merge."
+            exit 1
+          FORCE_SYNC="${{ github.event.inputs.force_sync || 'false' }}"
+
+          echo "🔄 Merging origin/$BASE into ${{ matrix.pr.head_ref }}..."
+
+          if git merge "origin/$BASE" --no-edit -m "chore: sync with $BASE"; then
+            echo "merge_status=success" >> $GITHUB_OUTPUT
+            echo "✅ Merge successful"
+          elif [ "$FORCE_SYNC" = "true" ]; then
+            echo "⚠️ Attempting auto-resolution with -X theirs due to force_sync=true"
+            if git merge "origin/$BASE" -X theirs --no-edit -m "chore: sync with $BASE (auto-resolved conflicts)"; then
+              echo "merge_status=auto_resolved" >> $GITHUB_OUTPUT
+              echo "⚠️ Merge successful with auto-resolution (using theirs strategy)"
+            else
+              echo "merge_status=failed" >> $GITHUB_OUTPUT
+              echo "❌ Merge failed - conflicts require manual resolution"
+              git merge --abort || true
+            fi
+          else
+            echo "merge_status=failed" >> $GITHUB_OUTPUT
+            echo "❌ Merge failed - conflicts require manual resolution (auto-resolution not permitted)"
+            git merge --abort || true
+          fi
+      - name: Push changes
+        if: |
+          steps.merge.outputs.merge_status == 'success' ||
+          steps.merge.outputs.merge_status == 'auto_resolved'
+        run: |
+          if [ -n "${{ secrets.BOT_TOKEN }}" ]; then
+            echo "📤 Pushing sync to origin/${{ matrix.pr.head_ref }}..."
+            git push origin HEAD
+            echo "✅ Push successful"
+          else
+            echo "⚠️ No BOT_TOKEN configured - cannot push changes"
+          fi
+
+      - name: Comment on PR
+        if: steps.check.outputs.sync_needed == 'true'
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const status = '${{ steps.merge.outputs.merge_status }}';
+            const commitsBehind = '${{ steps.check.outputs.commits_behind }}';
+
+            let body = '';
+
+            if (status === 'success') {
+              body = `✅ **Branch sync completed**\n\nAutomatically merged ${commitsBehind} commit(s) from \`${{ matrix.pr.base_ref }}\` into this PR branch.`;
+            } else if (status === 'auto_resolved') {
+              body = `⚠️ **Branch sync completed with auto-resolution**\n\nMerged ${commitsBehind} commit(s) from \`${{ matrix.pr.base_ref }}\`. Some conflicts were automatically resolved using the base branch version. Please review the changes.`;
+            } else if (status === 'failed') {
+              body = `❌ **Branch sync failed**\n\nThis PR is ${commitsBehind} commit(s) behind \`${{ matrix.pr.base_ref }}\` and has conflicts that require manual resolution.\n\nPlease run:\n\`\`\`bash\ngit fetch origin ${{ matrix.pr.base_ref }}\ngit merge origin/${{ matrix.pr.base_ref }}\n# Resolve conflicts\ngit push\n\`\`\``;
+
+              // Add conflict label
+              try {
+                await github.rest.issues.addLabels({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: ${{ matrix.pr.number }},
+                  labels: ['conflicts']
+                });
+              } catch (error) {
+                console.log('Could not add conflict label:', error.message);
+              }
+            }
+
+            if (body) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: ${{ matrix.pr.number }},
+                body: body
+              });
+            }
+
+      - name: Request re-review if synced
+        if: |
+          (steps.merge.outputs.merge_status == 'success' ||
+          steps.merge.outputs.merge_status == 'auto_resolved')
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        continue-on-error: true
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            // Get current reviews
+            const { data: reviews } = await github.rest.pulls.listReviews({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: ${{ matrix.pr.number }}
+            });
+
+            // Get unique approved reviewers
+            const approvedReviewers = [...new Set(
+              reviews
+                .filter(r => r.state === 'APPROVED')
+                .map(r => r.user.login)
+            )];
+
+            // Request re-review from approved reviewers
+            if (approvedReviewers.length > 0) {
+              try {
+                await github.rest.pulls.requestReviewers({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: ${{ matrix.pr.number }},
+                  reviewers: approvedReviewers
+                });
+                console.log(`Requested re-review from: ${approvedReviewers.join(', ')}`);
+              } catch (error) {
+                console.log('Could not request re-review:', error.message);
+              }
+            }
+
+  # Job 3: Summary
+  summary:
+    name: "📊 Sync Summary"
+    needs: [discover, sync]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create summary
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const prs = JSON.parse('${{ needs.discover.outputs.prs }}');
+
+            core.summary
+              .addHeading('Branch Sync Summary')
+              .addRaw(`\n📋 Checked ${prs.length} PR(s)\n`)
+              .addRaw(`\n✅ Sync jobs completed\n`)
+              .write();
+
+            console.log(`✅ Branch sync workflow completed for ${prs.length} PR(s)`);

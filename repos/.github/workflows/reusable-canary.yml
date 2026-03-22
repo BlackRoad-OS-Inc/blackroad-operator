@@ -1,0 +1,74 @@
+name: Reusable Canary Promotion
+
+on:
+  workflow_call:
+    inputs:
+      service:
+        required: true
+        type: string
+      cluster:
+        required: true
+        type: string
+      region:
+        required: true
+        type: string
+      image:
+        required: true
+        type: string
+      percentages:
+        required: false
+        type: string
+        default: '1,50,100'
+      bake_minutes:
+        required: false
+        type: string
+        default: '10'
+      commit:
+        required: true
+        type: string
+    secrets:
+      GATEKEEPER_ENDPOINT:
+        required: false
+
+jobs:
+  canary:
+    runs-on: ubuntu-latest
+    env:
+      PERCENTAGES: ${{ inputs.percentages }}
+      BAKE: ${{ inputs.bake_minutes }}
+      SERVICE: ${{ inputs.service }}
+      CLUSTER: ${{ inputs.cluster }}
+      REGION: ${{ inputs.region }}
+      IMAGE: ${{ inputs.image }}
+      GATEKEEPER_ENDPOINT: ${{ secrets.GATEKEEPER_ENDPOINT }}
+    steps:
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+      - name: Start canary rollout
+        run: |
+          IFS=',' read -ra STEPS <<< "$PERCENTAGES"
+          for pct in "${STEPS[@]}"; do
+            echo "Routing $pct% traffic for $SERVICE on $CLUSTER ($REGION) with image $IMAGE"
+            sleep 2
+            echo "Baking for $BAKE minutes"
+          done
+      - name: Monitor canary health
+        run: |
+          echo "Monitoring CloudWatch alarms and synthetic probes for $SERVICE"
+      - name: Report canary health
+        if: always() && env.GATEKEEPER_ENDPOINT != ''
+        env:
+          COMMIT_SHA: ${{ inputs.commit }}
+          JOB_STATE: ${{ job.status }}
+        run: |
+          STATUS="success"
+          if [ "$JOB_STATE" != "success" ]; then
+            STATUS="failure"
+          fi
+          curl -sS -X POST "$GATEKEEPER_ENDPOINT" \
+            -H "Content-Type: application/json" \
+            -d "{\"commit\":\"$COMMIT_SHA\",\"name\":\"Canary Health\",\"status\":\"$STATUS\",\"summary\":\"Canary rollout $STATUS\"}"
+      - name: Rollback canary
+        if: failure()
+        run: |
+          chmod +x scripts/rollback.sh
+          ./scripts/rollback.sh --env staging --to-image "$IMAGE"

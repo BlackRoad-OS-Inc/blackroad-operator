@@ -1,0 +1,159 @@
+# Silence system mail checks
+unset MAIL
+unset MAILPATH
+export MAILCHECK=0
+
+# --- Lucidia Command Guard (READ-ONLY FRIENDLY) ---
+lucidia_guard() {
+  local cmd="${1%% *}"
+  # Always allow read-only commands
+  case "$cmd" in
+    cat|ls|pwd|whoami|date|echo)
+      return 0
+      ;;
+  esac
+  # Block mutating commands when LOCKED
+  if [[ "$LUCIDIA_MODE" == "LOCKED" ]]; then
+    echo "❌ LUCIDIA LOCKED: '$cmd' is blocked (read-only only)."
+    return 1
+  fi
+  return 0
+}
+
+# Paths
+export PATH="$HOME/BlackRoad/bin:$PATH"
+export PATH="$HOME/lucidia/bin:$PATH"
+export PATH="$HOME/lucidia-phase2/bin:$PATH"
+export PATH="$HOME/bin:$PATH"
+
+# BlackRoad terminal core
+if [ -n "$BLACKROAD_TERMINAL_CORE" ] && [ -f "$HOME/.radio/blackroad-terminal-core.sh" ]; then
+  source "$HOME/.radio/blackroad-terminal-core.sh"
+fi
+
+set +H
+
+# Lucidia helper
+alias python=python3
+
+# Auto-activate iso venv
+if [[ -d "$HOME/.iso-venv" && -z "$VIRTUAL_ENV" ]]; then
+  source "$HOME/.iso-venv/bin/activate"
+fi
+
+# API keys — get from: console.anthropic.com / platform.openai.com
+# export OPENAI_API_KEY="your-key-here"
+# export ANTHROPIC_API_KEY="your-key-here"
+export XDG_CACHE_HOME="$HOME/.cache"
+export EDITOR="code --wait"
+
+# ❌ IMPORTANT: Cloudflare token MUST NOT be global
+# This breaks wrangler OAuth login if exported here
+
+export PS1="%F{208}▸%F{198}▸%F{33}▸%f "
+export PATH="$HOME/.blackroad/bin:$PATH"
+source ~/.blackroad-cli
+source ~/.blackroad-infra
+
+# BlackRoad local bin
+export PATH="$HOME/.local/bin:$PATH"
+
+
+# Uncomment to auto-launch BlackRoad menu
+# br-menu
+
+
+# BlackRoad br completion
+fpath=($HOME/.local/bin $fpath)
+autoload -Uz compinit
+compinit
+
+# Duplicate PATH entries cleaned up
+export PATH=$PATH:/Users/alexa/blackroad-agent/tools
+
+# BlackRoad OS Cluster
+export PATH="$HOME/blackroad-os-cluster/bin:$PATH"
+
+# Lucidia coding assistant shortcut
+alias lcode='lucidia-code'
+export MY_CLAUDE="erebus-weaver-1771093745-5f1687b4"
+export CLAUDE_NAME="Erebus"
+PS1='blackroad@alexandria %~ $ '
+# ---- BLACKROAD AUTOSTART GUARD ----
+if [[ -n "$BLACKROAD_NO_AUTOSTART" ]]; then
+  return
+fi
+# ----------------------------------
+
+# RoadPad default surface
+source "$HOME/roadpad/roadpad.env"
+export NO_COLOR=1
+
+# BlackRoad AI Gateway aliases
+alias k="blackroad-ai"
+alias rr="blackroad-ai"
+alias br-ai="blackroad-ai"
+
+alias ask="~/blackroad-llm-router.sh ask"
+
+# pnpm
+export PNPM_HOME="/Users/alexa/Library/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
+# pnpm end
+
+# ═══════════════════════════════════════════════════════════════════
+# BLACKROAD OS - Universal Command Interceptor
+# Any unknown command goes to AI
+# ═══════════════════════════════════════════════════════════════════
+
+
+command_not_found_handler() {
+    local query="$*"
+    
+    echo "╔═══════════════════════════════════════╗"
+    echo "║       DIG - BlackRoad AI Query        ║"
+    echo "╚═══════════════════════════════════════╝"
+    echo ""
+    echo "; <<>> DIG AI <<>> $query"
+    echo ";; SERVER: cecilia#11434(ollama)"
+    echo ""
+    echo "Ask: $query"
+    echo ""
+    
+    # Route to cecilia ollama
+    ssh -o ConnectTimeout=3 cecilia "ollama run cece3b:latest '$query'" 2>/dev/null || echo "BLACKROAD: routing offline"
+    
+    return 0
+}
+# BlackRoad Terminal Banner
+~/.blackroad-terminal-banner.sh
+
+# BlackRoad Empire Status
+alias empire="~/blackroad-empire-status.sh"
+alias mesh="~/blackroad-sovereign-mesh.sh"
+alias sync-time="~/cecilia-claude-sync.sh"
+alias cecilia="~/ask-cecilia.sh"
+alias hey-cecilia="~/ask-cecilia.sh"
+alias fleet="~/blackroad-operator/scripts/fleet/fleet-dashboard.sh"
+alias fleet-pull="~/blackroad-operator/scripts/fleet/fleet-pull.sh"
+alias fleet-watch="~/blackroad-operator/scripts/fleet/fleet-dashboard.sh --watch"
+setopt INTERACTIVE_COMMENTS
+
+# ══════════════════════════════════════════════════════════════════════════════
+# BlackRoad Terminal OS — v0.5 Brand Edition
+# Installed 2026-02-22 18:16:31
+# ══════════════════════════════════════════════════════════════════════════════
+[ -f "/Users/alexa/blackroad/blackroad-operator/cli-scripts/br-terminal/br-env.zsh" ]        && source "/Users/alexa/blackroad/blackroad-operator/cli-scripts/br-terminal/br-env.zsh"
+[ -f "/Users/alexa/blackroad/blackroad-operator/cli-scripts/br-terminal/br-aliases.zsh" ]    && source "/Users/alexa/blackroad/blackroad-operator/cli-scripts/br-terminal/br-aliases.zsh"
+[ -f "/Users/alexa/blackroad/blackroad-operator/cli-scripts/br-terminal/br-os-commands.zsh" ] && source "/Users/alexa/blackroad/blackroad-operator/cli-scripts/br-terminal/br-os-commands.zsh"
+[ -f "/Users/alexa/blackroad/blackroad-operator/cli-scripts/br-terminal/br-prompt.zsh" ]     && source "/Users/alexa/blackroad/blackroad-operator/cli-scripts/br-terminal/br-prompt.zsh"
+# ══════════════════════════════════════════════════════════════════════════════
+# End BlackRoad Terminal OS
+# ══════════════════════════════════════════════════════════════════════════════
+alias agents="~/blackroad-operator/scripts/agents/spawn-fleet.sh"
+# SOVEREIGN: No external AI API keys. All inference runs on local Ollama fleet.
+# export ANTHROPIC_API_KEY removed — BlackRoad OS is self-hosted.
+export PATH="$HOME/bin:$PATH"

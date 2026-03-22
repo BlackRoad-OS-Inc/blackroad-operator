@@ -1,0 +1,27 @@
+repo:
+  name: blackroad-prism
+  org: BlackRoad-OS-Inc
+  type: worker
+  languages: [typescript]
+  url: https://github.com/BlackRoad-OS-Inc/blackroad-prism
+
+ownership:
+  owner: blackboxprogramming
+  codeowners: ["@blackboxprogramming"]
+  license: proprietary
+
+policies:
+  inherits: ["coding", "collaboration", "safety", "issues", "pr-review", "docs"]
+  additional:
+    - "Fleet data must come from KV, never hardcoded"
+    - "Public endpoints must not expose internal IPs or secrets"
+    - "Dashboard must follow BlackRoad design system"
+
+certification:
+  required_level: 2
+  modules: ["fundamentals", "workers", "infrastructure"]
+
+deployment:
+  target: cloudflare-workers
+  command: "npx wrangler deploy"
+  health_check: "curl https://prism.blackroad.io/api/health"

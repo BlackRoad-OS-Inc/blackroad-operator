@@ -1,0 +1,30 @@
+---
+- name: Install NVIDIA container toolkit
+  shell: |
+    distribution=$(. /etc/os-release;echo $ID$VERSION_ID) && \
+    curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg && \
+    curl -fsSL https://nvidia.github.io/libnvidia-container/$distribution/libnvidia-container.list | \
+      sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
+      tee /etc/apt/sources.list.d/nvidia-container-toolkit.list && \
+    apt update && apt install -y nvidia-container-toolkit && nvidia-ctk runtime configure && systemctl restart docker
+- name: Pull edge agent image (multi-arch)
+  shell: "docker pull ghcr.io/blackroad/edge-agent:latest || true"
+- name: Install edge-agent systemd
+  copy:
+    dest: /etc/systemd/system/edge-agent.service
+    content: |
+      [Unit]
+      Description=BlackRoad Edge Agent
+      After=docker.service
+
+      [Service]
+      Restart=always
+      ExecStart=/usr/bin/docker run --rm --gpus all -e GATEWAY_URL=http://{{ hostvars[groups['pi'][0]].ansible_host }}:30888 -e TS_TRUST=0.62 ghcr.io/blackroad/edge-agent:latest
+
+      [Install]
+      WantedBy=multi-user.target
+- name: Enable edge-agent
+  systemd:
+    name: edge-agent
+    state: started
+    enabled: yes

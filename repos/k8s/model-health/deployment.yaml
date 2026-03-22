@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: model-health
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: model-health
+  template:
+    metadata:
+      labels:
+        app: model-health
+    spec:
+      containers:
+        - name: api
+          image: ghcr.io/blackroad/model-health:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: PROVIDER_CONFIG_PATH
+              value: /config/providers.yaml
+            - name: INCIDENT_LOG_PATH
+              value: /var/log/model-incidents.jsonl
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 15
+          volumeMounts:
+            - name: provider-config
+              mountPath: /config
+              readOnly: true
+            - name: incident-log
+              mountPath: /var/log
+      volumes:
+        - name: provider-config
+          configMap:
+            name: model-health-config
+            items:
+              - key: providers.yaml
+                path: providers.yaml
+        - name: incident-log
+          emptyDir: {}

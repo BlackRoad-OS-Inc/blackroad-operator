@@ -1,0 +1,77 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: prism-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-prism_console}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ./backups:/backups
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - prism_network
+    # Security
+    security_opt:
+      - no-new-privileges:true
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '1'
+          memory: 1G
+
+  # Automated backup service
+  postgres_backup:
+    image: postgres:16-alpine
+    container_name: prism-postgres-backup
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-prism_console}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}
+      POSTGRES_HOST: postgres
+      BACKUP_DIR: /backups
+      BACKUP_KEEP_DAYS: 30
+    volumes:
+      - ./backups:/backups
+      - ../../scripts/backup-database.sh:/usr/local/bin/backup-database.sh:ro
+    command: >
+      sh -c "
+      apk add --no-cache bash &&
+      chmod +x /usr/local/bin/backup-database.sh &&
+      while true; do
+        echo 'Running scheduled backup...'
+        DB_HOST=postgres DB_PASSWORD=$${POSTGRES_PASSWORD} /usr/local/bin/backup-database.sh
+        echo 'Next backup in 24 hours'
+        sleep 86400
+      done
+      "
+    networks:
+      - prism_network
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  prism_network:
+    driver: bridge

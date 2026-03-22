@@ -1,0 +1,130 @@
+#!/bin/bash
+# BR-Live-Monitor — Real-time BlackRoad OS terminal dashboard
+# Usage: br-live-monitor [SECONDS]
+
+set -e
+
+INTERVAL="${1:-5}"
+[[ "$1" == "--interval" ]] && INTERVAL="${2:-5}"
+
+W='\033[1;37m'
+D='\033[0;90m'
+N='\033[0m'
+
+PIES=("alice:192.168.4.49" "cecilia:192.168.4.96" "octavia:192.168.4.101" "aria:192.168.4.98" "lucidia:192.168.4.38")
+DROPS=("gematria:64.23.174.135" "anastasia:64.23.180.28")
+
+bar() {
+    local pct=$1 w=20
+    local filled=$(( pct * w / 100 ))
+    local empty=$(( w - filled ))
+    for ((i=0; i<filled; i++)); do printf '█'; done
+    for ((i=0; i<empty; i++)); do printf '░'; done
+    printf " %3d%%" "$pct"
+}
+
+check_host() {
+    ping -c1 -W1 "$1" &>/dev/null && echo "up" || echo "down"
+}
+
+render() {
+    clear
+    local now=$(date '+%H:%M:%S')
+    local today=$(date '+%Y-%m-%d')
+
+    echo ""
+    printf "  ${W}BLACKROAD OS${N}  ${D}live monitor${N}          ${D}%s  %s${N}\n" "$today" "$now"
+    printf "  ${D}────────────────────────────────────────────────${N}\n"
+
+    # Local stats
+    local cpu=$(ps -A -o %cpu | awk '{s+=$1} END {printf "%.0f", s/'"$(sysctl -n hw.ncpu)"'}')
+    local mem_used=$(vm_stat | awk '/Pages active/ {a=$NF} /Pages wired/ {w=$NF} END {printf "%.0f", (a+w)*4096/1073741824}' 2>/dev/null)
+    local mem_total=$(sysctl -n hw.memsize 2>/dev/null | awk '{printf "%.0f", $1/1073741824}')
+    local mem_pct=0
+    (( mem_total > 0 )) && mem_pct=$(( mem_used * 100 / mem_total ))
+    local disk_pct=$(df -h / | awk 'NR==2 {gsub(/%/,""); print $5}')
+    local docker_count=$(docker ps -q 2>/dev/null | wc -l | tr -d ' ')
+    local up=$(uptime | sed 's/.*up //' | sed 's/,.*//')
+
+    printf "\n  ${W}ALEXANDRIA${N}  ${D}up %s${N}\n" "$up"
+    printf "    cpu  "; bar "$cpu"; echo ""
+    printf "    mem  "; bar "$mem_pct"; printf "  ${D}%s/%sG${N}\n" "$mem_used" "$mem_total"
+    printf "    disk "; bar "$disk_pct"; echo ""
+    printf "    ${D}docker: %s containers${N}\n" "$docker_count"
+
+    # Fleet
+    printf "\n  ${W}FLEET${N}\n"
+    for entry in "${PIES[@]}"; do
+        local name="${entry%%:*}" ip="${entry##*:}"
+        local st=$(check_host "$ip")
+        if [[ "$st" == "up" ]]; then
+            printf "    ${W}*${N}  %-10s ${D}%s${N}\n" "$name" "$ip"
+        else
+            printf "    ${D}-  %-10s %s${N}\n" "$name" "$ip"
+        fi
+    done
+    echo ""
+    for entry in "${DROPS[@]}"; do
+        local name="${entry%%:*}" ip="${entry##*:}"
+        local st=$(check_host "$ip")
+        if [[ "$st" == "up" ]]; then
+            printf "    ${W}*${N}  %-10s ${D}%s${N}\n" "$name" "$ip"
+        else
+            printf "    ${D}-  %-10s %s${N}\n" "$name" "$ip"
+        fi
+    done
+
+    # Memory
+    local journal=0 codex=0 tils=0 collab=0
+    [[ -f ~/blackroad-operator/data/memory/journal.jsonl ]] && journal=$(wc -l < ~/blackroad-operator/data/memory/journal.jsonl 2>/dev/null | tr -d ' ')
+    [[ -f ~/blackroad-operator/data/memory/codex.db ]] && codex=$(sqlite3 ~/blackroad-operator/data/memory/codex.db "SELECT COUNT(*) FROM solutions;" 2>/dev/null || echo 0)
+    [[ -f ~/blackroad-operator/data/memory/til.jsonl ]] && tils=$(wc -l < ~/blackroad-operator/data/memory/til.jsonl 2>/dev/null | tr -d ' ')
+    [[ -f ~/blackroad-operator/data/memory/collaboration.db ]] && collab=$(sqlite3 ~/blackroad-operator/data/memory/collaboration.db "SELECT COUNT(*) FROM messages;" 2>/dev/null || echo 0)
+
+    printf "\n  ${W}MEMORY${N}\n"
+    printf "    journal  %-6s  codex  %-6s  tils  %-6s  collab  %s\n" "$journal" "$codex" "$tils" "$collab"
+
+    # Services
+    printf "\n  ${W}SERVICES${N}\n"
+    for svc in Docker Ollama Redis; do
+        local st="stopped" mark="-"
+        case "$svc" in
+            Docker)  docker info &>/dev/null && { st="running"; mark="*"; } ;;
+            Ollama)  [[ "$(curl -s -o /dev/null -w '%{http_code}' --connect-timeout 1 http://localhost:11434/api/tags 2>/dev/null)" == "200" ]] && { st="running"; mark="*"; } ;;
+            Redis)   redis-cli ping &>/dev/null 2>&1 && { st="running"; mark="*"; } ;;
+        esac
+        if [[ "$mark" == "*" ]]; then
+            printf "    ${W}*${N}  %-12s %s\n" "$svc" "$st"
+        else
+            printf "    ${D}-  %-12s %s${N}\n" "$svc" "$st"
+        fi
+    done
+
+    # Network
+    local net_in="n/a" net_out="n/a"
+    if command -v netstat &>/dev/null; then
+        local nd=$(netstat -ib 2>/dev/null | awk '/en0/ && !/^$/ {print $7, $10; exit}')
+        net_in=$(echo "$nd" | awk '{printf "%.1f GB", $1/1073741824}')
+        net_out=$(echo "$nd" | awk '{printf "%.1f GB", $2/1073741824}')
+    fi
+    printf "\n  ${W}NETWORK${N}  ${D}en0${N}\n"
+    printf "    down %s   up %s\n" "$net_in" "$net_out"
+
+    # Repos
+    local local_repos=$(find ~ -maxdepth 2 -name ".git" -type d 2>/dev/null | wc -l | tr -d ' ')
+    printf "\n  ${W}REPOS${N}\n"
+    printf "    local %s   gitea 239 / 8 orgs\n" "$local_repos"
+
+    printf "\n  ${D}────────────────────────────────────────────────${N}\n"
+    printf "  ${D}refresh %ss  q=quit${N}\n\n" "$INTERVAL"
+}
+
+trap 'tput cnorm; exit 0' INT TERM
+tput civis
+
+while true; do
+    render
+    read -t "$INTERVAL" -n 1 key 2>/dev/null && [[ "$key" =~ [qQ] ]] && break
+done
+
+tput cnorm

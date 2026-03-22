@@ -1,0 +1,14 @@
+name: SBOM
+on:
+  push:
+    branches: [main]
+    paths: ["apps/api/**", "release/**", ".github/workflows/sbom.yml"]
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+      - uses: CycloneDX/gh-node-module-generatebom@f1b6c8b8f1b6c8b8f1b6c8b8f1b6c8b8f1b6c8b8 # v4
+        with: { path: "apps/api", output: "bom.xml" }
+      - uses: actions/upload-artifact@26f96dfa697d77e81fd5907df203aa23a56210a8 # v4
+        with: { name: sbom, path: bom.xml }

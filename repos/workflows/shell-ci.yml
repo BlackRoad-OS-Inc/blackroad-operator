@@ -1,0 +1,29 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install shellcheck
+        run: sudo apt-get install -y shellcheck
+
+      - name: Lint shell scripts
+        run: |
+          find . -name '*.sh' -not -path './node_modules/*' -not -path './.git/*' | while read -r script; do
+            echo "Checking $script..."
+            shellcheck "$script" || true
+          done
+
+      - name: Syntax check
+        run: |
+          find . -name '*.sh' -not -path './node_modules/*' -not -path './.git/*' | while read -r script; do
+            bash -n "$script" && echo "OK: $script" || echo "FAIL: $script"
+          done

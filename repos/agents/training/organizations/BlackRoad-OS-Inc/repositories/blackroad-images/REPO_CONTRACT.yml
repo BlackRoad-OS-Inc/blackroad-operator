@@ -1,0 +1,27 @@
+repo:
+  name: blackroad-images
+  org: BlackRoad-OS-Inc
+  type: worker
+  languages: [javascript, bash, sql]
+  url: https://github.com/BlackRoad-OS-Inc/blackroad-images
+
+ownership:
+  owner: blackboxprogramming
+  codeowners: ["@blackboxprogramming"]
+  license: proprietary
+
+policies:
+  inherits: ["coding", "collaboration", "safety", "issues", "pr-review", "docs"]
+  additional:
+    - "Brand assets must follow DESIGN-RULES.md"
+    - "AI generation endpoints must be rate limited"
+    - "R2 uploads must include proper content-type headers"
+
+certification:
+  required_level: 2
+  modules: ["fundamentals", "workers"]
+
+deployment:
+  target: cloudflare-workers + r2
+  command: "npx wrangler deploy"
+  health_check: "curl https://images.blackroad.io/pixel-art/road-logo.png"

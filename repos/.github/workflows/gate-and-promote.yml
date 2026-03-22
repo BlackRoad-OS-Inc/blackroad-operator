@@ -1,0 +1,193 @@
+name: Gate and Promote
+
+on:
+  workflow_dispatch:
+    inputs:
+      env:
+        description: Environment to promote
+        type: choice
+        required: true
+        options:
+          - preview
+          - staging
+          - production
+        default: preview
+      sha:
+        description: Commit SHA to deploy
+        required: false
+  workflow_call:
+    inputs:
+      env:
+        description: Environment to promote
+        required: true
+        type: string
+      sha:
+        description: Commit SHA to deploy
+        required: false
+        type: string
+
+env:
+  TARGET_SHA: ${{ inputs.sha || github.sha }}
+  TARGET_ENV: ${{ inputs.env || 'preview' }}
+
+jobs:
+  policy_gate:
+    name: Policy Gate
+    runs-on: ubuntu-latest
+    env:
+      GATEKEEPER_ENDPOINT: ${{ secrets.GATEKEEPER_ENDPOINT }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+        with:
+          ref: ${{ env.TARGET_SHA }}
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 8
+      - uses: actions/setup-node@b39b52d1213e96004bfcb1c61a8a6fa8ab84f3e8 # v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Run policy gate
+        run: pnpm dlx ts-node --esm tools/policy_gate.ts
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GATEKEEPER_ENDPOINT: ${{ env.GATEKEEPER_ENDPOINT }}
+          PRISM_CONSOLE_ROOT: ${{ github.workspace }}
+      - name: Confirm policy gate check
+        if: ${{ success() && env.GATEKEEPER_ENDPOINT != '' }}
+        env:
+          COMMIT_SHA: ${{ env.TARGET_SHA }}
+        run: |
+          curl -sS -X POST "$GATEKEEPER_ENDPOINT" \
+            -H "Content-Type: application/json" \
+            -d "{\"commit\":\"$COMMIT_SHA\",\"name\":\"Policy Gate\",\"status\":\"success\",\"summary\":\"Policy gate passed\"}"
+
+  tests_gate:
+    name: Tests Gate
+    runs-on: ubuntu-latest
+    needs: policy_gate
+    env:
+      GATEKEEPER_ENDPOINT: ${{ secrets.GATEKEEPER_ENDPOINT }}
+    steps:
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+        with:
+          ref: ${{ env.TARGET_SHA }}
+      - uses: actions/setup-node@b39b52d1213e96004bfcb1c61a8a6fa8ab84f3e8 # v4
+        with:
+          node-version: 20
+      - name: Install API dependencies
+        run: npm install
+        working-directory: apps/api
+      - name: Run API tests
+        run: npm test
+        working-directory: apps/api
+      - name: Report tests gate
+        if: always() && env.GATEKEEPER_ENDPOINT != ''
+        env:
+          COMMIT_SHA: ${{ env.TARGET_SHA }}
+          JOB_STATE: ${{ job.status }}
+        run: |
+          STATUS="success"
+          if [ "$JOB_STATE" != "success" ]; then
+            STATUS="failure"
+          fi
+          curl -sS -X POST "$GATEKEEPER_ENDPOINT" \
+            -H "Content-Type: application/json" \
+            -d "{\"commit\":\"$COMMIT_SHA\",\"name\":\"Tests Gate\",\"status\":\"$STATUS\",\"summary\":\"Node test suite $STATUS\"}"
+
+  metrics_gate:
+    name: Metrics Gate
+    runs-on: ubuntu-latest
+    needs: tests_gate
+    env:
+      GATEKEEPER_ENDPOINT: ${{ secrets.GATEKEEPER_ENDPOINT }}
+    steps:
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+        with:
+          ref: ${{ env.TARGET_SHA }}
+      - name: Validate metrics contract
+        run: |
+          node -e "const data=require('./data/metrics/status.json'); if(!data.contract||!data.observability){process.exit(1);}"
+      - name: Report metrics gate
+        if: always() && env.GATEKEEPER_ENDPOINT != ''
+        env:
+          COMMIT_SHA: ${{ env.TARGET_SHA }}
+          JOB_STATE: ${{ job.status }}
+        run: |
+          STATUS="success"
+          if [ "$JOB_STATE" != "success" ]; then
+            STATUS="failure"
+          fi
+          curl -sS -X POST "$GATEKEEPER_ENDPOINT" \
+            -H "Content-Type: application/json" \
+            -d "{\"commit\":\"$COMMIT_SHA\",\"name\":\"Metrics Gate\",\"status\":\"$STATUS\",\"summary\":\"Metrics contract $STATUS\"}"
+
+  approvals_gate:
+    name: Approvals Gate
+    runs-on: ubuntu-latest
+    needs: metrics_gate
+    environment:
+      name: ${{ env.TARGET_ENV }}
+    env:
+      GATEKEEPER_ENDPOINT: ${{ secrets.GATEKEEPER_ENDPOINT }}
+    steps:
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+        with:
+          ref: ${{ env.TARGET_SHA }}
+      - name: Inspect approvals manifest
+        run: |
+          node -e "const fs=require('fs');const env=process.env.ENVIRONMENT;const manifest=JSON.parse(fs.readFileSync('config/approvals.json','utf8'));const req=manifest[env]||[];console.log('Required approvals:',req.join(', ')||'none');"
+        env:
+          ENVIRONMENT: ${{ env.TARGET_ENV }}
+      - name: Report approvals gate
+        if: always() && env.GATEKEEPER_ENDPOINT != ''
+        env:
+          COMMIT_SHA: ${{ env.TARGET_SHA }}
+          JOB_STATE: ${{ job.status }}
+        run: |
+          STATUS="success"
+          if [ "$JOB_STATE" != "success" ]; then
+            STATUS="failure"
+          fi
+          curl -sS -X POST "$GATEKEEPER_ENDPOINT" \
+            -H "Content-Type: application/json" \
+            -d "{\"commit\":\"$COMMIT_SHA\",\"name\":\"Approvals Gate\",\"status\":\"$STATUS\",\"summary\":\"Approvals gate $STATUS\"}"
+
+  promote_preview:
+    name: Promote Preview
+    runs-on: ubuntu-latest
+    needs: approvals_gate
+    if: ${{ env.TARGET_ENV == 'preview' }}
+    steps:
+      - run: echo "Preview promotion handled via deploy-preview workflow"
+
+  promote_staging:
+    name: Promote Staging
+    needs: approvals_gate
+    if: ${{ env.TARGET_ENV == 'staging' }}
+    uses: ./.github/workflows/reusable-canary.yml
+    with:
+      service: prism-console-web
+      cluster: prism-shared-staging
+      region: us-east-1
+      image: ghcr.io/blackroad/prism-console:${{ env.TARGET_SHA }}
+      percentages: '1,50,100'
+      bake_minutes: '15'
+      commit: ${{ env.TARGET_SHA }}
+    secrets: inherit
+
+  promote_production:
+    name: Promote Production
+    needs: approvals_gate
+    if: ${{ env.TARGET_ENV == 'production' }}
+    uses: ./.github/workflows/reusable-bluegreen.yml
+    with:
+      service: prism-console-web
+      cluster: prism-shared-prod
+      region: us-east-1
+      image: ghcr.io/blackroad/prism-console:${{ env.TARGET_SHA }}
+      commit: ${{ env.TARGET_SHA }}
+    secrets: inherit

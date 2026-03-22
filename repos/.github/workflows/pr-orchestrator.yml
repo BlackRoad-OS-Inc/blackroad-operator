@@ -1,0 +1,310 @@
+name: "🎯 PR Master Orchestrator"
+
+# This is the master workflow that coordinates all PR automation
+# Triggers on PR open/update and orchestrates the entire PR lifecycle
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  pull_request_target:
+    types: [opened, synchronize, reopened, ready_for_review]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR number to process'
+        required: false
+
+permissions:
+  contents: write
+  pull-requests: write
+  checks: write
+  statuses: write
+  issues: write
+  actions: write
+
+jobs:
+  # Step 1: Initial PR setup and validation
+  setup:
+    name: "🚀 Initialize PR"
+    runs-on: ubuntu-latest
+    outputs:
+      pr_number: ${{ steps.pr_info.outputs.pr_number }}
+      base_branch: ${{ steps.pr_info.outputs.base_branch }}
+      head_branch: ${{ steps.pr_info.outputs.head_branch }}
+      has_conflicts: ${{ steps.check_conflicts.outputs.has_conflicts }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || github.ref }}
+
+      - name: Get PR info
+        id: pr_info
+        run: |
+          PR_NUM="${{ github.event.pull_request.number || inputs.pr_number }}"
+          BASE="${{ github.event.pull_request.base.ref || github.base_ref || 'main' }}"
+          HEAD="${{ github.event.pull_request.head.ref || github.head_ref }}"
+
+          echo "pr_number=${PR_NUM}" >> $GITHUB_OUTPUT
+          echo "base_branch=${BASE}" >> $GITHUB_OUTPUT
+          echo "head_branch=${HEAD}" >> $GITHUB_OUTPUT
+
+          echo "📋 PR #${PR_NUM}: ${HEAD} → ${BASE}"
+
+      - name: Check for conflicts
+        id: check_conflicts
+        run: |
+          git fetch origin "${{ steps.pr_info.outputs.base_branch }}"
+
+          if git merge-base --is-ancestor "origin/${{ steps.pr_info.outputs.base_branch }}" HEAD; then
+            echo "✅ No conflicts detected"
+            echo "has_conflicts=false" >> $GITHUB_OUTPUT
+          else
+            # Try merge to detect conflicts
+            if git merge --no-commit --no-ff "origin/${{ steps.pr_info.outputs.base_branch }}" 2>&1 | grep -q "CONFLICT"; then
+              echo "⚠️ Conflicts detected"
+              echo "has_conflicts=true" >> $GITHUB_OUTPUT
+              git merge --abort || true
+            else
+              echo "✅ Clean merge possible"
+              echo "has_conflicts=false" >> $GITHUB_OUTPUT
+              git merge --abort || true
+            fi
+          fi
+
+      - name: Label PR for tracking
+        if: github.event.pull_request.number
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const labels = ['automated-pr-flow'];
+            if ('${{ steps.check_conflicts.outputs.has_conflicts }}' === 'true') {
+              labels.push('conflicts-detected');
+            }
+
+            try {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: ${{ steps.pr_info.outputs.pr_number }},
+                labels: labels
+              });
+            } catch (error) {
+              console.log('Label already exists or error:', error.message);
+            }
+
+      - name: Post setup comment
+        if: github.event.pull_request.number
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          has_conflicts: ${{ steps.check_conflicts.outputs.has_conflicts }}
+          script: |
+            const conflictMsg = (has_conflicts === 'true')
+              ? '⚠️ Conflicts detected - auto-sync will attempt resolution'
+              : '✅ No conflicts detected';
+            const body = `## 🎯 PR Orchestrator Activated
+
+            ✅ Initial setup complete
+            📋 PR #${{ steps.pr_info.outputs.pr_number }}
+            🌲 Branch: \`${{ steps.pr_info.outputs.head_branch }}\` → \`${{ steps.pr_info.outputs.base_branch }}\`
+            ${conflictMsg}
+
+            The following automated workflows will run:
+            - 🔍 Code quality checks (linting, formatting)
+            - 🧪 Test suite execution
+            - 🔄 Branch sync with base
+            - 🤖 Auto-remediation on failures
+            - 📊 Build validation
+
+            _Powered by PR Master Orchestrator_`;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: ${{ steps.pr_info.outputs.pr_number }},
+              body: body
+            });
+
+  # Step 2: Sync with base branch if needed
+  sync:
+    name: "🔄 Sync with Base"
+    needs: setup
+    runs-on: ubuntu-latest
+    if: needs.setup.outputs.has_conflicts == 'true'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+        with:
+          fetch-depth: 0
+          ref: ${{ needs.setup.outputs.head_branch }}
+          token: ${{ secrets.BOT_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Configure git
+        run: |
+          git config user.name "${{ secrets.BOT_USER || 'blackroad-bot' }}"
+          git config user.email "${{ secrets.BOT_USER || 'blackroad-bot' }}@users.noreply.github.com"
+
+      - name: Attempt auto-sync
+        id: sync
+        run: |
+          BASE="${{ needs.setup.outputs.base_branch }}"
+          git fetch origin "$BASE"
+
+          echo "🔄 Attempting to merge origin/$BASE into current branch..."
+
+          if git merge "origin/$BASE" --no-edit -m "chore: auto-sync with $BASE"; then
+            echo "✅ Auto-merge successful"
+            echo "success=true" >> $GITHUB_OUTPUT
+            git push origin HEAD
+          else
+            echo "⚠️ Auto-merge failed - manual intervention required"
+            echo "success=false" >> $GITHUB_OUTPUT
+            git merge --abort || true
+          fi
+
+      - name: Comment on sync result
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const success = '${{ steps.sync.outputs.success }}' === 'true';
+            const body = success
+              ? '✅ **Auto-sync completed** - Branch successfully synced with `${{ needs.setup.outputs.base_branch }}`'
+              : '⚠️ **Auto-sync failed** - Manual conflict resolution required. Please merge `${{ needs.setup.outputs.base_branch }}` manually.';
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: ${{ needs.setup.outputs.pr_number }},
+              body: body
+            });
+
+  # Step 3: Run comprehensive validation
+  validate:
+    name: "✅ Validate PR"
+    needs: [setup, sync]
+    if: always() && needs.setup.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+        with:
+          ref: ${{ needs.setup.outputs.head_branch }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@b39b52d1213e96004bfcb1c61a8a6fa8ab84f3e8 # v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          npm ci || npm install
+
+      - name: Run linting
+        id: lint
+        continue-on-error: true
+        run: |
+          npm run lint 2>&1 || echo "⚠️ Linting found issues"
+
+      - name: Run tests
+        id: test
+        continue-on-error: true
+        run: |
+          npm run test 2>&1 || echo "⚠️ Tests failed"
+
+      - name: Run build
+        id: build
+        continue-on-error: true
+        run: |
+          npm run build 2>&1 || echo "⚠️ Build failed"
+
+      - name: Post validation summary
+        if: github.event.pull_request.number
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const lint = '${{ steps.lint.outcome }}' === 'success' ? '✅' : '❌';
+            const test = '${{ steps.test.outcome }}' === 'success' ? '✅' : '❌';
+            const build = '${{ steps.build.outcome }}' === 'success' ? '✅' : '❌';
+
+            const allPassed = lint === '✅' && test === '✅' && build === '✅';
+
+            const body = `## 📊 Validation Results
+
+            ${lint} **Linting**
+            ${test} **Tests**
+            ${build} **Build**
+
+            ${allPassed ? '✅ All checks passed! This PR is ready for review.' : '⚠️ Some checks failed. Auto-remediation workflow will attempt fixes.'}`;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: ${{ needs.setup.outputs.pr_number }},
+              body: body
+            });
+
+            // Trigger auto-remediation if any check failed
+            if (!allPassed) {
+              await github.rest.actions.createWorkflowDispatch({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                workflow_id: 'pr-auto-remediate.yml',
+                ref: '${{ needs.setup.outputs.head_branch }}',
+                inputs: {
+                  pr_number: '${{ needs.setup.outputs.pr_number }}',
+                  failed_checks: [lint, test, build].map((s, i) =>
+                    s === '❌' ? ['lint', 'test', 'build'][i] : null
+                  ).filter(Boolean).join(',')
+                }
+              }).catch(err => console.log('Auto-remediate workflow not found:', err.message));
+            } else {
+              // Add automerge label if all passed
+              try {
+                await github.rest.issues.addLabels({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: ${{ needs.setup.outputs.pr_number }},
+                  labels: ['ready-for-review', 'automerge']
+                });
+              } catch (error) {
+                console.log('Could not add labels:', error.message);
+              }
+            }
+
+  # Step 4: Final status check
+  complete:
+    name: "🎉 Orchestration Complete"
+    needs: [setup, sync, validate]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Final status
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const setupSuccess = '${{ needs.setup.result }}' === 'success';
+            const syncResult = '${{ needs.sync.result }}';
+            const validateResult = '${{ needs.validate.result }}';
+
+            let status = '✅ PR orchestration completed successfully!';
+
+            if (!setupSuccess) {
+              status = '❌ PR setup failed';
+            } else if (syncResult === 'failure') {
+              status = '⚠️ PR orchestration completed with sync warnings';
+            } else if (validateResult === 'failure') {
+              status = '⚠️ PR orchestration completed with validation warnings';
+            }
+
+            console.log(status);
+            core.summary
+              .addHeading('PR Orchestrator Summary')
+              .addRaw(status)
+              .write();

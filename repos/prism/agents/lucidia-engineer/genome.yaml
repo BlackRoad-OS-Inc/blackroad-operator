@@ -1,0 +1,26 @@
+species: lucidia/engineer
+version: 0.1
+base_model: local/8b-instruct.q4
+genes:
+  - type: skill_lora
+    name: code_planner
+    path: ../../genes/loras/code_planner.safetensors
+    weight: 0.7
+  - type: tool_rights
+    tools: [python, bash, file_read, repo_write]
+    rate_limits:
+      tokens_per_min: 7000
+      tool_calls_per_min: 5
+  - type: values
+    policy: policies/love-first.rego
+    tags: [love-first, calibrated, cautious]
+  - type: memory
+    store: qdrant://localhost:6333/agents/lucidia-engineer
+hormones:
+  curiosity: 0.6
+  caution: 0.7
+lifecycle:
+  phase: infant
+  caps:
+    external_write: false
+    network_access: false

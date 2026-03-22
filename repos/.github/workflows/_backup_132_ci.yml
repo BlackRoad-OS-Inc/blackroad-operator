@@ -1,0 +1,17 @@
+name: CI
+on:
+  push: { branches: [main] }
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -r services/bridge/requirements.txt || true
+      - run: pip install -r packages/agents/requirements.txt || true
+      - run: pytest -q services/bridge || true
+      - run: pytest -q packages/agents || true

@@ -1,0 +1,72 @@
+# BlackRoad OS — Pave Tomorrow.
+# Universal Linter — auto-detects language
+name: Lint & Format
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  detect:
+    runs-on: ubuntu-latest
+    outputs:
+      has_js: ${{ steps.check.outputs.has_js }}
+      has_py: ${{ steps.check.outputs.has_py }}
+      has_sh: ${{ steps.check.outputs.has_sh }}
+      has_go: ${{ steps.check.outputs.has_go }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: check
+        run: |
+          echo "has_js=$(test -f package.json && echo true || echo false)" >> $GITHUB_OUTPUT
+          echo "has_py=$(test -f requirements.txt -o -f setup.py -o -f pyproject.toml && echo true || echo false)" >> $GITHUB_OUTPUT
+          echo "has_sh=$(find . -name '*.sh' -maxdepth 3 | head -1 | grep -q . && echo true || echo false)" >> $GITHUB_OUTPUT
+          echo "has_go=$(test -f go.mod && echo true || echo false)" >> $GITHUB_OUTPUT
+
+  js-lint:
+    needs: detect
+    if: needs.detect.outputs.has_js == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm ci
+      - run: npx eslint . --max-warnings 0 || true
+      - run: npx prettier --check . 2>/dev/null || true
+
+  py-lint:
+    needs: detect
+    if: needs.detect.outputs.has_py == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install flake8 black
+      - run: flake8 . --max-line-length 120 --count --show-source
+      - run: black --check .
+
+  sh-lint:
+    needs: detect
+    if: needs.detect.outputs.has_sh == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get install -y shellcheck
+      - run: find . -name '*.sh' -exec shellcheck {} +
+
+  go-lint:
+    needs: detect
+    if: needs.detect.outputs.has_go == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: 'stable'
+      - run: go vet ./...
+      - run: test -z "$(gofmt -l .)"

@@ -1,0 +1,54 @@
+# BlackRoad OS — Pave Tomorrow.
+# Nightly health check of all workers and services
+name: Nightly Health Check
+
+on:
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check all worker health endpoints
+        run: |
+          WORKERS=(
+            "https://roadcode-squad.amundsonalexa.workers.dev/health"
+            "https://squad-webhook.amundsonalexa.workers.dev/health"
+            "https://pay.blackroad.io/health"
+            "https://auth.blackroad.io/health"
+            "https://stripe.blackroad.io/health"
+            "https://stats-blackroad.amundsonalexa.workers.dev/health"
+            "https://analytics-blackroad.amundsonalexa.workers.dev/health"
+          )
+
+          FAILED=0
+          echo "## Health Check Report" > report.md
+          echo "" >> report.md
+          echo "| Service | Status | Response Time |" >> report.md
+          echo "|---------|--------|--------------|" >> report.md
+
+          for url in "${WORKERS[@]}"; do
+            name=$(echo "$url" | sed 's|https://||;s|\..*||')
+            START=$(date +%s%N)
+            CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "$url" 2>/dev/null || echo "000")
+            END=$(date +%s%N)
+            MS=$(( (END - START) / 1000000 ))
+
+            if [ "$CODE" = "200" ]; then
+              echo "| $name | ✅ $CODE | ${MS}ms |" >> report.md
+            else
+              echo "| $name | ❌ $CODE | ${MS}ms |" >> report.md
+              FAILED=$((FAILED + 1))
+            fi
+          done
+
+          echo "" >> report.md
+          echo "*BlackRoad OS — Pave Tomorrow.*" >> report.md
+          cat report.md
+
+          if [ $FAILED -gt 0 ]; then
+            echo "::error::$FAILED services are unhealthy"
+            exit 1
+          fi

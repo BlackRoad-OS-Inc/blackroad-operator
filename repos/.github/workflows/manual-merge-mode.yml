@@ -1,0 +1,56 @@
+name: Manual-Merge-Mode
+on:
+  workflow_dispatch:
+    inputs:
+      enable:
+        description: "true to relax gates temporarily"
+        required: true
+        default: "true"
+      ttl_minutes:
+        description: "Minutes before re-locking protections"
+        required: false
+        default: "30"
+
+jobs:
+  toggle:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: write
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install gh
+        uses: cli/cli-action@v2
+
+      - name: Read inputs
+        id: cfg
+        run: |
+          echo "ENABLE=${{ github.event.inputs.enable }}" >> $GITHUB_ENV
+          echo "TTL=${{ github.event.inputs.ttl_minutes }}" >> $GITHUB_ENV
+
+      - name: Relax protections (allow admin merge even if checks fail)
+        if: env.ENABLE == 'true'
+        run: |
+          gh api \
+            -X PUT \
+            -H "Accept: application/vnd.github+json" \
+            repos/${{ github.repository }}/branches/main/protection \
+            -f required_status_checks.strict=false \
+            -f enforce_admins=false \
+            -f required_status_checks='{"strict":false,"contexts":[]}' \
+            -f required_pull_request_reviews='{"required_approving_review_count":0}' \
+            -f restrictions='null'
+          echo "Manual-merge mode ENABLED for $TTL minutes"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Re-lock protections after TTL
+        if: env.ENABLE == 'true'
+        run: |
+          sleep $(( $TTL * 60 ))
+          gh workflow run ReLock-Protections
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

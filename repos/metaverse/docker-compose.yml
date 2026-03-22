@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  metaverse-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: blackroad-metaverse:latest
+    container_name: blackroad-metaverse-api
+    ports:
+      - "8080:8080"  # REST API
+      - "8081:8081"  # WebSocket
+    environment:
+      - NODE_ENV=production
+      - METAVERSE_API_PORT=8080
+      - METAVERSE_WS_PORT=8081
+      - JWT_SECRET=${JWT_SECRET:-your-secret-key-here}
+      - AUTO_SPAWN_AGENTS=false
+      - LOG_LEVEL=info
+    volumes:
+      - metaverse-data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - blackroad-network
+
+  # Redis for state management (optional but recommended for production)
+  redis:
+    image: redis:7-alpine
+    container_name: blackroad-metaverse-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+    networks:
+      - blackroad-network
+
+  # NGINX reverse proxy for load balancing
+  nginx:
+    image: nginx:alpine
+    container_name: blackroad-metaverse-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - metaverse-api
+    restart: unless-stopped
+    networks:
+      - blackroad-network
+
+volumes:
+  metaverse-data:
+  redis-data:
+
+networks:
+  blackroad-network:
+    driver: bridge

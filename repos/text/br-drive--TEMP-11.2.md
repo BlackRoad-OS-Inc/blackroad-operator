@@ -1,0 +1,81 @@
+# TEMP 11.2
+
+**Source:** br-drive
+
+---
+
+JOUR 4251
+
+Advertising and behavior change (Principles of compliance) - Ch 7 part 1
+
+Principles of compliance
+
+Compliance
+
+= doing the behavior; giving in; doing it because it has been requested You see social influence everywhere:
+
+Infomercials, social media, direct mail, traditional advertisement
+
+In Chapter 7, we are thinking about situations where the attitude doesn’t  matter. It’s the behavior that does.
+
+Social influence
+
+We are talking about social influence without pressure Tactics used to foster compliance are:
+
+● Closeness: in space and time
+
+● Specificity: buy a particular product, donate to a specific charity Refer to immediate action or choice environment
+
+Do NOT result in long-term behavior choices - affects singular behavior
+
+Automaticity is often cited as the reason compliance occurs.  You don’t think. You just agree.
+
+Social influence relies on techniques that are subtle and outside of  conscious awareness.
+
+Scripts
+
+Knowledge structures about sequence of events. Examples
+
+Restaurant: Fancy restaurant vs. fast food restaurant Bus: checking in when entering vs. exiting
+
+We do not pay attention - we are mindless during scripts
+
+Copier experiment
+
+“Excuse me, I have five pages. May I use the Xerox Machine?”
+
+“Excuse me, I have five pages. May I use the Xerox Machine because I am in a  rush?”
+
+“Excuse me, I have five pages. May I use the Xerox machine because I have  to make copies?”
+
+Least effort principle
+
+You only pay attention if it is worth your while to (motivated).
+
+This doesn’t work for big favors.
+
+Then, real excuse is mildly effective. Fake one not.
+
+Heuristics
+
+Another knowledge structure that helps simplify complex decisions Sufficiency principle
+
+Tendency to strike a balance between minimizing cognitive effort and  satisfying motivational concerns
+
+(when not motivated; you don’t put effort in)
+
+Who is going to win the tournament?
+
+Recognition Heuristic
+
+Function of just recognizing the stimulus
+
+We want to be efficient. This is an efficient way of not thinking. How can you apply this to advertising?
+
+Principles of compliance
+
+What’s next?
+
+● Continue reading Chapter 7
+
+● Assignment #4 on behavior is due by April 23

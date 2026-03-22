@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="console">
+  <h1>Evidence Console</h1>
+  {% if bundle %}
+  <div class="bundle">
+    <h2>Case {{ bundle.case_id }} — {{ bundle.status|upper }}</h2>
+    <p>Latency: {{ bundle.latency_ms }} ms · PQC: {{ 'ON' if bundle.pqc_enabled else 'OFF' }}</p>
+    <p>Manifest hash: <code>{{ bundle.manifest.hash_value }}</code></p>
+    {% if bundle.signature %}
+    <p>Signature: <code>{{ bundle.signature }}</code></p>
+    {% endif %}
+    <h3>Rationale</h3>
+    <p>{{ bundle.rationale.rationale_text }}</p>
+    {% if bundle.rationale.remediation_text %}
+    <div class="alert warning">Auto-fix guidance: {{ bundle.rationale.remediation_text }}</div>
+    {% endif %}
+    <h3>Policy checks</h3>
+    <table>
+      <thead>
+        <tr><th>Rule</th><th>Result</th><th>Severity</th><th>Rationale</th></tr>
+      </thead>
+      <tbody>
+        {% for finding in bundle.findings %}
+        <tr class="{{ 'pass' if finding.passed else 'fail' }}">
+          <td>{{ finding.rule_id }}</td>
+          <td>{{ 'PASS' if finding.passed else 'FAIL' }}</td>
+          <td>{{ finding.severity }}</td>
+          <td>{{ finding.rationale }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <div class="downloads">
+      <a class="btn" href="/bundles/{{ bundle.case_id }}/artifact.json">Artifact JSON</a>
+      <a class="btn" href="/bundles/{{ bundle.case_id }}/manifest.json">Manifest</a>
+      <a class="btn" href="/bundles/{{ bundle.case_id }}/report.pdf">Audit PDF</a>
+    </div>
+  </div>
+  {% else %}
+  <p>Run a sandbox review to populate the console with a live bundle.</p>
+  {% endif %}
+  <aside class="cases">
+    <h2>Recent cases</h2>
+    <table>
+      <thead>
+        <tr><th>Case</th><th>Status</th><th>PQC</th><th>Advisor</th><th>Failures</th></tr>
+      </thead>
+      <tbody>
+        {% for case in console.cases %}
+        <tr>
+          <td>{{ case.case_id }}</td>
+          <td>{{ case.status }}</td>
+          <td>{{ 'ON' if case.pqc_enabled else 'OFF' }}</td>
+          <td>{{ case.advisor_email }}</td>
+          <td>{{ case.rule_failures|join(', ') if case.rule_failures else 'None' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <h3>Metrics snapshot</h3>
+    <ul>
+      <li>Total reviews: {{ console.metrics.total_reviews }}</li>
+      <li>Approval rate: {{ '%.0f'|format(console.metrics.approval_rate * 100) }}%</li>
+      <li>PQC usage: {{ '%.0f'|format(console.metrics.pqc_usage_rate * 100) }}%</li>
+      <li>Avg latency: {{ '%.1f'|format(console.metrics.average_latency_ms) }} ms</li>
+      <li>Top failures: {{ console.metrics.top_failure_causes|join(', ') }}</li>
+    </ul>
+  </aside>
+</section>
+{% endblock %}

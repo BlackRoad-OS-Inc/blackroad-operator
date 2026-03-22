@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Oficina Pixel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --office-bg-url: url('assets/oficina-placeholder.png');
+        }
+        body { background: #1a1a2e; color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow-x: hidden; }
+        .pixel-art {
+            image-rendering: pixelated;
+        }
+        .minimap-marker {
+            transition: all 0.2s;
+        }
+        
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(20, 20px);
+            grid-template-rows: repeat(25, 20px);
+            gap: 1px;
+            background: #333;
+            border: 2px solid #555;
+            width: fit-content;
+            position: relative;
+        }
+        .grid-bg-img {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            pointer-events: none;
+            opacity: 0.4;
+            background-image: var(--office-bg-url);
+            background-size: 100% 100%;
+            z-index: 0;
+            image-rendering: pixelated;
+        }
+        .grid-cell {
+            width: 20px;
+            height: 20px;
+            background: rgba(0,0,0,0.4);
+            cursor: crosshair;
+            transition: opacity 0.1s;
+            z-index: 10;
+        }
+        .grid-cell:hover {
+            opacity: 0.8;
+            border: 1px solid #fff;
+            z-index: 20;
+        }
+        /* Obstáculos visuales encima del background */
+        .cell-0 { background: transparent; } /* Suelo */
+        .cell-1 { background: rgba(239, 68, 68, 0.6); } /* Pared (Rojo) */
+        .cell-2 { background: rgba(234, 179, 8, 0.6); } /* Puerta (Amarillo) */
+        .cell-3 { background: rgba(34, 197, 94, 0.6); } /* Silla/Mueble (Verde) */
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1a1a2e; }
+        ::-webkit-scrollbar-thumb { background: #4a5568; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #718096; }
+
+        /* Activar tabs */
+        .tab-active { border-bottom: 2px solid #60a5fa; color: #60a5fa; }
+        .tab-inactive { color: #9ca3af; }
+        .tab-inactive:hover { color: #d1d5db; }
+    </style>
+</head>
+<body class="bg-slate-900 text-white min-h-screen flex flex-col font-sans relative">
+
+    <!-- LOGIN SCREEN -->
+    <div id="loginScreen" class="absolute inset-0 z-50 flex items-center justify-center bg-[#0f0f1a] hidden">
+        <div class="bg-gray-800 p-8 rounded-xl shadow-2xl border border-gray-700 w-full max-w-sm">
+            <h1 class="text-3xl font-bold mb-6 text-center text-blue-400">Acceso Admin</h1>
+            <form id="loginForm" onsubmit="event.preventDefault(); checkLogin();">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium mb-1 text-slate-300">Contraseña</label>
+                    <input type="password" id="passwordInput" class="w-full bg-slate-900 border border-slate-600 rounded px-4 py-2 focus:outline-none focus:border-blue-500 text-white" placeholder="Introduce la contraseña" autocomplete="current-password">
+                    <p id="loginError" class="text-red-500 text-sm mt-2 hidden">Contraseña incorrecta.</p>
+                </div>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded transition-colors shadow shadow-blue-500/30">
+                    Ingresar
+                </button>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- MAIN DASHBOARD -->
+    <div id="dashboardScreen" class="flex flex-col h-screen hidden">
+        <!-- HEADER -->
+        <header class="bg-slate-800 border-b border-slate-700 p-4 shrink-0 shadow-lg z-20">
+            <div class="max-w-7xl mx-auto flex justify-between items-center">
+                <h1 class="text-2xl font-bold text-blue-400 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+                    Panel de Control Pixel
+                </h1>
+                
+                <div class="flex gap-4">
+                    <button onclick="exportConfig()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded-lg transition-colors shadow shadow-blue-500/30 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        Exportar
+                    </button>
+                    <button onclick="document.getElementById('importConfigInput').click()" class="bg-purple-600 hover:bg-purple-500 text-white font-bold py-2 px-4 rounded-lg transition-colors shadow shadow-purple-500/30 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                        Importar
+                    </button>
+                    <input type="file" id="importConfigInput" accept=".json" class="hidden" onchange="importConfig(event)">
+                    
+                    <button onclick="saveAllAndGoToApp()" class="bg-green-600 hover:bg-green-500 text-white font-bold py-2 px-6 rounded-lg transition-colors shadow shadow-green-500/30 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                        Guardar e Ir a la Oficina
+                    </button>
+                    <button onclick="logout()" class="bg-slate-700 hover:bg-slate-600 text-slate-300 font-bold py-2 px-4 rounded transition-colors border border-slate-600">
+                        Salir
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- TABS -->
+        <div class="bg-slate-800 shrink-0 border-b border-slate-700 z-10 px-4">
+            <div class="max-w-7xl mx-auto flex gap-6 px-4">
+                <button onclick="switchTab('chars')" id="tabBtnChars" class="py-3 px-2 text-sm font-bold tab-active flex items-center gap-2 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                    Personajes y Ubicación
+                </button>
+                <button onclick="switchTab('map')" id="tabBtnMap" class="py-3 px-2 text-sm font-bold tab-inactive flex items-center gap-2 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"></polygon><line x1="9" y1="3" x2="9" y2="21"></line><line x1="15" y1="3" x2="15" y2="21"></line></svg>
+                    Colisiones y Salas (IA)
+                </button>
+            </div>
+        </div>
+
+        <!-- CONTENT AREA -->
+        <div class="flex-1 overflow-hidden relative bg-[#0f0f1a]">
+        
+            <!-- VISTA: PERSONAJES -->
+            <div id="viewChars" class="absolute inset-0 p-6 overflow-y-auto w-full max-w-7xl mx-auto flex flex-col">
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 flex-1 min-h-0 items-start">
+                    
+                    <div class="bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-700 max-h-full flex flex-col">
+                        <h2 class="text-xl font-semibold mb-4 text-slate-200 shrink-0">Configuración Individual</h2>
+                        <div id="characterList" class="space-y-4 overflow-y-auto pr-2 pb-4">
+                            <!-- Generado por JS -->
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-700 sticky top-0">
+                        <h2 class="text-xl font-semibold mb-2 text-slate-200">Mapa de Ubicación Inicial</h2>
+                        <p class="text-sm text-slate-400 mb-4" id="mapInstruction">Selecciona un personaje en la lista para ubicarlo.</p>
+                        
+                        <!-- Contenedor del minimapa -->
+                        <div class="relative mx-auto border-2 border-slate-600 rounded overflow-hidden shadow-inner bg-slate-900" style="width: 320px; height: 400px; cursor: crosshair;" onclick="handleMinimapClick(event)" id="minimapWrap">
+                            <img id="officePreview" src="assets/oficina-placeholder.png" class="w-full h-full object-cover pixel-art opacity-60" draggable="false" alt="Office layout preview">
+                            <div id="markersContainer" class="absolute inset-0 pointer-events-none"></div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- VISTA: MAPA / COLISIONES -->
+            <div id="viewMap" class="absolute inset-0 p-6 hidden flex w-full max-w-7xl mx-auto gap-6">
+                
+                <!-- Panel Central: Editor Grid -->
+                <div class="flex-1 bg-slate-800 rounded-xl shadow-lg border border-slate-700 flex flex-col overflow-hidden">
+                    <div class="bg-slate-900 p-3 border-b border-slate-700 flex justify-between items-center">
+                        <h2 class="text-lg font-bold text-white">Editor de Plano</h2>
+                        <div class="flex gap-2">
+                            <span class="text-xs bg-slate-800 text-slate-400 px-3 py-1 rounded border border-slate-700 font-mono" id="coordTracker">X: 0, Y: 0</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Barra de herramientas (Top) -->
+                    <div class="bg-slate-800 p-2 border-b border-slate-700 flex flex-wrap gap-2 items-center justify-center shadow-inner">
+                        
+                        <div class="text-xs font-bold text-slate-400 uppercase mr-2 tracking-wider">Terreno:</div>
+                        
+                        <button onclick="setMapBrush('terrain', 0)" id="brush-0" class="brush-btn px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-xs rounded border border-slate-500 shadow-sm flex items-center gap-2 transition-colors">
+                            <div class="w-3 h-3 bg-gray-500 rounded-sm border border-gray-900"></div> Suelo (Borrar)
+                        </button>
+                        <button onclick="setMapBrush('terrain', 1)" id="brush-1" class="brush-btn px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-xs rounded border border-slate-500 shadow-sm flex items-center gap-2 transition-colors">
+                            <div class="w-3 h-3 bg-red-500 rounded-sm opacity-80 border border-gray-900"></div> Pared (Muro)
+                        </button>
+                        <button onclick="setMapBrush('terrain', 2)" id="brush-2" class="brush-btn px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-xs rounded border border-slate-500 shadow-sm flex items-center gap-2 transition-colors">
+                            <div class="w-3 h-3 bg-yellow-500 rounded-sm opacity-80 border border-gray-900"></div> Puerta
+                        </button>
+                        <button onclick="setMapBrush('terrain', 3)" id="brush-3" class="brush-btn px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-xs rounded border border-slate-500 shadow-sm flex items-center gap-2 transition-colors">
+                            <div class="w-3 h-3 bg-green-500 rounded-sm opacity-80 border border-gray-900"></div> Silla (Destino)
+                        </button>
+                    </div>
+
+                    <div class="flex-1 overflow-auto bg-[#0f0f1a] flex items-center justify-center p-4">
+                        <!-- El grid en sí -->
+                        <div id="interactiveGrid" class="grid-container shadow-[0_0_20px_rgba(0,0,0,0.5)]">
+                            <div class="grid-bg-img"></div>
+                            <!-- Celdas via JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Panel Lateral Mapeo IA (Derecha) -->
+                <div class="w-80 flex flex-col gap-4">
+                    
+                    <div class="bg-slate-800 rounded-xl flex-1 border border-slate-700 shadow-lg flex flex-col overflow-hidden">
+                        <div class="p-3 border-b border-slate-700 bg-slate-900 flex justify-between items-center">
+                            <h3 class="text-sm font-bold text-white">Mapeo Salas Inteligencia Art.</h3>
+                        </div>
+                        
+                        <div class="p-3 border-b border-slate-700 bg-slate-800">
+                            <button onclick="setMapBrush('room')" id="brush-room" class="w-full brush-btn px-3 py-2 bg-purple-700 hover:bg-purple-600 text-white text-xs rounded border border-purple-500 shadow flex justify-center items-center gap-2 transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l7-7 3 3-7 7-3-3z"></path><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path><path d="M2 2l7.586 7.586"></path><circle cx="11" cy="11" r="2"></circle></svg>
+                                Pintar Salas (IA)
+                            </button>
+                            <p class="text-[10px] text-slate-400 mt-2 text-center leading-tight">Activa este pincel y selecciona una sala abajo para vincular secciones a esa sala.</p>
+                        </div>
+
+                        <div class="flex-1 overflow-y-auto p-3" id="roomListDashboard">
+                            <!-- JS Rooms -->
+                        </div>
+
+                        <div class="p-3 border-t border-slate-700 bg-slate-900">
+                            <button onclick="addNewRoom()" class="w-full py-2 bg-slate-700 hover:bg-slate-600 text-white text-xs rounded border border-slate-500 border-dashed transition-colors flex items-center justify-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                Nueva Habitación
+                            </button>
+                        </div>
+                    </div>
+
+                        <!-- Configuración IA -->
+                        <div class="bg-gray-800 p-4 rounded-xl border border-gray-700 shadow-lg shrink-0">
+                            <h3 class="text-xs font-bold text-blue-400 mb-2 flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                                API Inteligencia Artificial
+                            </h3>
+                            <label class="block text-[10px] text-slate-400 mb-1">Gemini API Key</label>
+                            <input type="password" id="geminiApiKey" onchange="saveApiKey()" spellcheck="false" class="w-full bg-slate-900 border border-slate-600 text-xs px-2 py-1.5 rounded text-white focus:outline-none focus:border-blue-400 mb-2" placeholder="AIzaSy...">
+                            <p class="text-[9px] text-slate-500 leading-tight">Modelo configurado: <strong class="text-slate-300">gemini-2.5-flash</strong><br>Para procesar comandos de voz naturales.</p>
+                        </div>
+            </div>
+
+
+    <script>
+        // CONFIG CONSTANTS  (Using map size from index)
+        const COLS = 20;
+        const ROWS = 25;
+        const NUM_CHARS = 6;
+        const MINIMAP_SCALE = 0.5; // (320/640)
+        const TILE_SIZE = 32;
+
+        const ROOM_COLORS = ['#3b82f6', '#ec4899', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#eab308'];
+
+        // Default map if no save
+        let DEFAULT_COLLISION_MAP = [
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+            [1,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,1],
+            [1,0,0,0,0,0,1,1,0,0,0,0,0,1,0,0,0,0,0,1],
+            [1,0,0,0,0,0,1,0,3,1,1,3,0,1,0,0,0,0,0,1],
+            [1,0,0,0,0,0,1,0,3,1,1,3,0,1,0,0,0,0,0,1],
+            [1,0,0,0,0,0,1,0,3,1,1,3,0,1,0,0,0,0,0,1],
+            [1,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,1],
+            [1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+            [1,0,1,1,1,1,1,1,1,1,1,0,0,0,3,1,1,3,0,1],
+            [1,0,0,3,0,0,3,0,0,3,0,0,1,0,0,0,0,0,0,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,1,0,3,1,1,3,0,1],
+            [1,0,0,0,1,1,1,1,0,0,1,0,1,0,0,0,0,0,0,1],
+            [1,0,0,3,0,0,3,0,0,3,0,0,1,0,1,0,0,0,0,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,2,1,1,1],
+            [1,1,1,1,1,1,1,1,1,1,0,0,1,1,1,1,2,1,1,1],
+            [1,1,1,1,1,1,1,1,1,1,0,0,1,0,0,0,0,0,0,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1],
+            [1,0,0,0,1,1,1,1,0,0,0,0,1,0,1,1,1,0,0,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,3,0,0,0,1],
+            [1,0,1,1,0,0,0,0,0,0,0,0,0,1,0,0,0,1,1,1],
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+        ];
+
+        // DATAS
+        let charConfig = [];
+        let collisionMap = [];
+        let aiRooms = [];
+        
+        let selectedCharId = null;
+        
+        // Editor State
+        let currentBrushType = 'terrain'; // 'terrain' or 'room'
+        let currentTerrainValue = 1;      // 0,1,2,3
+        let activeRoomId = null;          // which room we are painting
+        let isMouseDown = false;
+
+        // AUTH
+        async function initApp() {
+            if (sessionStorage.getItem('pixelAdminAuth') === 'true') {
+                await showDashboard();
+            } else {
+                document.getElementById('loginScreen').classList.remove('hidden');
+            }
+        }
+
+        async function checkLogin() {
+            const pass = document.getElementById('passwordInput').value;
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: pass })
+                });
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result.success) {
+                        sessionStorage.setItem('pixelAdminAuth', 'true');
+                        document.getElementById('loginError').classList.add('hidden');
+                        document.getElementById('loginScreen').classList.add('hidden');
+                        await showDashboard();
+                        return;
+                    }
+                }
+            } catch (error) {
+                console.error('Error al verificar contraseña', error);
+            }
+            document.getElementById('loginError').classList.remove('hidden');
+        }
+
+        function logout() {
+            sessionStorage.removeItem('pixelAdminAuth');
+            location.reload();
+        }
+
+        function switchTab(t) {
+            const vChars = document.getElementById('viewChars');
+            const vMap = document.getElementById('viewMap');
+            const bChars = document.getElementById('tabBtnChars');
+            const bMap = document.getElementById('tabBtnMap');
+
+            // Ocultar todas las vistas
+            vChars.classList.add('hidden');
+            vMap.classList.add('hidden');
+            
+            // Resetear todos los botones
+            bChars.className = "py-3 px-2 text-sm font-bold tab-inactive flex items-center gap-2 transition-colors";
+            bMap.className = "py-3 px-2 text-sm font-bold tab-inactive flex items-center gap-2 transition-colors";
+
+            if(t === 'chars') {
+                vChars.classList.remove('hidden');
+                bChars.className = "py-3 px-2 text-sm font-bold tab-active flex items-center gap-2 transition-colors";
+            } else if (t === 'map') {
+                vMap.classList.remove('hidden');
+                bMap.className = "py-3 px-2 text-sm font-bold tab-active flex items-center gap-2 transition-colors";
+                renderGrid();
+            }
+        }
+
+        async function showDashboard() {
+            document.getElementById('dashboardScreen').classList.remove('hidden');
+            await loadAllData();
+            // Default select
+            setMapBrush('terrain', 1); // Select Pared
+            
+            // Render all
+            renderCharacters();
+            renderMinimapMarkers();
+            renderGrid();
+            renderRoomsList();
+            
+        }
+
+        // LOAD / SAVE from SERVER
+        async function loadAllData() {
+            // API Key (localStorage - personal)
+            const savedAPI = localStorage.getItem('pixel_gemini_api_key');
+            if (savedAPI) {
+                const el = document.getElementById('geminiApiKey');
+                if (el) el.value = savedAPI;
+            }
+
+            try {
+                // Load from server
+                const [configRes, collisionRes, roomsRes] = await Promise.all([
+                    fetch('/api/config').catch(() => null),
+                    fetch('/api/collision').catch(() => null),
+                    fetch('/api/rooms').catch(() => null)
+                ]);
+
+                // 1. Chars from server
+                if (configRes && configRes.ok) {
+                    const config = await configRes.json();
+                    charConfig = config.agents.map(a => ({
+                        id: a.id,
+                        name: a.name,
+                        x: a.x ? Math.floor(a.x / 32) : null,
+                        y: a.y ? Math.floor(a.y / 32) : null,
+                        role: a.role || '',
+                        room: '',
+                        personality: 'Trabajador',
+                        visible: a.active !== false
+                    }));
+                } else {
+                    throw new Error('No server config');
+                }
+
+                // Assure 6 chars
+                while(charConfig.length < NUM_CHARS) {
+                    charConfig.push({ id: charConfig.length, name: `Personaje ${charConfig.length+1}`, x: null, y: null, role:'', room:'', personality:'Trabajador', visible:true });
+                }
+
+                // 2. Collision from server
+                if (collisionRes && collisionRes.ok) {
+                    collisionMap = await collisionRes.json();
+                } else {
+                    collisionMap = JSON.parse(JSON.stringify(DEFAULT_COLLISION_MAP));
+                }
+
+                // 3. Rooms from server
+                if (roomsRes && roomsRes.ok) {
+                    const rooms = await roomsRes.json();
+                    aiRooms = rooms.map(r => ({
+                        id: r.id || Date.now() + Math.random(),
+                        name: r.name,
+                        color: r.color || '#3b82f6',
+                        tiles: r.tiles || []
+                    }));
+                } else {
+                    aiRooms = [];
+                }
+
+            } catch(e) {
+                console.log('Using defaults:', e);
+                charConfig = generateDefaultChars();
+                collisionMap = JSON.parse(JSON.stringify(DEFAULT_COLLISION_MAP));
+                aiRooms = [];
+            }
+        }
+
+        async function saveToServer() {
+            try {
+                // Save config (agents)
+                const agentsConfig = charConfig.map(c => ({
+                    id: c.id,
+                    name: c.name,
+                    role: c.role,
+                    color: c.id,
+                    x: c.x !== null ? c.x * 32 + 16 : 320,
+                    y: c.y !== null ? c.y * 32 + 16 : 400,
+                    state: 'idle',
+                    active: c.visible !== false
+                }));
+
+                await fetch('/api/config', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ agents: agentsConfig, rooms: aiRooms.map(r => ({ name: r.name, x: r.x || 0, y: r.y || 0 })) })
+                });
+
+                // Save collision
+                await fetch('/api/collision', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(collisionMap)
+                });
+
+                // Save rooms
+                await fetch('/api/rooms', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(aiRooms)
+                });
+
+                console.log('Saved to server');
+                return true;
+            } catch(e) {
+                console.error('Error saving to server:', e);
+                return false;
+            }
+        }
+
+        function generateDefaultChars() {
+            const arr = [];
+            for(let i=0; i<NUM_CHARS; i++) arr.push({id:i, name:'Personaje '+(i+1), x:null, y:null, role:'', room:'', personality:'Trabajador', visible:true});
+            return arr;
+        }
+
+        function saveApiKey() {
+            const el = document.getElementById('geminiApiKey');
+            if (el) localStorage.setItem('pixel_gemini_api_key', el.value);
+        }
+
+        async function autoSave() {
+            await saveToServer();
+        }
+
+        async function saveAllAndGoToApp() {
+            await saveToServer();
+            window.location.href = 'index.html';
+        }
+
+        function exportConfig() {
+            autoSave();
+            const config = {
+                pixel_office_config: localStorage.getItem('pixel_office_config'),
+                pixel_office_collision: localStorage.getItem('pixel_office_collision'),
+                pixelOfficeRooms: localStorage.getItem('pixelOfficeRooms'),
+                pixel_gemini_api_key: localStorage.getItem('pixel_gemini_api_key')
+            };
+            
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(config, null, 2));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href",     dataStr);
+            downloadAnchorNode.setAttribute("download", "pixel_office_config.json");
+            document.body.appendChild(downloadAnchorNode); // required for firefox
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        }
+
+        async function importConfig(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const config = JSON.parse(e.target.result);
+                    if (config.pixel_office_config) {
+                        charConfig = JSON.parse(config.pixel_office_config);
+                    }
+                    if (config.pixel_office_collision) {
+                        collisionMap = JSON.parse(config.pixel_office_collision);
+                    }
+                    if (config.pixelOfficeRooms) {
+                        aiRooms = JSON.parse(config.pixelOfficeRooms);
+                    }
+                    if (config.pixel_gemini_api_key) {
+                        localStorage.setItem('pixel_gemini_api_key', config.pixel_gemini_api_key);
+                        const apiKeyInput = document.getElementById('geminiApiKey');
+                        if (apiKeyInput) {
+                            apiKeyInput.value = config.pixel_gemini_api_key;
+                        }
+                    }
+                    
+                    // Save to server
+                    await saveToServer();
+                    
+                    // Actualizar UI
+                    renderCharacters();
+                    renderMinimapMarkers();
+                    renderGrid();
+                    renderRoomsList();
+                    
+                    alert('Configuración importada y guardada en servidor.');
+                } catch (error) {
+                    console.error('Error al parsear el archivo JSON', error);
+                    alert('Error al importar la configuración. Archivo no válido.');
+                }
+            };
+            reader.readAsText(file);
+            // Reset input so the same file can be selected again if needed
+            event.target.value = '';
+        }
+
+        // ================= TRAYECTORIA Y PERSONAJES =================
+        function renderCharacters() {
+            const list = document.getElementById('characterList');
+            list.innerHTML = '';
+
+            charConfig.forEach(char => {
+                const isSel = selectedCharId === char.id;
+                // Calculamos background (mismo q miniatura en index)
+                const spriteStyle = `width: 32px; height: 64px; background-image: url('assets/characters/char_${char.id}.png'); background-position: 0px 0px; background-size: 224px 192px;`;
+
+                const el = document.createElement('div');
+                el.className = `flex flex-col gap-2 p-4 rounded-xl transition-all border-2 ${isSel ? 'bg-blue-900/60 border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.3)]' : 'bg-slate-800/80 border-slate-700 hover:bg-slate-700'}`;
+
+                // Populate rooms for select
+                let roomOptions = '<option value="">Ninguna</option>';
+                aiRooms.forEach(r => {
+                    roomOptions += `<option value="${r.name}" ${char.room === r.name ? 'selected' : ''}>${r.name}</option>`;
+                });
+
+                let posText = char.x !== null ? `Coordenada: [${char.x}, ${char.y}]` : 'Posición Aleatoria';
+                
+                el.innerHTML = `
+                    <div class="flex items-center gap-4">
+                        <div class="pixel-art border border-slate-900 rounded bg-slate-900 flex items-end justify-center pt-2 pb-1 shrink-0" style="width: 48px; height: 74px;">
+                            <div style="${spriteStyle}"></div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <label class="block text-xs text-slate-400 mb-1">Nombre</label>
+                            <input type="text" value="${char.name}" onchange="updateCharItem(${char.id}, 'name', this.value)" class="w-full bg-slate-900 border ${isSel ? 'border-blue-400' : 'border-slate-600'} rounded px-3 py-1.5 outline-none text-white text-sm focus:border-blue-400 transition-colors">
+                            <div class="mt-1 text-[11px] ${char.x !== null ? 'text-green-400' : 'text-slate-400'} font-mono">${posText}</div>
+                        </div>
+                        <div class="flex flex-col items-center gap-2 shrink-0">
+                             <div class="flex items-center gap-2" title="Mostrar/Ocultar personaje">
+                                 <span class="text-[10px] text-slate-400 font-semibold uppercase">Visible</span>
+                                 <label class="relative inline-flex items-center cursor-pointer">
+                                     <input type="checkbox" class="sr-only peer" onchange="updateCharItem(${char.id}, 'visible', this.checked)" ${char.visible !== false ? 'checked' : ''}>
+                                     <div class="w-8 h-4 bg-slate-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-blue-500"></div>
+                                 </label>
+                             </div>
+                             <button onclick="selectCharForPlacement(${char.id})" class="${isSel ? 'bg-blue-600 text-white border border-blue-400 shadow-md' : 'bg-slate-700 text-slate-300 hover:bg-slate-600 border border-slate-600'} w-full text-xs font-bold py-1.5 px-3 rounded-lg transition-colors flex items-center justify-center gap-1">
+                                 📍 <span>${isSel ? 'Situar...' : 'Ubicar'}</span>
+                             </button>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 mt-2">
+                        <div>
+                            <label class="block text-[10px] text-slate-400 mb-1 uppercase">Cargo / Rol</label>
+                            <input type="text" placeholder="Ej: Desarrollador" value="${char.role || ''}" onchange="updateCharItem(${char.id}, 'role', this.value)" class="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1 outline-none text-white text-xs focus:border-blue-400 transition-colors">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-slate-400 mb-1 uppercase">Sala Dfct.</label>
+                            <select onchange="updateCharItem(${char.id}, 'room', this.value)" class="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1 outline-none text-white text-xs focus:border-blue-400 transition-colors">
+                                ${roomOptions}
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-slate-400 mb-1 uppercase">Personalidad</label>
+                            <select onchange="updateCharItem(${char.id}, 'personality', this.value)" class="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1 outline-none text-white text-xs focus:border-blue-400 transition-colors">
+                                <option value="Trabajador" ${char.personality === 'Trabajador' ? 'selected' : ''}>Trabajador</option>
+                                <option value="Inquieto" ${char.personality === 'Inquieto' ? 'selected' : ''}>Inquieto (Camina)</option>
+                                <option value="Perezoso" ${char.personality === 'Perezoso' ? 'selected' : ''}>Perezoso (Charlatán)</option>
+                            </select>
+                        </div>
+                    </div>
+                `;
+                list.appendChild(el);
+            });
+        }
+
+        function updateCharItem(id, key, val) {
+            charConfig[id][key] = val;
+            autoSave();
+        }
+
+        function updateCharName(id, val) {
+            updateCharItem(id, 'name', val);
+        }
+
+        function selectCharForPlacement(id) {
+            selectedCharId = id;
+            document.getElementById('mapInstruction').innerHTML = `Haz clic en el mapa derecho para ubicar a <span class="text-blue-400 font-bold">${charConfig[id].name}</span>`;
+            renderCharacters();
+            renderMinimapMarkers();
+        }
+
+        function handleMinimapClick(e) {
+            if (selectedCharId === null) return;
+            const rect = document.getElementById('minimapWrap').getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const clickY = e.clientY - rect.top;
+
+            // map scaling
+            const realX = clickX / MINIMAP_SCALE;
+            const realY = clickY / MINIMAP_SCALE;
+            const tX = Math.floor(realX / TILE_SIZE);
+            const tY = Math.floor(realY / TILE_SIZE);
+
+            if(tX >= 0 && tX < COLS && tY >= 0 && tY < ROWS) {
+                charConfig[selectedCharId].x = tX;
+                charConfig[selectedCharId].y = tY;
+                autoSave();
+                renderCharacters();
+                renderMinimapMarkers();
+                selectedCharId = null;
+                document.getElementById('mapInstruction').textContent = 'Selecciona un personaje en la lista para ubicarlo.';
+                renderCharacters(); // quit highlights
+            }
+        }
+
+        function renderMinimapMarkers() {
+            const container = document.getElementById('markersContainer');
+            container.innerHTML = '';
+            charConfig.forEach(char => {
+                if(char.x !== null && char.y !== null) {
+                    const mk = document.createElement('div');
+                    const mx = (char.x * TILE_SIZE + TILE_SIZE/2) * MINIMAP_SCALE;
+                    const my = (char.y * TILE_SIZE + TILE_SIZE/2) * MINIMAP_SCALE;
+                    
+                    mk.className = `absolute w-5 h-5 -ml-2.5 -mt-5 pointer-events-auto cursor-pointer flex flex-col items-center justify-end z-10 ${selectedCharId === char.id ? 'animate-bounce' : ''}`;
+                    mk.style.left = mx + 'px';
+                    mk.style.top = my + 'px';
+                    
+                    mk.innerHTML = `
+                         <div class="relative group" onclick="selectCharForPlacement(${char.id}); event.stopPropagation()">
+                            <div class="w-5 h-5 bg-blue-500 rounded-full border-2 border-white shadow-md flex items-center justify-center text-[9px] font-bold text-white leading-none">
+                                ${char.id + 1}
+                            </div>
+                            <div class="w-0.5 h-1.5 bg-blue-500 mx-auto"></div>
+                            <div class="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 whitespace-nowrap bg-black text-white text-[10px] px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 pointer-events-none z-50">
+                                ${char.name}
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(mk);
+                }
+            });
+        }
+
+
+        // ================= EDITOR MAPAS / SALAS IA =================
+        function setMapBrush(type, value = null) {
+            currentBrushType = type;
+            
+            // UI visual update
+            document.querySelectorAll('.brush-btn').forEach(b => b.classList.remove('border-blue-400', 'bg-blue-900', 'shadow-[0_0_10px_rgba(59,130,246,0.5)]'));
+            
+            if (type === 'terrain') {
+                currentTerrainValue = value;
+                const b = document.getElementById('brush-'+value);
+                if(b) b.classList.add('border-blue-400', 'bg-blue-900', 'shadow-[0_0_10px_rgba(59,130,246,0.5)]');
+                activeRoomId = null;
+            } else if (type === 'room') {
+                const b = document.getElementById('brush-room');
+                if(b) b.classList.add('border-blue-400', 'bg-blue-900', 'shadow-[0_0_10px_rgba(59,130,246,0.5)]');
+                // Make sure a room is active if available
+                if(!activeRoomId && aiRooms.length > 0) activeRoomId = aiRooms[0].id;
+            }
+            renderRoomsList();
+        }
+
+        function renderGrid() {
+            const container = document.getElementById('interactiveGrid');
+            // Remove everything except background
+            Array.from(container.children).forEach(c => {
+                if(!c.classList.contains('grid-bg-img')) c.remove();
+            });
+
+            container.onmousedown = () => { isMouseDown = true; };
+            window.onmouseup = () => { isMouseDown = false; autoSave(); };
+            container.ondragstart = (e) => e.preventDefault();
+
+            for(let y=0; y<ROWS; y++) {
+                for(let x=0; x<COLS; x++) {
+                    const c = document.createElement('div');
+                    c.className = 'grid-cell cell-' + collisionMap[y][x];
+                    c.dataset.x = x; c.dataset.y = y;
+
+                    // Hover effects and paint
+                    c.onmouseenter = (e) => {
+                        document.getElementById('coordTracker').textContent = `X: ${x}, Y: ${y}`;
+                        if(isMouseDown) paintCell(x,y, c);
+                    };
+                    c.onmousedown = (e) => {
+                        e.preventDefault();
+                        paintCell(x,y, c);
+                    };
+
+                    // Draw AI room colors ON TOP if it belongs to one
+                    const r = aiRooms.find(rm => rm.tiles.some(t => t.x===x && t.y===y));
+                    if(r) {
+                        // Blend color over terrain
+                        c.style.backgroundColor = hexToRgba(r.color, 0.4);
+                        // outline
+                        c.style.border = `1px dashed ${r.color}`;
+                    }
+
+                    container.appendChild(c);
+                }
+            }
+        }
+
+        function paintCell(x, y, node) {
+            if (currentBrushType === 'terrain') {
+                collisionMap[y][x] = currentTerrainValue;
+                // Update class directly without redraw
+                node.className = 'grid-cell cell-' + currentTerrainValue;
+                // Keep room color if exists
+                const r = aiRooms.find(rm => rm.tiles.some(t => t.x===x && t.y===y));
+                if(r) {
+                    node.style.backgroundColor = hexToRgba(r.color, 0.4);
+                    node.style.border = `1px dashed ${r.color}`;
+                } else {
+                    node.style.backgroundColor = '';
+                    node.style.border = '';
+                }
+
+            } else if (currentBrushType === 'room') {
+                if(!activeRoomId) return;
+                const active = aiRooms.find(r => r.id === activeRoomId);
+                
+                let isMine = active.tiles.some(t => t.x===x && t.y===y);
+                
+                // Quitamos de otras salas primero si hiciera falta
+                aiRooms.forEach(room => {
+                    if (room.id !== activeRoomId) {
+                        const oldLen = room.tiles.length;
+                        room.tiles = room.tiles.filter(t => !(t.x===x && t.y===y));
+                        if(oldLen !== room.tiles.length) {
+                             const counterEl = document.getElementById('roomCount_' + room.id);
+                             if (counterEl) counterEl.textContent = 'Celdas: ' + room.tiles.length;
+                        }
+                    }
+                });
+
+                if(!isMine) {
+                    active.tiles.push({x,y});
+                    node.style.backgroundColor = hexToRgba(active.color, 0.4);
+                    node.style.border = `1px dashed ${active.color}`;
+                } else {
+                    active.tiles = active.tiles.filter(t => !(t.x===x && t.y===y));
+                    node.style.backgroundColor = '';
+                    node.style.border = '';
+                }
+                
+                // Actualizar solo el contador para optimizar
+                const activeCounter = document.getElementById('roomCount_' + activeRoomId);
+                if (activeCounter) activeCounter.textContent = 'Celdas: ' + active.tiles.length;
+            }
+        }
+
+        function hexToRgba(hex, a=1) {
+            let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? `rgba(${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}, ${a})` : null;
+        }
+
+
+        // ================= ROOMS (IA) =================
+        function addNewRoom() {
+            const col = ROOM_COLORS[aiRooms.length % ROOM_COLORS.length];
+            aiRooms.push({ id: Date.now(), name: 'Zona '+(aiRooms.length+1), color: col, tiles: [] });
+            if(currentBrushType !== 'room') setMapBrush('room');
+            activeRoomId = aiRooms[aiRooms.length-1].id;
+            autoSave();
+            renderRoomsList();
+        }
+
+        function updateRoom(id, val) {
+            const r = aiRooms.find(x=>x.id===id);
+            if(r) r.name = val;
+            autoSave();
+            
+        }
+
+        function removeRoom(id) {
+            aiRooms = aiRooms.filter(x=>x.id!==id);
+            if(activeRoomId === id) activeRoomId = null;
+            autoSave();
+            renderRoomsList();
+            renderGrid();
+            
+        }
+
+        function renderRoomsList() {
+            const list = document.getElementById('roomListDashboard');
+            list.innerHTML = '';
+            if(aiRooms.length===0) list.innerHTML = `<p class="text-xs text-slate-500 italic text-center mt-4">No hay áreas mapeadas.</p>`;
+
+            aiRooms.forEach(r => {
+                const isSel = (activeRoomId === r.id && currentBrushType === 'room');
+                const p = document.createElement('div');
+                p.className = `flex flex-col gap-2 p-3 mb-2 rounded border transition-colors cursor-pointer ${isSel ? 'bg-slate-700 border-purple-400' : 'bg-slate-800 border-slate-600 hover:border-slate-400'}`;
+                
+                p.onclick = (e) => {
+                    if(e.target.tagName!=='INPUT' && e.target.tagName!=='BUTTON' && !e.target.closest('button')) {
+                        setMapBrush('room');
+                        activeRoomId = r.id;
+                        renderRoomsList();
+                    }
+                };
+
+                p.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <div class="w-4 h-4 rounded shadow-inner shrink-0" style="background-color: ${r.color}"></div>
+                        <input type="text" value="${r.name}" onchange="updateRoom(${r.id}, this.value)" class="flex-1 bg-slate-900 border ${isSel ? 'border-purple-400' : 'border-slate-700'} text-xs px-2 py-1 rounded text-white focus:outline-none" onclick="(e)=>e.stopPropagation()">
+                        <button onclick="removeRoom(${r.id})" class="text-slate-500 hover:text-red-400 p-1 bg-slate-900 rounded border border-slate-700 shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        </button>
+                    </div>
+                    <div class="text-[10px] text-slate-400 flex justify-between items-center px-1">
+                        <span id="roomCount_${r.id}">Celdas: ${r.tiles.length}</span>
+                        ${isSel ? '<span class="text-purple-400 font-bold animate-pulse">● PINTANDO</span>' : ''}
+                    </div>
+                `;
+                list.appendChild(p);
+            });
+        }
+
+
+        // START
+        initApp();
+    </script>
+    <script>
+        (function() {
+            const officeAssetPath = 'assets/oficina.png';
+            const previewEl = document.getElementById('officePreview');
+            const probe = new Image();
+            probe.onload = () => {
+                document.documentElement.style.setProperty('--office-bg-url', `url('${officeAssetPath}')`);
+                if (previewEl) {
+                    previewEl.src = officeAssetPath;
+                }
+            };
+            probe.src = officeAssetPath;
+        })();
+    </script>
+
+</body>
+</html>

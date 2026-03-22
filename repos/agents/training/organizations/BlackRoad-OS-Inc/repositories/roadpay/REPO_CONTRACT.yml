@@ -1,0 +1,32 @@
+repo:
+  name: roadpay
+  org: BlackRoad-OS-Inc
+  type: worker
+  languages: [javascript, sql]
+  url: https://github.com/BlackRoad-OS-Inc/roadpay
+
+ownership:
+  owner: blackboxprogramming
+  codeowners: ["@blackboxprogramming"]
+  license: proprietary
+
+policies:
+  inherits: ["coding", "collaboration", "safety", "issues", "pr-review", "docs"]
+  additional:
+    - "Stripe secret key must ONLY exist in Worker secrets"
+    - "All billing mutations must be idempotent (webhook retries)"
+    - "Price changes require explicit approval"
+    - "D1 is source of truth for subscriptions, not Stripe"
+    - "Webhook signature verification must never be disabled"
+
+certification:
+  required_level: 4
+  modules: ["fundamentals", "workers", "coding-standards"]
+
+deployment:
+  target: cloudflare-workers
+  command: "npx wrangler deploy"
+  health_check: "curl https://roadpay.amundsonalexa.workers.dev/health"
+
+safe_changes:
+  ref: SAFE_CHANGE_BOUNDARIES.md

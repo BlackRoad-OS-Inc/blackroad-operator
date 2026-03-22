@@ -1,0 +1,24 @@
+# BlackRoad Bot Registry
+# Single source of truth for automation bots across BlackRoad environments
+# Each bot entry includes webhook endpoints, supported commands, and owning team
+bots:
+  - name: blackroad-deploy-bot
+    description: "Coordinates deploy orchestration and status fan-out for BlackRoad services."
+    owner:
+      team: "Platform Engineering"
+      contacts:
+        - "platform-oncall@blackroad.io"
+        - "sre@blackroad.io"
+    commands:
+      - trigger: "/deploy"
+        description: "Kick off staged deployment pipeline."
+        handler: "scripts/deploy.sh"
+        permissions:
+          - role: "sre"
+          - role: "release-manager"
+    webhooks:
+      - event: "deployment.completed"
+        target: "https://hooks.example.com/deploy"
+        secret: "ENV:DEPLOY_WEBHOOK_SECRET"
+        notes: "Sent after production deploy completes."
+    runbook: "docs/runbooks/deploy.md"

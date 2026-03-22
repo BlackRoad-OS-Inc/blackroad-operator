@@ -1,0 +1,31 @@
+# BlackRoad OS — Pave Tomorrow.
+# Docker Build & Push to Gitea Packages Registry
+name: Docker Build
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set image tag
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            echo "TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+          else
+            echo "TAG=latest" >> $GITHUB_ENV
+          fi
+
+      - name: Login to Gitea Registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login git.blackroad.io -u ${{ github.actor }} --password-stdin
+
+      - name: Build image
+        run: docker build -t git.blackroad.io/${{ github.repository }}:${{ env.TAG }} .
+
+      - name: Push image
+        run: docker push git.blackroad.io/${{ github.repository }}:${{ env.TAG }}

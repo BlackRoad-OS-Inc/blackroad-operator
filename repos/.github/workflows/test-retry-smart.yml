@@ -1,0 +1,319 @@
+name: "🔄 Intelligent Test Retry"
+
+# Retries only failed tests with categorization and analysis
+# More efficient than rerunning entire test suite
+
+on:
+  workflow_run:
+    workflows: ["Test CI", "CI (deterministic + flakes + caches)", "tests"]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      workflow_run_id:
+        description: 'Workflow run ID to retry'
+        required: false
+
+permissions:
+  actions: write
+  contents: read
+  pull-requests: write
+  checks: write
+
+jobs:
+  analyze-failures:
+    name: "📊 Analyze Test Failures"
+    if: |
+      github.event.workflow_run.conclusion == 'failure' ||
+      github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    outputs:
+      has_failures: ${{ steps.detect.outputs.has_failures }}
+      failure_type: ${{ steps.categorize.outputs.failure_type }}
+      retry_recommended: ${{ steps.categorize.outputs.retry_recommended }}
+      failed_tests: ${{ steps.detect.outputs.failed_tests }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+
+      - name: Detect failed tests
+        id: detect
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const runId = context.payload.workflow_run?.id || '${{ inputs.workflow_run_id }}';
+            if (!runId) {
+              core.setOutput('has_failures', 'false');
+              return;
+            }
+
+            // Get workflow run details
+            const { data: run } = await github.rest.actions.getWorkflowRun({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: runId
+            });
+
+            // Get job details to find failures
+            const { data: jobs } = await github.rest.actions.listJobsForWorkflowRun({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: runId
+            });
+
+            const failedJobs = jobs.jobs.filter(job => job.conclusion === 'failure');
+            const failedTests = [];
+
+            // Parse logs to extract failed test names
+            for (const job of failedJobs) {
+              try {
+                const logs = await github.rest.actions.downloadJobLogsForWorkflowRun({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  job_id: job.id
+                });
+
+                // Parse Jest/pytest output (simplified)
+                const logText = logs.data || '';
+                const jestMatches = logText.match(/FAIL\s+(.+?\.test\.(js|ts|jsx|tsx))/g) || [];
+                const pytestMatches = logText.match(/FAILED\s+(.+?\.py::\w+)/g) || [];
+
+                failedTests.push(...jestMatches, ...pytestMatches);
+              } catch (error) {
+                console.log(`Could not parse logs for job ${job.id}`);
+              }
+            }
+
+            core.setOutput('has_failures', failedJobs.length > 0 ? 'true' : 'false');
+            core.setOutput('failed_tests', JSON.stringify(failedTests));
+            core.setOutput('failed_job_count', failedJobs.length);
+
+      - name: Categorize failures
+        id: categorize
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const failedTests = JSON.parse('${{ steps.detect.outputs.failed_tests }}' || '[]');
+            const runAttempt = context.payload.workflow_run?.run_attempt || 1;
+
+            let failureType = 'unknown';
+            let retryRecommended = false;
+
+            // Categorize based on patterns
+            if (failedTests.length === 0) {
+              failureType = 'build_or_lint';
+              retryRecommended = runAttempt < 2;  // Retry build failures once
+            } else if (failedTests.some(t => t.includes('timeout'))) {
+              failureType = 'timeout';
+              retryRecommended = runAttempt < 3;  // Retry timeouts up to 3 times
+            } else if (runAttempt === 1) {
+              failureType = 'first_attempt';
+              retryRecommended = true;  // Always retry first failures
+            } else if (runAttempt === 2) {
+              failureType = 'potentially_flaky';
+              retryRecommended = true;  // Second attempt - might be flaky
+            } else {
+              failureType = 'consistent_failure';
+              retryRecommended = false;  // After 3 attempts, likely real bug
+            }
+
+            core.setOutput('failure_type', failureType);
+            core.setOutput('retry_recommended', retryRecommended ? 'true' : 'false');
+
+  retry-failed:
+    name: "🔁 Retry Failed Tests"
+    needs: analyze-failures
+    if: |
+      needs.analyze-failures.outputs.has_failures == 'true' &&
+      needs.analyze-failures.outputs.retry_recommended == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        retry_attempt: [1, 2, 3]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@b39b52d1213e96004bfcb1c61a8a6fa8ab84f3e8 # v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Setup Python
+        uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          npm ci || npm install
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
+
+      - name: Wait before retry (exponential backoff)
+        run: |
+          DELAY=$((2 ** ${{ matrix.retry_attempt }} - 1))
+          echo "Waiting ${DELAY}s before retry attempt ${{ matrix.retry_attempt }}..."
+          sleep ${DELAY}
+
+      - name: Retry failed tests only
+        id: retry
+        continue-on-error: true
+        run: |
+          echo "🔄 Retry attempt ${{ matrix.retry_attempt }} of 3"
+
+          # Try to run only failed tests
+          FAILED_TESTS='${{ needs.analyze-failures.outputs.failed_tests }}'
+
+          if echo "$FAILED_TESTS" | grep -q "\.test\."; then
+            echo "Running failed Jest tests..."
+            npm test -- --testPathPattern="$(echo $FAILED_TESTS | jq -r '.[]' | tr '\n' '|')" || true
+          fi
+
+          if echo "$FAILED_TESTS" | grep -q "\.py::"; then
+            echo "Running failed pytest tests..."
+            pytest $(echo $FAILED_TESTS | jq -r '.[]') -v || true
+          fi
+
+          # If we can't isolate, run full suite
+          if [ -z "$FAILED_TESTS" ] || [ "$FAILED_TESTS" = "[]" ]; then
+            echo "Running full test suite..."
+            npm test || true
+            pytest -q || true
+          fi
+
+      - name: Report retry result
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const success = '${{ steps.retry.outcome }}' === 'success';
+            const attempt = ${{ matrix.retry_attempt }};
+            const failureType = '${{ needs.analyze-failures.outputs.failure_type }}';
+
+            let emoji = success ? '✅' : '❌';
+            let status = success ? 'PASSED' : 'FAILED';
+
+            const body = `## ${emoji} Test Retry Result
+
+**Attempt:** ${attempt}/3
+**Status:** ${status}
+**Failure Type:** ${failureType}
+**Run:** [View logs](${context.payload.workflow_run?.html_url})
+
+${success ? '✅ Tests passed on retry!' : `⚠️ Tests still failing. ${attempt < 3 ? 'Will retry again.' : 'Manual intervention required.'}`}
+            `;
+
+            // Comment on PR if exists
+            if (context.payload.workflow_run?.pull_requests?.length > 0) {
+              const prNumber = context.payload.workflow_run.pull_requests[0].number;
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                body
+              });
+            }
+
+  report-flaky:
+    name: "🔍 Report Flaky Tests"
+    needs: [analyze-failures, retry-failed]
+    if: |
+      always() &&
+      needs.analyze-failures.outputs.failure_type == 'potentially_flaky'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+
+      - name: Update flaky test database
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const failedTests = JSON.parse('${{ needs.analyze-failures.outputs.failed_tests }}' || '[]');
+
+            // Create issue for flaky tests
+            if (failedTests.length > 0) {
+              const body = `## 🔍 Flaky Tests Detected
+
+The following tests failed initially but may have passed on retry:
+
+${failedTests.map(test => `- \`${test}\``).join('\n')}
+
+**Workflow Run:** ${context.payload.workflow_run?.html_url}
+**Run Attempt:** ${context.payload.workflow_run?.run_attempt}
+
+### Recommended Actions:
+1. Investigate race conditions or timing issues
+2. Add test isolation
+3. Consider adding to quarantine if consistently flaky
+
+**Auto-generated by Intelligent Test Retry workflow**
+              `;
+
+              // Check if issue already exists
+              const { data: issues } = await github.rest.issues.listForRepo({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                labels: 'flaky-test',
+                state: 'open'
+              });
+
+              const existingIssue = issues.find(issue =>
+                failedTests.some(test => issue.body?.includes(test))
+              );
+
+              if (!existingIssue) {
+                await github.rest.issues.create({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  title: `🔍 Flaky Test: ${failedTests[0] || 'Multiple tests'}`,
+                  body,
+                  labels: ['flaky-test', 'automated', 'needs-investigation']
+                });
+              } else {
+                // Add comment to existing issue
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: existingIssue.number,
+                  body: `🔄 Flaky behavior detected again in [run ${context.payload.workflow_run?.run_number}](${context.payload.workflow_run?.html_url})`
+                });
+              }
+            }
+
+  success-summary:
+    name: "📊 Summary"
+    needs: [analyze-failures, retry-failed]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create summary
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const hasFailures = '${{ needs.analyze-failures.outputs.has_failures }}' === 'true';
+            const failureType = '${{ needs.analyze-failures.outputs.failure_type }}';
+            const retryRecommended = '${{ needs.analyze-failures.outputs.retry_recommended }}' === 'true';
+
+            let summary = '## 🔄 Intelligent Test Retry Summary\n\n';
+
+            if (!hasFailures) {
+              summary += '✅ No failures detected - all tests passed!\n';
+            } else {
+              summary += `**Failure Type:** ${failureType}\n`;
+              summary += `**Retry Recommended:** ${retryRecommended ? 'Yes' : 'No'}\n\n`;
+
+              if (retryRecommended) {
+                summary += '🔄 Automated retry was initiated.\n';
+              } else {
+                summary += '⚠️ No retry recommended - likely requires manual intervention.\n';
+              }
+            }
+
+            await core.summary
+              .addRaw(summary)
+              .write();

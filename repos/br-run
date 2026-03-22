@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# ============================================================================
+# BLACKROAD OS, INC. - PROPRIETARY AND CONFIDENTIAL
+# Copyright (c) 2025-2026 BlackRoad OS, Inc. All Rights Reserved.
+# ============================================================================
+# br-run - Run an Ollama model and extract operational steps
+
+set -eo pipefail
+
+if [[ -z "$1" ]]; then
+  echo "Usage: br-run <model> [prompt...]" >&2
+  echo "  Runs an Ollama model and extracts operational steps from output" >&2
+  exit 1
+fi
+
+MODEL="$1"
+shift
+
+if [[ -z "$*" ]]; then
+  echo "Error: No prompt provided" >&2
+  exit 1
+fi
+
+ollama run "$MODEL" "$@" \
+  | sed '/^Operational steps:/,$!d' \
+  | sed '/^$/,$d'

@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero">
+  <div class="hero-copy">
+    <h1>Quantum-Secure Compliance Copilot</h1>
+    <p class="tagline">90% faster pre-approvals. Immutable audit bundles in one click. PQC-ready signatures on demand.</p>
+    <div class="hero-cta">
+      <a class="btn btn-primary" href="/sandbox">Try the sandbox</a>
+      <a class="btn btn-secondary" href="#lead-form">Book a pilot</a>
+    </div>
+    <ul class="benefits">
+      <li><strong>90% faster</strong> marketing and suitability approvals.</li>
+      <li><strong>Audit log in one click</strong> with PDF + JSON bundle.</li>
+      <li><strong>Quantum-secure</strong> signing via PQC toggle.</li>
+    </ul>
+  </div>
+  <div class="hero-metrics">
+    <div class="metric-card">
+      <span class="metric-value">{{ '%.0f'|format(metrics.approval_rate * 100) }}%</span>
+      <span class="metric-label">Approval rate</span>
+    </div>
+    <div class="metric-card">
+      <span class="metric-value">{{ metrics.total_reviews }}</span>
+      <span class="metric-label">Bundles generated</span>
+    </div>
+    <div class="metric-card">
+      <span class="metric-value">{{ '%.0f'|format(metrics.pqc_usage_rate * 100) }}%</span>
+      <span class="metric-label">PQC adoption</span>
+    </div>
+  </div>
+</section>
+<section class="lead" id="lead-form">
+  <h2>Get early access</h2>
+  <form method="post" action="/leads" class="lead-form">
+    <label>Email<input type="email" name="email" required /></label>
+    <label>Role<input type="text" name="role" required /></label>
+    <label>Organization<input type="text" name="organization" required /></label>
+    <label>Team size
+      <select name="team_size">
+        <option value="1-5">1-5</option>
+        <option value="6-20">6-20</option>
+        <option value="21-100">21-100</option>
+        <option value="100+">100+</option>
+      </select>
+    </label>
+    <label>Timeline
+      <select name="timeline">
+        <option value="immediate">Immediate</option>
+        <option value="this-quarter">This quarter</option>
+        <option value="this-year">This year</option>
+      </select>
+    </label>
+    <button type="submit" class="btn btn-primary">Book pilot</button>
+  </form>
+</section>
+<section class="demo-cases">
+  <h2>Scripted demo cases</h2>
+  <div class="cases">
+    {% for case in demo_cases %}
+    <article class="case">
+      <h3>{{ case.case_id }} — {{ case.title }}</h3>
+      <p>{{ case.description }}</p>
+      <p><strong>Outcome:</strong> {{ case.expected_outcome.replace('-', ' ') }}</p>
+      <p><strong>Highlights:</strong> {{ ", ".join(case.highlighted_rules) }}</p>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+<section class="metrics">
+  <h2>Today's funnel</h2>
+  <div class="funnel">
+    <div><span class="label">Visits</span><span class="value">{{ metrics.funnel.visits }}</span></div>
+    <div><span class="label">Sandbox starts</span><span class="value">{{ metrics.funnel.sandbox }}</span></div>
+    <div><span class="label">Bundles generated</span><span class="value">{{ metrics.funnel.bundles }}</span></div>
+    <div><span class="label">Signups</span><span class="value">{{ metrics.funnel.signups }}</span></div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,21 @@
+name: policy-guard
+
+on:
+  push:
+    branches: ["main", "master", "develop"]
+  pull_request:
+
+jobs:
+  org-guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+      - name: Fetch repo settings
+        run: gh api repos/${{ github.repository }} > repo.json
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Setup OPA
+        uses: open-policy-agent/setup-opa@950f159c93899f2a46eb2184e7793f2b978ac6fc # v2.3.0
+      - name: Evaluate policies
+        run: |
+          opa eval -d .github/policy -i repo.json "data.repo.deny" --fail-defined

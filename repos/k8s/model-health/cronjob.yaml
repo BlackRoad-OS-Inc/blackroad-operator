@@ -1,0 +1,38 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: model-provider-canary
+spec:
+  schedule: "*/1 * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            job: model-provider-canary
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: canary
+              image: ghcr.io/blackroad/model-health:latest
+              imagePullPolicy: IfNotPresent
+              command: ["python", "/app/canary.py"]
+              env:
+                - name: PROVIDER_CONFIG_PATH
+                  value: /config/providers.yaml
+                - name: HEALTH_SINK_URL
+                  value: http://model-health:8080
+              volumeMounts:
+                - name: provider-config
+                  mountPath: /config
+                  readOnly: true
+          volumes:
+            - name: provider-config
+              configMap:
+                name: model-health-config
+                items:
+                  - key: providers.yaml
+                    path: providers.yaml

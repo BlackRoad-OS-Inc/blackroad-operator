@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RoadWay — Deploy Any Code, Instantly</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --pink: #FF1D6C; --amber: #F5A623; --blue: #2979FF;
+    --violet: #9C27B0; --bg: #0a0a0f; --card: #12121a;
+    --border: #1e1e2e; --text: #e4e4e7; --muted: #71717a;
+    --green: #22c55e; --red: #ef4444; --orange: #f97316;
+  }
+  body {
+    font-family: 'SF Mono', 'JetBrains Mono', 'Fira Code', monospace;
+    background: var(--bg); color: var(--text); min-height: 100vh;
+  }
+  a { color: var(--blue); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* Header */
+  .header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 32px; border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, rgba(255,29,108,0.03), transparent);
+  }
+  .logo {
+    font-size: 22px; font-weight: 800;
+    background: linear-gradient(135deg, var(--pink), var(--violet));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .logo span { font-weight: 400; opacity: 0.6; }
+  .header-right { display: flex; gap: 12px; align-items: center; }
+  .badge {
+    padding: 4px 12px; border-radius: 99px; font-size: 11px; font-weight: 600;
+    background: rgba(255, 29, 108, 0.1); color: var(--pink); border: 1px solid rgba(255, 29, 108, 0.2);
+  }
+  .badge.green { background: rgba(34,197,94,0.1); color: var(--green); border-color: rgba(34,197,94,0.2); }
+
+  /* Nav tabs */
+  .nav { display: flex; gap: 0; border-bottom: 1px solid var(--border); padding: 0 32px; }
+  .nav-tab {
+    padding: 12px 24px; font-size: 13px; color: var(--muted); cursor: pointer;
+    border-bottom: 2px solid transparent; transition: all 0.2s;
+  }
+  .nav-tab:hover { color: var(--text); }
+  .nav-tab.active { color: var(--pink); border-bottom-color: var(--pink); }
+  .nav-tab .count {
+    display: inline-block; margin-left: 6px; padding: 1px 6px; border-radius: 8px;
+    font-size: 10px; background: rgba(255,29,108,0.15); color: var(--pink);
+  }
+
+  /* Main */
+  .main { max-width: 1400px; margin: 0 auto; padding: 24px 32px; }
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* Stats row */
+  .stats { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin-bottom: 24px; }
+  .stat {
+    background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+    padding: 16px; text-align: center;
+  }
+  .stat-value { font-size: 28px; font-weight: 800; color: var(--pink); }
+  .stat-label { font-size: 10px; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 1px; }
+
+  /* Fleet nodes */
+  .fleet-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 16px; margin-bottom: 24px; }
+  .node-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    overflow: hidden; transition: border-color 0.2s;
+  }
+  .node-card:hover { border-color: rgba(255,29,108,0.3); }
+  .node-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 20px; border-bottom: 1px solid var(--border);
+    background: linear-gradient(135deg, rgba(255,29,108,0.05), rgba(156,39,176,0.05));
+  }
+  .node-name { font-size: 16px; font-weight: 700; }
+  .node-meta { font-size: 11px; color: var(--muted); }
+  .node-status {
+    display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600;
+  }
+  .node-status.online { color: var(--green); }
+  .node-status.offline { color: var(--red); }
+  .pulse {
+    width: 8px; height: 8px; border-radius: 50%; background: currentColor;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+  .node-body { padding: 12px 20px; max-height: 400px; overflow-y: auto; }
+  .node-body::-webkit-scrollbar { width: 4px; }
+  .node-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  /* Service rows */
+  .svc-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 0; border-bottom: 1px solid rgba(30,30,46,0.5);
+    font-size: 12px;
+  }
+  .svc-row:last-child { border-bottom: none; }
+  .svc-info { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
+  .svc-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .svc-dot.running { background: var(--green); }
+  .svc-dot.stopped { background: var(--red); }
+  .svc-dot.restarting { background: var(--orange); }
+  .svc-name { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .svc-type {
+    display: inline-block; padding: 1px 6px; border-radius: 3px;
+    font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px;
+    flex-shrink: 0;
+  }
+  .svc-type.docker { background: rgba(41,121,255,0.15); color: var(--blue); }
+  .svc-type.systemd { background: rgba(156,39,176,0.15); color: var(--violet); }
+  .svc-type.pm2 { background: rgba(245,166,35,0.15); color: var(--amber); }
+  .svc-type.workerd { background: rgba(255,29,108,0.15); color: var(--pink); }
+  .svc-type.process { background: rgba(34,197,94,0.15); color: var(--green); }
+  .svc-port { color: var(--muted); font-size: 11px; margin-left: 4px; flex-shrink: 0; }
+  .svc-actions { display: flex; gap: 4px; flex-shrink: 0; margin-left: 8px; }
+  .svc-btn {
+    background: transparent; border: 1px solid var(--border); color: var(--muted);
+    padding: 2px 8px; border-radius: 4px; font-size: 10px; cursor: pointer;
+    font-family: inherit; transition: all 0.15s;
+  }
+  .svc-btn:hover { border-color: var(--pink); color: var(--pink); }
+  .svc-btn.danger:hover { border-color: var(--red); color: var(--red); }
+
+  /* Deploy section */
+  .deploy-section {
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    padding: 20px; margin-bottom: 24px;
+  }
+  .deploy-section h2 {
+    font-size: 14px; margin-bottom: 14px;
+    background: linear-gradient(135deg, var(--pink), var(--amber));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .deploy-form { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .deploy-form input, .deploy-form select {
+    background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+    padding: 8px 12px; color: var(--text); font-family: inherit; font-size: 13px;
+    outline: none; transition: border 0.2s;
+  }
+  .deploy-form input:focus { border-color: var(--pink); }
+  .deploy-form input.wide { flex: 1; min-width: 180px; }
+  .btn {
+    background: linear-gradient(135deg, var(--pink), var(--violet));
+    color: white; border: none; border-radius: 6px; padding: 8px 20px;
+    font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .btn:hover { opacity: 0.85; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-sm { padding: 6px 14px; font-size: 12px; }
+  .btn-outline {
+    background: transparent; border: 1px solid var(--border); color: var(--text);
+    padding: 6px 14px; font-size: 12px; border-radius: 6px; cursor: pointer;
+    font-family: inherit;
+  }
+  .btn-outline:hover { border-color: var(--pink); color: var(--pink); }
+
+  /* Apps table */
+  .apps-table { width: 100%; border-collapse: collapse; }
+  .apps-table th {
+    text-align: left; padding: 8px 12px; font-size: 10px;
+    text-transform: uppercase; letter-spacing: 1px; color: var(--muted);
+    border-bottom: 1px solid var(--border);
+  }
+  .apps-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .apps-table tr:hover td { background: rgba(255,29,108,0.02); }
+
+  /* Log panel */
+  .log-panel {
+    background: #000; border: 1px solid var(--border); border-radius: 8px;
+    padding: 16px; max-height: 350px; overflow-y: auto; font-size: 11px;
+    line-height: 1.7; display: none; margin-bottom: 24px;
+  }
+  .log-panel.visible { display: block; }
+  .log-panel .line { color: var(--muted); }
+  .log-panel .line.error { color: var(--red); }
+  .log-panel .line.success { color: var(--green); }
+  .log-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 8px;
+  }
+  .log-title { font-size: 12px; font-weight: 700; color: var(--pink); }
+  .log-close { cursor: pointer; color: var(--muted); font-size: 14px; }
+  .log-close:hover { color: var(--text); }
+
+  /* Search / filter */
+  .filter-bar {
+    display: flex; gap: 10px; margin-bottom: 20px; align-items: center;
+  }
+  .filter-input {
+    background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+    padding: 8px 12px; color: var(--text); font-family: inherit; font-size: 13px;
+    outline: none; flex: 1; max-width: 400px;
+  }
+  .filter-input:focus { border-color: var(--pink); }
+  .filter-pills { display: flex; gap: 6px; }
+  .pill {
+    padding: 4px 12px; border-radius: 99px; font-size: 11px; cursor: pointer;
+    border: 1px solid var(--border); color: var(--muted); background: transparent;
+    transition: all 0.15s;
+  }
+  .pill:hover, .pill.active { border-color: var(--pink); color: var(--pink); background: rgba(255,29,108,0.08); }
+
+  /* Toast */
+  .toast {
+    position: fixed; bottom: 20px; right: 20px; padding: 12px 20px;
+    background: var(--card); border: 1px solid var(--pink); border-radius: 8px;
+    font-size: 12px; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 100;
+  }
+  .toast.show { opacity: 1; pointer-events: auto; }
+
+  .scanning {
+    text-align: center; padding: 40px; color: var(--muted);
+  }
+  .scanning .spinner {
+    display: inline-block; width: 20px; height: 20px; border: 2px solid var(--border);
+    border-top-color: var(--pink); border-radius: 50%; animation: spin 0.8s linear infinite;
+    margin-right: 8px; vertical-align: middle;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .node-footer {
+    padding: 10px 20px; border-top: 1px solid var(--border);
+    display: flex; gap: 8px; justify-content: flex-end;
+  }
+
+  @media (max-width: 768px) {
+    .stats { grid-template-columns: repeat(3, 1fr); }
+    .fleet-grid { grid-template-columns: 1fr; }
+    .deploy-form { flex-direction: column; }
+    .main { padding: 16px; }
+    .nav { padding: 0 16px; overflow-x: auto; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">RoadWay <span>by BlackRoad</span></div>
+  <div class="header-right">
+    <span class="badge green" id="server-status">Connected</span>
+    <span class="badge" id="fleet-badge">Scanning...</span>
+  </div>
+</div>
+
+<div class="nav">
+  <div class="nav-tab active" data-page="fleet">Fleet <span class="count" id="nav-fleet-count">0</span></div>
+  <div class="nav-tab" data-page="deploy">Deploy</div>
+  <div class="nav-tab" data-page="apps">My Apps <span class="count" id="nav-apps-count">0</span></div>
+</div>
+
+<div class="main">
+
+  <!-- ========== FLEET PAGE ========== -->
+  <div class="page active" id="page-fleet">
+    <div class="stats" id="fleet-stats">
+      <div class="stat"><div class="stat-value" id="s-nodes">-</div><div class="stat-label">Nodes Online</div></div>
+      <div class="stat"><div class="stat-value" id="s-apps">-</div><div class="stat-label">Total Services</div></div>
+      <div class="stat"><div class="stat-value" id="s-docker">-</div><div class="stat-label">Containers</div></div>
+      <div class="stat"><div class="stat-value" id="s-workers">-</div><div class="stat-label">Workers</div></div>
+      <div class="stat"><div class="stat-value" id="s-systemd">-</div><div class="stat-label">Systemd</div></div>
+      <div class="stat"><div class="stat-value" id="s-ports">-</div><div class="stat-label">Ports Open</div></div>
+    </div>
+
+    <div class="filter-bar">
+      <input class="filter-input" id="fleet-search" placeholder="Search services across all nodes..." oninput="filterFleet()" />
+      <div class="filter-pills">
+        <div class="pill active" data-filter="all" onclick="setFilter('all',this)">All</div>
+        <div class="pill" data-filter="docker" onclick="setFilter('docker',this)">Docker</div>
+        <div class="pill" data-filter="systemd" onclick="setFilter('systemd',this)">Systemd</div>
+        <div class="pill" data-filter="workerd" onclick="setFilter('workerd',this)">Workers</div>
+        <div class="pill" data-filter="pm2" onclick="setFilter('pm2',this)">PM2</div>
+      </div>
+      <button class="btn-outline" onclick="refreshFleet()">Refresh</button>
+    </div>
+
+    <div class="log-panel" id="fleet-log">
+      <div class="log-header">
+        <span class="log-title" id="log-title">Logs</span>
+        <span class="log-close" onclick="closeLog()">x</span>
+      </div>
+      <div id="log-content"></div>
+    </div>
+
+    <div id="fleet-container">
+      <div class="scanning"><span class="spinner"></span> Scanning fleet...</div>
+    </div>
+  </div>
+
+  <!-- ========== DEPLOY PAGE ========== -->
+  <div class="page" id="page-deploy">
+    <div class="deploy-section">
+      <h2>Deploy to Local (Docker)</h2>
+      <div class="deploy-form">
+        <input class="wide" id="deploy-name" placeholder="App name" />
+        <input class="wide" id="deploy-path" placeholder="Local path" />
+        <select id="deploy-runtime">
+          <option value="">Auto-detect</option>
+          <option value="node">Node.js</option><option value="nextjs">Next.js</option>
+          <option value="python">Python</option><option value="fastapi">FastAPI</option>
+          <option value="django">Django</option><option value="flask">Flask</option>
+          <option value="go">Go</option><option value="rust">Rust</option>
+          <option value="static">Static</option><option value="deno">Deno</option>
+          <option value="bun">Bun</option><option value="docker">Docker</option>
+        </select>
+        <button class="btn" onclick="deployLocal()" id="deploy-btn">Deploy</button>
+      </div>
+    </div>
+
+    <div class="deploy-section">
+      <h2>Deploy from Git</h2>
+      <div class="deploy-form">
+        <input class="wide" id="git-name" placeholder="App name" />
+        <input class="wide" id="git-repo" placeholder="Git URL" />
+        <input id="git-branch" placeholder="Branch" style="width:100px" />
+        <button class="btn" onclick="deployGit()" id="git-btn">Deploy</button>
+      </div>
+    </div>
+
+    <div class="deploy-section">
+      <h2>Deploy to Fleet Node</h2>
+      <div class="deploy-form">
+        <input class="wide" id="remote-name" placeholder="App name" />
+        <input class="wide" id="remote-repo" placeholder="Git URL" />
+        <select id="remote-node">
+          <option value="alice">Alice (gateway)</option>
+          <option value="octavia">Octavia (compute)</option>
+          <option value="lucidia">Lucidia (web/ai)</option>
+          <option value="aria">Aria (compute)</option>
+        </select>
+        <button class="btn" onclick="deployRemote()" id="remote-btn">Deploy to Node</button>
+      </div>
+    </div>
+
+    <div class="log-panel" id="deploy-log"></div>
+  </div>
+
+  <!-- ========== MY APPS PAGE ========== -->
+  <div class="page" id="page-apps">
+    <div id="apps-container">
+      <table class="apps-table" id="apps-table" style="display:none">
+        <thead>
+          <tr><th>App</th><th>Status</th><th>Runtime</th><th>Port</th><th>URL</th><th>Deployed</th><th>Actions</th></tr>
+        </thead>
+        <tbody id="apps-body"></tbody>
+      </table>
+      <div class="scanning" id="apps-empty" style="display:none">
+        No apps deployed via RoadWay yet. Go to Deploy to launch your first app.
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let ws, fleetData = null, currentFilter = 'all';
+
+// ── Nav ──────────────────────────────────────────────────
+document.querySelectorAll('.nav-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('page-' + tab.dataset.page).classList.add('active');
+  });
+});
+
+// ── WebSocket ────────────────────────────────────────────
+function connectWS() {
+  const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+  ws = new WebSocket(`${proto}://${location.host}/ws`);
+  ws.onmessage = (e) => {
+    const msg = JSON.parse(e.data);
+    if (msg.type === 'build_log') addDeployLine(msg.msg);
+    if (msg.type === 'build_start') { showDeployLog(); addDeployLine(`Building ${msg.app}...`, 'success'); }
+    if (msg.type === 'build_success') { addDeployLine(`Deployed! ${msg.url}`, 'success'); toast(`${msg.app} live on :${msg.port}`); loadMyApps(); }
+    if (msg.type === 'build_fail') { addDeployLine(`FAILED: ${msg.error}`, 'error'); toast(`Build failed`); }
+    if (msg.type === 'fleet_action') { toast(`${msg.action} ${msg.service} on ${msg.node}`); setTimeout(loadFleet, 1000); }
+    if (msg.type === 'fleet_deploy') { toast(`Deployed ${msg.app} to ${msg.node}`); setTimeout(loadFleet, 2000); }
+    if (['app_stopped','app_started','app_restarted','app_deleted'].includes(msg.type)) loadMyApps();
+  };
+  ws.onclose = () => {
+    document.getElementById('server-status').textContent = 'Disconnected';
+    document.getElementById('server-status').classList.remove('green');
+    setTimeout(connectWS, 3000);
+  };
+  ws.onopen = () => {
+    document.getElementById('server-status').textContent = 'Connected';
+    document.getElementById('server-status').classList.add('green');
+  };
+}
+
+// ── Fleet ────────────────────────────────────────────────
+async function loadFleet(force) {
+  try {
+    const res = await fetch(`/api/fleet${force ? '?refresh=true' : ''}`);
+    fleetData = await res.json();
+    renderFleet();
+  } catch (e) {
+    document.getElementById('fleet-container').innerHTML = `<div class="scanning" style="color:var(--red)">Fleet scan failed: ${e.message}</div>`;
+  }
+}
+
+function refreshFleet() {
+  document.getElementById('fleet-container').innerHTML = '<div class="scanning"><span class="spinner"></span> Scanning fleet...</div>';
+  loadFleet(true);
+}
+
+function renderFleet() {
+  if (!fleetData) return;
+  const nodes = Object.values(fleetData.nodes);
+  const allApps = nodes.flatMap(n => n.apps || []);
+
+  // Stats
+  const online = nodes.filter(n => n.status === 'online').length;
+  document.getElementById('s-nodes').textContent = `${online}/${nodes.length}`;
+  document.getElementById('s-apps').textContent = allApps.length;
+  document.getElementById('s-docker').textContent = allApps.filter(a => a.type === 'docker').length;
+  document.getElementById('s-workers').textContent = allApps.filter(a => a.type === 'workerd').length;
+  document.getElementById('s-systemd').textContent = allApps.filter(a => a.type === 'systemd').length;
+  document.getElementById('s-ports').textContent = allApps.filter(a => a.port).length;
+  document.getElementById('fleet-badge').textContent = `${allApps.length} services`;
+  document.getElementById('nav-fleet-count').textContent = allApps.length;
+
+  const search = document.getElementById('fleet-search').value.toLowerCase();
+  const container = document.getElementById('fleet-container');
+  container.innerHTML = '';
+
+  const grid = document.createElement('div');
+  grid.className = 'fleet-grid';
+
+  nodes.forEach(node => {
+    let apps = node.apps || [];
+
+    // Filter by type
+    if (currentFilter !== 'all') {
+      apps = apps.filter(a => a.type === currentFilter || (currentFilter === 'workerd' && a.name?.includes('br-worker')));
+    }
+
+    // Filter by search
+    if (search) {
+      apps = apps.filter(a => a.name?.toLowerCase().includes(search) || a.description?.toLowerCase().includes(search) || a.type?.toLowerCase().includes(search));
+    }
+
+    const card = document.createElement('div');
+    card.className = 'node-card';
+    card.innerHTML = `
+      <div class="node-header">
+        <div>
+          <div class="node-name">${node.name}</div>
+          <div class="node-meta">${node.ip} — ${node.role}</div>
+        </div>
+        <div class="node-status ${node.status}">
+          <div class="pulse"></div> ${node.status} (${(node.apps||[]).length})
+        </div>
+      </div>
+      <div class="node-body">
+        ${node.status === 'offline'
+          ? '<div style="padding:20px;text-align:center;color:var(--red)">Node unreachable</div>'
+          : apps.length === 0
+            ? '<div style="padding:20px;text-align:center;color:var(--muted)">No matching services</div>'
+            : apps.map(a => renderSvcRow(node.name, a)).join('')}
+      </div>
+      ${node.status === 'online' ? `
+      <div class="node-footer">
+        <button class="svc-btn" onclick="scanSingleNode('${node.name}')">Rescan</button>
+      </div>` : ''}
+    `;
+    grid.appendChild(card);
+  });
+
+  container.appendChild(grid);
+}
+
+function renderSvcRow(nodeName, app) {
+  const statusClass = app.status === 'running' ? 'running' : app.status === 'stopped' ? 'stopped' : 'restarting';
+  let typeClass = 'process';
+  if (app.type === 'docker') typeClass = 'docker';
+  else if (app.type === 'systemd') typeClass = 'systemd';
+  else if (app.type === 'pm2') typeClass = 'pm2';
+  else if (app.type === 'workerd' || app.name?.includes('br-worker')) typeClass = 'workerd';
+
+  const port = app.port ? `:${app.port}` : '';
+  const safeName = (app.name || '').replace(/'/g, "\\'");
+
+  return `
+    <div class="svc-row">
+      <div class="svc-info">
+        <div class="svc-dot ${statusClass}"></div>
+        <span class="svc-name" title="${app.description || app.name}">${app.name}</span>
+        <span class="svc-type ${typeClass}">${app.type}</span>
+        ${port ? `<span class="svc-port">${port}</span>` : ''}
+      </div>
+      <div class="svc-actions">
+        <button class="svc-btn" onclick="fleetLogs('${nodeName}','${safeName}')">logs</button>
+        <button class="svc-btn" onclick="fleetAction('${nodeName}','${safeName}','restart')">restart</button>
+        <button class="svc-btn danger" onclick="fleetAction('${nodeName}','${safeName}','stop')">stop</button>
+      </div>
+    </div>
+  `;
+}
+
+function filterFleet() { renderFleet(); }
+function setFilter(f, el) {
+  currentFilter = f;
+  document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  renderFleet();
+}
+
+async function scanSingleNode(name) {
+  toast(`Scanning ${name}...`);
+  try {
+    const res = await fetch(`/api/fleet/${name}`);
+    const node = await res.json();
+    if (fleetData) { fleetData.nodes[name] = node; renderFleet(); }
+    toast(`${name}: ${node.apps.length} services`);
+  } catch (e) { toast(`Scan failed: ${e.message}`); }
+}
+
+async function fleetAction(node, service, action) {
+  toast(`${action}ing ${service} on ${node}...`);
+  try {
+    const res = await fetch(`/api/fleet/${node}/${service}/${action}`, { method: 'POST' });
+    const r = await res.json();
+    if (r.ok) toast(`${service} ${action}ed via ${r.method}`);
+    else toast(`Failed: ${r.error}`);
+  } catch (e) { toast(`Error: ${e.message}`); }
+}
+
+async function fleetLogs(node, service) {
+  const panel = document.getElementById('fleet-log');
+  const content = document.getElementById('log-content');
+  const title = document.getElementById('log-title');
+  title.textContent = `${service} @ ${node}`;
+  content.innerHTML = '<div class="line">Loading...</div>';
+  panel.classList.add('visible');
+  try {
+    const res = await fetch(`/api/fleet/${node}/${service}/logs?lines=80`);
+    const { logs } = await res.json();
+    content.innerHTML = logs.split('\n').map(l =>
+      `<div class="line ${l.includes('error') || l.includes('Error') || l.includes('FAIL') ? 'error' : ''}">${escHtml(l)}</div>`
+    ).join('');
+    panel.scrollTop = panel.scrollHeight;
+  } catch (e) {
+    content.innerHTML = `<div class="line error">Failed to fetch logs: ${e.message}</div>`;
+  }
+}
+
+function closeLog() { document.getElementById('fleet-log').classList.remove('visible'); }
+
+// ── Deploy ───────────────────────────────────────────────
+async function deployLocal() {
+  const name = document.getElementById('deploy-name').value.trim();
+  const path = document.getElementById('deploy-path').value.trim();
+  const runtime = document.getElementById('deploy-runtime').value;
+  if (!name || !path) return toast('Name and path required');
+  document.getElementById('deploy-btn').disabled = true;
+  try {
+    const r = await (await fetch('/api/deploy', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, path, runtime: runtime || undefined }),
+    })).json();
+    if (!r.ok) toast(`Error: ${r.error}`);
+    else { toast(`${name} deployed!`); loadMyApps(); }
+  } catch (e) { toast(e.message); }
+  document.getElementById('deploy-btn').disabled = false;
+}
+
+async function deployGit() {
+  const name = document.getElementById('git-name').value.trim();
+  const repo = document.getElementById('git-repo').value.trim();
+  const branch = document.getElementById('git-branch').value.trim();
+  if (!name || !repo) return toast('Name and repo required');
+  document.getElementById('git-btn').disabled = true;
+  try {
+    const r = await (await fetch('/api/deploy/git', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, repo, branch: branch || undefined }),
+    })).json();
+    if (!r.ok) toast(`Error: ${r.error}`);
+    else { toast(`${name} deployed!`); loadMyApps(); }
+  } catch (e) { toast(e.message); }
+  document.getElementById('git-btn').disabled = false;
+}
+
+async function deployRemote() {
+  const name = document.getElementById('remote-name').value.trim();
+  const repo = document.getElementById('remote-repo').value.trim();
+  const node = document.getElementById('remote-node').value;
+  if (!name || !repo) return toast('Name and repo required');
+  document.getElementById('remote-btn').disabled = true;
+  toast(`Deploying ${name} to ${node}...`);
+  try {
+    const r = await (await fetch(`/api/fleet/${node}/deploy`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, repo }),
+    })).json();
+    if (r.ok) toast(`${name} deployed to ${node}!`);
+    else toast(`Error: ${r.error}`);
+  } catch (e) { toast(e.message); }
+  document.getElementById('remote-btn').disabled = false;
+}
+
+function showDeployLog() {
+  const el = document.getElementById('deploy-log');
+  el.classList.add('visible');
+}
+function addDeployLine(text, cls = '') {
+  const el = document.getElementById('deploy-log');
+  const line = document.createElement('div');
+  line.className = `line ${cls}`;
+  line.textContent = text;
+  el.appendChild(line);
+  el.scrollTop = el.scrollHeight;
+}
+
+// ── My Apps ──────────────────────────────────────────────
+async function loadMyApps() {
+  try {
+    const { apps } = await (await fetch('/api/apps')).json();
+    document.getElementById('nav-apps-count').textContent = apps.length;
+    const tbody = document.getElementById('apps-body');
+    const table = document.getElementById('apps-table');
+    const empty = document.getElementById('apps-empty');
+    if (!apps.length) { table.style.display = 'none'; empty.style.display = ''; return; }
+    table.style.display = ''; empty.style.display = 'none';
+    tbody.innerHTML = apps.map(a => `
+      <tr>
+        <td><strong>${a.name}</strong></td>
+        <td><span class="svc-dot ${a.status}" style="display:inline-block;vertical-align:middle"></span> ${a.status}</td>
+        <td><span class="svc-type ${a.runtime === 'docker' ? 'docker' : 'process'}">${a.runtime || '?'}</span></td>
+        <td>${a.port || '-'}</td>
+        <td><a href="${a.url}" target="_blank">${a.url || '-'}</a></td>
+        <td>${a.deployed_at ? new Date(a.deployed_at).toLocaleString() : '-'}</td>
+        <td>
+          ${a.status === 'running'
+            ? `<button class="svc-btn" onclick="appAction('${a.name}','stop')">stop</button>
+               <button class="svc-btn" onclick="appAction('${a.name}','restart')">restart</button>`
+            : `<button class="svc-btn" onclick="appAction('${a.name}','start')">start</button>`}
+          <button class="svc-btn" onclick="appLogs('${a.name}')">logs</button>
+          <button class="svc-btn danger" onclick="appAction('${a.name}','delete')">delete</button>
+        </td>
+      </tr>
+    `).join('');
+  } catch {}
+}
+
+async function appAction(name, action) {
+  if (action === 'delete' && !confirm(`Delete ${name}?`)) return;
+  const method = action === 'delete' ? 'DELETE' : 'POST';
+  const url = action === 'delete' ? `/api/apps/${name}` : `/api/apps/${name}/${action}`;
+  await fetch(url, { method });
+  loadMyApps();
+}
+
+async function appLogs(name) {
+  const panel = document.getElementById('fleet-log');
+  const content = document.getElementById('log-content');
+  document.getElementById('log-title').textContent = `${name} (local)`;
+  content.innerHTML = '<div class="line">Loading...</div>';
+  panel.classList.add('visible');
+  try {
+    const { logs } = await (await fetch(`/api/apps/${name}/logs?lines=80`)).json();
+    content.innerHTML = logs.split('\n').map(l =>
+      `<div class="line ${l.includes('error') || l.includes('Error') ? 'error' : ''}">${escHtml(l)}</div>`
+    ).join('');
+  } catch (e) {
+    content.innerHTML = `<div class="line error">${e.message}</div>`;
+  }
+}
+
+// ── Utils ────────────────────────────────────────────────
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+// ── Init ─────────────────────────────────────────────────
+connectWS();
+loadFleet();
+loadMyApps();
+setInterval(() => loadFleet(), 30000);
+setInterval(loadMyApps, 15000);
+</script>
+</body>
+</html>

@@ -1,0 +1,48 @@
+name: Deploy Staging
+
+on:
+  push:
+    branches:
+      - staging
+  workflow_dispatch:
+
+jobs:
+  deploy-web:
+    name: Deploy Prism Console (Staging)
+    uses: ./.github/workflows/reusable-fly-deploy.yml
+    with:
+      app: prism-console-staging
+      image: ghcr.io/blackroad/prism-console:${{ github.sha }}
+      environment: staging
+      strategy: rolling
+    secrets:
+      fly-api-token: ${{ secrets.FLY_API_TOKEN }}
+
+  deploy-roadview-search:
+    name: Deploy RoadView Search (Staging)
+    needs: deploy-web
+    uses: ./.github/workflows/reusable-aws-ecs-deploy.yml
+    with:
+      cluster: prism-shared-staging
+      service: roadview-search
+      image: ghcr.io/blackroad/roadview-search:${{ github.sha }}
+      container-name: app
+      region: us-east-1
+      environment: staging
+    secrets:
+      aws-role-to-assume: ${{ secrets.AWS_STAGING_DEPLOY_ROLE }}
+      aws-external-id: ${{ secrets.AWS_STAGING_EXTERNAL_ID }}
+
+  smoke-tests:
+    name: Staging smoke tests
+    needs:
+      - deploy-web
+      - deploy-roadview-search
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check console health
+        run: |
+          curl --fail --retry 6 --retry-connrefused --retry-delay 10 https://staging.console.blackroad.io/healthz
+      - name: Check RoadView search health
+        run: |
+          curl --fail --retry 6 --retry-connrefused --retry-delay 10 https://roadview.staging.blackroad.io/healthz

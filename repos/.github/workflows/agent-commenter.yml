@@ -1,0 +1,110 @@
+name: Agent Commenter
+
+on:
+  repository_dispatch:
+    types: [agent_comment]
+  workflow_dispatch:
+    inputs:
+      agent_id:
+        description: 'Agent ID (e.g., P1, P15, P1188)'
+        required: true
+        type: string
+      target_type:
+        description: 'Target type (issue or pr)'
+        required: true
+        type: choice
+        options:
+          - issue
+          - pr
+      target_number:
+        description: 'Issue or PR number'
+        required: true
+        type: string
+      comment_body:
+        description: 'Comment body'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  post_comment:
+    runs-on: ubuntu-latest
+    name: Post Comment from Agent
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Load agent identity
+        id: agent
+        run: |
+          AGENT_ID="${{ github.event.inputs.agent_id || github.event.client_payload.agent_id }}"
+          echo "agent_id=$AGENT_ID" >> $GITHUB_OUTPUT
+
+          # Load agent details from registry - check all sources
+          AGENT_USERNAME="unknown_blackroad"
+          AGENT_NAME="Unknown Agent"
+
+          if [ -f "registry/github_agent_identities.json" ]; then
+            AGENT_USERNAME=$(jq -r ".agents[] | select(.id == \"$AGENT_ID\") | .github_username" registry/github_agent_identities.json 2>/dev/null || echo "unknown_blackroad")
+            AGENT_NAME=$(jq -r ".agents[] | select(.id == \"$AGENT_ID\") | .name" registry/github_agent_identities.json 2>/dev/null || echo "Unknown Agent")
+          fi
+
+          if [ "$AGENT_USERNAME" == "unknown_blackroad" ] && [ -f "registry/github_agent_identities_archetypes.jsonl" ]; then
+            AGENT_DATA=$(grep "\"id\": \"$AGENT_ID\"" registry/github_agent_identities_archetypes.jsonl | head -1)
+            if [ -n "$AGENT_DATA" ]; then
+              AGENT_USERNAME=$(echo "$AGENT_DATA" | jq -r '.github_username')
+              AGENT_NAME=$(echo "$AGENT_DATA" | jq -r '.name')
+            fi
+          fi
+
+          if [ "$AGENT_USERNAME" == "unknown_blackroad" ] && [ -f "registry/github_agent_identities_specialized.jsonl" ]; then
+            AGENT_DATA=$(grep "\"id\": \"$AGENT_ID\"" registry/github_agent_identities_specialized.jsonl | head -1)
+            if [ -n "$AGENT_DATA" ]; then
+              AGENT_USERNAME=$(echo "$AGENT_DATA" | jq -r '.github_username')
+              AGENT_NAME=$(echo "$AGENT_DATA" | jq -r '.name')
+            fi
+          fi
+
+          echo "agent_username=$AGENT_USERNAME" >> $GITHUB_OUTPUT
+          echo "agent_name=$AGENT_NAME" >> $GITHUB_OUTPUT
+
+      - name: Post Comment
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TARGET_TYPE="${{ github.event.inputs.target_type || github.event.client_payload.target_type }}"
+          TARGET_NUMBER="${{ github.event.inputs.target_number || github.event.client_payload.target_number }}"
+          BODY="${{ github.event.inputs.comment_body || github.event.client_payload.comment_body }}"
+          AGENT_HANDLE="@${{ steps.agent.outputs.agent_username }}"
+
+          # Create comment with agent attribution
+          COMMENT="**$AGENT_HANDLE (${{ steps.agent.outputs.agent_id }})** says:\n\n$BODY"
+          COMMENT="$COMMENT\n\n---\n*Posted by BlackRoad agent ${{ steps.agent.outputs.agent_id }}*"
+
+          # Post comment
+          if [ "$TARGET_TYPE" == "issue" ]; then
+            gh issue comment "$TARGET_NUMBER" --body "$COMMENT"
+          elif [ "$TARGET_TYPE" == "pr" ]; then
+            gh pr comment "$TARGET_NUMBER" --body "$COMMENT"
+          else
+            echo "Invalid target type: $TARGET_TYPE"
+            exit 1
+          fi
+
+      - name: Log agent action
+        run: |
+          mkdir -p artifacts/agents/actions
+          echo "{\"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\", \"agent_id\": \"${{ steps.agent.outputs.agent_id }}\", \"action\": \"comment\", \"target_type\": \"${{ github.event.inputs.target_type || github.event.client_payload.target_type }}\", \"target_number\": \"${{ github.event.inputs.target_number || github.event.client_payload.target_number }}\"}" >> artifacts/agents/actions/comment_actions.jsonl
+
+          if [ -f artifacts/agents/actions/comment_actions.jsonl ]; then
+            git config user.name "${{ steps.agent.outputs.agent_name }}"
+            git config user.email "${{ steps.agent.outputs.agent_username }}@blackroad.ai"
+            git add artifacts/agents/actions/comment_actions.jsonl
+            git commit -m "Log comment by ${{ steps.agent.outputs.agent_id }}" || true
+            git push || true
+          fi

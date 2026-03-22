@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: math
+  namespace: prism
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: math
+  template:
+    metadata:
+      labels:
+        app: math
+    spec:
+      containers:
+        - name: math
+          image: ghcr.io/blackroad-prism/lucidia-math:latest
+          ports:
+            - containerPort: 9000
+          env:
+            - name: MATH_OUTPUT_DIR
+              value: /output
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 9000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/ambr/energy
+              port: 9000
+            initialDelaySeconds: 15
+            periodSeconds: 30
+          envFrom:
+            - configMapRef:
+                name: prism-config
+            - secretRef:
+                name: prism-secrets
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 9000
+            initialDelaySeconds: 10
+            periodSeconds: 20
+            timeoutSeconds: 2
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 9000
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          volumeMounts:
+            - name: math-output
+              mountPath: /output
+      volumes:
+        - name: math-output
+          persistentVolumeClaim:
+            claimName: math-output-pvc

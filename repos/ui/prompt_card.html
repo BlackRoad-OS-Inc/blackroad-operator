@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Silas Prompt Card</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      body {
+        margin: 0;
+        padding: 2rem;
+        background: #0b0c10;
+        color: #f5f5f5;
+      }
+
+      .card {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 2rem;
+        background: rgba(20, 24, 33, 0.92);
+        border-radius: 24px;
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      h1 {
+        font-size: 1.8rem;
+        margin-bottom: 1rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+
+      section + section {
+        margin-top: 1.75rem;
+      }
+
+      .section-title {
+        font-size: 0.9rem;
+        font-weight: 600;
+        opacity: 0.75;
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.35rem 0.75rem;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.08);
+        margin: 0.15rem;
+        font-size: 0.85rem;
+      }
+
+      .token-line {
+        margin: 0.35rem 0;
+        line-height: 1.6;
+      }
+
+      .ternary {
+        font-family: "JetBrains Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+        font-size: 1rem;
+        background: rgba(255, 255, 255, 0.04);
+        padding: 0.75rem 1rem;
+        border-radius: 16px;
+        display: inline-block;
+      }
+
+      pre {
+        background: rgba(0, 0, 0, 0.35);
+        border-radius: 12px;
+        padding: 1rem;
+        overflow-x: auto;
+        font-size: 0.9rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Silas Prompt Card</h1>
+      <section>
+        <div class="section-title">Assumptions</div>
+        <div id="assumptions"></div>
+      </section>
+      <section>
+        <div class="section-title">Logic Steps</div>
+        <div id="logic"></div>
+      </section>
+      <section>
+        <div class="section-title">Code</div>
+        <pre id="code"></pre>
+      </section>
+      <section>
+        <div class="section-title">Tests</div>
+        <pre id="tests"></pre>
+      </section>
+      <section>
+        <div class="section-title">Balanced Ternary</div>
+        <div id="balanced" class="ternary"></div>
+      </section>
+    </div>
+
+    <script id="packet-data" type="application/json">
+      {
+        "assumptions": ["Local model available", "Schema validated"],
+        "logic_steps": [
+          "Ingest request",
+          "Route to local provider",
+          "Render structured response"
+        ],
+        "code": "print('hello silas')",
+        "tests": "pytest tests/test_silas_router_local.py",
+        "balanced_ternary": "+0-+"
+      }
+    </script>
+    <script>
+      const packetElement = document.getElementById("packet-data");
+      const packet = JSON.parse(packetElement.textContent.trim());
+
+      const hslMap = {
+        plus: "hsl(135, 70%, 45%)",
+        zero: "hsl(0, 0%, 60%)",
+        minus: "hsl(10, 70%, 50%)",
+        noun: "hsl(210, 70%, 52%)",
+        verb: "hsl(30, 80%, 52%)",
+        adj: "hsl(280, 65%, 62%)",
+        default: "hsl(200, 10%, 55%)"
+      };
+
+      const assumptionsEl = document.getElementById("assumptions");
+      packet.assumptions.forEach((item) => {
+        const pill = document.createElement("span");
+        pill.className = "pill";
+        pill.style.backgroundColor = "rgba(255,255,255,0.08)";
+        pill.textContent = item;
+        assumptionsEl.appendChild(pill);
+      });
+
+      const logicEl = document.getElementById("logic");
+      const tokenize = (text) => text.match(/[^\s]+/g) || [];
+
+      packet.logic_steps.forEach((step) => {
+        const line = document.createElement("div");
+        line.className = "token-line";
+        tokenize(step).forEach((token) => {
+          const span = document.createElement("span");
+          span.textContent = token + " ";
+          const color = token.endsWith("ing")
+            ? hslMap.verb
+            : token[0] === token[0]?.toUpperCase()
+            ? hslMap.noun
+            : hslMap.default;
+          span.style.color = color;
+          line.appendChild(span);
+        });
+        logicEl.appendChild(line);
+      });
+
+      const codeEl = document.getElementById("code");
+      codeEl.textContent = packet.code;
+
+      const testsEl = document.getElementById("tests");
+      testsEl.textContent = packet.tests;
+
+      const ternaryEl = document.getElementById("balanced");
+      packet.balanced_ternary.split("").forEach((char) => {
+        const span = document.createElement("span");
+        span.textContent = char;
+        span.style.color =
+          char === "+"
+            ? hslMap.plus
+            : char === "-"
+            ? hslMap.minus
+            : hslMap.zero;
+        ternaryEl.appendChild(span);
+      });
+    </script>
+  </body>
+</html>

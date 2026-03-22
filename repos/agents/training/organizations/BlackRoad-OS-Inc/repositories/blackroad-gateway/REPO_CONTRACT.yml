@@ -1,0 +1,32 @@
+repo:
+  name: blackroad-gateway
+  org: BlackRoad-OS-Inc
+  type: worker
+  languages: [typescript]
+  url: https://github.com/BlackRoad-OS-Inc/blackroad-gateway
+
+ownership:
+  owner: blackboxprogramming
+  codeowners: ["@blackboxprogramming"]
+  license: proprietary
+
+policies:
+  inherits: ["coding", "collaboration", "safety", "issues", "pr-review", "docs"]
+  additional:
+    - "API keys must ONLY exist in Worker secrets, never in code"
+    - "All inference requests must be audit logged"
+    - "Rate limiting must be enforced before provider calls"
+    - "JWT validation must happen on every request"
+    - "Never log request/response bodies containing user prompts"
+
+certification:
+  required_level: 4
+  modules: ["fundamentals", "workers", "coding-standards", "agents"]
+
+deployment:
+  target: cloudflare-workers
+  command: "npx wrangler deploy"
+  health_check: "curl https://gateway.blackroad.io/health"
+
+safe_changes:
+  ref: SAFE_CHANGE_BOUNDARIES.md

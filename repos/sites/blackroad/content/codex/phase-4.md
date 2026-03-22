@@ -1,0 +1,161 @@
+---
+type: codex-prompt
+id: phase-4
+slug: phase-4
+title: "Phase 4 — AI Compliance Grid Codex"
+summary: "Immutable compliance ledger binding Lucidia and BlackRoad audit evidence."
+owner: "blackroad"
+tags: ["codex","compliance","ledger","audit","sec","finra"]
+model_hint: "Codex"
+temperature: 0
+updated: "2025-11-22"
+version: "1.0.0"
+canonical_repo: "blackboxprogramming/blackroad-prism-console"
+copy_filename: "codex_phase_04.yaml"
+---
+
+Here’s Phase 4 — AI Compliance Grid Codex. Paste this into Codex.
+
+⸻
+
+**Codex Prompt — Phase 4 (Lucidia + BlackRoad compliance ledger, immutable audit evidence, SEC/FINRA readiness)**
+
+This codex binds BlackRoad formation, registration, and RIA orchestration threads into a live compliance ledger. Every filing, AI decision, and client communication becomes a signed, time-stamped record auditable by regulators.
+
+```yaml
+# === AI COMPLIANCE GRID CODEX ===
+# Phase IV of the BlackRoad Formation Series
+# Author: Alexa Louise Amundson | November 2025
+# Purpose: unify compliance, supervision, and audit functions across Lucidia + BlackRoad
+
+codex:
+  title: "Lucidia-Compliance-Grid"
+  description: "Immutable audit and evidence framework linking AI agent activity, regulatory filings, and compliance logs."
+  version: "4.0"
+  priority: "Mission Critical"
+  timezone: "America/Chicago"
+  start_date: "2025-11-22"
+
+# === SECTION 1: SYSTEM OVERVIEW ===
+architecture:
+  - ledger_type: "Hybrid Compliance Ledger (Blockchain-inspired, off-chain index)"
+  - storage_layers:
+      - "Primary: Encrypted PostgreSQL + checksum hash"
+      - "Secondary: GitHub private repo (commit-signed logs)"
+      - "Tertiary: Cold archive (Pi cluster AES-256)"
+  - hash_algorithm: "SHA-512 with time-based nonce"
+  - retention: "7 years (per SEC Rule 17a-4/MN Rule 2876.4110)"
+  - ledger_entry_format:
+      fields:
+        - "timestamp_utc"
+        - "entity_id (BlackRoad/Lucidia)"
+        - "agent_id (Guardian/Athena/Cadillac)"
+        - "action_type (filing, advisory, trade, client_comm, system_event)"
+        - "source_reference (form #, client id, doc hash)"
+        - "signature (PGP v5 detached)"
+        - "status_flag (pending/validated/audited)"
+
+# === SECTION 2: AUTOMATED RECORD GENERATION ===
+event_triggers:
+  - trigger: "Regulatory Filing Submitted"
+    agents: ["Guardian"]
+    record:
+      action_type: "FILING"
+      data_capture:
+        - "Form type"
+        - "Regulator endpoint"
+        - "submission receipt #"
+        - "MD5 hash of file"
+  - trigger: "AI-Generated Advisory Draft"
+    agents: ["Athena"]
+    record:
+      action_type: "ADVISORY_GENERATION"
+      validation:
+        - "Human co-sign required"
+        - "Sentiment neutrality score > 0.90"
+  - trigger: "Client Communication Logged"
+    agents: ["Cadillac"]
+    record:
+      action_type: "CLIENT_COMM"
+      archive_policy: "Immediate duplicate to cloud + local"
+  - trigger: "License Renewal / Continuing Education"
+    agents: ["Guardian"]
+    record:
+      action_type: "CE_TRACKING"
+      report_fields:
+        - "Course title / CE provider"
+        - "Completion certificate hash"
+        - "Next renewal date"
+
+# === SECTION 3: AUDIT & SUPERVISION FRAMEWORK ===
+audit_cycle:
+  frequency: "Quarterly"
+  supervised_by: ["Chief Compliance Officer", "Guardian AI Oversight"]
+  steps:
+    - "Ledger integrity check (hash diff validation)"
+    - "Compare against FINRA/IARD timestamps"
+    - "Reconcile CE credits vs NIPR database"
+    - "Flag unverified AI actions > 72 hours old"
+  escalation:
+    - "Medium risk → internal review within 5 days"
+    - "High risk → attorney review + FINRA notification within 48 hours"
+
+# === SECTION 4: REPORTING PIPELINE ===
+reports:
+  - name: "Regulatory Evidence Packet"
+    frequency: "Quarterly / On Demand"
+    contents:
+      - "Ledger snapshot (CSV + PDF)"
+      - "Hash index manifest"
+      - "Key holder signatures (Guardian, CCO, CPA)"
+      - "Summary of AI decision activity"
+  - name: "Form 17a-4 Compliance Log"
+    generation: "Automated daily"
+    retention: "7 years"
+  - name: "Audit Diff Report"
+    trigger: "Post-supervision cycle"
+    format: "JSON + signed PDF"
+
+# === SECTION 5: SECURITY & KEY MANAGEMENT ===
+encryption:
+  pgp_keyring: "Lucidia_Compliance_Keys.gpg"
+  roles:
+    - id: "Guardian_Key"    # root ledger signer
+    - id: "Athena_Key"      # AI advisory output signer
+    - id: "Cadillac_Key"    # communications log signer
+    - id: "CCO_Master_Key"  # human override and final attestation
+  rotation_policy:
+    - "Quarterly for AI keys"
+    - "Annually for CCO key"
+    - "Immediate rotation upon compromise alert"
+
+# === SECTION 6: HUMAN + AI CO-SIGNING PROTOCOL ===
+co_sign_rules:
+  - "All AI-generated client output requires human approval within 24 hours."
+  - "Guardian verifies signature pair (Athena + CCO) before ledger commit."
+  - "Cadillac refuses to transmit documents lacking dual signatures."
+
+# === SECTION 7: CONTINUOUS MONITORING ===
+monitoring:
+  - "Real-time ledger watchdog (AI daemon)"
+  - "Weekly checksum verification"
+  - "Monthly regulatory sync (FINRA Gateway / IARD API)"
+  - "Quarterly penetration test by third party vendor"
+  alerts:
+    critical: "Compliance Ledger Tamper Detected"
+    high: "Unverified Action > 72 hrs"
+    medium: "Late filing > 24 hrs"
+    low: "Non-material data drift"
+
+# === SECTION 8: SUCCESS METRICS ===
+success_indicators:
+  - "0 missing audit records"
+  - "Ledger integrity = 100 % hash match"
+  - "All AI outputs dual-signed within 24 hrs"
+  - "Quarterly reports filed < 3 days after period end"
+  - "No FINRA/SEC deficiency letters"
+
+# === END OF CODEX ===
+```
+
+This codex turns Lucidia’s compliance operations into an immutable evidence engine with auditable signatures and regulator-ready reporting.

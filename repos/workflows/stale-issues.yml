@@ -1,0 +1,52 @@
+# BlackRoad OS — Pave Tomorrow.
+# Close stale issues after 30 days of inactivity
+name: Stale Issues
+
+on:
+  schedule:
+    - cron: '0 8 * * *'
+  workflow_dispatch:
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Find and label stale issues
+        run: |
+          CUTOFF=$(date -d "30 days ago" +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || date -v-30d +%Y-%m-%dT%H:%M:%SZ)
+          API="${{ github.server_url }}/api/v1"
+          TOKEN="${{ secrets.GITHUB_TOKEN }}"
+          REPO="${{ github.repository }}"
+
+          # Get open issues older than 30 days
+          PAGE=1
+          STALE=0
+          while true; do
+            ISSUES=$(curl -s "$API/repos/$REPO/issues?state=open&type=issues&sort=updated&limit=50&page=$PAGE" \
+              -H "Authorization: token $TOKEN")
+
+            COUNT=$(echo "$ISSUES" | python3 -c "import sys,json; print(len(json.load(sys.stdin)))" 2>/dev/null || echo 0)
+            [ "$COUNT" = "0" ] && break
+
+            echo "$ISSUES" | python3 -c "
+          import sys, json
+          from datetime import datetime, timezone, timedelta
+          issues = json.load(sys.stdin)
+          cutoff = datetime.now(timezone.utc) - timedelta(days=30)
+          for issue in issues:
+              updated = datetime.fromisoformat(issue['updated_at'].replace('Z', '+00:00'))
+              if updated < cutoff:
+                  print(f'{issue[\"number\"]}|{issue[\"title\"][:50]}')
+          " 2>/dev/null | while IFS='|' read -r num title; do
+              echo "Stale: #$num - $title"
+              # Add comment
+              curl -s -X POST "$API/repos/$REPO/issues/$num/comments" \
+                -H "Authorization: token $TOKEN" \
+                -H "Content-Type: application/json" \
+                -d '{"body": "This issue has been inactive for 30+ days. It will be closed in 7 days if no activity occurs.\n\n*BlackRoad Stale Bot*"}'
+              STALE=$((STALE + 1))
+            done
+
+            PAGE=$((PAGE + 1))
+          done
+          echo "Processed stale issues"

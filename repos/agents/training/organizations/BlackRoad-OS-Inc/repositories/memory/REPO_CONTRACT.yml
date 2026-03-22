@@ -1,0 +1,28 @@
+repo:
+  name: memory
+  org: BlackRoad-OS-Inc
+  type: system
+  languages: [bash, python]
+  url: https://github.com/BlackRoad-OS-Inc/memory
+
+ownership:
+  owner: blackboxprogramming
+  codeowners: ["@blackboxprogramming"]
+  license: proprietary
+
+policies:
+  inherits: ["coding", "collaboration", "safety", "issues", "pr-review", "docs"]
+  additional:
+    - "Memory scripts must maintain backward compatibility"
+    - "Hash chain must never be broken or reset"
+    - "SQLite databases must use WAL mode for concurrent access"
+    - "All scripts must be idempotent (safe to re-run)"
+
+certification:
+  required_level: 3
+  modules: ["fundamentals", "coding-standards", "agents"]
+
+deployment:
+  target: local + pi-fleet
+  command: "rsync scripts/ to blackroad-operator/scripts/memory/"
+  health_check: "memory-system.sh status"

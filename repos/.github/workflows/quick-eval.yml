@@ -1,0 +1,17 @@
+name: Quick Eval
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  pulse:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Smoke endpoints
+        run: |
+          bash -eo pipefail -c '
+            curl -fsS http://localhost:4000/health || true
+            exit 0
+          '

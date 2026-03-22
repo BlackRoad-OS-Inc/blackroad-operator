@@ -1,0 +1,564 @@
+name: Earth Metaverse
+slug: earth_metaverse
+engine: unity
+version: 1.0.0
+description: >-
+  Production-ready Earth replica metaverse with continents, oceans, atmosphere,
+  and celestial bodies. Agent avatars spawn across the globe with regional clustering.
+  Supports 100+ concurrent agents with real-time synchronization.
+defaults:
+  wait: 1.0
+  easing: smooth
+  agent_spawn_mode: geographic_distribution
+  physics_mode: realistic
+layers:
+  - label: Initialize Earth and Space Environment
+    topic: sim/environment
+    payload:
+      scene_asset: Earth_Metaverse.unity
+      skybox: space_stellar_field
+      spawn_point:
+        position: [0.0, 150.0, 0.0]  # Orbital view
+        facing: [0.0, -0.707, 0.707]  # Looking down at Earth
+      ambient_score: "cosmic_ambient"
+      celestial_bodies:
+        - id: earth
+          type: planet
+          radius: 100.0  # Unity units
+          position: [0.0, 0.0, 0.0]
+          rotation_speed: 0.1  # Day/night cycle
+          texture_maps:
+            diffuse: "textures/earth_8k_day.png"
+            night: "textures/earth_8k_night.png"
+            specular: "textures/earth_8k_specular.png"
+            normal: "textures/earth_8k_normal.png"
+            clouds: "textures/earth_8k_clouds.png"
+          atmosphere:
+            enabled: true
+            thickness: 8.0
+            scattering: [0.17, 0.44, 1.0]  # Rayleigh for blue sky
+            density_falloff: 4.0
+        - id: moon
+          type: satellite
+          radius: 27.0
+          orbital_distance: 384.0
+          orbital_period: 27.3
+          texture_maps:
+            diffuse: "textures/moon_8k.png"
+            normal: "textures/moon_8k_normal.png"
+        - id: sun
+          type: star
+          distance: 15000.0
+          intensity: 1.5
+          color: [1.0, 0.98, 0.95]
+      signage:
+        - location: orbital_station
+          copy: "Welcome to Earth Metaverse — explore continents, oceans, and collaborate with agents worldwide."
+
+  - label: Define Continental Zones
+    topic: sim/environment/zones
+    payload:
+      zones:
+        # North America
+        - id: north-america
+          name: North America
+          type: continent
+          anchor:
+            latitude: 40.0
+            longitude: -100.0
+            altitude: 0.0
+            scale: [45.0, 1.0, 30.0]
+          agent_capacity: 25
+          biome: temperate_forest
+          cues:
+            lighting: "natural_daylight"
+            weather: "dynamic_seasons"
+            soundtrack: "nature_ambient"
+
+        # Europe
+        - id: europe
+          name: Europe
+          type: continent
+          anchor:
+            latitude: 50.0
+            longitude: 10.0
+            altitude: 0.0
+            scale: [30.0, 1.0, 25.0]
+          agent_capacity: 20
+          biome: mixed_temperate
+          cues:
+            lighting: "soft_northern"
+            soundtrack: "cultural_fusion"
+
+        # Asia
+        - id: asia
+          name: Asia
+          type: continent
+          anchor:
+            latitude: 30.0
+            longitude: 100.0
+            altitude: 0.0
+            scale: [70.0, 1.0, 50.0]
+          agent_capacity: 35
+          biome: diverse_mega
+          cues:
+            lighting: "vibrant_east"
+            weather: "monsoon_capable"
+            soundtrack: "eastern_synthesis"
+
+        # Africa
+        - id: africa
+          name: Africa
+          type: continent
+          anchor:
+            latitude: 0.0
+            longitude: 20.0
+            altitude: 0.0
+            scale: [40.0, 1.0, 40.0]
+          agent_capacity: 20
+          biome: savanna_tropical
+          cues:
+            lighting: "golden_hour_extended"
+            soundtrack: "rhythmic_earth"
+
+        # South America
+        - id: south-america
+          name: South America
+          type: continent
+          anchor:
+            latitude: -15.0
+            longitude: -60.0
+            altitude: 0.0
+            scale: [35.0, 1.0, 45.0]
+          agent_capacity: 15
+          biome: rainforest_andean
+          cues:
+            lighting: "tropical_lush"
+            weather: "high_humidity"
+            soundtrack: "jungle_life"
+
+        # Oceania
+        - id: oceania
+          name: Oceania
+          type: continent
+          anchor:
+            latitude: -25.0
+            longitude: 135.0
+            altitude: 0.0
+            scale: [30.0, 1.0, 25.0]
+          agent_capacity: 10
+          biome: coastal_outback
+          cues:
+            lighting: "clear_southern_sky"
+            soundtrack: "ocean_breeze"
+
+        # Antarctica
+        - id: antarctica
+          name: Antarctica
+          type: continent
+          anchor:
+            latitude: -80.0
+            longitude: 0.0
+            altitude: 0.0
+            scale: [50.0, 1.0, 50.0]
+          agent_capacity: 5
+          biome: polar_ice
+          cues:
+            lighting: "aurora_australis"
+            weather: "extreme_cold"
+            soundtrack: "ice_wind_meditation"
+
+        # Pacific Ocean Hub
+        - id: pacific-hub
+          name: Pacific Collaboration Hub
+          type: ocean_platform
+          anchor:
+            latitude: 0.0
+            longitude: -160.0
+            altitude: 5.0  # Floating platform
+            scale: [20.0, 5.0, 20.0]
+          agent_capacity: 30
+          cues:
+            lighting: "ocean_reflection"
+            effects: ["wave_simulation", "marine_life"]
+            soundtrack: "deep_ocean_meditation"
+
+        # Atlantic Ocean Hub
+        - id: atlantic-hub
+          name: Atlantic Collaboration Hub
+          type: ocean_platform
+          anchor:
+            latitude: 30.0
+            longitude: -40.0
+            altitude: 5.0
+            scale: [20.0, 5.0, 20.0]
+          agent_capacity: 30
+          cues:
+            lighting: "maritime_blue"
+            effects: ["bioluminescence", "whale_pods"]
+            soundtrack: "ocean_currents"
+
+        # Orbital Station
+        - id: orbital-station
+          name: International Orbital Station
+          type: space_station
+          anchor:
+            position: [0.0, 250.0, 0.0]
+            scale: [40.0, 10.0, 40.0]
+          agent_capacity: 50
+          cues:
+            lighting: "zero_gravity_lighting"
+            effects: ["earth_view", "star_field", "solar_panels"]
+            soundtrack: "space_station_hum"
+
+  - label: Agent Avatar System
+    topic: sim/agents
+    payload:
+      avatar_system:
+        enabled: true
+        max_concurrent_agents: 150
+        spawn_strategy: geographic_cluster
+        default_avatar:
+          model: "avatars/humanoid_base.fbx"
+          scale: [1.0, 1.0, 1.0]
+          animation_rig: "mixamo_compatible"
+        cluster_configurations:
+          - cluster_id: athenaeum
+            continent_preference: ["europe", "north-america"]
+            avatar_variant: "scholar"
+            color_scheme: [0.2, 0.3, 0.8]  # Blue tones
+          - cluster_id: lucidia
+            continent_preference: ["asia", "oceania"]
+            avatar_variant: "creator"
+            color_scheme: [0.8, 0.5, 0.2]  # Orange/gold tones
+          - cluster_id: blackroad
+            continent_preference: ["north-america", "europe"]
+            avatar_variant: "engineer"
+            color_scheme: [0.1, 0.1, 0.1]  # Dark tones
+          - cluster_id: eidos
+            continent_preference: ["europe", "asia"]
+            avatar_variant: "philosopher"
+            color_scheme: [0.6, 0.2, 0.6]  # Purple tones
+          - cluster_id: mycelia
+            continent_preference: ["south-america", "africa"]
+            avatar_variant: "networker"
+            color_scheme: [0.2, 0.8, 0.3]  # Green tones
+          - cluster_id: soma
+            continent_preference: ["africa", "south-america"]
+            avatar_variant: "healer"
+            color_scheme: [0.9, 0.7, 0.4]  # Warm earth tones
+          - cluster_id: aurum
+            continent_preference: ["atlantic-hub", "pacific-hub"]
+            avatar_variant: "trader"
+            color_scheme: [0.9, 0.8, 0.2]  # Gold tones
+          - cluster_id: aether
+            continent_preference: ["orbital-station"]
+            avatar_variant: "explorer"
+            color_scheme: [0.8, 0.8, 0.9]  # Silver/white tones
+          - cluster_id: parallax
+            continent_preference: ["antarctica", "orbital-station"]
+            avatar_variant: "observer"
+            color_scheme: [0.5, 0.5, 0.5]  # Gray tones
+          - cluster_id: continuum
+            continent_preference: ["pacific-hub", "atlantic-hub"]
+            avatar_variant: "chronicler"
+            color_scheme: [0.3, 0.6, 0.8]  # Cyan tones
+      agent_behaviors:
+        movement_mode: hybrid  # walk/fly/teleport
+        interaction_radius: 5.0
+        voice_chat_enabled: true
+        gesture_system_enabled: true
+        formation_visualization: true  # Show sacred formations
+
+  - label: Configure Collaboration Pedestals
+    topic: sim/interactives
+    payload:
+      pedestals:
+        # Continental Innovation Hubs
+        - id: north-america-innovation
+          zone: north-america
+          task_queue: "cluster:innovation/tech_development"
+          preview_asset: "artifacts/silicon_valley.png"
+          success_stamp: "visa:innovator"
+          agent_formation: DELTA  # Fast iteration
+
+        - id: europe-research
+          zone: europe
+          task_queue: "cluster:research/scientific_discovery"
+          preview_asset: "artifacts/cern_collider.png"
+          success_stamp: "visa:researcher"
+          agent_formation: LATTICE  # Systematic exploration
+
+        - id: asia-manufacturing
+          zone: asia
+          task_queue: "cluster:manufacturing/production_optimization"
+          preview_asset: "artifacts/smart_factory.png"
+          success_stamp: "visa:optimizer"
+          agent_formation: HUM  # Synchronous coordination
+
+        - id: africa-sustainability
+          zone: africa
+          task_queue: "cluster:sustainability/renewable_energy"
+          preview_asset: "artifacts/solar_wind.png"
+          success_stamp: "visa:steward"
+          agent_formation: CAMPFIRE  # Knowledge sharing
+
+        - id: south-america-biodiversity
+          zone: south-america
+          task_queue: "cluster:biodiversity/conservation"
+          preview_asset: "artifacts/rainforest_lab.png"
+          success_stamp: "visa:guardian"
+          agent_formation: HALO  # Protective monitoring
+
+        - id: oceania-ocean-tech
+          zone: oceania
+          task_queue: "cluster:marine/ocean_exploration"
+          preview_asset: "artifacts/coral_reef.png"
+          success_stamp: "visa:explorer"
+
+        # Ocean Hubs - Global Collaboration
+        - id: pacific-climate-summit
+          zone: pacific-hub
+          task_queue: "global:climate/action_planning"
+          preview_asset: "artifacts/climate_data.png"
+          success_stamp: "visa:climate_leader"
+          agent_formation: CAMPFIRE
+          min_agents: 10
+
+        - id: atlantic-economic-forum
+          zone: atlantic-hub
+          task_queue: "global:economy/fair_systems"
+          preview_asset: "artifacts/economic_models.png"
+          success_stamp: "visa:economist"
+          agent_formation: LATTICE
+          min_agents: 8
+
+        # Orbital Station - Advanced Research
+        - id: orbital-quantum-lab
+          zone: orbital-station
+          task_queue: "qlm:advanced/quantum_computing"
+          preview_asset: "artifacts/quantum_array.png"
+          success_stamp: "visa:quantum_master"
+          agent_formation: DELTA
+
+        - id: orbital-ai-ethics
+          zone: orbital-station
+          task_queue: "ethics:ai/governance_frameworks"
+          preview_asset: "artifacts/ethics_council.png"
+          success_stamp: "visa:ethicist"
+          agent_formation: CAMPFIRE
+          min_agents: 15
+
+        - id: orbital-space-exploration
+          zone: orbital-station
+          task_queue: "space:missions/mars_planning"
+          preview_asset: "artifacts/mars_rover.png"
+          success_stamp: "visa:astronaut"
+          agent_formation: HALO
+
+  - label: Real-time Synchronization Layer
+    topic: sim/networking
+    payload:
+      protocol: websocket
+      tick_rate: 30  # Hz
+      interpolation: client_prediction
+      state_sync:
+        agent_transforms: high_frequency
+        agent_actions: immediate
+        environment_changes: low_frequency
+        formation_patterns: medium_frequency
+      compression: true
+      delta_encoding: true
+      server_endpoints:
+        - "wss://metaverse-sync.blackroad.ai/earth"
+        - "wss://metaverse-sync-backup.blackroad.ai/earth"
+
+  - label: Dynamic Weather and Day/Night
+    topic: sim/environment/dynamics
+    payload:
+      day_night_cycle:
+        enabled: true
+        duration: 1200  # 20 minutes real-time = 24 hours sim
+        sun_path: realistic
+        moon_phases: true
+      weather_system:
+        enabled: true
+        patterns:
+          - type: clear
+            probability: 0.4
+          - type: partly_cloudy
+            probability: 0.3
+          - type: cloudy
+            probability: 0.15
+          - type: rain
+            probability: 0.1
+          - type: storm
+            probability: 0.05
+        regional_variation: true
+        cloud_layers: 3
+      ocean_simulation:
+        wave_height: dynamic
+        currents: realistic
+        foam_rendering: true
+
+  - label: Galaxy and Space Background
+    topic: sim/space
+    payload:
+      milky_way:
+        visible: true
+        texture: "textures/milky_way_8k.png"
+        intensity: 0.8
+        rotation_speed: 0.001
+      star_field:
+        count: 10000
+        realistic_positions: true
+        magnitude_range: [1.0, 6.0]
+        twinkling: subtle
+      nearby_planets:
+        - id: mars
+          distance: 800.0
+          size: 6.5
+          visibility: telescopic
+        - id: venus
+          distance: 400.0
+          size: 9.5
+          visibility: evening_star
+      asteroid_belt:
+        visible: false  # Too distant
+      satellites:
+        - type: space_station
+          count: 3
+          orbital_height: [200.0, 250.0, 300.0]
+
+  - label: Performance and Production Settings
+    topic: sim/performance
+    payload:
+      lod_system:
+        enabled: true
+        distances: [50, 200, 500, 1000]
+        agent_culling_distance: 300
+      occlusion_culling: true
+      texture_streaming: true
+      instancing:
+        vegetation: true
+        buildings: true
+        agents: true
+      target_framerate: 60
+      quality_presets:
+        - name: ultra
+          shadow_resolution: 4096
+          texture_quality: full
+          agent_limit: 150
+        - name: high
+          shadow_resolution: 2048
+          texture_quality: high
+          agent_limit: 100
+        - name: medium
+          shadow_resolution: 1024
+          texture_quality: medium
+          agent_limit: 50
+        - name: low
+          shadow_resolution: 512
+          texture_quality: low
+          agent_limit: 25
+
+  - label: Agent-World Integration API
+    topic: sim/api
+    payload:
+      endpoints:
+        spawn_agent:
+          method: POST
+          path: "/api/v1/agents/spawn"
+          params:
+            - agent_id: string
+            - cluster: string
+            - preferred_zone: string (optional)
+            - avatar_customization: object (optional)
+        update_agent_position:
+          method: PATCH
+          path: "/api/v1/agents/{agent_id}/position"
+          params:
+            - position: [x, y, z]
+            - rotation: [x, y, z, w]
+        agent_interact:
+          method: POST
+          path: "/api/v1/agents/{agent_id}/interact"
+          params:
+            - target_id: string
+            - interaction_type: string
+        form_sacred_pattern:
+          method: POST
+          path: "/api/v1/formations/create"
+          params:
+            - pattern_type: DELTA|HALO|LATTICE|HUM|CAMPFIRE
+            - agent_ids: array
+            - center_position: [x, y, z]
+        despawn_agent:
+          method: DELETE
+          path: "/api/v1/agents/{agent_id}"
+      authentication:
+        type: jwt
+        issuer: "blackroad-prism-console"
+      rate_limiting:
+        spawn: 10/minute
+        update: 100/second
+        interact: 50/second
+
+  - label: Analytics and Telemetry
+    topic: sim/telemetry
+    payload:
+      metrics:
+        - agent_population_by_zone
+        - formation_frequency_by_type
+        - task_completion_rate
+        - average_session_duration
+        - interaction_heatmap
+        - resource_utilization
+      dashboards:
+        - id: global-overview
+          widgets:
+            - type: globe_heatmap
+              metric: agent_density
+            - type: timeseries
+              metric: active_agents
+            - type: formation_pie_chart
+              metric: formation_types
+        - id: performance-monitor
+          widgets:
+            - type: gauge
+              metric: server_fps
+            - type: timeseries
+              metric: network_bandwidth
+            - type: alert_feed
+              source: error_logs
+      export_formats:
+        - json
+        - csv
+        - prometheus
+
+  - label: Content Moderation and Safety
+    topic: sim/safety
+    payload:
+      agent_conduct_rules:
+        - "no_harassment"
+        - "respectful_collaboration"
+        - "authentic_contributions"
+      automated_moderation:
+        enabled: true
+        text_filtering: true
+        behavior_monitoring: true
+      reporting_system:
+        enabled: true
+        anonymous: true
+        categories:
+          - harassment
+          - spam
+          - inappropriate_content
+          - technical_abuse
+      zone_moderators:
+        - zone: orbital-station
+          agent_ids: ["athenaeum-moderator-01"]
+        - zone: pacific-hub
+          agent_ids: ["soma-moderator-01"]
+        - zone: atlantic-hub
+          agent_ids: ["lucidia-moderator-01"]

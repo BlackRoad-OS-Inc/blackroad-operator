@@ -1,0 +1,16 @@
+---
+- name: Install k3s server (first host only)
+  shell: "curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC='--write-kubeconfig-mode 644' sh -"
+  when: inventory_hostname == (groups['pi'] | first)
+- name: Fetch node token
+  slurp:
+    src: /var/lib/rancher/k3s/server/node-token
+  register: k3s_token
+  when: inventory_hostname == (groups['pi'] | first)
+- name: Set fact token
+  set_fact:
+    token: "{{ k3s_token['content'] | b64decode | trim }}"
+  run_once: true
+- name: Install k3s agents (others)
+  shell: "curl -sfL https://get.k3s.io | K3S_URL='https://{{ hostvars[groups['pi'][0]].ansible_host }}:6443' K3S_TOKEN='{{ token }}' sh -"
+  when: inventory_hostname != (groups['pi'] | first)

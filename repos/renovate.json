@@ -1,0 +1,170 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": "Automated dependency updates with intelligent auto-merge",
+  "extends": [
+    "config:recommended",
+    ":dependencyDashboard",
+    ":semanticCommits",
+    ":automergeDigest",
+    ":automergePatch",
+    ":automergeMinor",
+    "group:monorepos"
+  ],
+  "timezone": "America/New_York",
+  "schedule": [
+    "after 10pm every weekday",
+    "before 5am every weekday",
+    "every weekend"
+  ],
+  "labels": ["dependencies", "automated"],
+  "assignees": ["@blackboxprogramming"],
+  "reviewers": ["@blackboxprogramming"],
+  "prConcurrentLimit": 10,
+  "branchPrefix": "renovate/",
+  "commitMessagePrefix": "chore(deps):",
+  "rangeStrategy": "bump",
+  "semanticCommits": "enabled",
+  "configMigration": true,
+  "dependencyDashboard": true,
+  "dependencyDashboardTitle": "🤖 Dependency Updates Dashboard",
+  "platformAutomerge": true,
+  "automerge": true,
+  "automergeType": "pr",
+  "automergeStrategy": "squash",
+  "ignoreTests": false,
+  "stabilityDays": 3,
+  "prCreation": "immediate",
+  "rebaseWhen": "behind-base-branch",
+  "packageRules": [
+    {
+      "description": "Auto-merge patch updates immediately",
+      "matchUpdateTypes": ["patch", "pin", "digest"],
+      "automerge": true,
+      "automergeType": "pr",
+      "stabilityDays": 0,
+      "minimumReleaseAge": "0 days"
+    },
+    {
+      "description": "Auto-merge minor updates after 3 days",
+      "matchUpdateTypes": ["minor"],
+      "automerge": true,
+      "automergeType": "pr",
+      "stabilityDays": 3,
+      "minimumReleaseAge": "3 days"
+    },
+    {
+      "description": "Require manual review for major updates",
+      "matchUpdateTypes": ["major"],
+      "automerge": false,
+      "labels": ["dependencies", "major-update", "needs-review"]
+    },
+    {
+      "description": "Critical security updates - immediate auto-merge",
+      "matchDatasources": ["npm", "pypi"],
+      "matchUpdateTypes": ["patch"],
+      "vulnerabilitySeverity": "high",
+      "automerge": true,
+      "automergeType": "pr",
+      "stabilityDays": 0,
+      "labels": ["security", "critical", "dependencies"]
+    },
+    {
+      "description": "Group all ESLint packages together",
+      "groupName": "eslint packages",
+      "matchPackagePatterns": ["^eslint", "^@typescript-eslint"],
+      "automerge": true
+    },
+    {
+      "description": "Group all Jest packages together",
+      "groupName": "jest packages",
+      "matchPackagePatterns": ["^jest", "^@jest"],
+      "automerge": true
+    },
+    {
+      "description": "Group all Prettier packages together",
+      "groupName": "prettier packages",
+      "matchPackagePatterns": ["^prettier"],
+      "automerge": true
+    },
+    {
+      "description": "Group all TypeScript packages together",
+      "groupName": "typescript packages",
+      "matchPackagePatterns": ["^typescript", "^@types"],
+      "automerge": true
+    },
+    {
+      "description": "Group all React packages together",
+      "groupName": "react packages",
+      "matchPackagePatterns": ["^react", "^@react", "vite"],
+      "automerge": false,
+      "labels": ["dependencies", "react", "needs-testing"]
+    },
+    {
+      "description": "Group all Next.js packages together",
+      "groupName": "next.js packages",
+      "matchPackagePatterns": ["^next"],
+      "automerge": false,
+      "labels": ["dependencies", "nextjs", "needs-testing"]
+    },
+    {
+      "description": "Group all Python dev dependencies",
+      "groupName": "python dev dependencies",
+      "matchManagers": ["pip_requirements"],
+      "matchFileNames": ["requirements-dev.txt"],
+      "automerge": true
+    },
+    {
+      "description": "Auto-merge GitHub Actions updates",
+      "matchManagers": ["github-actions"],
+      "automerge": true,
+      "automergeType": "pr",
+      "stabilityDays": 1
+    },
+    {
+      "description": "Docker base images - be cautious",
+      "matchManagers": ["dockerfile"],
+      "automerge": false,
+      "labels": ["dependencies", "docker", "needs-review"]
+    },
+    {
+      "description": "Pin npm package versions (no ranges)",
+      "matchDatasources": ["npm"],
+      "rangeStrategy": "pin"
+    },
+    {
+      "description": "Separate lockfile maintenance",
+      "matchUpdateTypes": ["lockFileMaintenance"],
+      "automerge": true,
+      "schedule": ["before 5am on monday"],
+      "commitMessageAction": "Lock file maintenance"
+    }
+  ],
+  "vulnerabilityAlerts": {
+    "labels": ["security", "vulnerability"],
+    "automerge": true,
+    "assignees": ["@blackboxprogramming"],
+    "reviewers": ["@blackboxprogramming"]
+  },
+  "lockFileMaintenance": {
+    "enabled": true,
+    "automerge": true,
+    "schedule": ["before 5am on monday"]
+  },
+  "separateMajorMinor": true,
+  "separateMinorPatch": false,
+  "separateMultipleMajor": true,
+  "regexManagers": [
+    {
+      "fileMatch": ["(^|/)\\.nvmrc$"],
+      "matchStrings": ["(?<currentValue>.*?)\\n"],
+      "depNameTemplate": "node",
+      "datasourceTemplate": "node-version"
+    },
+    {
+      "fileMatch": ["(^|/)\\.python-version$"],
+      "matchStrings": ["(?<currentValue>.*?)\\n"],
+      "depNameTemplate": "python",
+      "datasourceTemplate": "python-version"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: prism
+spec:
+  hosts: [ "api.yourdomain" ]
+  http:
+    - route:
+        - destination: { host: prism.default.svc.cluster.local, subset: stable, port: { number: 80 } , weight: 90 }
+        - destination: { host: prism.default.svc.cluster.local, subset: canary, port: { number: 80 } , weight: 10 }

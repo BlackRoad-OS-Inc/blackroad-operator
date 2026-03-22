@@ -1,0 +1,58 @@
+name: Label from emoji
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Resolve label from title emoji
+        id: emoji_label
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const mapping = {
+              '✨': 'feature',
+              '🐛': 'bug',
+              '🧪': 'tests',
+              '⚙️': 'ci',
+              '🧰': 'tooling',
+              '📦': 'deps',
+              '🧹': 'chore',
+              '📝': 'docs',
+              '🔒': 'security',
+              '🚀': 'perf',
+              '🧭': 'infra',
+              '🧩': 'agents',
+              '🔍': 'debug',
+            };
+
+            const rawTitle = context.payload.pull_request?.title ?? '';
+            const title = rawTitle.trimStart();
+            let label = '';
+
+            // The matching logic inspects only the leading emoji in the PR title.
+            for (const [emoji, mappedLabel] of Object.entries(mapping)) {
+              if (title.startsWith(emoji)) {
+                label = mappedLabel;
+                core.info(`Matched leading emoji "${emoji}" to label "${mappedLabel}".`);
+                break;
+              }
+            }
+
+            if (!label) {
+              core.info('No leading emoji match found. Skipping label application.');
+            }
+
+            return label;
+
+      - name: Apply label
+        if: steps.emoji_label.outputs.result != ''
+        # The workflow only considers the first emoji at the start of the PR title as the label signal.
+        uses: actions-ecosystem/action-add-labels@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          labels: ${{ steps.emoji_label.outputs.result }}
+

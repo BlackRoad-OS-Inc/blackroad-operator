@@ -1,0 +1,340 @@
+name: "📊 Automation Health Dashboard"
+
+# Comprehensive monitoring of all automation systems
+# Generates metrics and reports on auto-fix success rates
+
+on:
+  schedule:
+    # Run every 6 hours
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: read
+  actions: read
+
+jobs:
+  collect-metrics:
+    name: "📈 Collect Metrics"
+    runs-on: ubuntu-latest
+    outputs:
+      metrics: ${{ steps.analyze.outputs.metrics }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+
+      - name: Analyze automation performance
+        id: analyze
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(); // Last 7 days
+
+            // Get workflow runs
+            const { data: workflows } = await github.rest.actions.listRepoWorkflows({
+              owner: context.repo.owner,
+              repo: context.repo.repo
+            });
+
+            const automationWorkflows = workflows.workflows.filter(w =>
+              w.name.includes('Auto') || w.name.includes('Retry') || w.name.includes('Heal') ||
+              w.name.includes('Remediate') || w.name.includes('Quarantine') || w.name.includes('Cache Recovery')
+            );
+
+            const metrics = {
+              total_runs: 0,
+              successful_runs: 0,
+              failed_runs: 0,
+              workflows: {}
+            };
+
+            for (const workflow of automationWorkflows) {
+              const { data: runs } = await github.rest.actions.listWorkflowRuns({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                workflow_id: workflow.id,
+                created: `>=${since}`
+              });
+
+              const successful = runs.workflow_runs.filter(r => r.conclusion === 'success').length;
+              const failed = runs.workflow_runs.filter(r => r.conclusion === 'failure').length;
+              const total = runs.workflow_runs.length;
+
+              metrics.workflows[workflow.name] = {
+                total,
+                successful,
+                failed,
+                success_rate: total > 0 ? ((successful / total) * 100).toFixed(1) : 0
+              };
+
+              metrics.total_runs += total;
+              metrics.successful_runs += successful;
+              metrics.failed_runs += failed;
+            }
+
+            metrics.overall_success_rate = metrics.total_runs > 0
+              ? ((metrics.successful_runs / metrics.total_runs) * 100).toFixed(1)
+              : 0;
+
+            core.setOutput('metrics', JSON.stringify(metrics));
+
+            // Get PR merge metrics
+            const { data: prs } = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'closed',
+              sort: 'updated',
+              direction: 'desc',
+              per_page: 100
+            });
+
+            const recentMerged = prs.filter(pr =>
+              pr.merged_at && new Date(pr.merged_at) > new Date(since)
+            );
+
+            const autoMerged = recentMerged.filter(pr =>
+              pr.labels.some(l => l.name === 'automerge') ||
+              pr.user.login.includes('bot')
+            );
+
+            const avgMergeTime = recentMerged.reduce((sum, pr) => {
+              const created = new Date(pr.created_at);
+              const merged = new Date(pr.merged_at);
+              return sum + (merged - created);
+            }, 0) / recentMerged.length / (1000 * 60 * 60); // Convert to hours
+
+            metrics.pr_metrics = {
+              total_merged: recentMerged.length,
+              auto_merged: autoMerged.length,
+              auto_merge_rate: recentMerged.length > 0
+                ? ((autoMerged.length / recentMerged.length) * 100).toFixed(1)
+                : 0,
+              avg_merge_time_hours: avgMergeTime.toFixed(1)
+            };
+
+            // Get flaky test metrics
+            try {
+              const quarantineDB = await github.rest.repos.getContent({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                path: '.github/quarantine/flaky-tests.json'
+              }).catch(() => null);
+
+              if (quarantineDB) {
+                const content = JSON.parse(Buffer.from(quarantineDB.data.content, 'base64').toString());
+                metrics.flaky_tests = {
+                  total: Object.keys(content.tests || {}).length,
+                  tests: content.tests
+                };
+              } else {
+                metrics.flaky_tests = { total: 0, tests: {} };
+              }
+            } catch (error) {
+              metrics.flaky_tests = { total: 0, tests: {} };
+            }
+
+            // Get failure recovery metrics
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: 'automated',
+              state: 'all',
+              since
+            });
+
+            const autoCreatedIssues = issues.filter(i => i.user.login.includes('bot'));
+            const autoResolvedIssues = autoCreatedIssues.filter(i => i.state === 'closed');
+
+            metrics.issue_metrics = {
+              auto_created: autoCreatedIssues.length,
+              auto_resolved: autoResolvedIssues.length,
+              resolution_rate: autoCreatedIssues.length > 0
+                ? ((autoResolvedIssues.length / autoCreatedIssues.length) * 100).toFixed(1)
+                : 0
+            };
+
+            core.setOutput('metrics', JSON.stringify(metrics));
+
+  generate-dashboard:
+    name: "📊 Generate Dashboard"
+    needs: collect-metrics
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create dashboard
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const metrics = JSON.parse('${{ needs.collect-metrics.outputs.metrics }}');
+
+            let dashboard = '# 📊 Automation Health Dashboard\n\n';
+            dashboard += `**Generated:** ${new Date().toISOString()}\n`;
+            dashboard += `**Period:** Last 7 days\n\n`;
+
+            dashboard += '## 🎯 Key Metrics\n\n';
+            dashboard += '| Metric | Value | Status |\n';
+            dashboard += '|--------|-------|--------|\n';
+            dashboard += `| Overall Automation Success Rate | ${metrics.overall_success_rate}% | ${metrics.overall_success_rate >= 90 ? '✅' : metrics.overall_success_rate >= 75 ? '⚠️' : '❌'} |\n`;
+            dashboard += `| Total Automation Runs | ${metrics.total_runs} | ℹ️ |\n`;
+            dashboard += `| Successful Runs | ${metrics.successful_runs} | ✅ |\n`;
+            dashboard += `| Failed Runs | ${metrics.failed_runs} | ${metrics.failed_runs === 0 ? '✅' : '⚠️'} |\n`;
+            dashboard += `| Auto-Merge Rate | ${metrics.pr_metrics.auto_merge_rate}% | ${metrics.pr_metrics.auto_merge_rate >= 50 ? '✅' : '⚠️'} |\n`;
+            dashboard += `| Avg PR Merge Time | ${metrics.pr_metrics.avg_merge_time_hours}h | ${metrics.pr_metrics.avg_merge_time_hours <= 24 ? '✅' : '⚠️'} |\n`;
+            dashboard += `| Quarantined Flaky Tests | ${metrics.flaky_tests.total} | ${metrics.flaky_tests.total <= 5 ? '✅' : metrics.flaky_tests.total <= 10 ? '⚠️' : '❌'} |\n`;
+
+            dashboard += '\n## 🤖 Automation Workflow Performance\n\n';
+            dashboard += '| Workflow | Runs | Success | Failed | Success Rate |\n';
+            dashboard += '|----------|------|---------|--------|-------------|\n';
+
+            Object.entries(metrics.workflows).forEach(([name, stats]) => {
+              const statusEmoji = stats.success_rate >= 90 ? '✅' : stats.success_rate >= 75 ? '⚠️' : '❌';
+              dashboard += `| ${name} | ${stats.total} | ${stats.successful} | ${stats.failed} | ${stats.success_rate}% ${statusEmoji} |\n`;
+            });
+
+            dashboard += '\n## 🔄 PR Metrics\n\n';
+            dashboard += `- **Total PRs Merged:** ${metrics.pr_metrics.total_merged}\n`;
+            dashboard += `- **Auto-Merged:** ${metrics.pr_metrics.auto_merged} (${metrics.pr_metrics.auto_merge_rate}%)\n`;
+            dashboard += `- **Average Merge Time:** ${metrics.pr_metrics.avg_merge_time_hours} hours\n`;
+
+            dashboard += '\n## 🔍 Flaky Test Status\n\n';
+            if (metrics.flaky_tests.total === 0) {
+              dashboard += '✅ No tests currently in quarantine!\n';
+            } else {
+              dashboard += `⚠️ **${metrics.flaky_tests.total} tests** currently in quarantine:\n\n`;
+              Object.entries(metrics.flaky_tests.tests || {}).forEach(([test, data]) => {
+                dashboard += `- \`${test}\` - Failures: ${data.failures}, Consecutive Passes: ${data.consecutive_passes}\n`;
+              });
+            }
+
+            dashboard += '\n## 📋 Issue Tracking\n\n';
+            dashboard += `- **Auto-Created Issues:** ${metrics.issue_metrics.auto_created}\n`;
+            dashboard += `- **Auto-Resolved Issues:** ${metrics.issue_metrics.auto_resolved}\n`;
+            dashboard += `- **Resolution Rate:** ${metrics.issue_metrics.resolution_rate}%\n`;
+
+            dashboard += '\n## 🎯 Health Score\n\n';
+            const healthScore = (
+              (parseFloat(metrics.overall_success_rate) * 0.4) +
+              (parseFloat(metrics.pr_metrics.auto_merge_rate) * 0.2) +
+              ((100 - Math.min(metrics.flaky_tests.total * 10, 100)) * 0.2) +
+              (parseFloat(metrics.issue_metrics.resolution_rate) * 0.2)
+            ).toFixed(1);
+
+            let healthStatus = '❌ Critical';
+            let healthColor = 'red';
+            if (healthScore >= 90) {
+              healthStatus = '✅ Excellent';
+              healthColor = 'green';
+            } else if (healthScore >= 75) {
+              healthStatus = '⚠️ Good';
+              healthColor = 'yellow';
+            } else if (healthScore >= 60) {
+              healthStatus = '⚠️ Fair';
+              healthColor = 'orange';
+            }
+
+            dashboard += `**Overall Health Score:** ${healthScore}/100 ${healthStatus}\n\n`;
+
+            dashboard += '### Health Breakdown\n';
+            dashboard += '- Automation Success (40%): ' + (parseFloat(metrics.overall_success_rate) * 0.4).toFixed(1) + '/40\n';
+            dashboard += '- Auto-Merge Rate (20%): ' + (parseFloat(metrics.pr_metrics.auto_merge_rate) * 0.2).toFixed(1) + '/20\n';
+            dashboard += '- Flaky Test Management (20%): ' + ((100 - Math.min(metrics.flaky_tests.total * 10, 100)) * 0.2).toFixed(1) + '/20\n';
+            dashboard += '- Issue Resolution (20%): ' + (parseFloat(metrics.issue_metrics.resolution_rate) * 0.2).toFixed(1) + '/20\n';
+
+            dashboard += '\n## 📈 Trends & Recommendations\n\n';
+            if (healthScore >= 90) {
+              dashboard += '✅ Automation system is performing excellently!\n';
+            } else {
+              if (parseFloat(metrics.overall_success_rate) < 90) {
+                dashboard += '⚠️ **Action Required:** Automation success rate below target. Review failed workflows.\n';
+              }
+              if (parseFloat(metrics.pr_metrics.auto_merge_rate) < 50) {
+                dashboard += '⚠️ **Action Required:** Low auto-merge rate. Review auto-merge criteria.\n';
+              }
+              if (metrics.flaky_tests.total > 10) {
+                dashboard += '⚠️ **Action Required:** High number of flaky tests. Prioritize fixes.\n';
+              }
+              if (parseFloat(metrics.issue_metrics.resolution_rate) < 75) {
+                dashboard += '⚠️ **Action Required:** Low issue resolution rate. Review pending issues.\n';
+              }
+            }
+
+            dashboard += '\n---\n';
+            dashboard += '*Auto-generated by Automation Health Dashboard workflow*\n';
+
+            // Write to job summary
+            await core.summary.addRaw(dashboard).write();
+
+            // Update or create dashboard issue
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: 'automation-dashboard',
+              state: 'open'
+            });
+
+            if (issues.length === 0) {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: '📊 Automation Health Dashboard',
+                body: dashboard,
+                labels: ['automation-dashboard', 'automated', 'metrics']
+              });
+            } else {
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issues[0].number,
+                body: dashboard
+              });
+            }
+
+  alert-on-degradation:
+    name: "🚨 Alert on Degradation"
+    needs: collect-metrics
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for degradation
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const metrics = JSON.parse('${{ needs.collect-metrics.outputs.metrics }}');
+
+            const alerts = [];
+
+            // Check thresholds
+            if (parseFloat(metrics.overall_success_rate) < 75) {
+              alerts.push('🚨 **CRITICAL:** Automation success rate below 75%');
+            }
+
+            if (metrics.flaky_tests.total > 15) {
+              alerts.push('⚠️ **WARNING:** More than 15 tests in quarantine');
+            }
+
+            if (parseFloat(metrics.pr_metrics.auto_merge_rate) < 30) {
+              alerts.push('⚠️ **WARNING:** Auto-merge rate below 30%');
+            }
+
+            if (parseFloat(metrics.pr_metrics.avg_merge_time_hours) > 48) {
+              alerts.push('⚠️ **WARNING:** Average PR merge time exceeds 48 hours');
+            }
+
+            if (alerts.length > 0) {
+              const body = '## 🚨 Automation System Alerts\n\n' +
+                alerts.join('\n') + '\n\n' +
+                '**Action Required:** Please review the [Automation Dashboard](https://github.com/' +
+                context.repo.owner + '/' + context.repo.repo + '/issues?q=is%3Aissue+is%3Aopen+label%3Aautomation-dashboard)\n\n' +
+                '*Auto-generated alert*';
+
+              // Create alert issue
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: '🚨 Automation System Alert - ' + new Date().toISOString().split('T')[0],
+                body,
+                labels: ['automation-alert', 'urgent', 'automated']
+              });
+            } else {
+              console.log('✅ No alerts - all metrics within acceptable ranges');
+            }

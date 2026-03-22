@@ -1,0 +1,60 @@
+name: RoadView Search CI
+
+on:
+  push:
+    paths:
+      - 'services/roadview-search/**'
+  pull_request:
+    paths:
+      - 'services/roadview-search/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Poetry
+        uses: abatilo/actions-poetry@v2
+        with:
+          poetry-version: '1.7.1'
+
+      - name: Install dependencies
+        working-directory: services/roadview-search
+        run: |
+          poetry install
+
+      - name: Lint
+        working-directory: services/roadview-search
+        run: poetry run make lint
+
+      - name: Type check
+        working-directory: services/roadview-search
+        run: poetry run make type
+
+      - name: Tests
+        working-directory: services/roadview-search
+        run: poetry run make test
+
+      - name: Export OpenAPI
+        working-directory: services/roadview-search
+        run: poetry run make openapi
+
+      - name: Contract Tests
+        working-directory: services/roadview-search
+        run: |
+          poetry run uvicorn src.roadview.main:app --host 0.0.0.0 --port 4001 &
+          SERVER_PID=$!
+          sleep 5
+          poetry run make contract || (kill $SERVER_PID && exit 1)
+          kill $SERVER_PID
+
+      - name: Docker build
+        working-directory: services/roadview-search
+        run: poetry run make build

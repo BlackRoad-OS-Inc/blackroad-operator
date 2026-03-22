@@ -1,0 +1,58 @@
+name: protect-branch-config
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, reopened, synchronize, ready_for_review]
+
+jobs:
+  enforce:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      administration: read
+    steps:
+      - name: Ensure branch policy guardrails remain intact
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const violations = [];
+
+            const repoInfo = await github.rest.repos.get({ owner, repo });
+            if (repoInfo.data.allow_merge_commit) {
+              violations.push("Merge commits are enabled (allow_merge_commit=true)");
+            }
+            if (!repoInfo.data.allow_squash_merge) {
+              violations.push("Squash merge must stay enabled");
+            }
+            if (!repoInfo.data.allow_rebase_merge) {
+              violations.push("Rebase merge must stay enabled");
+            }
+
+            try {
+              const protection = await github.rest.repos.getBranchProtection({ owner, repo, branch: "main" });
+              if (protection.data.allow_force_pushes?.enabled) {
+                violations.push("Force pushes are allowed on main");
+              }
+              if (protection.data.allow_deletions?.enabled) {
+                violations.push("Branch deletions are allowed on main");
+              }
+              if (!protection.data.required_linear_history?.enabled) {
+                violations.push("Linear history enforcement is disabled");
+              }
+            } catch (error) {
+              if (error.status === 404) {
+                violations.push("Branch protection for main is missing");
+              } else {
+                throw error;
+              }
+            }
+
+            if (violations.length) {
+              core.setFailed(`Branch policy regression detected:\n- ${violations.join("\n- ")}`);
+            } else {
+              core.info("Branch guardrails are intact.");
+            }
+

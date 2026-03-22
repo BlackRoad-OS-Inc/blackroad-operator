@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Silas Prompt Cards</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        font-family: "Inter", "Segoe UI", sans-serif;
+        background-color: #10121a;
+        color: #f1f5f9;
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+      }
+
+      header {
+        padding: 2rem 3rem 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        background: radial-gradient(circle at top left, rgba(80, 156, 255, 0.35), transparent 55%),
+          radial-gradient(circle at top right, rgba(125, 211, 252, 0.2), transparent 50%);
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(2rem, 3vw, 2.75rem);
+        letter-spacing: -0.03em;
+      }
+
+      p {
+        margin: 0;
+        max-width: 60ch;
+        line-height: 1.6;
+        color: rgba(226, 232, 240, 0.85);
+      }
+
+      main {
+        padding: 0 3rem 4rem;
+        display: grid;
+        gap: 1.5rem;
+      }
+
+      .card {
+        border-radius: 1rem;
+        background: rgba(15, 23, 42, 0.85);
+        border: 1px solid rgba(94, 234, 212, 0.15);
+        box-shadow: 0 32px 60px -40px rgba(15, 118, 110, 0.45);
+        padding: 1.75rem 2rem;
+        display: grid;
+        gap: 1.25rem;
+      }
+
+      .card-header {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .card-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+      }
+
+      .card-purpose {
+        color: rgba(148, 163, 184, 0.9);
+        font-size: 0.95rem;
+      }
+
+      .tokens {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+
+      .token {
+        border-radius: 999px;
+        padding: 0.45rem 0.85rem;
+        font-size: 0.9rem;
+        line-height: 1;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        letter-spacing: 0.01em;
+      }
+
+      .token[data-category="goal"] {
+        background: rgba(34, 197, 94, 0.18);
+        border: 1px solid rgba(34, 197, 94, 0.35);
+        color: rgb(187, 247, 208);
+      }
+
+      .token[data-category="constraint"] {
+        background: rgba(239, 68, 68, 0.16);
+        border: 1px solid rgba(248, 113, 113, 0.35);
+        color: rgb(254, 202, 202);
+      }
+
+      .token[data-category="signal"] {
+        background: rgba(56, 189, 248, 0.18);
+        border: 1px solid rgba(125, 211, 252, 0.35);
+        color: rgb(224, 242, 254);
+      }
+
+      .token[data-category="cadence"] {
+        background: rgba(244, 114, 182, 0.18);
+        border: 1px solid rgba(244, 114, 182, 0.35);
+        color: rgb(252, 231, 243);
+      }
+
+      .token[data-category="quality"] {
+        background: rgba(192, 132, 252, 0.18);
+        border: 1px solid rgba(192, 132, 252, 0.35);
+        color: rgb(243, 232, 255);
+      }
+
+      .prompt-text {
+        background: rgba(15, 23, 42, 0.95);
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        border-radius: 0.85rem;
+        padding: 1.25rem 1.5rem;
+        font-family: "JetBrains Mono", "SFMono-Regular", ui-monospace, SFMono-Regular, Menlo, Monaco,
+          Consolas, "Liberation Mono", "Courier New", monospace;
+        font-size: 0.9rem;
+        line-height: 1.6;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+
+      @media (max-width: 768px) {
+        header,
+        main {
+          padding: 1.5rem;
+        }
+
+        .card {
+          padding: 1.5rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Silas Prompt Cards</h1>
+      <p>
+        A focused view into Silas's execution rituals. Each card captures the problem Silas is solving, the
+        signals he watches, and the cadence that keeps the machine running.
+      </p>
+    </header>
+    <main id="cards"></main>
+
+    <template id="card-template">
+      <article class="card">
+        <header class="card-header">
+          <span class="card-title"></span>
+          <span class="card-purpose"></span>
+        </header>
+        <section class="tokens"></section>
+        <pre class="prompt-text"></pre>
+      </article>
+    </template>
+
+    <script>
+      async function loadCards() {
+        const response = await fetch('cards.json', { cache: 'no-store' });
+        if (!response.ok) {
+          throw new Error(`Failed to load cards.json: ${response.status}`);
+        }
+        return response.json();
+      }
+
+      function renderCards(payload) {
+        const container = document.getElementById('cards');
+        const template = document.getElementById('card-template');
+        container.innerHTML = '';
+
+        payload.cards.forEach((card) => {
+          const node = template.content.cloneNode(true);
+          node.querySelector('.card-title').textContent = card.title;
+          node.querySelector('.card-purpose').textContent = card.purpose;
+
+          const tokensContainer = node.querySelector('.tokens');
+          card.tokens.forEach((token) => {
+            const span = document.createElement('span');
+            span.className = 'token';
+            span.dataset.category = token.category;
+            span.textContent = token.text;
+            tokensContainer.appendChild(span);
+          });
+
+          node.querySelector('.prompt-text').textContent = card.prompt.trim();
+          container.appendChild(node);
+        });
+      }
+
+      loadCards()
+        .then(renderCards)
+        .catch((error) => {
+          const container = document.getElementById('cards');
+          container.innerHTML = `<p>Failed to load cards: ${error.message}</p>`;
+        });
+    </script>
+  </body>
+</html>

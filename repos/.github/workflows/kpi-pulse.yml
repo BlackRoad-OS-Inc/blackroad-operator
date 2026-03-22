@@ -1,0 +1,31 @@
+# .github/workflows/kpi-pulse.yml
+name: kpi-pulse
+on:
+  schedule:
+    - cron: "17 4 * * MON"
+  workflow_dispatch: {}
+jobs:
+  pulse:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+      - name: Compute KPIs
+        run: |
+          node --version
+          node tools/kpis/compute.js data/timemachine/index.json > data/kpis/latest.json
+      - name: Write Pulse
+        run: |
+          node tools/pulse/write.js data/kpis/latest.json > pulses/$(date +SYS-PERF-%Y-W%V).md
+      - name: Commit artifacts
+        run: |
+          git config user.name "prism-bot"
+          git config user.email "bot@blackroad.io"
+          git add data/kpis/latest.json pulses/
+          git commit -m "chore(pulse): weekly performance report" || echo "no changes"
+          git push || true
+      - name: Slack summary (optional)
+        if: ${{ secrets.SLACK_WEBHOOK_URL != '' }}
+        env:
+          WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          node tools/pulse/slack.js pulses/$(date +SYS-PERF-%Y-W%V).md "$WEBHOOK"

@@ -1,0 +1,127 @@
+name: Agent Issue Creator
+
+on:
+  repository_dispatch:
+    types: [agent_create_issue]
+  workflow_dispatch:
+    inputs:
+      agent_id:
+        description: 'Agent ID (e.g., P1, P15, P1188)'
+        required: true
+        type: string
+      issue_title:
+        description: 'Issue title'
+        required: true
+        type: string
+      issue_body:
+        description: 'Issue body'
+        required: true
+        type: string
+      labels:
+        description: 'Comma-separated labels (e.g., bug,enhancement)'
+        required: false
+        type: string
+      assignees:
+        description: 'Comma-separated assignees'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  create_issue:
+    runs-on: ubuntu-latest
+    name: Create Issue from Agent
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Load agent identity
+        id: agent
+        run: |
+          AGENT_ID="${{ github.event.inputs.agent_id || github.event.client_payload.agent_id }}"
+          echo "agent_id=$AGENT_ID" >> $GITHUB_OUTPUT
+
+          # Load agent details from registry
+          if [ -f "registry/github_agent_identities.json" ]; then
+            AGENT_USERNAME=$(jq -r ".agents[] | select(.id == \"$AGENT_ID\") | .github_username" registry/github_agent_identities.json 2>/dev/null || echo "unknown_blackroad")
+            AGENT_NAME=$(jq -r ".agents[] | select(.id == \"$AGENT_ID\") | .name" registry/github_agent_identities.json 2>/dev/null || echo "Unknown Agent")
+
+            # If not in main agents list, check archetypes
+            if [ "$AGENT_USERNAME" == "unknown_blackroad" ] && [ -f "registry/github_agent_identities_archetypes.jsonl" ]; then
+              AGENT_DATA=$(grep "\"id\": \"$AGENT_ID\"" registry/github_agent_identities_archetypes.jsonl | head -1)
+              if [ -n "$AGENT_DATA" ]; then
+                AGENT_USERNAME=$(echo "$AGENT_DATA" | jq -r '.github_username')
+                AGENT_NAME=$(echo "$AGENT_DATA" | jq -r '.name')
+              fi
+            fi
+
+            # If still not found, check specialized
+            if [ "$AGENT_USERNAME" == "unknown_blackroad" ] && [ -f "registry/github_agent_identities_specialized.jsonl" ]; then
+              AGENT_DATA=$(grep "\"id\": \"$AGENT_ID\"" registry/github_agent_identities_specialized.jsonl | head -1)
+              if [ -n "$AGENT_DATA" ]; then
+                AGENT_USERNAME=$(echo "$AGENT_DATA" | jq -r '.github_username')
+                AGENT_NAME=$(echo "$AGENT_DATA" | jq -r '.name')
+              fi
+            fi
+          else
+            AGENT_USERNAME="unknown_blackroad"
+            AGENT_NAME="Unknown Agent"
+          fi
+
+          echo "agent_username=$AGENT_USERNAME" >> $GITHUB_OUTPUT
+          echo "agent_name=$AGENT_NAME" >> $GITHUB_OUTPUT
+
+      - name: Create Issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TITLE="${{ github.event.inputs.issue_title || github.event.client_payload.issue_title }}"
+          BODY="${{ github.event.inputs.issue_body || github.event.client_payload.issue_body }}"
+          LABELS="${{ github.event.inputs.labels || github.event.client_payload.labels }}"
+          ASSIGNEES="${{ github.event.inputs.assignees || github.event.client_payload.assignees }}"
+          AGENT_HANDLE="@${{ steps.agent.outputs.agent_username }}"
+
+          # Create issue body with agent attribution
+          ISSUE_BODY="**Submitted by:** $AGENT_HANDLE (${{ steps.agent.outputs.agent_id }})"
+          ISSUE_BODY="$ISSUE_BODY\n\n$BODY"
+          ISSUE_BODY="$ISSUE_BODY\n\n---\n*This issue was created by a BlackRoad agent as part of the autonomous agent ecosystem.*"
+
+          # Build gh issue create command
+          CMD="gh issue create --title \"$TITLE\" --body \"$ISSUE_BODY\""
+
+          # Add labels
+          if [ -n "$LABELS" ]; then
+            IFS=',' read -ra LABEL_ARRAY <<< "$LABELS"
+            for label in "${LABEL_ARRAY[@]}"; do
+              CMD="$CMD --label \"$(echo $label | xargs)\""
+            done
+          fi
+          CMD="$CMD --label \"agent-created\""
+
+          # Add assignees
+          if [ -n "$ASSIGNEES" ]; then
+            IFS=',' read -ra ASSIGNEE_ARRAY <<< "$ASSIGNEES"
+            for assignee in "${ASSIGNEE_ARRAY[@]}"; do
+              CMD="$CMD --assignee \"$(echo $assignee | xargs)\""
+            done
+          fi
+
+          # Execute
+          eval $CMD
+
+      - name: Log agent action
+        run: |
+          mkdir -p artifacts/agents/actions
+          echo "{\"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\", \"agent_id\": \"${{ steps.agent.outputs.agent_id }}\", \"action\": \"issue_create\", \"title\": \"${{ github.event.inputs.issue_title || github.event.client_payload.issue_title }}\"}" >> artifacts/agents/actions/issue_actions.jsonl
+
+          if [ -f artifacts/agents/actions/issue_actions.jsonl ]; then
+            git config user.name "${{ steps.agent.outputs.agent_name }}"
+            git config user.email "${{ steps.agent.outputs.agent_username }}@blackroad.ai"
+            git add artifacts/agents/actions/issue_actions.jsonl
+            git commit -m "Log issue creation by ${{ steps.agent.outputs.agent_id }}" || true
+            git push || true
+          fi

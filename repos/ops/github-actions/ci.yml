@@ -1,0 +1,106 @@
+name: reusable-ci
+
+on:
+  workflow_call:
+    inputs:
+      service:
+        required: true
+        type: string
+      node-version:
+        type: string
+        default: '20'
+      python-version:
+        type: string
+        default: '3.11'
+      preview-env:
+        type: string
+        default: 'ci-${{ github.run_id }}'
+    secrets:
+      REGISTRY_USERNAME:
+        required: true
+      REGISTRY_PASSWORD:
+        required: true
+      FLY_API_TOKEN:
+        required: false
+      AWS_ACCESS_KEY_ID:
+        required: false
+      AWS_SECRET_ACCESS_KEY:
+        required: false
+
+jobs:
+  lint-test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ inputs.python-version }}
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: npm
+          cache-dependency-path: apps/${{ inputs.service }}/package-lock.json
+      - name: Install dependencies
+        run: make setup
+      - name: Run tests
+        run: make test
+      - name: Trivy scan
+        uses: aquasecurity/trivy-action@0.18.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          severity: CRITICAL,HIGH
+          exit-code: '1'
+      - name: OPA policy check
+        run: |
+          opa eval --format pretty --data ops/policies/opa --input ops/github-actions/sample-input.json "data.deploy.allow"
+
+  build-and-push:
+    runs-on: ubuntu-latest
+    needs: lint-test
+    permissions:
+      contents: read
+      packages: write
+    env:
+      IMAGE_TAG: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Log in to registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+      - name: Build and push images
+        run: |
+          make build REGISTRY=ghcr.io/${{ secrets.REGISTRY_USERNAME }} IMAGE_TAG=${IMAGE_TAG}
+          docker push ghcr.io/${{ secrets.REGISTRY_USERNAME }}/svc-template-fastapi:${IMAGE_TAG}
+          docker push ghcr.io/${{ secrets.REGISTRY_USERNAME }}/svc-template-node:${IMAGE_TAG}
+          docker push ghcr.io/${{ secrets.REGISTRY_USERNAME }}/web-next:${IMAGE_TAG}
+
+  preview:
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    if: ${{ secrets.FLY_API_TOKEN != '' }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy preview to Fly.io
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          fly auth token ${FLY_API_TOKEN}
+          make fly-deploy REGISTRY=ghcr.io/${{ secrets.REGISTRY_USERNAME }} IMAGE_TAG=${IMAGE_TAG}
+      - name: Run smoke tests
+        run: |
+          ./ops/scripts/run_smoke.sh "${{ inputs.preview-env }}"
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-results
+          path: ops/artifacts

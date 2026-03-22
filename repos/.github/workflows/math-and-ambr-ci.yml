@@ -1,0 +1,22 @@
+name: math-and-ambr-ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+      - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt || true; fi
+          pip install -r srv/lucidia-math/requirements.txt
+          pip install pytest numpy fastapi uvicorn pydantic prometheus-client matplotlib
+      - name: Run tests
+        run: pytest -q

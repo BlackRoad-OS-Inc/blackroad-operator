@@ -1,0 +1,36 @@
+name: "🏷️ Auto-label PRs for merge"
+
+on:
+  pull_request_target:
+    types: [opened, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  auto-label:
+    # Only run on non-draft PRs
+    if: ${{ !github.event.pull_request.draft }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Add automerge label
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            // Check if PR already has automerge label
+            const labels = context.payload.pull_request.labels.map(l => l.name);
+            if (labels.includes('automerge')) {
+              core.info('PR already has automerge label');
+              return;
+            }
+
+            // Add automerge label
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              labels: ['automerge']
+            });
+
+            core.info('Added automerge label to PR');

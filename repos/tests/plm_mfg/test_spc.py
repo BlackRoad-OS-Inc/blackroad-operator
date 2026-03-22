@@ -1,0 +1,13 @@
+from mfg import spc
+
+
+def test_stdev_and_rules(tmp_path, monkeypatch):
+    xs = [1.0] * 7 + [5.0]
+    m = spc._mean(xs)
+    s = spc._stdev(xs)
+    assert s > 0 and (xs[-1] > m + 3 * s) is False
+
+    monkeypatch.setattr(spc, 'ART_DIR', tmp_path)
+    report = spc.analyze('OP-200', 10, csv_dir='fixtures/mfg/spc')
+    assert 'findings' in report
+    assert (tmp_path / 'findings.json').exists()

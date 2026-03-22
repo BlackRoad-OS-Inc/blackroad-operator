@@ -1,0 +1,37 @@
+name: Route on comment
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  issues: write
+  pull-requests: write
+  contents: read
+
+jobs:
+  reroute:
+    if: ${{ github.event.issue.pull_request && contains(github.event.comment.body, '/route') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+
+      - name: Get PR number
+        id: pr
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const {owner, repo} = context.repo
+            const number = context.payload.issue?.number
+            if (!number) {
+              throw new Error('No issue number found on comment event.')
+            }
+            const {data: pr} = await github.rest.pulls.get({owner, repo, pull_number: number})
+            core.setOutput('number', String(pr.number))
+
+      - name: Dispatch auto-mention
+        uses: benc-uk/workflow-dispatch@4c044c1613fabbe5250deadc65452d54c4ad4fc7 # v1.2.4
+        with:
+          workflow: Auto mention on PRs
+          ref: ${{ github.ref }}
+          inputs: |
+            pull_number=${{ steps.pr.outputs.number }}

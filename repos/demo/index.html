@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="author" content="Haozhe Xie">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CityDreamer Demo</title>
+    <link rel="stylesheet" type="text/css" href="/static/css/semantic.min.css" >
+    <link rel="stylesheet" type="text/css" href="/static/css/style.css" >
+    <script type="text/javascript" src="/static/js/jquery-3.7.0.min.js"></script>
+</head>
+<body>
+    <div id="header">
+        <div class="ui container">
+            <h1>CityDreamer: Compositional Generative Model of Unbounded 3D Cities</h1>
+            <p>The official demo to generate your own city in New York style.</p>
+            <div class="ui horizontal list">
+                <div class="item">
+                  <div class="content">
+                    <a href="https://github.com/hzxie/city-dreamer" target="_blank">
+                        <i class="github icon"></i> Source Code
+                    </a>
+                  </div> <!-- .content -->
+                </div> <!-- .item -->
+                <div class="item">
+                  <div class="content">
+                    <a href="https://haozhexie.com/project/city-dreamer" target="_blank">
+                        <i class="home icon"></i> Project Page
+                    </a>
+                  </div> <!-- .content -->
+                </div> <!-- .item -->
+            </div> <!-- .horizontal.list -->
+            <img src="static/images/logo.png" alt="Logo">
+        </div> <!-- .container -->
+    </div> <!-- #header -->
+    <div class="ui container">
+        <div class="ui grid">
+            <div class="four wide column">
+                <div class="ui vertical steps">
+                    <div class="layout step">
+                        <i class="braille icon"></i>
+                        <div class="content">
+                            <div class="title">Layout</div>
+                            <div class="description">Generate the city layout</div>
+                        </div> <!-- .content -->
+                    </div> <!-- .step -->
+                    <div class="trajectory step">
+                        <i class="camera retro icon"></i>
+                        <div class="content">
+                            <div class="title">Trajectory</div>
+                            <div class="description">Set up camera trajectory</div>
+                        </div> <!-- .content -->
+                    </div> <!-- .step -->
+                    <div class="render step">
+                        <i class="video icon"></i>
+                        <div class="content">
+                            <div class="title">Render</div>
+                            <div class="description">Generate your own city</div>
+                        </div> <!-- .content -->
+                    </div> <!-- .step -->
+                </div> <!-- .ordered.steps -->
+            </div> <!-- .four.wide.column -->
+            <div class="twelve wide column">
+                <div class="ui negative hidden message">
+                    <i class="close icon"></i>
+                    <div class="header">
+                      We're sorry we can't apply that discount
+                    </div>
+                    <p>That offer has expired</p>
+                </div> <!-- .negative.message -->
+                <div class="layout section">
+                    <form class="ui form">
+                        <div class="field">
+                            <div class="fields">
+                                <div class="six wide field">
+                                    <label>Data Source</label>
+                                    <select id="layout-data-src" class="ui dropdown">
+                                        <option value="generator">Layout Generator</option>
+                                        <option value="osm">OpenStreetMap</option>
+                                    </select>
+                                </div> <!-- .six.wide.field -->
+                                <div class="five wide field">
+                                    <label>Layout Size</label>
+                                    <select id="layout-size" class="ui dropdown">
+                                        <option value="4096">4096x4096</option>
+                                        <option value="8192">8192x8192</option>
+                                        <option value="16384">16384x16384</option>
+                                        <option value="32768">32768x32768</option>
+                                    </select>
+                                </div> <!-- .five.wide.field -->
+                                <div class="five wide field">
+                                    <label>&nbsp;</label>
+                                    <button class="ui primary button">Generate</button>
+                                </div> <!-- .two.wide.field -->
+                            </div> <!-- .fields -->
+                        </div> <!-- .field -->
+                    </form>
+                    <div id="layout-canvas" class="ui grid">
+                        <div class="eleven wide column">
+                            <label>Segmentation Map</label>
+                            <canvas id="seg-map-canvas"></canvas>
+                            <div id="seg-map-uploader" class="imgdrop hidden">
+                                Drag seg. map here
+                            </div> <!-- #seg-map-uploader -->
+                            <p>Press and hold the Ctrl/Command key to enter the edit mode.</p>
+                        </div> <!-- .eleven.wide.column -->
+                        <div class="five wide column">
+                            <label>Height Field</label>
+                            <canvas id="hf-canvas"></canvas>
+                            <div id="hf-uploader" class="imgdrop hidden">
+                                Drag height map here
+                            </div> <!-- #hf-uploader -->
+                        </div> <!-- .five.wide.column -->
+                    </div> <!-- .equal.width.grid -->
+                </div> <!-- #layout-section -->
+                <div class="trajectory section">
+                    <div class="ui negative hidden message"></div> <!-- .message -->
+                    <div class="ui grid">
+                        <div class="eleven wide column">
+                            <label>Camera Trajectory Configurator</label>
+                            <canvas id="cam-trj-canvas"></canvas>
+                            <p>Press and hold the Ctrl/Command key to enter the edit mode.</p>
+                        </div> <!-- .eleven.wide.column -->
+                        <div class="five wide column">
+                            <form class="ui form">
+                                <div class="field">
+                                    <label>Trajectory Mode</label>
+                                    <select id="trajectory-mode" class="ui dropdown">
+                                        <option value=""></option>
+                                        <option value="orbit">Orbit</option>
+                                        <option value="p2p">Point to Point</option>
+                                        <option value="keypoints">Keypoints</option>
+                                    </select>
+                                </div> <!-- .field -->
+                                <div class="field">
+                                    <label>Camera Step Size</label>
+                                    <div id="cam-step-size" class="ui slider">
+                                        <p><span class="value"></span> m</p>
+                                    </div> <!-- #cam-step-size -->
+                                </div> <!-- .field -->
+                                <div class="field">
+                                    <label>Camera Altitude</label>
+                                    <div id="cam-altitude" class="ui slider">
+                                        <p><span class="value"></span> m</p>
+                                    </div> <!-- #cam-altitude -->
+                                </div> <!-- .field -->
+                                <div class="field">
+                                    <label>Elevation Angle</label>
+                                    <div id="cam-elevation" class="ui slider">
+                                        <p><span class="value"></span> &deg;</p>
+                                    </div> <!-- #cam-elevation -->
+                                </div> <!-- .field -->
+                                <button class="ui fluid primary button">Preview Trajectory</button>
+                                <button class="ui fluid red button hidden">Remove Last Keypoint</button>
+                            </form>
+                        </div> <!-- .five.wide.column -->
+                    </div> <!-- .grid -->
+                </div> <!-- #trajectory-section -->
+                <div class="render section">
+                    <div class="ui negative hidden message"></div> <!-- .message -->
+                    <div class="ui grid">
+                        <div class="column">
+                            <label>City Viewer</label>
+                            <div class="image-viewer">
+                            </div> <!-- .image-viewer -->
+                            <div class="ui progress">
+                                <div class="blue bar">
+                                    <div class="centered progress"></div>
+                                </div> <!-- .bar -->
+                            </div> <!-- .progress -->
+                            <button class="ui primary button">Render Video</button>
+                            <button class="ui green button">Play Video</button>
+                        </div> <!-- .column -->
+                    </div> <!-- .grid -->
+                </div> <!-- #render-section -->
+            </div> <!-- .twelve.wide.column -->
+        </div> <!-- .grid -->
+    </div> <!-- .container -->
+    <div class="ui basic modal">
+        <div class="content">
+            <video controls>
+                <source src="" type="video/mp4">
+                <p>The video is not supported by your browser.</p>
+            </video>
+        </div> <!-- .content -->
+    </div> <!-- .modal -->
+    <script type="text/javascript" src="static/js/semantic.min.js"></script>
+    <script type="text/javascript" src="static/js/fabric-5.3.0.min.js"></script>
+    <script type="text/javascript" src="static/js/jquery.image-drop.js"></script>
+    <script type="text/javascript" src="static/js/app.js"></script>
+</body>
+</html>

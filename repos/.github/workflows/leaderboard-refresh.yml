@@ -1,0 +1,35 @@
+name: Refresh Leaderboards
+
+on:
+  push:
+    paths:
+      - logs/blocks.csv
+      - config/leaderboard_config.json
+      - scripts/build_leaderboards.py
+      - leaderboard.md
+      - leaderboard_snapshot.json
+      - .github/workflows/leaderboard-refresh.yml
+
+jobs:
+  build:
+    name: Build leaderboard snapshot
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+
+      - name: Set up Python
+        uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5
+        with:
+          python-version: "3.11"
+
+      - name: Generate leaderboards
+        run: python3 scripts/build_leaderboards.py
+
+      - name: Commit refreshed leaderboard
+        uses: stefanzweifel/git-auto-commit-action@8621497c8c39c72f3e2a999a26b4ca1b5058a842 # v5
+        with:
+          commit_message: "chore: refresh leaderboards"
+          file_pattern: |
+            leaderboard.md
+            leaderboard_snapshot.json

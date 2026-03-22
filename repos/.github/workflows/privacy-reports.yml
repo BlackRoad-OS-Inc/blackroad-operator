@@ -1,0 +1,16 @@
+name: Privacy Monthly Report
+on:
+  schedule: [{ cron: "15 2 1 * *" }]
+  workflow_dispatch:
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+      - uses: actions/setup-node@b39b52d1213e96004bfcb1c61a8a6fa8ab84f3e8 # v4
+        with: { node-version: '20' }
+      - run: node scripts/privacy/monthly_report.js
+      - uses: stefanzweifel/git-auto-commit-action@8621497c8c39c72f3e2a999a26b4ca1b5058a842 # v5
+        with:
+          commit_message: "chore(privacy): monthly report"
+          file_pattern: "privacy/reports/PRIV_*.md"

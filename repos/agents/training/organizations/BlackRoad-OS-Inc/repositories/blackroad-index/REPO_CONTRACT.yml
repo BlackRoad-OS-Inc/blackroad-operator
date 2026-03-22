@@ -1,0 +1,26 @@
+repo:
+  name: blackroad-index
+  org: BlackRoad-OS-Inc
+  type: worker
+  languages: [javascript]
+  url: https://github.com/BlackRoad-OS-Inc/blackroad-index
+
+ownership:
+  owner: blackboxprogramming
+  codeowners: ["@blackboxprogramming"]
+  license: proprietary
+
+policies:
+  inherits: ["coding", "collaboration", "safety", "issues", "pr-review", "docs"]
+  additional:
+    - "API tokens must only exist in Worker secrets"
+    - "Indexing must respect API rate limits"
+
+certification:
+  required_level: 2
+  modules: ["fundamentals", "workers"]
+
+deployment:
+  target: cloudflare-workers
+  command: "npx wrangler deploy"
+  health_check: "curl /api/search?q=test"

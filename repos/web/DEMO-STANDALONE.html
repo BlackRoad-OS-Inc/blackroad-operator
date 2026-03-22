@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BlackRoad - All Sites Demo</title>
+  <style>
+    /* Embedded BlackRoad Design System */
+    :root {
+      --spectrum-gold: #fdba2d;
+      --spectrum-orange: #ff6b35;
+      --spectrum-pink: #ff4fd8;
+      --spectrum-purple: #c753ff;
+      --spectrum-indigo: #6366f1;
+      --spectrum-blue: #3b82f6;
+      --spectrum-cyan: #06b6d4;
+      --spectrum-green: #10b981;
+
+      --gradient-spectrum: linear-gradient(135deg, #fdba2d 0%, #ff6b35 15%, #ff4fd8 35%, #c753ff 55%, #6366f1 75%, #3b82f6 100%);
+      --gradient-spectrum-full: linear-gradient(135deg, #fdba2d 0%, #ff6b35 12.5%, #ff4fd8 25%, #c753ff 37.5%, #6366f1 50%, #3b82f6 62.5%, #06b6d4 75%, #10b981 100%);
+
+      --bg-black: #000000;
+      --bg-dark: #0a0a0f;
+      --bg-secondary: #13131a;
+      --bg-tertiary: #1a1a24;
+      --bg-elevated: #202030;
+
+      --text-primary: #ffffff;
+      --text-secondary: rgba(255, 255, 255, 0.7);
+      --text-tertiary: rgba(255, 255, 255, 0.5);
+
+      --border-subtle: rgba(255, 255, 255, 0.08);
+
+      --success: #22c55e;
+
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space-md: 12px;
+      --space-lg: 16px;
+      --space-xl: 24px;
+      --space-2xl: 32px;
+      --space-3xl: 48px;
+      --space-4xl: 64px;
+
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --radius-xl: 16px;
+      --radius-full: 9999px;
+
+      --font-system: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+      --font-mono: 'Courier New', 'Consolas', 'Monaco', monospace;
+
+      --text-xs: 0.75rem;
+      --text-sm: 0.85rem;
+      --text-base: 0.95rem;
+      --text-lg: 1.1rem;
+      --text-xl: 1.3rem;
+      --text-2xl: 1.6rem;
+      --text-3xl: 2rem;
+      --text-4xl: 2.5rem;
+
+      --transition-base: 0.2s ease;
+
+      --glow-pink: 0 0 20px rgba(255, 79, 216, 0.5);
+      --glow-cyan: 0 0 20px rgba(6, 182, 212, 0.5);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: var(--font-system);
+      background: radial-gradient(1200px 900px at 80% -10%, rgba(124,108,255,.15), transparent 40%),
+                  radial-gradient(1000px 800px at -20% 100%, rgba(0,208,255,.12), transparent 50%),
+                  var(--bg-dark);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: var(--space-4xl) var(--space-xl);
+    }
+
+    .hero {
+      text-align: center;
+      margin-bottom: var(--space-4xl);
+    }
+
+    .logo {
+      width: 150px;
+      height: 150px;
+      margin: 0 auto var(--space-2xl);
+      background: var(--gradient-spectrum);
+      border-radius: var(--radius-xl);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 80px;
+      font-weight: 900;
+      color: var(--bg-black);
+      box-shadow: 0 0 50px rgba(255, 79, 216, 0.8);
+      animation: glowPulse 3s ease-in-out infinite;
+    }
+
+    @keyframes glowPulse {
+      0%, 100% { box-shadow: 0 0 30px rgba(255, 79, 216, 0.6); }
+      50% { box-shadow: 0 0 60px rgba(255, 79, 216, 0.9); }
+    }
+
+    .text-gradient {
+      background: var(--gradient-spectrum);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .text-glow-cyan {
+      color: var(--spectrum-cyan);
+      text-shadow: 0 0 10px var(--spectrum-cyan);
+    }
+
+    .text-glow-pink {
+      color: var(--spectrum-pink);
+      text-shadow: 0 0 10px var(--spectrum-pink);
+    }
+
+    .text-glow-gold {
+      color: var(--spectrum-gold);
+      text-shadow: 0 0 10px var(--spectrum-gold);
+    }
+
+    h1 {
+      font-size: var(--text-4xl);
+      font-weight: 900;
+      margin-bottom: var(--space-lg);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: var(--space-xl);
+      margin-top: var(--space-3xl);
+    }
+
+    .card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: var(--space-xl);
+      transition: all var(--transition-base);
+      cursor: pointer;
+    }
+
+    .card:hover {
+      border-color: var(--spectrum-pink);
+      box-shadow: var(--glow-pink);
+      transform: translateY(-8px);
+    }
+
+    .site-icon {
+      font-size: 64px;
+      margin-bottom: var(--space-lg);
+      filter: drop-shadow(0 0 20px currentColor);
+    }
+
+    .site-title {
+      font-size: var(--text-2xl);
+      font-weight: 900;
+      margin-bottom: var(--space-md);
+    }
+
+    .site-desc {
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: var(--space-lg);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: var(--space-xs) var(--space-md);
+      border-radius: var(--radius-full);
+      font-size: var(--text-xs);
+      font-weight: 700;
+      margin-right: var(--space-sm);
+      margin-bottom: var(--space-sm);
+    }
+
+    .badge-cyan {
+      background: rgba(6, 182, 212, 0.2);
+      color: var(--spectrum-cyan);
+      border: 1px solid var(--spectrum-cyan);
+    }
+
+    .badge-pink {
+      background: rgba(255, 79, 216, 0.2);
+      color: var(--spectrum-pink);
+      border: 1px solid var(--spectrum-pink);
+    }
+
+    .badge-purple {
+      background: rgba(199, 83, 255, 0.2);
+      color: var(--spectrum-purple);
+      border: 1px solid var(--spectrum-purple);
+    }
+
+    .badge-gold {
+      background: rgba(253, 186, 45, 0.2);
+      color: var(--spectrum-gold);
+      border: 1px solid var(--spectrum-gold);
+    }
+
+    .badge-success {
+      background: rgba(34, 197, 94, 0.2);
+      color: var(--success);
+      border: 1px solid var(--success);
+    }
+
+    .terminal-text {
+      font-family: var(--font-mono);
+      color: var(--spectrum-cyan);
+      text-shadow: 0 0 8px var(--spectrum-cyan);
+    }
+
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: var(--bg-secondary);
+      border: 2px solid var(--spectrum-cyan);
+      border-radius: var(--radius-md);
+      padding: var(--space-lg);
+      box-shadow: var(--glow-cyan);
+      z-index: 1000;
+      animation: slideIn 0.3s ease-out;
+      max-width: 300px;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    .info-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: var(--space-2xl);
+      margin-top: var(--space-3xl);
+      text-align: center;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-xl);
+      margin-top: var(--space-xl);
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-number {
+      font-size: var(--text-3xl);
+      font-weight: 900;
+      color: var(--spectrum-cyan);
+      text-shadow: 0 0 15px var(--spectrum-cyan);
+    }
+
+    .stat-label {
+      color: var(--text-tertiary);
+      margin-top: var(--space-sm);
+      font-size: var(--text-sm);
+    }
+
+    .btn {
+      display: inline-block;
+      padding: var(--space-md) var(--space-xl);
+      background: var(--gradient-spectrum);
+      color: var(--bg-black);
+      border: none;
+      border-radius: var(--radius-md);
+      font-weight: 700;
+      cursor: pointer;
+      transition: all var(--transition-base);
+      text-decoration: none;
+      margin: var(--space-sm);
+    }
+
+    .btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 30px rgba(255, 79, 216, 0.8);
+    }
+
+    @media (max-width: 768px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .logo {
+        width: 100px;
+        height: 100px;
+        font-size: 50px;
+      }
+
+      h1 {
+        font-size: var(--text-2xl);
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="hero">
+      <div class="logo">RB</div>
+      <h1 class="text-gradient">BlackRoad Websites</h1>
+      <p style="font-size: var(--text-xl); color: var(--text-secondary);">
+        Complete ecosystem with retro-futuristic design system
+      </p>
+    </div>
+
+    <div class="grid">
+      <!-- BlackRoad.io Platform -->
+      <div class="card" onclick="showDemo('platform')">
+        <div class="site-icon text-glow-cyan">🚀</div>
+        <h2 class="site-title text-gradient">BlackRoad.io</h2>
+        <p class="site-desc">
+          The Quantum AI Platform for next-generation development. Build, deploy, and scale
+          intelligent applications with autonomous AI agents.
+        </p>
+        <div>
+          <span class="badge badge-cyan">Platform</span>
+          <span class="badge badge-pink">AI Agents</span>
+          <span class="badge badge-purple">Quantum</span>
+        </div>
+      </div>
+
+      <!-- BlackRoad Inc Corporate -->
+      <div class="card" onclick="showDemo('corporate')">
+        <div class="site-icon text-glow-gold">🏢</div>
+        <h2 class="site-title text-gradient">BlackRoad Inc.</h2>
+        <p class="site-desc">
+          Corporate website for BlackRoad Technologies, Inc. Learn about our mission,
+          team, values, and career opportunities.
+        </p>
+        <div>
+          <span class="badge badge-gold">Corporate</span>
+          <span class="badge badge-success">Careers</span>
+          <span class="badge badge-cyan">About Us</span>
+        </div>
+      </div>
+
+      <!-- Design System Showcase -->
+      <div class="card" onclick="showDemo('design')">
+        <div class="site-icon text-glow-pink">🎨</div>
+        <h2 class="site-title text-gradient">Design System</h2>
+        <p class="site-desc">
+          Interactive showcase of the BlackRoad design system with retro-futuristic
+          components, Matrix vibes, and Y2K aesthetics.
+        </p>
+        <div>
+          <span class="badge badge-pink">Components</span>
+          <span class="badge badge-cyan">CSS</span>
+          <span class="badge badge-purple">JavaScript</span>
+        </div>
+      </div>
+
+      <!-- Pi Boot Screen -->
+      <div class="card" onclick="showDemo('boot')">
+        <div class="site-icon">💻</div>
+        <h2 class="site-title text-gradient">Pi Boot Screen</h2>
+        <p class="site-desc">
+          Retro CRT-style boot sequence for BlackRoad OS. Full scanline effects,
+          terminal aesthetics, and no slave terminology.
+        </p>
+        <div>
+          <span class="badge badge-purple">Retro CRT</span>
+          <span class="badge badge-cyan">Terminal</span>
+        </div>
+      </div>
+
+      <!-- Social Platform -->
+      <div class="card" onclick="showDemo('social')">
+        <div class="site-icon text-glow-purple">💬</div>
+        <h2 class="site-title text-gradient">BlackRoad Social</h2>
+        <p class="site-desc">
+          Modern social platform with Reddit-style features, AI assistants,
+          games, and community engagement.
+        </p>
+        <div>
+          <span class="badge badge-pink">Social</span>
+          <span class="badge badge-gold">Community</span>
+          <span class="badge badge-cyan">AI Chat</span>
+        </div>
+      </div>
+
+      <!-- Quantum Demo -->
+      <div class="card" onclick="showDemo('quantum')">
+        <div class="site-icon text-glow-cyan">⚛️</div>
+        <h2 class="site-title text-gradient">Quantum</h2>
+        <p class="site-desc">
+          Quantum computing visualization and demonstration. Explore quantum
+          algorithms and real QPU integration.
+        </p>
+        <div>
+          <span class="badge badge-cyan">Quantum</span>
+          <span class="badge badge-purple">Science</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Info Card -->
+    <div class="info-card">
+      <div class="terminal-text">
+        <div style="font-size: var(--text-xl); font-weight: 700; margin-bottom: var(--space-md);">
+          SPECTRUM INITIALIZED ✨
+        </div>
+        <div style="color: var(--text-secondary);">
+          All websites built with the BlackRoad Design System<br>
+          Retro-futuristic • Matrix vibes • Y2K aesthetics • Unified colors
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat">
+          <div class="stat-number">6</div>
+          <div class="stat-label">WEBSITES</div>
+        </div>
+        <div class="stat">
+          <div class="stat-number">1</div>
+          <div class="stat-label">DESIGN SYSTEM</div>
+        </div>
+        <div class="stat">
+          <div class="stat-number">∞</div>
+          <div class="stat-label">POSSIBILITIES</div>
+        </div>
+      </div>
+
+      <div style="margin-top: var(--space-2xl);">
+        <p style="color: var(--text-secondary); margin-bottom: var(--space-lg);">
+          Ready to see the full sites? They're in your repo at:
+        </p>
+        <div style="font-family: var(--font-mono); font-size: var(--text-sm); color: var(--spectrum-gold); margin-bottom: var(--space-xl);">
+          /home/user/blackroad-prism-console/web/
+        </div>
+        <a href="https://github.com/blackboxprogramming/blackroad-prism-console/tree/claude/update-website-colors-remove-slave-011CUw73MwVtb1ajv5oGYfrU/web" class="btn" target="_blank">
+          View on GitHub
+        </a>
+        <button class="btn" onclick="downloadInstructions()">
+          Download Instructions
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Simple audio context for sound effects
+    function playBeep() {
+      if (!window.AudioContext && !window.webkitAudioContext) return;
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      const context = new AudioCtx();
+      const now = context.currentTime;
+      const oscillator = context.createOscillator();
+      const gain = context.createGain();
+
+      oscillator.type = 'square';
+      oscillator.frequency.setValueAtTime(880, now);
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.exponentialRampToValueAtTime(0.2, now + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.1);
+
+      oscillator.connect(gain);
+      gain.connect(context.destination);
+
+      oscillator.start(now);
+      oscillator.stop(now + 0.15);
+    }
+
+    function showToast(message) {
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.innerHTML = '<div class="terminal-text">' + message + '</div>';
+      document.body.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(400px)';
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+
+    function showDemo(site) {
+      playBeep();
+
+      const messages = {
+        platform: 'BlackRoad.io Platform - Quantum AI for developers',
+        corporate: 'BlackRoad Inc. - Building the future of AI collaboration',
+        design: 'Design System - Retro-futuristic components showcase',
+        boot: 'Pi Boot Screen - CRT terminal aesthetics',
+        social: 'BlackRoad Social - Community platform with AI',
+        quantum: 'Quantum Computing - Real QPU integration'
+      };
+
+      showToast(messages[site] + '<br><br>Full site available in your repo!');
+    }
+
+    function downloadInstructions() {
+      playBeep();
+
+      const instructions = `╔═══════════════════════════════════════════════════════╗
+║                                                       ║
+║              BLACKROAD WEBSITES                       ║
+║              How to View Your Sites                   ║
+║                                                       ║
+╚═══════════════════════════════════════════════════════╝
+
+🌐 YOUR WEBSITES ARE READY!
+
+All files are in your repo at:
+/home/user/blackroad-prism-console/web/
+
+📂 FILES:
+- index.html (navigation hub)
+- blackroad.io.html (platform landing)
+- blackroadinc.us.html (corporate site)
+- blackroad-showcase.html (design system)
+- blackroad-pi-boot.html (boot screen)
+- blackroad-social.html (social platform)
+- quantum.html (quantum demo)
+- assets/blackroad.css (design system)
+- assets/blackroad.js (interactive effects)
+
+🚀 TO VIEW LOCALLY:
+
+Option 1: Open files directly
+  - Navigate to web folder
+  - Double-click any .html file
+  - Opens in your default browser!
+
+Option 2: Run local server
+  cd web
+  ./serve.sh
+
+  Then visit: http://localhost:8080
+
+Option 3: Deploy to Vercel
+  cd web
+  npx vercel
+
+  Get a live URL instantly!
+
+✨ FEATURES:
+- Spectrum gradient colors
+- Retro CRT effects
+- Sound effects on interaction
+- Smooth animations
+- Matrix/Y2K aesthetics
+- No "slave" terminology
+- Fully responsive
+
+📦 NEXT STEPS:
+1. Create a PR on GitHub
+2. Vercel will auto-deploy a preview
+3. Set custom domains:
+   - blackroad.io → Platform
+   - blackroadinc.us → Corporate
+
+SPECTRUM INITIALIZED ✨
+`;
+
+      const blob = new Blob([instructions], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'BLACKROAD-INSTRUCTIONS.txt';
+      a.click();
+      URL.revokeObjectURL(url);
+
+      showToast('Instructions downloaded!');
+    }
+
+    // Add click sounds to all cards
+    document.querySelectorAll('.card').forEach(card => {
+      card.addEventListener('mouseenter', playBeep);
+    });
+
+    // Welcome message
+    setTimeout(() => {
+      showToast('Welcome to BlackRoad! Click any card to learn more ✨');
+    }, 1000);
+
+    // Easter egg
+    let konamiCode = [];
+    const konami = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+
+    document.addEventListener('keydown', (e) => {
+      konamiCode.push(e.key);
+      konamiCode = konamiCode.slice(-10);
+
+      if (konamiCode.join(',') === konami.join(',')) {
+        for (let i = 0; i < 5; i++) {
+          setTimeout(playBeep, i * 100);
+        }
+        showToast('🌈 SPECTRUM POWER UNLOCKED! 🌈<br>All sites are FIRE! 🔥');
+        document.body.style.animation = 'rainbow 5s infinite';
+      }
+    });
+
+    const style = document.createElement('style');
+    style.textContent = '@keyframes rainbow { 0%, 100% { filter: hue-rotate(0deg); } 50% { filter: hue-rotate(360deg); } }';
+    document.head.appendChild(style);
+  </script>
+</body>
+</html>

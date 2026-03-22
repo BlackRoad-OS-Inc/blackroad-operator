@@ -1,0 +1,41 @@
+app = "svc-template"
+primary_region = "iad"
+kill_signal = "SIGTERM"
+
+[build]
+  image = "ghcr.io/yourorg/svc-template-fastapi:latest"
+
+[[services]]
+  internal_port = 4000
+  protocol = "tcp"
+
+  [[services.ports]]
+    handlers = ["http", "tls"]
+    port = 80
+
+  [[services.ports]]
+    handlers = ["tls", "http"]
+    port = 443
+
+  [[services.http_checks]]
+    interval = "30s"
+    timeout = "5s"
+    grace_period = "5s"
+    method = "get"
+    path = "/health"
+
+  [[services.tcp_checks]]
+    interval = "15s"
+    timeout = "2s"
+
+[checks.ready]
+  type = "http"
+  port = 80
+  method = "get"
+  path = "/ready"
+  interval = "15s"
+  timeout = "3s"
+
+[metrics]
+  port = 4000
+  path = "/metrics"

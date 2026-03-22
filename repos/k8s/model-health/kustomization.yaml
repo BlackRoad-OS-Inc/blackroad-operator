@@ -1,0 +1,13 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: prism-ops
+resources:
+  - deployment.yaml
+  - service.yaml
+  - cronjob.yaml
+configMapGenerator:
+  - name: model-health-config
+    files:
+      - providers.yaml=../../configs/aiops/providers.yaml
+generatorOptions:
+  disableNameSuffixHash: true
