@@ -35,7 +35,7 @@ logsRouter.get('/:name', async (req: AuthRequest, res: Response) => {
         tail: parseInt(tail as string),
       });
 
-      stream.on('data', (chunk) => {
+      stream.on('data', (chunk: Buffer) => {
         res.write(chunk.toString());
       });
 
@@ -44,7 +44,7 @@ logsRouter.get('/:name', async (req: AuthRequest, res: Response) => {
       });
 
       req.on('close', () => {
-        stream.destroy();
+        (stream as any).destroy();
       });
     } else {
       // Get static logs

@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920,height=1080">
+<title>BlackRoad — Infrastructure</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1920px;height:1080px;overflow:hidden;background:#000;color:#fff;font-family:'Space Grotesk',sans-serif}
+.scene{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;opacity:0;transition:opacity .8s}
+.scene.active{opacity:1}
+.mono{font-family:'JetBrains Mono',monospace}
+.grad{background:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.grad-border{border-image:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF) 1}
+
+/* Network visualization */
+.network{position:relative;width:1200px;height:700px}
+.node{position:absolute;text-align:center;opacity:0;transition:opacity .6s,transform .6s;transform:scale(.8)}
+.node.visible{opacity:1;transform:scale(1)}
+.node-circle{width:80px;height:80px;border-radius:50%;border:1px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;position:relative;background:rgba(255,255,255,.02)}
+.node-circle::after{content:'';position:absolute;inset:-4px;border-radius:50%;border:1px solid transparent;border-image:linear-gradient(135deg,#FF6B2B,#00D4FF) 1;border-radius:50%;opacity:0;transition:opacity .5s}
+.node.active .node-circle::after{opacity:1}
+.node-circle .icon{font-size:28px}
+.node-name{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:500;letter-spacing:.05em}
+.node-detail{font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(255,255,255,.3);margin-top:4px}
+.node-status{width:6px;height:6px;border-radius:50%;position:absolute;top:4px;right:4px}
+.node-status.online{background:#22c55e;box-shadow:0 0 8px #22c55e}
+.node-status.offline{background:#ef4444}
+
+/* Connection lines */
+svg.connections{position:absolute;inset:0;z-index:0}
+.conn-line{stroke:url(#grad);stroke-width:1;fill:none;opacity:0;transition:opacity .5s}
+.conn-line.visible{opacity:.3}
+.conn-line.pulse{animation:connPulse 2s ease infinite}
+@keyframes connPulse{0%,100%{opacity:.1}50%{opacity:.5}}
+
+/* Data packet animation */
+.packet{position:absolute;width:4px;height:4px;border-radius:50%;background:#00D4FF;box-shadow:0 0 8px #00D4FF;opacity:0}
+.packet.moving{animation:packetMove var(--duration,3s) linear forwards}
+
+/* Terminal */
+.terminal{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:24px 32px;font-family:'JetBrains Mono',monospace;font-size:15px;line-height:2;width:900px;text-align:left}
+.terminal .prompt{color:rgba(255,255,255,.3)}
+.terminal .cmd{color:#fff}
+.terminal .output{color:rgba(255,255,255,.5)}
+.terminal .success{color:#22c55e}
+.terminal .line{opacity:0;animation:lineAppear .3s ease forwards}
+@keyframes lineAppear{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:translateX(0)}}
+
+/* Spec card */
+.spec-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;width:1000px}
+.spec-card{border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:28px;text-align:left;opacity:0;transform:translateY(20px);transition:all .6s}
+.spec-card.visible{opacity:1;transform:translateY(0)}
+.spec-card .spec-value{font-family:'JetBrains Mono',monospace;font-size:36px;font-weight:700;margin-bottom:8px}
+.spec-card .spec-label{font-family:'JetBrains Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:.15em;color:rgba(255,255,255,.3)}
+</style>
+</head>
+<body>
+
+<!-- SCENE 1: Title -->
+<div class="scene" id="s1">
+  <div style="font-size:14px;letter-spacing:.3em;color:rgba(255,255,255,.3);margin-bottom:16px" class="mono">INFRASTRUCTURE</div>
+  <div style="font-size:56px;font-weight:700">The Fleet</div>
+  <div style="height:3px;width:200px;border-radius:2px;background:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);margin-top:24px;animation:lineGrow 1.2s ease .5s both" class="grad-line"></div>
+  <div style="font-size:18px;color:rgba(255,255,255,.4);margin-top:20px;font-weight:300">5 Raspberry Pi 5s. 2 Hailo-8 AI accelerators. 2 cloud droplets. 48+ domains.</div>
+  @keyframes lineGrow{from{width:0}to{width:200px}}
+</div>
+
+<!-- SCENE 2: Network map -->
+<div class="scene" id="s2">
+  <div class="network">
+    <svg class="connections" viewBox="0 0 1200 700">
+      <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#FF6B2B"/><stop offset="50%" stop-color="#8844FF"/><stop offset="100%" stop-color="#00D4FF"/>
+      </linearGradient></defs>
+      <!-- Lines drawn by JS -->
+    </svg>
+    <!-- Mac (center) -->
+    <div class="node" style="left:520px;top:280px" data-id="mac">
+      <div class="node-circle"><div class="node-status online"></div><span class="icon">&#x1F4BB;</span></div>
+      <div class="node-name">Alexandria</div>
+      <div class="node-detail">Mac • 192.168.4.28</div>
+    </div>
+    <!-- Alice -->
+    <div class="node" style="left:120px;top:100px" data-id="alice">
+      <div class="node-circle"><div class="node-status online"></div><span class="icon">&#x1F30D;</span></div>
+      <div class="node-name">Alice</div>
+      <div class="node-detail">Pi 400 • Gateway • 65+ routes</div>
+    </div>
+    <!-- Cecilia -->
+    <div class="node" style="left:900px;top:80px" data-id="cecilia">
+      <div class="node-circle"><div class="node-status online"></div><span class="icon">&#x1F9E0;</span></div>
+      <div class="node-name">Cecilia</div>
+      <div class="node-detail">Pi 5 • Hailo-8 • 16 models</div>
+    </div>
+    <!-- Octavia -->
+    <div class="node" style="left:900px;top:450px" data-id="octavia">
+      <div class="node-circle"><div class="node-status online"></div><span class="icon">&#x1F4BE;</span></div>
+      <div class="node-name">Octavia</div>
+      <div class="node-detail">Pi 5 • 1TB NVMe • Gitea</div>
+    </div>
+    <!-- Aria -->
+    <div class="node" style="left:120px;top:450px" data-id="aria">
+      <div class="node-circle"><div class="node-status offline"></div><span class="icon">&#x1F3A8;</span></div>
+      <div class="node-name">Aria</div>
+      <div class="node-detail">Pi 5 • Portainer • Headscale</div>
+    </div>
+    <!-- Lucidia -->
+    <div class="node" style="left:520px;top:550px" data-id="lucidia">
+      <div class="node-circle"><div class="node-status online"></div><span class="icon">&#x2728;</span></div>
+      <div class="node-name">Lucidia</div>
+      <div class="node-detail">Pi 5 • 334 web apps • API</div>
+    </div>
+    <!-- Gematria -->
+    <div class="node" style="left:300px;top:30px" data-id="gematria">
+      <div class="node-circle"><div class="node-status online"></div><span class="icon">&#x2601;</span></div>
+      <div class="node-name">Gematria</div>
+      <div class="node-detail">DO NYC3 • 4cpu/8GB</div>
+    </div>
+    <!-- Anastasia -->
+    <div class="node" style="left:700px;top:30px" data-id="anastasia">
+      <div class="node-circle"><div class="node-status online"></div><span class="icon">&#x2601;</span></div>
+      <div class="node-name">Anastasia</div>
+      <div class="node-detail">DO NYC1 • WG Hub</div>
+    </div>
+  </div>
+</div>
+
+<!-- SCENE 3: Spec cards -->
+<div class="scene" id="s3">
+  <div style="font-size:14px;letter-spacing:.3em;color:rgba(255,255,255,.3);margin-bottom:32px" class="mono">SPECIFICATIONS</div>
+  <div class="spec-grid">
+    <div class="spec-card" style="transition-delay:.1s"><div class="spec-value grad">52</div><div class="spec-label">AI TOPS (Hailo-8)</div></div>
+    <div class="spec-card" style="transition-delay:.2s"><div class="spec-value">7</div><div class="spec-label">Compute Nodes</div></div>
+    <div class="spec-card" style="transition-delay:.3s"><div class="spec-value">48+</div><div class="spec-label">Custom Domains</div></div>
+    <div class="spec-card" style="transition-delay:.4s"><div class="spec-value">207</div><div class="spec-label">Git Repositories</div></div>
+    <div class="spec-card" style="transition-delay:.5s"><div class="spec-value">95+</div><div class="spec-label">Pages Projects</div></div>
+    <div class="spec-card" style="transition-delay:.6s"><div class="spec-value grad">7.2M</div><div class="spec-label">Lines of Code</div></div>
+  </div>
+</div>
+
+<!-- SCENE 4: Terminal -->
+<div class="scene" id="s4">
+  <div class="terminal" id="term"></div>
+</div>
+
+<!-- SCENE 5: Tagline -->
+<div class="scene" id="s5">
+  <div style="font-size:18px;color:rgba(255,255,255,.3);margin-bottom:16px" class="mono">SOVEREIGN INFRASTRUCTURE</div>
+  <div style="font-size:52px;font-weight:700" class="grad">Zero cloud dependency.</div>
+  <div style="font-size:52px;font-weight:700;margin-top:8px">Total ownership.</div>
+</div>
+
+<script>
+const scenes = document.querySelectorAll('.scene');
+const durations = [4000, 8000, 6000, 8000, 5000];
+let current = 0;
+
+function showScene(i) {
+  if (i >= scenes.length) return;
+  scenes.forEach(s => s.classList.remove('active'));
+  scenes[i].classList.add('active');
+
+  if (i === 1) animateNetwork();
+  if (i === 2) animateSpecs();
+  if (i === 3) animateTerminal();
+
+  current = i;
+  setTimeout(() => showScene(i + 1), durations[i]);
+}
+
+function animateNetwork() {
+  const nodes = document.querySelectorAll('.node');
+  nodes.forEach((n, i) => setTimeout(() => {
+    n.classList.add('visible');
+    setTimeout(() => n.classList.add('active'), 500);
+  }, i * 400));
+
+  // Draw SVG connections after nodes appear
+  setTimeout(() => {
+    const svg = document.querySelector('.connections');
+    const pairs = [['mac','alice'],['mac','cecilia'],['mac','octavia'],['mac','lucidia'],['mac','aria'],['alice','gematria'],['anastasia','cecilia'],['anastasia','alice'],['alice','lucidia'],['octavia','cecilia']];
+    pairs.forEach((pair, i) => {
+      const a = document.querySelector(`[data-id="${pair[0]}"]`);
+      const b = document.querySelector(`[data-id="${pair[1]}"]`);
+      if (!a || !b) return;
+      const ax = parseInt(a.style.left) + 40, ay = parseInt(a.style.top) + 40;
+      const bx = parseInt(b.style.left) + 40, by = parseInt(b.style.top) + 40;
+      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      line.setAttribute('x1', ax); line.setAttribute('y1', ay);
+      line.setAttribute('x2', bx); line.setAttribute('y2', by);
+      line.classList.add('conn-line');
+      svg.appendChild(line);
+      setTimeout(() => { line.classList.add('visible'); line.classList.add('pulse'); }, i * 200);
+    });
+  }, 2000);
+}
+
+function animateSpecs() {
+  document.querySelectorAll('.spec-card').forEach((c, i) =>
+    setTimeout(() => c.classList.add('visible'), i * 200)
+  );
+}
+
+function animateTerminal() {
+  const lines = [
+    { type: 'prompt', text: 'blackroad@alexandria ~ $' },
+    { type: 'cmd', text: ' br status --fleet' },
+    { type: 'output', text: '' },
+    { type: 'success', text: '  ✓ Alice      online   Pi 400   192.168.4.49    65 routes' },
+    { type: 'success', text: '  ✓ Cecilia    online   Pi 5     192.168.4.96    Hailo-8 26 TOPS' },
+    { type: 'success', text: '  ✓ Octavia    online   Pi 5     192.168.4.100   1TB NVMe + Gitea' },
+    { type: 'output', text: '  ✗ Aria       offline  Pi 5     192.168.4.98    needs reboot' },
+    { type: 'success', text: '  ✓ Lucidia    online   Pi 5     192.168.4.38    334 web apps' },
+    { type: 'success', text: '  ✓ Gematria   online   DO       nyc3            WireGuard mesh' },
+    { type: 'success', text: '  ✓ Anastasia  online   DO       nyc1            WG hub + Headscale' },
+    { type: 'output', text: '' },
+    { type: 'output', text: '  Fleet: 6/7 online • 52 TOPS • 48 domains • mesh active' },
+  ];
+
+  const term = document.getElementById('term');
+  term.innerHTML = '';
+  lines.forEach((line, i) => {
+    setTimeout(() => {
+      const div = document.createElement('div');
+      div.className = 'line ' + line.type;
+      div.style.animationDelay = '0s';
+      if (line.type === 'prompt') {
+        div.innerHTML = `<span class="prompt">${line.text}</span>`;
+      } else {
+        div.innerHTML = `<span class="${line.type}">${line.text}</span>`;
+      }
+      // Merge prompt + cmd on same line
+      if (line.type === 'cmd') {
+        const last = term.lastElementChild;
+        if (last) last.innerHTML += `<span class="cmd">${line.text}</span>`;
+        return;
+      }
+      term.appendChild(div);
+    }, i * 350);
+  });
+}
+
+showScene(0);
+</script>
+</body>
+</html>

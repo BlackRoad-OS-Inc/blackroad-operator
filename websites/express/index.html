@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Express — One Command. Live.</title>
+<link rel="icon" type="image/png" sizes="32x32" href="https://images.blackroad.io/brand/br-square-32.png" />
+<link rel="apple-touch-icon" sizes="180x180" href="https://images.blackroad.io/brand/apple-touch-icon.png" />
+<meta property="og:image" content="https://images.blackroad.io/brand/br-square-512.png" />
+<meta name="description" content="Express — Instant preview and deploy. Push to any node in the fleet. Zero config.">
+<link rel="stylesheet" href="../_shared/design.css">
+<style>
+  .hero { padding: var(--sp-xl) var(--sp-md); min-height: 100vh; display: flex; flex-direction: column; justify-content: center; }
+  @media (min-width: 768px) { .hero { padding: 0 var(--sp-xl); } }
+  .hero-sub { font-size: 1.1rem; color: var(--subtle); max-width: 480px; line-height: 1.7; margin: var(--sp-md) 0 var(--sp-xl); }
+  .btn-primary { display: inline-flex; align-items: center; gap: 8px; background: var(--grad); color: var(--white); padding: 14px 28px; font-weight: 700; font-size: 0.95rem; transition: opacity 0.2s; border: none; cursor: pointer; }
+  .btn-primary:hover { opacity: 0.9; }
+  .feature-card { background: var(--surface); border: 1px solid var(--border); padding: var(--sp-lg); transition: border-color 0.25s; }
+  .feature-card:hover { border-color: var(--muted); }
+  .feature-card h3 { margin-bottom: var(--sp-xs); }
+  .feature-card p { font-size: 0.85rem; color: var(--subtle); line-height: 1.6; }
+  .feature-icon { font-family: var(--jb); font-size: 1.2rem; color: var(--muted); margin-bottom: var(--sp-sm); }
+  .terminal { background: var(--surface); border: 1px solid var(--border); margin: var(--sp-xl) 0; overflow: hidden; }
+  .terminal-bar { display: flex; align-items: center; gap: 6px; padding: 10px var(--sp-md); border-bottom: 1px solid var(--border); }
+  .terminal-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .terminal-dot.r { background: #FF2255; }
+  .terminal-dot.y { background: #FF6B2B; }
+  .terminal-dot.g { background: #00D4FF; }
+  .terminal-body { padding: var(--sp-md); font-family: var(--jb); font-size: 0.8rem; line-height: 1.8; }
+  .t-prompt { color: var(--muted); }
+  .t-cmd { color: var(--white); }
+  .t-out { color: var(--subtle); }
+  .t-success { color: #00D4FF; }
+  .t-url { color: #8844FF; }
+  .t-time { color: #FF6B2B; }
+  .node-grid { display: grid; grid-template-columns: 1fr; gap: var(--sp-sm); margin: var(--sp-xl) 0; }
+  @media (min-width: 600px) { .node-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 900px) { .node-grid { grid-template-columns: repeat(5, 1fr); } }
+  .node-card { background: var(--surface); border: 1px solid var(--border); padding: var(--sp-md); text-align: center; }
+  .node-name { font-family: var(--sg); font-weight: 600; font-size: 0.9rem; }
+  .node-role { font-family: var(--jb); font-size: 0.7rem; color: var(--muted); margin-top: 4px; }
+  .node-status { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #00D4FF; margin-right: 4px; box-shadow: 0 0 6px rgba(0,212,255,0.5); }
+  .node-status.off { background: var(--muted); box-shadow: none; }
+  .cta-section { text-align: center; padding: var(--sp-2xl) var(--sp-md); }
+  .cta-section h2 { margin-bottom: var(--sp-md); }
+  .cta-section p { max-width: 480px; margin: 0 auto var(--sp-xl); }
+</style>
+</head>
+<body class="dot-bg">
+  <nav>
+    <div class="nav-logo">Express</div>
+    <div class="nav-links">
+      <a href="#deploy">Deploy</a>
+      <a href="#features">Features</a>
+      <a href="https://blackroad.io">BlackRoad OS</a>
+    </div>
+    <button class="nav-cta" onclick="location.href='#start'">Ship Now</button>
+    <button class="nav-toggle" onclick="this.classList.toggle('open');document.getElementById('nav-mobile').classList.toggle('open')" aria-label="Menu"><span></span><span></span><span></span></button>
+  </nav>
+  <div id="nav-mobile" class="nav-mobile">
+    <a href="#deploy" onclick="document.getElementById('nav-mobile').classList.remove('open')">Deploy</a>
+    <a href="#features" onclick="document.getElementById('nav-mobile').classList.remove('open')">Features</a>
+    <a href="https://blackroad.io">BlackRoad OS</a>
+  </div>
+
+  <div class="hero">
+    <div class="section-label">Instant Deploy</div>
+    <h1>One command.<br>Live.</h1>
+    <p class="hero-sub">Push to any node in the fleet. Instant preview URLs. Zero config. Your code goes from laptop to production in seconds, not pipelines.</p>
+    <a href="#start" class="btn-primary">Deploy Something</a>
+  </div>
+
+  <section id="deploy">
+    <div class="section-label">Live Deploy</div>
+    <h2 style="margin-bottom:var(--sp-md);">Watch it happen</h2>
+    <div class="terminal">
+      <div class="terminal-bar">
+        <div class="terminal-dot r"></div>
+        <div class="terminal-dot y"></div>
+        <div class="terminal-dot g"></div>
+      </div>
+      <div class="terminal-body">
+        <div><span class="t-prompt">$ </span><span class="t-cmd">br express deploy ./my-app</span></div>
+        <div class="t-out">&nbsp;</div>
+        <div class="t-out">Detecting project... <span class="t-success">Next.js 15</span></div>
+        <div class="t-out">Building............. <span class="t-success">done</span> <span class="t-time">(2.1s)</span></div>
+        <div class="t-out">Selecting node....... <span class="t-success">Lucidia (.38)</span></div>
+        <div class="t-out">Pushing assets....... <span class="t-success">47 files, 1.2MB</span></div>
+        <div class="t-out">Configuring TLS...... <span class="t-success">Let's Encrypt via Caddy</span></div>
+        <div class="t-out">Setting DNS.......... <span class="t-success">my-app.blackroad.io</span></div>
+        <div class="t-out">&nbsp;</div>
+        <div class="t-success">Deployed.</div>
+        <div class="t-out">&nbsp;</div>
+        <div><span class="t-out">Preview: </span><span class="t-url">https://my-app-preview.blackroad.io</span></div>
+        <div><span class="t-out">Live:    </span><span class="t-url">https://my-app.blackroad.io</span></div>
+        <div><span class="t-out">Time:    </span><span class="t-time">4.7 seconds</span></div>
+      </div>
+    </div>
+
+    <div class="section-label" style="margin-top:var(--sp-xl)">Fleet Nodes</div>
+    <h3 style="margin-bottom:var(--sp-md);">Deploy to any node</h3>
+    <div class="node-grid">
+      <div class="node-card"><div class="node-name"><span class="node-status"></span>Alice</div><div class="node-role">Gateway / Edge</div></div>
+      <div class="node-card"><div class="node-name"><span class="node-status off"></span>Cecilia</div><div class="node-role">AI / Storage</div></div>
+      <div class="node-card"><div class="node-name"><span class="node-status"></span>Octavia</div><div class="node-role">Workers / Git</div></div>
+      <div class="node-card"><div class="node-name"><span class="node-status"></span>Lucidia</div><div class="node-role">Apps / DNS</div></div>
+      <div class="node-card"><div class="node-name"><span class="node-status"></span>Gematria</div><div class="node-role">TLS Edge</div></div>
+    </div>
+  </section>
+
+  <section id="features">
+    <div class="section-label">Capabilities</div>
+    <h2 style="margin-bottom:var(--sp-xl);">Zero friction deployment</h2>
+    <div class="grid-3">
+      <div class="feature-card">
+        <div class="feature-icon">0cf</div>
+        <h3>Zero Config</h3>
+        <p>Auto-detects your framework. Next.js, Vite, static, Worker, API. No config files. No build settings. Just deploy.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">prv</div>
+        <h3>Preview URLs</h3>
+        <p>Every deploy gets a unique preview URL. Share with the team. Test before promoting. Roll back instantly.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">tls</div>
+        <h3>Auto TLS</h3>
+        <p>Let's Encrypt certificates provisioned automatically via Caddy. HTTPS from the first second. Zero setup.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">dns</div>
+        <h3>Auto DNS</h3>
+        <p>PowerDNS creates records automatically. Custom domains work out of the box. No dashboard clicking.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">wg+</div>
+        <h3>Fleet Routing</h3>
+        <p>WireGuard mesh routes traffic to the optimal node. Load balancing across the Pi fleet. Self-healing.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">rb&lt;</div>
+        <h3>Instant Rollback</h3>
+        <p>Every deploy is versioned. Roll back to any previous version with one command. No downtime.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="start" class="cta-section">
+    <div class="section-label">Get Started</div>
+    <h2>Just ship it.</h2>
+    <p>Install the CLI. Run one command. Your app is live. That's the whole workflow.</p>
+    <a href="https://blackroad.io" class="btn-primary">Deploy with Express</a>
+  </section>
+
+  <footer>
+    <span>&copy; 2026 BlackRoad OS, Inc. &mdash; Pave Tomorrow.</span>
+    <span style="display:flex;gap:var(--sp-lg);flex-wrap:wrap;">
+      <a href="https://blackroad.io" style="color:var(--muted)">Home</a>
+      <a href="https://blackroadai.com" style="color:var(--muted)">AI</a>
+      <a href="https://blackroad.network" style="color:var(--muted)">Network</a>
+    </span>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RoadLoop — Automate Anything</title>
+<link rel="icon" type="image/png" sizes="32x32" href="https://images.blackroad.io/brand/br-square-32.png" />
+<link rel="apple-touch-icon" sizes="180x180" href="https://images.blackroad.io/brand/apple-touch-icon.png" />
+<meta property="og:image" content="https://images.blackroad.io/brand/br-square-512.png" />
+<meta name="description" content="RoadLoop — Visual workflow builder. Drag-and-drop automation. If-this-then-that on steroids. Self-hosted.">
+<link rel="stylesheet" href="../_shared/design.css">
+<style>
+  .hero { padding: var(--sp-xl) var(--sp-md); min-height: 100vh; display: flex; flex-direction: column; justify-content: center; }
+  @media (min-width: 768px) { .hero { padding: 0 var(--sp-xl); } }
+  .hero-sub { font-size: 1.1rem; color: var(--subtle); max-width: 520px; line-height: 1.7; margin: var(--sp-md) 0 var(--sp-xl); }
+  .btn-primary { display: inline-flex; align-items: center; gap: 8px; background: var(--grad); color: var(--white); padding: 14px 28px; font-weight: 700; font-size: 0.95rem; transition: opacity 0.2s; border: none; cursor: pointer; }
+  .btn-primary:hover { opacity: 0.9; }
+  .feature-card { background: var(--surface); border: 1px solid var(--border); padding: var(--sp-lg); }
+  .feature-card h3 { margin-bottom: var(--sp-xs); }
+  .feature-card p { font-size: 0.85rem; color: var(--subtle); line-height: 1.6; }
+  .feature-icon { font-size: 1.5rem; margin-bottom: var(--sp-sm); }
+  .workflow-canvas { background: var(--surface); border: 1px solid var(--border); padding: var(--sp-xl) var(--sp-lg); margin-top: var(--sp-xl); position: relative; min-height: 300px; }
+  .wf-node { display: inline-flex; align-items: center; gap: var(--sp-xs); padding: 10px 16px; border: 1px solid var(--border); font-family: var(--jb); font-size: 0.8rem; margin: var(--sp-xs) var(--sp-xs); background: var(--elevated); }
+  .wf-node.trigger { border-color: #FF6B2B; color: #FF6B2B; }
+  .wf-node.condition { border-color: #CC00AA; color: #CC00AA; }
+  .wf-node.action { border-color: #4488FF; color: #4488FF; }
+  .wf-node.output { border-color: #00D4FF; color: #00D4FF; }
+  .wf-row { display: flex; flex-wrap: wrap; align-items: center; margin-bottom: var(--sp-sm); }
+  .wf-connector { color: var(--muted); font-family: var(--jb); font-size: 0.8rem; margin: var(--sp-xs); }
+  .template-grid { display: grid; grid-template-columns: 1fr; gap: var(--sp-md); margin-top: var(--sp-xl); }
+  @media (min-width: 600px) { .template-grid { grid-template-columns: repeat(2, 1fr); } }
+  .template-card { background: var(--surface); border: 1px solid var(--border); padding: var(--sp-lg); }
+  .template-card h4 { font-family: var(--sg); font-size: 1rem; margin-bottom: var(--sp-xs); }
+  .template-card p { font-size: 0.82rem; color: var(--subtle); line-height: 1.6; }
+  .template-tag { display: inline-block; font-family: var(--jb); font-size: 0.65rem; color: var(--muted); border: 1px solid var(--border); padding: 2px 8px; margin-top: var(--sp-sm); margin-right: 4px; }
+</style>
+</head>
+<body class="dot-bg">
+  <nav>
+    <div class="nav-logo">RoadLoop</div>
+    <div class="nav-links">
+      <a href="#builder">Builder</a>
+      <a href="#templates">Templates</a>
+      <a href="#features">Features</a>
+      <a href="https://blackroad.io">BlackRoad OS</a>
+    </div>
+    <button class="nav-toggle" onclick="this.classList.toggle('open');document.getElementById('nav-mobile').classList.toggle('open')" aria-label="Menu"><span></span><span></span><span></span></button>
+  </nav>
+  <div id="nav-mobile" class="nav-mobile">
+    <a href="#builder" onclick="document.getElementById('nav-mobile').classList.remove('open')">Builder</a>
+    <a href="#templates" onclick="document.getElementById('nav-mobile').classList.remove('open')">Templates</a>
+    <a href="#features" onclick="document.getElementById('nav-mobile').classList.remove('open')">Features</a>
+    <a href="https://blackroad.io">BlackRoad OS</a>
+  </div>
+
+  <div class="hero">
+    <div class="section-label">Visual Automation</div>
+    <h1>Automate<br>anything.</h1>
+    <p class="hero-sub">RoadLoop is a visual workflow builder. Drag triggers, conditions, and actions together. If-this-then-that, but without the limits. Runs on your hardware. No per-execution pricing.</p>
+    <a href="#builder" class="btn-primary">Open the Builder</a>
+  </div>
+
+  <section id="builder">
+    <div class="section-label">Workflow Canvas</div>
+    <h2 style="margin-bottom:var(--sp-md);">Visual. Composable. Powerful.</h2>
+    <p style="max-width:520px;">Build workflows by connecting nodes. Every trigger, condition, and action is a building block. Chain them into anything.</p>
+    <div class="workflow-canvas">
+      <div class="wf-row">
+        <div class="wf-node trigger">TRIGGER: git push</div>
+        <span class="wf-connector">&rarr;</span>
+        <div class="wf-node condition">IF branch = main</div>
+      </div>
+      <div class="wf-row">
+        <span class="wf-connector" style="margin-left:var(--sp-xl);">&darr; yes</span>
+      </div>
+      <div class="wf-row">
+        <div class="wf-node action">RUN: build + test</div>
+        <span class="wf-connector">&rarr;</span>
+        <div class="wf-node condition">IF tests pass</div>
+      </div>
+      <div class="wf-row">
+        <span class="wf-connector" style="margin-left:var(--sp-xl);">&darr; yes</span>
+      </div>
+      <div class="wf-row">
+        <div class="wf-node action">DEPLOY to fleet</div>
+        <span class="wf-connector">&rarr;</span>
+        <div class="wf-node output">NOTIFY: chat</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="templates">
+    <div class="section-label">Templates</div>
+    <h2 style="margin-bottom:var(--sp-md);">Start from a template</h2>
+    <p style="max-width:520px;">Pre-built workflows you can deploy in one click. Customize everything after.</p>
+    <div class="template-grid">
+      <div class="template-card">
+        <h4>Deploy on push</h4>
+        <p>Push to main triggers build, test, and deploy. Rollback on failure. Notification on completion.</p>
+        <span class="template-tag">git</span><span class="template-tag">ci/cd</span><span class="template-tag">deploy</span>
+      </div>
+      <div class="template-card">
+        <h4>SSL certificate monitor</h4>
+        <p>Check all domains every 15 minutes. Alert 30 days before expiry. Auto-renew with Caddy.</p>
+        <span class="template-tag">security</span><span class="template-tag">monitoring</span>
+      </div>
+      <div class="template-card">
+        <h4>Database backup</h4>
+        <p>Nightly encrypted backup of all PostgreSQL databases. Upload to MinIO. Verify restore. Rotate old backups.</p>
+        <span class="template-tag">database</span><span class="template-tag">backup</span>
+      </div>
+      <div class="template-card">
+        <h4>Fleet health check</h4>
+        <p>Ping every node every 5 minutes. Check disk, memory, CPU, services. Alert on anomalies. Log to InfluxDB.</p>
+        <span class="template-tag">monitoring</span><span class="template-tag">fleet</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="features">
+    <div class="section-label">Features</div>
+    <h2 style="margin-bottom:var(--sp-xl);">Automation without limits</h2>
+    <div class="grid-3">
+      <div class="feature-card">
+        <div class="feature-icon">&#128312;</div>
+        <h3>Drag-and-drop</h3>
+        <p>Visual canvas. Drag nodes, draw connections, configure properties. No code required for simple workflows.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#128187;</div>
+        <h3>Code when you want</h3>
+        <p>Drop into JavaScript for custom logic. Full access to Node.js APIs. Mix visual and code nodes freely.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#128260;</div>
+        <h3>Branching + loops</h3>
+        <p>If/else branches, for-each loops, while conditions. Real programming constructs in a visual interface.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#128268;</div>
+        <h3>100+ integrations</h3>
+        <p>Every LoadRoad connector is available. Database, API, file, message queue. Connect anything.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#128202;</div>
+        <h3>Execution history</h3>
+        <p>Every run logged. Replay any execution. Inspect data at each node. Debug visually.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#128274;</div>
+        <h3>Self-hosted</h3>
+        <p>Runs on your Pi fleet. Workflows execute on your network. No cloud. No per-execution billing.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>&copy; 2026 BlackRoad OS, Inc. — Pave Tomorrow.</span>
+    <span style="display:flex;gap:var(--sp-lg);flex-wrap:wrap;">
+      <a href="https://blackroad.io" style="color:var(--muted)">Home</a>
+      <a href="https://blackroadai.com" style="color:var(--muted)">AI</a>
+      <a href="https://blackroad.network" style="color:var(--muted)">Network</a>
+    </span>
+  </footer>
+</body>
+</html>

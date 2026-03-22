@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="icon" type="image/png" sizes="32x32" href="https://images.blackroad.io/brand/br-square-32.png" />
+<link rel="icon" type="image/png" sizes="192x192" href="https://images.blackroad.io/brand/br-square-192.png" />
+<link rel="apple-touch-icon" sizes="180x180" href="https://images.blackroad.io/brand/apple-touch-icon.png" />
+<meta property="og:image" content="https://images.blackroad.io/brand/br-square-512.png" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:image" content="https://images.blackroad.io/brand/br-square-512.png" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Writing Studio — Longform writing with AI co-writer and direct publishing. Write once. Publish everywhere.">
+<meta name="theme-color" content="#FF6B2B">
+<link rel="canonical" href="https://write.blackroad.io">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://write.blackroad.io">
+<meta property="og:title" content="Writing Studio — Write once. Publish everywhere.">
+<meta property="og:description" content="Longform writing with AI co-writer, grammar analysis, SEO, and direct publishing to blog, social, and docs.">
+<meta property="og:site_name" content="BlackRoad OS">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Writing Studio","url":"https://write.blackroad.io","description":"Longform writing with AI co-writer and direct publishing.","applicationCategory":"BusinessApplication","operatingSystem":"Web"}</script>
+<title>Writing Studio — Write once. Publish everywhere.</title>
+<link rel="stylesheet" href="../_shared/design.css">
+<style>
+  .hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: var(--sp-xl) var(--sp-md);
+    position: relative; overflow: hidden;
+  }
+  @media (min-width: 768px) {
+    .hero { padding: 0 var(--sp-xl); }
+  }
+  .hero-eyebrow {
+    font-family: var(--jb); font-size: 0.75rem;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--subtle); margin-bottom: var(--sp-md);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .hero-eyebrow::before {
+    content: ''; width: 6px; height: 6px;
+    background: var(--ember); border-radius: 50%;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+  }
+  .hero h1 { max-width: 800px; margin-bottom: var(--sp-lg); }
+  .hero-sub {
+    font-size: 1.1rem; color: var(--subtle);
+    max-width: 520px; margin-bottom: var(--sp-xl); line-height: 1.7;
+  }
+  @media (min-width: 768px) {
+    .hero-sub { font-size: 1.2rem; }
+  }
+  .hero-actions { display: flex; gap: var(--sp-md); align-items: center; flex-wrap: wrap; }
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--grad); color: var(--white);
+    padding: 14px 28px; border-radius: 6px;
+    font-weight: 700; font-size: 0.95rem;
+    transition: opacity 0.2s, transform 0.2s var(--ease-spring);
+  }
+  .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+  .btn-ghost {
+    display: inline-flex; align-items: center; gap: 8px;
+    border: 1px solid var(--border); color: var(--subtle);
+    padding: 14px 28px; border-radius: 6px; font-size: 0.95rem;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .btn-ghost:hover { border-color: var(--muted); color: var(--white); }
+
+  .replaces {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--jb); font-size: 0.7rem;
+    color: var(--muted); margin-top: var(--sp-md);
+  }
+  .replaces-name { text-decoration: line-through; opacity: 0.5; }
+
+  /* Editor Mockup */
+  .editor-mockup {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    max-width: 900px;
+    margin-top: var(--sp-xl);
+  }
+  .editor-topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 16px;
+    background: var(--elevated);
+    border-bottom: 1px solid var(--border);
+  }
+  .editor-title {
+    font-family: var(--sg); font-size: 0.85rem;
+    color: var(--white); font-weight: 600;
+  }
+  .editor-wordcount {
+    font-family: var(--jb); font-size: 0.7rem;
+    color: var(--subtle);
+  }
+  .word-num {
+    background: var(--grad); -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent; background-clip: text;
+    font-weight: 700;
+  }
+  .editor-toolbar {
+    display: flex; align-items: center; gap: 2px;
+    padding: 6px 16px;
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+  }
+  .ed-tool {
+    padding: 4px 10px;
+    font-family: var(--jb); font-size: 0.7rem;
+    color: var(--muted);
+    border: 1px solid transparent;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .ed-tool:hover { color: var(--white); border-color: var(--border); }
+  .ed-tool.active { color: var(--white); border-color: var(--ember); }
+  .editor-body {
+    padding: 24px 20px;
+    min-height: 280px;
+  }
+  @media (min-width: 600px) {
+    .editor-body { padding: 32px 48px; min-height: 340px; }
+  }
+  @media (min-width: 768px) {
+    .editor-body { padding: 40px 64px; }
+  }
+  .ed-h1 {
+    font-family: var(--sg); font-size: 1.8rem;
+    font-weight: 700; color: var(--white);
+    margin-bottom: 16px; line-height: 1.15;
+  }
+  @media (min-width: 768px) {
+    .ed-h1 { font-size: 2.2rem; }
+  }
+  .ed-para {
+    font-family: var(--in); font-size: 0.95rem;
+    color: var(--subtle); line-height: 1.85;
+    margin-bottom: 16px;
+  }
+  .ed-cursor {
+    display: inline-block; width: 2px; height: 1.1em;
+    background: var(--ember);
+    animation: blink 1s step-end infinite;
+    vertical-align: text-bottom;
+  }
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+  .ed-ai-suggest {
+    color: var(--muted); font-style: italic;
+    border-left: 2px solid var(--ember);
+    padding-left: 12px;
+    opacity: 0.6;
+  }
+  .editor-status {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 16px;
+    border-top: 1px solid var(--border);
+    font-family: var(--jb); font-size: 0.65rem;
+    color: var(--muted);
+    flex-wrap: wrap; gap: 8px;
+  }
+  .grammar-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    color: #22c55e;
+  }
+  .grammar-badge::before {
+    content: ''; width: 5px; height: 5px;
+    background: #22c55e; border-radius: 50%;
+  }
+
+  /* Word count ticker */
+  .ticker-section { text-align: center; }
+  .ticker-num {
+    font-size: clamp(3rem, 8vw, 6rem);
+    font-weight: 800; font-family: var(--jb);
+    letter-spacing: -0.04em;
+    background: var(--grad); -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .ticker-label {
+    font-size: 0.9rem; color: var(--subtle); margin-top: var(--sp-xs);
+  }
+
+  /* Grammar structures */
+  .grammar-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr);
+    gap: var(--sp-xs); margin-top: var(--sp-md);
+  }
+  @media (min-width: 600px) {
+    .grammar-grid { grid-template-columns: repeat(4, 1fr); }
+  }
+  @media (min-width: 900px) {
+    .grammar-grid { grid-template-columns: repeat(7, 1fr); }
+  }
+  .grammar-tag {
+    font-family: var(--jb); font-size: 0.75rem;
+    padding: 10px; text-align: center;
+    border: 1px solid var(--border);
+    color: var(--subtle);
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .grammar-tag:hover { border-color: var(--ember); color: var(--white); }
+  .grammar-desc {
+    font-family: var(--jb); font-size: 0.6rem;
+    color: var(--muted); margin-top: 4px;
+  }
+
+  .features-grid { display: grid; grid-template-columns: 1fr; gap: var(--sp-md); }
+  @media (min-width: 600px) { .features-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 900px) { .features-grid { grid-template-columns: repeat(3, 1fr); } }
+  .feature-title { font-size: 1rem; font-weight: 600; margin-bottom: var(--sp-xs); }
+  .feature-desc { font-size: 0.875rem; color: var(--subtle); line-height: 1.65; }
+  .feature-icon {
+    font-family: var(--jb); font-size: 0.75rem; font-weight: 700;
+    margin-bottom: var(--sp-sm);
+    background: var(--grad); -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent; background-clip: text;
+  }
+
+  /* Publish targets */
+  .publish-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr);
+    gap: var(--sp-sm); margin-top: var(--sp-lg);
+  }
+  @media (min-width: 600px) {
+    .publish-grid { grid-template-columns: repeat(4, 1fr); }
+  }
+  .publish-target {
+    padding: var(--sp-md);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    text-align: center;
+    transition: border-color 0.2s;
+  }
+  .publish-target:hover { border-color: var(--muted); }
+  .pub-name {
+    font-family: var(--sg); font-size: 0.9rem;
+    font-weight: 600; color: var(--white);
+    margin-bottom: 4px;
+  }
+  .pub-desc {
+    font-family: var(--jb); font-size: 0.65rem;
+    color: var(--muted);
+  }
+
+  .cta-band {
+    background: linear-gradient(135deg, rgba(255,107,43,0.08) 0%, rgba(255,34,85,0.08) 50%, rgba(204,0,170,0.08) 100%);
+    border: 1px solid var(--border); border-radius: 10px;
+    padding: var(--sp-xl) var(--sp-md); text-align: center;
+  }
+  @media (min-width: 768px) {
+    .cta-band { padding: var(--sp-2xl) var(--sp-xl); }
+  }
+  .cta-band h2 { margin-bottom: var(--sp-md); }
+  .cta-band p { max-width: 500px; margin: 0 auto var(--sp-xl); }
+</style>
+<script src="https://blackroad-mesh.amundsonalexa.workers.dev/mesh.js" defer></script>
+</head>
+<body class="dot-bg">
+
+  <!-- Nav -->
+  <nav>
+    <div class="nav-logo">Writing Studio</div>
+    <div class="nav-links">
+      <a href="#editor">Editor</a>
+      <a href="#features">Features</a>
+      <a href="#publish">Publish</a>
+      <a href="https://blackroad.io">BlackRoad OS</a>
+    </div>
+    <a href="https://write.blackroad.io/new" class="nav-cta">Start Writing</a>
+    <button class="nav-toggle" onclick="this.classList.toggle('open');document.getElementById('nav-mobile').classList.toggle('open')" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+  <div id="nav-mobile" class="nav-mobile">
+    <a href="#editor" onclick="document.getElementById('nav-mobile').classList.remove('open')">Editor</a>
+    <a href="#features" onclick="document.getElementById('nav-mobile').classList.remove('open')">Features</a>
+    <a href="#publish" onclick="document.getElementById('nav-mobile').classList.remove('open')">Publish</a>
+    <a href="https://blackroad.io">BlackRoad OS</a>
+    <a href="https://write.blackroad.io/new" style="color:var(--white);font-weight:700;">Start Writing</a>
+  </div>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-eyebrow">Wave 2 &middot; Creator Tools</div>
+    <h1>Write once.<br>Publish everywhere.</h1>
+    <p class="hero-sub">Writing Studio is your longform editor with an AI co-writer that understands grammar at the structural level. Write, refine, and publish directly to your blog, social, and docs.</p>
+    <div class="hero-actions">
+      <a href="https://write.blackroad.io/new" class="btn-primary">Start Writing</a>
+      <a href="#features" class="btn-ghost">See Features</a>
+    </div>
+    <div class="replaces">
+      Replaces <span class="replaces-name">Google Docs</span> <span class="replaces-name">Notion</span> <span class="replaces-name">Medium</span>
+    </div>
+  </div>
+
+  <!-- Editor Mockup -->
+  <section id="editor">
+    <div class="section-label">Distraction-Free</div>
+    <h2 style="margin-bottom: var(--sp-md);">Just you and the words</h2>
+    <p style="max-width: 520px; margin-bottom: var(--sp-lg);">A clean writing surface with AI suggestions that appear only when you need them. Grammar analysis powered by Greenbaum's 7 sentence structures.</p>
+    <div class="editor-mockup">
+      <div class="editor-topbar">
+        <div class="editor-title">Building Sovereign Infrastructure</div>
+        <div class="editor-wordcount"><span class="word-num">2,847</span> words</div>
+      </div>
+      <div class="editor-toolbar">
+        <div class="ed-tool active">H1</div>
+        <div class="ed-tool">H2</div>
+        <div class="ed-tool">B</div>
+        <div class="ed-tool">I</div>
+        <div class="ed-tool">Link</div>
+        <div class="ed-tool">Code</div>
+        <div class="ed-tool">List</div>
+        <div class="ed-tool" style="margin-left:auto;">AI</div>
+      </div>
+      <div class="editor-body">
+        <div class="ed-h1">The case for owning your infrastructure</div>
+        <p class="ed-para">Every dependency is a liability. Every API call is a permission slip. The companies that survive the next decade will be the ones that own their stack from the metal up.</p>
+        <p class="ed-para">We started with five Raspberry Pis and a VPN mesh. Today we run 239 repositories, 35 agents, and 28 live websites on hardware we physically control.<span class="ed-cursor"></span></p>
+        <p class="ed-para ed-ai-suggest">Consider expanding on the cost comparison between cloud hosting and self-hosted infrastructure over a 3-year period...</p>
+      </div>
+      <div class="editor-status">
+        <span><span class="grammar-badge">Grammar OK</span> &middot; SVO structure &middot; Readability: 72</span>
+        <span>Auto-saved 2s ago</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Word Count Ticker -->
+  <section class="ticker-section">
+    <div class="section-label">Platform Total</div>
+    <div class="ticker-num" id="ticker">0</div>
+    <div class="ticker-label">words written on Writing Studio</div>
+  </section>
+  <script>
+    (function() {
+      var target = 1847293;
+      var el = document.getElementById('ticker');
+      var current = 0;
+      var steps = 60;
+      var increment = target / steps;
+      var interval = 2000 / steps;
+      var observer = new IntersectionObserver(function(entries) {
+        if (entries[0].isIntersecting) {
+          var timer = setInterval(function() {
+            current += increment;
+            if (current >= target) { current = target; clearInterval(timer); }
+            el.textContent = Math.floor(current).toLocaleString();
+          }, interval);
+          observer.disconnect();
+        }
+      });
+      observer.observe(el);
+    })();
+  </script>
+
+  <!-- Grammar -->
+  <section>
+    <div class="section-label">Grammar Engine</div>
+    <h2 style="margin-bottom: var(--sp-md);">Greenbaum's 7 structures</h2>
+    <p style="max-width: 520px; margin-bottom: var(--sp-sm);">Writing Studio doesn't just check spelling. It parses sentence structure using the 7 canonical English sentence patterns. Real grammar, not heuristics.</p>
+    <div class="grammar-grid">
+      <div class="grammar-tag">SV<div class="grammar-desc">Subject-Verb</div></div>
+      <div class="grammar-tag">SVA<div class="grammar-desc">+ Adverbial</div></div>
+      <div class="grammar-tag">SVC<div class="grammar-desc">+ Complement</div></div>
+      <div class="grammar-tag">SVO<div class="grammar-desc">+ Object</div></div>
+      <div class="grammar-tag">SVOO<div class="grammar-desc">+ 2 Objects</div></div>
+      <div class="grammar-tag">SVOA<div class="grammar-desc">+ Obj + Adv</div></div>
+      <div class="grammar-tag">SVOC<div class="grammar-desc">+ Obj + Comp</div></div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section id="features">
+    <div class="section-label">Features</div>
+    <h2 style="margin-bottom: var(--sp-xl);">Write better.<br>Ship faster.</h2>
+    <div class="features-grid">
+      <div class="card">
+        <div class="feature-icon">AI</div>
+        <div class="feature-title">AI Co-Writer</div>
+        <p class="feature-desc">Not autocomplete. A co-writer that understands your topic, voice, and intent. Suggests structure, fills gaps, and edits on request.</p>
+      </div>
+      <div class="card">
+        <div class="feature-icon">GRM</div>
+        <div class="feature-title">Structural Grammar</div>
+        <p class="feature-desc">Powered by Greenbaum and Nelson's 7 sentence structures. Identifies SV, SVO, SVOC and more. Real linguistic analysis, not pattern matching.</p>
+      </div>
+      <div class="card">
+        <div class="feature-icon">SEO</div>
+        <div class="feature-title">SEO Analysis</div>
+        <p class="feature-desc">Keyword density, readability score, meta descriptions, heading structure. Optimize for search engines without leaving the editor.</p>
+      </div>
+      <div class="card">
+        <div class="feature-icon">ZEN</div>
+        <div class="feature-title">Distraction-Free Mode</div>
+        <p class="feature-desc">Full-screen writing. Just text, a cursor, and your thoughts. All toolbars fade away. Come back when you're ready.</p>
+      </div>
+      <div class="card">
+        <div class="feature-icon">VER</div>
+        <div class="feature-title">Version History</div>
+        <p class="feature-desc">Every save is a snapshot. Compare any two versions side-by-side. Roll back without losing a single word.</p>
+      </div>
+      <div class="card">
+        <div class="feature-icon">PUB</div>
+        <div class="feature-title">One-Click Publish</div>
+        <p class="feature-desc">Blog, social media, documentation, PDF. Write once, format for each platform, publish from a single button.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Publish -->
+  <section id="publish">
+    <div class="section-label">Publish Targets</div>
+    <h2 style="margin-bottom: var(--sp-md);">Write here. Publish there.</h2>
+    <p style="max-width: 520px;">One document, every platform. Writing Studio formats and publishes directly. No copy-pasting, no reformatting.</p>
+    <div class="publish-grid">
+      <div class="publish-target">
+        <div class="pub-name">Blog</div>
+        <div class="pub-desc">Your domain</div>
+      </div>
+      <div class="publish-target">
+        <div class="pub-name">Social</div>
+        <div class="pub-desc">Thread format</div>
+      </div>
+      <div class="publish-target">
+        <div class="pub-name">Docs</div>
+        <div class="pub-desc">Technical docs</div>
+      </div>
+      <div class="publish-target">
+        <div class="pub-name">PDF</div>
+        <div class="pub-desc">Print-ready</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section>
+    <div class="cta-band">
+      <div class="section-label">Writing Studio</div>
+      <h2>Your words. Your platform.</h2>
+      <p>Stop writing for someone else's algorithm. Write for yourself, then publish everywhere with one click.</p>
+      <div style="display:flex;gap:var(--sp-md);justify-content:center;flex-wrap:wrap;">
+        <a href="https://write.blackroad.io/new" class="btn-primary">Start Writing</a>
+        <a href="https://blackroad.io" class="btn-ghost">BlackRoad OS</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <span>&copy; 2026 BlackRoad OS, Inc. All rights reserved.</span>
+    <span style="display:flex;gap:var(--sp-lg);flex-wrap:wrap;">
+      <a href="https://blackroad.io" style="color:var(--muted);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">Home</a>
+      <a href="https://blackroadai.com" style="color:var(--muted);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">AI</a>
+      <a href="https://blackroad.network" style="color:var(--muted);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">Network</a>
+      <a href="https://pricing.blackroad.io" style="color:var(--muted);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">Pricing</a>
+    </span>
+  </footer>
+
+</body>
+</html>

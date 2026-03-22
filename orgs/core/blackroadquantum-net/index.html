@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BlackRoad Quantum Network — Mesh Topology</title>
+<meta name="description" content="Quantum-inspired mesh network. See how agents coordinate across nodes in real time.">
+<meta name="theme-color" content="#000000">
+<link rel="canonical" href="https://blackroadquantum.net">
+<link rel="icon" type="image/x-icon" href="https://images.blackroad.io/brand/favicon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="https://images.blackroad.io/brand/br-square-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://images.blackroad.io/brand/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://blackroadquantum.net">
+<meta property="og:title" content="BlackRoad Quantum Network">
+<meta property="og:description" content="Quantum-inspired mesh network topology.">
+<meta property="og:image" content="https://images.blackroad.io/brand/br-square-512.png">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"BlackRoad Quantum Network","url":"https://blackroadquantum.net","description":"Quantum-inspired mesh network topology."}</script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+:root{
+  --g:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);
+  --g135:linear-gradient(135deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);
+  --bg:#000;--card:#0a0a0a;--border:#1a1a1a;--muted:#444;--sub:#737373;--text:#f5f5f5;--white:#fff;
+  --sg:'Space Grotesk',sans-serif;--jb:'JetBrains Mono',monospace
+}
+body{background:#000;color:var(--text);font-family:var(--sg);overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+::selection{background:rgba(136,68,255,.3)}
+
+.progress-bar{position:fixed;top:0;left:0;height:3px;background:var(--g);z-index:1000;width:0%;will-change:width}
+
+/* HERO */
+.hero-container{height:300vh;position:relative}
+.hero-sticky{position:sticky;top:0;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
+#hero-canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.hero-content{position:relative;z-index:1;text-align:center;will-change:transform,opacity}
+.hero-title{font-size:clamp(56px,11vw,140px);font-weight:700;letter-spacing:-.04em;line-height:.9;opacity:0}
+.hero-sub{font-size:clamp(16px,2.2vw,28px);font-weight:300;opacity:0;margin-top:28px;line-height:1.5}
+.hero-hint{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);opacity:0;font-family:var(--jb);font-size:12px;letter-spacing:.1em;text-transform:uppercase}
+.hero-hint::after{content:'';display:block;width:1px;height:40px;background:rgba(255,255,255,.2);margin:12px auto 0}
+
+/* TOPOLOGY */
+.topo-section{min-height:100vh;padding:100px 48px;position:relative}
+.topo-wrap{max-width:1200px;margin:0 auto}
+.section-label{font-family:var(--jb);font-size:11px;letter-spacing:.15em;text-transform:uppercase;opacity:.25;margin-bottom:12px}
+.section-title{font-size:clamp(32px,5vw,72px);font-weight:700;letter-spacing:-.03em;margin-bottom:16px}
+.section-desc{font-size:16px;opacity:.4;max-width:520px;line-height:1.7;margin-bottom:40px}
+#topo-canvas{width:100%;height:min(600px,65vw);border:1px solid var(--border);border-radius:16px;background:#030305;display:block;cursor:pointer}
+.topo-controls{display:flex;gap:8px;justify-content:center;margin-top:20px;flex-wrap:wrap}
+.topo-btn{padding:10px 20px;border:1px solid var(--border);border-radius:8px;background:transparent;color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--jb);transition:border-color .2s,opacity .2s;opacity:.35}
+.topo-btn:hover{opacity:.7;border-color:rgba(255,255,255,.2)}
+.topo-btn.active{opacity:.9;border-color:rgba(255,255,255,.25)}
+.topo-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-top:20px}
+.stat-card{border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center}
+.stat-val{font-size:24px;font-weight:700}
+.stat-lbl{font-family:var(--jb);font-size:10px;opacity:.2;text-transform:uppercase;letter-spacing:.08em;margin-top:6px}
+.topo-log{border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-top:16px;font-family:var(--jb);font-size:11px;opacity:.3;max-height:160px;overflow-y:auto;line-height:2}
+
+/* AGENTS (scroll-pinned) */
+.agents-container{height:400vh;position:relative}
+.agents-sticky{position:sticky;top:0;height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:0 48px}
+#agents-canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.agent-slide{position:absolute;text-align:center;opacity:0;will-change:transform,opacity;z-index:1;max-width:600px}
+.agent-name{font-size:clamp(36px,6vw,80px);font-weight:700;letter-spacing:-.03em}
+.agent-role{font-family:var(--jb);font-size:14px;opacity:.3;margin-top:8px}
+.agent-desc{font-size:16px;opacity:.35;margin-top:16px;line-height:1.7}
+.agent-stats{display:flex;gap:24px;justify-content:center;margin-top:20px}
+.agent-stat{text-align:center}
+.agent-stat-val{font-size:20px;font-weight:700}
+.agent-stat-lbl{font-family:var(--jb);font-size:9px;opacity:.2;text-transform:uppercase;margin-top:2px}
+
+/* LATENCY */
+.latency-section{min-height:100vh;padding:100px 48px;position:relative}
+.latency-wrap{max-width:900px;margin:0 auto}
+#latency-canvas{width:100%;height:300px;border:1px solid var(--border);border-radius:16px;background:#030305;display:block;margin-top:24px}
+.latency-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-top:20px}
+.latency-card{border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center;position:relative;overflow:hidden}
+.latency-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.latency-node{font-size:14px;font-weight:600;margin-bottom:4px}
+.latency-ms{font-family:var(--jb);font-size:20px;font-weight:700}
+.latency-status{font-family:var(--jb);font-size:9px;opacity:.25;text-transform:uppercase;margin-top:4px}
+
+/* FOOTER */
+.site-footer{padding:120px 48px 48px;text-align:center}
+.footer-tagline{font-size:clamp(48px,8vw,120px);font-weight:700;letter-spacing:-.04em;opacity:.15;margin-bottom:60px}
+.footer-links{display:flex;gap:32px;justify-content:center;flex-wrap:wrap;margin-bottom:32px}
+.footer-links a{font-size:14px;opacity:.3;transition:opacity .2s}
+.footer-links a:hover{opacity:.7}
+.footer-copy{font-size:12px;opacity:.15;font-family:var(--jb)}
+.eco-footer{text-align:center;padding:24px 48px;border-top:1px solid var(--border);margin-top:48px}
+.eco-footer a{font-size:11px;opacity:.2;margin:0 12px;transition:opacity .2s}
+.eco-footer a:hover{opacity:.5}
+
+@media(prefers-reduced-motion:reduce){.hero-container,.agents-container{height:auto!important}.hero-sticky,.agents-sticky{position:relative!important}}
+@media(max-width:768px){
+  .topo-section,.latency-section{padding:60px 20px}
+  .topo-stats{grid-template-columns:repeat(2,1fr)}
+  .latency-grid{grid-template-columns:repeat(2,1fr)}
+  .agents-sticky{padding:0 20px}
+  .site-footer{padding:80px 20px 32px}
+}
+</style>
+<script src="https://bb.blackroad.io/bb.js" defer></script>
+</head>
+<body>
+
+<div class="progress-bar" id="progress-bar"></div>
+
+<!-- HERO -->
+<section class="hero-container" id="hero-container">
+  <div class="hero-sticky">
+    <canvas id="hero-canvas"></canvas>
+    <div class="hero-content" id="hero-content">
+      <h1 class="hero-title" id="hero-title">Quantum Network</h1>
+      <p class="hero-sub" id="hero-sub">Watch agents coordinate across an entangled mesh — on your devices.</p>
+    </div>
+    <div class="hero-hint" id="hero-hint">Scroll to explore</div>
+  </div>
+</section>
+
+<!-- TOPOLOGY -->
+<section class="topo-section" id="topo-section">
+  <div class="topo-wrap">
+    <div class="section-label">Live Topology</div>
+    <div class="section-title">Network Map</div>
+    <div class="section-desc">Interactive mesh visualization. Click nodes to inspect. Watch messages propagate in real time across the entangled network.</div>
+    <canvas id="topo-canvas"></canvas>
+    <div class="topo-controls">
+      <button class="topo-btn active" data-layout="mesh">Mesh</button>
+      <button class="topo-btn" data-layout="ring">Ring</button>
+      <button class="topo-btn" data-layout="star">Star</button>
+      <button class="topo-btn" id="topo-ping">Ping All</button>
+      <button class="topo-btn" id="topo-broadcast">Broadcast</button>
+      <button class="topo-btn" id="topo-reset">Reset</button>
+    </div>
+    <div class="topo-stats">
+      <div class="stat-card"><div class="stat-val" id="ts-nodes">5</div><div class="stat-lbl">Nodes</div></div>
+      <div class="stat-card"><div class="stat-val" id="ts-edges">10</div><div class="stat-lbl">Links</div></div>
+      <div class="stat-card"><div class="stat-val" id="ts-msgs">0</div><div class="stat-lbl">Messages</div></div>
+      <div class="stat-card"><div class="stat-val" id="ts-latency">0ms</div><div class="stat-lbl">Avg Latency</div></div>
+      <div class="stat-card"><div class="stat-val" id="ts-uptime">100%</div><div class="stat-lbl">Uptime</div></div>
+    </div>
+    <div class="topo-log" id="topo-log">[NETWORK] Mesh initialized with 5 nodes, 10 links</div>
+  </div>
+</section>
+
+<!-- AGENTS scroll-pinned -->
+<section class="agents-container" id="agents-container">
+  <div class="agents-sticky">
+    <canvas id="agents-canvas"></canvas>
+    <div class="agent-slide" id="agent-0">
+      <div class="agent-name">Alice</div>
+      <div class="agent-role">The Gateway &mdash; 192.168.4.49</div>
+      <div class="agent-desc">Edge router, Pi-hole DNS, PostgreSQL, Qdrant vector DB. First point of contact for every request entering the mesh.</div>
+      <div class="agent-stats">
+        <div class="agent-stat"><div class="agent-stat-val">4GB</div><div class="agent-stat-lbl">RAM</div></div>
+        <div class="agent-stat"><div class="agent-stat-val">DNS</div><div class="agent-stat-lbl">Service</div></div>
+        <div class="agent-stat"><div class="agent-stat-val">49</div><div class="agent-stat-lbl">IP</div></div>
+      </div>
+    </div>
+    <div class="agent-slide" id="agent-1">
+      <div class="agent-name">Cecilia</div>
+      <div class="agent-role">The Brain &mdash; 192.168.4.96</div>
+      <div class="agent-desc">16 Ollama models, Hailo-8 accelerator at 26 TOPS. Handles all inference, embedding, and model serving for the fleet.</div>
+      <div class="agent-stats">
+        <div class="agent-stat"><div class="agent-stat-val">26</div><div class="agent-stat-lbl">TOPS</div></div>
+        <div class="agent-stat"><div class="agent-stat-val">16</div><div class="agent-stat-lbl">Models</div></div>
+        <div class="agent-stat"><div class="agent-stat-val">96</div><div class="agent-stat-lbl">IP</div></div>
+      </div>
+    </div>
+    <div class="agent-slide" id="agent-2">
+      <div class="agent-name">Octavia</div>
+      <div class="agent-role">The Architect &mdash; 192.168.4.101</div>
+      <div class="agent-desc">Gitea with 207 repos, Docker Swarm orchestrator, Hailo-8 inference. The code and container backbone of the entire system.</div>
+      <div class="agent-stats">
+        <div class="agent-stat"><div class="agent-stat-val">207</div><div class="agent-stat-lbl">Repos</div></div>
+        <div class="agent-stat"><div class="agent-stat-val">26</div><div class="agent-stat-lbl">TOPS</div></div>
+        <div class="agent-stat"><div class="agent-stat-val">101</div><div class="agent-stat-lbl">IP</div></div>
+      </div>
+    </div>
+    <div class="agent-slide" id="agent-3">
+      <div class="agent-name">Aria</div>
+      <div class="agent-role">The Interface &mdash; 192.168.4.98</div>
+      <div class="agent-desc">Frontend rendering, UX agent, webhook relay. Translates between the mesh internals and everything users touch.</div>
+      <div class="agent-stats">
+        <div class="agent-stat"><div class="agent-stat-val">4GB</div><div class="agent-stat-lbl">RAM</div></div>
+        <div class="agent-stat"><div class="agent-stat-val">UX</div><div class="agent-stat-lbl">Role</div></div>
+        <div class="agent-stat"><div class="agent-stat-val">98</div><div class="agent-stat-lbl">IP</div></div>
+      </div>
+    </div>
+    <div class="agent-slide" id="agent-4">
+      <div class="agent-name">Lucidia</div>
+      <div class="agent-role">The Dreamer &mdash; 192.168.4.38</div>
+      <div class="agent-desc">334 web apps, GitHub Actions runner, creative vision. Hosts the public face of every BlackRoad product and experiment.</div>
+      <div class="agent-stats">
+        <div class="agent-stat"><div class="agent-stat-val">334</div><div class="agent-stat-lbl">Apps</div></div>
+        <div class="agent-stat"><div class="agent-stat-val">CI</div><div class="agent-stat-lbl">Runner</div></div>
+        <div class="agent-stat"><div class="agent-stat-val">38</div><div class="agent-stat-lbl">IP</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LATENCY -->
+<section class="latency-section" id="latency-section">
+  <div class="latency-wrap">
+    <div class="section-label">Performance</div>
+    <div class="section-title">Link Latency</div>
+    <div class="section-desc">Simulated ping times across the mesh. Each node continuously measures round-trip time to every peer.</div>
+    <canvas id="latency-canvas"></canvas>
+    <div class="latency-grid" id="latency-grid"></div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="site-footer">
+  <div class="footer-tagline">Pave Tomorrow.</div>
+  <div class="footer-links">
+    <a href="https://blackroad.io">Home</a>
+    <a href="https://blackroadai.com">AI</a>
+    <a href="https://blackroadquantum.com">Quantum</a>
+    <a href="https://lucidia.earth">Lucidia</a>
+    <a href="https://blackroad.network">Network</a>
+    <a href="https://blackroad.systems">Status</a>
+    <a href="https://blackroad.company">Company</a>
+    <a href="https://brand.blackroad.io">Brand</a>
+    <a href="https://github.com/blackboxprogramming">GitHub</a>
+  </div>
+  <div class="footer-copy">&copy; 2025-2026 BlackRoad OS, Inc.</div>
+</footer>
+<div class="eco-footer">
+  <a href="https://blackroadquantum.com">Quantum</a>
+  <a href="https://blackroadquantum.info">Research</a>
+  <a href="https://blackroadquantum.shop">Hardware</a>
+  <a href="https://blackroadquantum.store">Store</a>
+  <a href="https://pricing.blackroad.io">Pricing</a>
+</div>
+
+<script>
+/* ================================================================
+   BLACKROAD QUANTUM NETWORK — MESH TOPOLOGY
+   ================================================================ */
+const GRAD = ['#FF6B2B','#FF2255','#CC00AA','#8844FF','#4488FF','#00D4FF'];
+const PI2 = Math.PI * 2;
+const lerp = (a,b,t) => a+(b-a)*t;
+const clamp = (v,lo,hi) => Math.min(hi,Math.max(lo,v));
+const getScrollProgress = el => { const r=el.getBoundingClientRect(); return clamp(-r.top/(el.offsetHeight-innerHeight),0,1); };
+
+let scrollY = 0;
+window.addEventListener('scroll', () => { scrollY = pageYOffset; }, { passive: true });
+
+function setupCanvas(cv) {
+  const dpr=Math.min(devicePixelRatio,2), r=cv.getBoundingClientRect();
+  cv.width=r.width*dpr; cv.height=r.height*dpr;
+  const ctx=cv.getContext('2d'); ctx.scale(dpr,dpr);
+  return {ctx,w:r.width,h:r.height};
+}
+
+/* ================================================================
+   NODES — real fleet data
+   ================================================================ */
+const NODES = [
+  { id:'alice',   name:'Alice',   ip:'.49',  color:'#00D4FF', x:0, y:0, targetX:0, targetY:0, pulse:0, selected:false },
+  { id:'cecilia', name:'Cecilia', ip:'.96',  color:'#CC00AA', x:0, y:0, targetX:0, targetY:0, pulse:0, selected:false },
+  { id:'octavia', name:'Octavia', ip:'.101', color:'#8844FF', x:0, y:0, targetX:0, targetY:0, pulse:0, selected:false },
+  { id:'aria',    name:'Aria',    ip:'.98',  color:'#FF2255', x:0, y:0, targetX:0, targetY:0, pulse:0, selected:false },
+  { id:'lucidia', name:'Lucidia', ip:'.38',  color:'#4488FF', x:0, y:0, targetX:0, targetY:0, pulse:0, selected:false },
+];
+const EDGES = [];
+for (let i=0;i<NODES.length;i++) for (let j=i+1;j<NODES.length;j++) EDGES.push({a:i,b:j,active:true,latency:Math.random()*8+1,packets:[]});
+
+let msgCount = 0, layout = 'mesh';
+const topoLog = document.getElementById('topo-log');
+function logMsg(msg) { topoLog.innerHTML += '\n' + msg; topoLog.scrollTop = topoLog.scrollHeight; }
+
+/* ================================================================
+   TOPOLOGY CANVAS
+   ================================================================ */
+const topoCv = document.getElementById('topo-canvas');
+let topoCtx, topoW, topoH;
+function resizeTopo() {
+  ({ctx:topoCtx, w:topoW, h:topoH} = setupCanvas(topoCv));
+  positionNodes();
+}
+
+function positionNodes() {
+  const cx=topoW/2, cy=topoH/2, r=Math.min(topoW,topoH)*0.32;
+  if (layout==='mesh') {
+    // Pentagon layout
+    NODES.forEach((n,i) => { const a=-Math.PI/2+i*(PI2/5); n.targetX=cx+Math.cos(a)*r; n.targetY=cy+Math.sin(a)*r; });
+  } else if (layout==='ring') {
+    NODES.forEach((n,i) => { const a=-Math.PI/2+i*(PI2/5); n.targetX=cx+Math.cos(a)*r; n.targetY=cy+Math.sin(a)*r; });
+  } else if (layout==='star') {
+    NODES[0].targetX=cx; NODES[0].targetY=cy;
+    for (let i=1;i<NODES.length;i++) { const a=-Math.PI/2+(i-1)*(PI2/4); NODES[i].targetX=cx+Math.cos(a)*r; NODES[i].targetY=cy+Math.sin(a)*r; }
+  }
+}
+
+let topoT = 0;
+function drawTopo() {
+  topoCtx.clearRect(0,0,topoW,topoH);
+  topoT += 0.01;
+
+  // Smooth position
+  NODES.forEach(n => { n.x=lerp(n.x,n.targetX,0.06); n.y=lerp(n.y,n.targetY,0.06); n.pulse=(n.pulse+0.02)%PI2; });
+
+  // Draw edges
+  EDGES.forEach(e => {
+    const a=NODES[e.a], b=NODES[e.b];
+    topoCtx.beginPath(); topoCtx.moveTo(a.x,a.y); topoCtx.lineTo(b.x,b.y);
+    topoCtx.strokeStyle = e.active ? 'rgba(136,68,255,0.12)' : 'rgba(255,50,50,0.08)';
+    topoCtx.lineWidth = 1; topoCtx.stroke();
+
+    // Latency label at midpoint
+    const mx=(a.x+b.x)/2, my=(a.y+b.y)/2;
+    topoCtx.fillStyle='rgba(255,255,255,0.08)';
+    topoCtx.font='400 9px "JetBrains Mono"'; topoCtx.textAlign='center'; topoCtx.textBaseline='middle';
+    topoCtx.fillText(e.latency.toFixed(1)+'ms',mx,my-8);
+
+    // Animate packets
+    for (let i=e.packets.length-1;i>=0;i--) {
+      const p=e.packets[i]; p.t+=0.015;
+      if (p.t>1) { e.packets.splice(i,1); continue; }
+      const px=lerp(a.x,b.x,p.t), py=lerp(a.y,b.y,p.t);
+      topoCtx.beginPath(); topoCtx.arc(px,py,3,0,PI2);
+      topoCtx.fillStyle=p.color; topoCtx.globalAlpha=0.6*(1-p.t); topoCtx.fill();
+    }
+    topoCtx.globalAlpha=1;
+  });
+
+  // Draw nodes
+  NODES.forEach((n,i) => {
+    const pulseR = 20 + Math.sin(n.pulse)*3;
+    // Outer ring
+    topoCtx.beginPath(); topoCtx.arc(n.x,n.y,pulseR,0,PI2);
+    topoCtx.strokeStyle=n.color+(n.selected?'60':'25'); topoCtx.lineWidth=n.selected?2:1; topoCtx.stroke();
+    // Inner glow
+    const grd=topoCtx.createRadialGradient(n.x,n.y,0,n.x,n.y,pulseR);
+    grd.addColorStop(0,n.color+'15'); grd.addColorStop(1,'transparent');
+    topoCtx.fillStyle=grd; topoCtx.beginPath(); topoCtx.arc(n.x,n.y,pulseR,0,PI2); topoCtx.fill();
+    // Core dot
+    topoCtx.beginPath(); topoCtx.arc(n.x,n.y,5,0,PI2); topoCtx.fillStyle=n.color; topoCtx.globalAlpha=0.8; topoCtx.fill();
+    topoCtx.globalAlpha=1;
+    // Label
+    topoCtx.fillStyle='rgba(255,255,255,0.5)'; topoCtx.font='600 12px "Space Grotesk"'; topoCtx.textAlign='center';
+    topoCtx.fillText(n.name,n.x,n.y+pulseR+18);
+    topoCtx.fillStyle='rgba(255,255,255,0.15)'; topoCtx.font='400 10px "JetBrains Mono"';
+    topoCtx.fillText(n.ip,n.x,n.y+pulseR+32);
+  });
+}
+
+// Click to select node
+topoCv.addEventListener('click', e => {
+  const r=topoCv.getBoundingClientRect(), mx=e.clientX-r.left, my=e.clientY-r.top;
+  NODES.forEach(n => { n.selected=false; });
+  for (const n of NODES) {
+    if (Math.hypot(mx-n.x,my-n.y)<30) {
+      n.selected=true;
+      logMsg(`[SELECT] ${n.name} (192.168.4${n.ip})`);
+      // Send packets from this node
+      EDGES.forEach(e => {
+        const idx=NODES.indexOf(n);
+        if (e.a===idx||e.b===idx) { e.packets.push({t:e.a===idx?0:1,color:n.color,dir:e.a===idx?1:-1}); if(e.a!==idx) e.packets[e.packets.length-1].t=0; }
+      });
+      msgCount++;
+      document.getElementById('ts-msgs').textContent=msgCount;
+      break;
+    }
+  }
+});
+
+// Controls
+document.querySelectorAll('.topo-btn[data-layout]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.topo-btn[data-layout]').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active'); layout=btn.dataset.layout; positionNodes();
+    logMsg(`[LAYOUT] Switched to ${layout}`);
+  });
+});
+document.getElementById('topo-ping').addEventListener('click', () => {
+  EDGES.forEach(e => { e.packets.push({t:0,color:GRAD[Math.floor(Math.random()*6)]}); e.latency=Math.random()*8+1; });
+  msgCount+=EDGES.length;
+  document.getElementById('ts-msgs').textContent=msgCount;
+  const avg=(EDGES.reduce((s,e)=>s+e.latency,0)/EDGES.length).toFixed(1);
+  document.getElementById('ts-latency').textContent=avg+'ms';
+  logMsg(`[PING] All nodes pinged, avg ${avg}ms`);
+});
+document.getElementById('topo-broadcast').addEventListener('click', () => {
+  // Cascade: Alice -> all -> all
+  let delay=0;
+  EDGES.forEach((e,i) => {
+    setTimeout(() => { e.packets.push({t:0,color:'#00D4FF'}); msgCount++; document.getElementById('ts-msgs').textContent=msgCount; }, delay);
+    delay+=120;
+  });
+  logMsg('[BROADCAST] Flooding mesh from Alice');
+});
+document.getElementById('topo-reset').addEventListener('click', () => {
+  msgCount=0; EDGES.forEach(e=>{e.packets=[];e.latency=Math.random()*8+1;});
+  document.getElementById('ts-msgs').textContent='0';
+  document.getElementById('ts-latency').textContent='0ms';
+  topoLog.innerHTML='[NETWORK] Reset';
+});
+
+resizeTopo();
+NODES.forEach(n => { n.x=n.targetX; n.y=n.targetY; });
+
+/* ================================================================
+   HERO CANVAS — Entangled particle pairs
+   ================================================================ */
+const heroCv = document.getElementById('hero-canvas');
+let heroCtx, heroW, heroH;
+function resizeHero() { ({ctx:heroCtx,w:heroW,h:heroH}=setupCanvas(heroCv)); }
+resizeHero();
+
+const entangled = [];
+for (let i=0;i<40;i++) {
+  const x=Math.random()*2000,y=Math.random()*2000;
+  entangled.push(
+    {x,y,px:x+Math.random()*200-100,py:y+Math.random()*200-100,vx:(Math.random()-.5)*.3,vy:(Math.random()-.5)*.3,c:GRAD[i%6],pair:i}
+  );
+}
+function drawHero(p) {
+  heroCtx.clearRect(0,0,heroW,heroH);
+  entangled.forEach((pt,i) => {
+    pt.x+=pt.vx; pt.y+=pt.vy;
+    if(pt.x<0)pt.x=heroW; if(pt.x>heroW)pt.x=0; if(pt.y<0)pt.y=heroH; if(pt.y>heroH)pt.y=0;
+    pt.px+=pt.vx*0.7; pt.py+=pt.vy*0.7;
+    if(pt.px<0)pt.px=heroW; if(pt.px>heroW)pt.px=0; if(pt.py<0)pt.py=heroH; if(pt.py>heroH)pt.py=0;
+    // Entanglement line
+    heroCtx.beginPath(); heroCtx.moveTo(pt.x,pt.y); heroCtx.lineTo(pt.px,pt.py);
+    heroCtx.strokeStyle=pt.c; heroCtx.globalAlpha=0.03*p; heroCtx.lineWidth=1; heroCtx.stroke();
+    // Particles
+    heroCtx.beginPath(); heroCtx.arc(pt.x,pt.y,1.5,0,PI2); heroCtx.fillStyle=pt.c; heroCtx.globalAlpha=0.15*p; heroCtx.fill();
+    heroCtx.beginPath(); heroCtx.arc(pt.px,pt.py,1,0,PI2); heroCtx.globalAlpha=0.08*p; heroCtx.fill();
+  });
+  heroCtx.globalAlpha=1;
+}
+
+/* ================================================================
+   AGENTS CANVAS — background particles
+   ================================================================ */
+const agentsCv = document.getElementById('agents-canvas');
+let agentsCtx, agentsW, agentsH;
+function resizeAgents() { ({ctx:agentsCtx,w:agentsW,h:agentsH}=setupCanvas(agentsCv)); }
+resizeAgents();
+
+const agentParticles = [];
+for(let i=0;i<60;i++) agentParticles.push({x:Math.random()*2000,y:Math.random()*2000,vx:(Math.random()-.5)*.2,vy:(Math.random()-.5)*.2,r:Math.random()+.5,c:GRAD[i%6]});
+function drawAgentsBg() {
+  agentsCtx.clearRect(0,0,agentsW,agentsH);
+  agentParticles.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0)p.x=agentsW;if(p.x>agentsW)p.x=0;if(p.y<0)p.y=agentsH;if(p.y>agentsH)p.y=0;agentsCtx.beginPath();agentsCtx.arc(p.x,p.y,p.r,0,PI2);agentsCtx.fillStyle=p.c;agentsCtx.globalAlpha=.03;agentsCtx.fill();});
+  agentsCtx.globalAlpha=1;
+}
+
+/* ================================================================
+   LATENCY CHART — rolling line graph
+   ================================================================ */
+const latCv = document.getElementById('latency-canvas');
+let latCtx, latW, latH;
+function resizeLat() { ({ctx:latCtx,w:latW,h:latH}=setupCanvas(latCv)); }
+resizeLat();
+
+const latencyHistory = NODES.map(()=>[]);
+function updateLatency() {
+  NODES.forEach((n,i) => {
+    latencyHistory[i].push(Math.random()*6+1);
+    if(latencyHistory[i].length>100) latencyHistory[i].shift();
+  });
+}
+setInterval(updateLatency,500);
+
+function drawLatency() {
+  latCtx.clearRect(0,0,latW,latH);
+  // Grid
+  for(let i=0;i<5;i++){const y=latH*i/4;latCtx.beginPath();latCtx.moveTo(0,y);latCtx.lineTo(latW,y);latCtx.strokeStyle='rgba(255,255,255,0.03)';latCtx.lineWidth=1;latCtx.stroke();}
+  // Lines
+  NODES.forEach((n,ni) => {
+    const hist=latencyHistory[ni]; if(hist.length<2)return;
+    latCtx.beginPath();
+    hist.forEach((v,i)=>{const x=i*(latW/(hist.length-1)),y=latH-v*(latH/12);if(i===0)latCtx.moveTo(x,y);else latCtx.lineTo(x,y);});
+    latCtx.strokeStyle=n.color; latCtx.globalAlpha=0.4; latCtx.lineWidth=1.5; latCtx.stroke();
+    latCtx.globalAlpha=1;
+  });
+  // Legend
+  NODES.forEach((n,i)=>{latCtx.fillStyle=n.color;latCtx.globalAlpha=.4;latCtx.font='400 10px "JetBrains Mono"';latCtx.textAlign='left';latCtx.fillText(n.name,10+i*80,latH-8);});
+  latCtx.globalAlpha=1;
+}
+
+// Latency cards
+const latGrid = document.getElementById('latency-grid');
+NODES.forEach((n,i) => {
+  const card = document.createElement('div');
+  card.className = 'latency-card';
+  card.innerHTML = `<div style="position:absolute;top:0;left:0;right:0;height:2px;background:${n.color};opacity:.3"></div><div class="latency-node">${n.name}</div><div class="latency-ms" id="lat-${i}">--</div><div class="latency-status">online</div>`;
+  latGrid.appendChild(card);
+});
+setInterval(() => {
+  NODES.forEach((n,i) => {
+    const ms = (Math.random()*6+1).toFixed(1);
+    document.getElementById('lat-'+i).textContent = ms+'ms';
+  });
+}, 2000);
+
+/* ================================================================
+   SCROLL + MAIN LOOP
+   ================================================================ */
+const progressBar = document.getElementById('progress-bar');
+
+function mainLoop() {
+  const docH=document.documentElement.scrollHeight-innerHeight;
+  progressBar.style.width=(docH>0?scrollY/docH*100:0)+'%';
+
+  // Hero
+  const heroP=getScrollProgress(document.getElementById('hero-container'));
+  const ht=document.getElementById('hero-title'), hs=document.getElementById('hero-sub'), hh=document.getElementById('hero-hint');
+  if(heroP<.15){const t=heroP/.15;ht.style.opacity=t;ht.style.transform=`translateY(${lerp(50,0,t)}px)`;}
+  else if(heroP<.5){ht.style.opacity=1;ht.style.transform='translateY(0)';}
+  else{const t=(heroP-.5)/.3;ht.style.opacity=1-t;ht.style.transform=`translateY(${lerp(0,-50,t)}px)`;}
+  if(heroP<.2)hs.style.opacity=0;else if(heroP<.35)hs.style.opacity=(heroP-.2)/.15;else if(heroP<.55)hs.style.opacity=1;else hs.style.opacity=Math.max(0,1-(heroP-.55)/.2);
+  hh.style.opacity=heroP<.05?heroP/.05*.5:heroP<.2?.5:Math.max(0,.5-(heroP-.2)*3);
+  drawHero(clamp(heroP*3,0,1));
+
+  // Agents
+  const agentsP=getScrollProgress(document.getElementById('agents-container'));
+  const quarter=.2;
+  for(let i=0;i<5;i++){
+    const el=document.getElementById('agent-'+i);
+    const start=i*quarter, peak=start+quarter*.25, end=start+quarter;
+    if(agentsP>=start&&agentsP<end){
+      let op,sc;
+      if(agentsP<peak){const t=(agentsP-start)/(peak-start);op=t;sc=lerp(.85,1,t);}
+      else if(agentsP<end-quarter*.2){op=1;sc=1;}
+      else{const t=(agentsP-(end-quarter*.2))/(quarter*.2);op=1-t;sc=lerp(1,1.05,t);}
+      el.style.opacity=op;el.style.transform=`scale(${sc})`;
+    } else el.style.opacity=0;
+  }
+  drawAgentsBg();
+
+  // Topo + Latency
+  drawTopo();
+  drawLatency();
+
+  requestAnimationFrame(mainLoop);
+}
+
+// Observer for sections
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => { if(e.isIntersecting){e.target.style.opacity='1';e.target.style.transform='translateY(0)';} });
+}, {threshold:.1});
+document.querySelectorAll('.topo-section,.latency-section').forEach(el => {
+  el.style.opacity='0'; el.style.transform='translateY(40px)'; el.style.transition='opacity .8s ease,transform .8s ease';
+  observer.observe(el);
+});
+
+let resizeTimer;
+window.addEventListener('resize',()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(()=>{resizeHero();resizeTopo();resizeAgents();resizeLat();},150);});
+
+requestAnimationFrame(mainLoop);
+
+(function(){if(!localStorage.getItem('br-consent-seen')){var b=document.createElement('div');b.id='br-consent';b.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:9999;background:#000;border-top:1px solid rgba(255,255,255,.08);padding:20px 48px;font-family:var(--sg)';b.innerHTML='<div style="max-width:900px;margin:0 auto;display:flex;align-items:center;gap:24px;flex-wrap:wrap"><div style="flex:1;min-width:280px"><div style="font-size:14px;color:#fff;font-weight:600;margin-bottom:4px">No cookies. No tracking. No data sold.</div><div style="font-size:12px;color:#fff;opacity:.4">Your data stays on your device.</div></div><div><button onclick="document.getElementById(\'br-consent\').remove();localStorage.setItem(\'br-consent-seen\',\'1\')" style="padding:10px 28px;background:#fff;color:#000;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--sg)">Got it</button></div></div>';document.body.appendChild(b)}})();
+</script>
+</body>
+</html>

@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="icon" type="image/png" sizes="32x32" href="https://images.blackroad.io/brand/br-square-32.png" />
+<link rel="icon" type="image/png" sizes="192x192" href="https://images.blackroad.io/brand/br-square-192.png" />
+<link rel="apple-touch-icon" sizes="180x180" href="https://images.blackroad.io/brand/apple-touch-icon.png" />
+<meta property="og:image" content="https://images.blackroad.io/brand/br-square-512.png" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:image" content="https://images.blackroad.io/brand/br-square-512.png" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="RoadCode — Sovereign Git hosting for BlackRoad OS. 239 repos, 8 orgs, self-hosted on your hardware. Fork of Gitea.">
+<meta name="theme-color" content="#4488FF">
+<link rel="canonical" href="https://roadcode.blackroad.io">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://roadcode.blackroad.io">
+<meta property="og:title" content="RoadCode — Sovereign Git Hosting">
+<meta property="og:description" content="239 repos. 8 orgs. Self-hosted. Your code lives on your hardware.">
+<meta property="og:site_name" content="BlackRoad OS">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"RoadCode","url":"https://roadcode.blackroad.io","description":"Sovereign Git hosting for BlackRoad OS."}</script>
+<title>RoadCode — Sovereign Git Hosting</title>
+<link rel="stylesheet" href="../_shared/design.css">
+<style>
+  /* Hero — mobile-first */
+  .hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: var(--sp-xl) var(--sp-md);
+    position: relative; overflow: hidden;
+  }
+  @media (min-width: 768px) {
+    .hero { padding: 0 var(--sp-xl); }
+  }
+  .hero-eyebrow {
+    font-family: var(--jb); font-size: 0.75rem;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--subtle); margin-bottom: var(--sp-md);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .hero-eyebrow::before {
+    content: ''; width: 6px; height: 6px;
+    background: #4488FF; border-radius: 50%;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+  }
+  .hero h1 { max-width: 800px; margin-bottom: var(--sp-lg); }
+  .hero-sub {
+    font-size: 1.1rem; color: var(--subtle);
+    max-width: 520px; margin-bottom: var(--sp-xl); line-height: 1.7;
+  }
+  @media (min-width: 768px) {
+    .hero-sub { font-size: 1.2rem; }
+  }
+  .hero-actions { display: flex; gap: var(--sp-md); align-items: center; flex-wrap: wrap; }
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--grad); color: var(--white);
+    padding: 14px 28px; border-radius: 6px;
+    font-weight: 700; font-size: 0.95rem;
+    transition: opacity 0.2s, transform 0.2s var(--ease-spring);
+  }
+  .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+  .btn-ghost {
+    display: inline-flex; align-items: center; gap: 8px;
+    border: 1px solid var(--border); color: var(--subtle);
+    padding: 14px 28px; border-radius: 6px; font-size: 0.95rem;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .btn-ghost:hover { border-color: var(--muted); color: var(--white); }
+
+  /* Stats — mobile-first */
+  .stats-row {
+    display: grid; grid-template-columns: repeat(2, 1fr);
+    gap: var(--sp-lg); text-align: center;
+  }
+  @media (min-width: 600px) {
+    .stats-row { grid-template-columns: repeat(4, 1fr); }
+  }
+  .stat-num {
+    font-size: 2.5rem; font-weight: 800;
+    font-family: var(--jb); letter-spacing: -0.04em;
+    background: var(--grad); -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  @media (min-width: 768px) {
+    .stat-num { font-size: 3rem; }
+  }
+  .stat-label { font-size: 0.8rem; color: var(--subtle); margin-top: 4px; }
+
+  /* Features — mobile-first */
+  .features-grid { display: grid; grid-template-columns: 1fr; gap: var(--sp-md); }
+  @media (min-width: 600px) { .features-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 900px) { .features-grid { grid-template-columns: repeat(3, 1fr); } }
+  .feature-title { font-size: 1rem; font-weight: 600; margin-bottom: var(--sp-xs); }
+  .feature-desc { font-size: 0.875rem; color: var(--subtle); line-height: 1.65; }
+  .feature-icon { font-size: 1.3rem; margin-bottom: var(--sp-sm); }
+
+  /* Road Fleet table — mobile-first */
+  .fleet-table {
+    width: 100%; border-collapse: collapse;
+    font-family: var(--jb); font-size: 0.78rem;
+  }
+  .fleet-table th {
+    text-align: left; padding: var(--sp-sm) var(--sp-xs);
+    color: var(--muted); font-weight: 400;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    font-size: 0.68rem; border-bottom: 1px solid var(--border);
+  }
+  .fleet-table td {
+    padding: var(--sp-sm) var(--sp-xs);
+    border-bottom: 1px solid var(--border);
+  }
+  .fleet-table tr:hover td { background: var(--surface); }
+  .fork-name { color: var(--white); font-weight: 600; }
+  .fork-upstream { color: var(--subtle); }
+  .fork-status { font-size: 0.7rem; letter-spacing: 0.08em; }
+  .fork-status.live { color: #22c55e; }
+  .fork-status.pending { color: var(--muted); }
+
+  /* Hide columns on mobile */
+  .hide-mobile { display: none; }
+  @media (min-width: 600px) { .hide-mobile { display: table-cell; } }
+
+  /* Terminal — mobile-first */
+  .terminal {
+    background: #0a0a0a; border: 1px solid var(--border);
+    border-radius: 10px; padding: var(--sp-md);
+    font-family: var(--jb); font-size: 0.75rem;
+    line-height: 1.8; overflow-x: auto;
+  }
+  @media (min-width: 768px) {
+    .terminal { padding: var(--sp-lg); font-size: 0.82rem; }
+  }
+  .terminal-bar { display: flex; gap: 6px; margin-bottom: var(--sp-md); }
+  .terminal-dot { width: 12px; height: 12px; border-radius: 50%; }
+  .t-red { background: #ff5f57; }
+  .t-yellow { background: #febc2e; }
+  .t-green { background: #28c840; }
+  .t-prompt { color: #4488FF; }
+  .t-cmd { color: var(--white); }
+  .t-out { color: var(--muted); }
+  .t-success { color: #22c55e; }
+  .t-comment { color: rgba(255,255,255,0.3); }
+
+  /* CTA */
+  .cta-band {
+    background: linear-gradient(135deg, rgba(68,136,255,0.08) 0%, rgba(136,68,255,0.08) 50%, rgba(0,212,255,0.08) 100%);
+    border: 1px solid var(--border); border-radius: 10px;
+    padding: var(--sp-xl) var(--sp-md); text-align: center;
+  }
+  @media (min-width: 768px) {
+    .cta-band { padding: var(--sp-2xl) var(--sp-xl); }
+  }
+  .cta-band h2 { margin-bottom: var(--sp-md); }
+  .cta-band p { max-width: 500px; margin: 0 auto var(--sp-xl); }
+</style>
+<script src="https://blackroad-mesh.amundsonalexa.workers.dev/mesh.js" defer></script>
+</head>
+<body class="dot-bg">
+
+  <!-- Nav -->
+  <nav>
+    <div class="nav-logo">RoadCode</div>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#fleet">Road Fleet</a>
+      <a href="#quickstart">Quick Start</a>
+      <a href="https://blackroad.io">BlackRoad OS</a>
+    </div>
+    <a href="http://192.168.4.101:3100" class="nav-cta">Open RoadCode →</a>
+    <button class="nav-toggle" onclick="this.classList.toggle('open');document.getElementById('nav-mobile').classList.toggle('open')" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+  <div id="nav-mobile" class="nav-mobile">
+    <a href="#features" onclick="document.getElementById('nav-mobile').classList.remove('open')">Features</a>
+    <a href="#fleet" onclick="document.getElementById('nav-mobile').classList.remove('open')">Road Fleet</a>
+    <a href="#quickstart" onclick="document.getElementById('nav-mobile').classList.remove('open')">Quick Start</a>
+    <a href="https://blackroad.io">BlackRoad OS</a>
+    <a href="http://192.168.4.101:3100" style="color:var(--white);font-weight:700;">Open RoadCode →</a>
+  </div>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-eyebrow">Road Fleet · Sovereign Git</div>
+    <h1>Your code.<br>Your hardware.</h1>
+    <p class="hero-sub">RoadCode is BlackRoad's sovereign Git platform. 239 repos across 8 orgs, self-hosted on Octavia. Fork of Gitea — rebranded, hardened, yours.</p>
+    <div class="hero-actions">
+      <a href="http://192.168.4.101:3100" class="btn-primary">Open RoadCode →</a>
+      <a href="#fleet" class="btn-ghost">View Road Fleet</a>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <section id="stats">
+    <div class="section-label">By the numbers</div>
+    <div class="stats-row" style="margin-top: var(--sp-lg);">
+      <div>
+        <div class="stat-num">239</div>
+        <div class="stat-label">Repositories</div>
+      </div>
+      <div>
+        <div class="stat-num">8</div>
+        <div class="stat-label">Organizations</div>
+      </div>
+      <div>
+        <div class="stat-num">12</div>
+        <div class="stat-label">Road Fleet Forks</div>
+      </div>
+      <div>
+        <div class="stat-num">0</div>
+        <div class="stat-label">External Dependencies</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section id="features">
+    <div class="section-label">Features</div>
+    <h2 style="margin-bottom: var(--sp-xl);">Everything GitHub does.<br>On your Pi.</h2>
+    <div class="features-grid">
+      <div class="card">
+        <div class="feature-icon">⚡</div>
+        <div class="feature-title">Self-Hosted</div>
+        <p class="feature-desc">Runs on Octavia (Raspberry Pi 5, 8GB). No cloud dependency. No rate limits. No surprise pricing.</p>
+      </div>
+      <div class="card">
+        <div class="feature-icon">🔄</div>
+        <div class="feature-title">GitHub Mirror</div>
+        <p class="feature-desc">Gitea is primary, GitHub is mirror. <code style="color:#4488FF;font-size:0.8em">sync-downstream --push</code> pushes to 17 GitHub orgs.</p>
+      </div>
+      <div class="card">
+        <div class="feature-icon">🏗️</div>
+        <div class="feature-title">CI/CD Built In</div>
+        <p class="feature-desc">Gitea Actions + act_runner on the Pi fleet. Self-hosted runners. Zero billable minutes.</p>
+      </div>
+      <div class="card">
+        <div class="feature-icon">🔒</div>
+        <div class="feature-title">Road Fleet Forks</div>
+        <p class="feature-desc">Every open-source dependency forked and rebranded. Gitea → RoadCode, WireGuard → TollBooth, Pi-hole → PitStop.</p>
+      </div>
+      <div class="card">
+        <div class="feature-icon">📦</div>
+        <div class="feature-title">Package Registry</div>
+        <p class="feature-desc">npm, Docker, Go modules — all served from your own hardware. No npmjs.org dependency for private packages.</p>
+      </div>
+      <div class="card">
+        <div class="feature-icon">🤖</div>
+        <div class="feature-title">Squad Webhook</div>
+        <p class="feature-desc">8 AI agents respond to @blackboxprogramming mentions. Auto-review PRs, fix issues, maintain 69+ repos.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Road Fleet Table -->
+  <section id="fleet">
+    <div class="section-label">Road Fleet</div>
+    <h2 style="margin-bottom: var(--sp-xl);">Sovereign forks</h2>
+    <div style="overflow-x: auto;">
+      <table class="fleet-table">
+        <thead>
+          <tr>
+            <th>Road Name</th>
+            <th>Replaces</th>
+            <th class="hide-mobile">Purpose</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="fork-name">RoadCode</td><td class="fork-upstream">Gitea</td><td class="hide-mobile">Git hosting + CI/CD</td><td><span class="fork-status live">LIVE</span></td></tr>
+          <tr><td class="fork-name">TollBooth</td><td class="fork-upstream">WireGuard</td><td class="hide-mobile">VPN mesh networking</td><td><span class="fork-status live">LIVE</span></td></tr>
+          <tr><td class="fork-name">PitStop</td><td class="fork-upstream">Pi-hole</td><td class="hide-mobile">DNS filtering + ad blocking</td><td><span class="fork-status live">LIVE</span></td></tr>
+          <tr><td class="fork-name">Passenger</td><td class="fork-upstream">Ollama</td><td class="hide-mobile">Local LLM inference</td><td><span class="fork-status live">LIVE</span></td></tr>
+          <tr><td class="fork-name">OneWay</td><td class="fork-upstream">Caddy</td><td class="hide-mobile">TLS edge / reverse proxy</td><td><span class="fork-status live">LIVE</span></td></tr>
+          <tr><td class="fork-name">RearView</td><td class="fork-upstream">Qdrant</td><td class="hide-mobile">Vector database / RAG</td><td><span class="fork-status live">LIVE</span></td></tr>
+          <tr><td class="fork-name">Curb</td><td class="fork-upstream">MinIO</td><td class="hide-mobile">S3-compatible object storage</td><td><span class="fork-status live">LIVE</span></td></tr>
+          <tr><td class="fork-name">RoundAbout</td><td class="fork-upstream">Headscale</td><td class="hide-mobile">Tailscale control plane</td><td><span class="fork-status pending">PENDING</span></td></tr>
+          <tr><td class="fork-name">CarPool</td><td class="fork-upstream">NATS</td><td class="hide-mobile">Pub/sub messaging</td><td><span class="fork-status live">LIVE</span></td></tr>
+          <tr><td class="fork-name">OverPass</td><td class="fork-upstream">n8n</td><td class="hide-mobile">Workflow automation</td><td><span class="fork-status pending">PENDING</span></td></tr>
+          <tr><td class="fork-name">BackRoad</td><td class="fork-upstream">Portainer</td><td class="hide-mobile">Container management</td><td><span class="fork-status pending">PENDING</span></td></tr>
+          <tr><td class="fork-name">RoadMap</td><td class="fork-upstream">Grafana</td><td class="hide-mobile">Monitoring dashboards</td><td><span class="fork-status pending">PENDING</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Terminal -->
+  <section id="quickstart">
+    <div class="section-label">Quick Start</div>
+    <div class="terminal">
+      <div class="terminal-bar">
+        <div class="terminal-dot t-red"></div>
+        <div class="terminal-dot t-yellow"></div>
+        <div class="terminal-dot t-green"></div>
+      </div>
+      <div><span class="t-comment"># clone from RoadCode (self-hosted)</span></div>
+      <div><span class="t-prompt">$</span> <span class="t-cmd">git clone git@192.168.4.101:blackroad-os/blackroad-operator.git</span></div>
+      <br>
+      <div><span class="t-comment"># or use the br CLI</span></div>
+      <div><span class="t-prompt">$</span> <span class="t-cmd">br repo-search "mesh"</span></div>
+      <div><span class="t-out">  blackroad-mesh        blackroad-os/blackroad-mesh</span></div>
+      <div><span class="t-out">  mesh-network-poc      blackroad-os/mesh-network-poc</span></div>
+      <br>
+      <div><span class="t-comment"># push to GitHub mirror</span></div>
+      <div><span class="t-prompt">$</span> <span class="t-cmd">br sync-downstream --push</span></div>
+      <div><span class="t-success">  ✓ Synced 47 repos → 17 GitHub orgs</span></div>
+      <br>
+      <div><span class="t-comment"># road fleet status</span></div>
+      <div><span class="t-prompt">$</span> <span class="t-cmd">br fleet</span></div>
+      <div><span class="t-success">  ● RoadCode     Octavia:3100   239 repos</span></div>
+      <div><span class="t-success">  ● TollBooth    12/12 peers    mesh active</span></div>
+      <div><span class="t-success">  ● PitStop      Alice:8053     120 blocked</span></div>
+      <div><span class="t-success">  ● Passenger    4 nodes        52 TOPS</span></div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section>
+    <div class="cta-band">
+      <div class="section-label">Sovereign Code</div>
+      <h2>Your repos. Your rules.</h2>
+      <p>GitHub is the mirror. RoadCode is home. Every line of code lives on hardware you control.</p>
+      <div style="display:flex;gap:var(--sp-md);justify-content:center;flex-wrap:wrap;">
+        <a href="http://192.168.4.101:3100" class="btn-primary">Open RoadCode →</a>
+        <a href="https://blackroad.io" class="btn-ghost">BlackRoad OS</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <span>© 2026 BlackRoad OS, Inc. All rights reserved.</span>
+    <span style="display:flex;gap:var(--sp-lg);flex-wrap:wrap;">
+      <a href="https://blackroad.io" style="color:var(--muted);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">Home</a>
+      <a href="https://blackroadai.com" style="color:var(--muted);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">AI</a>
+      <a href="https://blackroad.network" style="color:var(--muted);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">Network</a>
+      <a href="https://blackroad.systems" style="color:var(--muted);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">Status</a>
+      <a href="https://pricing.blackroad.io" style="color:var(--muted);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">Pricing</a>
+      <a href="https://github.com/blackboxprogramming" style="color:var(--muted);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">GitHub</a>
+    </span>
+  </footer>
+
+</body>
+</html>

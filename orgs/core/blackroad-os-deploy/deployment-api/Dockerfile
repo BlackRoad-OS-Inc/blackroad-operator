@@ -1,19 +1,24 @@
+# Stage 1: Build
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm install
+
+COPY . .
+RUN npm run build
+
+# Stage 2: Production
 FROM node:20-alpine
 
 WORKDIR /app
 
-# Install dependencies
 COPY package*.json ./
-RUN npm ci --only=production
+RUN npm install --omit=dev
 
-# Copy source
-COPY . .
+COPY --from=builder /app/dist ./dist
 
-# Build TypeScript
-RUN npm run build
-
-# Expose port
 EXPOSE 3000
 
-# Start server
 CMD ["npm", "start"]

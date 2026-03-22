@@ -7,6 +7,7 @@ Vocabulary size: 4096 tokens.
 
 import json
 import re
+import sys
 from collections import Counter
 
 
@@ -43,6 +44,11 @@ class BPETokenizer:
 
             # find most frequent pair
             top_pair = max(pairs, key=pairs.get)
+
+            # stop merging when the best pair only appears once -- no benefit
+            if pairs[top_pair] < 2:
+                break
+
             new_id = 256 + i
             self.merges[top_pair] = new_id
             self.vocab[new_id] = self.vocab[top_pair[0]] + self.vocab[top_pair[1]]
@@ -50,8 +56,9 @@ class BPETokenizer:
             # merge in token list
             tokens = self._merge(tokens, top_pair, new_id)
 
-            if (i + 1) % 500 == 0:
+            if (i + 1) % 100 == 0:
                 print(f"  merge {i + 1}/{num_merges} | vocab size: {256 + i + 1} | tokens remaining: {len(tokens)}")
+                sys.stdout.flush()
 
         # build inverse vocab
         self.inverse_vocab = {v: k for k, v in self.vocab.items()}

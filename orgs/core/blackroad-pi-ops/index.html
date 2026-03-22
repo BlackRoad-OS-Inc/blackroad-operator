@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BlackRoad Pi Ops — Fleet Operations</title>
+<meta name="description" content="Pi fleet operations guide. SSH, systemd, Docker, cron. Every node's ops playbook.">
+<meta property="og:title" content="BlackRoad Pi Ops">
+<meta property="og:description" content="Fleet operations. 5 Pi nodes, each with its own playbook.">
+<meta property="og:image" content="https://images.blackroad.io/brand/br-square-512.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://images.blackroad.io/brand/br-square-512.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://images.blackroad.io/brand/br-square-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="https://images.blackroad.io/brand/br-square-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://images.blackroad.io/brand/apple-touch-icon.png">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
+:root{
+  --g:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);
+  --g135:linear-gradient(135deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);
+  --bg:#000;
+  --card:#0a0a0a;
+  --elevated:#111;
+  --hover:#181818;
+  --border:#1a1a1a;
+  --muted:#444;
+  --sub:#737373;
+  --text:#f5f5f5;
+  --white:#fff;
+  --sg:'Space Grotesk',sans-serif;
+  --jb:'JetBrains Mono',monospace
+}
+body{background:#000;color:var(--text);font-family:var(--sg);overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+.gbar{height:3px;background:var(--g)}
+
+nav{display:flex;align-items:center;justify-content:space-between;padding:14px 48px;border-bottom:1px solid var(--border)}
+.nl{font-weight:700;font-size:18px;display:flex;align-items:center;gap:10px}
+.nm{width:28px;height:3px;border-radius:2px;background:var(--g)}
+.nk{display:flex;gap:28px}
+.nk a{font-size:13px;font-weight:500;opacity:.4;transition:opacity .2s}
+.nk a:hover{opacity:1}
+
+.hw{height:200vh;position:relative}
+.hero{position:sticky;top:0;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 24px;overflow:hidden}
+.horb{position:absolute;border-radius:50%;filter:blur(140px);opacity:.06;pointer-events:none}
+.ho1{width:500px;height:500px;background:#22c55e;top:-15%;left:5%}
+.ho2{width:400px;height:400px;background:#8844FF;bottom:-10%;right:5%}
+.hero h1{font-size:110px;font-weight:700;letter-spacing:-.04em;line-height:.95;margin-bottom:24px}
+.hero p{font-size:17px;opacity:.4;max-width:480px;line-height:1.7}
+
+/* NODES */
+.nodes{max-width:1100px;margin:0 auto;padding:80px 24px}
+.sl{font-family:var(--jb);font-size:10px;opacity:.2;letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px}
+.st{font-size:36px;font-weight:700;letter-spacing:-.02em;margin-bottom:12px}
+.sd{font-size:14px;opacity:.35;max-width:440px;margin-bottom:48px;line-height:1.7}
+
+.node-tabs{display:flex;gap:0;border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:32px}
+.ntab{padding:12px 24px;font-size:13px;font-weight:600;cursor:pointer;border-right:1px solid var(--border);opacity:.4;transition:background .2s;flex:1;text-align:center}
+.ntab:last-child{border-right:none}
+.ntab.active{background:rgba(255,255,255,.05);opacity:1}
+.ntab:hover{opacity:.7}
+
+.node-content{display:none;animation:fadeIn .3s ease}
+.node-content.active{display:block}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+.node-header{border:1px solid var(--border);border-radius:10px;padding:28px;margin-bottom:16px;position:relative;overflow:hidden}
+.node-header::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--g)}
+.nh-name{font-size:24px;font-weight:700;margin-bottom:4px}
+.nh-role{font-size:13px;opacity:.35;margin-bottom:16px}
+.nh-specs{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.nh-spec{text-align:center}
+.nh-spec-val{font-size:16px;font-weight:700;margin-bottom:2px}
+.nh-spec-lbl{font-family:var(--jb);font-size:8px;opacity:.2;letter-spacing:.06em;text-transform:uppercase}
+
+.ops-section{margin-bottom:12px}
+.ops-title{font-size:14px;font-weight:600;margin-bottom:8px;padding-top:16px}
+.ops-code{background:#0a0a0a;border:1px solid var(--border);border-radius:6px;padding:16px;font-family:var(--jb);font-size:11px;line-height:1.9;overflow-x:auto;margin-bottom:12px}
+.tp{opacity:.3}.tc{opacity:1}.to{opacity:.4}.tok{color:#22c55e}.tcmt{opacity:.15}
+
+.ops-services{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px}
+.ops-svc{border:1px solid var(--border);border-radius:6px;padding:12px;font-size:12px}
+.ops-svc-name{font-family:var(--jb);font-weight:500;margin-bottom:2px}
+.ops-svc-desc{opacity:.35;font-size:11px}
+
+footer{border-top:1px solid var(--border);max-width:1100px;margin:0 auto;padding:48px 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
+.fb{font-weight:700;font-size:15px}
+.fl{display:flex;gap:20px;flex-wrap:wrap}
+.fl a{font-size:12px;opacity:.35;transition:opacity .2s}
+.fl a:hover{opacity:1}
+.fc{font-size:11px;opacity:.15;width:100%;text-align:center;margin-top:16px}
+
+@media(max-width:900px){.nh-specs{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){nav{padding:12px 20px}.nk{display:none}.hero h1{font-size:52px}.node-tabs{flex-wrap:wrap}.nh-specs,.ops-services{grid-template-columns:1fr}footer{flex-direction:column;text-align:center}}
+</style>
+</head>
+<body>
+<div class="gbar"></div>
+
+<nav>
+  <a href="https://blackroad.io" class="nl"><div class="nm"></div>Pi Ops</a>
+  <div class="nk">
+    <a href="https://blackroad.io">Home</a>
+    <a href="https://blackroad.network">Network</a>
+    <a href="https://docs.blackroad.io">Docs</a>
+    <a href="https://github.com/blackboxprogramming">GitHub</a>
+  </div>
+</nav>
+
+<div class="hw">
+  <section class="hero">
+    <div class="horb ho1"></div>
+    <div class="horb ho2"></div>
+    <h1>Pi Ops</h1>
+    <p>Fleet operations for 5 Raspberry Pi nodes. SSH, systemd, Docker, cron. Each node has its own playbook.</p>
+  </section>
+</div>
+
+<section class="nodes">
+  <div class="sl">Fleet</div>
+  <div class="st">Select a node.</div>
+  <div class="sd">Each node runs a specific workload with tailored operations.</div>
+
+  <div class="node-tabs" id="node-tabs">
+    <div class="ntab active" data-node="alice">Alice</div>
+    <div class="ntab" data-node="cecilia">Cecilia</div>
+    <div class="ntab" data-node="octavia">Octavia</div>
+    <div class="ntab" data-node="aria">Aria</div>
+    <div class="ntab" data-node="lucidia">Lucidia</div>
+  </div>
+
+  <div class="node-content active" id="node-alice">
+    <div class="node-header"><div class="nh-name">Alice</div><div class="nh-role">The Gateway -- DNS, PostgreSQL, Qdrant, Pi-hole</div><div class="nh-specs"><div class="nh-spec"><div class="nh-spec-val">192.168.4.49</div><div class="nh-spec-lbl">IP</div></div><div class="nh-spec"><div class="nh-spec-val">8GB</div><div class="nh-spec-lbl">RAM</div></div><div class="nh-spec"><div class="nh-spec-val">Pi 5</div><div class="nh-spec-lbl">Hardware</div></div><div class="nh-spec"><div class="nh-spec-val">Bullseye</div><div class="nh-spec-lbl">OS</div></div></div></div>
+    <div class="ops-section"><div class="ops-title">SSH Access</div><div class="ops-code"><span class="tp">$</span> <span class="tc">ssh pi@192.168.4.49</span><br><span class="tp">$</span> <span class="tc">ssh alice@192.168.4.49</span>  <span class="tcmt"># NOPASSWD sudo</span></div></div>
+    <div class="ops-section"><div class="ops-title">Key Services</div><div class="ops-services"><div class="ops-svc"><div class="ops-svc-name">Pi-hole</div><div class="ops-svc-desc">DNS filtering, 120+ domains blocked</div></div><div class="ops-svc"><div class="ops-svc-name">PostgreSQL</div><div class="ops-svc-desc">Primary database server</div></div><div class="ops-svc"><div class="ops-svc-name">Qdrant</div><div class="ops-svc-desc">Vector database for RAG</div></div><div class="ops-svc"><div class="ops-svc-name">WireGuard</div><div class="ops-svc-desc">Mesh VPN endpoint</div></div></div></div>
+    <div class="ops-section"><div class="ops-title">Common Operations</div><div class="ops-code"><span class="tcmt"># check services</span><br><span class="tp">$</span> <span class="tc">sudo systemctl status pihole-FTL postgresql qdrant</span><br><br><span class="tcmt"># restart Pi-hole</span><br><span class="tp">$</span> <span class="tc">sudo systemctl restart pihole-FTL</span><br><br><span class="tcmt"># check DNS queries</span><br><span class="tp">$</span> <span class="tc">pihole -c</span></div></div>
+  </div>
+
+  <div class="node-content" id="node-cecilia">
+    <div class="node-header"><div class="nh-name">Cecilia</div><div class="nh-role">Edge Intelligence -- 16 Ollama Models, Hailo-8</div><div class="nh-specs"><div class="nh-spec"><div class="nh-spec-val">192.168.4.96</div><div class="nh-spec-lbl">IP</div></div><div class="nh-spec"><div class="nh-spec-val">8GB</div><div class="nh-spec-lbl">RAM</div></div><div class="nh-spec"><div class="nh-spec-val">Pi 5 + Hailo-8</div><div class="nh-spec-lbl">Hardware</div></div><div class="nh-spec"><div class="nh-spec-val">26 TOPS</div><div class="nh-spec-lbl">Compute</div></div></div></div>
+    <div class="ops-section"><div class="ops-title">SSH Access</div><div class="ops-code"><span class="tp">$</span> <span class="tc">ssh blackroad@192.168.4.96</span>  <span class="tcmt"># NOPASSWD sudo</span></div></div>
+    <div class="ops-section"><div class="ops-title">Key Services</div><div class="ops-services"><div class="ops-svc"><div class="ops-svc-name">Ollama</div><div class="ops-svc-desc">16 models, local inference</div></div><div class="ops-svc"><div class="ops-svc-name">Hailo-8</div><div class="ops-svc-desc">26 TOPS AI accelerator</div></div><div class="ops-svc"><div class="ops-svc-name">Embedding</div><div class="ops-svc-desc">nomic-embed-text for RAG</div></div><div class="ops-svc"><div class="ops-svc-name">MinIO</div><div class="ops-svc-desc">S3-compatible CDN storage</div></div></div></div>
+    <div class="ops-section"><div class="ops-title">Common Operations</div><div class="ops-code"><span class="tcmt"># list models</span><br><span class="tp">$</span> <span class="tc">ollama list</span><br><br><span class="tcmt"># run inference</span><br><span class="tp">$</span> <span class="tc">ollama run llama3.1:8b "explain quantum computing"</span><br><br><span class="tcmt"># check Hailo</span><br><span class="tp">$</span> <span class="tc">hailortcli fw-control identify</span></div></div>
+  </div>
+
+  <div class="node-content" id="node-octavia">
+    <div class="node-header"><div class="nh-name">Octavia</div><div class="nh-role">The Architect -- Gitea, Docker Swarm, 1TB NVMe</div><div class="nh-specs"><div class="nh-spec"><div class="nh-spec-val">192.168.4.101</div><div class="nh-spec-lbl">IP</div></div><div class="nh-spec"><div class="nh-spec-val">8GB</div><div class="nh-spec-lbl">RAM</div></div><div class="nh-spec"><div class="nh-spec-val">Pi 5 + Hailo-8</div><div class="nh-spec-lbl">Hardware</div></div><div class="nh-spec"><div class="nh-spec-val">1TB NVMe</div><div class="nh-spec-lbl">Storage</div></div></div></div>
+    <div class="ops-section"><div class="ops-title">SSH Access</div><div class="ops-code"><span class="tp">$</span> <span class="tc">ssh pi@192.168.4.101</span>  <span class="tcmt"># NOPASSWD sudo</span></div></div>
+    <div class="ops-section"><div class="ops-title">Key Services</div><div class="ops-services"><div class="ops-svc"><div class="ops-svc-name">Gitea</div><div class="ops-svc-desc">207 repos, 7 orgs, port 3100</div></div><div class="ops-svc"><div class="ops-svc-name">Docker Swarm</div><div class="ops-svc-desc">Container orchestration</div></div><div class="ops-svc"><div class="ops-svc-name">GitHub Relay</div><div class="ops-svc-desc">Auto-mirror to GitHub every 30m</div></div><div class="ops-svc"><div class="ops-svc-name">Hailo-8</div><div class="ops-svc-desc">26 TOPS AI accelerator</div></div></div></div>
+    <div class="ops-section"><div class="ops-title">Common Operations</div><div class="ops-code"><span class="tcmt"># check Gitea</span><br><span class="tp">$</span> <span class="tc">sudo systemctl status gitea</span><br><br><span class="tcmt"># Docker containers</span><br><span class="tp">$</span> <span class="tc">docker ps</span><br><br><span class="tcmt"># NVMe health</span><br><span class="tp">$</span> <span class="tc">sudo nvme smart-log /dev/nvme0</span></div></div>
+  </div>
+
+  <div class="node-content" id="node-aria">
+    <div class="node-header"><div class="nh-name">Aria</div><div class="nh-role">The Interface -- Portainer, Headscale, Orchestration</div><div class="nh-specs"><div class="nh-spec"><div class="nh-spec-val">192.168.4.98</div><div class="nh-spec-lbl">IP</div></div><div class="nh-spec"><div class="nh-spec-val">8GB</div><div class="nh-spec-lbl">RAM</div></div><div class="nh-spec"><div class="nh-spec-val">Pi 5</div><div class="nh-spec-lbl">Hardware</div></div><div class="nh-spec"><div class="nh-spec-val">Bookworm</div><div class="nh-spec-lbl">OS</div></div></div></div>
+    <div class="ops-section"><div class="ops-title">SSH Access</div><div class="ops-code"><span class="tp">$</span> <span class="tc">ssh blackroad@192.168.4.98</span></div></div>
+    <div class="ops-section"><div class="ops-title">Key Services</div><div class="ops-services"><div class="ops-svc"><div class="ops-svc-name">Portainer</div><div class="ops-svc-desc">Container management UI</div></div><div class="ops-svc"><div class="ops-svc-name">Headscale</div><div class="ops-svc-desc">Mesh VPN coordination</div></div></div></div>
+  </div>
+
+  <div class="node-content" id="node-lucidia">
+    <div class="node-header"><div class="nh-name">Lucidia</div><div class="nh-role">Memory -- 334 Web Apps, GitHub Actions</div><div class="nh-specs"><div class="nh-spec"><div class="nh-spec-val">192.168.4.38</div><div class="nh-spec-lbl">IP</div></div><div class="nh-spec"><div class="nh-spec-val">8GB</div><div class="nh-spec-lbl">RAM</div></div><div class="nh-spec"><div class="nh-spec-val">Pi 5</div><div class="nh-spec-lbl">Hardware</div></div><div class="nh-spec"><div class="nh-spec-val">Bookworm</div><div class="nh-spec-lbl">OS</div></div></div></div>
+    <div class="ops-section"><div class="ops-title">SSH Access</div><div class="ops-code"><span class="tp">$</span> <span class="tc">ssh pi@192.168.4.38</span>  <span class="tcmt"># NOPASSWD sudo</span><br><span class="tp">$</span> <span class="tc">ssh octavia@192.168.4.38</span>  <span class="tcmt"># NOPASSWD sudo</span></div></div>
+    <div class="ops-section"><div class="ops-title">Key Services</div><div class="ops-services"><div class="ops-svc"><div class="ops-svc-name">Web Apps</div><div class="ops-svc-desc">334 web applications</div></div><div class="ops-svc"><div class="ops-svc-name">GitHub Actions</div><div class="ops-svc-desc">ARM64 CI/CD runners</div></div><div class="ops-svc"><div class="ops-svc-name">UFW</div><div class="ops-svc-desc">Only node with active firewall</div></div><div class="ops-svc"><div class="ops-svc-name">PowerDNS</div><div class="ops-svc-desc">Authoritative DNS</div></div></div></div>
+    <div class="ops-section"><div class="ops-title">Known Issues</div><div class="ops-code"><span class="tcmt"># SD card degradation warning</span><br><span class="to">mmc0: Card stuck being busy! Check hardware.</span><br><span class="tcmt"># Monitor with:</span><br><span class="tp">$</span> <span class="tc">dmesg | grep mmc</span></div></div>
+  </div>
+</section>
+
+<footer>
+  <div class="fb">BlackRoad OS</div>
+  <div class="fl">
+    <a href="https://blackroad.io">Home</a>
+    <a href="https://lucidia.earth">Lucidia</a>
+    <a href="https://blackroadai.com">AI</a>
+    <a href="https://blackroad.network">Network</a>
+    <a href="https://blackroad.systems">Status</a>
+    <a href="https://blackroad.company">Company</a>
+    <a href="https://brand.blackroad.io">Brand</a>
+    <a href="https://pay.blackroad.io">Pricing</a>
+    <a href="https://github.com/blackboxprogramming">GitHub</a>
+  </div>
+  <div class="fc">&copy; 2025-2026 BlackRoad OS, Inc. All rights reserved. Pave Tomorrow.</div>
+</footer>
+<div class="gbar"></div>
+
+<script>
+document.querySelectorAll('.ntab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.node-content').forEach(c=>c.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('node-'+tab.dataset.node).classList.add('active');
+  });
+});
+</script>
+</body>
+</html>

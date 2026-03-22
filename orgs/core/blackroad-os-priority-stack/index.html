@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Priority Stack — Task Management | BlackRoad OS</title>
+<link rel="icon" type="image/x-icon" href="https://images.blackroad.io/brand/favicon.png" /><link rel="icon" type="image/png" sizes="192x192" href="https://images.blackroad.io/brand/br-square-192.png" /><link rel="apple-touch-icon" sizes="180x180" href="https://images.blackroad.io/brand/apple-touch-icon.png" /><meta property="og:image" content="https://images.blackroad.io/brand/blackroad-icon-512.png" /><meta property="og:title" content="Priority Stack — Task Management | BlackRoad OS" /><meta property="og:description" content="Stack-based task management. Push priorities, pop completions. Your task queue on your device." /><meta property="og:type" content="website" /><meta name="twitter:card" content="summary_large_image" /><meta name="twitter:image" content="https://images.blackroad.io/brand/blackroad-icon-512.png" /><meta name="description" content="Stack-based task management. Push priorities, pop completions. Your task queue on your device.">
+<style>
+
+:root{
+  --g:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);
+  --g135:linear-gradient(135deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);
+  --bg:#000;
+  --card:#0a0a0a;
+  --elevated:#111;
+  --hover:#181818;
+  --border:#1a1a1a;
+  --muted:#444;
+  --sub:#737373;
+  --text:#f5f5f5;
+  --white:#fff;
+  --sg:'Space Grotesk',sans-serif;
+  --jb:'JetBrains Mono',monospace
+}
+*{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}body{background:#000;color:var(--text);font-family:'Space Grotesk',sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}.hero{height:200vh;position:relative}.hero-pin{position:sticky;top:0;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center}.hero-title{font-size:clamp(50px,10vw,100px);font-weight:700;text-align:center;line-height:0.95;letter-spacing:-3px}.hero-sub{font-family:'JetBrains Mono',monospace;font-size:clamp(14px,1.8vw,20px);margin-top:24px;opacity:0.7;text-align:center}.grad-line{width:60%;max-width:600px;height:2px;margin:32px auto 0;background:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF)}.grid-bg{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.03) 1px,transparent 1px);background-size:60px 60px;pointer-events:none}section{padding:120px 40px;max-width:1200px;margin:0 auto}.section-label{font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:3px;text-transform:uppercase;opacity:0.5;margin-bottom:16px}.section-title{font-size:clamp(32px,5vw,56px);font-weight:700;margin-bottom:48px;line-height:1.1}
+.stack{border:1px solid rgba(255,255,255,0.12);margin-bottom:48px}
+.stack-item{padding:20px 24px;border-bottom:1px solid rgba(255,255,255,0.04);display:grid;grid-template-columns:40px 1fr 100px 80px;align-items:center;gap:16px;transition:background 0.2s;cursor:pointer}
+.stack-item:hover{background:rgba(255,255,255,0.02)}
+.stack-priority{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;opacity:0.3}
+.stack-task{font-size:15px;opacity:0.7}.stack-agent{font-family:'JetBrains Mono',monospace;font-size:12px;opacity:0.4}
+.stack-status{font-family:'JetBrains Mono',monospace;font-size:11px;opacity:0.3;text-align:right}
+.stack-actions{display:flex;gap:12px;margin-top:24px;padding:0 24px 24px}
+.stack-btn{background:transparent;border:1px solid rgba(255,255,255,0.15);color:#fff;padding:10px 24px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;cursor:pointer;transition:all 0.2s}
+.stack-btn:hover{border-color:#fff;background:rgba(255,255,255,0.04)}
+.features{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:24px;margin-top:60px}
+.feat{border:1px solid rgba(255,255,255,0.12);padding:28px}.feat-name{font-weight:700;font-size:18px;margin-bottom:8px}.feat-desc{font-size:14px;opacity:0.5;line-height:1.7}
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:24px;margin-top:60px}.stat-box{border:1px solid rgba(255,255,255,0.12);padding:24px;text-align:center}.stat-num{font-size:36px;font-weight:700;margin-bottom:4px}.stat-label{font-size:12px;font-family:'JetBrains Mono',monospace;opacity:0.4;text-transform:uppercase;letter-spacing:2px}
+footer{border-top:1px solid rgba(255,255,255,0.08);padding:60px 40px;text-align:center;margin-top:120px}footer nav{display:flex;flex-wrap:wrap;justify-content:center;gap:24px;margin-bottom:24px}footer a{color:rgba(255,255,255,0.4);text-decoration:none;font-size:14px;transition:color 0.3s}footer a:hover{color:#fff}footer p{font-size:13px;opacity:0.3}@media(max-width:768px){section{padding:80px 20px}.stack-item{grid-template-columns:1fr;gap:4px}}
+</style>
+</head>
+<body>
+<div class="hero"><div class="hero-pin"><div class="grid-bg"></div><h1 class="hero-title">Priority Stack</h1><p class="hero-sub">push tasks. pop results. your device.</p><div class="grad-line"></div></div></div>
+
+<section>
+<div class="section-label">Task Queue</div>
+<h2 class="section-title">Stack-based. Priority-ordered.</h2>
+<div class="stack" id="stack"></div>
+
+<div class="features">
+<div class="feat"><div class="feat-name">Priority Queue</div><div class="feat-desc">Tasks ordered by urgency. Critical items surface first. Background jobs wait their turn.</div></div>
+<div class="feat"><div class="feat-name">Agent Assignment</div><div class="feat-desc">Each task routes to the right agent. Octavia plans, Alice deploys, Lucidia reasons.</div></div>
+<div class="feat"><div class="feat-name">Local Storage</div><div class="feat-desc">SQLite-backed task database. No cloud sync. No third-party project management tool.</div></div>
+</div>
+
+<div class="stats-row">
+<div class="stat-box"><div class="stat-num" id="task-count">0</div><div class="stat-label">Active Tasks</div></div>
+<div class="stat-box"><div class="stat-num">5</div><div class="stat-label">Agents</div></div>
+<div class="stat-box"><div class="stat-num">SQLite</div><div class="stat-label">Storage</div></div>
+<div class="stat-box"><div class="stat-num">Local</div><div class="stat-label">Processing</div></div>
+</div>
+</section>
+
+<footer><nav><a href="https://blackroad.io">Home</a><a href="https://lucidia.earth">Lucidia</a><a href="https://blackroadai.com">AI</a><a href="https://blackroad.network">Network</a><a href="https://blackroad.systems">Cloud</a><a href="https://blackroad.company">Company</a><a href="https://pay.blackroad.io">Pricing</a><a href="https://search.blackroad.io">Search</a><a href="https://github.com/blackboxprogramming">GitHub</a></nav><p>BlackRoad OS — Pave Tomorrow.</p><p style="margin-top:8px">&copy; 2025-2026 BlackRoad OS, Inc. All rights reserved.</p></footer>
+
+<script>
+const tasks=[
+{p:'P0',task:'Deploy auth hotfix to edge',agent:'Alice',status:'running'},
+{p:'P0',task:'Rotate leaked GitHub PAT on Lucidia',agent:'Shellfish',status:'pending'},
+{p:'P1',task:'Migrate Alice to Bookworm kernel',agent:'Alice',status:'queued'},
+{p:'P1',task:'Fix Octavia DHCP reservation',agent:'Alice',status:'queued'},
+{p:'P2',task:'Rebuild FTS5 search index',agent:'Lucidia',status:'queued'},
+{p:'P2',task:'Audit 50+ SSH keys on Alice',agent:'Shellfish',status:'queued'},
+{p:'P3',task:'Update ecosystem footer links',agent:'Aria',status:'queued'},
+{p:'P3',task:'Generate new pixel art assets',agent:'Aria',status:'queued'}
+];
+function render(){document.getElementById('stack').innerHTML=tasks.map((t,i)=>`<div class="stack-item" onclick="complete(${i})"><div class="stack-priority">${t.p}</div><div class="stack-task">${t.task}</div><div class="stack-agent">${t.agent}</div><div class="stack-status">${t.status}</div></div>`).join('')+'<div class="stack-actions"><button class="stack-btn" onclick="addTask()">Push Task</button><button class="stack-btn" onclick="complete(0)">Pop Top</button></div>';document.getElementById('task-count').textContent=tasks.length}
+function complete(i){tasks.splice(i,1);render()}
+function addTask(){tasks.push({p:'P2',task:'New task added at '+new Date().toTimeString().split(' ')[0],agent:'Octavia',status:'queued'});render()}
+render();
+</script>
+</body>
+</html>

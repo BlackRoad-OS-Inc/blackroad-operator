@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BlackRoad Database</title>
+    <link rel="icon" type="image/x-icon" href="https://images.blackroad.io/brand/favicon.ico" />
+    <link rel="icon" type="image/png" sizes="192x192" href="https://images.blackroad.io/brand/blackroad-icon-192.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="https://images.blackroad.io/brand/apple-touch-icon.png" />
+    <meta property="og:image" content="https://images.blackroad.io/brand/blackroad-icon-512.png" />
+<meta name="description" content="Search everything in the BlackRoad ecosystem. Repos, agents, models, domains, scripts, workers.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --g: linear-gradient(135deg, #FF6B2B, #FF2255, #CC00AA, #8844FF, #4488FF, #00D4FF);
+  --b: #1a1a1a;
+  --jb: 'JetBrains Mono', monospace;
+  --in: 'Inter', sans-serif;
+  --sg: 'Space Grotesk', sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: #000;
+  color: #fff;
+  font-family: var(--in);
+  min-height: 100vh;
+  overflow-x: hidden;
+  line-height: 1.6;
+}
+#particle-canvas {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  z-index: 0; pointer-events: none; opacity: 0.4;
+}
+.container {
+  position: relative; z-index: 1;
+  max-width: 960px; margin: 0 auto; padding: 0 24px;
+}
+
+/* Hero */
+.hero { padding: 100px 0 40px; text-align: center; }
+.hero h1 {
+  font-family: var(--sg); font-weight: 700; font-size: 3rem;
+  background: var(--g); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text; margin-bottom: 8px;
+}
+.hero .subtitle {
+  font-family: var(--in); font-size: 1.1rem; color: #999; margin-bottom: 40px;
+}
+
+/* Search */
+.search-wrap {
+  position: relative; max-width: 720px; margin: 0 auto 24px;
+}
+.search-wrap input {
+  width: 100%; height: 56px; padding: 0 56px 0 20px;
+  background: var(--b); border: 1px solid #333; border-radius: 4px;
+  color: #fff; font-family: var(--jb); font-size: 1rem;
+  outline: none; transition: border-color 0.2s;
+}
+.search-wrap input::placeholder { color: #555; }
+.search-wrap input:focus { border-color: #8844FF; }
+.search-wrap .shortcut {
+  position: absolute; right: 16px; top: 50%; transform: translateY(-50%);
+  background: #333; color: #888; font-family: var(--jb); font-size: 0.75rem;
+  padding: 2px 8px; border-radius: 4px; pointer-events: none;
+}
+
+/* Pills */
+.pills {
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 8px;
+  max-width: 720px; margin: 0 auto 48px;
+}
+.pill {
+  font-family: var(--jb); font-size: 0.8rem; padding: 6px 16px;
+  background: transparent; border: 1px solid #333; border-radius: 4px;
+  color: #aaa; cursor: pointer; transition: all 0.2s; position: relative;
+}
+.pill:hover { border-color: #666; color: #fff; }
+.pill.active {
+  color: #fff; border-color: transparent;
+  background: var(--b);
+}
+.pill.active::after {
+  content: ''; position: absolute; bottom: -2px; left: 20%; right: 20%;
+  height: 2px; background: var(--g); border-radius: 1px;
+}
+
+/* Stats bar */
+.stats-bar {
+  display: flex; justify-content: center; gap: 32px;
+  padding: 16px 0; margin-bottom: 32px;
+  border-top: 1px solid #1f1f1f; border-bottom: 1px solid #1f1f1f;
+  font-family: var(--jb); font-size: 0.75rem; color: #666;
+}
+.stats-bar .stat-val { color: #aaa; font-weight: 500; }
+
+/* Results */
+.results-grid {
+  display: grid; grid-template-columns: 1fr;
+  gap: 16px; margin-bottom: 48px;
+}
+@media (min-width: 640px) {
+  .results-grid { grid-template-columns: 1fr 1fr; }
+}
+.card {
+  background: var(--b); border: 1px solid #2a2a2a; border-radius: 4px;
+  padding: 20px; transition: border-color 0.2s, transform 0.2s;
+  cursor: pointer; text-decoration: none; color: inherit; display: block;
+  animation: cardIn 0.3s ease-out both;
+}
+.card:hover { border-color: #444; transform: translateY(-2px); }
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.card-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 8px; }
+.card-icon { font-size: 12px; flex-shrink: 0; line-height: 1; width:28px;height:28px;border:1px solid #333;border-radius:4px;display:flex;align-items:center;justify-content:center;font-family:var(--jb);color:#888; }
+.card-name {
+  font-family: var(--sg); font-weight: 600; font-size: 1rem;
+  flex: 1; word-break: break-word;
+}
+.card-desc {
+  font-size: 0.85rem; color: #888; margin-bottom: 12px;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.card-footer { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.badge {
+  font-family: var(--jb); font-size: 0.65rem; text-transform: uppercase;
+  padding: 2px 8px; border-radius: 4px; letter-spacing: 0.05em;
+}
+.badge-repos { background: #2979FF22; color: #4488FF; border: 1px solid #2979FF44; }
+.badge-agents { background: #9C27B022; color: #BB77FF; border: 1px solid #9C27B044; }
+.badge-domains { background: #00D4FF22; color: #00D4FF; border: 1px solid #00D4FF44; }
+.badge-models { background: #FF225522; color: #FF6688; border: 1px solid #FF225544; }
+.badge-scripts { background: #F5A62322; color: #F5A623; border: 1px solid #F5A62344; }
+.badge-workers { background: #00CC6622; color: #44DD88; border: 1px solid #00CC6644; }
+.tag {
+  font-family: var(--jb); font-size: 0.6rem; color: #666;
+  padding: 1px 6px; border: 1px solid #333; border-radius: 3px;
+}
+.card-arrow {
+  margin-left: auto; color: #444; font-size: 1.1rem; flex-shrink: 0;
+}
+
+/* Browse section */
+.section-title {
+  font-family: var(--sg); font-weight: 600; font-size: 1.2rem;
+  margin-bottom: 16px; color: #ccc;
+}
+.category-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px; margin-bottom: 48px;
+}
+.cat-card {
+  background: var(--b); border: 1px solid #2a2a2a; border-radius: 4px;
+  padding: 20px 16px; text-align: center; cursor: pointer;
+  transition: border-color 0.2s, transform 0.2s;
+}
+.cat-card:hover { border-color: #555; transform: translateY(-2px); }
+.cat-icon { font-size: 14px; margin-bottom: 8px; font-family:var(--jb);width:32px;height:32px;border:1px solid #333;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;color:#888; }
+.cat-label { font-family: var(--jb); font-size: 0.75rem; color: #aaa; text-transform: uppercase; letter-spacing: 0.05em; }
+.cat-count { font-family: var(--sg); font-size: 1.5rem; font-weight: 700; color: #fff; margin-top: 4px; }
+
+/* Empty / loading states */
+.empty-state {
+  text-align: center; padding: 60px 20px; color: #555;
+}
+.empty-state .empty-icon { font-size: 3rem; margin-bottom: 16px; opacity: 0.3; }
+.empty-state p { font-size: 0.9rem; }
+.spinner {
+  width: 32px; height: 32px; border: 3px solid #333; border-top-color: #8844FF;
+  border-radius: 50%; animation: spin 0.8s linear infinite; margin: 40px auto;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Footer */
+.footer {
+  text-align: center; padding: 40px 0; color: #333;
+  font-family: var(--jb); font-size: 0.7rem;
+  border-top: 1px solid #111;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .hero { padding: 80px 0 32px; }
+  .hero h1 { font-size: 2rem; }
+  .stats-bar { gap: 16px; font-size: 0.65rem; flex-wrap: wrap; }
+  .category-grid { grid-template-columns: repeat(3, 1fr); }
+}
+</style>
+  <script src="https://blackroad-mesh.amundsonalexa.workers.dev/mesh.js" defer></script>
+</head>
+<body>
+<canvas id="particle-canvas"></canvas>
+
+<div class="container">
+  <section class="hero">
+    <h1>BlackRoad Database</h1>
+    <p class="subtitle">Search everything.</p>
+    <div class="search-wrap">
+      <input type="text" id="search" placeholder="Search repos, agents, models, domains..." autocomplete="off" spellcheck="false">
+      <span class="shortcut" id="shortcut-hint">/</span>
+    </div>
+    <div class="pills" id="pills">
+      <button class="pill active" data-type="all">All</button>
+      <button class="pill" data-type="repos">Repos</button>
+      <button class="pill" data-type="agents">Agents</button>
+      <button class="pill" data-type="domains">Domains</button>
+      <button class="pill" data-type="models">Models</button>
+      <button class="pill" data-type="scripts">Scripts</button>
+      <button class="pill" data-type="workers">Workers</button>
+    </div>
+  </section>
+
+  <div class="stats-bar" id="stats-bar">
+    <span><span class="stat-val" id="stat-total">--</span> items</span>
+    <span><span class="stat-val" id="stat-cats">--</span> categories</span>
+    <span>indexed <span class="stat-val" id="stat-last">--</span></span>
+  </div>
+
+  <div id="content">
+    <div id="browse-section">
+      <h3 class="section-title">Browse by category</h3>
+      <div class="category-grid" id="category-grid"></div>
+      <h3 class="section-title">Recently updated</h3>
+      <div class="results-grid" id="recent-grid"></div>
+    </div>
+    <div id="results-section" style="display:none;">
+      <div class="results-grid" id="results-grid"></div>
+    </div>
+    <div id="loading" style="display:none;"><div class="spinner"></div></div>
+    <div id="empty-state" style="display:none;" class="empty-state">
+      <div class="empty-icon">&#x1F50D;</div>
+      <p>No results found. Try a different search term.</p>
+    </div>
+  </div>
+
+  <div style="border-top:1px solid #111;padding:40px 0 24px;margin-top:32px">
+    <h3 class="section-title">Explore the ecosystem</h3>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px">
+      <a href="https://blackroad.io" style="display:block;padding:14px 18px;border:1px solid #111;border-radius:4px;text-decoration:none;transition:border-color .2s" onmouseover="this.style.borderColor='#333'" onmouseout="this.style.borderColor='#111'"><div style="font-family:var(--sg);font-size:13px;color:#f5f5f5;font-weight:500">Platform</div><div style="font-family:var(--jb);font-size:11px;color:#444;margin-top:2px">blackroad.io</div></a>
+      <a href="https://blackroadai.com" style="display:block;padding:14px 18px;border:1px solid #111;border-radius:4px;text-decoration:none;transition:border-color .2s" onmouseover="this.style.borderColor='#333'" onmouseout="this.style.borderColor='#111'"><div style="font-family:var(--sg);font-size:13px;color:#f5f5f5;font-weight:500">AI Platform</div><div style="font-family:var(--jb);font-size:11px;color:#444;margin-top:2px">blackroadai.com</div></a>
+      <a href="https://lucidia.earth" style="display:block;padding:14px 18px;border:1px solid #111;border-radius:4px;text-decoration:none;transition:border-color .2s" onmouseover="this.style.borderColor='#333'" onmouseout="this.style.borderColor='#111'"><div style="font-family:var(--sg);font-size:13px;color:#f5f5f5;font-weight:500">Lucidia</div><div style="font-family:var(--jb);font-size:11px;color:#444;margin-top:2px">lucidia.earth</div></a>
+      <a href="https://agents.blackroad.io" style="display:block;padding:14px 18px;border:1px solid #111;border-radius:4px;text-decoration:none;transition:border-color .2s" onmouseover="this.style.borderColor='#333'" onmouseout="this.style.borderColor='#111'"><div style="font-family:var(--sg);font-size:13px;color:#f5f5f5;font-weight:500">Agents</div><div style="font-family:var(--jb);font-size:11px;color:#444;margin-top:2px">agents.blackroad.io</div></a>
+      <a href="https://stats.blackroad.io/api/stats" style="display:block;padding:14px 18px;border:1px solid #111;border-radius:4px;text-decoration:none;transition:border-color .2s" onmouseover="this.style.borderColor='#333'" onmouseout="this.style.borderColor='#111'"><div style="font-family:var(--sg);font-size:13px;color:#f5f5f5;font-weight:500">Live Stats</div><div style="font-family:var(--jb);font-size:11px;color:#444;margin-top:2px">stats.blackroad.io</div></a>
+      <a href="https://index.blackroad.io" style="display:block;padding:14px 18px;border:1px solid #111;border-radius:4px;text-decoration:none;transition:border-color .2s" onmouseover="this.style.borderColor='#333'" onmouseout="this.style.borderColor='#111'"><div style="font-family:var(--sg);font-size:13px;color:#f5f5f5;font-weight:500">Code Index</div><div style="font-family:var(--jb);font-size:11px;color:#444;margin-top:2px">index.blackroad.io</div></a>
+      <a href="https://wiki.blackroad.io" style="display:block;padding:14px 18px;border:1px solid #111;border-radius:4px;text-decoration:none;transition:border-color .2s" onmouseover="this.style.borderColor='#333'" onmouseout="this.style.borderColor='#111'"><div style="font-family:var(--sg);font-size:13px;color:#f5f5f5;font-weight:500">Wiki</div><div style="font-family:var(--jb);font-size:11px;color:#444;margin-top:2px">wiki.blackroad.io</div></a>
+      <a href="https://showcase.blackroad.io" style="display:block;padding:14px 18px;border:1px solid #111;border-radius:4px;text-decoration:none;transition:border-color .2s" onmouseover="this.style.borderColor='#333'" onmouseout="this.style.borderColor='#111'"><div style="font-family:var(--sg);font-size:13px;color:#f5f5f5;font-weight:500">Showcase</div><div style="font-family:var(--jb);font-size:11px;color:#444;margin-top:2px">showcase.blackroad.io</div></a>
+      <a href="https://mesh.blackroad.io" style="display:block;padding:14px 18px;border:1px solid #111;border-radius:4px;text-decoration:none;transition:border-color .2s" onmouseover="this.style.borderColor='#333'" onmouseout="this.style.borderColor='#111'"><div style="font-family:var(--sg);font-size:13px;color:#f5f5f5;font-weight:500">Mesh Network</div><div style="font-family:var(--jb);font-size:11px;color:#444;margin-top:2px">mesh.blackroad.io</div></a>
+      <a href="https://roadchain.io" style="display:block;padding:14px 18px;border:1px solid #111;border-radius:4px;text-decoration:none;transition:border-color .2s" onmouseover="this.style.borderColor='#333'" onmouseout="this.style.borderColor='#111'"><div style="font-family:var(--sg);font-size:13px;color:#f5f5f5;font-weight:500">Soul Chain</div><div style="font-family:var(--jb);font-size:11px;color:#444;margin-top:2px">roadchain.io</div></a>
+      <a href="https://blackroadquantum.com" style="display:block;padding:14px 18px;border:1px solid #111;border-radius:4px;text-decoration:none;transition:border-color .2s" onmouseover="this.style.borderColor='#333'" onmouseout="this.style.borderColor='#111'"><div style="font-family:var(--sg);font-size:13px;color:#f5f5f5;font-weight:500">Quantum</div><div style="font-family:var(--jb);font-size:11px;color:#444;margin-top:2px">blackroadquantum.com</div></a>
+      <a href="https://github.com/blackboxprogramming" style="display:block;padding:14px 18px;border:1px solid #111;border-radius:4px;text-decoration:none;transition:border-color .2s" onmouseover="this.style.borderColor='#333'" onmouseout="this.style.borderColor='#111'"><div style="font-family:var(--sg);font-size:13px;color:#f5f5f5;font-weight:500">GitHub</div><div style="font-family:var(--jb);font-size:11px;color:#444;margin-top:2px">blackboxprogramming</div></a>
+    </div>
+  </div>
+
+  <div class="footer">BlackRoad OS &mdash; db.blackroad.io</div>
+</div>
+
+<script>
+const ICONS = { repos: 'R', agents: 'A', domains: 'D', models: 'M', scripts: 'S', workers: 'W' };
+let activeType = 'all';
+let debounceTimer = null;
+let statsData = null;
+
+// -- Particles --
+(function() {
+  const c = document.getElementById('particle-canvas');
+  const ctx = c.getContext('2d');
+  let w, h, particles = [];
+  function resize() { w = c.width = window.innerWidth; h = c.height = window.innerHeight; }
+  resize(); window.addEventListener('resize', resize);
+  const colors = ['#FF6B2B', '#FF2255', '#CC00AA', '#8844FF', '#4488FF', '#00D4FF'];
+  for (let i = 0; i < 60; i++) {
+    particles.push({
+      x: Math.random() * w, y: Math.random() * h,
+      r: Math.random() * 1.5 + 0.5, vx: (Math.random() - 0.5) * 0.3, vy: (Math.random() - 0.5) * 0.3,
+      color: colors[Math.floor(Math.random() * colors.length)],
+    });
+  }
+  function draw() {
+    ctx.clearRect(0, 0, w, h);
+    for (const p of particles) {
+      p.x += p.vx; p.y += p.vy;
+      if (p.x < 0) p.x = w; if (p.x > w) p.x = 0;
+      if (p.y < 0) p.y = h; if (p.y > h) p.y = 0;
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = p.color; ctx.globalAlpha = 0.5; ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// -- Keyboard shortcuts --
+document.addEventListener('keydown', e => {
+  if (e.key === '/' && document.activeElement !== document.getElementById('search')) {
+    e.preventDefault();
+    document.getElementById('search').focus();
+  }
+  if (e.key === 'Escape') {
+    const el = document.getElementById('search');
+    el.value = '';
+    el.blur();
+    showBrowse();
+  }
+});
+
+// -- Init --
+loadStats();
+
+document.getElementById('search').addEventListener('input', e => {
+  clearTimeout(debounceTimer);
+  const q = e.target.value.trim();
+  document.getElementById('shortcut-hint').textContent = q ? 'esc' : '/';
+  if (!q) { showBrowse(); return; }
+  debounceTimer = setTimeout(() => doSearch(q), 300);
+});
+
+document.getElementById('pills').addEventListener('click', e => {
+  const pill = e.target.closest('.pill');
+  if (!pill) return;
+  document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+  pill.classList.add('active');
+  activeType = pill.dataset.type;
+  const q = document.getElementById('search').value.trim();
+  if (q) doSearch(q);
+  else if (activeType !== 'all') doBrowse(activeType);
+  else showBrowse();
+});
+
+async function loadStats() {
+  try {
+    const res = await fetch('/api/stats');
+    statsData = await res.json();
+    document.getElementById('stat-total').textContent = statsData.total || 0;
+    document.getElementById('stat-cats').textContent = (statsData.categories || []).length;
+    const lastTs = statsData.lastIndexed;
+    document.getElementById('stat-last').textContent = lastTs ? new Date(lastTs * 1000).toLocaleDateString() : 'never';
+
+    // Category grid
+    const grid = document.getElementById('category-grid');
+    const types = ['repos', 'agents', 'domains', 'models', 'scripts', 'workers'];
+    grid.innerHTML = types.map(t => {
+      const cat = (statsData.categories || []).find(c => c.type === t);
+      return `<div class="cat-card" data-browse="${t}">
+        <div class="cat-icon">${ICONS[t] || ''}</div>
+        <div class="cat-label">${t}</div>
+        <div class="cat-count">${cat ? cat.count : 0}</div>
+      </div>`;
+    }).join('');
+
+    grid.addEventListener('click', e => {
+      const card = e.target.closest('.cat-card');
+      if (card) {
+        const type = card.dataset.browse;
+        document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+        document.querySelector(`.pill[data-type="${type}"]`).classList.add('active');
+        activeType = type;
+        doBrowse(type);
+      }
+    });
+
+    // Recent
+    renderCards(document.getElementById('recent-grid'), statsData.recent || []);
+  } catch (err) {
+    console.error('Stats load error:', err);
+  }
+}
+
+async function doSearch(q) {
+  showLoading();
+  try {
+    if (typeof bb !== 'undefined' && bb.track) bb.track('search', { query: q, type: activeType });
+  } catch {}
+  try {
+    const params = new URLSearchParams({ q, type: activeType, limit: '50' });
+    const res = await fetch(`/api/search?${params}`);
+    const data = await res.json();
+    if (data.results && data.results.length > 0) {
+      showResults(data.results);
+    } else {
+      showEmpty();
+    }
+  } catch (err) {
+    console.error('Search error:', err);
+    showEmpty();
+  }
+}
+
+async function doBrowse(type) {
+  showLoading();
+  try {
+    const res = await fetch(`/api/browse?type=${type}&limit=50`);
+    const data = await res.json();
+    if (data.results && data.results.length > 0) {
+      showResults(data.results);
+    } else {
+      showEmpty();
+    }
+  } catch {
+    showEmpty();
+  }
+}
+
+function showLoading() {
+  document.getElementById('browse-section').style.display = 'none';
+  document.getElementById('results-section').style.display = 'none';
+  document.getElementById('empty-state').style.display = 'none';
+  document.getElementById('loading').style.display = 'block';
+}
+
+function showBrowse() {
+  document.getElementById('browse-section').style.display = 'block';
+  document.getElementById('results-section').style.display = 'none';
+  document.getElementById('empty-state').style.display = 'none';
+  document.getElementById('loading').style.display = 'none';
+}
+
+function showResults(results) {
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('browse-section').style.display = 'none';
+  document.getElementById('empty-state').style.display = 'none';
+  const section = document.getElementById('results-section');
+  section.style.display = 'block';
+  renderCards(document.getElementById('results-grid'), results);
+}
+
+function showEmpty() {
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('browse-section').style.display = 'none';
+  document.getElementById('results-section').style.display = 'none';
+  document.getElementById('empty-state').style.display = 'block';
+}
+
+function renderCards(container, items) {
+  container.innerHTML = items.map((item, i) => {
+    const icon = item.icon || ICONS[item.type] || '';
+    const tags = (item.tags || '').split(',').filter(t => t.trim());
+    const url = item.url || '#';
+    return `<a class="card" href="${escHtml(url)}" target="_blank" rel="noopener" style="animation-delay:${i * 0.04}s">
+      <div class="card-header">
+        <span class="card-icon">${icon}</span>
+        <span class="card-name">${escHtml(item.name)}</span>
+        <span class="card-arrow">&rarr;</span>
+      </div>
+      <div class="card-desc">${escHtml(item.description || '')}</div>
+      <div class="card-footer">
+        <span class="badge badge-${item.type}">${item.type}</span>
+        ${tags.slice(0, 3).map(t => `<span class="tag">${escHtml(t.trim())}</span>`).join('')}
+      </div>
+    </a>`;
+  }).join('');
+}
+
+function escHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+</script>
+<script src="https://blackroad.io/nav.js" defer></script>
+<script src="https://blackroad.io/footer.js" defer></script>
+<script src="https://blackroad.io/fleet.js" defer></script>
+<script src="https://blackroad.io/search.js" defer></script>
+<script src="https://blackroad.io/pulse.js" defer></script>
+<script src="https://blackroad.io/related.js" defer></script>
+<script src="https://bb.blackroad.io/bb.js" defer></script>
+</body>
+</html>

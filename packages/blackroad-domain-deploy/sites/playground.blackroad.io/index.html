@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BlackRoad API Playground — Test the AI Gateway</title>
+    <link rel="icon" type="image/x-icon" href="https://images.blackroad.io/brand/favicon.ico" />
+    <link rel="icon" type="image/png" sizes="192x192" href="https://images.blackroad.io/brand/br-square-192.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="https://images.blackroad.io/brand/apple-touch-icon.png" />
+    <meta property="og:image" content="https://images.blackroad.io/brand/blackroad-icon-512.png" />
+<meta name="description" content="Interactive API playground for BlackRoad OS — test AI models, endpoints, and streaming responses in real time.">
+<meta property="og:title" content="BlackRoad API Playground — Test the AI Gateway">
+<meta property="og:description" content="Interactive API playground for BlackRoad OS — test AI models, endpoints, and streaming responses in real time.">
+<meta property="og:image" content="https://playground.blackroad.io/og.png">
+<meta property="og:url" content="https://playground.blackroad.io">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="BlackRoad API Playground — Test the AI Gateway">
+<meta name="twitter:description" content="Interactive API playground for BlackRoad OS — test AI models, endpoints, and streaming responses in real time.">
+<meta name="twitter:image" content="https://playground.blackroad.io/og.png">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%23FF6B2B'/%3E%3Cstop offset='50%25' stop-color='%23CC00AA'/%3E%3Cstop offset='100%25' stop-color='%2300D4FF'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='6' fill='%23000'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-family='sans-serif' font-weight='900' font-size='20' fill='url(%23g)'%3EB%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#000;--surface:#0a0a0a;--surface2:#111;--border:#1a1a1a;--border2:#222;
+  --text:#fff;--text2:#999;--text3:#555;
+  --g1:#FF6B2B;--g2:#FF2255;--g3:#CC00AA;--g4:#8844FF;--g5:#4488FF;--g6:#00D4FF;
+  --font-display:'Space Grotesk',sans-serif;
+  --font-code:'JetBrains Mono',monospace;
+  --font-body:'Inter',sans-serif;
+  --radius:8px;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:14px;overflow:hidden}
+canvas#particles{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
+#app{position:relative;z-index:1;display:flex;flex-direction:column;height:100vh}
+.gradient-text{background:linear-gradient(135deg,var(--g1),var(--g2),var(--g3),var(--g4),var(--g5),var(--g6));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.gradient-border{position:relative}
+.gradient-border::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,var(--g1),var(--g2),var(--g3),var(--g4),var(--g5),var(--g6))}
+.gradient-bg{background:linear-gradient(135deg,var(--g1),var(--g2),var(--g3),var(--g4),var(--g5),var(--g6))}
+
+/* Header */
+header{display:flex;align-items:center;justify-content:space-between;padding:12px 24px;border-bottom:1px solid var(--border)}
+header h1{font-family:var(--font-display);font-size:20px;font-weight:700;letter-spacing:-0.5px}
+header .badge{font-family:var(--font-code);font-size:11px;padding:3px 10px;border:1px solid var(--border2);border-radius:20px;color:var(--text2)}
+header .right{display:flex;align-items:center;gap:12px}
+
+/* Main panels */
+.panels{display:flex;flex:1;overflow:hidden}
+.panel{width:50%;display:flex;flex-direction:column;overflow:hidden}
+.panel-left{border-right:1px solid var(--border)}
+.panel-header{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid var(--border);font-family:var(--font-display);font-size:13px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:1px}
+
+/* Controls */
+.controls{padding:12px 16px;display:flex;flex-direction:column;gap:10px;border-bottom:1px solid var(--border)}
+.control-row{display:flex;gap:10px;align-items:center}
+label.ctrl-label{font-size:12px;color:var(--text2);min-width:70px;font-weight:500}
+select,input[type="text"]{background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:7px 12px;border-radius:var(--radius);font-family:var(--font-code);font-size:12px;outline:none;flex:1}
+select:focus,input[type="text"]:focus{border-color:var(--g5)}
+select optgroup{font-family:var(--font-body);font-weight:600;color:var(--text2)}
+select option{font-family:var(--font-code);color:var(--text)}
+
+/* Toggle */
+.toggle-wrap{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.toggle{width:36px;height:20px;background:var(--border2);border-radius:10px;position:relative;cursor:pointer;transition:background .2s}
+.toggle.active{background:var(--g5)}
+.toggle::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;background:#fff;border-radius:50%;transition:transform .2s}
+.toggle.active::after{transform:translateX(16px)}
+
+/* Headers section */
+.headers-toggle{display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;color:var(--text3);padding:8px 16px;border-bottom:1px solid var(--border);user-select:none}
+.headers-toggle:hover{color:var(--text2)}
+.headers-toggle .arrow{transition:transform .2s;font-size:10px}
+.headers-toggle .arrow.open{transform:rotate(90deg)}
+.headers-content{display:none;padding:10px 16px;border-bottom:1px solid var(--border);font-family:var(--font-code);font-size:12px;color:var(--text2);line-height:1.8}
+.headers-content.show{display:block}
+.headers-content .hdr-key{color:var(--g5)}
+.headers-content .hdr-val{color:var(--text)}
+
+/* Editor */
+.editor-wrap{flex:1;position:relative;overflow:hidden}
+.editor{width:100%;height:100%;background:transparent;border:none;color:var(--text);font-family:var(--font-code);font-size:13px;line-height:1.6;padding:16px;resize:none;outline:none;tab-size:2}
+.editor::placeholder{color:var(--text3)}
+
+/* Send button */
+.send-bar{padding:12px 16px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.btn-send{padding:9px 24px;border:none;border-radius:var(--radius);color:#fff;font-family:var(--font-display);font-weight:600;font-size:13px;cursor:pointer;transition:opacity .2s,transform .1s}
+.btn-send:hover{opacity:.9}
+.btn-send:active{transform:scale(.97)}
+.btn-send:disabled{opacity:.4;cursor:not-allowed}
+.btn-send .gradient-bg{border-radius:var(--radius)}
+.shortcut{font-family:var(--font-code);font-size:11px;color:var(--text3)}
+
+/* Response panel */
+.response-meta{display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--border);font-family:var(--font-code);font-size:12px;flex-wrap:wrap}
+.meta-pill{padding:3px 10px;border-radius:20px;border:1px solid var(--border2);color:var(--text2)}
+.meta-pill.status-2{border-color:#1a3a1a;color:#4ade80}
+.meta-pill.status-4,.meta-pill.status-5{border-color:#3a1a1a;color:#f87171}
+.btn-copy{background:none;border:1px solid var(--border2);color:var(--text2);padding:3px 10px;border-radius:20px;font-size:11px;font-family:var(--font-code);cursor:pointer;transition:border-color .2s}
+.btn-copy:hover{border-color:var(--text2)}
+
+.resp-headers-toggle{display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;color:var(--text3);padding:8px 16px;border-bottom:1px solid var(--border);user-select:none}
+.resp-headers-toggle:hover{color:var(--text2)}
+.resp-headers-content{display:none;padding:10px 16px;border-bottom:1px solid var(--border);font-family:var(--font-code);font-size:11px;color:var(--text2);line-height:1.8;max-height:120px;overflow-y:auto}
+.resp-headers-content.show{display:block}
+
+.response-body{flex:1;overflow-y:auto;padding:16px;font-family:var(--font-code);font-size:13px;line-height:1.6;white-space:pre-wrap;word-break:break-word}
+.response-body .json-key{color:var(--g5)}
+.response-body .json-string{color:var(--g6)}
+.response-body .json-number{color:var(--g1)}
+.response-body .json-bool{color:var(--g3)}
+.response-body .json-null{color:var(--text3)}
+.response-body .json-bracket{color:var(--text2)}
+.response-body .streaming-cursor{display:inline-block;width:2px;height:14px;background:var(--g6);animation:blink 1s infinite;vertical-align:text-bottom;margin-left:2px}
+@keyframes blink{0%,50%{opacity:1}51%,100%{opacity:0}}
+
+.placeholder-msg{color:var(--text3);font-family:var(--font-body);font-size:13px;display:flex;align-items:center;justify-content:center;height:100%;text-align:center;line-height:1.6}
+
+/* Code generation tabs */
+.codegen{border-top:1px solid var(--border);display:flex;flex-direction:column;max-height:240px}
+.codegen-tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0}
+.codegen-tab{padding:8px 16px;font-family:var(--font-code);font-size:12px;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:color .2s}
+.codegen-tab:hover{color:var(--text2)}
+.codegen-tab.active{color:var(--text);border-bottom-color:var(--g5)}
+.codegen-body{flex:1;overflow-y:auto;position:relative}
+.codegen-code{padding:12px 16px;font-family:var(--font-code);font-size:12px;line-height:1.6;color:var(--text2);white-space:pre-wrap;word-break:break-all}
+.codegen-copy{position:absolute;top:8px;right:12px}
+
+/* Bottom bar */
+.bottom-bar{display:flex;align-items:center;justify-content:space-between;padding:8px 24px;border-top:1px solid var(--border);font-family:var(--font-code);font-size:11px;color:var(--text3)}
+.bottom-bar .provider{display:flex;align-items:center;gap:6px}
+.bottom-bar .dot{width:6px;height:6px;border-radius:50%;background:var(--g6)}
+.bottom-bar .history-count{cursor:pointer}
+.bottom-bar .history-count:hover{color:var(--text2)}
+
+/* History panel */
+.history-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:10}
+.history-overlay.show{display:block}
+.history-panel{position:fixed;top:0;right:0;width:380px;height:100%;background:var(--surface);border-left:1px solid var(--border);z-index:11;display:none;flex-direction:column}
+.history-panel.show{display:flex}
+.history-panel .hdr{display:flex;align-items:center;justify-content:space-between;padding:16px;border-bottom:1px solid var(--border);font-family:var(--font-display);font-weight:600}
+.history-panel .hdr button{background:none;border:none;color:var(--text2);cursor:pointer;font-size:18px}
+.history-list{flex:1;overflow-y:auto;padding:8px}
+.history-item{padding:10px 12px;border-radius:var(--radius);cursor:pointer;margin-bottom:4px;transition:background .15s}
+.history-item:hover{background:var(--surface2)}
+.history-item .hi-method{font-family:var(--font-code);font-size:11px;color:var(--g5);font-weight:500}
+.history-item .hi-endpoint{font-family:var(--font-code);font-size:12px;color:var(--text)}
+.history-item .hi-time{font-size:11px;color:var(--text3);margin-top:4px}
+.history-item .hi-status{font-family:var(--font-code);font-size:11px;float:right}
+.history-item .hi-status.s2{color:#4ade80}
+.history-item .hi-status.s4,.history-item .hi-status.s5{color:#f87171}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--text3)}
+</style>
+<script src="https://bb.blackroad.io/bb.js" defer></script>
+  <script src="https://blackroad-mesh.amundsonalexa.workers.dev/mesh.js" defer></script>
+</head>
+<body>
+<canvas id="particles"></canvas>
+<div id="app">
+  <header class="gradient-border">
+    <h1><span class="gradient-text">BlackRoad</span> API Playground</h1>
+    <div class="right">
+      <span class="badge">v1</span>
+      <span class="badge">OpenAI-compatible</span>
+    </div>
+  </header>
+
+  <div class="panels">
+    <!-- Left: Request Editor -->
+    <div class="panel panel-left">
+      <div class="panel-header">
+        <span>Request</span>
+        <span style="font-size:11px;font-family:var(--font-code);text-transform:none;letter-spacing:0">POST</span>
+      </div>
+      <div class="controls">
+        <div class="control-row">
+          <label class="ctrl-label">Endpoint</label>
+          <select id="endpoint">
+            <option value="/v1/chat/completions">/v1/chat/completions</option>
+            <option value="/v1/models">/v1/models</option>
+            <option value="/v1/providers">/v1/providers</option>
+            <option value="/v1/fleet">/v1/fleet</option>
+          </select>
+        </div>
+        <div class="control-row">
+          <label class="ctrl-label">Model</label>
+          <select id="model">
+            <optgroup label="OpenAI">
+              <option value="gpt-4o">gpt-4o</option>
+              <option value="gpt-4o-mini">gpt-4o-mini</option>
+              <option value="gpt-4-turbo">gpt-4-turbo</option>
+              <option value="gpt-4">gpt-4</option>
+              <option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
+              <option value="o1-preview">o1-preview</option>
+              <option value="o1-mini">o1-mini</option>
+            </optgroup>
+            <optgroup label="Anthropic">
+              <option value="claude-opus-4-20250514">claude-opus-4-20250514</option>
+              <option value="claude-sonnet-4-20250514">claude-sonnet-4-20250514</option>
+              <option value="claude-3-5-haiku-20241022">claude-3-5-haiku-20241022</option>
+              <option value="claude-3-opus-20240229">claude-3-opus-20240229</option>
+            </optgroup>
+            <optgroup label="Meta (Ollama)">
+              <option value="llama3.1:70b" selected>llama3.1:70b</option>
+              <option value="llama3.1:8b">llama3.1:8b</option>
+              <option value="llama3.2:3b">llama3.2:3b</option>
+              <option value="llama3.2:1b">llama3.2:1b</option>
+            </optgroup>
+            <optgroup label="Mistral (Ollama)">
+              <option value="mistral:7b">mistral:7b</option>
+              <option value="mixtral:8x7b">mixtral:8x7b</option>
+              <option value="mistral-nemo:12b">mistral-nemo:12b</option>
+            </optgroup>
+            <optgroup label="Google">
+              <option value="gemini-1.5-pro">gemini-1.5-pro</option>
+              <option value="gemini-1.5-flash">gemini-1.5-flash</option>
+              <option value="gemini-2.0-flash">gemini-2.0-flash</option>
+            </optgroup>
+            <optgroup label="Qwen (Ollama)">
+              <option value="qwen2.5:7b">qwen2.5:7b</option>
+              <option value="qwen2.5:3b">qwen2.5:3b</option>
+              <option value="qwen2.5-coder:7b">qwen2.5-coder:7b</option>
+            </optgroup>
+            <optgroup label="Other (Ollama)">
+              <option value="deepseek-r1:7b">deepseek-r1:7b</option>
+              <option value="phi3:mini">phi3:mini</option>
+              <option value="codellama:7b">codellama:7b</option>
+              <option value="nomic-embed-text">nomic-embed-text</option>
+              <option value="all-minilm:l6-v2">all-minilm:l6-v2</option>
+            </optgroup>
+          </select>
+        </div>
+        <div class="control-row">
+          <label class="ctrl-label">API Key</label>
+          <input type="text" id="apiKey" placeholder="sk-... (optional)" spellcheck="false">
+        </div>
+        <div class="control-row">
+          <label class="ctrl-label">&nbsp;</label>
+          <div class="toggle-wrap">
+            <div class="toggle" id="streamToggle" onclick="this.classList.toggle('active');updateBody()"></div>
+            <span>Stream</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="headers-toggle" onclick="toggleHeaders()">
+        <span class="arrow" id="headersArrow">&#9654;</span>
+        <span>Request Headers</span>
+      </div>
+      <div class="headers-content" id="headersContent">
+        <div><span class="hdr-key">Content-Type:</span> <span class="hdr-val">application/json</span></div>
+        <div><span class="hdr-key">Authorization:</span> <span class="hdr-val" id="authHeaderDisplay">Bearer sk-...</span></div>
+      </div>
+
+      <div class="editor-wrap">
+        <textarea class="editor" id="requestBody" spellcheck="false" placeholder="Enter request JSON..."></textarea>
+      </div>
+
+      <div class="send-bar">
+        <button class="btn-send gradient-bg" id="sendBtn" onclick="sendRequest()">Send Request</button>
+        <span class="shortcut">&#8984;+Enter</span>
+      </div>
+    </div>
+
+    <!-- Right: Response Viewer -->
+    <div class="panel panel-right">
+      <div class="panel-header">
+        <span>Response</span>
+        <button class="btn-copy" id="copyRespBtn" onclick="copyResponse()" style="display:none">Copy</button>
+      </div>
+
+      <div class="response-meta" id="respMeta" style="display:none">
+        <span class="meta-pill" id="metaStatus"></span>
+        <span class="meta-pill" id="metaLatency"></span>
+        <span class="meta-pill" id="metaProvider"></span>
+        <span class="meta-pill" id="metaTokens"></span>
+      </div>
+
+      <div class="resp-headers-toggle" id="respHeadersToggle" onclick="toggleRespHeaders()" style="display:none">
+        <span class="arrow" id="respHeadersArrow">&#9654;</span>
+        <span>Response Headers</span>
+      </div>
+      <div class="resp-headers-content" id="respHeadersContent"></div>
+
+      <div class="response-body" id="responseBody">
+        <div class="placeholder-msg">Send a request to see the response.<br>Use &#8984;+Enter as a shortcut.</div>
+      </div>
+
+      <!-- Code generation -->
+      <div class="codegen">
+        <div class="codegen-tabs">
+          <div class="codegen-tab active" data-lang="curl" onclick="switchCodeTab(this)">cURL</div>
+          <div class="codegen-tab" data-lang="python" onclick="switchCodeTab(this)">Python</div>
+          <div class="codegen-tab" data-lang="javascript" onclick="switchCodeTab(this)">JavaScript</div>
+          <div class="codegen-tab" data-lang="go" onclick="switchCodeTab(this)">Go</div>
+        </div>
+        <div class="codegen-body">
+          <button class="btn-copy codegen-copy" onclick="copyCode()">Copy</button>
+          <pre class="codegen-code" id="codegenCode"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-bar">
+    <div class="provider">
+      <span class="dot"></span>
+      <span id="bottomProvider">Ready</span>
+    </div>
+    <div>
+      <span id="bottomLatency"></span>
+      <span class="history-count" onclick="toggleHistory()" id="historyCount" title="Request history"></span>
+    </div>
+  </div>
+</div>
+
+<!-- History panel -->
+<div class="history-overlay" id="historyOverlay" onclick="toggleHistory()"></div>
+<div class="history-panel" id="historyPanel">
+  <div class="hdr">
+    <span>Request History</span>
+    <button onclick="toggleHistory()">&times;</button>
+  </div>
+  <div class="history-list" id="historyList"></div>
+</div>
+
+<script>
+const API_BASE = 'https://api.blackroad.io';
+const MAX_HISTORY = 20;
+
+let currentResponse = '';
+let currentLang = 'curl';
+let history = JSON.parse(localStorage.getItem('br_api_history') || '[]');
+let abortController = null;
+
+// --- Init ---
+function init() {
+  initParticles();
+  updateBody();
+  updateCodegen();
+  updateHistoryCount();
+  document.getElementById('apiKey').addEventListener('input', function() {
+    document.getElementById('authHeaderDisplay').textContent = 'Bearer ' + (this.value || 'sk-...');
+    updateCodegen();
+  });
+  document.getElementById('endpoint').addEventListener('change', function() {
+    updateBody();
+    updateCodegen();
+  });
+  document.getElementById('model').addEventListener('change', function() {
+    updateBody();
+    updateCodegen();
+  });
+  document.getElementById('requestBody').addEventListener('input', updateCodegen);
+  document.addEventListener('keydown', function(e) {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+      e.preventDefault();
+      sendRequest();
+    }
+  });
+  // Auto-format JSON on paste
+  document.getElementById('requestBody').addEventListener('paste', function(e) {
+    setTimeout(() => {
+      try {
+        const parsed = JSON.parse(this.value);
+        this.value = JSON.stringify(parsed, null, 2);
+        updateCodegen();
+      } catch(_) {}
+    }, 0);
+  });
+}
+
+// --- Body templates ---
+function getDefaultBody(endpoint) {
+  const model = document.getElementById('model').value;
+  const stream = document.getElementById('streamToggle').classList.contains('active');
+  switch(endpoint) {
+    case '/v1/chat/completions':
+      return JSON.stringify({
+        model: model,
+        messages: [
+          { role: "system", content: "You are a helpful assistant." },
+          { role: "user", content: "Hello! What is BlackRoad OS?" }
+        ],
+        temperature: 0.7,
+        max_tokens: 512,
+        stream: stream
+      }, null, 2);
+    case '/v1/models':
+      return '';
+    case '/v1/providers':
+      return '';
+    case '/v1/fleet':
+      return '';
+    default:
+      return '{}';
+  }
+}
+
+function updateBody() {
+  const endpoint = document.getElementById('endpoint').value;
+  document.getElementById('requestBody').value = getDefaultBody(endpoint);
+  updateCodegen();
+}
+
+// --- Send request ---
+async function sendRequest() {
+  const endpoint = document.getElementById('endpoint').value;
+  const apiKey = document.getElementById('apiKey').value;
+  const bodyStr = document.getElementById('requestBody').value;
+  const stream = document.getElementById('streamToggle').classList.contains('active');
+  const url = API_BASE + endpoint;
+  const btn = document.getElementById('sendBtn');
+  const respBody = document.getElementById('responseBody');
+  const isBodyEndpoint = endpoint === '/v1/chat/completions';
+  const method = isBodyEndpoint ? 'POST' : 'GET';
+
+  btn.disabled = true;
+  btn.textContent = 'Sending...';
+  respBody.innerHTML = '';
+  currentResponse = '';
+  showMeta(false);
+
+  const headers = { 'Content-Type': 'application/json' };
+  if (apiKey) headers['Authorization'] = 'Bearer ' + apiKey;
+
+  const startTime = performance.now();
+  abortController = new AbortController();
+
+  try {
+    const fetchOpts = {
+      method: method,
+      headers: headers,
+      signal: abortController.signal
+    };
+    if (isBodyEndpoint && bodyStr) fetchOpts.body = bodyStr;
+
+    const resp = await fetch(url, fetchOpts);
+    const latency = Math.round(performance.now() - startTime);
+
+    // Collect response headers
+    const respHeaders = {};
+    resp.headers.forEach((v, k) => { respHeaders[k] = v; });
+
+    if (stream && isBodyEndpoint && resp.ok && resp.body) {
+      await handleStream(resp, latency, respHeaders);
+    } else {
+      const text = await resp.text();
+      const endLatency = Math.round(performance.now() - startTime);
+      let formatted;
+      try {
+        const json = JSON.parse(text);
+        formatted = text;
+        currentResponse = JSON.stringify(json, null, 2);
+      } catch(_) {
+        currentResponse = text;
+      }
+      respBody.innerHTML = highlightJSON(currentResponse || text);
+      showMetaData(resp.status, endLatency, detectProvider(currentResponse), countTokens(currentResponse), respHeaders);
+    }
+    saveHistory(endpoint, method, resp.status, Math.round(performance.now() - startTime));
+  } catch(err) {
+    if (err.name === 'AbortError') {
+      respBody.innerHTML = '<span style="color:var(--text3)">Request aborted.</span>';
+    } else {
+      // Fallback demo mode
+      const demoResp = getDemoResponse(endpoint);
+      currentResponse = JSON.stringify(demoResp, null, 2);
+      respBody.innerHTML = highlightJSON(currentResponse);
+      const latency = Math.round(performance.now() - startTime);
+      showMetaData(200, latency, 'demo', '-', { 'x-mode': 'demo-fallback' });
+      document.getElementById('bottomProvider').textContent = 'Demo mode (API unreachable)';
+      saveHistory(endpoint, method, 200, latency);
+    }
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Send Request';
+    abortController = null;
+  }
+}
+
+// --- Streaming ---
+async function handleStream(resp, initialLatency, respHeaders) {
+  const respBody = document.getElementById('responseBody');
+  const reader = resp.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+  let fullContent = '';
+  let tokenCount = 0;
+  let provider = 'unknown';
+
+  showMetaData(resp.status, initialLatency, '...', '0', respHeaders);
+  respBody.innerHTML = '';
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n');
+    buffer = lines.pop();
+
+    for (const line of lines) {
+      if (!line.startsWith('data: ')) continue;
+      const data = line.slice(6).trim();
+      if (data === '[DONE]') continue;
+      try {
+        const chunk = JSON.parse(data);
+        if (chunk.model) provider = detectProviderFromModel(chunk.model);
+        const delta = chunk.choices?.[0]?.delta?.content;
+        if (delta) {
+          fullContent += delta;
+          tokenCount++;
+          respBody.textContent = fullContent;
+          const cursor = document.createElement('span');
+          cursor.className = 'streaming-cursor';
+          respBody.appendChild(cursor);
+          respBody.scrollTop = respBody.scrollHeight;
+          document.getElementById('metaTokens').textContent = tokenCount + ' tokens';
+        }
+      } catch(_) {}
+    }
+  }
+  currentResponse = fullContent;
+  const finalLatency = Math.round(performance.now() - performance.now() + initialLatency);
+  document.getElementById('metaProvider').textContent = provider;
+  document.getElementById('bottomProvider').textContent = provider;
+}
+
+// --- JSON highlighting ---
+function highlightJSON(str) {
+  try {
+    const obj = JSON.parse(str);
+    return syntaxHighlight(JSON.stringify(obj, null, 2));
+  } catch(_) {
+    return escapeHtml(str);
+  }
+}
+
+function syntaxHighlight(json) {
+  json = escapeHtml(json);
+  return json.replace(/("(\\u[\da-fA-F]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?|\bnull\b)/g, function(match) {
+    let cls = 'json-number';
+    if (/^"/.test(match)) {
+      if (/:$/.test(match)) {
+        cls = 'json-key';
+      } else {
+        cls = 'json-string';
+      }
+    } else if (/true|false/.test(match)) {
+      cls = 'json-bool';
+    } else if (/null/.test(match)) {
+      cls = 'json-null';
+    }
+    return '<span class="' + cls + '">' + match + '</span>';
+  });
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// --- Meta display ---
+function showMeta(visible) {
+  document.getElementById('respMeta').style.display = visible ? 'flex' : 'none';
+  document.getElementById('copyRespBtn').style.display = visible ? '' : 'none';
+  document.getElementById('respHeadersToggle').style.display = visible ? '' : 'none';
+}
+
+function showMetaData(status, latency, provider, tokens, headers) {
+  showMeta(true);
+  const statusEl = document.getElementById('metaStatus');
+  statusEl.textContent = status;
+  statusEl.className = 'meta-pill status-' + String(status)[0];
+  document.getElementById('metaLatency').textContent = latency + 'ms';
+  document.getElementById('metaProvider').textContent = provider;
+  document.getElementById('metaTokens').textContent = tokens ? tokens + ' tokens' : '';
+  document.getElementById('bottomLatency').textContent = latency + 'ms';
+  document.getElementById('bottomProvider').textContent = provider;
+
+  // Response headers
+  const hdrEl = document.getElementById('respHeadersContent');
+  hdrEl.innerHTML = '';
+  if (headers && typeof headers === 'object') {
+    for (const [k, v] of Object.entries(headers)) {
+      const div = document.createElement('div');
+      div.innerHTML = '<span class="hdr-key">' + escapeHtml(k) + ':</span> ' + escapeHtml(v);
+      hdrEl.appendChild(div);
+    }
+  }
+}
+
+// --- Helpers ---
+function detectProvider(text) {
+  try {
+    const obj = JSON.parse(text);
+    if (obj.model) return detectProviderFromModel(obj.model);
+    if (obj.provider) return obj.provider;
+  } catch(_) {}
+  return 'unknown';
+}
+
+function detectProviderFromModel(m) {
+  if (!m) return 'unknown';
+  if (m.startsWith('gpt') || m.startsWith('o1')) return 'openai';
+  if (m.startsWith('claude')) return 'anthropic';
+  if (m.startsWith('gemini')) return 'google';
+  if (m.includes('llama') || m.includes('mistral') || m.includes('mixtral') || m.includes('qwen') || m.includes('deepseek') || m.includes('phi') || m.includes('codellama') || m.includes('nomic') || m.includes('minilm')) return 'ollama';
+  return m;
+}
+
+function countTokens(text) {
+  try {
+    const obj = JSON.parse(text);
+    if (obj.usage) return (obj.usage.total_tokens || obj.usage.completion_tokens || '-');
+  } catch(_) {}
+  return '-';
+}
+
+// --- Toggle helpers ---
+function toggleHeaders() {
+  document.getElementById('headersContent').classList.toggle('show');
+  document.getElementById('headersArrow').classList.toggle('open');
+}
+
+function toggleRespHeaders() {
+  document.getElementById('respHeadersContent').classList.toggle('show');
+  document.getElementById('respHeadersArrow').classList.toggle('open');
+}
+
+// --- Copy ---
+function copyResponse() {
+  navigator.clipboard.writeText(currentResponse).then(() => {
+    const btn = document.getElementById('copyRespBtn');
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 1500);
+  });
+}
+
+function copyCode() {
+  const code = document.getElementById('codegenCode').textContent;
+  navigator.clipboard.writeText(code).then(() => {
+    const btn = document.querySelector('.codegen-copy');
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 1500);
+  });
+}
+
+// --- Code generation ---
+function switchCodeTab(el) {
+  document.querySelectorAll('.codegen-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  currentLang = el.dataset.lang;
+  updateCodegen();
+}
+
+function updateCodegen() {
+  const endpoint = document.getElementById('endpoint').value;
+  const model = document.getElementById('model').value;
+  const apiKey = document.getElementById('apiKey').value || 'YOUR_API_KEY';
+  const body = document.getElementById('requestBody').value;
+  const isBody = endpoint === '/v1/chat/completions';
+  const url = API_BASE + endpoint;
+  let code = '';
+
+  switch(currentLang) {
+    case 'curl':
+      if (isBody) {
+        code = `curl -X POST '${url}' \\
+  -H 'Content-Type: application/json' \\
+  -H 'Authorization: Bearer ${apiKey}' \\
+  -d '${body.replace(/'/g, "'\\''").replace(/\n/g, '\n  ')}'`;
+      } else {
+        code = `curl '${url}' \\
+  -H 'Authorization: Bearer ${apiKey}'`;
+      }
+      break;
+    case 'python':
+      if (isBody) {
+        code = `import requests
+
+response = requests.post(
+    "${url}",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer ${apiKey}",
+    },
+    json=${pythonDict(body)},
+)
+
+print(response.json())`;
+      } else {
+        code = `import requests
+
+response = requests.get(
+    "${url}",
+    headers={"Authorization": "Bearer ${apiKey}"},
+)
+
+print(response.json())`;
+      }
+      break;
+    case 'javascript':
+      if (isBody) {
+        code = `const response = await fetch("${url}", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    "Authorization": "Bearer ${apiKey}",
+  },
+  body: JSON.stringify(${body.trim() || '{}'}),
+});
+
+const data = await response.json();
+console.log(data);`;
+      } else {
+        code = `const response = await fetch("${url}", {
+  headers: { "Authorization": "Bearer ${apiKey}" },
+});
+
+const data = await response.json();
+console.log(data);`;
+      }
+      break;
+    case 'go':
+      if (isBody) {
+        code = `package main
+
+import (
+\t"bytes"
+\t"encoding/json"
+\t"fmt"
+\t"io"
+\t"net/http"
+)
+
+func main() {
+\tbody := []byte(\`${body.trim()}\`)
+\treq, _ := http.NewRequest("POST", "${url}", bytes.NewBuffer(body))
+\treq.Header.Set("Content-Type", "application/json")
+\treq.Header.Set("Authorization", "Bearer ${apiKey}")
+
+\tclient := &http.Client{}
+\tresp, err := client.Do(req)
+\tif err != nil {
+\t\tpanic(err)
+\t}
+\tdefer resp.Body.Close()
+
+\tdata, _ := io.ReadAll(resp.Body)
+\tvar result map[string]interface{}
+\tjson.Unmarshal(data, &result)
+\tfmt.Println(result)
+}`;
+      } else {
+        code = `package main
+
+import (
+\t"encoding/json"
+\t"fmt"
+\t"io"
+\t"net/http"
+)
+
+func main() {
+\treq, _ := http.NewRequest("GET", "${url}", nil)
+\treq.Header.Set("Authorization", "Bearer ${apiKey}")
+
+\tclient := &http.Client{}
+\tresp, err := client.Do(req)
+\tif err != nil {
+\t\tpanic(err)
+\t}
+\tdefer resp.Body.Close()
+
+\tdata, _ := io.ReadAll(resp.Body)
+\tvar result map[string]interface{}
+\tjson.Unmarshal(data, &result)
+\tfmt.Println(result)
+}`;
+      }
+      break;
+  }
+  document.getElementById('codegenCode').textContent = code;
+}
+
+function pythonDict(jsonStr) {
+  try {
+    const obj = JSON.parse(jsonStr);
+    return JSON.stringify(obj, null, 4)
+      .replace(/true/g, 'True')
+      .replace(/false/g, 'False')
+      .replace(/null/g, 'None');
+  } catch(_) {
+    return jsonStr || '{}';
+  }
+}
+
+// --- Demo responses ---
+function getDemoResponse(endpoint) {
+  switch(endpoint) {
+    case '/v1/chat/completions':
+      return {
+        id: "chatcmpl-demo-" + Date.now().toString(36),
+        object: "chat.completion",
+        created: Math.floor(Date.now() / 1000),
+        model: document.getElementById('model').value,
+        choices: [{
+          index: 0,
+          message: {
+            role: "assistant",
+            content: "BlackRoad OS is a sovereign AI operating system that runs across a distributed fleet of edge devices. It provides an OpenAI-compatible API gateway, mesh networking, and autonomous agent orchestration. Think of it as your own private AI cloud, running on Raspberry Pis with Hailo-8 accelerators."
+          },
+          finish_reason: "stop"
+        }],
+        usage: { prompt_tokens: 24, completion_tokens: 58, total_tokens: 82 },
+        provider: "demo"
+      };
+    case '/v1/models':
+      return {
+        object: "list",
+        data: [
+          { id: "llama3.1:70b", object: "model", owned_by: "ollama", provider: "cecilia" },
+          { id: "llama3.1:8b", object: "model", owned_by: "ollama", provider: "cecilia" },
+          { id: "qwen2.5:7b", object: "model", owned_by: "ollama", provider: "cecilia" },
+          { id: "mistral:7b", object: "model", owned_by: "ollama", provider: "cecilia" },
+          { id: "deepseek-r1:7b", object: "model", owned_by: "ollama", provider: "lucidia" },
+          { id: "gpt-4o", object: "model", owned_by: "openai", provider: "openai" },
+          { id: "claude-opus-4-20250514", object: "model", owned_by: "anthropic", provider: "anthropic" },
+        ]
+      };
+    case '/v1/providers':
+      return {
+        providers: [
+          { name: "cecilia", type: "ollama", status: "online", models: 16, ip: "192.168.4.96" },
+          { name: "lucidia", type: "ollama", status: "online", models: 4, ip: "192.168.4.38" },
+          { name: "openai", type: "api", status: "online", models: 7 },
+          { name: "anthropic", type: "api", status: "online", models: 4 },
+          { name: "google", type: "api", status: "online", models: 3 }
+        ]
+      };
+    case '/v1/fleet':
+      return {
+        nodes: [
+          { name: "alice", ip: "192.168.4.49", role: "gateway", status: "online", cpu: "12%", mem: "45%" },
+          { name: "cecilia", ip: "192.168.4.96", role: "inference", status: "online", cpu: "34%", mem: "62%", accelerator: "hailo-8" },
+          { name: "octavia", ip: "192.168.4.100", role: "storage", status: "online", cpu: "8%", mem: "28%", accelerator: "hailo-8" },
+          { name: "aria", ip: "192.168.4.98", role: "orchestrator", status: "offline" },
+          { name: "lucidia", ip: "192.168.4.38", role: "inference", status: "online", cpu: "22%", mem: "51%" }
+        ],
+        total_tops: 52,
+        mesh: "roadnet"
+      };
+    default:
+      return { status: "ok" };
+  }
+}
+
+// --- History ---
+function saveHistory(endpoint, method, status, latency) {
+  history.unshift({
+    endpoint, method, status, latency,
+    time: new Date().toISOString(),
+    body: document.getElementById('requestBody').value,
+    response: currentResponse
+  });
+  if (history.length > MAX_HISTORY) history = history.slice(0, MAX_HISTORY);
+  localStorage.setItem('br_api_history', JSON.stringify(history));
+  updateHistoryCount();
+}
+
+function updateHistoryCount() {
+  document.getElementById('historyCount').textContent = history.length > 0 ? history.length + ' requests' : '';
+}
+
+function toggleHistory() {
+  const panel = document.getElementById('historyPanel');
+  const overlay = document.getElementById('historyOverlay');
+  const showing = !panel.classList.contains('show');
+  panel.classList.toggle('show');
+  overlay.classList.toggle('show');
+  if (showing) renderHistory();
+}
+
+function renderHistory() {
+  const list = document.getElementById('historyList');
+  list.innerHTML = '';
+  if (history.length === 0) {
+    list.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text3)">No requests yet.</div>';
+    return;
+  }
+  history.forEach((item, i) => {
+    const div = document.createElement('div');
+    div.className = 'history-item';
+    const statusCls = 's' + String(item.status)[0];
+    const time = new Date(item.time);
+    const timeStr = time.toLocaleTimeString() + ' ' + time.toLocaleDateString();
+    div.innerHTML = `
+      <span class="hi-status ${statusCls}">${item.status}</span>
+      <span class="hi-method">${item.method}</span>
+      <span class="hi-endpoint">${item.endpoint}</span>
+      <div class="hi-time">${timeStr} &middot; ${item.latency}ms</div>
+    `;
+    div.onclick = () => loadHistoryItem(i);
+    list.appendChild(div);
+  });
+}
+
+function loadHistoryItem(index) {
+  const item = history[index];
+  document.getElementById('endpoint').value = item.endpoint;
+  if (item.body) document.getElementById('requestBody').value = item.body;
+  if (item.response) {
+    currentResponse = item.response;
+    document.getElementById('responseBody').innerHTML = highlightJSON(item.response);
+    showMetaData(item.status, item.latency, detectProvider(item.response), countTokens(item.response), {});
+  }
+  updateCodegen();
+  toggleHistory();
+}
+
+// --- Particle background ---
+function initParticles() {
+  const canvas = document.getElementById('particles');
+  const ctx = canvas.getContext('2d');
+  let w, h, particles;
+  const colors = ['#FF6B2B', '#FF2255', '#CC00AA', '#8844FF', '#4488FF', '#00D4FF'];
+
+  function resize() {
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+  }
+
+  function createParticles() {
+    particles = [];
+    const count = Math.floor((w * h) / 18000);
+    for (let i = 0; i < count; i++) {
+      particles.push({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: (Math.random() - 0.5) * 0.3,
+        r: Math.random() * 1.5 + 0.5,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        alpha: Math.random() * 0.3 + 0.05
+      });
+    }
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, w, h);
+    for (const p of particles) {
+      p.x += p.vx;
+      p.y += p.vy;
+      if (p.x < 0) p.x = w;
+      if (p.x > w) p.x = 0;
+      if (p.y < 0) p.y = h;
+      if (p.y > h) p.y = 0;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = p.alpha;
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+
+    // Draw subtle connections
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        const dx = particles[i].x - particles[j].x;
+        const dy = particles[i].y - particles[j].y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 100) {
+          ctx.beginPath();
+          ctx.moveTo(particles[i].x, particles[i].y);
+          ctx.lineTo(particles[j].x, particles[j].y);
+          ctx.strokeStyle = particles[i].color;
+          ctx.globalAlpha = 0.03 * (1 - dist / 100);
+          ctx.lineWidth = 0.5;
+          ctx.stroke();
+        }
+      }
+    }
+    ctx.globalAlpha = 1;
+    requestAnimationFrame(draw);
+  }
+
+  resize();
+  createParticles();
+  draw();
+  window.addEventListener('resize', () => { resize(); createParticles(); });
+}
+
+// --- Start ---
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>

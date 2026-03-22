@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BlackRoad Mesh — Distributed Compute Network</title>
+    <link rel="icon" type="image/x-icon" href="https://images.blackroad.io/brand/favicon.ico" />
+    <link rel="icon" type="image/png" sizes="192x192" href="https://images.blackroad.io/brand/blackroad-icon-192.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="https://images.blackroad.io/brand/apple-touch-icon.png" />
+    <meta property="og:image" content="https://images.blackroad.io/brand/blackroad-icon-512.png" />
+<meta name="description" content="Join the BlackRoad Mesh. Your browser becomes a compute node. Distributed AI inference across a global peer-to-peer network.">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#000;--surface:#0a0a0a;--border:#1a1a1a;--muted:#444;--sub:#737373;--white:#fff;
+--g:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);
+--green:#22c55e;--sg:'Space Grotesk',sans-serif;--jb:'JetBrains Mono',monospace}
+body{background:var(--bg);color:var(--white);font-family:var(--sg);min-height:100vh}
+.grad-bar{height:4px;background:var(--g)}
+
+.container{max-width:900px;margin:0 auto;padding:48px 24px}
+h1{font-size:48px;font-weight:700;text-align:center;margin-bottom:8px}
+h1 em{font-style:normal;color:#f5f5f5}
+.subtitle{text-align:center;font-size:16px;color:var(--sub);margin-bottom:48px}
+
+/* Stats */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:48px}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px;text-align:center}
+.stat-val{font-size:32px;font-weight:700;font-family:var(--jb)}
+.stat-label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-family:var(--jb);margin-top:4px}
+
+/* Node info */
+.node-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:24px}
+.node-card h2{font-size:18px;font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.node-dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.caps{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.cap{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}
+.cap-label{color:var(--sub)}.cap-value{font-family:var(--jb);color:var(--white)}
+
+/* Peers */
+.peers{margin-top:16px}
+.peer{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:13px;font-family:var(--jb);color:var(--sub)}
+.peer-dot{width:6px;height:6px;border-radius:50%;background:var(--green)}
+
+/* Try it */
+.try-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:24px}
+.try-card h2{font-size:18px;font-weight:600;margin-bottom:12px}
+.try-input{display:flex;gap:8px}
+.try-input input{flex:1;background:#0d0d0d;border:1px solid var(--border);border-radius:8px;padding:12px;color:var(--white);font-size:14px;font-family:var(--sg)}
+.try-input button{padding:12px 24px;background:transparent;color:var(--white);border:1px solid var(--white);border-radius:8px;font-weight:600;cursor:pointer;font-family:var(--sg)}
+.try-result{margin-top:16px;padding:16px;background:#0d0d0d;border:1px solid var(--border);border-radius:8px;font-family:var(--jb);font-size:13px;color:var(--sub);display:none;white-space:pre-wrap}
+
+/* Embed */
+.embed{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px}
+.embed h2{font-size:18px;font-weight:600;margin-bottom:8px}
+.embed p{font-size:13px;color:var(--sub);margin-bottom:16px}
+.code{background:#0d0d0d;border:1px solid var(--border);border-radius:8px;padding:14px;font-family:var(--jb);font-size:13px;color:#f5f5f5}
+
+/* Footer */
+footer{border-top:1px solid var(--border);padding:32px 24px;text-align:center;font-size:12px;color:var(--muted);font-family:var(--jb);margin-top:48px}
+
+@media(max-width:600px){
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .caps{grid-template-columns:1fr}
+  h1{font-size:32px}
+}
+</style>
+<script src="https://bb.blackroad.io/bb.js" defer></script>
+  <script src="https://blackroad-mesh.amundsonalexa.workers.dev/mesh.js" defer></script>
+</head>
+<body>
+<div class="grad-bar"></div>
+<div class="container">
+  <h1>BlackRoad <em>Mesh</em></h1>
+  <p class="subtitle">Your browser is now a compute node. Every tab is power.</p>
+
+  <!-- Mesh stats -->
+  <div class="stats">
+    <div class="stat"><div class="stat-val" id="totalNodes">-</div><div class="stat-label">Nodes Online</div></div>
+    <div class="stat"><div class="stat-val" id="totalTOPS">-</div><div class="stat-label">Total TOPS</div></div>
+    <div class="stat"><div class="stat-val" id="browserNodes">-</div><div class="stat-label">Browser Nodes</div></div>
+    <div class="stat"><div class="stat-val" id="countries">-</div><div class="stat-label">Countries</div></div>
+  </div>
+
+  <!-- Your node -->
+  <div class="node-card">
+    <h2><div class="node-dot"></div> Your Node</h2>
+    <div class="caps">
+      <div class="cap"><span class="cap-label">Node ID</span><span class="cap-value" id="nodeId">-</span></div>
+      <div class="cap"><span class="cap-label">Status</span><span class="cap-value">● Online</span></div>
+      <div class="cap"><span class="cap-label">WebGPU</span><span class="cap-value" id="capGPU">-</span></div>
+      <div class="cap"><span class="cap-label">WebAssembly</span><span class="cap-value" id="capWASM">-</span></div>
+      <div class="cap"><span class="cap-label">CPU Cores</span><span class="cap-value" id="capCores">-</span></div>
+      <div class="cap"><span class="cap-label">Est. TOPS</span><span class="cap-value" id="capTOPS">-</span></div>
+    </div>
+    <div class="peers" id="peersList"></div>
+  </div>
+
+  <!-- Try it -->
+  <div class="try-card">
+    <h2>Submit a task to the mesh</h2>
+    <div class="try-input">
+      <input type="text" id="taskInput" placeholder="Enter a prompt to distribute across the mesh...">
+      <button onclick="submitTask()">Send</button>
+    </div>
+    <div class="try-result" id="taskResult"></div>
+  </div>
+
+  <!-- Embed -->
+  <div class="embed">
+    <h2>Add your site to the mesh</h2>
+    <p>One script tag. Every visitor becomes a node. Your site gets free distributed compute.</p>
+    <div class="code">&lt;script src="https://blackboard.amundsonalexa.workers.dev/mesh.js"&gt;&lt;/script&gt;</div>
+  </div>
+</div>
+
+<footer>&copy; 2026 BlackRoad OS, Inc. — Every link is a node.</footer>
+
+<!-- Load mesh.js — this browser is now a node -->
+<script src="/mesh.js"></script>
+<script>
+// Update UI with node info
+setTimeout(function(){
+  if(window.mesh){
+    document.getElementById('nodeId').textContent=mesh.id;
+    document.getElementById('capGPU').textContent=mesh.caps.webgpu?'Available':'Not available';
+    document.getElementById('capGPU').style.color='var(--white)';
+    document.getElementById('capWASM').textContent=mesh.caps.wasm?'Available':'Not available';
+    document.getElementById('capWASM').style.color='var(--white)';
+    document.getElementById('capCores').textContent=mesh.caps.cores;
+    document.getElementById('capTOPS').textContent=mesh.caps.tops.toFixed(1);
+  }
+},1000);
+
+// Refresh stats every 10s
+function refreshStats(){
+  if(window.mesh){
+    mesh.stats().then(function(s){
+      document.getElementById('totalNodes').textContent=s.total_nodes||0;
+      document.getElementById('totalTOPS').textContent=(s.total_tops||0).toFixed(1);
+      document.getElementById('browserNodes').textContent=s.browser_nodes||0;
+      document.getElementById('countries').textContent=s.countries||0;
+
+      var peersEl=document.getElementById('peersList');
+      var peerIds=mesh.peers();
+      if(peerIds.length){
+        peersEl.innerHTML='<div style="font-size:12px;color:var(--muted);margin-top:12px;margin-bottom:8px">CONNECTED PEERS</div>'+
+          peerIds.map(function(p){return '<div class="peer"><div class="peer-dot"></div>'+p+'</div>'}).join('');
+      }
+    }).catch(function(){});
+  }
+}
+refreshStats();
+setInterval(refreshStats,10000);
+
+function submitTask(){
+  var input=document.getElementById('taskInput');
+  var result=document.getElementById('taskResult');
+  if(!input.value) return;
+  result.style.display='block';
+  result.textContent='Routing task across mesh...';
+  if(window.mesh){
+    mesh.submit(input.value).then(function(r){
+      result.textContent=JSON.stringify(r,null,2);
+    });
+  }
+}
+document.getElementById('taskInput').addEventListener('keydown',function(e){if(e.key==='Enter')submitTask()});
+</script>
+
+<script src="https://blackboard.amundsonalexa.workers.dev/bb.js"></script>
+</body>
+</html>

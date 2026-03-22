@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080,height=1920">
+<title>BlackRoad — Fleet Flex</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1080px;height:1920px;overflow:hidden;background:#000;color:#fff;font-family:'Space Grotesk',sans-serif}
+.scene{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:60px;opacity:0;transition:opacity .6s}
+.scene.active{opacity:1}
+.mono{font-family:'JetBrains Mono',monospace}
+.grad{background:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.grad-line{height:4px;border-radius:2px;background:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF)}
+.big{font-size:72px;font-weight:700;line-height:1.1;text-align:center}
+
+/* Agent cards */
+.agent-card{width:100%;border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:32px 36px;display:flex;align-items:center;gap:24px;opacity:0;transform:translateY(30px);transition:all .5s}
+.agent-card.visible{opacity:1;transform:translateY(0)}
+.agent-icon{font-size:40px;width:64px;height:64px;display:flex;align-items:center;justify-content:center;border-radius:12px;border:1px solid rgba(255,255,255,.08)}
+.agent-info{flex:1}
+.agent-name{font-size:24px;font-weight:600}
+.agent-role{font-size:15px;color:rgba(255,255,255,.3);margin-top:4px;font-family:'JetBrains Mono',monospace}
+.agent-status{font-size:13px;font-family:'JetBrains Mono',monospace}
+.agent-status.on{color:#22c55e}
+.agent-status.off{color:#ef4444}
+</style>
+</head>
+<body>
+
+<!-- Frame 1: Hook -->
+<div class="scene" id="s1">
+  <div class="big">My AI runs on<br><span class="grad">Raspberry Pis</span><br>in my house.</div>
+</div>
+
+<!-- Frame 2: Fleet cards -->
+<div class="scene" id="s2">
+  <div style="width:100%;display:flex;flex-direction:column;gap:20px">
+    <div class="agent-card" style="transition-delay:.1s">
+      <div class="agent-icon">&#x1F30D;</div>
+      <div class="agent-info"><div class="agent-name">Alice</div><div class="agent-role">Gateway • 65+ routes • Pi-hole DNS</div></div>
+      <div class="agent-status on">ONLINE</div>
+    </div>
+    <div class="agent-card" style="transition-delay:.3s">
+      <div class="agent-icon">&#x1F9E0;</div>
+      <div class="agent-info"><div class="agent-name">Cecilia</div><div class="agent-role">Hailo-8 AI • 16 Ollama models • TTS</div></div>
+      <div class="agent-status on">ONLINE</div>
+    </div>
+    <div class="agent-card" style="transition-delay:.5s">
+      <div class="agent-icon">&#x1F4BE;</div>
+      <div class="agent-info"><div class="agent-name">Octavia</div><div class="agent-role">1TB NVMe • Gitea 207 repos • Docker Swarm</div></div>
+      <div class="agent-status on">ONLINE</div>
+    </div>
+    <div class="agent-card" style="transition-delay:.7s">
+      <div class="agent-icon">&#x1F3A8;</div>
+      <div class="agent-info"><div class="agent-name">Aria</div><div class="agent-role">Portainer • Headscale • Pironman5</div></div>
+      <div class="agent-status off">OFFLINE</div>
+    </div>
+    <div class="agent-card" style="transition-delay:.9s">
+      <div class="agent-icon">&#x2728;</div>
+      <div class="agent-info"><div class="agent-name">Lucidia</div><div class="agent-role">334 web apps • FastAPI • CarPool</div></div>
+      <div class="agent-status on">ONLINE</div>
+    </div>
+  </div>
+</div>
+
+<!-- Frame 3: Stats -->
+<div class="scene" id="s3">
+  <div style="text-align:center">
+    <div style="font-size:120px;font-weight:700" class="grad">52</div>
+    <div style="font-size:28px;color:rgba(255,255,255,.4);margin-top:8px">Tera Operations Per Second</div>
+    <div style="height:2px;width:200px;background:rgba(255,255,255,.1);margin:40px auto"></div>
+    <div style="font-size:22px;color:rgba(255,255,255,.3);line-height:2.2">
+      2x Hailo-8 accelerators<br>
+      WireGuard mesh network<br>
+      Self-healing autonomy scripts<br>
+      Zero cloud dependency
+    </div>
+  </div>
+</div>
+
+<!-- Frame 4: Tagline -->
+<div class="scene" id="s4">
+  <div class="grad-line" style="width:300px;margin-bottom:48px"></div>
+  <div class="big" style="font-size:56px">Sovereign<br>infrastructure.</div>
+  <div style="font-size:24px;color:rgba(255,255,255,.3);margin-top:24px">No AWS. No GCP. No Azure.</div>
+  <div style="font-size:24px;margin-top:8px" class="grad">Just BlackRoad.</div>
+  <div class="grad-line" style="width:300px;margin-top:48px"></div>
+</div>
+
+<script>
+const scenes = document.querySelectorAll('.scene');
+const durations = [3500, 6000, 5500, 5000];
+let cur = 0;
+function show(i) {
+  if (i >= scenes.length) return;
+  scenes.forEach(s => s.classList.remove('active'));
+  scenes[i].classList.add('active');
+  if (i === 1) document.querySelectorAll('.agent-card').forEach((el, j) => setTimeout(() => el.classList.add('visible'), j * 300));
+  setTimeout(() => show(i + 1), durations[i]);
+}
+show(0);
+</script>
+</body>
+</html>

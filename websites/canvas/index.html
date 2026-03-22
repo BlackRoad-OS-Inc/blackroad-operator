@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="icon" type="image/png" sizes="32x32" href="https://images.blackroad.io/brand/br-square-32.png" />
+<link rel="icon" type="image/png" sizes="192x192" href="https://images.blackroad.io/brand/br-square-192.png" />
+<link rel="apple-touch-icon" sizes="180x180" href="https://images.blackroad.io/brand/apple-touch-icon.png" />
+<meta property="og:image" content="https://images.blackroad.io/brand/br-square-512.png" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:image" content="https://images.blackroad.io/brand/br-square-512.png" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Canvas Studio — AI design tool with brand DNA awareness. Design with your brand built in. Replaces Canva and Figma.">
+<meta name="theme-color" content="#CC00AA">
+<link rel="canonical" href="https://canvas.blackroad.io">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://canvas.blackroad.io">
+<meta property="og:title" content="Canvas Studio — Design with your brand built in">
+<meta property="og:description" content="AI design tool with brand DNA awareness. Generate images, manage brand kits, export PNG/SVG/PDF.">
+<meta property="og:site_name" content="BlackRoad OS">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Canvas Studio","url":"https://canvas.blackroad.io","description":"AI design tool with brand DNA awareness.","applicationCategory":"DesignApplication","operatingSystem":"Web"}</script>
+<title>Canvas Studio — Design with your brand built in</title>
+<link rel="stylesheet" href="../_shared/design.css">
+<style>
+  .hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: var(--sp-xl) var(--sp-md);
+    position: relative; overflow: hidden;
+  }
+  @media (min-width: 768px) {
+    .hero { padding: 0 var(--sp-xl); }
+  }
+  .hero-eyebrow {
+    font-family: var(--jb); font-size: 0.75rem;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--subtle); margin-bottom: var(--sp-md);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .hero-eyebrow::before {
+    content: ''; width: 6px; height: 6px;
+    background: var(--magenta); border-radius: 50%;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+  }
+  .hero h1 { max-width: 800px; margin-bottom: var(--sp-lg); }
+  .hero-sub {
+    font-size: 1.1rem; color: var(--subtle);
+    max-width: 520px; margin-bottom: var(--sp-xl); line-height: 1.7;
+  }
+  @media (min-width: 768px) {
+    .hero-sub { font-size: 1.2rem; }
+  }
+  .hero-actions { display: flex; gap: var(--sp-md); align-items: center; flex-wrap: wrap; }
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--grad); color: var(--white);
+    padding: 14px 28px; border-radius: 6px;
+    font-weight: 700; font-size: 0.95rem;
+    transition: opacity 0.2s, transform 0.2s var(--ease-spring);
+  }
+  .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+  .btn-ghost {
+    display: inline-flex; align-items: center; gap: 8px;
+    border: 1px solid var(--border); color: var(--subtle);
+    padding: 14px 28px; border-radius: 6px; font-size: 0.95rem;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .btn-ghost:hover { border-color: var(--muted); color: var(--white); }
+
+  /* Canvas UI Mockup */
+  .canvas-mockup {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: var(--sp-xl);
+    max-width: 900px;
+  }
+  .canvas-toolbar {
+    display: flex; align-items: center; gap: 2px;
+    padding: 8px 12px;
+    background: var(--elevated);
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+  }
+  .canvas-tool {
+    width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid transparent;
+    color: var(--subtle);
+    font-size: 0.85rem; font-family: var(--jb);
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+    flex-shrink: 0;
+  }
+  .canvas-tool:hover { border-color: var(--border); color: var(--white); }
+  .canvas-tool.active { border-color: var(--magenta); color: var(--white); }
+  .canvas-body {
+    display: flex; min-height: 300px;
+  }
+  @media (min-width: 600px) {
+    .canvas-body { min-height: 380px; }
+  }
+  .canvas-sidebar {
+    width: 48px; flex-shrink: 0;
+    background: var(--elevated);
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    align-items: center; gap: 4px;
+    padding: 8px 0;
+  }
+  .sidebar-icon {
+    width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 0.8rem; font-family: var(--jb);
+    transition: color 0.2s;
+  }
+  .sidebar-icon:hover { color: var(--white); }
+  .canvas-area {
+    flex: 1; position: relative;
+    display: flex; align-items: center; justify-content: center;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+  .canvas-artboard {
+    width: 65%; max-width: 320px; aspect-ratio: 4/3;
+    background: var(--deep);
+    border: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 12px; position: relative;
+  }
+  .artboard-shape-1 {
+    width: 80px; height: 80px;
+    background: linear-gradient(135deg, var(--magenta), var(--orchid));
+    border-radius: 50%;
+    opacity: 0.85;
+  }
+  .artboard-shape-2 {
+    width: 120px; height: 24px;
+    background: linear-gradient(90deg, var(--flare), var(--ember));
+    border-radius: 4px;
+    opacity: 0.7;
+  }
+  .artboard-shape-3 {
+    width: 60px; height: 60px;
+    background: linear-gradient(135deg, var(--arc), var(--cyan));
+    opacity: 0.6;
+    transform: rotate(45deg);
+    position: absolute;
+    top: 12px; right: 12px;
+  }
+  .canvas-props {
+    width: 160px; flex-shrink: 0;
+    background: var(--elevated);
+    border-left: 1px solid var(--border);
+    padding: 12px;
+    display: none;
+  }
+  @media (min-width: 768px) {
+    .canvas-props { display: block; }
+  }
+  .prop-label {
+    font-family: var(--jb); font-size: 0.6rem;
+    color: var(--muted); text-transform: uppercase;
+    letter-spacing: 0.1em; margin-bottom: 6px;
+    margin-top: 12px;
+  }
+  .prop-label:first-child { margin-top: 0; }
+  .prop-row {
+    display: flex; gap: 4px; margin-bottom: 4px;
+  }
+  .prop-swatch {
+    width: 18px; height: 18px; border-radius: 3px;
+    border: 1px solid var(--border);
+  }
+  .prop-input {
+    width: 100%; height: 24px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--subtle);
+    font-family: var(--jb); font-size: 0.65rem;
+    padding: 0 6px;
+  }
+
+  .replaces {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--jb); font-size: 0.7rem;
+    color: var(--muted); margin-top: var(--sp-md);
+  }
+  .replaces-name { text-decoration: line-through; opacity: 0.5; }
+
+  .stats-row {
+    display: grid; grid-template-columns: repeat(2, 1fr);
+    gap: var(--sp-lg); text-align: center;
+  }
+  @media (min-width: 600px) {
+    .stats-row { grid-template-columns: repeat(4, 1fr); }
+  }
+  .stat-num {
+    font-size: 2.5rem; font-weight: 800;
+    font-family: var(--jb); letter-spacing: -0.04em;
+    background: var(--grad); -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .stat-label { font-size: 0.8rem; color: var(--subtle); margin-top: 4px; }
+
+  .features-grid { display: grid; grid-template-columns: 1fr; gap: var(--sp-md); }
+  @media (min-width: 600px) { .features-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 900px) { .features-grid { grid-template-columns: repeat(3, 1fr); } }
+  .feature-title { font-size: 1rem; font-weight: 600; margin-bottom: var(--sp-xs); }
+  .feature-desc { font-size: 0.875rem; color: var(--subtle); line-height: 1.65; }
+  .feature-icon {
+    font-family: var(--jb); font-size: 0.75rem; font-weight: 700;
+    margin-bottom: var(--sp-sm);
+    background: var(--grad); -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent; background-clip: text;
+  }
+
+  .export-row {
+    display: flex; gap: var(--sp-sm); flex-wrap: wrap;
+    margin-top: var(--sp-md);
+  }
+  .export-badge {
+    font-family: var(--jb); font-size: 0.7rem;
+    padding: 6px 14px;
+    border: 1px solid var(--border);
+    color: var(--subtle);
+    letter-spacing: 0.05em;
+  }
+
+  .cta-band {
+    background: linear-gradient(135deg, rgba(204,0,170,0.08) 0%, rgba(136,68,255,0.08) 50%, rgba(0,212,255,0.08) 100%);
+    border: 1px solid var(--border); border-radius: 10px;
+    padding: var(--sp-xl) var(--sp-md); text-align: center;
+  }
+  @media (min-width: 768px) {
+    .cta-band { padding: var(--sp-2xl) var(--sp-xl); }
+  }
+  .cta-band h2 { margin-bottom: var(--sp-md); }
+  .cta-band p { max-width: 500px; margin: 0 auto var(--sp-xl); }
+</style>
+<script src="https://blackroad-mesh.amundsonalexa.workers.dev/mesh.js" defer></script>
+</head>
+<body class="dot-bg">
+
+  <!-- Nav -->
+  <nav>
+    <div class="nav-logo">Canvas Studio</div>
+    <div class="nav-links">
+      <a href="#mockup">Preview</a>
+      <a href="#features">Features</a>
+      <a href="#workflow">Workflow</a>
+      <a href="https://blackroad.io">BlackRoad OS</a>
+    </div>
+    <a href="https://canvas.blackroad.io/app" class="nav-cta">Open Canvas</a>
+    <button class="nav-toggle" onclick="this.classList.toggle('open');document.getElementById('nav-mobile').classList.toggle('open')" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+  <div id="nav-mobile" class="nav-mobile">
+    <a href="#mockup" onclick="document.getElementById('nav-mobile').classList.remove('open')">Preview</a>
+    <a href="#features" onclick="document.getElementById('nav-mobile').classList.remove('open')">Features</a>
+    <a href="#workflow" onclick="document.getElementById('nav-mobile').classList.remove('open')">Workflow</a>
+    <a href="https://blackroad.io">BlackRoad OS</a>
+    <a href="https://canvas.blackroad.io/app" style="color:var(--white);font-weight:700;">Open Canvas</a>
+  </div>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-eyebrow">Wave 2 &middot; Creator Tools</div>
+    <h1>Design with your<br>brand built in.</h1>
+    <p class="hero-sub">Canvas Studio is an AI design tool that knows your brand DNA. Generate images, apply your palette, and export production-ready assets in seconds.</p>
+    <div class="hero-actions">
+      <a href="https://canvas.blackroad.io/app" class="btn-primary">Open Canvas</a>
+      <a href="#features" class="btn-ghost">See Features</a>
+    </div>
+    <div class="replaces">
+      Replaces <span class="replaces-name">Canva</span> <span class="replaces-name">Figma</span>
+    </div>
+  </div>
+
+  <!-- Canvas UI Mockup -->
+  <section id="mockup">
+    <div class="section-label">Live Preview</div>
+    <h2 style="margin-bottom: var(--sp-md);">A real design surface</h2>
+    <p style="max-width: 520px; margin-bottom: var(--sp-lg);">Your brand kit loads automatically. Every shape, color, and font aligns with your identity from the first pixel.</p>
+    <div class="canvas-mockup">
+      <div class="canvas-toolbar">
+        <div class="canvas-tool active">V</div>
+        <div class="canvas-tool">R</div>
+        <div class="canvas-tool">O</div>
+        <div class="canvas-tool">T</div>
+        <div class="canvas-tool">P</div>
+        <div class="canvas-tool" style="margin-left:auto; font-size:0.7rem; width:auto; padding:0 8px; color:var(--muted);">100%</div>
+      </div>
+      <div class="canvas-body">
+        <div class="canvas-sidebar">
+          <div class="sidebar-icon">L</div>
+          <div class="sidebar-icon">I</div>
+          <div class="sidebar-icon">T</div>
+          <div class="sidebar-icon">B</div>
+          <div class="sidebar-icon" style="margin-top:auto;">+</div>
+        </div>
+        <div class="canvas-area">
+          <div class="canvas-artboard">
+            <div class="artboard-shape-3"></div>
+            <div class="artboard-shape-1"></div>
+            <div class="artboard-shape-2"></div>
+          </div>
+        </div>
+        <div class="canvas-props">
+          <div class="prop-label">Brand Kit</div>
+          <div class="prop-row">
+            <div class="prop-swatch" style="background:#FF6B2B;"></div>
+            <div class="prop-swatch" style="background:#FF2255;"></div>
+            <div class="prop-swatch" style="background:#CC00AA;"></div>
+            <div class="prop-swatch" style="background:#8844FF;"></div>
+            <div class="prop-swatch" style="background:#4488FF;"></div>
+            <div class="prop-swatch" style="background:#00D4FF;"></div>
+          </div>
+          <div class="prop-label">Size</div>
+          <input class="prop-input" value="1200 x 900" readonly>
+          <div class="prop-label">Font</div>
+          <input class="prop-input" value="Space Grotesk" readonly>
+          <div class="prop-label">Opacity</div>
+          <input class="prop-input" value="100%" readonly>
+          <div class="prop-label">Export</div>
+          <input class="prop-input" value="PNG @2x" readonly>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats -->
+  <section>
+    <div class="section-label">Capabilities</div>
+    <div class="stats-row" style="margin-top: var(--sp-lg);">
+      <div>
+        <div class="stat-num">AI</div>
+        <div class="stat-label">Image Generation</div>
+      </div>
+      <div>
+        <div class="stat-num">50+</div>
+        <div class="stat-label">Templates</div>
+      </div>
+      <div>
+        <div class="stat-num">3</div>
+        <div class="stat-label">Export Formats</div>
+      </div>
+      <div>
+        <div class="stat-num">0</div>
+        <div class="stat-label">External Dependencies</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section id="features">
+    <div class="section-label">Features</div>
+    <h2 style="margin-bottom: var(--sp-xl);">Everything you need.<br>Nothing you don't.</h2>
+    <div class="features-grid">
+      <div class="card">
+        <div class="feature-icon">GEN</div>
+        <div class="feature-title">AI Image Generation</div>
+        <p class="feature-desc">Describe what you need. Canvas generates images that match your brand palette, typography, and visual identity automatically.</p>
+      </div>
+      <div class="card">
+        <div class="feature-icon">KIT</div>
+        <div class="feature-title">Brand Kit</div>
+        <p class="feature-desc">Upload your logo, set your colors, define your fonts. Every design starts on-brand. No more style guide violations.</p>
+      </div>
+      <div class="card">
+        <div class="feature-icon">TPL</div>
+        <div class="feature-title">Smart Templates</div>
+        <p class="feature-desc">Social posts, pitch decks, ads, banners. Templates that adapt to your brand kit. Pick one, customize, export.</p>
+      </div>
+      <div class="card">
+        <div class="feature-icon">VEC</div>
+        <div class="feature-title">Vector + Raster</div>
+        <p class="feature-desc">Work with shapes, paths, and pixels on the same canvas. SVG precision meets bitmap flexibility in one tool.</p>
+      </div>
+      <div class="card">
+        <div class="feature-icon">COL</div>
+        <div class="feature-title">Collaboration</div>
+        <p class="feature-desc">Share designs with your team. Real-time cursors, comments, version history. No more emailing PNGs back and forth.</p>
+      </div>
+      <div class="card">
+        <div class="feature-icon">API</div>
+        <div class="feature-title">Programmatic Access</div>
+        <p class="feature-desc">Generate designs via API. Feed in data, get back branded assets. Automate social media, reports, and marketing materials.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Workflow -->
+  <section id="workflow">
+    <div class="section-label">Workflow</div>
+    <h2 style="margin-bottom: var(--sp-md);">From idea to asset in three steps</h2>
+    <p style="max-width: 520px; margin-bottom: var(--sp-xl);">Your brand kit loads the moment you open Canvas. Every design is on-brand from the start.</p>
+    <div class="grid-3">
+      <div class="card">
+        <h3 style="margin-bottom: var(--sp-xs);">1. Describe or draw</h3>
+        <p class="feature-desc">Type a prompt or start placing shapes. AI fills in the rest, matching your brand DNA.</p>
+      </div>
+      <div class="card">
+        <h3 style="margin-bottom: var(--sp-xs);">2. Refine</h3>
+        <p class="feature-desc">Adjust colors, swap elements, resize. Everything snaps to your brand grid.</p>
+      </div>
+      <div class="card">
+        <h3 style="margin-bottom: var(--sp-xs);">3. Export</h3>
+        <p class="feature-desc">One click. PNG, SVG, or PDF. Multiple sizes for every platform.</p>
+      </div>
+    </div>
+    <div class="export-row">
+      <div class="export-badge">PNG</div>
+      <div class="export-badge">SVG</div>
+      <div class="export-badge">PDF</div>
+      <div class="export-badge">@1x</div>
+      <div class="export-badge">@2x</div>
+      <div class="export-badge">@3x</div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section>
+    <div class="cta-band">
+      <div class="section-label">Canvas Studio</div>
+      <h2>Your brand. Every pixel.</h2>
+      <p>Stop fighting generic design tools. Canvas Studio speaks your visual language from the first click.</p>
+      <div style="display:flex;gap:var(--sp-md);justify-content:center;flex-wrap:wrap;">
+        <a href="https://canvas.blackroad.io/app" class="btn-primary">Open Canvas</a>
+        <a href="https://blackroad.io" class="btn-ghost">BlackRoad OS</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <span>&copy; 2026 BlackRoad OS, Inc. All rights reserved.</span>
+    <span style="display:flex;gap:var(--sp-lg);flex-wrap:wrap;">
+      <a href="https://blackroad.io" style="color:var(--muted);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">Home</a>
+      <a href="https://blackroadai.com" style="color:var(--muted);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">AI</a>
+      <a href="https://blackroad.network" style="color:var(--muted);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">Network</a>
+      <a href="https://pricing.blackroad.io" style="color:var(--muted);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">Pricing</a>
+    </span>
+  </footer>
+
+</body>
+</html>

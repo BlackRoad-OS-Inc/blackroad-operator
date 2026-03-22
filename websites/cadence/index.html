@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="icon" type="image/png" sizes="32x32" href="https://images.blackroad.io/brand/br-square-32.png" />
+<link rel="icon" type="image/png" sizes="192x192" href="https://images.blackroad.io/brand/br-square-192.png" />
+<link rel="apple-touch-icon" sizes="180x180" href="https://images.blackroad.io/brand/apple-touch-icon.png" />
+<meta property="og:image" content="https://images.blackroad.io/brand/br-square-512.png" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:image" content="https://images.blackroad.io/brand/br-square-512.png" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Cadence — Describe your music. Get the track. Text-to-music, beat maker, stems separation, export WAV and MP3.">
+<meta name="theme-color" content="#00D4FF">
+<link rel="canonical" href="https://cadence.blackroad.io">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://cadence.blackroad.io">
+<meta property="og:title" content="Cadence — Hum it. Type it. Play it.">
+<meta property="og:description" content="AI music creation. Text-to-music, beat maker, stems separation, export WAV/MP3.">
+<meta property="og:site_name" content="BlackRoad OS">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Cadence","url":"https://cadence.blackroad.io","description":"AI music creation. Describe your music. Get the track.","applicationCategory":"MultimediaApplication","operatingSystem":"Web"}</script>
+<title>Cadence — Hum it. Type it. Play it.</title>
+<link rel="stylesheet" href="../_shared/design.css">
+<style>
+  .hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: var(--sp-xl) var(--sp-md);
+    position: relative; overflow: hidden;
+  }
+  @media (min-width: 768px) {
+    .hero { padding: 0 var(--sp-xl); }
+  }
+  .hero-eyebrow {
+    font-family: var(--jb); font-size: 0.75rem;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--subtle); margin-bottom: var(--sp-md);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .hero-eyebrow::before {
+    content: ''; width: 6px; height: 6px;
+    background: var(--cyan); border-radius: 50%;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+  }
+  .hero h1 { max-width: 800px; margin-bottom: var(--sp-lg); }
+  .hero-sub {
+    font-size: 1.1rem; color: var(--subtle);
+    max-width: 520px; margin-bottom: var(--sp-xl); line-height: 1.7;
+  }
+  @media (min-width: 768px) {
+    .hero-sub { font-size: 1.2rem; }
+  }
+  .hero-actions { display: flex; gap: var(--sp-md); align-items: center; flex-wrap: wrap; }
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--grad); color: var(--white);
+    padding: 14px 28px; border-radius: 6px;
+    font-weight: 700; font-size: 0.95rem;
+    transition: opacity 0.2s, transform 0.2s var(--ease-spring);
+  }
+  .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+  .btn-ghost {
+    display: inline-flex; align-items: center; gap: 8px;
+    border: 1px solid var(--border); color: var(--subtle);
+    padding: 14px 28px; border-radius: 6px; font-size: 0.95rem;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .btn-ghost:hover { border-color: var(--muted); color: var(--white); }
+
+  .replaces {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--jb); font-size: 0.7rem;
+    color: var(--muted); margin-top: var(--sp-md);
+  }
+  .replaces-name { text-decoration: line-through; opacity: 0.5; }
+
+  /* Waveform Visualization */
+  .waveform-section { text-align: center; }
+  .waveform {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    height: 120px;
+    margin: var(--sp-xl) auto;
+    max-width: 700px;
+  }
+  @media (min-width: 768px) {
+    .waveform { height: 160px; gap: 4px; }
+  }
+  .wave-bar {
+    width: 4px;
+    background: var(--grad);
+    background-size: 100% 300%;
+    border-radius: 2px;
+    animation: barPulse 1.5s ease-in-out infinite;
+  }
+  @media (min-width: 768px) {
+    .wave-bar { width: 5px; }
+  }
+  .waveform-label {
+    font-family: var(--jb); font-size: 0.7rem;
+    color: var(--muted); letter-spacing: 0.1em;
+    margin-top: var(--sp-md);
+  }
+
+  /* Prompt mockup */
+  .prompt-mockup {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    max-width: 700px;
+    margin-top: var(--sp-xl);
+  }
+  .prompt-bar {
+    display: flex; align-items: center;
+    padding: 10px 16px;
+    background: var(--elevated);
+    border-bottom: 1px solid var(--border);
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  @media (min-width: 600px) {
+    .prompt-bar { flex-wrap: nowrap; }
+  }
+  .prompt-icon {
+    font-family: var(--jb); font-size: 0.7rem;
+    color: var(--cyan); font-weight: 700;
+    flex-shrink: 0;
+  }
+  .prompt-text {
+    font-family: var(--in); font-size: 0.9rem;
+    color: var(--white); flex: 1;
+    min-width: 0;
+  }
+  .prompt-generate {
+    font-family: var(--jb); font-size: 0.7rem;
+    padding: 6px 14px;
+    background: var(--grad); color: var(--white);
+    border: none; border-radius: 4px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .prompt-result { padding: 16px; }
+  .result-track {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px;
+    border: 1px solid var(--border);
+    margin-bottom: 8px;
+    transition: border-color 0.2s;
+  }
+  .result-track:hover { border-color: var(--muted); }
+  .result-track:last-child { margin-bottom: 0; }
+  .result-play {
+    width: 32px; height: 32px;
+    border: 1px solid var(--subtle);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .result-play:hover { border-color: var(--white); }
+  .result-play::after {
+    content: '';
+    width: 0; height: 0;
+    border-left: 10px solid var(--subtle);
+    border-top: 6px solid transparent;
+    border-bottom: 6px solid transparent;
+    margin-left: 2px;
+  }
+  .result-info { flex: 1; min-width: 0; }
+  .result-name {
+    font-family: var(--sg); font-size: 0.85rem;
+    color: var(--white); font-weight: 600;
+  }
+  .result-meta {
+    font-family: var(--jb); font-size: 0.65rem;
+    color: var(--muted); margin-top: 2px;
+  }
+  .result-waveform {
+    display: flex; align-items: center; gap: 1px;
+    height: 24px; flex-shrink: 0;
+    display: none;
+  }
+  @media (min-width: 600px) {
+    .result-waveform { display: flex; }
+  }
+  .mini-bar {
+    width: 2px; background: var(--cyan);
+    border-radius: 1px; opacity: 0.5;
+  }
+
+  /* Beat grid */
+  .beat-grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 4px;
+    max-width: 500px;
+    margin-top: var(--sp-lg);
+  }
+  @media (min-width: 600px) {
+    .beat-grid { grid-template-columns: repeat(16, 1fr); max-width: 700px; }
+  }
+  .beat-cell {
+    aspect-ratio: 1;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    transition: background 0.15s, border-color 0.15s;
+    cursor: pointer;
+  }
+  .beat-cell:hover { border-color: var(--muted); }
+  .beat-cell.on-cyan { background: var(--cyan); border-color: var(--cyan); opacity: 0.8; }
+  .beat-cell.on-orchid { background: var(--orchid); border-color: var(--orchid); opacity: 0.7; }
+  .beat-cell.on-flare { background: var(--flare); border-color: var(--flare); opacity: 0.6; }
+  .beat-row-label {
+    grid-column: 1 / -1;
+    font-family: var(--jb); font-size: 0.6rem;
+    color: var(--muted); padding: 4px 0 2px;
+  }
+
+  .features-grid { display: grid; grid-template-columns: 1fr; gap: var(--sp-md); }
+  @media (min-width: 600px) { .features-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 900px) { .features-grid { grid-template-columns: repeat(3, 1fr); } }
+  .feature-title { font-size: 1rem; font-weight: 600; margin-bottom: var(--sp-xs); }
+  .feature-desc { font-size: 0.875rem; color: var(--subtle); line-height: 1.65; }
+  .feature-icon {
+    font-family: var(--jb); font-size: 0.75rem; font-weight: 700;
+    margin-bottom: var(--sp-sm);
+    background: var(--grad); -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent; background-clip: text;
+  }
+
+  .export-row {
+    display: flex; gap: var(--sp-sm); flex-wrap: wrap;
+    margin-top: var(--sp-md);
+  }
+  .export-badge {
+    font-family: var(--jb); font-size: 0.7rem;
+    padding: 6px 14px;
+    border: 1px solid var(--border);
+    color: var(--subtle);
+    letter-spacing: 0.05em;
+  }
+
+  .cta-band {
+    background: linear-gradient(135deg, rgba(0,212,255,0.08) 0%, rgba(68,136,255,0.08) 50%, rgba(136,68,255,0.08) 100%);
+    border: 1px solid var(--border); border-radius: 10px;
+    padding: var(--sp-xl) var(--sp-md); text-align: center;
+  }
+  @media (min-width: 768px) {
+    .cta-band { padding: var(--sp-2xl) var(--sp-xl); }
+  }
+  .cta-band h2 { margin-bottom: var(--sp-md); }
+  .cta-band p { max-width: 500px; margin: 0 auto var(--sp-xl); }
+</style>
+<script src="https://blackroad-mesh.amundsonalexa.workers.dev/mesh.js" defer></script>
+</head>
+<body class="dot-bg">
+
+  <!-- Nav -->
+  <nav>
+    <div class="nav-logo">Cadence</div>
+    <div class="nav-links">
+      <a href="#create">Create</a>
+      <a href="#features">Features</a>
+      <a href="#beatmaker">Beat Maker</a>
+      <a href="https://blackroad.io">BlackRoad OS</a>
+    </div>
+    <a href="https://cadence.blackroad.io/studio" class="nav-cta">Make Music</a>
+    <button class="nav-toggle" onclick="this.classList.toggle('open');document.getElementById('nav-mobile').classList.toggle('open')" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+  <div id="nav-mobile" class="nav-mobile">
+    <a href="#create" onclick="document.getElementById('nav-mobile').classList.remove('open')">Create</a>
+    <a href="#features" onclick="document.getElementById('nav-mobile').classList.remove('open')">Features</a>
+    <a href="#beatmaker" onclick="document.getElementById('nav-mobile').classList.remove('open')">Beat Maker</a>
+    <a href="https://blackroad.io">BlackRoad OS</a>
+    <a href="https://cadence.blackroad.io/studio" style="color:var(--white);font-weight:700;">Make Music</a>
+  </div>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-eyebrow">Wave 2 &middot; Creator Tools</div>
+    <h1>Hum it. Type it.<br>Play it.</h1>
+    <p class="hero-sub">Cadence turns descriptions into music. Type a mood, a genre, a tempo. AI generates a full track with stems you can isolate, remix, and export.</p>
+    <div class="hero-actions">
+      <a href="https://cadence.blackroad.io/studio" class="btn-primary">Make Music</a>
+      <a href="#features" class="btn-ghost">See Features</a>
+    </div>
+    <div class="replaces">
+      Replaces <span class="replaces-name">FL Studio</span> <span class="replaces-name">GarageBand</span> <span class="replaces-name">Suno</span>
+    </div>
+  </div>
+
+  <!-- Waveform Visualization -->
+  <section class="waveform-section">
+    <div class="section-label">Now Playing</div>
+    <div class="waveform" id="waveform"></div>
+    <div class="waveform-label">AI-generated &middot; 120 BPM &middot; C minor &middot; Lo-fi Hip Hop</div>
+  </section>
+  <script>
+    (function() {
+      var container = document.getElementById('waveform');
+      var barCount = window.innerWidth < 600 ? 40 : 64;
+      for (var i = 0; i < barCount; i++) {
+        var bar = document.createElement('div');
+        bar.className = 'wave-bar';
+        var h = 20 + Math.sin(i * 0.3) * 30 + Math.random() * 50;
+        bar.style.height = h + '%';
+        bar.style.animationDelay = (i * 0.05) + 's';
+        bar.style.animationDuration = (1 + Math.random() * 1) + 's';
+        container.appendChild(bar);
+      }
+    })();
+  </script>
+
+  <!-- Create -->
+  <section id="create">
+    <div class="section-label">Text to Music</div>
+    <h2 style="margin-bottom: var(--sp-md);">Describe your sound</h2>
+    <p style="max-width: 520px; margin-bottom: var(--sp-lg);">Type a description. Cadence generates multiple variations. Pick your favorite, refine, and export.</p>
+    <div class="prompt-mockup">
+      <div class="prompt-bar">
+        <span class="prompt-icon">~</span>
+        <span class="prompt-text">Lo-fi hip hop, rainy day, vinyl crackle, 85 BPM, 2 minutes</span>
+        <button class="prompt-generate">Generate</button>
+      </div>
+      <div class="prompt-result">
+        <div class="result-track">
+          <div class="result-play"></div>
+          <div class="result-info">
+            <div class="result-name">Variation 1 — Midnight Rain</div>
+            <div class="result-meta">2:04 &middot; 85 BPM &middot; Lo-fi Hip Hop &middot; WAV</div>
+          </div>
+          <div class="result-waveform" id="mini-wave-1"></div>
+        </div>
+        <div class="result-track">
+          <div class="result-play"></div>
+          <div class="result-info">
+            <div class="result-name">Variation 2 — Window Fog</div>
+            <div class="result-meta">2:01 &middot; 85 BPM &middot; Lo-fi Hip Hop &middot; WAV</div>
+          </div>
+          <div class="result-waveform" id="mini-wave-2"></div>
+        </div>
+        <div class="result-track">
+          <div class="result-play"></div>
+          <div class="result-info">
+            <div class="result-name">Variation 3 — Puddle Steps</div>
+            <div class="result-meta">1:58 &middot; 85 BPM &middot; Lo-fi Hip Hop &middot; WAV</div>
+          </div>
+          <div class="result-waveform" id="mini-wave-3"></div>
+        </div>
+      </div>
+    </div>
+    <script>
+      (function() {
+        [1,2,3].forEach(function(n) {
+          var container = document.getElementById('mini-wave-' + n);
+          if (!container) return;
+          for (var i = 0; i < 20; i++) {
+            var bar = document.createElement('div');
+            bar.className = 'mini-bar';
+            bar.style.height = (4 + Math.random() * 18) + 'px';
+            container.appendChild(bar);
+          }
+        });
+      })();
+    </script>
+  </section>
+
+  <!-- Beat Maker -->
+  <section id="beatmaker">
+    <div class="section-label">Beat Maker</div>
+    <h2 style="margin-bottom: var(--sp-md);">Tap out a pattern</h2>
+    <p style="max-width: 520px; margin-bottom: 0;">Click cells to build a beat. AI fills in the rest. Layer drums, bass, and melody on a simple grid.</p>
+    <div class="beat-grid">
+      <div class="beat-row-label">Kick</div>
+      <div class="beat-cell on-cyan"></div><div class="beat-cell"></div><div class="beat-cell"></div><div class="beat-cell"></div>
+      <div class="beat-cell on-cyan"></div><div class="beat-cell"></div><div class="beat-cell"></div><div class="beat-cell"></div>
+      <div class="beat-cell on-cyan"></div><div class="beat-cell"></div><div class="beat-cell"></div><div class="beat-cell"></div>
+      <div class="beat-cell on-cyan"></div><div class="beat-cell"></div><div class="beat-cell"></div><div class="beat-cell"></div>
+      <div class="beat-row-label">Snare</div>
+      <div class="beat-cell"></div><div class="beat-cell"></div><div class="beat-cell"></div><div class="beat-cell on-orchid"></div>
+      <div class="beat-cell"></div><div class="beat-cell"></div><div class="beat-cell"></div><div class="beat-cell on-orchid"></div>
+      <div class="beat-cell"></div><div class="beat-cell"></div><div class="beat-cell"></div><div class="beat-cell on-orchid"></div>
+      <div class="beat-cell"></div><div class="beat-cell"></div><div class="beat-cell"></div><div class="beat-cell on-orchid"></div>
+      <div class="beat-row-label">Hi-Hat</div>
+      <div class="beat-cell on-flare"></div><div class="beat-cell on-flare"></div><div class="beat-cell on-flare"></div><div class="beat-cell on-flare"></div>
+      <div class="beat-cell on-flare"></div><div class="beat-cell on-flare"></div><div class="beat-cell on-flare"></div><div class="beat-cell on-flare"></div>
+      <div class="beat-cell on-flare"></div><div class="beat-cell on-flare"></div><div class="beat-cell on-flare"></div><div class="beat-cell on-flare"></div>
+      <div class="beat-cell on-flare"></div><div class="beat-cell on-flare"></div><div class="beat-cell on-flare"></div><div class="beat-cell on-flare"></div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section id="features">
+    <div class="section-label">Features</div>
+    <h2 style="margin-bottom: var(--sp-xl);">Full studio.<br>Zero learning curve.</h2>
+    <div class="features-grid">
+      <div class="card">
+        <div class="feature-icon">TXT</div>
+        <div class="feature-title">Text-to-Music</div>
+        <p class="feature-desc">Describe genre, mood, tempo, instruments, and duration. Cadence generates a full multi-track composition ready for use.</p>
+      </div>
+      <div class="card">
+        <div class="feature-icon">BPM</div>
+        <div class="feature-title">Beat Maker</div>
+        <p class="feature-desc">A step sequencer that anyone can use. Tap out a pattern and AI extends it into a full beat with fills, variations, and dynamics.</p>
+      </div>
+      <div class="card">
+        <div class="feature-icon">STM</div>
+        <div class="feature-title">Stems Separation</div>
+        <p class="feature-desc">Upload any track. Cadence isolates vocals, drums, bass, and melody into separate stems. Remix anything.</p>
+      </div>
+      <div class="card">
+        <div class="feature-icon">MIX</div>
+        <div class="feature-title">AI Mixing</div>
+        <p class="feature-desc">Automatic EQ, compression, reverb, and mastering. Describe how you want it to sound. The AI handles the engineering.</p>
+      </div>
+      <div class="card">
+        <div class="feature-icon">LYR</div>
+        <div class="feature-title">Lyric Generator</div>
+        <p class="feature-desc">Need words? Give Cadence a theme and it writes lyrics that fit the rhythm, syllable count, and rhyme scheme of your track.</p>
+      </div>
+      <div class="card">
+        <div class="feature-icon">LIB</div>
+        <div class="feature-title">Sound Library</div>
+        <p class="feature-desc">Thousands of samples, loops, and one-shots. Searchable by mood, key, and BPM. All royalty-free for your projects.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Export -->
+  <section>
+    <div class="section-label">Export</div>
+    <h2 style="margin-bottom: var(--sp-md);">Your music. Your format.</h2>
+    <p style="max-width: 520px;">Export the master, individual stems, or both. Lossless or compressed. Ready for streaming, sync, or download.</p>
+    <div class="export-row">
+      <div class="export-badge">WAV</div>
+      <div class="export-badge">MP3</div>
+      <div class="export-badge">FLAC</div>
+      <div class="export-badge">Stems</div>
+      <div class="export-badge">MIDI</div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section>
+    <div class="cta-band">
+      <div class="section-label">Cadence</div>
+      <h2>Sound is a prompt away.</h2>
+      <p>You don't need to read sheet music or learn a DAW. You just need to know how you want it to sound.</p>
+      <div style="display:flex;gap:var(--sp-md);justify-content:center;flex-wrap:wrap;">
+        <a href="https://cadence.blackroad.io/studio" class="btn-primary">Make Music</a>
+        <a href="https://blackroad.io" class="btn-ghost">BlackRoad OS</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <span>&copy; 2026 BlackRoad OS, Inc. All rights reserved.</span>
+    <span style="display:flex;gap:var(--sp-lg);flex-wrap:wrap;">
+      <a href="https://blackroad.io" style="color:var(--muted);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">Home</a>
+      <a href="https://blackroadai.com" style="color:var(--muted);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">AI</a>
+      <a href="https://blackroad.network" style="color:var(--muted);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">Network</a>
+      <a href="https://pricing.blackroad.io" style="color:var(--muted);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">Pricing</a>
+    </span>
+  </footer>
+
+</body>
+</html>

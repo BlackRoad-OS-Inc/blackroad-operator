@@ -69,7 +69,7 @@ const COMMANDS = {
     { t: "agent", name: "Cecilia",   role: "core · identity",         status: "running", color: "#CC00AA" },
     { t: "agent", name: "Alice",     role: "gateway · routing",       status: "running", color: "#FF6B2B" },
     { t: "gap" },
-    { t: "dim",   v: "5/6 running · 1 idle · next: 30,000 agent scale (v2.0)" },
+    { t: "dim",   v: "5/6 running · 1 idle · next: fleet expansion (v2.0)" },
   ],
 
   chain: () => {

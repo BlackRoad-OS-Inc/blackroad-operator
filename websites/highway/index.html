@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Highway — Your Content. Delivered Fast.</title>
+<link rel="icon" type="image/png" sizes="32x32" href="https://images.blackroad.io/brand/br-square-32.png" />
+<link rel="apple-touch-icon" sizes="180x180" href="https://images.blackroad.io/brand/apple-touch-icon.png" />
+<meta property="og:image" content="https://images.blackroad.io/brand/br-square-512.png" />
+<meta name="description" content="Highway — Self-hosted CDN. Edge caching across your Pi fleet and droplets. No Cloudflare. No AWS. Your infrastructure.">
+<link rel="stylesheet" href="../_shared/design.css">
+<style>
+  .hero { padding: var(--sp-xl) var(--sp-md); min-height: 100vh; display: flex; flex-direction: column; justify-content: center; }
+  @media (min-width: 768px) { .hero { padding: 0 var(--sp-xl); } }
+  .hero-sub { font-size: 1.1rem; color: var(--subtle); max-width: 520px; line-height: 1.7; margin: var(--sp-md) 0 var(--sp-xl); }
+  .btn-primary { display: inline-flex; align-items: center; gap: 8px; background: var(--grad); color: var(--white); padding: 14px 28px; font-weight: 700; font-size: 0.95rem; transition: opacity 0.2s; border: none; cursor: pointer; }
+  .btn-primary:hover { opacity: 0.9; }
+  .btn-secondary { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--border); color: var(--white); padding: 14px 28px; font-weight: 600; font-size: 0.95rem; transition: border-color 0.2s; background: transparent; cursor: pointer; }
+  .btn-secondary:hover { border-color: var(--muted); }
+  .btn-row { display: flex; flex-wrap: wrap; gap: var(--sp-sm); }
+  .feature-card { background: var(--surface); border: 1px solid var(--border); padding: var(--sp-lg); transition: border-color 0.25s; }
+  .feature-card:hover { border-color: var(--muted); }
+  .feature-card h3 { margin-bottom: var(--sp-xs); }
+  .feature-card p { font-size: 0.85rem; color: var(--subtle); line-height: 1.6; }
+  .feature-icon { font-family: var(--jb); font-size: 0.8rem; color: var(--muted); margin-bottom: var(--sp-sm); display: block; }
+  .arch-diagram { background: var(--surface); border: 1px solid var(--border); padding: var(--sp-xl) var(--sp-md); margin: var(--sp-xl) 0; }
+  @media (min-width: 768px) { .arch-diagram { padding: var(--sp-xl); } }
+  .arch-layer { display: flex; flex-wrap: wrap; gap: var(--sp-sm); margin-bottom: var(--sp-lg); align-items: center; }
+  .arch-layer:last-child { margin-bottom: 0; }
+  .arch-label { font-family: var(--jb); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); min-width: 80px; flex-shrink: 0; }
+  .arch-node { display: inline-block; padding: 6px 14px; border: 1px solid var(--border); font-family: var(--jb); font-size: 0.75rem; color: var(--subtle); }
+  .arch-node.active { border-color: var(--muted); color: var(--white); }
+  .arch-arrow { color: var(--muted); font-family: var(--jb); font-size: 0.8rem; margin: 0 4px; }
+  .perf-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--sp-md); }
+  @media (min-width: 768px) { .perf-grid { grid-template-columns: repeat(3, 1fr); } }
+  .perf-card { border: 1px solid var(--border); padding: var(--sp-lg); text-align: center; }
+  .perf-value { font-family: var(--sg); font-size: 2rem; font-weight: 700; background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .perf-label { font-size: 0.7rem; color: var(--muted); font-family: var(--jb); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 4px; }
+  .perf-detail { font-size: 0.75rem; color: var(--subtle); margin-top: 2px; }
+  .replaces { border: 1px solid var(--border); padding: var(--sp-lg); }
+  .replaces-item { display: flex; justify-content: space-between; padding: var(--sp-sm) 0; border-bottom: 1px solid var(--border); font-size: 0.82rem; }
+  .replaces-item:last-child { border-bottom: none; }
+  .replaces-old { color: var(--muted); text-decoration: line-through; }
+  .replaces-new { color: var(--white); font-family: var(--sg); font-weight: 600; }
+</style>
+</head>
+<body class="dot-bg">
+  <nav>
+    <a href="https://cdn.blackroad.io" class="nav-logo">Highway</a>
+    <div class="nav-links">
+      <a href="#architecture">Architecture</a>
+      <a href="#performance">Performance</a>
+      <a href="#features">Features</a>
+      <a href="https://blackroad.io">BlackRoad OS</a>
+    </div>
+    <a href="#deploy" class="nav-cta">Deploy</a>
+    <button class="nav-toggle" onclick="this.classList.toggle('open');document.getElementById('nav-mobile').classList.toggle('open')" aria-label="Menu"><span></span><span></span><span></span></button>
+  </nav>
+  <div id="nav-mobile" class="nav-mobile">
+    <a href="#architecture" onclick="document.getElementById('nav-mobile').classList.remove('open')">Architecture</a>
+    <a href="#performance" onclick="document.getElementById('nav-mobile').classList.remove('open')">Performance</a>
+    <a href="#features" onclick="document.getElementById('nav-mobile').classList.remove('open')">Features</a>
+    <a href="https://blackroad.io">BlackRoad OS</a>
+  </div>
+
+  <div class="hero">
+    <div class="section-label">Self-Hosted CDN</div>
+    <h1>Your content.<br>Delivered fast.</h1>
+    <p class="hero-sub">Highway is a self-hosted content delivery network that caches and serves your assets across your Pi fleet and cloud droplets. TLS termination via Caddy. Object storage via MinIO. No Cloudflare dependency.</p>
+    <div class="btn-row">
+      <a href="#deploy" class="btn-primary">Deploy Highway</a>
+      <a href="#architecture" class="btn-secondary">See Architecture</a>
+    </div>
+  </div>
+
+  <section id="architecture">
+    <div class="section-label">Architecture</div>
+    <h2 style="margin-bottom:var(--sp-xl);">Edge to origin in your hands</h2>
+    <div class="arch-diagram">
+      <div class="arch-layer">
+        <span class="arch-label">Users</span>
+        <span class="arch-node">Browser</span>
+        <span class="arch-arrow">&rarr;</span>
+        <span class="arch-node active">Gematria (TLS Edge)</span>
+      </div>
+      <div class="arch-layer">
+        <span class="arch-label">Edge</span>
+        <span class="arch-node active">Caddy + Let's Encrypt</span>
+        <span class="arch-arrow">&rarr;</span>
+        <span class="arch-node active">Highway Cache</span>
+      </div>
+      <div class="arch-layer">
+        <span class="arch-label">Mesh</span>
+        <span class="arch-node active">WireGuard</span>
+        <span class="arch-arrow">&rarr;</span>
+        <span class="arch-node">Alice</span>
+        <span class="arch-node">Octavia</span>
+        <span class="arch-node">Lucidia</span>
+      </div>
+      <div class="arch-layer">
+        <span class="arch-label">Origin</span>
+        <span class="arch-node active">MinIO (Cecilia)</span>
+        <span class="arch-arrow">+</span>
+        <span class="arch-node">nginx upstream</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="performance">
+    <div class="section-label">Performance</div>
+    <h2 style="margin-bottom:var(--sp-xl);">Numbers that matter</h2>
+    <div class="perf-grid">
+      <div class="perf-card">
+        <div class="perf-value">151</div>
+        <div class="perf-label">Domains</div>
+        <div class="perf-detail">All served from Highway</div>
+      </div>
+      <div class="perf-card">
+        <div class="perf-value">91%</div>
+        <div class="perf-label">Self-hosted</div>
+        <div class="perf-detail">138/151 off Cloudflare</div>
+      </div>
+      <div class="perf-card">
+        <div class="perf-value">&lt;40ms</div>
+        <div class="perf-label">Cache hit</div>
+        <div class="perf-detail">Edge response time</div>
+      </div>
+      <div class="perf-card">
+        <div class="perf-value">4</div>
+        <div class="perf-label">Edge nodes</div>
+        <div class="perf-detail">Pi fleet + 2 droplets</div>
+      </div>
+      <div class="perf-card">
+        <div class="perf-value">TLS</div>
+        <div class="perf-label">Auto-cert</div>
+        <div class="perf-detail">Let's Encrypt via Caddy</div>
+      </div>
+      <div class="perf-card">
+        <div class="perf-value">$0</div>
+        <div class="perf-label">CDN cost</div>
+        <div class="perf-detail">Runs on your hardware</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="features">
+    <div class="section-label">Features</div>
+    <h2 style="margin-bottom:var(--sp-xl);">A CDN you actually own</h2>
+    <div class="grid-3">
+      <div class="feature-card">
+        <span class="feature-icon">// cache</span>
+        <h3>Intelligent caching</h3>
+        <p>Highway caches at the edge with configurable TTLs per path, per domain. Cache invalidation via CLI or webhook. No purge queue delays.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">// tls</span>
+        <h3>Automatic TLS</h3>
+        <p>Caddy provisions and renews Let's Encrypt certificates automatically. HTTPS for every domain. No manual cert management. OCSP stapling included.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">// s3</span>
+        <h3>S3-compatible origin</h3>
+        <p>MinIO provides S3-compatible object storage as the origin server. Use standard S3 tools to upload assets. Highway serves them at the edge.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">// multi</span>
+        <h3>Multi-domain routing</h3>
+        <p>One Highway instance handles all 151 domains. Route by hostname, path, or header. Different origins for different domains. One config file.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">// img</span>
+        <h3>Image optimization</h3>
+        <p>On-the-fly WebP conversion, resizing, and quality adjustment. Serve the right size image for every device. Reduce bandwidth by up to 70%.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">// log</span>
+        <h3>Access logs</h3>
+        <p>Structured JSON access logs for every request. Feed them into your own analytics. No third-party tracking pixel. Your traffic data stays yours.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-label">Replaces</div>
+    <h2 style="margin-bottom:var(--sp-xl);">Services you no longer need</h2>
+    <div class="replaces">
+      <div class="replaces-item"><span class="replaces-old">Cloudflare CDN ($20-200/mo)</span><span class="replaces-new">Highway Cache</span></div>
+      <div class="replaces-item"><span class="replaces-old">Cloudflare R2 ($0.015/GB)</span><span class="replaces-new">MinIO on Pi</span></div>
+      <div class="replaces-item"><span class="replaces-old">AWS CloudFront ($0.085/GB)</span><span class="replaces-new">Highway Edge</span></div>
+      <div class="replaces-item"><span class="replaces-old">Imgix ($4/1000 images)</span><span class="replaces-new">Highway Transform</span></div>
+      <div class="replaces-item"><span class="replaces-old">Let's Encrypt certbot</span><span class="replaces-new">Caddy auto-TLS</span></div>
+    </div>
+  </section>
+
+  <section id="deploy">
+    <div class="section-label">Deploy</div>
+    <h2 style="margin-bottom:var(--sp-md);">Your CDN in 5 minutes</h2>
+    <p style="max-width:520px;margin-bottom:var(--sp-xl);">Highway deploys across your existing fleet. Point it at your domains and origins. Caddy handles TLS. MinIO handles storage. Highway handles the rest.</p>
+    <div style="background:var(--surface);border:1px solid var(--border);padding:var(--sp-md);font-family:var(--jb);font-size:0.8rem;color:var(--subtle);line-height:1.8;">
+      <span style="color:var(--muted);"># Deploy Highway CDN</span><br>
+      <span style="color:var(--white);">br install highway</span><br>
+      <span style="color:var(--white);">br highway add-domain</span> <span style="color:var(--cyan);">blackroad.io --origin minio://assets</span><br>
+      <span style="color:var(--white);">br highway deploy</span> <span style="color:var(--cyan);">--nodes gematria,alice,lucidia</span><br><br>
+      <span style="color:var(--muted);"># Purge cache</span><br>
+      <span style="color:var(--white);">br highway purge</span> <span style="color:var(--cyan);">--domain blackroad.io --path "/images/*"</span>
+    </div>
+  </section>
+
+  <footer>
+    <span>&copy; 2026 BlackRoad OS, Inc. &mdash; Pave Tomorrow.</span>
+    <span style="display:flex;gap:var(--sp-lg);flex-wrap:wrap;">
+      <a href="https://blackroad.io" style="color:var(--muted)">Home</a>
+      <a href="https://blackroadai.com" style="color:var(--muted)">AI</a>
+      <a href="https://blackroad.network" style="color:var(--muted)">Network</a>
+    </span>
+  </footer>
+</body>
+</html>

@@ -195,8 +195,8 @@ async function aggregateAll(env) {
       refresh_interval_ms: 1000,
     },
     headline: {
-      total_repos: github?.summary?.total_repos || 1825,
-      total_agents: 30000,
+      total_repos: github?.summary?.total_repos || 275,
+      total_agents: 67,
       total_orgs: 17,
       cf_workers: 75,
       railway_projects: 14,
