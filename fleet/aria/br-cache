@@ -1,0 +1,113 @@
+#!/bin/bash
+# br-cache - BlackRoad Distributed Cache CLI
+
+PINK='\033[38;5;205m'
+AMBER='\033[38;5;214m'
+GREEN='\033[38;5;82m'
+BLUE='\033[38;5;69m'
+NC='\033[0m'
+
+# Default cache server
+CACHE_HOST="${CACHE_HOST:-localhost}"
+
+case "$1" in
+    start)
+        echo -e "${PINK}Starting Cache Server on port 6379...${NC}"
+        nohup python3 ~/.blackroad/cache/cache_server.py > ~/.blackroad/cache/cache.log 2>&1 &
+        echo $! > ~/.blackroad/cache/cache.pid
+        echo -e "${GREEN}Cache started (PID: $(cat ~/.blackroad/cache/cache.pid))${NC}"
+        ;;
+
+    stop)
+        if [ -f ~/.blackroad/cache/cache.pid ]; then
+            kill $(cat ~/.blackroad/cache/cache.pid) 2>/dev/null
+            rm ~/.blackroad/cache/cache.pid
+            echo -e "${AMBER}Cache stopped${NC}"
+        fi
+        ;;
+
+    status)
+        if [ -f ~/.blackroad/cache/cache.pid ] && kill -0 $(cat ~/.blackroad/cache/cache.pid) 2>/dev/null; then
+            echo -e "${GREEN}Cache running${NC} (PID: $(cat ~/.blackroad/cache/cache.pid))"
+            python3 ~/.blackroad/cache/cache_client.py "$CACHE_HOST" INFO 2>/dev/null || echo "(info unavailable)"
+        else
+            echo -e "${AMBER}Cache not running${NC}"
+        fi
+        ;;
+
+    get)
+        python3 ~/.blackroad/cache/cache_client.py "$CACHE_HOST" GET "$2"
+        ;;
+
+    set)
+        shift
+        key="$1"
+        shift
+        value="$*"
+        python3 ~/.blackroad/cache/cache_client.py "$CACHE_HOST" SET "$key" "$value"
+        ;;
+
+    del)
+        shift
+        python3 ~/.blackroad/cache/cache_client.py "$CACHE_HOST" DEL "$@"
+        ;;
+
+    keys)
+        pattern="${2:-*}"
+        python3 ~/.blackroad/cache/cache_client.py "$CACHE_HOST" KEYS "$pattern"
+        ;;
+
+    incr)
+        python3 ~/.blackroad/cache/cache_client.py "$CACHE_HOST" INCR "$2"
+        ;;
+
+    info)
+        python3 ~/.blackroad/cache/cache_client.py "$CACHE_HOST" INFO
+        ;;
+
+    ping)
+        python3 ~/.blackroad/cache/cache_client.py "$CACHE_HOST" PING
+        ;;
+
+    fleet-start)
+        echo -e "${PINK}Starting Cache on fleet...${NC}"
+        for host in cecilia lucidia octavia aria anastasia; do
+            echo -n "$host: "
+            ssh "$host" 'nohup python3 ~/.blackroad/cache/cache_server.py > ~/.blackroad/cache/cache.log 2>&1 &' && \
+                echo -e "${GREEN}started${NC}" || echo "failed"
+        done
+        ;;
+
+    fleet-status)
+        echo -e "${PINK}Cache Status Across Fleet${NC}"
+        for host in cecilia lucidia octavia aria anastasia; do
+            echo -n -e "${AMBER}$host${NC}: "
+            result=$(python3 ~/.blackroad/cache/cache_client.py "$host" PING 2>/dev/null)
+            if [ "$result" = "PONG" ]; then
+                echo -e "${GREEN}PONG${NC}"
+            else
+                echo "offline"
+            fi
+        done
+        ;;
+
+    *)
+        echo -e "${PINK}br-cache${NC} - BlackRoad Distributed Cache"
+        echo ""
+        echo "Commands:"
+        echo "  start           - Start local cache server"
+        echo "  stop            - Stop local cache server"
+        echo "  status          - Show cache status"
+        echo "  get <key>       - Get value"
+        echo "  set <key> <val> - Set value"
+        echo "  del <key>...    - Delete keys"
+        echo "  keys [pattern]  - List keys"
+        echo "  incr <key>      - Increment value"
+        echo "  info            - Cache info"
+        echo "  ping            - Test connection"
+        echo "  fleet-start     - Start cache on all nodes"
+        echo "  fleet-status    - Check fleet cache status"
+        echo ""
+        echo "Set CACHE_HOST to connect to remote: CACHE_HOST=cecilia br-cache get mykey"
+        ;;
+esac

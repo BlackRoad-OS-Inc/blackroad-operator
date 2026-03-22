@@ -1,0 +1,262 @@
+name: AI/ML Model Deployment
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - 'models/**'
+      - 'ml/**'
+      - '*.py'
+      - 'requirements.txt'
+      - 'pyproject.toml'
+  pull_request:
+    paths:
+      - 'models/**'
+      - 'ml/**'
+      - '*.py'
+  workflow_dispatch:
+    inputs:
+      model_name:
+        description: 'Model to deploy (e.g., meta-llama/Llama-3.1-8B)'
+        required: false
+      action:
+        description: 'Action to perform'
+        required: true
+        type: choice
+        options:
+          - deploy
+          - validate
+          - benchmark
+
+env:
+  HUGGINGFACE_TOKEN: ${{ secrets.HUGGINGFACE_TOKEN }}
+  HF_API_KEY: ${{ secrets.HF_API_KEY }}
+
+jobs:
+  # ============ MODEL SAFETY VALIDATION ============
+  validate-models:
+    runs-on: ubuntu-latest
+    outputs:
+      safe: ${{ steps.validate.outputs.safe }}
+      models: ${{ steps.detect.outputs.models }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Dependencies
+        run: |
+          pip install huggingface_hub transformers safetensors
+
+      - name: Detect Model References
+        id: detect
+        run: |
+          # Find all model references in the codebase
+          MODELS=""
+
+          # Check for model config files
+          if [ -f "models/config.yaml" ] || [ -f "ml/models.yaml" ]; then
+            CONFIG_FILE=$([ -f "models/config.yaml" ] && echo "models/config.yaml" || echo "ml/models.yaml")
+            MODELS=$(grep -oP '(?:huggingface|hf_model|model_id):\s*["\x27]?\K[^"\x27\s]+' "$CONFIG_FILE" 2>/dev/null || echo "")
+          fi
+
+          # Check Python files for model loading
+          PY_MODELS=$(grep -rhoP 'from_pretrained\(["\x27]\K[^"\x27]+' . --include="*.py" 2>/dev/null | sort -u || echo "")
+
+          ALL_MODELS=$(echo -e "$MODELS\n$PY_MODELS" | sort -u | tr '\n' ',' | sed 's/,$//')
+          echo "models=$ALL_MODELS" >> $GITHUB_OUTPUT
+
+      - name: Validate Model Safety
+        id: validate
+        run: |
+          cat << 'EOF' > validate_models.py
+          import os
+          import sys
+          from huggingface_hub import HfApi, model_info
+
+          # Safe/approved model prefixes and organizations
+          APPROVED_ORGS = [
+              "meta-llama", "mistralai", "Qwen", "google", "microsoft",
+              "bigscience", "bigcode", "allenai", "stabilityai", "openai",
+              "facebook", "deepseek-ai", "01-ai", "tiiuae", "BAAI",
+              "intfloat", "nomic-ai", "mosaicml", "togethercomputer",
+              "openlm-research", "llava-hf", "Salesforce", "suno",
+              "black-forest-labs", "kandinsky-community", "codellama"
+          ]
+
+          # Blocked patterns (unsafe/problematic models)
+          BLOCKED_PATTERNS = [
+              "uncensored", "jailbreak", "nsfw", "unfiltered",
+              "abliterated", "bypass", "no-safety"
+          ]
+
+          def validate_model(model_id):
+              """Validate a model for safety and licensing."""
+              try:
+                  api = HfApi()
+                  info = api.model_info(model_id)
+
+                  # Check organization
+                  org = model_id.split("/")[0] if "/" in model_id else None
+
+                  # Check for blocked patterns
+                  model_lower = model_id.lower()
+                  for pattern in BLOCKED_PATTERNS:
+                      if pattern in model_lower:
+                          return False, f"Blocked pattern '{pattern}' found in model name"
+
+                  # Check if from approved org
+                  if org and org not in APPROVED_ORGS:
+                      # Not from approved org, but might still be safe
+                      # Check for permissive license
+                      license_info = getattr(info, 'cardData', {}).get('license', '') if hasattr(info, 'cardData') else ''
+                      if not license_info:
+                          return False, f"Model from unknown org '{org}' without clear license"
+
+                  # Check for safetensors (preferred format)
+                  files = [f.rfilename for f in info.siblings] if info.siblings else []
+                  has_safetensors = any('.safetensors' in f for f in files)
+
+                  return True, "Model validated successfully" + (" (has safetensors)" if has_safetensors else "")
+
+              except Exception as e:
+                  return False, f"Validation error: {str(e)}"
+
+          if __name__ == "__main__":
+              models_str = os.environ.get("MODELS", "")
+              if not models_str:
+                  print("No models to validate")
+                  sys.exit(0)
+
+              models = [m.strip() for m in models_str.split(",") if m.strip()]
+              all_safe = True
+
+              for model in models:
+                  safe, message = validate_model(model)
+                  status = "SAFE" if safe else "BLOCKED"
+                  print(f"[{status}] {model}: {message}")
+                  if not safe:
+                      all_safe = False
+
+              sys.exit(0 if all_safe else 1)
+          EOF
+
+          MODELS="${{ steps.detect.outputs.models }}"
+          if [ -n "$MODELS" ]; then
+            MODELS="$MODELS" python validate_models.py
+            if [ $? -eq 0 ]; then
+              echo "safe=true" >> $GITHUB_OUTPUT
+            else
+              echo "safe=false" >> $GITHUB_OUTPUT
+              exit 1
+            fi
+          else
+            echo "safe=true" >> $GITHUB_OUTPUT
+          fi
+
+  # ============ DEPLOY TO HUGGING FACE ============
+  deploy-huggingface:
+    runs-on: ubuntu-latest
+    needs: validate-models
+    if: needs.validate-models.outputs.safe == 'true' && github.event_name == 'push'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Dependencies
+        run: |
+          pip install huggingface_hub transformers
+
+      - name: Deploy to Hugging Face Spaces
+        if: hashFiles('app.py') != '' || hashFiles('gradio_app.py') != ''
+        env:
+          HF_TOKEN: ${{ env.HUGGINGFACE_TOKEN }}
+        run: |
+          # Check for Space configuration
+          if [ -f "README.md" ]; then
+            # Check if it's a Space
+            if grep -q "sdk:" README.md; then
+              huggingface-cli login --token "$HF_TOKEN"
+
+              # Get space name from config or repo name
+              SPACE_NAME="${{ github.repository }}"
+              SPACE_NAME="${SPACE_NAME#*/}"
+
+              # Push to Hugging Face Space
+              huggingface-cli repo create "$SPACE_NAME" --type space --space_sdk gradio 2>/dev/null || true
+              git remote add hf "https://huggingface.co/spaces/${{ github.repository_owner }}/$SPACE_NAME" 2>/dev/null || true
+              git push hf main --force
+            fi
+          fi
+
+      - name: Push Model to Hub
+        if: hashFiles('models/**') != ''
+        env:
+          HF_TOKEN: ${{ env.HUGGINGFACE_TOKEN }}
+        run: |
+          huggingface-cli login --token "$HF_TOKEN"
+
+          # Find and upload models
+          for model_dir in models/*/; do
+            if [ -d "$model_dir" ]; then
+              MODEL_NAME=$(basename "$model_dir")
+              huggingface-cli repo create "$MODEL_NAME" --type model 2>/dev/null || true
+              huggingface-cli upload "${{ github.repository_owner }}/$MODEL_NAME" "$model_dir"
+            fi
+          done
+
+  # ============ MODEL INFERENCE TEST ============
+  test-inference:
+    runs-on: ubuntu-latest
+    needs: validate-models
+    if: needs.validate-models.outputs.safe == 'true'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Dependencies
+        run: |
+          pip install transformers torch huggingface_hub pytest
+
+      - name: Run Inference Tests
+        env:
+          HF_TOKEN: ${{ env.HUGGINGFACE_TOKEN }}
+        run: |
+          # Run any existing tests
+          if [ -f "tests/test_inference.py" ]; then
+            pytest tests/test_inference.py -v
+          elif [ -f "test_model.py" ]; then
+            python test_model.py
+          fi
+
+  # ============ NOTIFY DEPLOYMENT ============
+  notify:
+    runs-on: ubuntu-latest
+    needs: [validate-models, deploy-huggingface]
+    if: always()
+
+    steps:
+      - name: Deployment Summary
+        run: |
+          echo "## AI/ML Deployment Summary"
+          echo ""
+          echo "- Model Validation: ${{ needs.validate-models.outputs.safe == 'true' && 'Passed' || 'Failed' }}"
+          echo "- Models Detected: ${{ needs.validate-models.outputs.models || 'None' }}"
+          echo "- Deployment: ${{ needs.deploy-huggingface.result }}"

@@ -1,0 +1,89 @@
+name: Deploy Worker
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'worker/**'
+  workflow_dispatch:
+
+jobs:
+  typecheck:
+    name: Type Check Worker
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: worker/package-lock.json
+      - name: Install worker deps
+        run: npm ci
+        working-directory: worker
+      - name: Type check
+        run: npx tsc --noEmit
+        working-directory: worker
+
+  deploy:
+    name: Deploy to Cloudflare Workers
+    runs-on: ubuntu-latest
+    needs: typecheck
+    permissions:
+      contents: read
+      deployments: write
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: worker/package-lock.json
+
+      - name: Install worker deps
+        run: npm ci
+        working-directory: worker
+
+      - name: Deploy to Cloudflare Workers
+        uses: cloudflare/wrangler-action@da0e0dfe58b7a431659754fdf3f186c529afbe65 # v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ vars.CLOUDFLARE_ACCOUNT_ID || '848cf0b18d51e0170e0d1537aec3505a' }}
+          workingDirectory: worker
+          wranglerVersion: '3.99.0'
+
+      - name: Smoke test deployed worker
+        run: |
+          ACCOUNT_ID="${{ vars.CLOUDFLARE_ACCOUNT_ID || '848cf0b18d51e0170e0d1537aec3505a' }}"
+          WORKER_URL="https://blackroad-agents.${ACCOUNT_ID}.workers.dev"
+          echo "Waiting for worker propagation..."
+          sleep 10
+          HTTP_STATUS=$(curl -s -o /tmp/health.json -w "%{http_code}" "${WORKER_URL}/health")
+          echo "HTTP status: $HTTP_STATUS"
+          if [ "$HTTP_STATUS" = "200" ]; then
+            cat /tmp/health.json
+            python3 -c "
+import json, sys
+d = json.load(open('/tmp/health.json'))
+assert d.get('status') == 'healthy', f'Expected healthy, got: {d}'
+assert d.get('agentCount', 0) > 0, f'Expected agents, got: {d}'
+print(f'✅ Worker healthy — {d[\"agentCount\"]} agents, version {d.get(\"version\",\"?\")}')
+"
+          else
+            echo "⚠ Worker health check returned HTTP $HTTP_STATUS (may be propagating)"
+          fi
+        continue-on-error: true
+
+      - name: Job summary
+        run: |
+          ACCOUNT_ID="${{ vars.CLOUDFLARE_ACCOUNT_ID || '848cf0b18d51e0170e0d1537aec3505a' }}"
+          echo "## ✅ Worker Deployed" >> $GITHUB_STEP_SUMMARY
+          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|---|---|" >> $GITHUB_STEP_SUMMARY
+          echo "| Repo | ${{ github.repository }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Commit | \`${{ github.sha }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Branch | ${{ github.ref_name }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| URL | https://blackroad-agents.${ACCOUNT_ID}.workers.dev |" >> $GITHUB_STEP_SUMMARY

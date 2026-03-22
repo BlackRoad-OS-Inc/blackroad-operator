@@ -1,0 +1,55 @@
+# Warp Terminal Workflow - Deployment
+# https://docs.warp.dev/features/warp-drive/workflows
+# Place in .warp/workflows/ directory
+
+name: Deploy to Platform
+description: Deploy your application to the configured platform
+author: BlackRoad OS
+tags:
+  - deployment
+  - ci-cd
+  - devops
+
+arguments:
+  - name: environment
+    description: Target environment
+    default_value: preview
+
+steps:
+  - name: detect_platform
+    command: |
+      if [ -f "vercel.json" ]; then
+        echo "vercel"
+      elif [ -f "railway.toml" ]; then
+        echo "railway"
+      elif [ -f "wrangler.toml" ]; then
+        echo "cloudflare"
+      elif [ -f ".do/app.yaml" ]; then
+        echo "digitalocean"
+      else
+        echo "railway"
+      fi
+
+  - name: deploy
+    command: |
+      PLATFORM=$({{steps.detect_platform.output}})
+      ENV={{arguments.environment}}
+
+      case $PLATFORM in
+        vercel)
+          if [ "$ENV" = "production" ]; then
+            vercel deploy --prod
+          else
+            vercel deploy
+          fi
+          ;;
+        railway)
+          railway up
+          ;;
+        cloudflare)
+          wrangler deploy --env $ENV
+          ;;
+        digitalocean)
+          doctl apps create-deployment
+          ;;
+      esac

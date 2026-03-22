@@ -1,0 +1,85 @@
+# Raspberry Pi Deployment Configuration
+# Place this file as .pi/config.yaml or pi-deploy.yaml in your repo
+
+version: "1.0"
+
+# Target device configuration
+device:
+  host: "${PI_HOST}"  # Set via environment or GitHub secret
+  user: "${PI_USER:-pi}"
+  ssh_key: "${PI_SSH_KEY}"  # Base64 encoded private key
+
+# Deployment settings
+deployment:
+  path: "/home/pi/apps/${REPO_NAME}"
+  method: rsync  # rsync, git, docker
+
+  # Files/directories to exclude from sync
+  exclude:
+    - ".git"
+    - "node_modules"
+    - ".env"
+    - "*.log"
+    - "__pycache__"
+    - ".pytest_cache"
+    - "venv"
+
+# Pre-deployment commands (run on Pi before sync)
+pre_deploy:
+  - "mkdir -p /home/pi/apps/${REPO_NAME}"
+  - "sudo systemctl stop ${SERVICE_NAME} 2>/dev/null || true"
+
+# Post-deployment commands (run on Pi after sync)
+post_deploy:
+  - "cd /home/pi/apps/${REPO_NAME} && npm install --production"
+  - "sudo systemctl restart ${SERVICE_NAME}"
+
+# Systemd service configuration
+service:
+  name: "blackroad-app"
+  enabled: true
+  template: |
+    [Unit]
+    Description=BlackRoad Application
+    After=network.target
+
+    [Service]
+    Type=simple
+    User=pi
+    WorkingDirectory=/home/pi/apps/${REPO_NAME}
+    ExecStart=/usr/bin/node /home/pi/apps/${REPO_NAME}/index.js
+    Restart=on-failure
+    RestartSec=10
+    StandardOutput=syslog
+    StandardError=syslog
+    SyslogIdentifier=blackroad-app
+    Environment=NODE_ENV=production
+
+    [Install]
+    WantedBy=multi-user.target
+
+# Health check
+health_check:
+  enabled: true
+  endpoint: "http://localhost:3000/health"
+  interval: 30
+  timeout: 10
+  retries: 3
+
+# GPIO configuration (optional)
+gpio:
+  enabled: false
+  pins:
+    led_status: 17
+    button_restart: 27
+
+# Docker deployment (alternative to direct deployment)
+docker:
+  enabled: false
+  image: "${DOCKER_IMAGE}"
+  ports:
+    - "3000:3000"
+  volumes:
+    - "/home/pi/data:/app/data"
+  environment:
+    - "NODE_ENV=production"

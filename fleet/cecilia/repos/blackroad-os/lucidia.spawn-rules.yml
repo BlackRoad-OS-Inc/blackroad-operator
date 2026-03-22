@@ -1,0 +1,90 @@
+# 🧬 lucidia.spawn-rules.yml
+# Auto-spawn rules for agent replication based on system conditions
+
+spawn_rules:
+  - if:
+      escalations_last_7_days: "> 10"
+    then:
+      spawn: guardian-clone-agent
+      config:
+        role: sentinel
+        traits: ["incident-response", "human-routing"]
+        parent: guardian-agent
+        ttl: 14d
+        log_channel: escalations.log
+
+  - if:
+      digest_count: "> 4"
+      average_blocked_pct: "> 20%"
+    then:
+      spawn: digest-auditor-agent
+      config:
+        role: analyst
+        traits: ["summary-check", "anomaly-detector"]
+        inherits_from: codex-digest-agent
+
+  - if:
+      created_repos_last_72h: "> 5"
+    then:
+      spawn: repo-mapper-agent
+      config:
+        role: indexer
+        outputs: ["org-registry.json", "repo-trees.mdx"]
+
+  - if:
+      overdue_issues_count: "> 20"
+    then:
+      spawn: overdue-cleaner-agent
+      config:
+        role: sweeper
+        traits: ["issue-triage", "stale-detection"]
+        ttl: 7d
+
+  - if:
+      emoji_threshold: "> 50"
+      emoji_type: "🛟"
+    then:
+      spawn: escalation-swarm-agent
+      config:
+        role: sentinel
+        traits: ["batch-escalation", "priority-router"]
+        parent: guardian-agent
+        ttl: 24h
+# Spawn rules based on signals and emoji heatmaps
+
+spawn_rules:
+  - name: "Escalation Surge Handler"
+    if:
+      escalations_last_7_days: ">10"
+    then:
+      spawn: "escalation-handler"
+      config:
+        priority: "high"
+        ttl: "72h"
+
+  - name: "Blocked Issue Resolver"
+    if:
+      average_blocked_pct: ">20"
+    then:
+      spawn: "blocked-resolver"
+      config:
+        priority: "medium"
+        ttl: "48h"
+
+  - name: "Repo Activity Monitor"
+    if:
+      created_repos_last_72h: ">5"
+    then:
+      spawn: "repo-watcher"
+      config:
+        priority: "low"
+        ttl: "24h"
+
+  - name: "Digest Overload Handler"
+    if:
+      digest_count: ">5"
+    then:
+      spawn: "digest-processor"
+      config:
+        priority: "medium"
+        ttl: "12h"

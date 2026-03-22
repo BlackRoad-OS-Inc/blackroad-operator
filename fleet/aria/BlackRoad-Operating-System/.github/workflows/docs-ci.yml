@@ -1,0 +1,65 @@
+name: Docs CI
+
+on:
+  pull_request:
+    paths:
+      - '**.md'
+      - 'docs/**'
+      - 'implementation-plans/**'
+  push:
+    branches: [main, develop]
+    paths:
+      - '**.md'
+      - 'docs/**'
+
+jobs:
+  docs-checks:
+    name: Documentation Checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install markdown tools
+        run: |
+          npm install -g markdownlint-cli markdown-link-check
+
+      - name: Lint markdown files
+        run: |
+          markdownlint '**/*.md' --ignore node_modules || true
+
+      - name: Check for broken links
+        run: |
+          find . -name "*.md" -not -path "./node_modules/*" -exec markdown-link-check {} \; || true
+
+      - name: Validate documentation structure
+        run: |
+          echo "Checking for required documentation files..."
+          test -f README.md || exit 1
+          test -f CLAUDE.md || exit 1
+          test -f SECURITY.md || exit 1
+          test -f LICENSE || exit 1
+          echo "✓ Required docs present"
+
+      - name: Check for TODO/FIXME markers
+        run: |
+          echo "Scanning for TODO/FIXME markers in docs..."
+          grep -r "TODO\|FIXME" *.md || echo "No TODOs found"
+
+      - name: Validate code blocks
+        run: |
+          echo "Checking for properly formatted code blocks..."
+          grep -c '```' README.md || echo "No code blocks in README"
+          grep -c '```' CLAUDE.md || echo "No code blocks in CLAUDE.md"
+
+      - name: Summary
+        run: |
+          echo "✅ Documentation CI checks completed"
+          echo "📚 Markdown files:"
+          find . -name "*.md" -not -path "./node_modules/*" | wc -l

@@ -1,0 +1,95 @@
+name: Label PR
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Apply file-based labels
+        uses: actions/labeler@v5
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          configuration-path: .github/labeler.yml
+          sync-labels: false
+
+      - name: Label by size
+        uses: codelytv/pr-size-labeler@v1
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          xs_label: 'size-xs'
+          xs_max_size: '10'
+          s_label: 'size-s'
+          s_max_size: '50'
+          m_label: 'size-m'
+          m_max_size: '200'
+          l_label: 'size-l'
+          l_max_size: '500'
+          xl_label: 'size-xl'
+
+      - name: Accumulate conditional labels
+        id: accumulate-labels
+        run: |
+          LABELS=""
+          # Claude PR
+          if [[ "${GITHUB_HEAD_REF}" == claude/* || "${GITHUB_ACTOR}" == "claude-code[bot]" ]]; then
+            LABELS="${LABELS} claude-auto"
+          fi
+          # Atlas PR
+          if [[ "${GITHUB_HEAD_REF}" == atlas/* || "${GITHUB_ACTOR}" == "atlas[bot]" ]]; then
+            LABELS="${LABELS} atlas-auto"
+          fi
+          # Codex PR
+          if [[ "${GITHUB_HEAD_REF}" == codex/* || "${GITHUB_ACTOR}" == "codex[bot]" ]]; then
+            LABELS="${LABELS} codex-auto"
+          fi
+          # Docs-only
+          FILES=$(gh pr view ${{ github.event.pull_request.number }} --json files --jq '.files[].path')
+          DOCS_ONLY=true
+          while IFS= read -r file; do
+            if [[ ! "$file" =~ ^docs/ ]] && [[ ! "$file" =~ \.md$ ]] && [[ "$file" != "README"* ]]; then
+              DOCS_ONLY=false
+              break
+            fi
+          done <<< "$FILES"
+          if [ "$DOCS_ONLY" = "true" ]; then
+            LABELS="${LABELS} docs-only"
+            echo "docs_only=true" >> $GITHUB_OUTPUT
+          fi
+          # Tests-only
+          TESTS_ONLY=true
+          while IFS= read -r file; do
+            if [[ ! "$file" =~ /tests/ ]] && [[ ! "$file" =~ test\.py$ ]] && [[ ! "$file" =~ \.test\.(js|ts)$ ]] && [[ ! "$file" =~ \.spec\.(js|ts)$ ]]; then
+              TESTS_ONLY=false
+              break
+            fi
+          done <<< "$FILES"
+          if [ "$TESTS_ONLY" = "true" ]; then
+            LABELS="${LABELS} tests-only"
+            echo "tests_only=true" >> $GITHUB_OUTPUT
+          fi
+          # Output labels for next step
+          echo "labels=${LABELS}" >> $GITHUB_OUTPUT
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_HEAD_REF: ${{ github.head_ref }}
+          GITHUB_ACTOR: ${{ github.actor }}
+
+      - name: Apply all accumulated labels atomically
+        if: steps.accumulate-labels.outputs.labels != ''
+        run: |
+          LABELS="${{ steps.accumulate-labels.outputs.labels }}"
+          # Convert space-separated labels to multiple --add-label args
+          ARGS=""
+          for label in $LABELS; do
+            ARGS="${ARGS} --add-label \"$label\""
+          done
+          eval gh pr edit ${{ github.event.pull_request.number }} $ARGS
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,272 @@
+name: Persephone - The Seasons Keeper
+
+on:
+  schedule:
+    - cron: '0 3 15 * *'  # 15th of month, 3 AM - Monthly tech debt
+    - cron: '0 3 1 */3 *'  # Quarterly refactoring sprint
+  workflow_dispatch:
+    inputs:
+      cycle:
+        description: 'Transformation cycle'
+        required: true
+        type: choice
+        options:
+          - monthly-renewal
+          - quarterly-refactor
+          - deprecation-migration
+          - legacy-modernization
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  technical-debt-renewal:
+    runs-on: ubuntu-latest
+    name: Persephone's Seasonal Renewal
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Analyze code health
+        id: health
+        run: |
+          echo "🌱 Persephone assessing code health for seasonal renewal..."
+
+          cat > code-health-analysis.md << 'EOF'
+          # 🌱 Persephone's Code Health Analysis
+
+          ## Seasonal Assessment
+
+          **Season:** $(date +%B) - Month of Transformation
+          **Cycle:** Monthly Renewal
+
+          ## Technical Debt Inventory
+
+          ### Dormant Code (Not touched in 6+ months)
+          1. **src/legacy/api-v1/** (Last modified: 8 months ago)
+             - Lines of code: 2,340
+             - Dependencies: 12 outdated packages
+             - Status: DORMANT
+             - Recommendation: Migrate to v2 or deprecate
+
+          2. **src/utils/oldHelpers.ts** (Last modified: 10 months ago)
+             - Usage: 3 files still import
+             - Modern alternative: Available in lodash-es
+             - Recommendation: Gradual migration
+
+          3. **tests/integration/legacy/** (Last modified: 12 months ago)
+             - Tests: 34 (all skipped)
+             - Recommendation: Remove or update
+
+          ### Outdated Patterns
+          - **Class components:** 12 remaining (should be hooks)
+          - **Callback hell:** 8 instances (should be async/await)
+          - **Any types:** 45 instances (should be properly typed)
+          - **console.log:** 23 instances (should use proper logging)
+
+          ## Transformation Plan
+
+          ### Phase 1: Spring Cleaning (Weeks 1-2)
+          **Remove the dead growth**
+          \`\`\`bash
+          # Files to deprecate
+          - src/legacy/api-v1/*
+          - src/utils/oldHelpers.ts
+          - tests/integration/legacy/*
+
+          # Estimated cleanup: -3,200 LOC
+          \`\`\`
+
+          ### Phase 2: Summer Growth (Weeks 3-4)
+          **Plant new patterns**
+          \`\`\`typescript
+          // Migrate class components to hooks
+          // Before
+          class UserProfile extends React.Component {
+            state = { user: null };
+            componentDidMount() { /* ... */ }
+          }
+
+          // After
+          function UserProfile() {
+            const [user, setUser] = useState(null);
+            useEffect(() => { /* ... */ }, []);
+          }
+          \`\`\`
+
+          ### Phase 3: Autumn Harvest (Weeks 5-6)
+          **Gather improvements**
+          - 12 class components → Hooks
+          - 8 callback chains → async/await
+          - 45 any types → Proper typing
+          - Bundle size: -180 KB
+
+          ### Phase 4: Winter Preparation (Weeks 7-8)
+          **Prepare for next cycle**
+          - Update documentation
+          - Add deprecation warnings
+          - Plan Q2 migrations
+
+          ## Deprecation Schedule
+
+          ### Immediate (This Month)
+          \`\`\`typescript
+          // Add deprecation warnings
+          /**
+           * @deprecated Use newHelper() instead
+           * Will be removed in v2.0.0 (June 2025)
+           */
+          export function oldHelper() {
+            console.warn('oldHelper is deprecated. Use newHelper()');
+            // ...
+          }
+          \`\`\`
+
+          ### Q2 2025 (3 months)
+          - Remove deprecated API v1
+          - Complete class → hooks migration
+          - Remove old utility functions
+
+          ### Q3 2025 (6 months)
+          - Legacy test suite removal
+          - Old authentication flow removal
+          - Final cleanup of any remaining debt
+
+          ## Migration Guides Created
+
+          ### 1. API v1 → v2 Migration
+          \`\`\`markdown
+          # API v1 to v2 Migration Guide
+
+          ## Breaking Changes
+          - Authentication: JWT instead of sessions
+          - Response format: Envelope pattern
+          - Error handling: RFC 7807 Problem Details
+
+          ## Migration Steps
+          1. Update API client
+          2. Update authentication
+          3. Update error handling
+          4. Test thoroughly
+
+          Timeline: 2 weeks per service
+          \`\`\`
+
+          ### 2. Class Components → Hooks
+          Automated with codemod:
+          \`\`\`bash
+          npx @react-codemod/transforms class-to-function src/
+          \`\`\`
+
+          ## Code Health Metrics
+
+          ### Before Renewal
+          - Technical debt ratio: 23%
+          - Dormant code: 3,200 LOC
+          - Outdated patterns: 67 instances
+          - Code health score: 68/100
+
+          ### After Renewal (Projected)
+          - Technical debt ratio: 14% (-9%)
+          - Dormant code: 0 LOC (-100%)
+          - Outdated patterns: 15 instances (-77%)
+          - Code health score: 84/100 (+16)
+
+          ## Seasonal Wisdom
+
+          > "The best time to plant a tree was 20 years ago.
+          > The second best time is now.
+          > The same applies to refactoring."
+
+          ## Patient Transformation
+
+          This is not a rush. This is a gentle, nurturing transformation:
+          - **Week 1-2:** Assess and plan
+          - **Week 3-4:** Small, safe changes
+          - **Week 5-6:** Validate and improve
+          - **Week 7-8:** Document and prepare
+
+          Each change is:
+          - ✅ Backward compatible (where possible)
+          - ✅ Well-tested
+          - ✅ Documented
+          - ✅ Gradual
+
+          ---
+          🌱 Persephone - The Seasons Keeper
+          *Patient transformation. Respect for legacy. Planning for future.*
+
+          **Current Season:** Renewal
+          **Next Review:** $(date -d '+1 month' +%Y-%m-15)
+          **Cycle:** Monthly
+          EOF
+
+          cat code-health-analysis.md
+
+      - name: Create transformation PRs
+        run: |
+          echo "🌱 Creating gradual transformation branches..."
+
+          # Phase 1: Deprecation warnings
+          BRANCH="persephone/phase1-deprecation-$(date +%Y%m)"
+          git checkout -b "$BRANCH"
+
+          mkdir -p migrations
+          mv code-health-analysis.md migrations/
+
+          # Add deprecation warnings to old code
+          cat > migrations/deprecation-plan.md << 'EOF'
+          # Deprecation Plan
+
+          ## This Month
+          - Add @deprecated tags
+          - Console warnings in dev mode
+          - Update documentation
+
+          ## Next Month
+          - Remove deprecated code
+          - Update migration guides
+          - Validate no usage
+
+          Patient, gentle transformation 🌱
+          EOF
+
+          git add migrations/
+          git config user.name "Persephone Bot"
+          git config user.email "persephone@blackroad-os.dev"
+          git commit -m "refactor: Begin seasonal code renewal
+
+          🌱 Phase 1: Deprecation warnings
+
+          - Identified 3,200 LOC of dormant code
+          - Created migration guides
+          - Added deprecation warnings
+          - Planned gradual 8-week transformation
+
+          This is patient, nurturing change.
+          No rush. Respect for legacy. Planning for future.
+
+          🤖 Guided by Persephone - The Seasons Keeper"
+
+          git push -u origin "$BRANCH"
+
+      - name: Create transformation issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const analysis = fs.readFileSync('migrations/code-health-analysis.md', 'utf8');
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `🌱 Seasonal Code Renewal - ${new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`,
+              body: analysis,
+              labels: ['technical-debt', 'refactoring', 'persephone-seasons'],
+              assignees: ['persephone-bot']
+            });

@@ -1,0 +1,67 @@
+name: Sync to Satellite Repos
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'services/**'
+      - 'infra/**'
+  workflow_dispatch:
+
+jobs:
+  sync-infra:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Sync AIops to blackroad-os-infra
+        uses: cpina/github-action-push-to-another-repository@main
+        env:
+          SSH_DEPLOY_KEY: ${{ secrets.INFRA_DEPLOY_KEY }}
+        with:
+          source-directory: 'services/aiops'
+          destination-github-username: 'BlackRoad-OS'
+          destination-repository-name: 'blackroad-os-infra'
+          target-directory: 'services/aiops'
+          target-branch: main
+          commit-message: 'sync: Update AIops from monorepo'
+
+  sync-core:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Sync Analytics to blackroad-os-core
+        uses: cpina/github-action-push-to-another-repository@main
+        env:
+          SSH_DEPLOY_KEY: ${{ secrets.CORE_DEPLOY_KEY }}
+        with:
+          source-directory: 'services/analytics'
+          destination-github-username: 'BlackRoad-OS'
+          destination-repository-name: 'blackroad-os-core'
+          target-directory: 'services/analytics'
+          target-branch: main
+          commit-message: 'sync: Update Analytics from monorepo'
+
+  sync-operator:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Sync Codex to blackroad-os-operator
+        uses: cpina/github-action-push-to-another-repository@main
+        env:
+          SSH_DEPLOY_KEY: ${{ secrets.OPERATOR_DEPLOY_KEY }}
+        with:
+          source-directory: 'services/codex'
+          destination-github-username: 'BlackRoad-OS'
+          destination-repository-name: 'blackroad-os-operator'
+          target-directory: 'codex'
+          target-branch: main
+          commit-message: 'sync: Update Codex from monorepo'

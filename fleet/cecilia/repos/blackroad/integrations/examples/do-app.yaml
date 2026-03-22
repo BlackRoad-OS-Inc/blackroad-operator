@@ -1,0 +1,63 @@
+# DigitalOcean App Platform Specification
+# https://docs.digitalocean.com/products/app-platform/reference/app-spec/
+
+name: blackroad-app
+region: nyc
+
+services:
+  - name: web
+    github:
+      repo: your-org/your-repo
+      branch: main
+      deploy_on_push: true
+    build_command: npm run build
+    run_command: npm start
+    environment_slug: node-js
+    instance_count: 1
+    instance_size_slug: basic-xxs
+    http_port: 3000
+    routes:
+      - path: /
+    health_check:
+      http_path: /health
+      initial_delay_seconds: 10
+      period_seconds: 30
+    envs:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        scope: RUN_TIME
+        type: SECRET
+
+# Static assets
+static_sites:
+  - name: static
+    github:
+      repo: your-org/your-repo
+      branch: main
+    build_command: npm run build
+    output_dir: dist
+    routes:
+      - path: /static
+
+# Workers (background jobs)
+workers:
+  - name: worker
+    github:
+      repo: your-org/your-repo
+      branch: main
+    build_command: npm run build:worker
+    run_command: npm run worker
+    instance_count: 1
+    instance_size_slug: basic-xxs
+    envs:
+      - key: WORKER_MODE
+        value: "true"
+
+# Databases
+databases:
+  - name: db
+    engine: PG
+    version: "15"
+    size: db-s-dev-database
+    num_nodes: 1

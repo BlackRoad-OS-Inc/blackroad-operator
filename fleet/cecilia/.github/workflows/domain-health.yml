@@ -1,0 +1,46 @@
+name: Domain Health Check
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"  # every 6 hours
+  workflow_dispatch: {}
+
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyyaml requests
+
+      - name: Run health checks
+        env:
+          # Add any API keys if needed for your health checks (not required for simple HTTP GET)
+        run: |
+          python - <<'PY'
+import yaml, requests, os
+
+with open("ops/domains.yaml") as f:
+    cfg = yaml.safe_load(f)
+
+for d in cfg.get("domains", []):
+    # Only health-check DNS records pointing to HTTP(S) targets
+    health = d.get("healthcheck", False)
+    if d.get("mode") == "dns" and health:
+        url = "https://" + d["name"]
+        try:
+            r = requests.get(url, timeout=10)
+            status = "healthy" if r.status_code < 400 else f"unhealthy (status {r.status_code})"
+        except Exception as e:
+            status = f"unhealthy (error {e})"
+        print(f"{d['name']}: {status}")
+PY

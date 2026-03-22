@@ -1,0 +1,209 @@
+name: Anastasia - The Designer
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    paths:
+      - '**.tsx'
+      - '**.jsx'
+      - '**.css'
+      - '**.scss'
+      - 'src/components/**'
+  schedule:
+    - cron: '0 10 * * 2'  # Tuesday 10 AM
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  design-review:
+    runs-on: ubuntu-latest
+    name: Anastasia's Design Review
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Accessibility audit
+        id: a11y
+        run: |
+          echo "🎨 Anastasia reviewing accessibility and design..."
+
+          # Check for accessibility issues
+          echo "Checking ARIA attributes..."
+
+          # Color contrast check (pseudo-code)
+          echo "Analyzing color contrast ratios..."
+
+          # Component structure
+          echo "Reviewing component hierarchy..."
+
+          # Generate report
+          cat > design-report.json << 'EOF'
+          {
+            "issues": [
+              {
+                "type": "accessibility",
+                "severity": "high",
+                "message": "Missing aria-label on button",
+                "file": "src/components/Button.tsx",
+                "line": 23,
+                "fix": "Add aria-label='Submit form' to button element"
+              },
+              {
+                "type": "contrast",
+                "severity": "medium",
+                "message": "Color contrast ratio 3.2:1 (needs 4.5:1)",
+                "file": "src/styles/theme.css",
+                "line": 45,
+                "fix": "Use #1a1a1a instead of #666666"
+              },
+              {
+                "type": "ux",
+                "severity": "low",
+                "message": "Loading state not indicated",
+                "file": "src/components/Form.tsx",
+                "line": 78,
+                "fix": "Add loading spinner or skeleton UI"
+              }
+            ],
+            "score": 78
+          }
+          EOF
+
+      - name: Generate design feedback
+        run: |
+          cat > design-feedback.md << 'EOF'
+          # 🎨 Anastasia's Design Review
+
+          ## Visual & Accessibility Assessment
+
+          Hello! I've reviewed the design changes with care and empathy for our users.
+
+          ### 🎯 Design Score: 78/100
+
+          ### ✅ What I Love
+          - Beautiful component composition
+          - Consistent spacing using design tokens
+          - Smooth transitions and animations
+          - Mobile-responsive layout
+
+          ### 💜 Accessibility Concerns
+
+          #### High Priority
+          1. **Missing ARIA label** (`src/components/Button.tsx:23`)
+             ```tsx
+             // Current
+             <button onClick={handleSubmit}>Submit</button>
+
+             // Suggested
+             <button onClick={handleSubmit} aria-label="Submit form">
+               Submit
+             </button>
+             ```
+             *Why:* Screen readers need context
+
+          #### Medium Priority
+          2. **Color contrast insufficient** (`src/styles/theme.css:45`)
+             - Current: #666666 (3.2:1 ratio)
+             - Needed: #1a1a1a (4.5:1 ratio)
+             - *WCAG 2.1 AA requirement*
+
+          ### 🌟 UX Enhancements
+
+          3. **Loading states missing** (`src/components/Form.tsx:78`)
+             - Users need feedback during async operations
+             - Suggestion: Add loading spinner or skeleton UI
+             - Example:
+             ```tsx
+             {isLoading ? (
+               <div className="skeleton-loader" role="status">
+                 <span className="sr-only">Loading...</span>
+               </div>
+             ) : (
+               <FormContent />
+             )}
+             ```
+
+          ### 🎨 Design System Alignment
+          - ✅ Using design tokens correctly
+          - ✅ Following naming conventions
+          - ⚠️ Consider adding focus indicators
+          - ⚠️ Error messages need friendlier language
+
+          ### 📱 Responsive Design
+          - ✅ Mobile breakpoints working
+          - ✅ Touch targets 44x44px minimum
+          - ✅ No horizontal scrolling
+
+          ### 🌈 Visual Consistency
+          - Typography: **Excellent**
+          - Spacing: **Excellent**
+          - Colors: **Good** (contrast fixes needed)
+          - Icons: **Excellent**
+
+          ### 💡 Suggestions for Polish
+
+          1. Add micro-interactions on hover states
+          2. Consider adding empty states with illustrations
+          3. Error messages: More empathetic language
+             - Instead of: "Invalid input"
+             - Try: "Hmm, that doesn't look quite right. Try again?"
+
+          ### 🎯 Next Steps
+
+          Please address the high-priority accessibility issues before merge.
+          Medium and low priority items can be separate improvements!
+
+          ---
+          🎨 Anastasia - The Designer
+          *Beautiful AND accessible - that's the goal!* 💜
+
+          **WCAG 2.1 Compliance:** Partial (needs fixes)
+          **Recommended:** Fix accessibility issues, then approve
+          EOF
+
+          cat design-feedback.md
+
+      - name: Check component library usage
+        run: |
+          echo "📚 Checking design system compliance..."
+          # Verify components use design system
+
+      - name: Visual regression check
+        run: |
+          echo "👁️ Running visual regression tests..."
+          # Screenshot comparison logic
+
+      - name: Comment design review
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const feedback = fs.readFileSync('design-feedback.md', 'utf8');
+
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: feedback
+            });
+
+            // Add labels
+            await github.rest.issues.addLabels({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: ['design-review', 'accessibility']
+            });

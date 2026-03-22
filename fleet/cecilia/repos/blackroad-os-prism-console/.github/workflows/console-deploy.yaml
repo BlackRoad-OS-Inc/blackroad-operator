@@ -1,0 +1,65 @@
+name: Console Deploy
+
+on:
+  push:
+    branches: [dev, staging, main]
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@f43a3398dc5d8737c2dbc7bf8ad6b50918d7a3d4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@b829d2ab59ffb3738572edf3c6dbd9bfebc477f1
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+      - name: Select Railway environment
+        id: env
+        run: |
+          BRANCH=${GITHUB_REF##*/}
+          if [ "$BRANCH" = "main" ]; then
+            echo "railway_env=prod" >> $GITHUB_OUTPUT
+            echo "health_url=https://console.blackroad.systems/api/health" >> $GITHUB_OUTPUT
+          elif [ "$BRANCH" = "staging" ]; then
+            echo "railway_env=staging" >> $GITHUB_OUTPUT
+            echo "health_url=https://staging.console.blackroad.systems/api/health" >> $GITHUB_OUTPUT
+          else
+            echo "railway_env=dev" >> $GITHUB_OUTPUT
+            if [ -n "${DEV_CONSOLE_URL:-}" ]; then
+              echo "health_url=${DEV_CONSOLE_URL%/}/api/health" >> $GITHUB_OUTPUT
+            else
+              echo "health_url=" >> $GITHUB_OUTPUT
+            fi
+          fi
+
+      - name: Deploy to Railway
+        uses: railwayapp/railway-action@v2
+        with:
+          railwayToken: ${{ secrets.RAILWAY_TOKEN }}
+          service: prism-console-web
+          environment: ${{ steps.env.outputs.railway_env }}
+
+      - name: Health check
+        run: |
+          if [ -z "${{ steps.env.outputs.health_url }}" ]; then
+            echo "No health URL configured for this branch; skipping health check."
+            exit 0
+          fi
+          echo "Checking ${{ steps.env.outputs.health_url }}"
+          curl --fail --location "${{ steps.env.outputs.health_url }}"

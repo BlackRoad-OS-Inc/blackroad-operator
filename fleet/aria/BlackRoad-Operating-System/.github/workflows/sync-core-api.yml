@@ -1,0 +1,118 @@
+name: Sync core-api to mirror
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'services/core-api/**'
+      - 'infra/github/sync-config.yml'
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    env:
+      SERVICE_KEY: core-api
+      SYNC_CONFIG: infra/github/sync-config.yml
+      SYNC_TOKEN: ${{ secrets.BR_OS_SYNC_TOKEN }}
+    steps:
+      - name: Checkout monorepo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Load service config
+        id: cfg
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, yaml, os
+
+          key = os.environ['SERVICE_KEY']
+          with open(os.environ['SYNC_CONFIG'], 'r') as f:
+            cfg = yaml.safe_load(f)
+
+          # service can live under services/apps/docs namespaces; search all
+          for section in ('services', 'apps', 'docs'):
+            if section in cfg and key in cfg[section]:
+              data = cfg[section][key]
+              break
+          else:
+            raise SystemExit(f"Service {key} not found in config")
+
+          for output_key, output_value in (
+            ('monorepo_path', data['monorepo_path']),
+            ('target_repo', data['target_repo']),
+            ('target_branch', data.get('target_branch', 'main')),
+            ('force_push', str(data.get('force_push', True)).lower()),
+          ):
+            print(f"{output_key}={output_value}")
+          PY | tee /tmp/svc_env
+          while IFS='=' read -r name value; do
+            echo "$name=$value" >> "$GITHUB_OUTPUT"
+          done < /tmp/svc_env
+
+      - name: Export service directory
+        run: |
+          mkdir -p /tmp/export
+          rsync -av --delete "${{ steps.cfg.outputs.monorepo_path }}/" /tmp/export/
+
+      - name: Clone target repository
+        env:
+          TOKEN: ${{ env.SYNC_TOKEN }}
+        run: |
+          if [ -z "$TOKEN" ]; then
+            echo "BR_OS_SYNC_TOKEN is required" >&2
+            exit 1
+          fi
+          git clone "https://${TOKEN}@github.com/${{ steps.cfg.outputs.target_repo }}.git" /tmp/target
+
+      - name: Prepare mirror working tree
+        working-directory: /tmp/target
+        run: |
+          shopt -s dotglob
+          rm -rf -- * .[!.]* ..?*
+          shopt -u dotglob
+          mkdir -p .
+          rsync -av --delete /tmp/export/ ./
+
+      - name: Write sync status
+        working-directory: /tmp/target
+        run: |
+          cat <<'STATUS' > sync-status.md
+          # Sync Status
+
+          - Source repo: blackboxprogramming/BlackRoad-Operating-System
+          - Source path: ${{ steps.cfg.outputs.monorepo_path }}
+          - Source commit: ${{ github.sha }}
+          - Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          STATUS
+
+      - name: Commit changes
+        working-directory: /tmp/target
+        run: |
+          git status
+          if git status --porcelain | grep .; then
+            git config user.name "blackroad-os-bot"
+            git config user.email "blackroad-os-bot@users.noreply.github.com"
+            git add .
+            git commit -m "Sync from BlackRoad-Operating-System: ${{ env.SERVICE_KEY }} @ ${{ github.sha }}"
+          else
+            echo "No changes to sync"
+            echo "skip_push=true" >> $GITHUB_OUTPUT
+          fi
+        id: commit
+
+      - name: Push mirror
+        if: steps.commit.outputs.skip_push != 'true'
+        working-directory: /tmp/target
+        env:
+          FORCE_PUSH: ${{ steps.cfg.outputs.force_push }}
+        run: |
+          if [ "$FORCE_PUSH" = "true" ]; then
+            git push origin "HEAD:${{ steps.cfg.outputs.target_branch }}" --force
+          else
+            git pull --rebase origin "${{ steps.cfg.outputs.target_branch }}"
+            git push origin "HEAD:${{ steps.cfg.outputs.target_branch }}"
+          fi

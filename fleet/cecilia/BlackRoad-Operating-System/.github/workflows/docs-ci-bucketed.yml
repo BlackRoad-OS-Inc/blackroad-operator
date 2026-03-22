@@ -1,0 +1,65 @@
+name: Docs CI
+
+on:
+  pull_request:
+    paths:
+      - 'docs/**'
+      - '*.md'
+      - 'README.*'
+  push:
+    branches: [main]
+    paths:
+      - 'docs/**'
+      - '*.md'
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: Docs Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Markdown lint
+        uses: nosborn/github-action-markdown-cli@v3.3.0
+        with:
+          files: .
+          config_file: .markdownlint.json
+          ignore_files: node_modules/,backend/,agents/
+        continue-on-error: true
+
+      - name: Check for broken links
+        uses: gaurav-nelson/github-action-markdown-link-check@v1
+        with:
+          use-quiet-mode: 'yes'
+          use-verbose-mode: 'no'
+          config-file: '.markdown-link-check.json'
+        continue-on-error: true
+
+      - name: Spell check
+        uses: rojopolis/spellcheck-github-actions@0.33.1
+        with:
+          config_path: .spellcheck.yml
+        continue-on-error: true
+
+      - name: Documentation structure check
+        run: |
+          echo "Checking documentation structure..."
+
+          # Check for required docs
+          required_docs=(
+            "README.md"
+            "docs/architecture"
+            "CLAUDE.md"
+          )
+
+          for doc in "${required_docs[@]}"; do
+            if [ ! -e "$doc" ]; then
+              echo "⚠️ Missing: $doc"
+            else
+              echo "✅ Found: $doc"
+            fi
+          done

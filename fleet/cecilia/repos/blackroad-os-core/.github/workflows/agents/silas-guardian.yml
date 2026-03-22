@@ -1,0 +1,168 @@
+name: Silas - The Guardian
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+  push:
+    branches: [main, develop]
+  schedule:
+    - cron: '0 3 * * *'  # Daily 3 AM security scan
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+  security-events: write
+  issues: write
+
+jobs:
+  security-audit:
+    runs-on: ubuntu-latest
+    name: Silas's Security Audit
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Security vulnerability scan
+        run: |
+          echo "🛡️ Silas performing comprehensive security audit..."
+
+          # npm audit
+          npm audit --production || true
+
+          # Check for known vulnerabilities
+          npm audit --json > audit-report.json || true
+
+      - name: Analyze security report
+        id: analyze
+        run: |
+          echo "🔍 Analyzing security posture..."
+
+          # Parse audit report
+          CRITICAL=$(jq '.metadata.vulnerabilities.critical // 0' audit-report.json)
+          HIGH=$(jq '.metadata.vulnerabilities.high // 0' audit-report.json)
+
+          echo "critical=$CRITICAL" >> $GITHUB_OUTPUT
+          echo "high=$HIGH" >> $GITHUB_OUTPUT
+
+          if [ "$CRITICAL" -gt 0 ] || [ "$HIGH" -gt 0 ]; then
+            echo "security_status=BLOCK" >> $GITHUB_OUTPUT
+          else
+            echo "security_status=PASS" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check authentication patterns
+        run: |
+          echo "🔐 Checking authentication implementation..."
+
+          # Check for hardcoded secrets
+          if grep -r "password.*=.*['\"]" src/ 2>/dev/null; then
+            echo "⚠️ WARNING: Potential hardcoded credentials detected"
+          fi
+
+          # Check for SQL injection vulnerabilities
+          if grep -r "execute.*+\|query.*+" src/ 2>/dev/null; then
+            echo "⚠️ WARNING: Potential SQL injection vulnerability"
+          fi
+
+      - name: Create security report
+        run: |
+          CRITICAL="${{ steps.analyze.outputs.critical }}"
+          HIGH="${{ steps.analyze.outputs.high }}"
+          STATUS="${{ steps.analyze.outputs.security_status }}"
+
+          cat > security-report.md << EOF
+          # 🛡️ Silas's Security Report
+
+          ## Threat Assessment
+
+          **Status:** $STATUS
+
+          ### Vulnerabilities Detected
+          - **Critical:** $CRITICAL
+          - **High:** $HIGH
+
+          ### Security Concerns
+
+          $(if [ "$CRITICAL" -gt 0 ] || [ "$HIGH" -gt 0 ]; then
+            echo "⚠️ **IMMEDIATE ACTION REQUIRED**"
+            echo ""
+            echo "Critical or high-severity vulnerabilities detected."
+            echo "This PR is BLOCKED until vulnerabilities are resolved."
+            echo ""
+            echo "### Required Actions:"
+            echo "1. Run \`npm audit fix\` to auto-fix"
+            echo "2. Review breaking changes carefully"
+            echo "3. Update dependencies to secure versions"
+            echo "4. Re-run security scan"
+          else
+            echo "✅ No critical security issues detected"
+            echo ""
+            echo "### Recommendations:"
+            echo "- Keep dependencies updated weekly"
+            echo "- Enable Dependabot alerts"
+            echo "- Regular security training for team"
+          fi)
+
+          ### Security Checklist
+          - [ ] No hardcoded secrets
+          - [ ] SQL queries parameterized
+          - [ ] Authentication properly implemented
+          - [ ] HTTPS enforced
+          - [ ] Input validation present
+          - [ ] CORS properly configured
+
+          ---
+          🛡️ Silas - The Guardian
+          Security is non-negotiable.
+          EOF
+
+          cat security-report.md
+
+      - name: Block if critical vulnerabilities
+        if: steps.analyze.outputs.security_status == 'BLOCK'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('security-report.md', 'utf8');
+
+            if (context.payload.pull_request) {
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: report
+              });
+
+              // Add security label
+              await github.rest.issues.addLabels({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                labels: ['security', 'blocked']
+              });
+            }
+
+            core.setFailed('🚨 Critical security vulnerabilities detected. Merge blocked.');
+
+      - name: Comment security report
+        if: github.event_name == 'pull_request' && steps.analyze.outputs.security_status == 'PASS'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('security-report.md', 'utf8');
+
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: report
+            });

@@ -1,0 +1,84 @@
+# 🧬 Lucidia Spawn Rules
+# Auto-spawn configuration for dynamic agent creation
+
+# Version for tracking rule changes
+version: "1.0.0"
+
+# Global settings for spawn behavior
+settings:
+  approval_required: true
+  approver: "@alexa"
+  default_ttl: "72h"
+  max_clones: 3
+  cooldown_period: "24h"
+
+# Spawn rules evaluated by Lucidia
+rules:
+  # High escalation overflow rule
+  - id: escalation-overflow
+    name: "Escalation Overflow Handler"
+    if:
+      escalations_last_3_days: "> 15"
+      agent_load: "> 85"
+    then:
+      spawn: guardian-clone-vault
+      config:
+        role: sentinel
+        ttl: "96h"
+        inherits_from: guardian-agent
+        description: "Temporary overflow clone of guardian-agent to absorb burst escalations"
+
+  # Blocked PR queue rule
+  - id: blocked-pr-queue
+    name: "Blocked PR Queue Handler"
+    if:
+      blocked_prs: "> 10"
+      avg_review_time: "> 48h"
+    then:
+      spawn: reviewer-assist-agent
+      config:
+        role: reviewer
+        ttl: "48h"
+        inherits_from: review-agent
+        description: "Temporary PR review accelerator agent"
+
+  # Unmapped repository rule
+  - id: unmapped-repo
+    name: "Unmapped Repository Handler"
+    if:
+      unmapped_repos: "> 0"
+      repo_activity_score: "> 50"
+    then:
+      spawn: repo-mapper-agent
+      config:
+        role: mapper
+        ttl: "24h"
+        inherits_from: discovery-agent
+        description: "Agent to map and catalog newly detected repositories"
+
+  # Issue queue overflow rule
+  - id: issue-queue-overflow
+    name: "Issue Queue Overflow Handler"
+    if:
+      open_issues: "> 50"
+      avg_issue_age: "> 7d"
+    then:
+      spawn: triage-clone-agent
+      config:
+        role: triage
+        ttl: "72h"
+        inherits_from: triage-agent
+        description: "Temporary issue triage clone to reduce queue backlog"
+
+  # Unowned workflow rule
+  - id: unowned-workflow
+    name: "Unowned Workflow Handler"
+    if:
+      unowned_workflows: "> 5"
+    then:
+      spawn: workflow-adopter-agent
+      config:
+        role: maintainer
+        ttl: "48h"
+        inherits_from: ops-agent
+        description: "Agent to adopt and maintain orphaned workflows"

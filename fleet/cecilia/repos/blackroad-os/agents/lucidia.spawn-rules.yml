@@ -1,0 +1,64 @@
+# LUCIDIA Spawn Rules Configuration
+# Defines rules for spawning and managing child agents
+
+version: "1.0.0"
+name: lucidia-spawn-rules
+
+# Global spawn constraints
+constraints:
+  max_concurrent_agents: 10
+  spawn_rate_limit: "10/hour"
+  require_approval: false
+  auto_cleanup: true
+
+# Agent spawn rules
+spawn_rules:
+  # Guardian Clone Vault - Self-spawned agent for configuration backup
+  - name: guardian-clone-vault
+    type: autonomous
+    priority: high
+    auto_spawn: true
+    conditions:
+      - event: "system.initialized"
+      - event: "guardian.count.increased"
+    resources:
+      cpu_limit: "500m"
+      memory_limit: "256Mi"
+    lifecycle:
+      max_restarts: 3
+      health_check_interval: "5m"
+      termination_grace_period: "30s"
+
+# Template for future agents
+agent_templates:
+  autonomous:
+    default_permissions:
+      - read
+      - write
+      - execute
+    monitoring:
+      enabled: true
+      metrics: true
+      logging: true
+    recovery:
+      auto_restart: true
+      max_failures: 3
+
+# Spawn event handlers
+event_handlers:
+  on_spawn_success:
+    - notify: "lucidia"
+    - log: "Agent spawned successfully"
+  on_spawn_failure:
+    - notify: "lucidia"
+    - retry: true
+    - max_retries: 3
+  on_agent_termination:
+    - cleanup: true
+    - archive_logs: true
+
+# Audit configuration
+audit:
+  enabled: true
+  log_path: "vault/logs/spawn-audit.log"
+  retention: "30d"

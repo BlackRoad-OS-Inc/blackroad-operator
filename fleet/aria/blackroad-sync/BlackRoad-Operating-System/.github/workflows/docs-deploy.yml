@@ -1,0 +1,65 @@
+name: Deploy Documentation
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'codex-docs/**'
+      - '.github/workflows/docs-deploy.yml'
+  workflow_dispatch:  # Allow manual trigger
+
+permissions:
+  contents: write
+
+jobs:
+  deploy-docs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history for git info
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install MkDocs and dependencies
+        run: |
+          pip install mkdocs mkdocs-material pymdown-extensions mkdocs-minify-plugin
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Build documentation
+        run: |
+          cd codex-docs
+          mkdocs build --strict --verbose
+
+      - name: Deploy to GitHub Pages
+        run: |
+          cd codex-docs
+          mkdocs gh-deploy --force --message "Deploy documentation from {sha}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Deployment summary
+        run: |
+          echo "## Documentation Deployed 📚" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Documentation has been successfully deployed to GitHub Pages." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Preview URLs:**" >> $GITHUB_STEP_SUMMARY
+          echo "- GitHub Pages: https://blackboxprogramming.github.io/BlackRoad-Operating-System/" >> $GITHUB_STEP_SUMMARY
+          echo "- Custom domain (after DNS setup): https://docs.blackroad.systems" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Next steps:**" >> $GITHUB_STEP_SUMMARY
+          echo "1. Configure GitHub Pages in repository settings" >> $GITHUB_STEP_SUMMARY
+          echo "2. Set custom domain: docs.blackroad.systems" >> $GITHUB_STEP_SUMMARY
+          echo "3. Add CNAME record in Cloudflare DNS" >> $GITHUB_STEP_SUMMARY

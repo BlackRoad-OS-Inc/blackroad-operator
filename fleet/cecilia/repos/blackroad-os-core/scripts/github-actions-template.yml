@@ -1,0 +1,119 @@
+# GitHub Actions Workflow for Cloudflare Pages Deployment
+# Place this file at: .github/workflows/deploy-cloudflare-pages.yml
+
+name: Deploy to Cloudflare Pages
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      deployments: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+        env:
+          NODE_ENV: production
+
+      - name: Deploy to Cloudflare Pages
+        id: deploy
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: PROJECT_NAME_HERE  # Replace with actual project name
+          directory: dist  # Replace with your build output directory
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref_name }}
+
+      - name: Comment deployment URL on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `🚀 Deployed to Cloudflare Pages!\n\n📍 Preview URL: ${{ steps.deploy.outputs.url }}`
+            })
+
+# ==============================================================================
+# Configuration Notes:
+# ==============================================================================
+#
+# Required GitHub Secrets:
+#   - CLOUDFLARE_API_TOKEN: Your Cloudflare API token with Pages edit permissions
+#   - CLOUDFLARE_ACCOUNT_ID: 848cf0b18d51e0170e0d1537aec3505a
+#
+# Project-Specific Configuration:
+#   Replace these values based on your project:
+#
+#   1. projectName: The name of your Cloudflare Pages project
+#      Examples:
+#        - blackroad-os-docs
+#        - blackroad-os-brand
+#        - blackroad-os-prism
+#        - lucidia-platform
+#
+#   2. directory: Your build output directory
+#      Examples:
+#        - dist (Vite, most static sites)
+#        - build (Create React App)
+#        - .next (Next.js - but use @cloudflare/next-on-pages instead)
+#        - out (Next.js static export)
+#        - public (Hugo, Jekyll)
+#
+#   3. Build command: Customize the "Build" step if needed
+#      Examples:
+#        - npm run build (most projects)
+#        - pnpm build (if using pnpm)
+#        - yarn build (if using yarn)
+#        - hugo (for Hugo sites)
+#
+# ==============================================================================
+# Example Configurations for Different Project Types:
+# ==============================================================================
+#
+# Next.js with Cloudflare Pages:
+#   - Use @cloudflare/next-on-pages adapter
+#   - directory: .vercel/output/static
+#   - Build: npm run pages:build
+#
+# Vite/React:
+#   - directory: dist
+#   - Build: npm run build
+#
+# Static HTML:
+#   - directory: public or .
+#   - Build: echo "No build needed" (or skip build step)
+#
+# Documentation (VitePress, Docusaurus, etc):
+#   - directory: .vitepress/dist or build
+#   - Build: npm run docs:build
+#
+# ==============================================================================

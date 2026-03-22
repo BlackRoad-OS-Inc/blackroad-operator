@@ -1,0 +1,70 @@
+#!/bin/bash
+# br-gateway - BlackRoad API Gateway CLI
+
+PINK='\033[38;5;205m'
+AMBER='\033[38;5;214m'
+GREEN='\033[38;5;82m'
+BLUE='\033[38;5;69m'
+NC='\033[0m'
+
+case "$1" in
+    start)
+        echo -e "${PINK}Starting API Gateway on port 8080...${NC}"
+        pip3 install aiohttp --quiet 2>/dev/null
+        nohup python3 ~/.blackroad/gateway/gateway.py > ~/.blackroad/gateway/logs/gateway.log 2>&1 &
+        echo $! > ~/.blackroad/gateway/gateway.pid
+        echo -e "${GREEN}Gateway started (PID: $(cat ~/.blackroad/gateway/gateway.pid))${NC}"
+        ;;
+
+    stop)
+        if [ -f ~/.blackroad/gateway/gateway.pid ]; then
+            kill $(cat ~/.blackroad/gateway/gateway.pid) 2>/dev/null
+            rm ~/.blackroad/gateway/gateway.pid
+            echo -e "${AMBER}Gateway stopped${NC}"
+        fi
+        ;;
+
+    status)
+        if [ -f ~/.blackroad/gateway/gateway.pid ] && kill -0 $(cat ~/.blackroad/gateway/gateway.pid) 2>/dev/null; then
+            echo -e "${GREEN}Gateway running${NC} (PID: $(cat ~/.blackroad/gateway/gateway.pid))"
+            curl -s http://localhost:8080/gateway/stats | python3 -m json.tool 2>/dev/null || echo "(stats unavailable)"
+        else
+            echo -e "${AMBER}Gateway not running${NC}"
+        fi
+        ;;
+
+    health)
+        curl -s http://localhost:8080/gateway/health | python3 -m json.tool
+        ;;
+
+    logs)
+        service="${2:-api}"
+        python3 ~/.blackroad/gateway/log_aggregator.py collect "$service"
+        ;;
+
+    search)
+        shift
+        query="$*"
+        python3 ~/.blackroad/gateway/log_aggregator.py search "$query"
+        ;;
+
+    metrics)
+        echo -e "${PINK}Collecting metrics from fleet...${NC}"
+        python3 ~/.blackroad/gateway/metrics_collector.py collect
+        echo ""
+        python3 ~/.blackroad/gateway/metrics_collector.py latest
+        ;;
+
+    *)
+        echo -e "${PINK}br-gateway${NC} - BlackRoad API Gateway"
+        echo ""
+        echo "Commands:"
+        echo "  start       - Start API Gateway"
+        echo "  stop        - Stop API Gateway"
+        echo "  status      - Show gateway status"
+        echo "  health      - Check backend health"
+        echo "  logs [svc]  - Aggregate logs (api/mesh/eventbus)"
+        echo "  search <q>  - Search aggregated logs"
+        echo "  metrics     - Collect and show metrics"
+        ;;
+esac

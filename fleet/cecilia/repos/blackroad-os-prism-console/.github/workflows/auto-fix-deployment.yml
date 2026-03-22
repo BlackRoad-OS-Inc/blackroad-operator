@@ -1,0 +1,239 @@
+name: Auto-Fix Failed Deployments
+
+on:
+  workflow_run:
+    workflows: ["Railway Deploy"]
+    types: [completed]
+
+jobs:
+  detect-and-fix:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332
+        with:
+          ref: ${{ github.event.workflow_run.head_branch }}
+          fetch-depth: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b
+        with:
+          node-version: '20'
+
+      - name: Analyze Failure
+        id: analyze
+        run: |
+          echo "Analyzing deployment failure..."
+
+          # Common failure patterns and fixes
+          NEEDS_DEPS=false
+          NEEDS_BUILD_FIX=false
+          NEEDS_ENV_FIX=false
+          NEEDS_RAILWAY_LINK=false
+
+          # Check if package-lock exists but pnpm is used
+          if [ -f "pnpm-lock.yaml" ] && [ -f "package-lock.json" ]; then
+            echo "fix_type=lock_conflict" >> $GITHUB_OUTPUT
+            echo "Detected lock file conflict"
+          elif [ ! -f "package-lock.json" ] && [ ! -f "pnpm-lock.yaml" ] && [ -f "package.json" ]; then
+            echo "fix_type=missing_lock" >> $GITHUB_OUTPUT
+            echo "Missing lock file"
+          elif [ -f "railway.json" ] || [ -f "railway.toml" ]; then
+            echo "fix_type=railway_config" >> $GITHUB_OUTPUT
+            echo "Railway config needs verification"
+          else
+            echo "fix_type=generic" >> $GITHUB_OUTPUT
+            echo "Generic deployment issue"
+          fi
+
+      - name: Fix Lock File Conflict
+        if: steps.analyze.outputs.fix_type == 'lock_conflict'
+        run: |
+          echo "🔧 Fixing lock file conflict..."
+          rm -f package-lock.json
+          npm install -g pnpm
+          pnpm install --frozen-lockfile || pnpm install
+          git config user.name "BlackRoad Auto-Fix Bot"
+          git config user.email "bot@blackroad.systems"
+          git add pnpm-lock.yaml
+          git diff --staged --quiet || git commit -m "🤖 Auto-fix: Remove package-lock.json conflict
+
+          Removed npm lock file in favor of pnpm-lock.yaml
+
+          Auto-fix triggered by failed deployment
+
+          Co-Authored-By: Claude <noreply@anthropic.com>"
+
+      - name: Fix Missing Lock File
+        if: steps.analyze.outputs.fix_type == 'missing_lock'
+        run: |
+          echo "🔧 Generating lock file..."
+          if [ -f "pnpm-lock.yaml" ]; then
+            npm install -g pnpm
+            pnpm install
+          else
+            npm install
+          fi
+          git config user.name "BlackRoad Auto-Fix Bot"
+          git config user.email "bot@blackroad.systems"
+          git add package-lock.json pnpm-lock.yaml 2>/dev/null || true
+          git diff --staged --quiet || git commit -m "🤖 Auto-fix: Generate missing lock file
+
+          Created lock file for dependency consistency
+
+          Auto-fix triggered by failed deployment
+
+          Co-Authored-By: Claude <noreply@anthropic.com>"
+
+      - name: Verify Railway Config
+        if: steps.analyze.outputs.fix_type == 'railway_config'
+        run: |
+          echo "🔧 Verifying Railway configuration..."
+
+          # Ensure railway.json or railway.toml is valid
+          if [ -f "railway.json" ]; then
+            node -e "JSON.parse(require('fs').readFileSync('railway.json'))" || {
+              echo "Invalid railway.json detected"
+              # Create basic valid config
+              cat > railway.json << 'RAILWAYCONFIG'
+              {
+                "$schema": "https://railway.app/railway.schema.json",
+                "build": {
+                  "builder": "NIXPACKS"
+                },
+                "deploy": {
+                  "restartPolicyType": "ON_FAILURE",
+                  "restartPolicyMaxRetries": 10
+                }
+              }
+              RAILWAYCONFIG
+              git config user.name "BlackRoad Auto-Fix Bot"
+              git config user.email "bot@blackroad.systems"
+              git add railway.json
+              git commit -m "🤖 Auto-fix: Repair railway.json configuration
+
+              Fixed invalid Railway configuration
+
+              Auto-fix triggered by failed deployment
+
+              Co-Authored-By: Claude <noreply@anthropic.com>"
+            }
+          fi
+
+      - name: Generic Fix - Clean and Rebuild
+        if: steps.analyze.outputs.fix_type == 'generic'
+        run: |
+          echo "🔧 Attempting generic fixes..."
+
+          # Clean common build artifacts
+          rm -rf node_modules .next .out dist build .cache
+
+          # Ensure package.json has basic scripts
+          if [ -f "package.json" ]; then
+            node -e "
+              const pkg = require('./package.json');
+              if (!pkg.scripts) { pkg.scripts = {}; }
+              if (!pkg.scripts.build) { pkg.scripts.build = 'echo No build needed'; }
+              if (!pkg.scripts.start) { pkg.scripts.start = 'echo No start command'; }
+              require('fs').writeFileSync('package.json', JSON.stringify(pkg, null, 2));
+            "
+          fi
+
+      - name: Push Fixes
+        run: |
+          git config user.name "BlackRoad Auto-Fix Bot"
+          git config user.email "bot@blackroad.systems"
+
+          if git diff --staged --quiet && git diff --quiet; then
+            echo "No fixes needed or already applied"
+          else
+            git add -A
+            git commit -m "🤖 Auto-fix: Resolve deployment issues
+
+            Automatic remediation of deployment failure
+
+            Fix type: ${{ steps.analyze.outputs.fix_type }}
+
+            Co-Authored-By: Claude <noreply@anthropic.com>" || true
+            git push origin ${{ github.event.workflow_run.head_branch }} || echo "Nothing to push"
+          fi
+
+      - name: Retry Deployment
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: |
+          echo "🔄 Retrying deployment after fixes..."
+          npm install -g @railway/cli
+          railway up --detach || {
+            echo "⚠️ Retry failed - manual intervention may be needed"
+            exit 1
+          }
+          echo "✅ Deployment retry successful!"
+
+      - name: Notify on Persistent Failure
+        if: failure()
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea
+        with:
+          script: |
+            const issue = {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: '🚨 Auto-Fix Failed: Deployment Issue Requires Manual Intervention',
+              body: `## Deployment Failure Alert
+
+            **Branch:** \`${{ github.event.workflow_run.head_branch }}\`
+            **Workflow:** Railway Deploy
+            **Auto-Fix Attempt:** Failed
+
+            ### Analysis
+            - Fix type attempted: \`${{ steps.analyze.outputs.fix_type }}\`
+            - Automatic remediation was unsuccessful
+
+            ### Next Steps
+            1. Review deployment logs: ${{ github.event.workflow_run.html_url }}
+            2. Check Railway dashboard for detailed error messages
+            3. Review recent commits for breaking changes
+            4. Verify environment variables and secrets
+
+            ### Workflow Run
+            - Run ID: ${{ github.event.workflow_run.id }}
+            - Commit: ${{ github.event.workflow_run.head_sha }}
+
+            This issue was automatically created by the Auto-Fix workflow.
+
+            cc: @blackboxprogramming
+
+            ---
+            🤖 Auto-generated issue`
+            };
+
+            // Check if similar issue already exists
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'deployment-failure'
+            });
+
+            const existingIssue = issues.find(i =>
+              i.title.includes('Auto-Fix Failed') &&
+              i.body.includes('${{ github.event.workflow_run.head_branch }}')
+            );
+
+            if (!existingIssue) {
+              const { data: newIssue } = await github.rest.issues.create({
+                ...issue,
+                labels: ['deployment-failure', 'auto-fix-failed', 'urgent']
+              });
+              console.log('Created issue:', newIssue.html_url);
+            } else {
+              console.log('Similar issue already exists:', existingIssue.html_url);
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existingIssue.number,
+                body: '🔄 Another auto-fix attempt failed. Still requires manual intervention.'
+              });
+            }

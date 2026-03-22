@@ -1,0 +1,21 @@
+apiVersion: blackroad/v1
+kind: Deployment
+metadata:
+  name: web-app
+  labels:
+    app: web
+spec:
+  replicas: 2
+  nodeSelector:
+    node: cecilia
+  template:
+    spec:
+      containers:
+      - name: web
+        image: nginx:alpine
+        ports:
+        - containerPort: 80
+          hostPort: 8080
+        env:
+        - name: ENV
+          value: production

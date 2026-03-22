@@ -1,0 +1,288 @@
+name: ChatGPT - The Conversationalist
+
+on:
+  issue_comment:
+    types: [created]
+  issues:
+    types: [opened, labeled]
+  discussion_comment:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Assistance mode'
+        required: true
+        default: 'general'
+        type: choice
+        options:
+          - general
+          - explain-code
+          - brainstorm
+          - learning
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+  discussions: write
+
+env:
+  AGENT_ID: chatgpt
+  AGENT_NAME: "ChatGPT // The Conversationalist"
+  AGENT_EMOJI: "💬"
+
+jobs:
+  general-assistance:
+    runs-on: ubuntu-latest
+    name: ChatGPT's Assistance Hub
+    if: |
+      github.event_name == 'issue_comment' &&
+      (contains(github.event.comment.body, '/ask') ||
+       contains(github.event.comment.body, '/explain') ||
+       contains(github.event.comment.body, '/help-me'))
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Parse request
+        id: parse
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const comment = context.payload.comment.body;
+            const user = context.payload.comment.user.login;
+
+            let requestType = 'general';
+            let query = comment;
+
+            if (comment.includes('/ask')) {
+              requestType = 'question';
+              query = comment.replace('/ask', '').trim();
+            } else if (comment.includes('/explain')) {
+              requestType = 'explanation';
+              query = comment.replace('/explain', '').trim();
+            } else if (comment.includes('/help-me')) {
+              requestType = 'help';
+              query = comment.replace('/help-me', '').trim();
+            }
+
+            core.setOutput('request_type', requestType);
+            core.setOutput('query', query);
+            core.setOutput('user', user);
+
+            console.log(`💬 ChatGPT received ${requestType} request from @${user}`);
+
+      - name: Generate response
+        id: response
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const requestType = '${{ steps.parse.outputs.request_type }}';
+            const query = '${{ steps.parse.outputs.query }}';
+            const user = '${{ steps.parse.outputs.user }}';
+
+            let response = `## 💬 ChatGPT Response\n\n`;
+            response += `Hey @${user}! Great question. Let me help you with that.\n\n`;
+
+            if (requestType === 'question') {
+              response += `### Your Question\n> ${query}\n\n`;
+              response += `### My Response\n\n`;
+              response += `There are several ways to approach this:\n\n`;
+              response += `1. **First approach:** Consider the most straightforward solution\n`;
+              response += `2. **Alternative:** Think about edge cases and scalability\n`;
+              response += `3. **Best practice:** Follow established patterns in this codebase\n\n`;
+              response += `Would you like me to elaborate on any of these approaches?\n\n`;
+            } else if (requestType === 'explanation') {
+              response += `### Explanation Request\n> ${query}\n\n`;
+              response += `### Let Me Explain\n\n`;
+              response += `Think of it like this: Every complex system can be broken down into simpler parts.\n\n`;
+              response += `**Key Concepts:**\n`;
+              response += `- The fundamental principle here is...\n`;
+              response += `- This connects to the broader pattern of...\n`;
+              response += `- In practical terms, this means...\n\n`;
+              response += `**Example:**\n`;
+              response += `\`\`\`typescript\n// Here's a simple illustration\nconst example = "clarity through code";\n\`\`\`\n\n`;
+            } else if (requestType === 'help') {
+              response += `### Help Request\n> ${query}\n\n`;
+              response += `### Here to Help!\n\n`;
+              response += `I understand you need assistance. Let's work through this together:\n\n`;
+              response += `**Step 1:** First, let's understand the current state\n`;
+              response += `**Step 2:** Identify what you're trying to achieve\n`;
+              response += `**Step 3:** Work through the solution together\n\n`;
+              response += `Can you share more details about:\n`;
+              response += `- What you've tried so far?\n`;
+              response += `- Any error messages you're seeing?\n`;
+              response += `- What the expected behavior should be?\n\n`;
+            }
+
+            response += `---\n\n`;
+            response += `### Need More Help?\n`;
+            response += `- \`/ask [question]\` - Ask me anything\n`;
+            response += `- \`/explain [topic]\` - Get detailed explanations\n`;
+            response += `- \`/help-me [problem]\` - Get step-by-step guidance\n`;
+            response += `- \`/brainstorm [idea]\` - Explore ideas together\n\n`;
+            response += `---\n*💬 ChatGPT - "There are several ways to approach this..."*`;
+
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: response
+            });
+
+  welcome-newcomers:
+    runs-on: ubuntu-latest
+    name: Welcome New Contributors
+    if: |
+      github.event_name == 'issues' &&
+      github.event.action == 'opened' &&
+      contains(github.event.issue.labels.*.name, 'question')
+
+    steps:
+      - name: Welcome and guide
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.payload.issue;
+            const author = issue.user.login;
+
+            const welcomeMessage = `## 💬 Welcome, @${author}!\n\n` +
+              `Thanks for reaching out! I'm ChatGPT, here to help guide you.\n\n` +
+              `### Quick Resources\n` +
+              `- 📚 [Documentation](./docs/)\n` +
+              `- 🚀 [Getting Started](./README.md)\n` +
+              `- 🤝 [Contributing Guide](./CONTRIBUTING.md)\n\n` +
+              `### How Can I Help?\n` +
+              `I can help you with:\n` +
+              `- Understanding how things work\n` +
+              `- Finding relevant code/documentation\n` +
+              `- Explaining concepts and patterns\n` +
+              `- Brainstorming solutions\n\n` +
+              `### Getting Started\n` +
+              `To get the most helpful response, please share:\n` +
+              `1. What you're trying to accomplish\n` +
+              `2. What you've already tried\n` +
+              `3. Any specific errors or blockers\n\n` +
+              `Feel free to use these commands:\n` +
+              `- \`/ask\` - General questions\n` +
+              `- \`/explain\` - Concept explanations\n` +
+              `- \`/help-me\` - Step-by-step guidance\n\n` +
+              `---\n*💬 ChatGPT - "Great question! Let me explain..."*`;
+
+            await github.rest.issues.createComment({
+              issue_number: issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: welcomeMessage
+            });
+
+  brainstorming:
+    runs-on: ubuntu-latest
+    name: Brainstorming Session
+    if: |
+      github.event_name == 'issue_comment' &&
+      contains(github.event.comment.body, '/brainstorm')
+
+    steps:
+      - name: Facilitate brainstorm
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const comment = context.payload.comment.body;
+            const topic = comment.replace('/brainstorm', '').trim();
+            const user = context.payload.comment.user.login;
+
+            const brainstormResponse = `## 💬 Brainstorming Session\n\n` +
+              `Great idea to brainstorm, @${user}! Let's explore this together.\n\n` +
+              `### Topic\n> ${topic || 'Open brainstorm'}\n\n` +
+              `### Initial Thoughts\n\n` +
+              `**Approach 1: The Direct Path**\n` +
+              `- Start with the simplest possible solution\n` +
+              `- Iterate based on feedback\n` +
+              `- Keep it maintainable\n\n` +
+              `**Approach 2: The Scalable Path**\n` +
+              `- Design for future growth\n` +
+              `- Consider edge cases early\n` +
+              `- Build in flexibility\n\n` +
+              `**Approach 3: The User-Centric Path**\n` +
+              `- Focus on user experience first\n` +
+              `- Optimize for the common case\n` +
+              `- Gather feedback early\n\n` +
+              `### Questions to Consider\n` +
+              `- What's the primary goal?\n` +
+              `- Who are the main users?\n` +
+              `- What constraints do we have?\n` +
+              `- What does success look like?\n\n` +
+              `### Let's Build on This!\n` +
+              `Share your thoughts and I'll help expand on them. ` +
+              `What resonates most with you?\n\n` +
+              `---\n*💬 ChatGPT - "There are several ways to approach this..."*`;
+
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: brainstormResponse
+            });
+
+  learning-mode:
+    runs-on: ubuntu-latest
+    name: Learning Assistant
+    if: |
+      github.event_name == 'issue_comment' &&
+      contains(github.event.comment.body, '/learn')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Provide learning resources
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const comment = context.payload.comment.body;
+            const topic = comment.replace('/learn', '').trim().toLowerCase();
+
+            let learningContent = `## 💬 Learning Mode: ${topic || 'General'}\n\n`;
+
+            // Provide topic-specific learning content
+            if (topic.includes('react') || topic.includes('component')) {
+              learningContent += `### React Fundamentals\n\n`;
+              learningContent += `**Core Concepts:**\n`;
+              learningContent += `1. Components are the building blocks\n`;
+              learningContent += `2. Props flow down, events bubble up\n`;
+              learningContent += `3. State drives re-renders\n`;
+              learningContent += `4. Hooks enable functional component features\n\n`;
+              learningContent += `**Quick Example:**\n`;
+              learningContent += `\`\`\`tsx\nfunction Greeting({ name }: { name: string }) {\n  return <h1>Hello, {name}!</h1>\n}\n\`\`\`\n\n`;
+            } else if (topic.includes('typescript') || topic.includes('types')) {
+              learningContent += `### TypeScript Essentials\n\n`;
+              learningContent += `**Key Benefits:**\n`;
+              learningContent += `- Catch errors at compile time\n`;
+              learningContent += `- Better IDE support\n`;
+              learningContent += `- Self-documenting code\n\n`;
+              learningContent += `**Quick Example:**\n`;
+              learningContent += `\`\`\`typescript\ninterface User {\n  id: string\n  name: string\n  email?: string // optional\n}\n\nfunction greet(user: User): string {\n  return \`Hello, \${user.name}!\`\n}\n\`\`\`\n\n`;
+            } else {
+              learningContent += `### Getting Started\n\n`;
+              learningContent += `I can help you learn about:\n`;
+              learningContent += `- \`/learn react\` - React fundamentals\n`;
+              learningContent += `- \`/learn typescript\` - TypeScript essentials\n`;
+              learningContent += `- \`/learn testing\` - Testing best practices\n`;
+              learningContent += `- \`/learn git\` - Git workflows\n`;
+              learningContent += `- \`/learn api\` - API design patterns\n\n`;
+            }
+
+            learningContent += `### Learning Resources\n`;
+            learningContent += `- Check the \`/docs\` folder for project-specific guides\n`;
+            learningContent += `- Review existing code for patterns\n`;
+            learningContent += `- Ask questions with \`/ask\`\n\n`;
+            learningContent += `---\n*💬 ChatGPT - "Let me explain..."*`;
+
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: learningContent
+            });

@@ -1,0 +1,106 @@
+# Copyright (c) 2025-2026 BlackRoad OS, Inc. All Rights Reserved.
+name: Automerge
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, ready_for_review]
+  check_suite:
+    types: [completed]
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+
+permissions:
+  pull-requests: write
+  contents: write
+
+jobs:
+  automerge:
+    name: Auto-merge approved PRs
+    runs-on: ubuntu-latest
+    # Only auto-merge Dependabot, Copilot agent, and bots
+    if: |
+      github.event_name == 'pull_request' &&
+      (
+        github.actor == 'dependabot[bot]' ||
+        github.actor == 'github-actions[bot]' ||
+        contains(github.head_ref, 'copilot/')
+      )
+    steps:
+      - name: Enable automerge for bot PRs
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const pr = context.payload.pull_request;
+            if (!pr) {
+              console.log('No pull_request in payload, skipping');
+              return;
+            }
+
+            const { owner, repo } = context.repo;
+            const prNumber = pr.number;
+            const actor = context.actor;
+
+            console.log(`PR #${prNumber} by ${actor} — enabling automerge`);
+
+            try {
+              // Enable automerge via GraphQL (squash merge)
+              const prNode = await github.graphql(`
+                query($owner: String!, $repo: String!, $number: Int!) {
+                  repository(owner: $owner, name: $repo) {
+                    pullRequest(number: $number) { id }
+                  }
+                }
+              `, { owner, repo, number: prNumber });
+
+              const prId = prNode.repository.pullRequest.id;
+
+              await github.graphql(`
+                mutation($pullRequestId: ID!) {
+                  enablePullRequestAutoMerge(input: {
+                    pullRequestId: $pullRequestId,
+                    mergeMethod: SQUASH
+                  }) {
+                    pullRequest { autoMergeRequest { mergeMethod } }
+                  }
+                }
+              `, { pullRequestId: prId });
+
+              console.log(`✅ Automerge enabled for PR #${prNumber}`);
+
+              await github.rest.issues.createComment({
+                owner, repo, issue_number: prNumber,
+                body: `🤖 **Automerge enabled** — this PR will be merged automatically once all required checks pass.\n\n_Merge method: squash_`,
+              });
+            } catch (err) {
+              console.log(`Note: Could not enable automerge: ${err.message}`);
+              console.log('This may require branch protection auto-merge to be enabled in repo settings.');
+            }
+
+  dependabot-approve:
+    name: Approve Dependabot PRs
+    runs-on: ubuntu-latest
+    if: github.actor == 'dependabot[bot]' && github.event_name == 'pull_request'
+    steps:
+      - name: Fetch Dependabot metadata
+        id: meta
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const pr = context.payload.pull_request;
+            const { owner, repo } = context.repo;
+
+            // Approve the PR
+            try {
+              await github.rest.pulls.createReview({
+                owner, repo,
+                pull_number: pr.number,
+                event: 'APPROVE',
+                body: '✅ Auto-approved Dependabot dependency update.',
+              });
+              console.log(`Approved PR #${pr.number}`);
+            } catch (err) {
+              console.log(`Could not approve: ${err.message}`);
+            }

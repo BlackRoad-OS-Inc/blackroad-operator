@@ -1,0 +1,102 @@
+name: 🧬 Spawn Runner – Lucidia Agent Dispatcher
+
+on:
+  workflow_dispatch:
+    inputs:
+      agent_name:
+        description: "Agent name/identifier (e.g., guardian-clone-vault)"
+        required: true
+        type: string
+      purpose:
+        description: "Purpose of the spawned agent"
+        required: true
+        type: string
+      summary:
+        description: "Summary of why the agent was spawned"
+        required: true
+        type: string
+      ttl:
+        description: "Time-to-live for the agent (e.g., 96h)"
+        required: false
+        default: "96h"
+        type: string
+      awaiting_approval:
+        description: "User to await approval from"
+        required: false
+        default: "alexa"
+        type: string
+name: 🧬 Lucidia Spawn Runner
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"  # Every 6 hours
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  spawn-agent:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🧬 Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: 🧠 Set up Node
+  spawn-runner:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: 📦 Install Dependencies
+        run: npm ci
+
+      - name: 🚀 Execute Spawn Runner
+        id: spawn
+        run: |
+          echo "Spawning agent: ${{ inputs.agent_name }}"
+          echo "Purpose: ${{ inputs.purpose }}"
+          echo "Summary: ${{ inputs.summary }}"
+          echo "TTL: ${{ inputs.ttl }}"
+          echo "Awaiting approval from: @${{ inputs.awaiting_approval }}"
+
+      - name: 📢 Notify Discord/Slack
+        if: ${{ secrets.LUCIDIA_WEBHOOK != '' }}
+        env:
+          LUCIDIA_WEBHOOK: ${{ secrets.LUCIDIA_WEBHOOK }}
+        run: |
+          # Build JSON payload safely using jq to prevent shell injection
+          REPO_URL="${{ github.server_url }}/${{ github.repository }}"
+          RUN_URL="${REPO_URL}/actions/runs/${{ github.run_id }}"
+          
+          MESSAGE=$(cat <<EOF
+          🚀 Lucidia has spawned a new agent!
+          🔗 Run: ${RUN_URL}
+          🧬 Agent: ${{ inputs.agent_name }}
+          📦 Purpose: ${{ inputs.purpose }}
+          💬 Summary: ${{ inputs.summary }}
+          ⏱️ TTL: ${{ inputs.ttl }}
+          👁️ Awaiting approval from @${{ inputs.awaiting_approval }}
+          EOF
+          )
+          
+          # Use jq to safely construct JSON payload
+          PAYLOAD=$(jq -n --arg content "$MESSAGE" --arg text "$MESSAGE" \
+            '{content: $content, text: $text}')
+          
+          curl -X POST \
+            -H "Content-Type: application/json" \
+            -d "$PAYLOAD" \
+            "$LUCIDIA_WEBHOOK"
+          
+          echo "✅ Notification sent to webhook"
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Spawn Runner
+        run: node bot/spawn-runner.js

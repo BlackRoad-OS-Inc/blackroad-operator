@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  blackroad-server:
+    build: .
+    container_name: blackroad-os-pyto-server
+    ports:
+      - "8080:8080"
+    environment:
+      - ENVIRONMENT=production
+      - PORT=8080
+      - HOST=0.0.0.0
+      - MAX_AGENTS=30000
+      - MAX_WEBSOCKET_CONNECTIONS=100
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+  # Optional: Add Redis for distributed caching
+  # Uncomment to enable
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: blackroad-redis
+  #   ports:
+  #     - "6379:6379"
+  #   restart: unless-stopped
+  #   command: redis-server --appendonly yes
+  #   volumes:
+  #     - redis_data:/data
+
+  # Optional: Add PostgreSQL for persistence
+  # Uncomment to enable
+  # postgres:
+  #   image: postgres:16-alpine
+  #   container_name: blackroad-postgres
+  #   ports:
+  #     - "5432:5432"
+  #   environment:
+  #     - POSTGRES_USER=blackroad
+  #     - POSTGRES_PASSWORD=blackroad
+  #     - POSTGRES_DB=blackroad
+  #   restart: unless-stopped
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+
+# volumes:
+#   redis_data:
+#   postgres_data:

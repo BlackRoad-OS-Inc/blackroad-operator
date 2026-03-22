@@ -1,0 +1,94 @@
+# Shared emoji automation config for GitHub Projects v2.
+# Keep IDs in sync with the target project configuration. All IDs below are
+# examples and should be replaced with the real IDs for your organization.
+
+defaults:
+  projectId: "PVT_default_project"
+  fields:
+    status: "PVTF_STATUS_FIELD"
+    team: "PVTF_TEAM_FIELD"
+    owner: "PVTF_OWNER_FIELD"
+    sprint: "PVTF_SPRINT_FIELD"
+  statusOptions:
+    backlog: "option_backlog"
+    in_progress: "option_in_progress"
+    in_review: "option_in_review"
+    blocked: "option_blocked"
+    shipped: "option_shipped"
+  emojiActions:
+    "✅":
+      statusOption: shipped
+      close: true
+      agents:
+        - builder-agent
+        - scribe-agent
+    "❌":
+      statusOption: blocked
+      close: false
+      agents:
+        - guardian-agent
+    "🛟":
+      statusOption: blocked
+      escalate: true
+      agents:
+        - guardian-agent
+    "🧠":
+      statusOption: in_review
+      agents:
+        - planner-agent
+    "🤖":
+      statusOption: in_progress
+      agents:
+        - builder-agent
+    "🧾":
+      statusOption: in_review
+      agents:
+        - scribe-agent
+    "📢":
+      statusOption: in_progress
+      agents:
+        - broadcast-agent
+  defaultFieldValues:
+    team: "Core"
+    sprint: "Current"
+
+defaultAgentRouting:
+  planner-agent: ["🧠"]
+  builder-agent: ["🤖", "✅"]
+  scribe-agent: ["🧾", "✅"]
+  guardian-agent: ["🛟", "❌"]
+  broadcast-agent: ["📢"]
+
+repos:
+  "open-sorcerers/blackroad-os":
+    projectId: "PVT_blackroad_os"
+    fields:
+      status: "PVTF_status_custom"
+      owner: "PVTF_owner_custom"
+    statusOptions:
+      shipped: "option_shipped_custom"
+      blocked: "option_blocked_custom"
+      in_review: "option_review_custom"
+    emojiActions:
+      "✅":
+        statusOption: shipped
+        close: true
+        fields:
+          owner: "automation-bot"
+          team: "DX"
+        agents:
+          - builder-agent
+          - scribe-agent
+          - broadcast-agent
+      "❌":
+        statusOption: blocked
+        close: false
+        agents:
+          - guardian-agent
+      "🛟":
+        statusOption: blocked
+        escalate: true
+        fields:
+          team: "Support"
+        agents:
+          - guardian-agent

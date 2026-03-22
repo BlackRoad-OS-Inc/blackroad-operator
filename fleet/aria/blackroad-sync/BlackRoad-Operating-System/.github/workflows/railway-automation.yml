@@ -1,0 +1,48 @@
+name: Railway Secrets & Automation Audit
+
+on:
+  push:
+    branches: ["main", "claude/**"]
+  pull_request:
+    branches: ["main"]
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+jobs:
+  validate:
+    name: Validate Railway configuration
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Run Railway validation script
+        run: |
+          python scripts/railway/validate_env_template.py
+
+  summary:
+    name: Automation summary
+    runs-on: ubuntu-latest
+    needs: validate
+    if: always()
+
+    steps:
+      - name: Summarize results
+        run: |
+          echo ""
+          echo "╔════════════════════════════════════════════════════════╗"
+          if [ "${{ needs.validate.result }}" = "success" ]; then
+            echo "║     ✅ Railway secrets automation checks succeeded     ║"
+          else
+            echo "║     ❌ Railway automation detected configuration drift ║"
+          fi
+          echo "║        scripts/railway/validate_env_template.py        ║"
+          echo "║        keeps .env.example and Railway config synced    ║"
+          echo "╚════════════════════════════════════════════════════════╝"

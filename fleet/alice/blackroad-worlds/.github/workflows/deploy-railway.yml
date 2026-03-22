@@ -1,0 +1,45 @@
+# Copyright (c) 2025-2026 BlackRoad OS, Inc. All Rights Reserved.
+name: Deploy to Railway
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy to Railway
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Check Railway secrets
+        id: check
+        run: |
+          if [ -z "${{ secrets.RAILWAY_TOKEN }}" ] || [ -z "${{ secrets.RAILWAY_PROJECT_ID }}" ]; then
+            echo "skip=true" >> $GITHUB_OUTPUT
+            echo "⚠ RAILWAY_TOKEN or RAILWAY_PROJECT_ID not configured — skipping Railway deploy"
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Install Railway CLI
+        if: steps.check.outputs.skip == 'false'
+        run: npm install -g @railway/cli
+
+      - name: Deploy to Railway
+        if: steps.check.outputs.skip == 'false'
+        run: railway up --detach --service blackroad-agents
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+          RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
+
+      - name: Job summary
+        run: |
+          echo "## Railway Deploy" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.check.outputs.skip }}" = "true" ]; then
+            echo "⚠ Skipped — add RAILWAY_TOKEN and RAILWAY_PROJECT_ID secrets to enable" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ Deployed to Railway" >> $GITHUB_STEP_SUMMARY
+            echo "- Commit: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          fi

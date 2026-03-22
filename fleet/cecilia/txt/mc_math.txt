@@ -1,0 +1,30 @@
+MINECRAFT BLOCK MATH (base 16, powers of 2)
+
+Block:     16 × 16 × 16 texels
+Chunk:     16 × 16 × 384 blocks  
+Region:    32 × 32 chunks (512 × 512 blocks)
+
+COORDINATE SYSTEM:
+  block_x = floor(world_x)
+  chunk_x = floor(block_x / 16)        # or: block_x >> 4
+  region_x = floor(chunk_x / 32)       # or: chunk_x >> 5
+
+LOCAL POSITION (within chunk):
+  local_x = block_x & 0xF              # mod 16 via bitmask
+  local_z = block_z & 0xF
+
+BLOCK INDEX (flat array):
+  index = (y * 16 + z) * 16 + x        # y-major ordering
+  index = y << 8 | z << 4 | x          # same thing, bit ops
+
+FACE LIGHT MULTIPLIERS:
+  top    = 1.0    (full sun)
+  bottom = 0.5
+  north  = 0.8    (+Z)
+  south  = 0.8    (-Z)  
+  east   = 0.6    (+X)
+  west   = 0.6    (-X)
+
+ISOMETRIC PROJECTION (2:1 pixel ratio):
+  screen_x = (block_x - block_z) * 2
+  screen_y = (block_x + block_z) - block_y * 2

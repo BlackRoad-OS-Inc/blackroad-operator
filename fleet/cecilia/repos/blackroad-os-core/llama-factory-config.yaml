@@ -1,0 +1,156 @@
+# LLaMA-Factory Configuration for BlackRoad Model Fine-Tuning
+#
+# This configuration fine-tunes base open source models on BlackRoad-specific data
+# to create sovereign, identity-aware, policy-compliant BlackRoad models.
+#
+# Usage:
+#   llamafactory-cli train llama-factory-config.yaml
+
+### Model Configuration
+model_name_or_path: Qwen/Qwen2.5-72B-Instruct  # Change for different base models
+model_type: qwen2  # Options: qwen2, llama, mistral
+
+### Output Configuration
+output_dir: ./models/blackroad-qwen-72b-v1
+overwrite_output_dir: false
+logging_dir: ./logs/blackroad-qwen-72b-v1
+
+### Dataset Configuration
+dataset: blackroad_corpus
+template: qwen  # Options: qwen, llama3, mistral
+cutoff_len: 8192  # Max sequence length
+preprocessing_num_workers: 16
+
+### Training Configuration
+do_train: true
+finetuning_type: lora  # LoRA for efficiency (full fine-tuning also supported)
+
+# LoRA-specific settings
+lora_rank: 8
+lora_alpha: 16
+lora_dropout: 0.05
+lora_target: all  # Apply LoRA to all linear layers
+
+### Training Hyperparameters
+learning_rate: 5.0e-5
+num_train_epochs: 3
+per_device_train_batch_size: 1  # Adjust based on GPU memory
+gradient_accumulation_steps: 16  # Effective batch size = 16
+lr_scheduler_type: cosine
+warmup_ratio: 0.1
+
+### Optimization
+optim: adamw_torch
+weight_decay: 0.01
+max_grad_norm: 1.0
+gradient_checkpointing: true  # Save memory
+
+### Mixed Precision
+fp16: false
+bf16: true  # Use BF16 if available (A100, H100)
+
+### Logging & Saving
+logging_steps: 10
+save_steps: 500
+save_total_limit: 3  # Keep only 3 latest checkpoints
+evaluation_strategy: steps
+eval_steps: 500
+load_best_model_at_end: true
+metric_for_best_model: loss
+
+### Distributed Training (if using multiple GPUs)
+ddp_backend: nccl
+ddp_find_unused_parameters: false
+
+### BlackRoad-Specific Features
+
+# System Prompt for all training examples
+default_system: |
+  You are a BlackRoad OS model. You are identity-aware, policy-compliant,
+  and breath-synchronized. Always include authority context in your responses.
+
+  Key Concepts:
+  - Genesis Principals: Alexa (human), Cece (operator), Lucidia (governance)
+  - Authority Chain: Principal → Operator → Governance → Agents
+  - PS-SHA∞: Infinite cascade hashing for identity
+  - Breath: Golden ratio synchronization (φ = 1.618034)
+  - RoadChain: Immutable event ledger
+
+  Always verify delegation chains and log authorizing identities.
+
+# Special Tokens
+special_tokens:
+  - "[IDENTITY:"
+  - "[AUTHORITY_CHAIN:"
+  - "[DELEGATION:"
+  - "[BREATH:"
+  - "[POLICY:"
+
+### Evaluation Configuration
+do_eval: true
+eval_dataset: blackroad_corpus_validation
+eval_accumulation_steps: 1
+
+### Inference Test (after training)
+do_predict: true
+predict_with_generate: true
+max_new_tokens: 2048
+temperature: 0.7
+top_p: 0.9
+repetition_penalty: 1.0
+
+### Hardware Configuration
+# Adjust these based on your GPU setup
+
+# For 8× A100 80GB GPUs:
+# per_device_train_batch_size: 2
+# gradient_accumulation_steps: 8
+
+# For 4× H100 GPUs:
+# per_device_train_batch_size: 4
+# gradient_accumulation_steps: 4
+
+# For single GPU (development):
+# per_device_train_batch_size: 1
+# gradient_accumulation_steps: 32
+# gradient_checkpointing: true
+
+### Advanced Features
+use_flash_attention_2: true  # Faster attention (if supported)
+rope_scaling: null  # Keep default RoPE scaling
+use_cache: false  # Disable KV cache during training
+
+### Reproducibility
+seed: 42
+data_seed: 42
+deterministic: true
+
+### Debugging
+report_to: tensorboard
+logging_first_step: true
+logging_nan_inf_filter: true
+
+---
+
+# Additional Configuration Files
+
+# blackroad_corpus dataset config (create in data/blackroad_corpus.json):
+# {
+#   "train": [
+#     {
+#       "instruction": "Spawn a new agent for financial analysis",
+#       "input": "",
+#       "output": "Verifying authority chain... Principal (Alexa) → Operator (Cece) → Governance (Lucidia). Authority validated. Spawning agent...",
+#       "system": "You are Cece, the governor agent of BlackRoad OS.",
+#       "history": []
+#     }
+#   ],
+#   "validation": [...]
+# }
+
+# To use this config:
+# 1. Install LLaMA-Factory: pip install llama-factory
+# 2. Prepare BlackRoad corpus dataset
+# 3. Run: llamafactory-cli train llama-factory-config.yaml
+# 4. Monitor: tensorboard --logdir ./logs/blackroad-qwen-72b-v1
+# 5. Test: llamafactory-cli chat --model_name_or_path ./models/blackroad-qwen-72b-v1

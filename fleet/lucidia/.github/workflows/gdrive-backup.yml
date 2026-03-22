@@ -1,0 +1,46 @@
+name: ☁️ Google Drive Backup
+on:
+  schedule:
+    - cron: '0 * * * *'   # Every hour
+  workflow_dispatch:
+    inputs:
+      direction:
+        description: 'Sync direction: push (local→gdrive) or pull (gdrive→local)'
+        default: 'push'
+
+jobs:
+  sync-to-gdrive:
+    runs-on: [self-hosted, pi, linux, octavia]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Sync workspace to Google Drive
+        run: |
+          DIRECTION="${{ github.event.inputs.direction || 'push' }}"
+          GDRIVE_PATH="gdrive-blackroad:blackroad"
+          LOCAL_PATH="$GITHUB_WORKSPACE"
+          
+          echo "Sync direction: $DIRECTION"
+          
+          if [ "$DIRECTION" = "push" ]; then
+            ~/bin/rclone sync "$LOCAL_PATH" "$GDRIVE_PATH" \
+              --exclude ".git/**" \
+              --exclude "node_modules/**" \
+              --exclude "*.log" \
+              --progress \
+              --stats-one-line \
+              2>&1 | tail -5
+          else
+            ~/bin/rclone sync "$GDRIVE_PATH" "$LOCAL_PATH" \
+              --exclude ".git/**" \
+              --progress \
+              --stats-one-line \
+              2>&1 | tail -5
+          fi
+          
+          echo "✅ Google Drive sync complete"
+
+      - name: Update sync timestamp
+        run: |
+          echo "Last synced: $(date -u)" > /tmp/gdrive-sync-status.txt
+          cat /tmp/gdrive-sync-status.txt

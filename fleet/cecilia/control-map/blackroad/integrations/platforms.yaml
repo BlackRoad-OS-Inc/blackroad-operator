@@ -1,0 +1,854 @@
+# BlackRoad OS - Platform Integrations Configuration
+# Comprehensive multi-platform deployment and service integration
+
+version: "2.0"
+name: "blackroad-integrations"
+
+# =============================================================================
+# DEPLOYMENT PLATFORMS
+# =============================================================================
+
+platforms:
+  # ---------------------------------------------------------------------------
+  # Railway - Container/App Deployment
+  # ---------------------------------------------------------------------------
+  railway:
+    name: "Railway"
+    type: "paas"
+    detection:
+      - "railway.toml"
+      - "railway.json"
+      - "Dockerfile"
+    secrets:
+      - "RAILWAY_TOKEN"
+    cli: "@railway/cli"
+    docs: "https://docs.railway.app"
+    features:
+      - "auto-scaling"
+      - "preview-environments"
+      - "databases"
+      - "cron-jobs"
+
+  # ---------------------------------------------------------------------------
+  # Vercel - Frontend/Serverless Deployment
+  # ---------------------------------------------------------------------------
+  vercel:
+    name: "Vercel"
+    type: "paas"
+    detection:
+      - "vercel.json"
+      - "next.config.js"
+      - "next.config.mjs"
+      - "next.config.ts"
+      - ".vercelignore"
+    secrets:
+      - "VERCEL_TOKEN"
+      - "VERCEL_ORG_ID"
+      - "VERCEL_PROJECT_ID"
+    cli: "vercel"
+    docs: "https://vercel.com/docs"
+    features:
+      - "edge-functions"
+      - "preview-deployments"
+      - "analytics"
+      - "serverless"
+
+  # ---------------------------------------------------------------------------
+  # Cloudflare Pages - Static/JAMstack Deployment
+  # ---------------------------------------------------------------------------
+  cloudflare_pages:
+    name: "Cloudflare Pages"
+    type: "static"
+    detection:
+      - "wrangler.toml"
+      - "pages.toml"
+      - "_headers"
+      - "_redirects"
+    secrets:
+      - "CLOUDFLARE_API_TOKEN"
+      - "CLOUDFLARE_ACCOUNT_ID"
+    cli: "wrangler"
+    docs: "https://developers.cloudflare.com/pages"
+    features:
+      - "edge-functions"
+      - "global-cdn"
+      - "preview-branches"
+
+  # ---------------------------------------------------------------------------
+  # Cloudflare Workers - Edge Computing
+  # ---------------------------------------------------------------------------
+  cloudflare_workers:
+    name: "Cloudflare Workers"
+    type: "serverless"
+    detection:
+      - "wrangler.toml"
+      - "wrangler.json"
+      - "worker.js"
+      - "worker.ts"
+    secrets:
+      - "CLOUDFLARE_API_TOKEN"
+      - "CLOUDFLARE_ACCOUNT_ID"
+    cli: "wrangler"
+    docs: "https://developers.cloudflare.com/workers"
+
+  # ---------------------------------------------------------------------------
+  # DigitalOcean - Cloud Infrastructure
+  # ---------------------------------------------------------------------------
+  digitalocean:
+    name: "DigitalOcean"
+    type: "iaas"
+    services:
+      droplets:
+        name: "Droplets"
+        description: "Virtual machines"
+        detection:
+          - "do-app.yaml"
+          - ".do/app.yaml"
+          - ".do/deploy.template.yaml"
+      app_platform:
+        name: "App Platform"
+        description: "Managed app deployment"
+        detection:
+          - ".do/app.yaml"
+          - "do-app.yaml"
+      kubernetes:
+        name: "Kubernetes"
+        description: "Managed K8s clusters"
+        detection:
+          - ".do/k8s/"
+          - "do-k8s.yaml"
+    secrets:
+      - "DIGITALOCEAN_ACCESS_TOKEN"
+      - "DIGITALOCEAN_SPACES_KEY"
+      - "DIGITALOCEAN_SPACES_SECRET"
+    cli: "doctl"
+    docs: "https://docs.digitalocean.com"
+
+  # ---------------------------------------------------------------------------
+  # Docker - Container Runtime
+  # ---------------------------------------------------------------------------
+  docker:
+    name: "Docker"
+    type: "container"
+    detection:
+      - "Dockerfile"
+      - "docker-compose.yml"
+      - "docker-compose.yaml"
+      - "compose.yml"
+      - "compose.yaml"
+      - ".dockerignore"
+    registries:
+      - name: "Docker Hub"
+        url: "docker.io"
+        secrets: ["DOCKER_USERNAME", "DOCKER_PASSWORD"]
+      - name: "GitHub Container Registry"
+        url: "ghcr.io"
+        secrets: ["GITHUB_TOKEN"]
+      - name: "Google Container Registry"
+        url: "gcr.io"
+        secrets: ["GCR_JSON_KEY"]
+      - name: "Amazon ECR"
+        url: "*.dkr.ecr.*.amazonaws.com"
+        secrets: ["AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY"]
+    docs: "https://docs.docker.com"
+
+  # ---------------------------------------------------------------------------
+  # GitHub - Source Control & CI/CD
+  # ---------------------------------------------------------------------------
+  github:
+    name: "GitHub"
+    type: "scm"
+    features:
+      actions:
+        description: "CI/CD pipelines"
+        detection: [".github/workflows/"]
+      pages:
+        description: "Static site hosting"
+        detection: [".github/pages/", "_config.yml"]
+      packages:
+        description: "Package registry"
+        detection: [".github/packages/"]
+      deployments:
+        description: "Deployment tracking"
+        api: "repos/{owner}/{repo}/deployments"
+    secrets:
+      - "GITHUB_TOKEN"
+      - "GH_PAT"
+    cli: "gh"
+    docs: "https://docs.github.com"
+
+  # ---------------------------------------------------------------------------
+  # Raspberry Pi - Edge/IoT Deployment
+  # ---------------------------------------------------------------------------
+  raspberry_pi:
+    name: "Raspberry Pi"
+    type: "edge"
+    description: "Deploy to Raspberry Pi devices for edge computing and IoT"
+    detection:
+      - ".pi/config.yaml"
+      - "pi-deploy.yaml"
+      - "raspberrypi.yaml"
+    connection:
+      methods:
+        - ssh
+        - tailscale
+        - cloudflare_tunnel
+    secrets:
+      - "PI_SSH_KEY"
+      - "PI_HOST"
+      - "PI_USER"
+      - "TAILSCALE_AUTH_KEY"
+    features:
+      - "gpio-access"
+      - "docker-support"
+      - "systemd-services"
+      - "auto-updates"
+    docs: "https://www.raspberrypi.com/documentation/"
+
+# =============================================================================
+# TUNNEL PROVIDERS
+# =============================================================================
+
+tunnels:
+  # ---------------------------------------------------------------------------
+  # Cloudflare Tunnel (formerly Argo Tunnel)
+  # ---------------------------------------------------------------------------
+  cloudflare_tunnel:
+    name: "Cloudflare Tunnel"
+    description: "Secure tunnel to expose local services"
+    cli: "cloudflared"
+    detection:
+      - ".cloudflared/"
+      - "cloudflared.yaml"
+      - "tunnel.yaml"
+    secrets:
+      - "CLOUDFLARE_TUNNEL_TOKEN"
+      - "CLOUDFLARE_API_TOKEN"
+    docs: "https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/"
+    features:
+      - "zero-trust"
+      - "no-port-forwarding"
+      - "auto-tls"
+
+  # ---------------------------------------------------------------------------
+  # ngrok - Development Tunnels
+  # ---------------------------------------------------------------------------
+  ngrok:
+    name: "ngrok"
+    description: "Expose local servers to the internet"
+    cli: "ngrok"
+    detection:
+      - "ngrok.yml"
+      - "ngrok.yaml"
+      - ".ngrok/"
+    secrets:
+      - "NGROK_AUTHTOKEN"
+    docs: "https://ngrok.com/docs"
+    features:
+      - "http-tunnels"
+      - "tcp-tunnels"
+      - "custom-domains"
+
+  # ---------------------------------------------------------------------------
+  # Tailscale - Private Network Mesh
+  # ---------------------------------------------------------------------------
+  tailscale:
+    name: "Tailscale"
+    description: "Zero-config VPN mesh network"
+    cli: "tailscale"
+    detection:
+      - "tailscale.json"
+      - ".tailscale/"
+    secrets:
+      - "TAILSCALE_AUTH_KEY"
+      - "TAILSCALE_API_KEY"
+    docs: "https://tailscale.com/kb"
+    features:
+      - "mesh-vpn"
+      - "magic-dns"
+      - "acl-policies"
+      - "funnel"
+
+# =============================================================================
+# DEVELOPER TOOLS
+# =============================================================================
+
+developer_tools:
+  # ---------------------------------------------------------------------------
+  # Warp - Modern Terminal
+  # ---------------------------------------------------------------------------
+  warp:
+    name: "Warp"
+    type: "terminal"
+    description: "AI-powered terminal with collaboration features"
+    detection:
+      - ".warp/"
+      - "warp.yaml"
+      - ".warprc"
+    features:
+      - "ai-commands"
+      - "workflows"
+      - "blocks"
+      - "collaboration"
+    config:
+      workflows_dir: ".warp/workflows/"
+      themes_dir: ".warp/themes/"
+    docs: "https://docs.warp.dev"
+
+  # ---------------------------------------------------------------------------
+  # Working Copy - iOS Git Client
+  # ---------------------------------------------------------------------------
+  working_copy:
+    name: "Working Copy"
+    type: "mobile-git"
+    platform: "ios"
+    description: "Professional Git client for iOS with automation"
+    detection:
+      - ".workingcopy/"
+      - "workingcopy.json"
+    features:
+      - "full-git-support"
+      - "shortcuts-integration"
+      - "file-provider"
+      - "ssh-keys"
+    url_scheme: "working-copy://"
+    docs: "https://workingcopy.app/manual/"
+
+  # ---------------------------------------------------------------------------
+  # Shellfish - iOS SSH/SFTP Client
+  # ---------------------------------------------------------------------------
+  shellfish:
+    name: "Shellfish"
+    type: "mobile-ssh"
+    platform: "ios"
+    description: "SSH and SFTP client for iOS with Files integration"
+    detection:
+      - ".shellfish/"
+      - "shellfish.json"
+    features:
+      - "ssh-terminal"
+      - "sftp"
+      - "mosh-support"
+      - "shortcuts-integration"
+      - "files-provider"
+    url_scheme: "shellfish://"
+    docs: "https://secureshellfish.app"
+
+  # ---------------------------------------------------------------------------
+  # Pyto - iOS Python IDE
+  # ---------------------------------------------------------------------------
+  pyto:
+    name: "Pyto"
+    type: "mobile-ide"
+    platform: "ios"
+    description: "Python IDE for iOS with full library support"
+    detection:
+      - ".pyto/"
+      - "pyto.json"
+      - "pyto_config.py"
+    features:
+      - "python-3.10"
+      - "pip-packages"
+      - "numpy-scipy"
+      - "shortcuts-integration"
+      - "file-provider"
+    supported_libraries:
+      - "numpy"
+      - "pandas"
+      - "matplotlib"
+      - "requests"
+      - "pillow"
+      - "opencv"
+    url_scheme: "pyto://"
+    docs: "https://pyto.app"
+
+# =============================================================================
+# PRODUCTIVITY INTEGRATIONS
+# =============================================================================
+
+productivity:
+  # ---------------------------------------------------------------------------
+  # Asana - Project Management
+  # ---------------------------------------------------------------------------
+  asana:
+    name: "Asana"
+    type: "project-management"
+    description: "Work management and task tracking"
+    detection:
+      - ".asana/"
+      - "asana.yaml"
+    api:
+      base_url: "https://app.asana.com/api/1.0"
+      auth: "bearer"
+    secrets:
+      - "ASANA_ACCESS_TOKEN"
+      - "ASANA_WORKSPACE_GID"
+    features:
+      - "task-creation"
+      - "project-sync"
+      - "webhook-events"
+      - "custom-fields"
+    webhooks:
+      events:
+        - "task.created"
+        - "task.completed"
+        - "project.created"
+    docs: "https://developers.asana.com"
+
+  # ---------------------------------------------------------------------------
+  # Notion - Knowledge Base & Docs
+  # ---------------------------------------------------------------------------
+  notion:
+    name: "Notion"
+    type: "knowledge-base"
+    description: "Connected workspace for docs, wikis, and projects"
+    detection:
+      - ".notion/"
+      - "notion.yaml"
+      - "notion.json"
+    api:
+      base_url: "https://api.notion.com/v1"
+      version: "2022-06-28"
+      auth: "bearer"
+    secrets:
+      - "NOTION_API_KEY"
+      - "NOTION_DATABASE_ID"
+    features:
+      - "database-sync"
+      - "page-creation"
+      - "block-manipulation"
+      - "search"
+    integration_types:
+      - "internal"
+      - "public"
+    docs: "https://developers.notion.com"
+
+# =============================================================================
+# AUTH & PAYMENTS
+# =============================================================================
+
+auth_payments:
+  # ---------------------------------------------------------------------------
+  # Clerk - Authentication
+  # ---------------------------------------------------------------------------
+  clerk:
+    name: "Clerk"
+    type: "authentication"
+    description: "Complete user management and authentication"
+    detection:
+      - ".clerk/"
+      - "clerk.yaml"
+      - "middleware.ts"  # with clerk import
+    api:
+      base_url: "https://api.clerk.com/v1"
+      auth: "bearer"
+    secrets:
+      - "CLERK_SECRET_KEY"
+      - "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY"
+      - "CLERK_WEBHOOK_SECRET"
+    features:
+      - "email-auth"
+      - "social-oauth"
+      - "mfa"
+      - "organizations"
+      - "webhooks"
+    sdks:
+      - "@clerk/nextjs"
+      - "@clerk/clerk-react"
+      - "@clerk/backend"
+    docs: "https://clerk.com/docs"
+
+  # ---------------------------------------------------------------------------
+  # Stripe - Payments
+  # ---------------------------------------------------------------------------
+  stripe:
+    name: "Stripe"
+    type: "payments"
+    description: "Payment processing and billing infrastructure"
+    detection:
+      - ".stripe/"
+      - "stripe.yaml"
+      - "stripe-config.json"
+    api:
+      base_url: "https://api.stripe.com/v1"
+      auth: "bearer"
+    secrets:
+      - "STRIPE_SECRET_KEY"
+      - "STRIPE_PUBLISHABLE_KEY"
+      - "STRIPE_WEBHOOK_SECRET"
+    features:
+      - "payments"
+      - "subscriptions"
+      - "invoicing"
+      - "connect"
+      - "billing-portal"
+    sdks:
+      - "stripe"
+      - "@stripe/stripe-js"
+      - "@stripe/react-stripe-js"
+    webhooks:
+      events:
+        - "payment_intent.succeeded"
+        - "customer.subscription.created"
+        - "invoice.paid"
+    docs: "https://stripe.com/docs"
+
+# =============================================================================
+# AI/ML INTEGRATIONS
+# =============================================================================
+
+ai_ml:
+  # ---------------------------------------------------------------------------
+  # Hugging Face - Model Hub & Inference
+  # ---------------------------------------------------------------------------
+  huggingface:
+    name: "Hugging Face"
+    type: "ml-platform"
+    description: "AI model hub, datasets, and inference"
+    detection:
+      - ".huggingface/"
+      - "huggingface.yaml"
+      - "model_config.json"
+    api:
+      base_url: "https://huggingface.co/api"
+      inference_url: "https://api-inference.huggingface.co/models"
+      auth: "bearer"
+    secrets:
+      - "HUGGINGFACE_TOKEN"
+      - "HF_API_KEY"
+    features:
+      - "model-inference"
+      - "model-training"
+      - "datasets"
+      - "spaces"
+      - "transformers"
+    libraries:
+      - "transformers"
+      - "datasets"
+      - "huggingface_hub"
+      - "diffusers"
+      - "accelerate"
+    docs: "https://huggingface.co/docs"
+
+  # ---------------------------------------------------------------------------
+  # Open Source Models Registry
+  # ---------------------------------------------------------------------------
+  open_source_models:
+    name: "Open Source AI Models"
+    type: "model-registry"
+    description: "Safe, forkable open source AI models"
+    models:
+      # Large Language Models
+      llm:
+        - name: "Llama 3.1"
+          provider: "Meta"
+          sizes: ["8B", "70B", "405B"]
+          license: "Llama 3.1 Community License"
+          huggingface: "meta-llama/Llama-3.1-*"
+          safe: true
+          forkable: true
+
+        - name: "Mistral"
+          provider: "Mistral AI"
+          sizes: ["7B", "8x7B", "8x22B"]
+          license: "Apache 2.0"
+          huggingface: "mistralai/Mistral-*"
+          safe: true
+          forkable: true
+
+        - name: "Qwen 2.5"
+          provider: "Alibaba"
+          sizes: ["0.5B", "1.5B", "3B", "7B", "14B", "32B", "72B"]
+          license: "Apache 2.0 / Qwen License"
+          huggingface: "Qwen/Qwen2.5-*"
+          safe: true
+          forkable: true
+
+        - name: "DeepSeek V3"
+          provider: "DeepSeek"
+          sizes: ["7B", "67B", "671B"]
+          license: "DeepSeek License"
+          huggingface: "deepseek-ai/DeepSeek-*"
+          safe: true
+          forkable: true
+
+        - name: "Gemma 2"
+          provider: "Google"
+          sizes: ["2B", "9B", "27B"]
+          license: "Gemma Terms of Use"
+          huggingface: "google/gemma-2-*"
+          safe: true
+          forkable: true
+
+        - name: "Phi-3"
+          provider: "Microsoft"
+          sizes: ["mini", "small", "medium"]
+          license: "MIT"
+          huggingface: "microsoft/Phi-3-*"
+          safe: true
+          forkable: true
+
+        - name: "Yi"
+          provider: "01.AI"
+          sizes: ["6B", "9B", "34B"]
+          license: "Apache 2.0"
+          huggingface: "01-ai/Yi-*"
+          safe: true
+          forkable: true
+
+        - name: "Falcon"
+          provider: "TII UAE"
+          sizes: ["7B", "40B", "180B"]
+          license: "Apache 2.0"
+          huggingface: "tiiuae/falcon-*"
+          safe: true
+          forkable: true
+
+        - name: "BLOOM"
+          provider: "BigScience"
+          sizes: ["560M", "1.1B", "3B", "7.1B", "176B"]
+          license: "BigScience RAIL"
+          huggingface: "bigscience/bloom*"
+          safe: true
+          forkable: true
+
+        - name: "OLMo"
+          provider: "AI2"
+          sizes: ["1B", "7B"]
+          license: "Apache 2.0"
+          huggingface: "allenai/OLMo-*"
+          safe: true
+          forkable: true
+
+        - name: "StableLM"
+          provider: "Stability AI"
+          sizes: ["3B", "7B"]
+          license: "Apache 2.0"
+          huggingface: "stabilityai/stablelm-*"
+          safe: true
+          forkable: true
+
+        - name: "OpenLLaMA"
+          provider: "OpenLM Research"
+          sizes: ["3B", "7B", "13B"]
+          license: "Apache 2.0"
+          huggingface: "openlm-research/open_llama_*"
+          safe: true
+          forkable: true
+
+        - name: "RedPajama"
+          provider: "Together AI"
+          sizes: ["3B", "7B"]
+          license: "Apache 2.0"
+          huggingface: "togethercomputer/RedPajama-*"
+          safe: true
+          forkable: true
+
+        - name: "MPT"
+          provider: "MosaicML"
+          sizes: ["7B", "30B"]
+          license: "Apache 2.0"
+          huggingface: "mosaicml/mpt-*"
+          safe: true
+          forkable: true
+
+      # Code Models
+      code:
+        - name: "CodeLlama"
+          provider: "Meta"
+          sizes: ["7B", "13B", "34B", "70B"]
+          license: "Llama 2 Community License"
+          huggingface: "codellama/CodeLlama-*"
+          safe: true
+          forkable: true
+
+        - name: "StarCoder2"
+          provider: "BigCode"
+          sizes: ["3B", "7B", "15B"]
+          license: "BigCode OpenRAIL-M"
+          huggingface: "bigcode/starcoder2-*"
+          safe: true
+          forkable: true
+
+        - name: "DeepSeek Coder"
+          provider: "DeepSeek"
+          sizes: ["1.3B", "6.7B", "33B"]
+          license: "DeepSeek License"
+          huggingface: "deepseek-ai/deepseek-coder-*"
+          safe: true
+          forkable: true
+
+        - name: "CodeGemma"
+          provider: "Google"
+          sizes: ["2B", "7B"]
+          license: "Gemma Terms of Use"
+          huggingface: "google/codegemma-*"
+          safe: true
+          forkable: true
+
+        - name: "Qwen2.5-Coder"
+          provider: "Alibaba"
+          sizes: ["1.5B", "7B", "32B"]
+          license: "Apache 2.0"
+          huggingface: "Qwen/Qwen2.5-Coder-*"
+          safe: true
+          forkable: true
+
+      # Vision Models
+      vision:
+        - name: "LLaVA"
+          provider: "UW/Microsoft"
+          sizes: ["7B", "13B", "34B"]
+          license: "Apache 2.0"
+          huggingface: "llava-hf/llava-*"
+          safe: true
+          forkable: true
+
+        - name: "CLIP"
+          provider: "OpenAI"
+          variants: ["ViT-B/32", "ViT-L/14"]
+          license: "MIT"
+          huggingface: "openai/clip-*"
+          safe: true
+          forkable: true
+
+        - name: "BLIP-2"
+          provider: "Salesforce"
+          sizes: ["2.7B", "6.7B"]
+          license: "BSD-3"
+          huggingface: "Salesforce/blip2-*"
+          safe: true
+          forkable: true
+
+        - name: "PaliGemma"
+          provider: "Google"
+          sizes: ["3B"]
+          license: "Gemma Terms of Use"
+          huggingface: "google/paligemma-*"
+          safe: true
+          forkable: true
+
+      # Image Generation
+      image_gen:
+        - name: "Stable Diffusion XL"
+          provider: "Stability AI"
+          license: "Stability AI License"
+          huggingface: "stabilityai/stable-diffusion-xl-*"
+          safe: true
+          forkable: true
+
+        - name: "FLUX"
+          provider: "Black Forest Labs"
+          variants: ["schnell", "dev"]
+          license: "Apache 2.0 / Non-commercial"
+          huggingface: "black-forest-labs/FLUX.*"
+          safe: true
+          forkable: true
+
+        - name: "Kandinsky"
+          provider: "Sber AI"
+          versions: ["2.2", "3"]
+          license: "Apache 2.0"
+          huggingface: "kandinsky-community/kandinsky-*"
+          safe: true
+          forkable: true
+
+      # Audio Models
+      audio:
+        - name: "Whisper"
+          provider: "OpenAI"
+          sizes: ["tiny", "base", "small", "medium", "large-v3"]
+          license: "MIT"
+          huggingface: "openai/whisper-*"
+          safe: true
+          forkable: true
+
+        - name: "MusicGen"
+          provider: "Meta"
+          sizes: ["small", "medium", "large"]
+          license: "CC-BY-NC 4.0"
+          huggingface: "facebook/musicgen-*"
+          safe: true
+          forkable: true
+
+        - name: "Bark"
+          provider: "Suno"
+          license: "MIT"
+          huggingface: "suno/bark"
+          safe: true
+          forkable: true
+
+      # Embedding Models
+      embeddings:
+        - name: "BGE"
+          provider: "BAAI"
+          sizes: ["small", "base", "large"]
+          license: "MIT"
+          huggingface: "BAAI/bge-*"
+          safe: true
+          forkable: true
+
+        - name: "E5"
+          provider: "Microsoft"
+          sizes: ["small", "base", "large"]
+          license: "MIT"
+          huggingface: "intfloat/e5-*"
+          safe: true
+          forkable: true
+
+        - name: "Nomic Embed"
+          provider: "Nomic AI"
+          license: "Apache 2.0"
+          huggingface: "nomic-ai/nomic-embed-*"
+          safe: true
+          forkable: true
+
+    # Model Safety Guidelines
+    safety_guidelines:
+      requirements:
+        - "Use only models with permissive/open licenses"
+        - "Verify model provenance before deployment"
+        - "Run safety evaluations on fine-tuned models"
+        - "Implement content filtering for generation"
+        - "Monitor for harmful outputs in production"
+      prohibited:
+        - "Models trained on non-consensual data"
+        - "Models designed for deception"
+        - "Uncensored/jailbroken model variants"
+        - "Models without clear licensing"
+
+# =============================================================================
+# RUNTIME CONFIGURATION
+# =============================================================================
+
+runtime:
+  default_platform: "railway"
+  fallback_chain:
+    - "vercel"
+    - "cloudflare_pages"
+    - "railway"
+    - "digitalocean"
+
+  detection_priority:
+    - "vercel.json"           # Vercel
+    - "railway.toml"          # Railway
+    - "wrangler.toml"         # Cloudflare Workers
+    - ".do/app.yaml"          # DigitalOcean
+    - "next.config.js"        # Next.js (Vercel/CF)
+    - "vite.config.ts"        # Vite (CF Pages)
+    - "Dockerfile"            # Container (Railway/DO)
+    - "package.json"          # Generic Node
+    - "requirements.txt"      # Python
+    - "go.mod"                # Go
+
+  environments:
+    preview:
+      triggers: ["pull_request"]
+      auto_destroy: true
+      ttl: "7d"
+    staging:
+      triggers: ["push:develop"]
+      auto_promote: false
+    production:
+      triggers: ["push:main", "push:master"]
+      require_approval: false

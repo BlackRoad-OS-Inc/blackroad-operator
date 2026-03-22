@@ -1,0 +1,35 @@
+#!/bin/bash
+PINK='\033[38;5;205m'
+GREEN='\033[38;5;82m'
+AMBER='\033[38;5;214m'
+NC='\033[0m'
+
+echo -e "${PINK}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo -e "\033[1;37m  BlackRoad Agent Status - $(hostname)${NC}"
+echo -e "${PINK}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo ""
+
+echo -e "${AMBER}Services:${NC}"
+for svc in fastapi node webhooks ollama; do
+    port=8000
+    case $svc in
+        node) port=3000 ;;
+        webhooks) port=9000 ;;
+        ollama) port=11434 ;;
+    esac
+    if curl -s "http://localhost:$port/" &>/dev/null; then
+        echo -e "  ${GREEN}●${NC} $svc (port $port)"
+    else
+        echo -e "  ○ $svc (port $port)"
+    fi
+done
+
+echo ""
+echo -e "${AMBER}Integrations:${NC}"
+echo -n "  Git: "; git --version 2>/dev/null | cut -d' ' -f3 || echo "not installed"
+echo -n "  Railway: "; railway --version 2>/dev/null || echo "not installed"
+echo -n "  gh: "; gh --version 2>/dev/null | head -1 || echo "not installed"
+
+echo ""
+echo -e "${AMBER}Memory:${NC}"
+~/memory-system.sh summary 2>/dev/null | grep -E "entries|agents" || echo "  Not initialized"

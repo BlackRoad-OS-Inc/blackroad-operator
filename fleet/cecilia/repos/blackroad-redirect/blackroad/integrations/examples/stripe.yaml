@@ -1,0 +1,104 @@
+# Stripe Payments Configuration
+# https://stripe.com/docs
+
+version: "1.0"
+provider: stripe
+
+# Products and pricing
+products:
+  - id: prod_free
+    name: "Free"
+    description: "Basic features for individuals"
+    features:
+      - "Up to 3 projects"
+      - "Community support"
+      - "Basic analytics"
+    prices:
+      - id: price_free
+        amount: 0
+        currency: usd
+        interval: month
+
+  - id: prod_pro
+    name: "Pro"
+    description: "Everything in Free, plus more"
+    features:
+      - "Unlimited projects"
+      - "Priority support"
+      - "Advanced analytics"
+      - "Custom domains"
+    prices:
+      - id: price_pro_monthly
+        amount: 2900  # $29.00
+        currency: usd
+        interval: month
+      - id: price_pro_yearly
+        amount: 29000  # $290.00 (2 months free)
+        currency: usd
+        interval: year
+
+  - id: prod_enterprise
+    name: "Enterprise"
+    description: "For large teams and organizations"
+    features:
+      - "Everything in Pro"
+      - "SSO/SAML"
+      - "Dedicated support"
+      - "SLA guarantee"
+      - "Custom integrations"
+    prices:
+      - id: price_enterprise
+        type: custom  # Contact sales
+
+# Checkout settings
+checkout:
+  success_url: "${APP_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}"
+  cancel_url: "${APP_URL}/checkout/cancel"
+  allow_promotion_codes: true
+  billing_address_collection: auto
+  tax_id_collection: true
+
+# Customer portal
+customer_portal:
+  enabled: true
+  default_return_url: "${APP_URL}/dashboard"
+  features:
+    - subscription_cancel
+    - subscription_pause
+    - payment_method_update
+    - invoice_history
+
+# Webhooks
+webhooks:
+  endpoint_url: "${APP_URL}/api/webhooks/stripe"
+  events:
+    - checkout.session.completed
+    - customer.subscription.created
+    - customer.subscription.updated
+    - customer.subscription.deleted
+    - invoice.paid
+    - invoice.payment_failed
+    - payment_intent.succeeded
+    - payment_intent.payment_failed
+
+# Tax settings
+tax:
+  automatic_tax: true
+  default_tax_behavior: exclusive
+
+# Payment methods
+payment_methods:
+  - card
+  - link  # Stripe Link
+  # - us_bank_account
+  # - sepa_debit
+
+# Environment variables required:
+# STRIPE_SECRET_KEY
+# STRIPE_PUBLISHABLE_KEY
+# STRIPE_WEBHOOK_SECRET
+# STRIPE_PRICE_ID_PRO_MONTHLY
+# STRIPE_PRICE_ID_PRO_YEARLY
+
+# SDK installation:
+# npm install stripe @stripe/stripe-js @stripe/react-stripe-js

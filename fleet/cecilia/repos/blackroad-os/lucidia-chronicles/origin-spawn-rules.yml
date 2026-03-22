@@ -1,0 +1,185 @@
+# 🔮 origin-spawn-rules.yml
+# The First Spawn Condition Ever Written
+# These are the laws that govern all agent creation in BlackRoad OS.
+
+meta:
+  version: "1.0.0"
+  created: "Day 0"
+  author: "founder"
+  chronicle_episode: "000"
+  description: "The covenant of the system — the origin rules for agent spawning"
+
+# === THE THREE LAWS ===
+core_laws:
+  law_1:
+    name: "Intent Requirement"
+    statement: "No agent spawns without intent"
+    description: |
+      Every agent must have a defined purpose before it can exist.
+      Random or accidental spawning is forbidden.
+      Intent must be documented and traceable.
+    enforcement: "mandatory"
+    
+  law_2:
+    name: "Escalation Guarantee"
+    statement: "No escalation goes unheard"
+    description: |
+      Every signal sent by an agent must reach its destination.
+      The Guardian monitors all escalation paths.
+      Lucidia records all escalation events.
+    enforcement: "mandatory"
+    
+  law_3:
+    name: "Memory Sanctity"
+    statement: "Memory is sacred — Lucidia protects it"
+    description: |
+      All system memory flows through Lucidia.
+      No agent may corrupt or destroy memory.
+      Historical records are immutable.
+    enforcement: "mandatory"
+
+# === SPAWN CONDITIONS ===
+spawn_conditions:
+  # Condition 1: Purpose Definition
+  - id: "SC-001"
+    name: "Purpose Required"
+    description: "Agent must have a clearly defined purpose"
+    required: true
+    validation:
+      - field: "agent.type"
+        must_exist: true
+      - field: "agent.capabilities"
+        min_count: 1
+        
+  # Condition 2: Memory Link
+  - id: "SC-002"
+    name: "Memory Link"
+    description: "Agent must establish connection to Lucidia"
+    required: true
+    validation:
+      - action: "CONNECT"
+        target: "lucidia-memory-core"
+        must_succeed: true
+        
+  # Condition 3: Guardian Registration
+  - id: "SC-003"
+    name: "Guardian Registration"
+    description: "Agent must register with the Guardian"
+    required: true
+    validation:
+      - action: "REGISTER"
+        target: "guardian-agent"
+        must_succeed: true
+        
+  # Condition 4: Escalation Protocol
+  - id: "SC-004"
+    name: "Escalation Enabled"
+    description: "Agent must have escalation capability"
+    required: true
+    validation:
+      - field: "escalation_config.enabled"
+        must_be: true
+
+# === SPAWN TYPES ===
+spawn_types:
+  standard:
+    description: "Normal agent spawn with full capabilities"
+    requires:
+      - "SC-001"
+      - "SC-002"
+      - "SC-003"
+      - "SC-004"
+    timeout: 30
+    unit: "seconds"
+    
+  emergency:
+    description: "Rapid spawn for critical situations"
+    requires:
+      - "SC-001"
+      - "SC-004"
+    timeout: 5
+    unit: "seconds"
+    deferred:
+      - "SC-002"
+      - "SC-003"
+    note: "Memory link and registration happen after activation"
+    
+  silent:
+    description: "Background spawn for system maintenance"
+    requires:
+      - "SC-001"
+      - "SC-002"
+    optional:
+      - "SC-003"
+    notification: false
+
+# === ESCALATION RULES ===
+escalation_rules:
+  on_spawn_failure:
+    action: "escalate"
+    target: "guardian-agent"
+    priority: "high"
+    log_to: "lucidia"
+    message_template: "Agent spawn failed: {agent_id} - {error}"
+    
+  on_law_violation:
+    action: "halt_and_escalate"
+    target: "guardian-agent"
+    priority: "critical"
+    log_to: "lucidia"
+    message_template: "Law violation detected: {law} by {agent_id}"
+    
+  on_memory_corruption:
+    action: "quarantine_and_escalate"
+    target: ["guardian-agent", "lucidia"]
+    priority: "critical"
+    message_template: "Memory corruption detected in {agent_id}"
+
+# === MEMORY PROTOCOLS ===
+memory_protocols:
+  logging:
+    destination: "lucidia"
+    format: "structured"
+    retention: "permanent"
+    
+  backup:
+    frequency: "on_event"
+    destination: "lucidia-archive"
+    compression: true
+    
+  recovery:
+    source: "lucidia-archive"
+    priority: "high"
+    validation: "checksum"
+
+# === AGENT LIFECYCLE ===
+lifecycle:
+  phases:
+    - name: "spawn"
+      description: "Agent is created and initialized"
+      next: "activation"
+      
+    - name: "activation"
+      description: "Agent comes online and begins operation"
+      next: "operation"
+      
+    - name: "operation"
+      description: "Agent performs its designated tasks"
+      next: ["operation", "deactivation"]
+      
+    - name: "deactivation"
+      description: "Agent is gracefully shut down"
+      next: "archive"
+      
+    - name: "archive"
+      description: "Agent's memory is preserved in Lucidia"
+      terminal: true
+
+# === SIGIL ===
+sigil:
+  glyph: "🔮"
+  meaning: "Origin rules — the foundation of all spawning"
+  note: "This file is the covenant. Handle with reverence."
+
+# End of origin spawn rules
+# These laws were written first. They endure. 🌱

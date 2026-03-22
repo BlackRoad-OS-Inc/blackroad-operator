@@ -1,0 +1,37 @@
+name: Core OS Tests
+
+on:
+  push:
+    branches: [ main, claude/** ]
+    paths:
+      - 'core_os/**'
+      - '.github/workflows/core-os-tests.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'core_os/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pytest pytest-asyncio httpx
+
+    - name: Run Core OS tests
+      run: |
+        pytest core_os/tests/ -v
+
+    - name: Test imports
+      run: |
+        python -c "from core_os import get_initial_state, open_window; print('Core OS imports successful')"

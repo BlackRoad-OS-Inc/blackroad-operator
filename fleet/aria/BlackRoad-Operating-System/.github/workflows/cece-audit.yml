@@ -1,0 +1,78 @@
+name: Cece System Audit
+
+on:
+  push:
+    branches: [main, claude/**]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  audit:
+    name: Run Cece OS Audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run Cece Audit
+        run: |
+          python scripts/cece_audit.py
+
+      - name: Check for critical issues
+        run: |
+          # Run audit and capture output
+          output=$(python scripts/cece_audit.py)
+          echo "$output"
+
+          # Extract summary counts
+          critical=$(echo "$output" | grep "🔴 CRITICAL:" | awk '{print $3}')
+          errors=$(echo "$output" | grep "🟠 ERROR:" | awk '{print $3}')
+
+          # Fail if critical issues found
+          if [ "$critical" -gt 0 ]; then
+            echo "❌ CRITICAL issues found: $critical"
+            echo "::error::Cece audit found $critical CRITICAL issues. See audit output above."
+            exit 1
+          fi
+
+          # Warn if errors found (but don't fail)
+          if [ "$errors" -gt 0 ]; then
+            echo "⚠️ ERROR issues found: $errors"
+            echo "::warning::Cece audit found $errors ERROR issues. See audit output above."
+          fi
+
+          echo "✅ No critical issues found"
+
+      - name: Generate audit summary
+        if: always()
+        run: |
+          python scripts/cece_audit.py > audit_output.txt
+
+          # Extract summary section
+          awk '/📊 SUMMARY/,/^$/' audit_output.txt > summary.txt
+
+          # Create GitHub step summary
+          {
+            echo "# 🔍 Cece OS Audit Results"
+            echo ""
+            echo "\`\`\`"
+            cat summary.txt
+            echo "\`\`\`"
+            echo ""
+            echo "Full audit output available in workflow logs."
+          } >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cece-audit-report
+          path: audit_output.txt
+          retention-days: 30

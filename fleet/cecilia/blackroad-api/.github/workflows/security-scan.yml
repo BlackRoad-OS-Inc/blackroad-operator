@@ -1,0 +1,83 @@
+name: 🔒 Security Scan
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  schedule:
+    - cron: '0 6 * * 1'  # Every Monday 6 AM UTC
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  secret-scan:
+    name: Secret Detection
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+
+      - name: Scan for secrets (trufflehog)
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+          extra_args: --only-verified
+        continue-on-error: true
+
+      - name: Check for hardcoded tokens
+        run: |
+          echo "Scanning for hardcoded credentials..."
+          # Check for common patterns
+          FOUND=0
+          grep -rn "sk-[a-zA-Z0-9]" . --include="*.ts" --include="*.js" --include="*.py" \
+            --exclude-dir=".git" --exclude-dir="node_modules" 2>/dev/null && FOUND=1
+          grep -rn "ANTHROPIC_API_KEY\s*=\s*['\"]sk" . \
+            --exclude-dir=".git" --exclude-dir="node_modules" 2>/dev/null && FOUND=1
+          grep -rn "ghp_[a-zA-Z0-9]" . \
+            --exclude-dir=".git" 2>/dev/null && FOUND=1
+          if [ $FOUND -eq 1 ]; then
+            echo "::error::Potential hardcoded credentials detected!"
+            exit 1
+          fi
+          echo "✅ No hardcoded credentials found"
+
+  dependency-audit:
+    name: Dependency Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Node.js audit
+        if: ${{ hashFiles('package-lock.json') != '' || hashFiles('package.json') != '' }}
+        run: |
+          npm audit --audit-level=high 2>/dev/null || echo "npm audit completed"
+        continue-on-error: true
+
+      - name: Python safety check
+        if: ${{ hashFiles('requirements.txt') != '' }}
+        run: |
+          pip install safety --quiet
+          safety check -r requirements.txt 2>/dev/null || echo "safety check completed"
+        continue-on-error: true
+
+  codeql:
+    name: CodeQL Analysis
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        language: ['javascript', 'python']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+        continue-on-error: true
+      - uses: github/codeql-action/autobuild@v3
+        continue-on-error: true
+      - uses: github/codeql-action/analyze@v3
+        continue-on-error: true

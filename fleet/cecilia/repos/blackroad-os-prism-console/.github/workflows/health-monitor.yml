@@ -1,0 +1,204 @@
+name: Health Monitor & Auto-Heal
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'  # Every 5 minutes
+  workflow_dispatch:
+
+jobs:
+  health-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332
+
+      - name: Check Service Health
+        id: health
+        run: |
+          echo "🏥 Checking service health..."
+
+          # Detect which service this is
+          SERVICE_NAME="${GITHUB_REPOSITORY#*/}"
+          echo "service_name=$SERVICE_NAME" >> $GITHUB_OUTPUT
+
+          # Try to determine the deployment URL
+          # This would normally come from Railway via their API
+          HEALTH_URL=""
+
+          if [ -f "railway.json" ] || [ -f "railway.toml" ]; then
+            echo "is_railway=true" >> $GITHUB_OUTPUT
+          fi
+
+          # For now, check if we have a known production URL
+          case "$SERVICE_NAME" in
+            "blackroad-os-web")
+              HEALTH_URL="https://www.blackroad.io/health"
+              ;;
+            "blackroad-os-prism-console")
+              HEALTH_URL="https://app.blackroad.io/health"
+              ;;
+            "blackroad-os-agents")
+              HEALTH_URL="https://agents.blackroad.io/health"
+              ;;
+            "blackroad-os-operator")
+              HEALTH_URL="https://ops.blackroad.io/health"
+              ;;
+            "blackroad-api")
+              HEALTH_URL="https://api.blackroad.io/health"
+              ;;
+          esac
+
+          echo "health_url=$HEALTH_URL" >> $GITHUB_OUTPUT
+
+          if [ -n "$HEALTH_URL" ]; then
+            echo "Testing: $HEALTH_URL"
+
+            # Attempt health check with retries
+            RETRY_COUNT=0
+            MAX_RETRIES=3
+            HEALTH_OK=false
+
+            while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+              HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$HEALTH_URL" || echo "000")
+
+              if [ "$HTTP_CODE" = "200" ]; then
+                echo "✅ Health check passed (HTTP $HTTP_CODE)"
+                HEALTH_OK=true
+                break
+              else
+                echo "⚠️ Health check failed (HTTP $HTTP_CODE) - Retry $((RETRY_COUNT + 1))/$MAX_RETRIES"
+                RETRY_COUNT=$((RETRY_COUNT + 1))
+                sleep 10
+              fi
+            done
+
+            if [ "$HEALTH_OK" = "false" ]; then
+              echo "health_status=failed" >> $GITHUB_OUTPUT
+              echo "❌ Service is unhealthy after $MAX_RETRIES attempts"
+              exit 1
+            else
+              echo "health_status=ok" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "health_status=unknown" >> $GITHUB_OUTPUT
+            echo "⚠️ No health URL configured for $SERVICE_NAME"
+          fi
+
+      - name: Auto-Restart Service
+        if: steps.health.outputs.health_status == 'failed' && steps.health.outputs.is_railway == 'true'
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: |
+          echo "🔄 Attempting to restart unhealthy service..."
+
+          npm install -g @railway/cli
+
+          # Get current deployment and restart
+          railway status || true
+          railway up --detach || {
+            echo "⚠️ Restart failed, triggering full redeploy..."
+            git commit --allow-empty -m "🤖 Auto-heal: Force redeploy due to health check failure
+
+            Health check failed after multiple retries
+            Triggering full redeployment
+
+            Co-Authored-By: Claude <noreply@anthropic.com>"
+            git push
+          }
+
+          echo "✅ Restart initiated"
+
+      - name: Verify Recovery
+        if: steps.health.outputs.health_status == 'failed'
+        run: |
+          echo "🔍 Waiting for service recovery..."
+          sleep 60
+
+          HEALTH_URL="${{ steps.health.outputs.health_url }}"
+          if [ -n "$HEALTH_URL" ]; then
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$HEALTH_URL" || echo "000")
+
+            if [ "$HTTP_CODE" = "200" ]; then
+              echo "✅ Service recovered successfully!"
+            else
+              echo "❌ Service still unhealthy after restart (HTTP $HTTP_CODE)"
+              exit 1
+            fi
+          fi
+
+      - name: Create Incident Issue
+        if: failure()
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea
+        with:
+          script: |
+            const service = '${{ steps.health.outputs.service_name }}';
+            const healthUrl = '${{ steps.health.outputs.health_url }}';
+
+            const issue = {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `🚨 Service Down: ${service}`,
+              body: `## Service Health Alert
+
+            **Service:** \`${service}\`
+            **Health URL:** ${healthUrl || 'Not configured'}
+            **Status:** Unhealthy
+            **Auto-Restart:** Failed
+
+            ### Timeline
+            - Health check failed after 3 retries
+            - Auto-restart attempted
+            - Recovery verification failed
+
+            ### Next Steps
+            1. Check Railway logs for errors
+            2. Review recent deployments
+            3. Verify environment variables
+            4. Check external dependencies (databases, APIs)
+
+            ### Monitoring
+            - Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+            This incident was automatically detected and requires manual intervention.
+
+            cc: @blackboxprogramming
+
+            ---
+            🤖 Auto-generated incident report`,
+              labels: ['incident', 'service-down', 'urgent', 'auto-detected']
+            };
+
+            // Check for existing open incident
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'service-down'
+            });
+
+            const existingIncident = issues.find(i =>
+              i.title.includes(service)
+            );
+
+            if (!existingIncident) {
+              const { data: newIssue } = await github.rest.issues.create(issue);
+              console.log('Created incident:', newIssue.html_url);
+            } else {
+              console.log('Updating existing incident:', existingIncident.html_url);
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existingIncident.number,
+                body: `🔄 Service still down. Auto-restart attempt failed.
+
+            Health check time: ${new Date().toISOString()}
+
+            Recovery actions taken:
+            - Retry health check (3 attempts)
+            - Railway restart command
+            - Force redeploy trigger
+
+            Manual intervention required.`
+              });
+            }

@@ -1,0 +1,89 @@
+name: Operator Engine CI
+
+on:
+  pull_request:
+    paths:
+      - 'operator_engine/**'
+      - 'backend/app/routers/operator_webhooks.py'
+  push:
+    branches: [main, develop]
+    paths:
+      - 'operator_engine/**'
+
+jobs:
+  operator-tests:
+    name: Operator Engine Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          cd backend
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio pytest-cov
+
+      - name: Run Operator Engine tests
+        run: |
+          cd backend
+          export PYTHONPATH="${PYTHONPATH}:$(pwd)/.."
+          pytest ../operator_engine/ -v --cov=operator_engine --cov-report=term-missing || true
+
+      - name: Check Python formatting (Black)
+        run: |
+          pip install black
+          black --check operator_engine/
+
+      - name: Lint with flake8
+        run: |
+          pip install flake8
+          flake8 operator_engine/ --count --select=E9,F63,F7,F82 --show-source --statistics
+
+      - name: Type check with mypy
+        run: |
+          pip install mypy
+          mypy operator_engine/ --ignore-missing-imports || true
+
+      - name: Validate PR Action Queue
+        run: |
+          cd backend
+          export PYTHONPATH="${PYTHONPATH}:$(pwd)/.."
+          python -c "
+          import sys
+          import asyncio
+          sys.path.insert(0, '..')
+          from operator_engine.pr_actions import get_queue, PRActionType
+          async def test():
+              queue = get_queue()
+              print('✓ PR Action Queue initialized')
+              print(f'✓ Available action types: {len(PRActionType)}')
+              stats = await queue.get_queue_stats()
+              print(f'✓ Queue stats: {stats}')
+          asyncio.run(test())
+          "
+
+      - name: Validate GitHub Client
+        run: |
+          cd backend
+          export PYTHONPATH="${PYTHONPATH}:$(pwd)/.."
+          export GITHUB_TOKEN="dummy-token-for-validation"
+          python -c "
+          import sys
+          sys.path.insert(0, '..')
+          from operator_engine.github_client import GitHubClient
+          client = GitHubClient(token='dummy-token')
+          print('✓ GitHub Client validated')
+          print(f'✓ Base URL: {client.base_url}')
+          "
+
+      - name: Summary
+        run: |
+          echo "✅ Operator Engine CI checks completed"

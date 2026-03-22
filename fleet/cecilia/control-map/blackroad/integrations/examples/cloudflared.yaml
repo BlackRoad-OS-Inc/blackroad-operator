@@ -1,0 +1,68 @@
+# Cloudflare Tunnel Configuration
+# Place this file as .cloudflared/config.yaml or cloudflared.yaml
+
+# Your tunnel UUID (from `cloudflared tunnel create`)
+tunnel: YOUR_TUNNEL_UUID
+
+# Path to credentials file
+credentials-file: /home/user/.cloudflared/YOUR_TUNNEL_UUID.json
+
+# Logging
+loglevel: info
+
+# Metrics server (optional)
+metrics: localhost:2000
+
+# Ingress rules - define how traffic is routed
+ingress:
+  # Main web application
+  - hostname: app.yourdomain.com
+    service: http://localhost:3000
+    originRequest:
+      noTLSVerify: false
+      connectTimeout: 30s
+
+  # API endpoint
+  - hostname: api.yourdomain.com
+    service: http://localhost:8080
+    originRequest:
+      httpHostHeader: api.internal
+
+  # WebSocket support
+  - hostname: ws.yourdomain.com
+    service: http://localhost:3001
+    originRequest:
+      disableChunkedEncoding: true
+
+  # SSH access (optional)
+  - hostname: ssh.yourdomain.com
+    service: ssh://localhost:22
+
+  # Catch-all (required as last rule)
+  - service: http_status:404
+
+# Origin server settings
+originRequest:
+  # Connection settings
+  connectTimeout: 30s
+  tlsTimeout: 10s
+  tcpKeepAlive: 30s
+  noHappyEyeballs: false
+  keepAliveConnections: 100
+  keepAliveTimeout: 90s
+
+  # HTTP settings
+  httpHostHeader: ""
+  originServerName: ""
+  noTLSVerify: false
+  disableChunkedEncoding: false
+
+  # Access control (integrate with Cloudflare Access)
+  access:
+    required: false
+    teamName: ""
+    audTag: []
+
+# Warp routing (for private network access)
+warp-routing:
+  enabled: false

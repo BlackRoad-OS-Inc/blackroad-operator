@@ -1,0 +1,71 @@
+name: 🧬 Lucidia Spawn Runner – Agent Auto-Spawn Monitor
+
+on:
+  schedule:
+    # Run every 6 hours
+    - cron: "0 */6 * * *"
+  workflow_dispatch:
+    inputs:
+      escalations_last_7_days:
+        description: "Number of escalations in last 7 days"
+        required: false
+        default: "0"
+      digest_count:
+        description: "Current digest count"
+        required: false
+        default: "0"
+      average_blocked_pct:
+        description: "Average blocked percentage"
+        required: false
+        default: "0"
+      created_repos_last_72h:
+        description: "Repos created in last 72 hours"
+        required: false
+        default: "0"
+      overdue_issues_count:
+        description: "Count of overdue issues"
+        required: false
+        default: "0"
+      emoji_threshold:
+        description: "Emoji reaction threshold"
+        required: false
+        default: "0"
+      emoji_type:
+        description: "Emoji type to check (e.g., 🛟)"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  spawn-runner:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🧬 Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: 🧠 Set up Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: 🚦 Run Lucidia Spawn Runner
+        id: spawn
+        env:
+          ESCALATIONS_LAST_7_DAYS: ${{ github.event.inputs.escalations_last_7_days || '0' }}
+          DIGEST_COUNT: ${{ github.event.inputs.digest_count || '0' }}
+          AVERAGE_BLOCKED_PCT: ${{ github.event.inputs.average_blocked_pct || '0' }}
+          CREATED_REPOS_LAST_72H: ${{ github.event.inputs.created_repos_last_72h || '0' }}
+          OVERDUE_ISSUES_COUNT: ${{ github.event.inputs.overdue_issues_count || '0' }}
+          EMOJI_THRESHOLD: ${{ github.event.inputs.emoji_threshold || '0' }}
+          EMOJI_TYPE: ${{ github.event.inputs.emoji_type || '' }}
+        run: node bot/lucidia-spawn-runner.js
+
+      - name: 📤 Upload Spawned Agents Manifest
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: spawned-agents
+          path: spawned-agents.json
+          if-no-files-found: ignore

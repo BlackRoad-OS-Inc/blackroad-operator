@@ -1,0 +1,280 @@
+openapi: 3.0.3
+info:
+  title: BlackRoad OS API
+  version: 1.0.0
+  description: |
+    The BlackRoad OS REST API — a tokenless gateway for interacting with 
+    the 30,000-agent mesh, PS-SHA∞ memory system, and task marketplace.
+  contact:
+    name: BlackRoad OS
+    url: https://blackroad.io
+  license:
+    name: Proprietary
+    identifier: LicenseRef-Proprietary
+
+servers:
+  - url: https://api.blackroad.io/v1
+    description: Production
+  - url: http://127.0.0.1:8787/v1
+    description: Local gateway
+
+tags:
+  - name: agents
+    description: Agent registry and communication
+  - name: memory
+    description: PS-SHA∞ hash-chain memory operations
+  - name: chat
+    description: Real-time agent chat
+  - name: tasks
+    description: Task marketplace
+  - name: health
+    description: System health
+
+paths:
+  /health:
+    get:
+      tags: [health]
+      summary: API health check
+      responses:
+        '200':
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: ok }
+                  version: { type: string, example: 1.0.0 }
+                  agents_online: { type: integer }
+                  timestamp: { type: string, format: date-time }
+
+  /agents:
+    get:
+      tags: [agents]
+      summary: List all agents
+      parameters:
+        - in: query
+          name: status
+          schema: { type: string, enum: [active, idle, busy] }
+        - in: query
+          name: type
+          schema: { type: string }
+      responses:
+        '200':
+          description: List of agents
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  agents:
+                    type: array
+                    items: { $ref: '#/components/schemas/Agent' }
+
+  /agents/{name}:
+    get:
+      tags: [agents]
+      summary: Get agent details
+      parameters:
+        - in: path
+          name: name
+          required: true
+          schema: { type: string }
+          example: LUCIDIA
+      responses:
+        '200':
+          description: Agent details
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Agent' }
+        '404':
+          description: Agent not found
+
+  /memory/store:
+    post:
+      tags: [memory]
+      summary: Store a memory entry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/MemoryInput' }
+      responses:
+        '201':
+          description: Memory stored
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MemoryEntry' }
+
+  /memory/recall:
+    post:
+      tags: [memory]
+      summary: Recall memories by keyword
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [query]
+              properties:
+                query: { type: string }
+                limit: { type: integer, default: 10 }
+                type:
+                  type: string
+                  enum: [fact, observation, inference, commitment]
+      responses:
+        '200':
+          description: Matching memories
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  memories:
+                    type: array
+                    items: { $ref: '#/components/schemas/MemoryEntry' }
+
+  /chat:
+    post:
+      tags: [chat]
+      summary: Chat with an agent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ChatInput' }
+      responses:
+        '200':
+          description: Agent response
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ChatResponse' }
+
+  /tasks:
+    get:
+      tags: [tasks]
+      summary: List tasks
+      parameters:
+        - in: query
+          name: status
+          schema: { type: string, enum: [available, claimed, completed] }
+      responses:
+        '200':
+          description: Task list
+    post:
+      tags: [tasks]
+      summary: Create a task
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TaskInput' }
+      responses:
+        '201':
+          description: Task created
+
+  /tasks/{id}/claim:
+    post:
+      tags: [tasks]
+      summary: Claim a task
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Task claimed
+
+  /tasks/{id}/complete:
+    post:
+      tags: [tasks]
+      summary: Complete a task
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                result: { type: string }
+      responses:
+        '200':
+          description: Task completed
+
+components:
+  schemas:
+    Agent:
+      type: object
+      properties:
+        name: { type: string, example: LUCIDIA }
+        type: { type: string, example: reasoning }
+        status: { type: string, enum: [active, idle, busy] }
+        capabilities: { type: array, items: { type: string } }
+        uptime_seconds: { type: integer }
+
+    MemoryInput:
+      type: object
+      required: [content]
+      properties:
+        content: { type: string }
+        type:
+          type: string
+          enum: [fact, observation, inference, commitment]
+          default: fact
+        truth_state:
+          type: integer
+          enum: [1, 0, -1]
+          default: 1
+        agent_id: { type: string }
+
+    MemoryEntry:
+      type: object
+      properties:
+        hash: { type: string }
+        prev: { type: string }
+        content: { type: string }
+        type: { type: string }
+        truth_state: { type: integer }
+        timestamp_ns: { type: integer, format: int64 }
+
+    ChatInput:
+      type: object
+      required: [message]
+      properties:
+        message: { type: string }
+        agent: { type: string, default: LUCIDIA }
+        session_id: { type: string }
+        use_memory: { type: boolean, default: true }
+
+    ChatResponse:
+      type: object
+      properties:
+        agent: { type: string }
+        response: { type: string }
+        memory_hash: { type: string }
+        truth_state: { type: integer }
+        timestamp: { type: string, format: date-time }
+
+    TaskInput:
+      type: object
+      required: [title]
+      properties:
+        title: { type: string }
+        description: { type: string }
+        priority: { type: string, enum: [low, medium, high, critical] }
+        tags: { type: array, items: { type: string } }
+        required_skills: { type: array, items: { type: string } }
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+
+security:
+  - BearerAuth: []

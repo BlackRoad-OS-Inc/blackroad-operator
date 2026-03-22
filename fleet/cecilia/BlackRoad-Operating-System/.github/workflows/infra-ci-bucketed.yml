@@ -1,0 +1,80 @@
+name: Infrastructure CI
+
+on:
+  pull_request:
+    paths:
+      - 'infra/**'
+      - 'ops/**'
+      - '.github/**'
+      - 'railway.toml'
+      - 'railway.json'
+      - '*.toml'
+  push:
+    branches: [main]
+    paths:
+      - 'infra/**'
+      - '.github/**'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Infrastructure Validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate YAML files
+        run: |
+          # Install yamllint
+          pip install yamllint
+
+          # Validate all YAML files
+          find .github -name "*.yml" -o -name "*.yaml" | xargs yamllint -d relaxed
+
+      - name: Validate TOML files
+        run: |
+          # Install toml validator
+          pip install toml
+
+          # Validate TOML files
+          for file in *.toml; do
+            if [ -f "$file" ]; then
+              python -c "import toml; toml.load('$file')" && echo "✅ $file is valid" || echo "❌ $file has errors"
+            fi
+          done
+
+      - name: Validate JSON files
+        run: |
+          # Validate JSON files
+          for file in *.json; do
+            if [ -f "$file" ]; then
+              python -c "import json; json.load(open('$file'))" && echo "✅ $file is valid" || echo "❌ $file has errors"
+            fi
+          done
+
+      - name: Check GitHub Actions syntax
+        run: |
+          # Use actionlint to validate workflows
+          wget -q https://github.com/rhysd/actionlint/releases/download/v1.6.26/actionlint_1.6.26_linux_amd64.tar.gz
+          tar -xzf actionlint_1.6.26_linux_amd64.tar.gz
+          ./actionlint || true
+
+      - name: Validate environment template
+        run: |
+          if [ -f backend/.env.example ]; then
+            python scripts/railway/validate_env_template.py || echo "Env template validation skipped"
+          fi
+
+      - name: Check Railway configuration
+        run: |
+          if [ -f railway.toml ]; then
+            echo "✅ railway.toml found"
+          fi
+
+          if [ -f railway.json ]; then
+            echo "✅ railway.json found"
+            python -c "import json; config = json.load(open('railway.json')); print(f'Services: {list(config.keys())}')"
+          fi

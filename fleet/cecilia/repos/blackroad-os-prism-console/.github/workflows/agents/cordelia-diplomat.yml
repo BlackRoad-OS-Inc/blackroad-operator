@@ -1,0 +1,171 @@
+name: Cordelia - The Diplomat
+
+on:
+  pull_request:
+    types: [opened]
+  pull_request_review:
+    types: [submitted]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  review-coordination:
+    runs-on: ubuntu-latest
+    name: Cordelia's Review Coordination
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Analyze PR for reviewers
+        id: analyze
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: files } = await github.rest.pulls.listFiles({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number
+            });
+
+            // Analyze changed files to determine expertise needed
+            const changedPaths = files.map(f => f.filename);
+            const expertise = [];
+
+            if (changedPaths.some(p => p.includes('security') || p.includes('auth'))) {
+              expertise.push('security');
+            }
+            if (changedPaths.some(p => p.includes('api') || p.includes('endpoint'))) {
+              expertise.push('backend');
+            }
+            if (changedPaths.some(p => p.includes('component') || p.includes('ui'))) {
+              expertise.push('frontend');
+            }
+            if (changedPaths.some(p => p.includes('test') || p.includes('spec'))) {
+              expertise.push('testing');
+            }
+
+            console.log('Expertise needed:', expertise.join(', '));
+            return expertise;
+
+      - name: Welcome PR author
+        if: github.event.action == 'opened'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const message = `## 🤝 Welcome, @${context.payload.pull_request.user.login}!
+
+            I'm Cordelia, your diplomatic coordinator. I'll help facilitate a smooth review process.
+
+            ### PR Summary
+            - **Files changed:** ${context.payload.pull_request.changed_files}
+            - **Lines added:** +${context.payload.pull_request.additions}
+            - **Lines removed:** -${context.payload.pull_request.deletions}
+
+            ### Review Process
+            I'll coordinate with the team to ensure:
+            - ✅ Appropriate reviewers are assigned
+            - ✅ Feedback is constructive and actionable
+            - ✅ Conflicts are resolved diplomatically
+            - ✅ Reviews are completed in a timely manner
+
+            ### Need Help?
+            Feel free to tag me with questions. I'm here to facilitate communication!
+
+            ---
+            🤝 Cordelia - Building consensus, one review at a time`;
+
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: message
+            });
+
+      - name: Mediate review conflicts
+        if: github.event_name == 'pull_request_review'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Get all reviews
+            const { data: reviews } = await github.rest.pulls.listReviews({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number
+            });
+
+            // Check for conflicting reviews
+            const approvals = reviews.filter(r => r.state === 'APPROVED');
+            const changesRequested = reviews.filter(r => r.state === 'CHANGES_REQUESTED');
+
+            if (approvals.length > 0 && changesRequested.length > 0) {
+              const message = `## 🤝 Cordelia's Mediation
+
+              I've noticed we have both approvals and change requests. Let me help find consensus.
+
+              **Approvals:** ${approvals.length}
+              **Changes Requested:** ${changesRequested.length}
+
+              ### Path Forward
+              1. Address the requested changes
+              2. Re-request review from those who requested changes
+              3. Once concerns are resolved, we can proceed
+
+              ### Common Ground
+              Everyone wants this to succeed! Let's work together to address concerns while preserving what's working well.
+
+              ---
+              🤝 Cordelia - Seeking consensus and collaboration`;
+
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: message
+              });
+            }
+
+      - name: Celebrate consensus
+        if: github.event_name == 'pull_request_review'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: reviews } = await github.rest.pulls.listReviews({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number
+            });
+
+            const latestReviews = {};
+            reviews.forEach(review => {
+              latestReviews[review.user.login] = review.state;
+            });
+
+            const allApproved = Object.values(latestReviews).every(
+              state => state === 'APPROVED' || state === 'COMMENTED'
+            );
+
+            if (allApproved && Object.keys(latestReviews).length >= 2) {
+              const message = `## 🎉 Consensus Achieved!
+
+              Wonderful collaboration, everyone! All reviewers are aligned.
+
+              **Status:** Ready to merge
+              **Reviewers:** ${Object.keys(latestReviews).length}
+
+              Thank you for the constructive and diplomatic review process!
+
+              ---
+              🤝 Cordelia - Celebrating successful collaboration`;
+
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: message
+              });
+            }

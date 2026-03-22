@@ -1,0 +1,83 @@
+name: SDK CI
+
+on:
+  pull_request:
+    paths:
+      - 'sdk/**'
+  push:
+    branches: [main]
+    paths:
+      - 'sdk/**'
+
+permissions:
+  contents: read
+
+jobs:
+  python-sdk:
+    name: Python SDK Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          cd sdk/python
+          pip install -e .
+          pip install pytest pytest-cov
+
+      - name: Run tests
+        run: |
+          cd sdk/python
+          pytest -v --cov
+
+      - name: Type check
+        run: |
+          cd sdk/python
+          pip install mypy
+          mypy blackroad_sdk --ignore-missing-imports || true
+
+      - name: Build package
+        run: |
+          cd sdk/python
+          pip install build
+          python -m build
+
+  typescript-sdk:
+    name: TypeScript SDK Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: sdk/typescript/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          cd sdk/typescript
+          npm ci
+
+      - name: Run tests
+        run: |
+          cd sdk/typescript
+          npm test
+
+      - name: Type check
+        run: |
+          cd sdk/typescript
+          npm run type-check || npx tsc --noEmit
+
+      - name: Build SDK
+        run: |
+          cd sdk/typescript
+          npm run build

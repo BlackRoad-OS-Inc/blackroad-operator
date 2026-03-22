@@ -1,0 +1,96 @@
+name: Deploy core-api to Railway
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'services/core-api/**'
+      - '.github/workflows/deploy-core-api.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      SERVICE_KEY: core-api
+      SYNC_CONFIG: infra/github/sync-config.yml
+    steps:
+      - name: Checkout monorepo
+        uses: actions/checkout@v4
+
+      - name: Load service config
+        id: cfg
+        shell: bash
+        run: |
+          python - <<'PY'
+          import yaml, os
+          key = os.environ['SERVICE_KEY']
+          with open(os.environ['SYNC_CONFIG'], 'r') as f:
+            cfg = yaml.safe_load(f)
+          for section in ('services', 'apps', 'docs'):
+            if section in cfg and key in cfg[section]:
+              data = cfg[section][key]
+              break
+          else:
+            raise SystemExit(f"Service {key} not found in config")
+          print(f"monorepo_path={data['monorepo_path']}")
+          PY | tee /tmp/svc_env
+          while IFS='=' read -r name value; do
+            echo "$name=$value" >> "$GITHUB_OUTPUT"
+          done < /tmp/svc_env
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install service dependencies (placeholder)
+        working-directory: ${{ steps.cfg.outputs.monorepo_path }}
+        run: |
+          if [ -f requirements.txt ]; then
+            python -m pip install --upgrade pip
+            pip install -r requirements.txt
+          else
+            echo "No requirements.txt; skipping install"
+          fi
+
+      - name: Run service tests (placeholder)
+        working-directory: ${{ steps.cfg.outputs.monorepo_path }}
+        run: |
+          if [ -d tests ]; then
+            pytest --maxfail=1 --disable-warnings -q
+          else
+            echo "No tests directory; skipping"
+          fi
+
+      - name: Deploy to Railway
+        working-directory: ${{ steps.cfg.outputs.monorepo_path }}
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: |
+          if [ -z "$RAILWAY_TOKEN" ]; then
+            echo "RAILWAY_TOKEN is required" >&2
+            exit 1
+          fi
+          # Replace this with the service-specific Railway command
+          railway up --service core-api --yes
+
+      - name: Post-deploy healthcheck
+        env:
+          CORE_API_HEALTHCHECK_URL: ${{ secrets.CORE_API_HEALTHCHECK_URL }}
+        run: |
+          if [ -z "$CORE_API_HEALTHCHECK_URL" ]; then
+            echo "CORE_API_HEALTHCHECK_URL not provided; skipping check"
+            exit 0
+          fi
+          status=$(curl -s -o /dev/null -w "%{http_code}" "$CORE_API_HEALTHCHECK_URL/health")
+          if [ "$status" != "200" ]; then
+            echo "Healthcheck failed with status $status" >&2
+            exit 1
+          fi
+
+      - name: Document environment expectations
+        run: |
+          echo "Expected env vars: CORE_API_DATABASE_URL, CORE_API_SECRET_KEY, CORE_API_ALLOWED_ORIGINS" \
+            "(see infra/railway/ENVIRONMENT_GUIDE.md)"

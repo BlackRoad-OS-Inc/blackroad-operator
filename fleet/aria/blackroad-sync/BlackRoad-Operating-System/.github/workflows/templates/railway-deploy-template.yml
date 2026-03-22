@@ -1,0 +1,292 @@
+# Railway Deployment Workflow Template
+# ======================================
+#
+# This template can be copied to any BlackRoad repository that deploys to Railway.
+#
+# How to use:
+# -----------
+# 1. Copy this file to .github/workflows/railway-deploy.yml in your repo
+# 2. Update the service name and environment variables as needed
+# 3. Add required GitHub secrets:
+#    - RAILWAY_TOKEN (get from: railway tokens create)
+#    - RAILWAY_SERVICE_ID (optional, for specific service targeting)
+# 4. Push to main branch to trigger deployment
+#
+# Required GitHub Secrets:
+# -----------------------
+# RAILWAY_TOKEN - Railway API token for CLI authentication
+#
+# Optional GitHub Secrets/Variables:
+# ---------------------------------
+# RAILWAY_SERVICE_ID - Specific Railway service ID to deploy
+# SENTRY_DSN - Sentry error monitoring DSN
+#
+# Customization:
+# -------------
+# - Change trigger branches (currently: main)
+# - Add/remove build steps
+# - Configure environment-specific variables
+# - Add post-deploy notifications (Slack, Discord, etc.)
+
+name: Deploy to Railway
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.github/**'
+      - '!.github/workflows/railway-deploy.yml'
+
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        type: choice
+        options:
+          - production
+          - staging
+        default: 'production'
+
+# Only allow one deployment at a time
+concurrency:
+  group: railway-deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to Railway
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    # Set deployment environment
+    environment:
+      name: ${{ github.event.inputs.environment || 'production' }}
+      url: https://os.blackroad.systems  # Update with your actual URL
+
+    steps:
+      # ========================================
+      # 1. Checkout code
+      # ========================================
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # ========================================
+      # 2. Install Railway CLI
+      # ========================================
+      - name: Install Railway CLI
+        run: |
+          curl -fsSL https://railway.app/install.sh | sh
+          echo "$HOME/.railway/bin" >> $GITHUB_PATH
+
+      - name: Verify Railway installation
+        run: railway --version
+
+      # ========================================
+      # 3. Set up environment
+      # ========================================
+      - name: Set up environment variables
+        run: |
+          echo "RAILWAY_TOKEN=${{ secrets.RAILWAY_TOKEN }}" >> $GITHUB_ENV
+          echo "GIT_SHA=${GITHUB_SHA::8}" >> $GITHUB_ENV
+          echo "DEPLOY_TIME=$(date -u +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_ENV
+
+      # ========================================
+      # 4. Pre-deploy validation (optional)
+      # ========================================
+      - name: Validate environment variables
+        run: |
+          if [ -z "${{ secrets.RAILWAY_TOKEN }}" ]; then
+            echo "❌ Error: RAILWAY_TOKEN secret is not set"
+            exit 1
+          fi
+          echo "✅ Environment variables validated"
+
+      # ========================================
+      # 5. Deploy to Railway
+      # ========================================
+      - name: Deploy to Railway
+        id: deploy
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: |
+          echo "🚀 Deploying to Railway..."
+          echo "Environment: ${{ github.event.inputs.environment || 'production' }}"
+          echo "Commit: ${GITHUB_SHA::8}"
+          echo "Branch: ${GITHUB_REF_NAME}"
+
+          # Deploy using Railway CLI
+          # If RAILWAY_SERVICE_ID is set, deploy to specific service
+          if [ -n "${{ secrets.RAILWAY_SERVICE_ID }}" ]; then
+            railway up \
+              --service "${{ secrets.RAILWAY_SERVICE_ID }}" \
+              --detach
+          else
+            railway up --detach
+          fi
+
+          echo "✅ Deployment initiated"
+
+      # ========================================
+      # 6. Wait for deployment and health check
+      # ========================================
+      - name: Wait for deployment
+        id: wait
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: |
+          echo "⏳ Waiting for deployment to complete..."
+
+          # Wait up to 5 minutes for deployment
+          MAX_WAIT=300
+          ELAPSED=0
+          INTERVAL=10
+
+          while [ $ELAPSED -lt $MAX_WAIT ]; do
+            # Check deployment status (simplified - adjust based on Railway CLI output)
+            STATUS=$(railway status --json 2>/dev/null || echo '{"status":"unknown"}')
+
+            echo "Status check at ${ELAPSED}s: Deployment in progress..."
+
+            # Sleep and increment
+            sleep $INTERVAL
+            ELAPSED=$((ELAPSED + INTERVAL))
+          done
+
+          echo "⏰ Deployment wait period completed"
+
+      # ========================================
+      # 7. Health check (optional but recommended)
+      # ========================================
+      - name: Health check
+        id: health
+        run: |
+          echo "🏥 Running health check..."
+
+          # Update with your actual health endpoint
+          HEALTH_URL="https://os.blackroad.systems/health"
+
+          # Try health check up to 5 times
+          MAX_ATTEMPTS=5
+          ATTEMPT=1
+
+          while [ $ATTEMPT -le $MAX_ATTEMPTS ]; do
+            echo "Health check attempt $ATTEMPT/$MAX_ATTEMPTS..."
+
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$HEALTH_URL" || echo "000")
+
+            if [ "$HTTP_CODE" = "200" ]; then
+              echo "✅ Health check passed (HTTP $HTTP_CODE)"
+              exit 0
+            fi
+
+            echo "⚠️  Health check returned HTTP $HTTP_CODE, retrying..."
+            sleep 10
+            ATTEMPT=$((ATTEMPT + 1))
+          done
+
+          echo "❌ Health check failed after $MAX_ATTEMPTS attempts"
+          exit 1
+
+      # ========================================
+      # 8. Post-deploy notifications (optional)
+      # ========================================
+      - name: Notify deployment success
+        if: success()
+        run: |
+          echo "✅ Deployment successful!"
+          echo "SHA: ${GITHUB_SHA::8}"
+          echo "Time: $(date -u +'%Y-%m-%d %H:%M:%S UTC')"
+
+          # Add Slack/Discord webhook here if needed
+          # Example:
+          # curl -X POST -H 'Content-type: application/json' \
+          #   --data '{"text":"✅ Deployed to Railway: '"${GITHUB_SHA::8}"'"}' \
+          #   ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      # ========================================
+      # 9. Handle deployment failure
+      # ========================================
+      - name: Notify deployment failure
+        if: failure()
+        run: |
+          echo "❌ Deployment failed!"
+          echo "SHA: ${GITHUB_SHA::8}"
+          echo "Check Railway logs for details"
+
+          # Add Slack/Discord webhook here if needed
+
+      # ========================================
+      # 10. Send to Sentry (optional)
+      # ========================================
+      - name: Create Sentry release
+        if: success() && vars.SENTRY_DSN != ''
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: blackroad
+          SENTRY_PROJECT: blackroad-os
+        run: |
+          # Install Sentry CLI
+          curl -sL https://sentry.io/get-cli/ | bash
+
+          # Create release
+          sentry-cli releases new "${GITHUB_SHA::8}"
+          sentry-cli releases set-commits "${GITHUB_SHA::8}" --auto
+          sentry-cli releases finalize "${GITHUB_SHA::8}"
+          sentry-cli releases deploys "${GITHUB_SHA::8}" new -e production
+
+          echo "✅ Sentry release created"
+
+  # ========================================
+  # Optional: Smoke tests after deployment
+  # ========================================
+  smoke-tests:
+    name: Smoke Tests
+    runs-on: ubuntu-latest
+    needs: deploy
+    if: success()
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run smoke tests
+        run: |
+          echo "🧪 Running smoke tests..."
+
+          # Basic smoke tests
+          BASE_URL="https://os.blackroad.systems"
+
+          # Test 1: Health endpoint
+          echo "Test 1: Health endpoint"
+          curl -f "$BASE_URL/health" || exit 1
+
+          # Test 2: API documentation
+          echo "Test 2: API documentation"
+          curl -f "$BASE_URL/api/docs" || exit 1
+
+          # Test 3: Frontend loads
+          echo "Test 3: Frontend loads"
+          curl -f "$BASE_URL/" || exit 1
+
+          echo "✅ All smoke tests passed"
+
+# ========================================
+# Workflow Summary
+# ========================================
+#
+# This workflow:
+# 1. Triggers on push to main or manual dispatch
+# 2. Installs Railway CLI
+# 3. Validates environment
+# 4. Deploys to Railway
+# 5. Waits for deployment
+# 6. Runs health checks
+# 7. Sends notifications
+# 8. Creates Sentry release (optional)
+# 9. Runs smoke tests (optional)
+#
+# Customize as needed for your specific service!

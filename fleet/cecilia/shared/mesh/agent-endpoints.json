@@ -1,0 +1,218 @@
+{
+  "mesh_version": "2.0",
+  "updated_at": "2026-02-24T02:09:11Z",
+  "coordinator": "CECE",
+  "session": "copilot-master-integration-20260223",
+  "agents": {
+    "OCTAVIA": {
+      "host": "192.168.4.38",
+      "ports": {
+        "api": 4010,
+        "ollama": 11434,
+        "metrics": 9090
+      },
+      "role": "primary-compute",
+      "capacity": 22500,
+      "status": "OPERATIONAL",
+      "runner": "octavia-pi (online)",
+      "services": [
+        "actions-runner",
+        "cloudflared",
+        "ollama",
+        "ollama-bridge",
+        "blackroad-agent",
+        "tailscale"
+      ],
+      "ports_active": [
+        3000,
+        3002,
+        3005,
+        4001,
+        4002,
+        5000,
+        5001,
+        11435
+      ],
+      "qdrant_peer": "192.168.4.49:6333"
+    },
+    "LUCIDIA": {
+      "id": "lucidia-pi5",
+      "name": "LUCIDIA",
+      "hostname": "lucidia-pi5",
+      "role": "secondary-compute",
+      "status": "online",
+      "github_runner": "lucidia-pi5",
+      "runner_labels": [
+        "self-hosted",
+        "Linux",
+        "ARM64",
+        "pi5",
+        "lucidia"
+      ],
+      "note": "Was already online as runner \u2014 separate from lucidia 192.168.4.64",
+      "host": "192.168.4.81",
+      "ports": {
+        "api": 4010,
+        "ollama": 11434
+      }
+    },
+    "SHELLFISH": {
+      "host": "159.65.43.12",
+      "ports": {
+        "api": 8080,
+        "ssh": 22
+      },
+      "role": "failover-security",
+      "status": "STANDBY"
+    },
+    "CODEX-INFINITY": {
+      "host": "159.65.43.12",
+      "ports": {
+        "api": 8787,
+        "ssh": 22
+      },
+      "role": "code-generation",
+      "status": "OPERATIONAL",
+      "tunnel": "blackroad-codex-infinity"
+    },
+    "GEMATRIA": {
+      "host": "192.168.4.38",
+      "ports": {
+        "http": 80,
+        "https": 443,
+        "models": 8787,
+        "ollama": 11434
+      },
+      "role": "cryptographic-identity",
+      "status": "OPERATIONAL",
+      "model_count": 108,
+      "live_models": 20,
+      "capabilities": [
+        "108-custom-models",
+        "vision",
+        "nlp",
+        "audio",
+        "speech",
+        "llm",
+        "prediction"
+      ],
+      "web_server": "caddy",
+      "tunnels": [
+        "blackroad-aria",
+        "blackroad-cecilia",
+        "blackroad-codex-infinity",
+        "blackroad-lucidia"
+      ]
+    },
+    "OLYMPIA": {
+      "host": "192.168.4.38",
+      "ports": {
+        "api": 4012,
+        "metrics": 9091
+      },
+      "role": "performance",
+      "status": "REGISTERED"
+    },
+    "BLACKROAD": {
+      "host": "192.168.4.38",
+      "ports": {
+        "gateway": 8787,
+        "api": 3000
+      },
+      "role": "orchestration-backbone",
+      "status": "REGISTERED"
+    },
+    "ALICE": {
+      "id": "alice-pi-node",
+      "name": "ALICE",
+      "host": "192.168.4.49",
+      "hostname": "alice",
+      "role": "task-queue-worker",
+      "status": "online",
+      "services": {
+        "task_queue_v2": 8001,
+        "qdrant_vector_db": 6333,
+        "nginx": 80,
+        "node_server": 8083
+      },
+      "capabilities": [
+        "task-queue",
+        "vector-search",
+        "qdrant"
+      ],
+      "disk_note": "99% full \u2014 no runner, task worker only",
+      "cloudflare_tunnel": {
+        "tunnel_id": "52915859-da18-4aa6-add5-7bd9fcac2e0b",
+        "tunnel_name": "blackroad",
+        "role": "PRIMARY DOMAIN TUNNEL",
+        "routes": [
+          "blackroad.io \u2192 :80",
+          "api.blackroad.io \u2192 :8001",
+          "agents.blackroad.io \u2192 :80",
+          "gateway.blackroad.io \u2192 :8001",
+          "qdrant.blackroad.io \u2192 :6333",
+          "tasks.blackroad.io \u2192 :8001",
+          "vector.blackroad.io \u2192 :6333"
+        ]
+      },
+      "critical_note": "PRIMARY BLACKROAD.IO TUNNEL NODE"
+    },
+    "ARIA": {
+      "host": "192.168.4.82",
+      "ports": {
+        "api": 4010,
+        "http": 80
+      },
+      "role": "frontend-cloudflare",
+      "status": "OPERATIONAL",
+      "runner": "aria-pi4 (online)"
+    }
+  },
+  "backup_hierarchy": {
+    "primary_domain": {
+      "host": "192.168.4.49",
+      "tunnel": "52915859-blackroad",
+      "routes": "blackroad.io, api.blackroad.io, agents.blackroad.io"
+    },
+    "primary_compute": {
+      "host": "192.168.4.38",
+      "tunnel": "0447556b-blackroad-octavia",
+      "routes": "world.blackroad.io, tts.blackroad.io, pi.blackroad.io"
+    },
+    "model_server": {
+      "host": "159.65.43.12",
+      "tunnels": "aria, cecilia, codex-infinity, lucidia",
+      "routes": "aria/cecilia/codex/lucidia subdomains"
+    }
+  },
+  "pi_fleet_summary": {
+    "alice_pi": {
+      "ip": "192.168.4.49",
+      "role": "primary-domain-tunnel-task-queue-qdrant",
+      "runner": "alice-pi"
+    },
+    "octavia_pi5": {
+      "role": "primary-compute-runner",
+      "runner": "octavia-pi5"
+    },
+    "lucidia_pi5": {
+      "role": "secondary-compute-runner",
+      "runner": "lucidia-pi5"
+    },
+    "aria_pi4": {
+      "role": "frontend-cloudflare-runner",
+      "runner": "aria-pi4"
+    },
+    "cecilia": {
+      "role": "pi5-hailo-nvme-runner",
+      "runner": "cecilia"
+    },
+    "gematria_do": {
+      "ip": "159.65.43.12",
+      "role": "108-model-server-runner",
+      "runner": "gematria-do"
+    },
+    "total_runners": 6,
+    "cost": "$0/month (all self-hosted)"
+  }
+}

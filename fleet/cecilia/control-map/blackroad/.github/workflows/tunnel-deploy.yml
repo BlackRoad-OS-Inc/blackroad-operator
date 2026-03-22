@@ -1,0 +1,190 @@
+name: Tunnel Deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      provider:
+        description: 'Tunnel provider'
+        required: true
+        type: choice
+        options:
+          - cloudflare
+          - ngrok
+          - tailscale
+      service_port:
+        description: 'Local service port to expose'
+        required: true
+        default: '3000'
+      subdomain:
+        description: 'Custom subdomain (if supported)'
+        required: false
+
+env:
+  CLOUDFLARE_TUNNEL_TOKEN: ${{ secrets.CLOUDFLARE_TUNNEL_TOKEN }}
+  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+  NGROK_AUTHTOKEN: ${{ secrets.NGROK_AUTHTOKEN }}
+  TAILSCALE_AUTH_KEY: ${{ secrets.TAILSCALE_AUTH_KEY }}
+
+jobs:
+  # ============ CLOUDFLARE TUNNEL ============
+  cloudflare-tunnel:
+    runs-on: ubuntu-latest
+    if: github.event.inputs.provider == 'cloudflare'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install cloudflared
+        run: |
+          curl -L --output cloudflared.deb https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
+          sudo dpkg -i cloudflared.deb
+
+      - name: Setup Tunnel
+        run: |
+          # Check for existing tunnel config
+          if [ -f "cloudflared.yaml" ] || [ -f ".cloudflared/config.yaml" ]; then
+            CONFIG_FILE=$([ -f "cloudflared.yaml" ] && echo "cloudflared.yaml" || echo ".cloudflared/config.yaml")
+            cloudflared tunnel --config "$CONFIG_FILE" run &
+          elif [ -n "${{ env.CLOUDFLARE_TUNNEL_TOKEN }}" ]; then
+            # Use quick tunnel with token
+            cloudflared tunnel run --token "${{ env.CLOUDFLARE_TUNNEL_TOKEN }}" &
+          else
+            # Create a temporary tunnel
+            cloudflared tunnel --url http://localhost:${{ github.event.inputs.service_port }}
+          fi
+
+      - name: Output Tunnel URL
+        run: |
+          echo "Tunnel is running. Check Cloudflare dashboard for URL."
+          echo "For persistent tunnels, add CLOUDFLARE_TUNNEL_TOKEN to secrets."
+
+  # ============ NGROK TUNNEL ============
+  ngrok-tunnel:
+    runs-on: ubuntu-latest
+    if: github.event.inputs.provider == 'ngrok'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install ngrok
+        run: |
+          curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null
+          echo "deb https://ngrok-agent.s3.amazonaws.com buster main" | sudo tee /etc/apt/sources.list.d/ngrok.list
+          sudo apt update && sudo apt install ngrok
+
+      - name: Configure ngrok
+        run: |
+          ngrok config add-authtoken "${{ env.NGROK_AUTHTOKEN }}"
+
+      - name: Start Tunnel
+        run: |
+          # Check for ngrok config
+          if [ -f "ngrok.yml" ] || [ -f "ngrok.yaml" ]; then
+            CONFIG_FILE=$([ -f "ngrok.yml" ] && echo "ngrok.yml" || echo "ngrok.yaml")
+            ngrok start --config "$CONFIG_FILE" --all &
+          else
+            SUBDOMAIN="${{ github.event.inputs.subdomain }}"
+            if [ -n "$SUBDOMAIN" ]; then
+              ngrok http --subdomain="$SUBDOMAIN" ${{ github.event.inputs.service_port }} &
+            else
+              ngrok http ${{ github.event.inputs.service_port }} &
+            fi
+          fi
+
+          # Wait for tunnel to establish
+          sleep 5
+
+          # Get tunnel URL
+          TUNNEL_URL=$(curl -s http://localhost:4040/api/tunnels | jq -r '.tunnels[0].public_url')
+          echo "Tunnel URL: $TUNNEL_URL"
+
+  # ============ TAILSCALE FUNNEL ============
+  tailscale-funnel:
+    runs-on: ubuntu-latest
+    if: github.event.inputs.provider == 'tailscale'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Tailscale
+        uses: tailscale/github-action@v2
+        with:
+          authkey: ${{ env.TAILSCALE_AUTH_KEY }}
+
+      - name: Enable Funnel
+        run: |
+          # Enable Tailscale Funnel for the service
+          tailscale funnel ${{ github.event.inputs.service_port }}
+
+          # Get the funnel URL
+          FUNNEL_URL=$(tailscale funnel status --json | jq -r '.URL')
+          echo "Funnel URL: $FUNNEL_URL"
+
+  # ============ GENERATE TUNNEL CONFIG ============
+  generate-config:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+
+    steps:
+      - name: Generate Cloudflare Tunnel Config
+        run: |
+          cat << 'EOF'
+          # .cloudflared/config.yaml
+          # Cloudflare Tunnel Configuration
+
+          tunnel: YOUR_TUNNEL_ID
+          credentials-file: /path/to/.cloudflared/YOUR_TUNNEL_ID.json
+
+          ingress:
+            - hostname: app.yourdomain.com
+              service: http://localhost:3000
+            - hostname: api.yourdomain.com
+              service: http://localhost:8080
+            - service: http_status:404
+          EOF
+
+      - name: Generate ngrok Config
+        run: |
+          cat << 'EOF'
+          # ngrok.yml
+          # ngrok Configuration
+
+          version: "2"
+          authtoken: YOUR_AUTH_TOKEN
+
+          tunnels:
+            web:
+              addr: 3000
+              proto: http
+              subdomain: myapp
+
+            api:
+              addr: 8080
+              proto: http
+              subdomain: myapp-api
+          EOF
+
+      - name: Generate Tailscale Config
+        run: |
+          cat << 'EOF'
+          # tailscale.json
+          # Tailscale Configuration (for ACL)
+
+          {
+            "tagOwners": {
+              "tag:server": ["autogroup:admin"]
+            },
+            "acls": [
+              {"action": "accept", "src": ["*"], "dst": ["tag:server:*"]}
+            ],
+            "nodeAttrs": [
+              {
+                "target": ["tag:server"],
+                "attr": ["funnel"]
+              }
+            ]
+          }
+          EOF

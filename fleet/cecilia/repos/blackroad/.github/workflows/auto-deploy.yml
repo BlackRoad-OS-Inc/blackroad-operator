@@ -1,0 +1,517 @@
+name: Auto Deploy
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [main, master]
+
+env:
+  # Deployment Platform Tokens
+  RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+  VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+  CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+  DIGITALOCEAN_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+
+  # Tunnel Providers
+  CLOUDFLARE_TUNNEL_TOKEN: ${{ secrets.CLOUDFLARE_TUNNEL_TOKEN }}
+  NGROK_AUTHTOKEN: ${{ secrets.NGROK_AUTHTOKEN }}
+  TAILSCALE_AUTH_KEY: ${{ secrets.TAILSCALE_AUTH_KEY }}
+
+  # Container Registries
+  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+
+  # Productivity Integrations
+  ASANA_ACCESS_TOKEN: ${{ secrets.ASANA_ACCESS_TOKEN }}
+  NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
+
+  # Auth & Payments
+  CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+  STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+
+  # AI/ML
+  HUGGINGFACE_TOKEN: ${{ secrets.HUGGINGFACE_TOKEN }}
+
+  # Edge/IoT
+  PI_SSH_KEY: ${{ secrets.PI_SSH_KEY }}
+  PI_HOST: ${{ secrets.PI_HOST }}
+  PI_USER: ${{ secrets.PI_USER }}
+
+jobs:
+  detect-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      deployments: write
+      packages: write
+
+    outputs:
+      platform: ${{ steps.detect.outputs.platform }}
+      environment: ${{ steps.detect.outputs.environment }}
+      deploy_url: ${{ steps.get-url.outputs.url }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+        if: hashFiles('requirements.txt') != '' || hashFiles('pyproject.toml') != ''
+
+      # ============ PROJECT DETECTION ============
+      - name: Detect Project Type
+        id: detect
+        run: |
+          # Priority-based platform detection
+
+          # 1. Vercel (Next.js optimized)
+          if [ -f "vercel.json" ]; then
+            echo "platform=vercel" >> $GITHUB_OUTPUT
+            echo "emoji=▲" >> $GITHUB_OUTPUT
+
+          # 2. Railway (explicit config)
+          elif [ -f "railway.toml" ] || [ -f "railway.json" ]; then
+            echo "platform=railway" >> $GITHUB_OUTPUT
+            echo "emoji=🚂" >> $GITHUB_OUTPUT
+
+          # 3. Cloudflare Workers
+          elif [ -f "wrangler.toml" ] || [ -f "wrangler.json" ]; then
+            # Check if it's workers or pages
+            if grep -q "workers_dev" wrangler.toml 2>/dev/null || [ -f "worker.js" ] || [ -f "worker.ts" ]; then
+              echo "platform=cloudflare-workers" >> $GITHUB_OUTPUT
+              echo "emoji=⚡" >> $GITHUB_OUTPUT
+            else
+              echo "platform=cloudflare-pages" >> $GITHUB_OUTPUT
+              echo "emoji=📄" >> $GITHUB_OUTPUT
+            fi
+
+          # 4. DigitalOcean App Platform
+          elif [ -f ".do/app.yaml" ] || [ -f "do-app.yaml" ]; then
+            echo "platform=digitalocean" >> $GITHUB_OUTPUT
+            echo "emoji=🌊" >> $GITHUB_OUTPUT
+
+          # 5. Raspberry Pi / Edge deployment
+          elif [ -f ".pi/config.yaml" ] || [ -f "pi-deploy.yaml" ]; then
+            echo "platform=raspberry-pi" >> $GITHUB_OUTPUT
+            echo "emoji=🍓" >> $GITHUB_OUTPUT
+
+          # 6. Docker with compose
+          elif [ -f "docker-compose.yml" ] || [ -f "docker-compose.yaml" ] || [ -f "compose.yml" ]; then
+            echo "platform=docker-compose" >> $GITHUB_OUTPUT
+            echo "emoji=🐳" >> $GITHUB_OUTPUT
+
+          # 7. Next.js (prefer Vercel)
+          elif [ -f "next.config.js" ] || [ -f "next.config.mjs" ] || [ -f "next.config.ts" ]; then
+            if [ -n "${{ env.VERCEL_TOKEN }}" ]; then
+              echo "platform=vercel" >> $GITHUB_OUTPUT
+              echo "emoji=▲" >> $GITHUB_OUTPUT
+            else
+              echo "platform=cloudflare-pages" >> $GITHUB_OUTPUT
+              echo "emoji=📄" >> $GITHUB_OUTPUT
+            fi
+            echo "framework=next" >> $GITHUB_OUTPUT
+
+          # 8. Vite/SPA (Cloudflare Pages)
+          elif [ -f "vite.config.ts" ] || [ -f "vite.config.js" ]; then
+            echo "platform=cloudflare-pages" >> $GITHUB_OUTPUT
+            echo "framework=vite" >> $GITHUB_OUTPUT
+            echo "emoji=📄" >> $GITHUB_OUTPUT
+
+          # 9. Dockerfile only
+          elif [ -f "Dockerfile" ]; then
+            if [ -n "${{ env.RAILWAY_TOKEN }}" ]; then
+              echo "platform=railway" >> $GITHUB_OUTPUT
+              echo "emoji=🚂" >> $GITHUB_OUTPUT
+            elif [ -n "${{ env.DIGITALOCEAN_ACCESS_TOKEN }}" ]; then
+              echo "platform=digitalocean" >> $GITHUB_OUTPUT
+              echo "emoji=🌊" >> $GITHUB_OUTPUT
+            else
+              echo "platform=docker" >> $GITHUB_OUTPUT
+              echo "emoji=🐳" >> $GITHUB_OUTPUT
+            fi
+
+          # 10. Python project
+          elif [ -f "requirements.txt" ] || [ -f "pyproject.toml" ]; then
+            echo "platform=railway" >> $GITHUB_OUTPUT
+            echo "framework=python" >> $GITHUB_OUTPUT
+            echo "emoji=🐍" >> $GITHUB_OUTPUT
+
+          # 11. Generic Node.js
+          elif [ -f "package.json" ]; then
+            if [ -n "${{ env.VERCEL_TOKEN }}" ]; then
+              echo "platform=vercel" >> $GITHUB_OUTPUT
+              echo "emoji=▲" >> $GITHUB_OUTPUT
+            else
+              echo "platform=cloudflare-pages" >> $GITHUB_OUTPUT
+              echo "emoji=📄" >> $GITHUB_OUTPUT
+            fi
+            echo "framework=static" >> $GITHUB_OUTPUT
+
+          # 12. Default fallback
+          else
+            echo "platform=railway" >> $GITHUB_OUTPUT
+            echo "emoji=🚀" >> $GITHUB_OUTPUT
+          fi
+
+          # Get repo name for service naming
+          echo "repo_name=${GITHUB_REPOSITORY#*/}" >> $GITHUB_OUTPUT
+
+          # Set environment based on event
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            echo "environment=preview" >> $GITHUB_OUTPUT
+            echo "pr_number=${{ github.event.pull_request.number }}" >> $GITHUB_OUTPUT
+          else
+            echo "environment=production" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Install Dependencies
+        run: |
+          if [ -f "package.json" ]; then
+            npm ci || npm install
+          fi
+          if [ -f "requirements.txt" ]; then
+            pip install -r requirements.txt
+          fi
+
+      - name: Build (if needed)
+        run: |
+          if [ -f "package.json" ]; then
+            npm run build || true
+          fi
+
+      # ============ VERCEL DEPLOYMENT ============
+      - name: Deploy to Vercel
+        if: steps.detect.outputs.platform == 'vercel' && env.VERCEL_TOKEN != ''
+        id: vercel
+        run: |
+          npm install -g vercel
+
+          if [ "${{ steps.detect.outputs.environment }}" == "preview" ]; then
+            RESULT=$(vercel deploy --token=${{ env.VERCEL_TOKEN }} 2>&1)
+          else
+            RESULT=$(vercel deploy --prod --token=${{ env.VERCEL_TOKEN }} 2>&1)
+          fi
+
+          DEPLOY_URL=$(echo "$RESULT" | grep -oP 'https://[^\s]+\.vercel\.app' | head -1 || echo "")
+          echo "url=$DEPLOY_URL" >> $GITHUB_OUTPUT
+          echo "success=true" >> $GITHUB_OUTPUT
+
+      # ============ RAILWAY DEPLOYMENT ============
+      - name: Install Railway CLI
+        if: steps.detect.outputs.platform == 'railway' && env.RAILWAY_TOKEN != ''
+        run: npm install -g @railway/cli
+
+      - name: Deploy to Railway
+        if: steps.detect.outputs.platform == 'railway' && env.RAILWAY_TOKEN != ''
+        id: railway
+        run: |
+          railway link --environment ${{ steps.detect.outputs.environment }} 2>/dev/null || true
+          DEPLOY_URL=$(railway up --detach 2>&1 | grep -oP 'https://[^\s]+' | head -1 || echo "")
+          if [ -n "$DEPLOY_URL" ]; then
+            echo "url=$DEPLOY_URL" >> $GITHUB_OUTPUT
+            echo "success=true" >> $GITHUB_OUTPUT
+          else
+            DEPLOY_URL=$(railway status --json 2>/dev/null | jq -r '.deployments[0].url // empty' || echo "")
+            echo "url=$DEPLOY_URL" >> $GITHUB_OUTPUT
+            echo "success=true" >> $GITHUB_OUTPUT
+          fi
+
+      # ============ CLOUDFLARE PAGES DEPLOYMENT ============
+      - name: Deploy to Cloudflare Pages
+        if: steps.detect.outputs.platform == 'cloudflare-pages' && env.CLOUDFLARE_API_TOKEN != ''
+        id: cloudflare-pages
+        run: |
+          npm install -g wrangler
+
+          # Detect output directory
+          if [ -d "dist" ]; then OUTPUT_DIR="dist"
+          elif [ -d "build" ]; then OUTPUT_DIR="build"
+          elif [ -d "out" ]; then OUTPUT_DIR="out"
+          elif [ -d ".next" ]; then OUTPUT_DIR=".next"
+          elif [ -d "public" ]; then OUTPUT_DIR="public"
+          else OUTPUT_DIR="."; fi
+
+          PROJECT_NAME="${{ steps.detect.outputs.repo_name }}"
+          wrangler pages project create "$PROJECT_NAME" --production-branch main 2>/dev/null || true
+
+          if [ "${{ steps.detect.outputs.environment }}" == "preview" ]; then
+            RESULT=$(wrangler pages deploy "$OUTPUT_DIR" --project-name="$PROJECT_NAME" --branch="pr-${{ steps.detect.outputs.pr_number }}" 2>&1)
+          else
+            RESULT=$(wrangler pages deploy "$OUTPUT_DIR" --project-name="$PROJECT_NAME" --branch=main 2>&1)
+          fi
+
+          DEPLOY_URL=$(echo "$RESULT" | grep -oP 'https://[^\s]+\.pages\.dev' | head -1 || echo "")
+          echo "url=$DEPLOY_URL" >> $GITHUB_OUTPUT
+          echo "success=true" >> $GITHUB_OUTPUT
+
+      # ============ CLOUDFLARE WORKERS DEPLOYMENT ============
+      - name: Deploy to Cloudflare Workers
+        if: steps.detect.outputs.platform == 'cloudflare-workers' && env.CLOUDFLARE_API_TOKEN != ''
+        id: cloudflare-workers
+        run: |
+          npm install -g wrangler
+          if [ "${{ steps.detect.outputs.environment }}" == "preview" ]; then
+            RESULT=$(wrangler deploy --env preview 2>&1 || wrangler deploy 2>&1)
+          else
+            RESULT=$(wrangler deploy 2>&1)
+          fi
+          DEPLOY_URL=$(echo "$RESULT" | grep -oP 'https://[^\s]+\.workers\.dev' | head -1 || echo "")
+          echo "url=$DEPLOY_URL" >> $GITHUB_OUTPUT
+          echo "success=true" >> $GITHUB_OUTPUT
+
+      # ============ DIGITALOCEAN DEPLOYMENT ============
+      - name: Install doctl
+        if: steps.detect.outputs.platform == 'digitalocean' && env.DIGITALOCEAN_ACCESS_TOKEN != ''
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ env.DIGITALOCEAN_ACCESS_TOKEN }}
+
+      - name: Deploy to DigitalOcean App Platform
+        if: steps.detect.outputs.platform == 'digitalocean' && env.DIGITALOCEAN_ACCESS_TOKEN != ''
+        id: digitalocean
+        run: |
+          APP_SPEC=".do/app.yaml"
+          if [ ! -f "$APP_SPEC" ]; then
+            APP_SPEC="do-app.yaml"
+          fi
+
+          # Check if app exists
+          APP_ID=$(doctl apps list --format ID,Spec.Name --no-header 2>/dev/null | grep "${{ steps.detect.outputs.repo_name }}" | awk '{print $1}' || echo "")
+
+          if [ -n "$APP_ID" ]; then
+            # Update existing app
+            doctl apps update "$APP_ID" --spec "$APP_SPEC"
+            doctl apps create-deployment "$APP_ID" --wait
+          else
+            # Create new app
+            doctl apps create --spec "$APP_SPEC" --wait
+          fi
+
+          DEPLOY_URL=$(doctl apps list --format DefaultIngress --no-header 2>/dev/null | head -1 || echo "")
+          echo "url=$DEPLOY_URL" >> $GITHUB_OUTPUT
+          echo "success=true" >> $GITHUB_OUTPUT
+
+      # ============ DOCKER BUILD & PUSH ============
+      - name: Docker Build and Push
+        if: (steps.detect.outputs.platform == 'docker' || steps.detect.outputs.platform == 'docker-compose') && env.DOCKER_USERNAME != ''
+        id: docker
+        run: |
+          echo "${{ env.DOCKER_PASSWORD }}" | docker login -u "${{ env.DOCKER_USERNAME }}" --password-stdin
+
+          IMAGE_NAME="${{ env.DOCKER_USERNAME }}/${{ steps.detect.outputs.repo_name }}"
+
+          if [ "${{ steps.detect.outputs.environment }}" == "preview" ]; then
+            TAG="pr-${{ steps.detect.outputs.pr_number }}"
+          else
+            TAG="latest"
+          fi
+
+          docker build -t "$IMAGE_NAME:$TAG" .
+          docker push "$IMAGE_NAME:$TAG"
+
+          # Also push to GHCR if available
+          if [ -n "${{ secrets.GITHUB_TOKEN }}" ]; then
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+            GHCR_IMAGE="ghcr.io/${{ github.repository_owner }}/${{ steps.detect.outputs.repo_name }}"
+            docker tag "$IMAGE_NAME:$TAG" "$GHCR_IMAGE:$TAG"
+            docker push "$GHCR_IMAGE:$TAG"
+          fi
+
+          echo "url=docker.io/$IMAGE_NAME:$TAG" >> $GITHUB_OUTPUT
+          echo "success=true" >> $GITHUB_OUTPUT
+
+      # ============ RASPBERRY PI DEPLOYMENT ============
+      - name: Deploy to Raspberry Pi
+        if: steps.detect.outputs.platform == 'raspberry-pi' && env.PI_HOST != ''
+        id: raspberry-pi
+        run: |
+          # Setup SSH
+          mkdir -p ~/.ssh
+          echo "${{ env.PI_SSH_KEY }}" > ~/.ssh/pi_key
+          chmod 600 ~/.ssh/pi_key
+
+          PI_USER="${{ env.PI_USER }}"
+          PI_HOST="${{ env.PI_HOST }}"
+
+          # Default user if not set
+          if [ -z "$PI_USER" ]; then
+            PI_USER="pi"
+          fi
+
+          # Read deployment config
+          DEPLOY_PATH="/home/$PI_USER/apps/${{ steps.detect.outputs.repo_name }}"
+
+          # Create remote directory
+          ssh -i ~/.ssh/pi_key -o StrictHostKeyChecking=no "$PI_USER@$PI_HOST" "mkdir -p $DEPLOY_PATH"
+
+          # Sync files
+          rsync -avz -e "ssh -i ~/.ssh/pi_key -o StrictHostKeyChecking=no" \
+            --exclude='.git' --exclude='node_modules' --exclude='.env' \
+            ./ "$PI_USER@$PI_HOST:$DEPLOY_PATH/"
+
+          # Run deployment script if exists
+          if [ -f ".pi/deploy.sh" ]; then
+            ssh -i ~/.ssh/pi_key -o StrictHostKeyChecking=no "$PI_USER@$PI_HOST" "cd $DEPLOY_PATH && bash .pi/deploy.sh"
+          elif [ -f "pi-deploy.sh" ]; then
+            ssh -i ~/.ssh/pi_key -o StrictHostKeyChecking=no "$PI_USER@$PI_HOST" "cd $DEPLOY_PATH && bash pi-deploy.sh"
+          fi
+
+          echo "url=ssh://$PI_USER@$PI_HOST:$DEPLOY_PATH" >> $GITHUB_OUTPUT
+          echo "success=true" >> $GITHUB_OUTPUT
+
+      # ============ GET DEPLOYMENT URL ============
+      - name: Get Deployment URL
+        id: get-url
+        run: |
+          URL="${{ steps.vercel.outputs.url }}"
+          [ -z "$URL" ] && URL="${{ steps.railway.outputs.url }}"
+          [ -z "$URL" ] && URL="${{ steps.cloudflare-pages.outputs.url }}"
+          [ -z "$URL" ] && URL="${{ steps.cloudflare-workers.outputs.url }}"
+          [ -z "$URL" ] && URL="${{ steps.digitalocean.outputs.url }}"
+          [ -z "$URL" ] && URL="${{ steps.docker.outputs.url }}"
+          [ -z "$URL" ] && URL="${{ steps.raspberry-pi.outputs.url }}"
+          echo "url=$URL" >> $GITHUB_OUTPUT
+
+      # ============ CREATE GITHUB DEPLOYMENT ============
+      - name: Create GitHub Deployment
+        if: steps.get-url.outputs.url != ''
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: deployment } = await github.rest.repos.createDeployment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: context.sha,
+              environment: '${{ steps.detect.outputs.environment }}',
+              auto_merge: false,
+              required_contexts: [],
+              description: 'Deployed via BlackRoad OS'
+            });
+
+            await github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              deployment_id: deployment.id,
+              state: 'success',
+              environment_url: '${{ steps.get-url.outputs.url }}',
+              description: 'Deployment successful'
+            });
+
+      # ============ COMMENT ON PR ============
+      - name: Comment Deployment URL on PR
+        if: github.event_name == 'pull_request' && steps.get-url.outputs.url != ''
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const platform = '${{ steps.detect.outputs.platform }}';
+            const deployUrl = '${{ steps.get-url.outputs.url }}';
+            const emoji = '${{ steps.detect.outputs.emoji }}';
+
+            const platformNames = {
+              'vercel': 'Vercel',
+              'railway': 'Railway',
+              'cloudflare-pages': 'Cloudflare Pages',
+              'cloudflare-workers': 'Cloudflare Workers',
+              'digitalocean': 'DigitalOcean',
+              'docker': 'Docker',
+              'docker-compose': 'Docker Compose',
+              'raspberry-pi': 'Raspberry Pi'
+            };
+
+            const body = `## ${emoji} Preview Deployment Ready!
+
+            | Platform | URL |
+            |----------|-----|
+            | **${platformNames[platform] || platform}** | ${deployUrl ? `[${deployUrl}](${deployUrl})` : 'Deploying...'} |
+
+            ---
+            *Auto-deployed by BlackRoad OS*`;
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const botComment = comments.find(c => c.body.includes('Preview Deployment Ready'));
+
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: body
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: body
+              });
+            }
+
+  # ============ NOTIFY INTEGRATIONS ============
+  notify-integrations:
+    runs-on: ubuntu-latest
+    needs: detect-and-deploy
+    if: needs.detect-and-deploy.outputs.deploy_url != ''
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Notify Asana
+      - name: Update Asana Task
+        if: env.ASANA_ACCESS_TOKEN != ''
+        env:
+          ASANA_ACCESS_TOKEN: ${{ secrets.ASANA_ACCESS_TOKEN }}
+        run: |
+          # Check for Asana task reference in PR/commit
+          ASANA_TASK_ID=""
+
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            ASANA_TASK_ID=$(echo "${{ github.event.pull_request.body }}" | grep -oP 'asana\.com/.*task/\K[0-9]+' | head -1 || echo "")
+          fi
+
+          if [ -n "$ASANA_TASK_ID" ]; then
+            curl -X POST "https://app.asana.com/api/1.0/tasks/$ASANA_TASK_ID/stories" \
+              -H "Authorization: Bearer $ASANA_ACCESS_TOKEN" \
+              -H "Content-Type: application/json" \
+              -d "{\"data\":{\"text\":\"Deployed to ${{ needs.detect-and-deploy.outputs.environment }}: ${{ needs.detect-and-deploy.outputs.deploy_url }}\"}}"
+          fi
+
+      # Notify Notion
+      - name: Update Notion Page
+        if: env.NOTION_API_KEY != ''
+        env:
+          NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
+          NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
+        run: |
+          if [ -n "$NOTION_DATABASE_ID" ]; then
+            curl -X POST "https://api.notion.com/v1/pages" \
+              -H "Authorization: Bearer $NOTION_API_KEY" \
+              -H "Notion-Version: 2022-06-28" \
+              -H "Content-Type: application/json" \
+              -d "{
+                \"parent\": {\"database_id\": \"$NOTION_DATABASE_ID\"},
+                \"properties\": {
+                  \"Name\": {\"title\": [{\"text\": {\"content\": \"Deployment: ${{ github.repository }}\"}}]},
+                  \"URL\": {\"url\": \"${{ needs.detect-and-deploy.outputs.deploy_url }}\"},
+                  \"Environment\": {\"select\": {\"name\": \"${{ needs.detect-and-deploy.outputs.environment }}\"}},
+                  \"Platform\": {\"select\": {\"name\": \"${{ needs.detect-and-deploy.outputs.platform }}\"}}
+                }
+              }"
+          fi

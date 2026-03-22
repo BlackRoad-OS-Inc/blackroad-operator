@@ -1,0 +1,73 @@
+name: Frontend CI
+
+on:
+  pull_request:
+    paths:
+      - 'blackroad-os/**'
+      - 'backend/static/**'
+  push:
+    branches: [main]
+    paths:
+      - 'blackroad-os/**'
+      - 'backend/static/**'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Frontend Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate HTML
+        continue-on-error: true
+        run: |
+          # Install html5validator
+          pip install html5validator
+
+          # Validate backend/static/index.html
+          if [ -f backend/static/index.html ]; then
+            html5validator --root backend/static/
+          fi
+
+          # Validate blackroad-os/index.html
+          if [ -f blackroad-os/index.html ]; then
+            html5validator --root blackroad-os/
+          fi
+      - name: Check JavaScript syntax
+        run: |
+          # Install Node.js for syntax checking
+          sudo apt-get update
+          sudo apt-get install -y nodejs
+
+          # Check all JS files for syntax errors
+          find backend/static/js -name "*.js" -exec node --check {} \;
+          find blackroad-os/js -name "*.js" -exec node --check {} \; || true
+
+      - name: Check for security issues
+        run: |
+          echo "Checking for common security issues..."
+
+          # Check for eval() usage
+          if grep -r "eval(" backend/static/js blackroad-os/js; then
+            echo "Warning: eval() found in JavaScript code"
+          fi
+
+          # Check for innerHTML without sanitization
+          if grep -r "innerHTML\s*=" backend/static/js blackroad-os/js; then
+            echo "Warning: innerHTML usage found (potential XSS risk)"
+          fi
+
+      - name: Check accessibility
+        run: |
+          echo "Basic accessibility checks..."
+
+          # Check for images without alt text
+          if grep -r "<img" backend/static blackroad-os | grep -v "alt="; then
+            echo "Warning: Images without alt text found"
+          fi
+
+          echo "✅ Frontend validation complete"

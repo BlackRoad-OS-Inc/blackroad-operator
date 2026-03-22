@@ -1,0 +1,77 @@
+name: Frontend CI
+
+on:
+  pull_request:
+    paths:
+      - 'backend/static/**'
+      - 'blackroad-os/**'
+      - 'prism-console/**'
+  push:
+    branches: [main, develop]
+    paths:
+      - 'backend/static/**'
+      - 'prism-console/**'
+
+jobs:
+  frontend-checks:
+    name: Frontend Validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Set up Python (for validation script)
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install validation tools
+        run: |
+          pip install html5lib beautifulsoup4
+          npm install -g jshint eslint
+
+      - name: Validate HTML
+        run: |
+          python validate_html.py
+
+      - name: Validate JavaScript syntax
+        run: |
+          find backend/static/js -name "*.js" -exec node -c {} \; || true
+          find prism-console/modules -name "*.js" -exec node -c {} \; || true
+
+      - name: Check for common JS issues
+        run: |
+          echo "Checking for eval(), innerHTML without sanitization..."
+          ! grep -r "eval(" backend/static/js/ || echo "Warning: eval() found"
+          ! grep -r "\.innerHTML\s*=" backend/static/js/ || echo "Warning: innerHTML assignment found"
+
+      - name: Validate CSS
+        run: |
+          npm install -g csslint
+          find backend/static -name "*.css" -exec csslint {} \; || true
+          find prism-console/styles -name "*.css" -exec csslint {} \; || true
+
+      - name: Check Prism Console structure
+        run: |
+          test -f prism-console/pages/merge-dashboard.html || exit 1
+          test -f prism-console/modules/merge-dashboard.js || exit 1
+          test -f prism-console/styles/merge-dashboard.css || exit 1
+          echo "✓ Prism Console structure validated"
+
+      - name: Validate asset paths
+        run: |
+          echo "Checking for broken asset paths..."
+          grep -r "src=\"" backend/static/*.html | grep -v "http" || true
+
+      - name: Summary
+        run: |
+          echo "✅ Frontend CI checks completed"
+          echo "📊 Files validated:"
+          find backend/static -name "*.html" -o -name "*.js" -o -name "*.css" | wc -l
+          find prism-console -name "*.html" -o -name "*.js" -o -name "*.css" | wc -l

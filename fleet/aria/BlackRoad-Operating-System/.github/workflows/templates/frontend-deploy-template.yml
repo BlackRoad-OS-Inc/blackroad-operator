@@ -1,0 +1,286 @@
+# Frontend Deployment Workflow Template
+# ======================================
+#
+# This template deploys static frontend sites to various platforms.
+#
+# Supported targets:
+# - GitHub Pages
+# - Cloudflare Pages
+# - Railway static hosting
+# - Vercel
+# - Netlify
+#
+# How to use:
+# -----------
+# 1. Copy this file to .github/workflows/frontend-deploy.yml
+# 2. Choose your deployment target (uncomment the relevant job)
+# 3. Configure custom domain settings
+# 4. Add required secrets
+# 5. Push to trigger deployment
+
+name: Deploy Frontend
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'landing/**'
+      - 'frontend/**'
+      - 'backend/static/**'
+  workflow_dispatch:
+
+# Only allow one deployment at a time
+concurrency:
+  group: frontend-deploy
+  cancel-in-progress: false
+
+jobs:
+  # ========================================
+  # Option 1: Deploy to GitHub Pages
+  # ========================================
+  deploy-github-pages:
+    name: Deploy to GitHub Pages
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    # Grant GITHUB_TOKEN permissions
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
+    # Protect production environment
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # If you have a build step:
+      # - name: Set up Node.js
+      #   uses: actions/setup-node@v4
+      #   with:
+      #     node-version: '20'
+      #     cache: 'npm'
+      #
+      # - name: Install dependencies
+      #   run: npm ci
+      #
+      # - name: Build site
+      #   run: npm run build
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # Update path based on your static files location
+          path: 'backend/static'  # or 'landing/', 'dist/', etc.
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Deployment summary
+        run: |
+          echo "✅ Deployed to GitHub Pages"
+          echo "URL: ${{ steps.deployment.outputs.page_url }}"
+
+  # ========================================
+  # Option 2: Deploy to Railway (Static)
+  # ========================================
+  # deploy-railway:
+  #   name: Deploy to Railway
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 10
+  #
+  #   environment:
+  #     name: production-frontend
+  #     url: https://blackroad.systems
+  #
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+  #
+  #     - name: Install Railway CLI
+  #       run: |
+  #         curl -fsSL https://railway.app/install.sh | sh
+  #         echo "$HOME/.railway/bin" >> $GITHUB_PATH
+  #
+  #     - name: Deploy to Railway
+  #       env:
+  #         RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+  #       run: |
+  #         railway up --service frontend --detach
+  #         echo "✅ Deployed to Railway"
+
+  # ========================================
+  # Option 3: Deploy to Cloudflare Pages
+  # ========================================
+  # deploy-cloudflare-pages:
+  #   name: Deploy to Cloudflare Pages
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 10
+  #
+  #   environment:
+  #     name: cloudflare-pages
+  #     url: https://blackroad.systems
+  #
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+  #
+  #     # Build step if needed
+  #     # - name: Build site
+  #     #   run: npm run build
+  #
+  #     - name: Publish to Cloudflare Pages
+  #       uses: cloudflare/pages-action@v1
+  #       with:
+  #         apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+  #         accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+  #         projectName: blackroad-os
+  #         directory: backend/static  # or dist/, build/, etc.
+  #         gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+  #
+  #     - name: Deployment summary
+  #       run: echo "✅ Deployed to Cloudflare Pages"
+
+  # ========================================
+  # Option 4: Deploy to Vercel
+  # ========================================
+  # deploy-vercel:
+  #   name: Deploy to Vercel
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 10
+  #
+  #   environment:
+  #     name: vercel-production
+  #
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+  #
+  #     - name: Deploy to Vercel
+  #       uses: amondnet/vercel-action@v25
+  #       with:
+  #         vercel-token: ${{ secrets.VERCEL_TOKEN }}
+  #         vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+  #         vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+  #         vercel-args: '--prod'
+  #         working-directory: ./
+  #
+  #     - name: Deployment summary
+  #       run: echo "✅ Deployed to Vercel"
+
+  # ========================================
+  # Post-Deployment: Cache Purge
+  # ========================================
+  purge-cache:
+    name: Purge Cloudflare Cache
+    runs-on: ubuntu-latest
+    needs: deploy-github-pages  # Update based on your deployment job
+    if: success()
+
+    steps:
+      - name: Purge Cloudflare cache
+        env:
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          CF_ZONE_ID: ${{ secrets.CF_ZONE_ID }}
+        run: |
+          curl -X POST "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/purge_cache" \
+            -H "Authorization: Bearer $CF_API_TOKEN" \
+            -H "Content-Type: application/json" \
+            --data '{"purge_everything":true}'
+
+          echo "✅ Cloudflare cache purged"
+
+  # ========================================
+  # Post-Deployment: Smoke Tests
+  # ========================================
+  smoke-tests:
+    name: Frontend Smoke Tests
+    runs-on: ubuntu-latest
+    needs: deploy-github-pages  # Update based on your deployment job
+    if: success()
+
+    steps:
+      - name: Wait for deployment propagation
+        run: sleep 30
+
+      - name: Test homepage loads
+        run: |
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" https://blackroad.systems/)
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "❌ Homepage returned HTTP $HTTP_CODE"
+            exit 1
+          fi
+          echo "✅ Homepage loads successfully"
+
+      - name: Test key pages
+        run: |
+          PAGES=(
+            "/"
+            "/architecture"
+            "/pricing"
+            "/contact"
+          )
+
+          for PAGE in "${PAGES[@]}"; do
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "https://blackroad.systems$PAGE")
+            if [ "$HTTP_CODE" = "200" ]; then
+              echo "✅ $PAGE loads successfully"
+            else
+              echo "⚠️  $PAGE returned HTTP $HTTP_CODE"
+            fi
+          done
+
+      - name: Test SSL certificate
+        run: |
+          echo | openssl s_client -servername blackroad.systems -connect blackroad.systems:443 2>/dev/null | \
+            openssl x509 -noout -dates
+          echo "✅ SSL certificate is valid"
+
+# ========================================
+# Configuration Guide
+# ========================================
+#
+# GitHub Pages Setup:
+# ------------------
+# 1. Repository → Settings → Pages
+# 2. Source: GitHub Actions
+# 3. Custom domain: blackroad.systems
+# 4. CNAME file: Create in static files root
+#
+# Required GitHub Secrets:
+# -----------------------
+# - CF_API_TOKEN (for cache purge)
+# - CF_ZONE_ID (for cache purge)
+#
+# Optional Secrets (based on target):
+# ----------------------------------
+# - RAILWAY_TOKEN (for Railway)
+# - CLOUDFLARE_API_TOKEN (for CF Pages)
+# - CLOUDFLARE_ACCOUNT_ID (for CF Pages)
+# - VERCEL_TOKEN (for Vercel)
+# - VERCEL_ORG_ID (for Vercel)
+# - VERCEL_PROJECT_ID (for Vercel)
+#
+# Custom Domain:
+# -------------
+# 1. Add CNAME file to your static files:
+#    echo "blackroad.systems" > CNAME
+# 2. Configure DNS (see infra/cloudflare/records.yaml)
+# 3. Wait for DNS propagation (5-60 minutes)
+#
+# Deployment Targets Comparison:
+# -----------------------------
+# GitHub Pages: Free, simple, good for docs/marketing
+# Cloudflare Pages: Free, global CDN, fast
+# Railway: Paid, unified with backend
+# Vercel: Free tier, excellent DX, edge functions
+# Netlify: Free tier, form handling, split testing

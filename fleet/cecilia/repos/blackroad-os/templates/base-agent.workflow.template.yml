@@ -1,0 +1,30 @@
+name: 🤖 {{AGENT_NAME}} – Agent Handler
+
+on:
+  issue_comment:
+    types: [created]
+  workflow_dispatch:
+
+jobs:
+  {{AGENT_ID}}:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🧬 Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: 🧠 Set up Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: 📦 Install Dependencies
+        run: npm ci
+
+      - name: 🚦 Run {{AGENT_NAME}} Handler
+        run: |
+          echo "Running {{AGENT_NAME}} agent..."
+          echo "Agent ID: {{AGENT_ID}}"
+          echo "Trigger: ${{ github.event_name }}"
+        env:
+          AGENT_ID: {{AGENT_ID}}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

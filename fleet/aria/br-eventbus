@@ -1,0 +1,87 @@
+#!/bin/bash
+# br-eventbus - BlackRoad Event Bus CLI
+
+PINK='\033[38;5;205m'
+AMBER='\033[38;5;214m'
+GREEN='\033[38;5;82m'
+BLUE='\033[38;5;69m'
+NC='\033[0m'
+
+# Default hub is cecilia
+HUB="${EVENTBUS_HUB:-cecilia}"
+
+case "$1" in
+    start)
+        echo -e "${PINK}Starting Event Bus...${NC}"
+        nohup python3 ~/.blackroad/eventbus/event_bus.py > ~/.blackroad/eventbus/logs/bus.log 2>&1 &
+        echo $! > ~/.blackroad/eventbus/bus.pid
+        echo -e "${GREEN}Event Bus started on port 8766${NC}"
+        ;;
+
+    stop)
+        if [ -f ~/.blackroad/eventbus/bus.pid ]; then
+            kill $(cat ~/.blackroad/eventbus/bus.pid) 2>/dev/null
+            rm ~/.blackroad/eventbus/bus.pid
+            echo -e "${AMBER}Event Bus stopped${NC}"
+        fi
+        ;;
+
+    status)
+        if [ -f ~/.blackroad/eventbus/bus.pid ] && kill -0 $(cat ~/.blackroad/eventbus/bus.pid) 2>/dev/null; then
+            echo -e "${GREEN}Event Bus running${NC} (PID: $(cat ~/.blackroad/eventbus/bus.pid))"
+        else
+            echo -e "${AMBER}Event Bus not running${NC}"
+        fi
+        ;;
+
+    pub|publish)
+        channel="${2:-system}"
+        shift 2 2>/dev/null
+        message="$*"
+        python3 ~/.blackroad/eventbus/publish.py "$HUB" "$channel" "$message"
+        ;;
+
+    sub|subscribe)
+        shift
+        channels="${@:-system}"
+        python3 ~/.blackroad/eventbus/subscribe.py "$HUB" $channels
+        ;;
+
+    fleet-start)
+        echo -e "${PINK}Starting Event Bus on fleet...${NC}"
+        for host in cecilia lucidia octavia aria anastasia; do
+            echo -n "$host: "
+            ssh "$host" 'nohup python3 ~/.blackroad/eventbus/event_bus.py > ~/.blackroad/eventbus/logs/bus.log 2>&1 &' && \
+                echo -e "${GREEN}started${NC}" || echo "failed"
+        done
+        ;;
+
+    announce)
+        # Announce to all standard channels
+        message="$2"
+        for channel in system deploy memory tasks agents; do
+            python3 ~/.blackroad/eventbus/publish.py "$HUB" "$channel" "$message"
+        done
+        echo -e "${GREEN}Announced to all channels${NC}"
+        ;;
+
+    *)
+        echo -e "${PINK}br-eventbus${NC} - BlackRoad Event Bus"
+        echo ""
+        echo "Commands:"
+        echo "  start          - Start local Event Bus"
+        echo "  stop           - Stop local Event Bus"
+        echo "  status         - Check Event Bus status"
+        echo "  pub <ch> <msg> - Publish message to channel"
+        echo "  sub <ch>...    - Subscribe to channel(s)"
+        echo "  fleet-start    - Start Event Bus on all devices"
+        echo "  announce <msg> - Announce to all channels"
+        echo ""
+        echo "Channels: system, deploy, memory, tasks, agents, alerts"
+        echo ""
+        echo "Examples:"
+        echo "  br-eventbus pub deploy 'Deployed cecilia API v2'"
+        echo "  br-eventbus sub deploy memory tasks"
+        echo "  br-eventbus announce 'Fleet maintenance starting'"
+        ;;
+esac

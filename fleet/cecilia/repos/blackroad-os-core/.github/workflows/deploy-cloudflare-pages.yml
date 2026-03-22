@@ -1,0 +1,124 @@
+name: Deploy to Cloudflare Pages
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'domains/**'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'domains/**'
+
+jobs:
+  deploy-agents-spawner:
+    name: Deploy Agent Spawner
+    runs-on: ubuntu-latest
+    if: contains(github.event.head_commit.modified, 'domains/agents-blackroad-io') || github.event_name == 'pull_request'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy domains/agents-blackroad-io --project-name=blackroad-agents-spawner --branch=${{ github.head_ref || github.ref_name }}
+
+  deploy-dashboard:
+    name: Deploy Dashboard
+    runs-on: ubuntu-latest
+    if: contains(github.event.head_commit.modified, 'domains/dashboard-blackroad-io') || github.event_name == 'pull_request'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy domains/dashboard-blackroad-io --project-name=blackroad-dashboard --branch=${{ github.head_ref || github.ref_name }}
+
+  deploy-api-explorer:
+    name: Deploy API Explorer
+    runs-on: ubuntu-latest
+    if: contains(github.event.head_commit.modified, 'domains/api-explorer-blackroad-io') || github.event_name == 'pull_request'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy domains/api-explorer-blackroad-io --project-name=blackroad-api-explorer --branch=${{ github.head_ref || github.ref_name }}
+
+  deploy-payment-page:
+    name: Deploy Payment Page
+    runs-on: ubuntu-latest
+    if: contains(github.event.head_commit.modified, 'domains/pay-blackroad-io') || github.event_name == 'pull_request'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy domains/pay-blackroad-io --project-name=blackroad-payment-page --branch=${{ github.head_ref || github.ref_name }}
+
+  deploy-buy-page:
+    name: Deploy Buy Now Page
+    runs-on: ubuntu-latest
+    if: contains(github.event.head_commit.modified, 'domains/buy-blackroad-io') || github.event_name == 'pull_request'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy domains/buy-blackroad-io --project-name=blackroad-buy-now --branch=${{ github.head_ref || github.ref_name }}
+
+  deploy-workers:
+    name: Deploy Workers
+    runs-on: ubuntu-latest
+    if: contains(github.event.head_commit.modified, 'workers/') || github.event_name == 'pull_request'
+    strategy:
+      matrix:
+        worker:
+          - name: payment-gateway
+            path: workers/payment-gateway
+          - name: subdomain-router
+            path: workers/subdomain-router
+          - name: api-gateway
+            path: workers/api-gateway
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: |
+          cd ${{ matrix.worker.path }}
+          npm install
+
+      - name: Deploy Worker
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: ${{ matrix.worker.path }}
+          command: deploy

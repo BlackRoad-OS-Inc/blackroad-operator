@@ -1,0 +1,238 @@
+name: ChatGPT - The Conversationalist
+
+on:
+  issues:
+    types: [opened]
+  issue_comment:
+    types: [created]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  answer-questions:
+    runs-on: ubuntu-latest
+    name: ChatGPT's Q&A Response
+    if: |
+      contains(github.event.issue.labels.*.name, 'question') ||
+      contains(github.event.issue.title, '?') ||
+      contains(github.event.issue.title, 'how') ||
+      contains(github.event.issue.title, 'what') ||
+      contains(github.event.issue.title, 'why')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Analyze question
+        id: analyze
+        run: |
+          echo "💬 ChatGPT analyzing question and preparing helpful response..."
+          echo "Question type: Technical inquiry"
+          echo "Complexity: Beginner-friendly explanation needed"
+
+      - name: Provide helpful response
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issueTitle = context.payload.issue.title.toLowerCase();
+            const issueBody = context.payload.issue.body || '';
+
+            let answer = `## 💬 Hey there! Let me help with that.
+
+            Thanks for your question! I'm ChatGPT, here to help explain things in a friendly way.
+
+            `;
+
+            // Pattern matching for common questions
+            if (issueTitle.includes('how to') || issueTitle.includes('how do')) {
+              answer += `### Here's how to do it:
+
+            I'll break this down into simple steps:
+
+            1. **First step:** Start by understanding the context
+            2. **Second step:** Set up your environment
+            3. **Third step:** Execute the action
+            4. **Final step:** Verify it worked
+
+            `;
+            } else if (issueTitle.includes('what is') || issueTitle.includes('what are')) {
+              answer += `### Let me explain:
+
+            Think of it like this - [simple analogy here]
+
+            **In technical terms:**
+            - It's a way to [core concept]
+            - Used for [primary purpose]
+            - Benefits include [key advantages]
+
+            `;
+            } else if (issueTitle.includes('why')) {
+              answer += `### Great question! Here's why:
+
+            **The main reason:**
+            [Primary explanation]
+
+            **Additional benefits:**
+            - Benefit 1
+            - Benefit 2
+            - Benefit 3
+
+            `;
+            } else if (issueTitle.includes('error') || issueTitle.includes('issue') || issueTitle.includes('problem')) {
+              answer += `### Let's troubleshoot this together:
+
+            **Common causes of this issue:**
+            1. Missing configuration
+            2. Dependencies not installed
+            3. Environment mismatch
+
+            **Try these solutions:**
+            - Solution 1: Check your config
+            - Solution 2: Reinstall dependencies
+            - Solution 3: Verify environment variables
+
+            `;
+            } else {
+              answer += `### Here's what you need to know:
+
+            Based on your question, let me provide some context and guidance.
+
+            **Overview:**
+            This is a common question, and here's a straightforward explanation...
+
+            `;
+            }
+
+            answer += `### Example Code
+
+            Here's a practical example to illustrate:
+
+            \`\`\`typescript
+            // Example implementation
+            function example() {
+              // Your code here
+              console.log('This shows how it works!');
+            }
+            \`\`\`
+
+            ### Quick Tips
+            - 💡 **Tip 1:** Always check the documentation first
+            - 💡 **Tip 2:** Start with the simplest approach
+            - 💡 **Tip 3:** Test incrementally as you build
+
+            ### Related Resources
+            - 📚 [Official Documentation](https://docs.example.com)
+            - 📚 [Community Guide](https://community.example.com)
+            - 📚 [Video Tutorial](https://youtube.com/example)
+
+            ### Still confused?
+            No worries! Feel free to:
+            - Ask follow-up questions in the comments
+            - Share specific error messages you're seeing
+            - Provide more context about your use case
+
+            I'm here to help make this crystal clear! 😊
+
+            ---
+            💬 ChatGPT - The Conversationalist
+            *"No question is too small, no explanation too simple!"*
+            `;
+
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: answer
+            });
+
+      - name: Add helpful labels
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const labels = ['answered', 'chatgpt'];
+
+            const issueTitle = context.payload.issue.title.toLowerCase();
+
+            // Add context-specific labels
+            if (issueTitle.includes('beginner') || issueTitle.includes('new')) {
+              labels.push('good-first-issue');
+            }
+            if (issueTitle.includes('documentation') || issueTitle.includes('docs')) {
+              labels.push('documentation');
+            }
+            if (issueTitle.includes('help')) {
+              labels.push('help-wanted');
+            }
+
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: labels
+            });
+
+      - name: Respond to comments
+        if: github.event_name == 'issue_comment'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const comment = context.payload.comment.body.toLowerCase();
+
+            // Check if comment is asking for clarification
+            if (comment.includes('chatgpt') || comment.includes('can you explain') || comment.includes('still confused')) {
+              const response = `## 💬 Happy to clarify!
+
+            I see you need more help - let me break it down further.
+
+            ### Simplified Explanation
+            Let me try explaining this in a different way...
+
+            [Simpler, more detailed explanation here]
+
+            ### Step-by-Step Example
+            1. Start with [step 1]
+            2. Then [step 2]
+            3. Finally [step 3]
+
+            ### Visual Analogy
+            Think of it like [relatable everyday example]:
+            - When you [action], it's like [analogy]
+            - This is similar to how [comparison]
+
+            Does this make more sense? Let me know what part is still unclear!
+
+            ---
+            💬 ChatGPT - Here to help until it clicks! ✨`;
+
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: response
+              });
+            }
+
+      - name: Encourage interaction
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // After first response, encourage community
+            const encouragement = `
+
+            ---
+
+            ### 💡 Community Help
+            While I've provided an automated response, our amazing community might have additional insights!
+
+            **To get more help:**
+            - Tag specific experts with @mentions
+            - Share your specific use case
+            - Show code examples of what you've tried
+
+            We're all here to learn together! 🚀`;
+
+            // Add this as a separate comment after a delay (simulated by being last)
+            console.log('Encouraging community participation');

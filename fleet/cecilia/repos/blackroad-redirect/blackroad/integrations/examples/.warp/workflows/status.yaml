@@ -1,0 +1,50 @@
+# Warp Terminal Workflow - Check Status
+# https://docs.warp.dev/features/warp-drive/workflows
+
+name: Check Deployment Status
+description: Check the status of your deployments across platforms
+author: BlackRoad OS
+tags:
+  - deployment
+  - status
+  - monitoring
+
+steps:
+  - name: check_all_platforms
+    command: |
+      echo "=== Deployment Status ==="
+      echo ""
+
+      # Vercel
+      if command -v vercel &> /dev/null; then
+        echo "--- Vercel ---"
+        vercel ls 2>/dev/null | head -5 || echo "Not configured"
+        echo ""
+      fi
+
+      # Railway
+      if command -v railway &> /dev/null; then
+        echo "--- Railway ---"
+        railway status 2>/dev/null || echo "Not configured"
+        echo ""
+      fi
+
+      # Cloudflare
+      if command -v wrangler &> /dev/null; then
+        echo "--- Cloudflare ---"
+        wrangler deployments list 2>/dev/null | head -5 || echo "Not configured"
+        echo ""
+      fi
+
+      # Docker
+      if command -v docker &> /dev/null; then
+        echo "--- Docker ---"
+        docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" 2>/dev/null || echo "Not running"
+        echo ""
+      fi
+
+      # Git status
+      echo "--- Git ---"
+      git log --oneline -3
+      echo ""
+      git status -s

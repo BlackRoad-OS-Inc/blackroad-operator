@@ -1,0 +1,213 @@
+name: Copilot - The Pair Programmer
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  code-suggestions:
+    runs-on: ubuntu-latest
+    name: Copilot's Code Suggestions
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Analyze code patterns
+        id: analyze
+        uses: actions/github-script@v7
+        with:
+          script: |
+            console.log('👥 Copilot analyzing code patterns...');
+
+            // Get changed files
+            const { data: files } = await github.rest.pulls.listFiles({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number
+            });
+
+            const suggestions = [];
+
+            // Analyze each file for common patterns
+            for (const file of files) {
+              if (file.filename.endsWith('.ts') || file.filename.endsWith('.js')) {
+                // Check for common improvements
+                if (file.patch && file.patch.includes('console.log')) {
+                  suggestions.push({
+                    file: file.filename,
+                    suggestion: '💡 Consider using a proper logging library instead of console.log for production code',
+                    type: 'improvement'
+                  });
+                }
+
+                if (file.patch && file.patch.includes('any')) {
+                  suggestions.push({
+                    file: file.filename,
+                    suggestion: '🎯 Consider using specific types instead of `any` for better type safety',
+                    type: 'typing'
+                  });
+                }
+
+                if (file.patch && file.patch.includes('.then(')) {
+                  suggestions.push({
+                    file: file.filename,
+                    suggestion: '🔄 Consider using async/await instead of .then() for better readability',
+                    type: 'modernization'
+                  });
+                }
+              }
+            }
+
+            return suggestions;
+
+      - name: Provide inline suggestions
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const suggestions = [
+              {
+                type: 'async-await',
+                message: '💡 **Suggestion: Use async/await**\n\nThis code could be more readable with async/await syntax:\n\n```typescript\n// Instead of:\nfetchData().then(data => {\n  processData(data);\n});\n\n// Consider:\nconst data = await fetchData();\nprocessData(data);\n```',
+                benefit: 'Better readability and error handling'
+              },
+              {
+                type: 'array-methods',
+                message: '🔄 **Suggestion: Use Array.map()**\n\nThis loop could be simplified:\n\n```typescript\n// Instead of:\nconst results = [];\nfor (const item of items) {\n  results.push(transform(item));\n}\n\n// Consider:\nconst results = items.map(item => transform(item));\n```',
+                benefit: 'More concise and functional style'
+              },
+              {
+                type: 'destructuring',
+                message: '🎯 **Suggestion: Use destructuring**\n\n```typescript\n// Instead of:\nconst name = user.name;\nconst email = user.email;\n\n// Consider:\nconst { name, email } = user;\n```',
+                benefit: 'Cleaner and more maintainable'
+              },
+              {
+                type: 'optional-chaining',
+                message: '✨ **Suggestion: Use optional chaining**\n\n```typescript\n// Instead of:\nif (user && user.profile && user.profile.avatar) {\n  return user.profile.avatar;\n}\n\n// Consider:\nreturn user?.profile?.avatar;\n```',
+                benefit: 'Safer and more concise null checking'
+              },
+              {
+                type: 'const-over-let',
+                message: '🔒 **Suggestion: Use const instead of let**\n\nIf this variable isn\'t reassigned, use `const` for immutability:\n\n```typescript\n// Instead of:\nlet config = getConfig();\n\n// Consider:\nconst config = getConfig();\n```',
+                benefit: 'Prevents accidental reassignment'
+              }
+            ];
+
+            // Create a friendly summary comment
+            const summary = `## 👥 Copilot's Code Suggestions
+
+            Hey! I've reviewed your code and have some friendly suggestions to make it even better.
+
+            ### General Suggestions
+
+            ${suggestions.map((s, i) => `
+            #### ${i + 1}. ${s.type.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
+            ${s.message}
+
+            **Benefit:** ${s.benefit}
+            `).join('\n')}
+
+            ### Additional Tips
+            - ✅ Consider adding JSDoc comments for public APIs
+            - ✅ Extract complex logic into well-named functions
+            - ✅ Add unit tests for new functionality
+            - ✅ Check for edge cases and error handling
+
+            ### Performance Considerations
+            - 🚀 Use memoization for expensive calculations
+            - 🚀 Consider lazy loading for heavy components
+            - 🚀 Optimize bundle size with code splitting
+
+            These are just suggestions - you know your codebase best! Feel free to apply what makes sense.
+
+            ---
+            👥 Copilot - Your friendly pair programmer
+            *"Two heads are better than one!"*`;
+
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: summary
+            });
+
+      - name: Check for best practices
+        run: |
+          echo "👥 Checking for code best practices..."
+
+          cat > best-practices-check.md << 'EOF'
+          # Code Quality Checklist
+
+          ## Best Practices Review
+          - [ ] Functions are small and focused (< 50 lines)
+          - [ ] Variables have descriptive names
+          - [ ] No magic numbers (use constants)
+          - [ ] Error handling is comprehensive
+          - [ ] Edge cases are covered
+          - [ ] Code is DRY (Don't Repeat Yourself)
+
+          ## Testing
+          - [ ] Unit tests added for new functions
+          - [ ] Edge cases are tested
+          - [ ] Error paths are tested
+          - [ ] Test coverage maintained or improved
+
+          ## Documentation
+          - [ ] Complex logic has explanatory comments
+          - [ ] Public APIs have JSDoc
+          - [ ] README updated if needed
+          - [ ] Breaking changes documented
+
+          ## Performance
+          - [ ] No unnecessary re-renders (React)
+          - [ ] Database queries are optimized
+          - [ ] Large lists are paginated/virtualized
+          - [ ] Images are optimized
+
+          ## Security
+          - [ ] User input is validated
+          - [ ] No sensitive data in logs
+          - [ ] SQL injection prevention
+          - [ ] XSS protection
+          EOF
+
+          cat best-practices-check.md
+
+      - name: Celebrate good code
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: files } = await github.rest.pulls.listFiles({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number
+            });
+
+            // Check for positive patterns
+            const hasTests = files.some(f => f.filename.includes('test') || f.filename.includes('spec'));
+            const hasDocs = files.some(f => f.filename.endsWith('.md'));
+            const isSmallPR = files.length <= 5;
+
+            let praise = '## 👥 Nice work! Here\'s what I love:\n\n';
+
+            if (hasTests) praise += '✅ **Great job adding tests!** This makes the codebase more reliable.\n\n';
+            if (hasDocs) praise += '📚 **Thanks for updating docs!** Future developers will appreciate this.\n\n';
+            if (isSmallPR) praise += '🎯 **Perfect PR size!** Small, focused PRs are easier to review.\n\n';
+
+            if (hasTests || hasDocs || isSmallPR) {
+              praise += '\nKeep up the excellent work! 🌟\n\n---\n👥 Copilot';
+
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: praise
+              });
+            }

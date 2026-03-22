@@ -1,0 +1,76 @@
+# ngrok Configuration
+# Place this file as ngrok.yml in your repo root
+
+version: "2"
+authtoken: YOUR_NGROK_AUTHTOKEN
+
+# API settings
+api_key: YOUR_NGROK_API_KEY
+
+# Global settings
+region: us  # us, eu, au, ap, sa, jp, in
+console_ui: true
+console_ui_color: transparent
+
+# Tunnel definitions
+tunnels:
+  # Web application tunnel
+  web:
+    proto: http
+    addr: 3000
+    inspect: true
+    # Paid features:
+    # subdomain: myapp
+    # hostname: myapp.ngrok.io
+    # auth: "user:password"
+    bind_tls: true
+
+  # API tunnel
+  api:
+    proto: http
+    addr: 8080
+    inspect: true
+    # hostname: api.myapp.ngrok.io
+
+  # TCP tunnel (for databases, SSH, etc.)
+  tcp-service:
+    proto: tcp
+    addr: 5432
+    # remote_addr: 1.tcp.ngrok.io:12345
+
+  # TLS tunnel (pass-through)
+  tls-service:
+    proto: tls
+    addr: 443
+    # hostname: secure.myapp.ngrok.io
+
+# Webhook verification (for security)
+# verify_webhook_provider: github
+# verify_webhook_secret: YOUR_SECRET
+
+# Circuit breaker settings
+# circuit_breaker:
+#   tripped_duration: 10s
+#   rolling_window: 60s
+#   num_buckets: 10
+#   volume_threshold: 20
+#   error_threshold_percentage: 0.50
+
+# IP restrictions (paid feature)
+# ip_restrictions:
+#   allow_cidrs:
+#     - 192.168.1.0/24
+#   deny_cidrs:
+#     - 10.0.0.0/8
+
+# Request headers
+# request_header:
+#   add:
+#     - "X-Custom-Header: value"
+#   remove:
+#     - "X-Unwanted-Header"
+
+# Response headers
+# response_header:
+#   add:
+#     - "X-Response-Header: value"

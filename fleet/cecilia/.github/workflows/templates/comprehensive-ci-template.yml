@@ -1,0 +1,418 @@
+# Comprehensive CI Workflow Template
+# ===================================
+#
+# This template provides a complete CI pipeline for BlackRoad repositories.
+# It includes linting, type checking, testing, and build verification.
+#
+# How to use:
+# -----------
+# 1. Copy this file to .github/workflows/ci.yml in your repo
+# 2. Customize the jobs based on your stack (Python/JS/both)
+# 3. Update paths and commands as needed
+# 4. Commit and push - CI will run on PRs and pushes
+#
+# What this workflow does:
+# -----------------------
+# - Lints code (Python: flake8/black, JS: eslint/prettier)
+# - Runs type checking (Python: mypy, TS: tsc)
+# - Runs test suite with coverage
+# - Builds the application
+# - Validates environment config
+# - Reports results to PR
+
+name: Continuous Integration
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - 'feature/**'
+  pull_request:
+    branches:
+      - main
+      - develop
+
+# Cancel previous runs if new push
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: '3.11'
+  NODE_VERSION: '20'
+
+jobs:
+  # ========================================
+  # Job 1: Python Linting
+  # ========================================
+  lint-python:
+    name: Lint Python Code
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+          cache-dependency-path: 'backend/requirements.txt'
+
+      - name: Install linting tools
+        run: |
+          pip install flake8 black isort mypy
+
+      - name: Run Black (code formatter check)
+        run: |
+          black --check backend/app
+          echo "✅ Black formatting check passed"
+
+      - name: Run isort (import sorting check)
+        run: |
+          isort --check-only backend/app
+          echo "✅ isort check passed"
+
+      - name: Run flake8 (linter)
+        run: |
+          flake8 backend/app --max-line-length=100 --ignore=E203,W503
+          echo "✅ flake8 linting passed"
+
+  # ========================================
+  # Job 2: Python Type Checking
+  # ========================================
+  type-check-python:
+    name: Python Type Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install -r backend/requirements.txt
+          pip install mypy types-redis types-requests
+
+      - name: Run mypy
+        run: |
+          mypy backend/app --ignore-missing-imports
+          echo "✅ Type checking passed"
+
+  # ========================================
+  # Job 3: Python Tests
+  # ========================================
+  test-python:
+    name: Python Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    # Test matrix for multiple Python versions (optional)
+    strategy:
+      matrix:
+        python-version: ['3.11']  # Add ['3.10', '3.11', '3.12'] for multi-version testing
+
+    services:
+      # PostgreSQL for tests
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: blackroad_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      # Redis for tests
+      redis:
+        image: redis:7
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install -r backend/requirements.txt
+          pip install pytest pytest-cov pytest-asyncio
+
+      - name: Set up test environment
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/blackroad_test
+          REDIS_URL: redis://localhost:6379/0
+          SECRET_KEY: test-secret-key-for-ci
+          ENVIRONMENT: test
+        run: |
+          echo "Test environment configured"
+
+      - name: Run tests with coverage
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/blackroad_test
+          REDIS_URL: redis://localhost:6379/0
+          SECRET_KEY: test-secret-key-for-ci
+          ENVIRONMENT: test
+        run: |
+          cd backend
+          pytest -v \
+            --cov=app \
+            --cov-report=term \
+            --cov-report=xml \
+            --cov-report=html \
+            --maxfail=3
+
+      - name: Upload coverage to Codecov (optional)
+        if: success()
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./backend/coverage.xml
+          flags: backend
+          name: backend-coverage
+
+  # ========================================
+  # Job 4: JavaScript/TypeScript Linting (if applicable)
+  # ========================================
+  lint-javascript:
+    name: Lint JavaScript/TypeScript
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    # Only run if package.json exists
+    if: hashFiles('package.json') != ''
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Run Prettier check
+        run: npm run format:check
+
+  # ========================================
+  # Job 5: JavaScript/TypeScript Tests (if applicable)
+  # ========================================
+  test-javascript:
+    name: JavaScript/TypeScript Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: hashFiles('package.json') != ''
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test -- --coverage
+
+      - name: Upload coverage
+        if: success()
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage/coverage-final.json
+          flags: frontend
+          name: frontend-coverage
+
+  # ========================================
+  # Job 6: Build Verification
+  # ========================================
+  build:
+    name: Build Verification
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Python build (if applicable)
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Verify Python build
+        run: |
+          pip install build
+          cd backend
+          python -m build
+          echo "✅ Python package builds successfully"
+
+      # Node build (if applicable)
+      - name: Set up Node.js
+        if: hashFiles('package.json') != ''
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Build frontend (if applicable)
+        if: hashFiles('package.json') != ''
+        run: |
+          npm ci
+          npm run build
+          echo "✅ Frontend builds successfully"
+
+  # ========================================
+  # Job 7: Environment Validation
+  # ========================================
+  validate-env:
+    name: Validate Environment Config
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Validate .env.example exists
+        run: |
+          if [ ! -f backend/.env.example ]; then
+            echo "❌ backend/.env.example not found"
+            exit 1
+          fi
+          echo "✅ .env.example exists"
+
+      - name: Validate .env.example is not committed
+        run: |
+          if [ -f backend/.env ]; then
+            echo "❌ backend/.env should not be committed!"
+            exit 1
+          fi
+          echo "✅ .env is gitignored"
+
+      - name: Validate Railway config
+        run: |
+          if [ -f railway.toml ]; then
+            echo "✅ railway.toml exists"
+          else
+            echo "⚠️  railway.toml not found (not required but recommended)"
+          fi
+
+  # ========================================
+  # Job 8: Security Scan (optional)
+  # ========================================
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Bandit (Python security linter)
+        run: |
+          pip install bandit
+          bandit -r backend/app -ll
+          echo "✅ Security scan passed"
+
+      - name: Check for secrets in code
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+
+  # ========================================
+  # Job 9: Summary
+  # ========================================
+  ci-summary:
+    name: CI Summary
+    runs-on: ubuntu-latest
+    needs:
+      - lint-python
+      - type-check-python
+      - test-python
+      - build
+      - validate-env
+    if: always()
+
+    steps:
+      - name: Check all jobs passed
+        if: |
+          needs.lint-python.result == 'failure' ||
+          needs.type-check-python.result == 'failure' ||
+          needs.test-python.result == 'failure' ||
+          needs.build.result == 'failure' ||
+          needs.validate-env.result == 'failure'
+        run: |
+          echo "❌ CI failed - check job logs above"
+          exit 1
+
+      - name: All checks passed
+        run: |
+          echo "✅ All CI checks passed!"
+          echo "Code is ready to merge"
+
+# ========================================
+# Workflow Summary
+# ========================================
+#
+# This comprehensive CI workflow:
+# 1. Lints Python code (black, isort, flake8)
+# 2. Type checks Python (mypy)
+# 3. Runs Python tests with coverage (pytest)
+# 4. Lints JavaScript/TypeScript (eslint, prettier)
+# 5. Runs JS/TS tests (jest)
+# 6. Verifies build succeeds
+# 7. Validates environment configuration
+# 8. Scans for security issues
+# 9. Provides overall summary
+#
+# Customize based on your stack:
+# - Remove JS jobs if Python-only
+# - Remove Python jobs if JS-only
+# - Add database migrations check
+# - Add API contract tests
+# - Add performance benchmarks
+#
+# Status checks:
+# - Configure branch protection to require these jobs
+# - Prevents merging failing code
+# - Ensures code quality standards

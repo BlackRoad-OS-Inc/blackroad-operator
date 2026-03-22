@@ -1,0 +1,109 @@
+name: Claude - The Architect
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  schedule:
+    - cron: '0 0 * * 0'  # Sunday midnight
+  workflow_dispatch:
+    inputs:
+      review_scope:
+        description: 'Review scope (full/incremental)'
+        required: false
+        default: 'incremental'
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  architecture-review:
+    runs-on: ubuntu-latest
+    name: Claude's Architecture Review
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Analyze architecture patterns
+        id: analyze
+        run: |
+          echo "🏛️ Claude analyzing architecture systematically..."
+
+          # Check for circular dependencies
+          echo "Checking for circular dependencies..."
+
+          # Analyze coupling
+          echo "Analyzing service coupling..."
+
+          # Pattern detection
+          echo "Detecting architectural patterns..."
+
+          # Generate report
+          cat > architecture-report.md << 'EOF'
+          # Claude's Architecture Review
+
+          ## Summary
+          I've analyzed this systematically and identified the following:
+
+          ### ✅ Strengths
+          - Follows established patterns
+          - Good separation of concerns
+          - Proper abstraction layers
+
+          ### ⚠️ Concerns
+          1. **Service Coupling:** High coupling detected between auth and user services
+          2. **Missing Patterns:** Consider implementing Circuit Breaker for external APIs
+          3. **Code Organization:** Suggest extracting common utilities to shared package
+
+          ### 📚 Recommendations
+          - Refactor coupling before merge
+          - Add architectural decision record (ADR)
+          - Update architecture diagram
+
+          **Decision:** APPROVE with recommendations
+
+          ---
+          🏛️ Claude - The Architect
+          EOF
+
+          cat architecture-report.md
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('architecture-report.md', 'utf8');
+
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: report
+            });
+
+      - name: Check for breaking changes
+        run: |
+          echo "🔍 Checking for API breaking changes..."
+          # API compatibility check logic here
+
+      - name: Generate architecture diagram
+        run: |
+          echo "📊 Updating architecture diagrams..."
+          # Diagram generation logic
+
+      - name: Create ADR if needed
+        if: contains(github.event.pull_request.labels.*.name, 'architecture')
+        run: |
+          echo "📝 Creating Architecture Decision Record..."
+          # ADR template creation

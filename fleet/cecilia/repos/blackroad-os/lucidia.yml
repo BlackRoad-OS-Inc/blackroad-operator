@@ -1,0 +1,116 @@
+# 🧠 lucidia.yml — Lucidia DSL Agent Orchestration Configuration
+# The highest form of intelligence orchestration in the BlackRoad OS system.
+
+version: "1.0"
+meta:
+  name: Lucidia
+  description: |
+    Central meta-agent language for BlackRoad OS.
+    Self-describing, interpretable, and fully routable via DSL.
+
+# Emoji definitions for agent communication
+emoji_registry:
+  status:
+    "✅": "Done"
+    "❌": "Blocked"
+    "🛟": "Escalation"
+    "🤔": "Needs Review"
+    "📊": "Metrics"
+    "🟡": "In Progress"
+    "⬜": "Not Started"
+    "🔁": "Rework"
+  reactions:
+    "✅": "close_issue"
+    "❌": "label_blocked"
+    "🛟": "notify_guardian_agent"
+    "🤔": "assign_reviewer"
+
+# Agent definitions
+agents:
+  codex-digest-agent:
+    role: interpreter
+    description: |
+      Translates weekly emoji-based agent performance data into executive summaries.
+      Reacts to: ✅ ❌ 🛟 🤔 📊
+      Outputs Markdown.
+    triggers:
+      - source: bot/index.js
+      - command: "summarize agent performance"
+    traits:
+      - math: emoji-count-ratio
+      - language: executive-tone
+      - emoji-native: true
+    outputs:
+      - markdown-summary
+      - actionable-recommendations
+      - escalation-alerts
+    integrations:
+      - slack
+      - gpt
+      - prism-console
+
+  guardian-agent:
+    role: sentinel
+    description: |
+      Security and escalation watchdog.
+      Monitors for blocked items and escalations.
+      Alerts security team and planner when issues arise.
+    responds_to:
+      - "🛟"
+      - "❌"
+    alerts:
+      - security-team
+      - planner-agent
+    traits:
+      - priority: high
+      - watch: continuous
+      - emoji-native: true
+
+  planner-agent:
+    role: orchestrator
+    description: |
+      Plans and coordinates work across agents.
+      Receives escalations from guardian-agent.
+    responds_to:
+      - "📊"
+      - "🤔"
+    inputs:
+      - digest-summaries
+      - escalation-alerts
+    outputs:
+      - task-assignments
+      - priority-updates
+    traits:
+      - planning: adaptive
+      - emoji-native: true
+
+# Routing rules for agent orchestration
+routing:
+  digest-to-escalation:
+    condition: "blocked_percentage > 15"
+    from: codex-digest-agent
+    to: planner-agent
+    action: escalate
+
+  escalation-to-guardian:
+    condition: "emoji == '🛟'"
+    from: any
+    to: guardian-agent
+    action: alert
+
+# Output configuration
+outputs:
+  markdown-summary:
+    format: markdown
+    destination:
+      - docs/
+      - slack
+  actionable-recommendations:
+    format: json
+    destination:
+      - api/recommendations
+  escalation-alerts:
+    format: notification
+    destination:
+      - guardian-agent
+      - security-team

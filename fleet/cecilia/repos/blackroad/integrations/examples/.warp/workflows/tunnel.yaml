@@ -1,0 +1,45 @@
+# Warp Terminal Workflow - Start Tunnel
+# https://docs.warp.dev/features/warp-drive/workflows
+
+name: Start Development Tunnel
+description: Expose local server via tunnel (Cloudflare, ngrok, or Tailscale)
+author: BlackRoad OS
+tags:
+  - tunnel
+  - development
+  - networking
+
+arguments:
+  - name: provider
+    description: Tunnel provider (cloudflare, ngrok, tailscale)
+    default_value: ngrok
+
+  - name: port
+    description: Local port to expose
+    default_value: "3000"
+
+steps:
+  - name: start_tunnel
+    command: |
+      PROVIDER={{arguments.provider}}
+      PORT={{arguments.port}}
+
+      case $PROVIDER in
+        cloudflare)
+          echo "Starting Cloudflare Tunnel on port $PORT..."
+          cloudflared tunnel --url http://localhost:$PORT
+          ;;
+        ngrok)
+          echo "Starting ngrok tunnel on port $PORT..."
+          ngrok http $PORT
+          ;;
+        tailscale)
+          echo "Starting Tailscale Funnel on port $PORT..."
+          tailscale funnel $PORT
+          ;;
+        *)
+          echo "Unknown provider: $PROVIDER"
+          echo "Supported: cloudflare, ngrok, tailscale"
+          exit 1
+          ;;
+      esac

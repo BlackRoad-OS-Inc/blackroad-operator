@@ -1,0 +1,71 @@
+name: Core CI
+
+on:
+  pull_request:
+    paths:
+      - 'backend/app/**'
+      - 'backend/requirements.txt'
+      - 'backend/Dockerfile'
+      - 'backend/alembic/**'
+      - '!backend/app/routers/**'
+      - '!backend/tests/**'
+  push:
+    branches: [main, develop]
+    paths:
+      - 'backend/app/**'
+      - 'backend/requirements.txt'
+      - '!backend/app/routers/**'
+      - '!backend/tests/**'
+
+jobs:
+  core-checks:
+    name: Core Module Checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          cd backend
+          pip install -r requirements.txt
+          pip install flake8 black mypy
+
+      - name: Check Python formatting (Black)
+        run: |
+          cd backend
+          black --check app/
+
+      - name: Lint with flake8
+        run: |
+          cd backend
+          flake8 app/ --count --select=E9,F63,F7,F82 --show-source --statistics
+          flake8 app/ --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+      - name: Type check with mypy
+        run: |
+          cd backend
+          mypy app/ --ignore-missing-imports || true
+
+      - name: Validate database models
+        run: |
+          cd backend
+          python -c "from app.database import Base; from app.models import *; print('Models validated')"
+
+      - name: Check for security issues
+        run: |
+          pip install bandit safety
+          cd backend
+          bandit -r app/ -ll
+          safety check --file requirements.txt || true
+
+      - name: Summary
+        run: |
+          echo "✅ Core CI checks completed"

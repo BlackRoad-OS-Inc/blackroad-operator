@@ -1,0 +1,78 @@
+# Clerk Authentication Configuration
+# https://clerk.com/docs
+
+version: "1.0"
+provider: clerk
+
+# Application settings
+application:
+  name: "BlackRoad App"
+  sign_in_url: "/sign-in"
+  sign_up_url: "/sign-up"
+  after_sign_in_url: "/dashboard"
+  after_sign_up_url: "/onboarding"
+
+# Authentication methods
+auth_methods:
+  email:
+    enabled: true
+    verification: required
+  phone:
+    enabled: false
+  username:
+    enabled: false
+
+  # Social OAuth providers
+  oauth:
+    - provider: google
+      enabled: true
+    - provider: github
+      enabled: true
+    - provider: apple
+      enabled: false
+    - provider: microsoft
+      enabled: false
+
+# Multi-factor authentication
+mfa:
+  enabled: true
+  methods:
+    - totp  # Authenticator apps
+    - sms   # SMS codes
+
+# Session settings
+session:
+  lifetime: 604800  # 7 days in seconds
+  inactivity_timeout: 86400  # 24 hours
+  single_session_mode: false
+
+# Organization settings (for B2B apps)
+organizations:
+  enabled: true
+  require_at_sign_up: false
+  max_members: 100
+  roles:
+    - admin
+    - member
+    - viewer
+
+# Webhooks
+webhooks:
+  - event: user.created
+    url: "${WEBHOOK_URL}/clerk/user-created"
+  - event: user.deleted
+    url: "${WEBHOOK_URL}/clerk/user-deleted"
+  - event: session.created
+    url: "${WEBHOOK_URL}/clerk/session-created"
+  - event: organization.created
+    url: "${WEBHOOK_URL}/clerk/org-created"
+
+# Environment variables required:
+# NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+# CLERK_SECRET_KEY
+# CLERK_WEBHOOK_SECRET
+
+# SDK installation:
+# npm install @clerk/nextjs
+# npm install @clerk/clerk-react
+# npm install @clerk/backend

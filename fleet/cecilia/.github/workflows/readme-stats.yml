@@ -1,0 +1,96 @@
+name: Update README Stats
+
+on:
+  schedule:
+    - cron: '0 6 * * *'   # nightly at 06:00 UTC
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'backend/**'
+      - 'agents/**'
+      - '.github/workflows/readme-stats.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  update-stats:
+    name: Refresh dynamic README section
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Gather repository statistics
+        id: stats
+        run: |
+          PY_FILES=$(find . -name "*.py" -not -path "./.git/*" | wc -l)
+          JS_FILES=$(find . -name "*.js" -not -path "./.git/*" | wc -l)
+          AGENT_FILES=$(find ./agents -name "*.py" 2>/dev/null | wc -l)
+          ROUTER_FILES=$(find ./backend/app/routers -name "*.py" 2>/dev/null | wc -l)
+          WORKFLOW_FILES=$(find ./.github/workflows -name "*.yml" | wc -l)
+          LAST_COMMIT=$(git log -1 --format="%ai" | cut -d' ' -f1)
+
+          echo "py_files=$PY_FILES" >> $GITHUB_OUTPUT
+          echo "js_files=$JS_FILES" >> $GITHUB_OUTPUT
+          echo "agent_files=$AGENT_FILES" >> $GITHUB_OUTPUT
+          echo "router_files=$ROUTER_FILES" >> $GITHUB_OUTPUT
+          echo "workflow_files=$WORKFLOW_FILES" >> $GITHUB_OUTPUT
+          echo "last_commit=$LAST_COMMIT" >> $GITHUB_OUTPUT
+
+      - name: Update README dynamic section
+        run: |
+          python3 - <<'PY'
+          import re
+
+          py_files   = "${{ steps.stats.outputs.py_files }}"
+          js_files   = "${{ steps.stats.outputs.js_files }}"
+          agent_files = "${{ steps.stats.outputs.agent_files }}"
+          router_files = "${{ steps.stats.outputs.router_files }}"
+          workflow_files = "${{ steps.stats.outputs.workflow_files }}"
+          last_commit = "${{ steps.stats.outputs.last_commit }}"
+
+          block = (
+              "<!-- DYNAMIC_STATS_START -->\n"
+              "| Metric | Count |\n"
+              "|--------|-------|\n"
+              f"| Python files | {py_files} |\n"
+              f"| JavaScript files | {js_files} |\n"
+              f"| Agent modules | {agent_files} |\n"
+              f"| API routers | {router_files} |\n"
+              f"| CI/CD workflows | {workflow_files} |\n"
+              f"| Last updated | {last_commit} |\n"
+              "<!-- DYNAMIC_STATS_END -->"
+          )
+
+          with open("README.md", "r") as f:
+              content = f.read()
+
+          updated = re.sub(
+              r"<!-- DYNAMIC_STATS_START -->.*?<!-- DYNAMIC_STATS_END -->",
+              block,
+              content,
+              flags=re.DOTALL,
+          )
+
+          with open("README.md", "w") as f:
+              f.write(updated)
+
+          print("README stats updated")
+          PY
+
+      - name: Commit updated README
+        run: |
+          git config user.name "BlackRoad Bot"
+          git config user.email "bot@blackroad.io"
+          git add README.md
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "docs: auto-update README stats [skip ci]"
+            git push
+          fi
