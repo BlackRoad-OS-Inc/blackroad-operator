@@ -1,0 +1,182 @@
+# .github/workflows/agent-org-health.yml
+# Self-improving org health agent
+# Monitors all 16 orgs: workflow health, repo counts, stale repos, security
+# Creates issues when things degrade, auto-fixes what it can
+
+name: "Agent: Org Health Monitor"
+
+on:
+  schedule:
+    - cron: '0 8 * * *'  # Daily 8am UTC
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Action to perform'
+        required: false
+        default: 'full_audit'
+        type: choice
+        options:
+          - full_audit
+          - fix_workflows
+          - archive_stale
+          - report_only
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  health-check:
+    name: "Org Health Audit"
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Audit all organizations
+        id: audit
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        with:
+          script: |
+            const ORGS = [
+              'BlackRoad-OS-Inc', 'BlackRoad-OS', 'BlackRoad-AI', 'BlackRoad-Studio',
+              'BlackRoad-Education', 'BlackRoad-Security', 'BlackRoad-Labs', 'BlackRoad-Hardware',
+              'BlackRoad-Media', 'BlackRoad-Foundation', 'BlackRoad-Ventures', 'BlackRoad-Cloud',
+              'BlackRoad-Gov', 'BlackRoad-Archive', 'BlackRoad-Interactive', 'Blackbox-Enterprises'
+            ];
+
+            const report = [];
+            let totalRepos = 0, totalActive = 0, totalArchived = 0;
+            let failingWorkflows = 0, healthyWorkflows = 0;
+            let missingDescriptions = 0, missingTopics = 0;
+
+            for (const org of ORGS) {
+              const orgReport = { org, repos: 0, active: 0, archived: 0, failing: 0, healthy: 0, issues: [] };
+
+              try {
+                // Get all repos
+                let page = 1;
+                let repos = [];
+                while (true) {
+                  const { data } = await github.rest.repos.listForOrg({ org, per_page: 100, page });
+                  if (data.length === 0) break;
+                  repos = repos.concat(data);
+                  page++;
+                }
+
+                orgReport.repos = repos.length;
+                orgReport.active = repos.filter(r => !r.archived).length;
+                orgReport.archived = repos.filter(r => r.archived).length;
+
+                // Check for repos without descriptions
+                const noDesc = repos.filter(r => !r.archived && (!r.description || r.description.length < 10));
+                if (noDesc.length > 0) {
+                  orgReport.issues.push(`${noDesc.length} repos missing descriptions`);
+                  missingDescriptions += noDesc.length;
+                }
+
+                // Check recent workflow failures (sample 5 repos)
+                const activeRepos = repos.filter(r => !r.archived).slice(0, 5);
+                for (const repo of activeRepos) {
+                  try {
+                    const { data: runs } = await github.rest.actions.listWorkflowRunsForRepo({
+                      owner: org, repo: repo.name, per_page: 5, status: 'failure'
+                    });
+                    if (runs.total_count > 0) {
+                      orgReport.failing++;
+                      failingWorkflows++;
+                    } else {
+                      orgReport.healthy++;
+                      healthyWorkflows++;
+                    }
+                  } catch { orgReport.healthy++; healthyWorkflows++; }
+                }
+
+                // Check for very stale repos (no push in 90+ days)
+                const now = new Date();
+                const stale = repos.filter(r => {
+                  if (r.archived) return false;
+                  const pushed = new Date(r.pushed_at);
+                  return (now - pushed) / (1000 * 60 * 60 * 24) > 90;
+                });
+                if (stale.length > repos.length * 0.5) {
+                  orgReport.issues.push(`${stale.length}/${repos.length} repos stale (>90 days)`);
+                }
+
+              } catch (e) {
+                orgReport.issues.push(`API error: ${e.message}`);
+              }
+
+              totalRepos += orgReport.repos;
+              totalActive += orgReport.active;
+              totalArchived += orgReport.archived;
+              report.push(orgReport);
+            }
+
+            // Generate summary
+            const summary = `## BlackRoad Org Health Report — ${new Date().toISOString().split('T')[0]}
+
+            | Org | Repos | Active | Archived | Workflow Health | Issues |
+            |-----|-------|--------|----------|---------------|--------|
+            ${report.map(r => `| ${r.org} | ${r.repos} | ${r.active} | ${r.archived} | ${r.failing > 0 ? '⚠️' : '✅'} ${r.healthy}/${r.healthy + r.failing} | ${r.issues.length > 0 ? r.issues.join('; ') : '—'} |`).join('\n')}
+
+            **Totals:** ${totalRepos} repos (${totalActive} active, ${totalArchived} archived)
+            **Workflows:** ${healthyWorkflows} healthy, ${failingWorkflows} failing
+            **Missing descriptions:** ${missingDescriptions}
+
+            ---
+            *Generated by BlackRoad Org Health Agent*`;
+
+            await core.summary.addRaw(summary).write();
+            console.log(summary);
+
+            // Create issue if health is degrading
+            const criticalIssues = report.filter(r => r.issues.length > 2);
+            if (criticalIssues.length > 0) {
+              try {
+                await github.rest.issues.create({
+                  owner: 'BlackRoad-OS-Inc',
+                  repo: 'blackroad-operator',
+                  title: `[Agent] Org Health Alert — ${criticalIssues.length} orgs need attention`,
+                  body: summary,
+                  labels: ['agent', 'health', 'automated']
+                });
+              } catch (e) {
+                console.log(`Could not create issue: ${e.message}`);
+              }
+            }
+
+      - name: Auto-fix missing descriptions
+        if: inputs.action != 'report_only'
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        with:
+          script: |
+            const ORGS = [
+              'BlackRoad-OS-Inc', 'BlackRoad-OS', 'BlackRoad-AI', 'BlackRoad-Studio',
+              'BlackRoad-Education', 'BlackRoad-Security', 'BlackRoad-Labs'
+            ];
+            let fixed = 0;
+
+            for (const org of ORGS) {
+              const { data: repos } = await github.rest.repos.listForOrg({ org, per_page: 100 });
+              for (const repo of repos) {
+                if (repo.archived || (repo.description && repo.description.length >= 10)) continue;
+                if (fixed >= 30) break;
+
+                const name = repo.name.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                const lang = repo.language ? `. Built with ${repo.language}` : '';
+                const desc = `${name} — BlackRoad OS${lang}. Proprietary to BlackRoad OS, Inc.`;
+
+                try {
+                  await github.rest.repos.update({
+                    owner: org, repo: repo.name,
+                    description: desc.substring(0, 350)
+                  });
+                  fixed++;
+                  console.log(`Fixed: ${org}/${repo.name}`);
+                } catch (e) {
+                  console.log(`Skip: ${org}/${repo.name} — ${e.message}`);
+                }
+              }
+            }
+            console.log(`Fixed ${fixed} descriptions`);

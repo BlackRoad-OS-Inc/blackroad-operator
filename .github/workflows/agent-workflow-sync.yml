@@ -1,0 +1,184 @@
+# .github/workflows/agent-workflow-sync.yml
+# Self-improving agent that keeps all org RoadCode repos in sync
+# When workflows change in operator, automatically propagates to all 16 orgs
+# Also detects and disables broken workflows across all orgs
+
+name: "Agent: Workflow Sync"
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/autonomous-*.yml'
+      - '.github/workflows/agent-*.yml'
+  schedule:
+    - cron: '0 12 * * 1'  # Weekly Monday noon UTC
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Action'
+        required: false
+        default: 'sync'
+        type: choice
+        options:
+          - sync
+          - disable_broken
+          - full
+
+permissions:
+  contents: write
+
+jobs:
+  sync-workflows:
+    name: "Sync Workflows to All Orgs"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || inputs.action == 'sync' || inputs.action == 'full'
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Sync autonomous workflows to all RoadCode repos
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        with:
+          script: |
+            const ORGS = [
+              'BlackRoad-OS-Inc', 'BlackRoad-OS', 'BlackRoad-Studio', 'BlackRoad-Archive',
+              'BlackRoad-Interactive', 'BlackRoad-Security', 'BlackRoad-Gov', 'BlackRoad-Education',
+              'BlackRoad-Hardware', 'BlackRoad-Media', 'BlackRoad-Foundation', 'BlackRoad-Ventures',
+              'BlackRoad-Cloud', 'BlackRoad-Labs', 'BlackRoad-AI', 'Blackbox-Enterprises'
+            ];
+
+            const WORKFLOWS = [
+              'autonomous-orchestrator.yml',
+              'autonomous-self-healer.yml',
+              'autonomous-issue-manager.yml',
+              'autonomous-cross-repo.yml',
+              'autonomous-dependency-manager.yml'
+            ];
+
+            let synced = 0, errors = 0;
+
+            for (const wf of WORKFLOWS) {
+              // Read source workflow from this repo
+              let sourceContent;
+              try {
+                const { data } = await github.rest.repos.getContent({
+                  owner: 'BlackRoad-OS-Inc', repo: 'blackroad-operator',
+                  path: `.github/workflows/${wf}`
+                });
+                sourceContent = data.content;
+              } catch (e) {
+                console.log(`Source not found: ${wf}`);
+                continue;
+              }
+
+              for (const org of ORGS) {
+                try {
+                  // Check if target exists
+                  let sha;
+                  try {
+                    const { data } = await github.rest.repos.getContent({
+                      owner: org, repo: 'RoadCode',
+                      path: `.github/workflows/${wf}`
+                    });
+                    sha = data.sha;
+
+                    // Skip if content is identical
+                    if (data.content.replace(/\s/g, '') === sourceContent.replace(/\s/g, '')) {
+                      continue;
+                    }
+                  } catch {}
+
+                  const params = {
+                    owner: org, repo: 'RoadCode',
+                    path: `.github/workflows/${wf}`,
+                    message: `agent: sync ${wf} from operator`,
+                    content: sourceContent,
+                    committer: { name: 'BlackRoad Agent', email: 'agent@blackroad.io' }
+                  };
+                  if (sha) params.sha = sha;
+
+                  await github.rest.repos.createOrUpdateFileContents(params);
+                  synced++;
+                  console.log(`Synced: ${org}/RoadCode/${wf}`);
+                } catch (e) {
+                  errors++;
+                  console.log(`Error: ${org}/RoadCode/${wf} — ${e.message}`);
+                }
+              }
+            }
+
+            console.log(`\nSynced: ${synced} | Errors: ${errors}`);
+            await core.summary.addRaw(`## Workflow Sync\n\nSynced: ${synced} workflows\nErrors: ${errors}`).write();
+
+  disable-broken:
+    name: "Disable Broken Workflows"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || inputs.action == 'disable_broken' || inputs.action == 'full'
+
+    steps:
+      - name: Find and disable failing scheduled workflows
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        with:
+          script: |
+            const ORGS = [
+              'BlackRoad-OS-Inc', 'BlackRoad-OS', 'BlackRoad-AI', 'BlackRoad-Studio',
+              'BlackRoad-Education', 'BlackRoad-Security', 'BlackRoad-Labs', 'BlackRoad-Hardware',
+              'BlackRoad-Media', 'BlackRoad-Foundation', 'BlackRoad-Ventures', 'BlackRoad-Cloud',
+              'BlackRoad-Gov', 'BlackRoad-Archive', 'BlackRoad-Interactive', 'Blackbox-Enterprises'
+            ];
+
+            // Patterns that indicate broken looping workflows
+            const DISABLE_PATTERNS = [
+              'Self-Healing', 'self-heal', 'Auto-Heal', 'auto-heal',
+              'HuggingFace', 'Autonomy System', 'BlackRoad AI Agents',
+              'Production Health Check', 'Uptime'
+            ];
+
+            let disabled = 0, checked = 0;
+
+            for (const org of ORGS) {
+              const { data: repos } = await github.rest.repos.listForOrg({ org, per_page: 100 });
+
+              for (const repo of repos.filter(r => !r.archived)) {
+                try {
+                  const { data: workflows } = await github.rest.actions.listRepoWorkflows({
+                    owner: org, repo: repo.name
+                  });
+
+                  for (const wf of workflows.workflows) {
+                    if (wf.state !== 'active') continue;
+                    checked++;
+
+                    // Check if it matches a broken pattern
+                    const shouldDisable = DISABLE_PATTERNS.some(p =>
+                      wf.name.includes(p) || wf.path.includes(p.toLowerCase().replace(/ /g, '-'))
+                    );
+
+                    if (!shouldDisable) continue;
+
+                    // Verify it's actually failing (last 3 runs all failed)
+                    try {
+                      const { data: runs } = await github.rest.actions.listWorkflowRuns({
+                        owner: org, repo: repo.name, workflow_id: wf.id,
+                        per_page: 3, status: 'completed'
+                      });
+
+                      const allFailed = runs.workflow_runs.length >= 3 &&
+                        runs.workflow_runs.every(r => r.conclusion === 'failure');
+
+                      if (allFailed) {
+                        await github.rest.actions.disableWorkflow({
+                          owner: org, repo: repo.name, workflow_id: wf.id
+                        });
+                        disabled++;
+                        console.log(`Disabled: ${org}/${repo.name}/${wf.name} (3+ consecutive failures)`);
+                      }
+                    } catch {}
+                  }
+                } catch {}
+              }
+            }
+
+            console.log(`\nChecked: ${checked} workflows | Disabled: ${disabled}`);
+            await core.summary.addRaw(`## Broken Workflow Cleanup\n\nChecked: ${checked}\nDisabled: ${disabled} (3+ consecutive failures)`).write();

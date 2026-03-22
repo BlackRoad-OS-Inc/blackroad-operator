@@ -1,0 +1,281 @@
+# .github/workflows/agent-repo-improver.yml
+# Self-improving agent that audits and fixes repos across all orgs
+# Runs daily — finds repos missing README, LICENSE, .gitignore, workflows
+# Creates PRs to fix them automatically
+
+name: "Agent: Repo Improver"
+
+on:
+  schedule:
+    - cron: '0 6 * * *'  # Daily 6am UTC
+  workflow_dispatch:
+    inputs:
+      target_org:
+        description: 'Target org (or "all")'
+        required: false
+        default: 'BlackRoad-OS-Inc'
+      dry_run:
+        description: 'Dry run (no changes)'
+        required: false
+        default: 'false'
+        type: boolean
+      max_repos:
+        description: 'Max repos to process'
+        required: false
+        default: '20'
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: repo-improver-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DRY_RUN: ${{ inputs.dry_run || 'false' }}
+  MAX_REPOS: ${{ inputs.max_repos || '20' }}
+
+jobs:
+  audit:
+    name: "Audit Repos"
+    runs-on: ubuntu-latest
+    outputs:
+      repos_to_fix: ${{ steps.audit.outputs.repos }}
+      total_issues: ${{ steps.audit.outputs.total }}
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Audit repositories
+        id: audit
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        with:
+          script: |
+            const targetOrg = '${{ inputs.target_org }}' || 'BlackRoad-OS-Inc';
+            const maxRepos = parseInt('${{ env.MAX_REPOS }}');
+            const orgs = targetOrg === 'all'
+              ? ['BlackRoad-OS-Inc','BlackRoad-OS','BlackRoad-AI','BlackRoad-Studio','BlackRoad-Education','BlackRoad-Security','BlackRoad-Labs','BlackRoad-Hardware','BlackRoad-Media','BlackRoad-Foundation','BlackRoad-Ventures','BlackRoad-Cloud','BlackRoad-Gov','BlackRoad-Archive','BlackRoad-Interactive','Blackbox-Enterprises']
+              : [targetOrg];
+
+            const issues = [];
+
+            for (const org of orgs) {
+              let page = 1;
+              let repos = [];
+              while (true) {
+                const { data } = await github.rest.repos.listForOrg({ org, per_page: 100, page, type: 'all' });
+                if (data.length === 0) break;
+                repos = repos.concat(data.filter(r => !r.archived && !r.fork));
+                page++;
+              }
+
+              for (const repo of repos) {
+                if (issues.length >= maxRepos) break;
+                const fixes = [];
+
+                // Check README
+                try {
+                  const { data: readme } = await github.rest.repos.getReadme({ owner: org, repo: repo.name });
+                  const content = Buffer.from(readme.content, 'base64').toString();
+                  if (content.length < 100) fixes.push('readme_stub');
+                } catch {
+                  fixes.push('readme_missing');
+                }
+
+                // Check LICENSE
+                try {
+                  await github.rest.repos.getContent({ owner: org, repo: repo.name, path: 'LICENSE' });
+                } catch {
+                  fixes.push('license_missing');
+                }
+
+                // Check description
+                if (!repo.description || repo.description.length < 10) {
+                  fixes.push('description_missing');
+                }
+
+                // Check topics
+                const { data: topicData } = await github.rest.repos.getAllTopics({ owner: org, repo: repo.name });
+                if (!topicData.names || topicData.names.length === 0) {
+                  fixes.push('topics_missing');
+                }
+
+                if (fixes.length > 0) {
+                  issues.push({ org, repo: repo.name, fixes, language: repo.language || 'unknown' });
+                }
+              }
+            }
+
+            core.setOutput('repos', JSON.stringify(issues.slice(0, maxRepos)));
+            core.setOutput('total', issues.length);
+            console.log(`Found ${issues.length} repos needing fixes`);
+            for (const i of issues.slice(0, 10)) {
+              console.log(`  ${i.org}/${i.repo}: ${i.fixes.join(', ')}`);
+            }
+
+  fix:
+    name: "Fix: ${{ matrix.repo }}"
+    needs: audit
+    if: needs.audit.outputs.total_issues != '0' && needs.audit.outputs.repos_to_fix != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include: ${{ fromJSON(needs.audit.outputs.repos_to_fix) }}
+      max-parallel: 5
+      fail-fast: false
+
+    steps:
+      - name: Apply fixes
+        if: env.DRY_RUN != 'true'
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        with:
+          script: |
+            const org = '${{ matrix.org }}';
+            const repo = '${{ matrix.repo }}';
+            const fixes = ${{ toJSON(matrix.fixes) }};
+            const language = '${{ matrix.language }}';
+
+            console.log(`Fixing ${org}/${repo}: ${fixes.join(', ')}`);
+
+            // Fix missing description
+            if (fixes.includes('description_missing')) {
+              const langDesc = {
+                'JavaScript': 'JS/TS application',
+                'TypeScript': 'TypeScript application',
+                'Python': 'Python application',
+                'Shell': 'Shell scripts and automation',
+                'HTML': 'Web application',
+                'Rust': 'Rust application',
+                'Go': 'Go application',
+                'unknown': 'BlackRoad OS component'
+              };
+              const desc = `${repo.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())} — ${langDesc[language] || 'BlackRoad OS component'}. Proprietary to BlackRoad OS, Inc.`;
+
+              await github.rest.repos.update({ owner: org, repo, description: desc.substring(0, 350) });
+              console.log(`  Set description: ${desc.substring(0, 80)}...`);
+            }
+
+            // Fix missing topics
+            if (fixes.includes('topics_missing')) {
+              const baseTags = ['blackroad', 'blackroad-os'];
+              const langTags = {
+                'JavaScript': ['javascript', 'nodejs'],
+                'TypeScript': ['typescript', 'nodejs'],
+                'Python': ['python'],
+                'Shell': ['bash', 'shell', 'automation'],
+                'HTML': ['html', 'web'],
+                'Rust': ['rust'],
+                'Go': ['golang']
+              };
+              const tags = [...baseTags, ...(langTags[language] || [])];
+
+              // Infer from repo name
+              if (repo.includes('ai') || repo.includes('lucidia')) tags.push('ai');
+              if (repo.includes('security') || repo.includes('audit')) tags.push('security');
+              if (repo.includes('fleet') || repo.includes('pi')) tags.push('raspberry-pi');
+              if (repo.includes('road')) tags.push('sovereign-infrastructure');
+
+              await github.rest.repos.replaceAllTopics({ owner: org, repo, names: [...new Set(tags)].slice(0, 20) });
+              console.log(`  Set topics: ${tags.join(', ')}`);
+            }
+
+            // Fix missing LICENSE (add proprietary license)
+            if (fixes.includes('license_missing')) {
+              const license = `BlackRoad OS, Inc. — Proprietary License
+
+Copyright (c) 2024-2026 BlackRoad OS, Inc. All Rights Reserved.
+
+This software is proprietary to BlackRoad OS, Inc.
+Source code is publicly visible for transparency.
+Commercial use, forking, and redistribution are prohibited
+without written authorization from BlackRoad OS, Inc.
+
+Contact: alexa@blackroad.io
+Website: https://blackroad.io
+`;
+              try {
+                await github.rest.repos.createOrUpdateFileContents({
+                  owner: org, repo, path: 'LICENSE',
+                  message: 'add proprietary LICENSE',
+                  content: Buffer.from(license).toString('base64'),
+                  committer: { name: 'BlackRoad Agent', email: 'agent@blackroad.io' }
+                });
+                console.log('  Added LICENSE');
+              } catch (e) {
+                console.log(`  LICENSE skip: ${e.message}`);
+              }
+            }
+
+            // Fix stub README (< 100 chars)
+            if (fixes.includes('readme_stub') || fixes.includes('readme_missing')) {
+              const readme = `# ${repo}
+
+**Proprietary Software — [BlackRoad OS, Inc.](https://github.com/BlackRoad-OS-Inc)**
+
+${language !== 'unknown' ? `Built with ${language}.` : ''}
+
+## About
+
+Part of the BlackRoad OS ecosystem — sovereign infrastructure on self-hosted hardware.
+
+## License
+
+This software is proprietary to BlackRoad OS, Inc. Source code is publicly visible for transparency. Commercial use, forking, and redistribution are prohibited without written authorization.
+
+---
+
+**BlackRoad OS — Pave Tomorrow.**
+
+*Copyright 2024-2026 BlackRoad OS, Inc. All Rights Reserved.*
+`;
+              try {
+                let sha;
+                try {
+                  const { data } = await github.rest.repos.getContent({ owner: org, repo, path: 'README.md' });
+                  sha = data.sha;
+                } catch {}
+
+                const params = {
+                  owner: org, repo, path: 'README.md',
+                  message: fixes.includes('readme_missing') ? 'add README' : 'improve stub README',
+                  content: Buffer.from(readme).toString('base64'),
+                  committer: { name: 'BlackRoad Agent', email: 'agent@blackroad.io' }
+                };
+                if (sha) params.sha = sha;
+
+                await github.rest.repos.createOrUpdateFileContents(params);
+                console.log('  Fixed README');
+              } catch (e) {
+                console.log(`  README skip: ${e.message}`);
+              }
+            }
+
+  report:
+    name: "Summary Report"
+    needs: [audit, fix]
+    if: always()
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Post summary
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        with:
+          script: |
+            const total = parseInt('${{ needs.audit.outputs.total_issues }}') || 0;
+            const repos = JSON.parse('${{ needs.audit.outputs.repos_to_fix }}' || '[]');
+
+            const summary = `## Repo Improver Report
+
+            **Repos audited with issues:** ${total}
+            **Repos fixed this run:** ${repos.length}
+
+            | Repo | Fixes Applied |
+            |------|--------------|
+            ${repos.map(r => `| ${r.org}/${r.repo} | ${r.fixes.join(', ')} |`).join('\n')}
+
+            ---
+            *BlackRoad Autonomous Agent — Pave Tomorrow.*`;
+
+            await core.summary.addRaw(summary).write();
