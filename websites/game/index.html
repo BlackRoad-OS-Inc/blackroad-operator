@@ -1,228 +1,26 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Genesis Road — Say It. Build It. Play It.</title>
-<link rel="icon" type="image/png" sizes="32x32" href="https://images.blackroad.io/brand/br-square-32.png" />
-<link rel="apple-touch-icon" sizes="180x180" href="https://images.blackroad.io/brand/apple-touch-icon.png" />
-<meta property="og:image" content="https://images.blackroad.io/brand/br-square-512.png" />
-<meta name="description" content="Genesis Road — Voice-controlled game engine. Describe your game, watch it build. Unity refugees welcome. Replaces Unity and Godot.">
-<meta property="og:title" content="Genesis Road — Say It. Build It. Play It.">
-<meta property="og:description" content="Voice-controlled game engine. Describe your game, watch it build in real time.">
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://game.blackroad.io">
-<meta name="twitter:card" content="summary_large_image">
-<link rel="stylesheet" href="../_shared/design.css">
-<style>
-  .hero { padding: var(--sp-xl) var(--sp-md); min-height: 100vh; display: flex; flex-direction: column; justify-content: center; }
-  @media (min-width: 768px) { .hero { padding: 0 var(--sp-xl); } }
-  .hero-sub { font-size: 1.1rem; color: var(--subtle); max-width: 520px; line-height: 1.7; margin: var(--sp-md) 0 var(--sp-xl); }
-  .btn-primary { display: inline-flex; align-items: center; gap: 8px; background: var(--grad); color: var(--white); padding: 14px 28px; font-weight: 700; font-size: 0.95rem; transition: opacity 0.2s; }
-  .btn-primary:hover { opacity: 0.9; }
-  .btn-outline { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--border); color: var(--white); padding: 14px 28px; font-weight: 600; font-size: 0.95rem; transition: border-color 0.2s; }
-  .btn-outline:hover { border-color: var(--muted); }
-  .hero-buttons { display: flex; gap: var(--sp-sm); flex-wrap: wrap; }
-  .feature-icon { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); margin-bottom: var(--sp-md); font-family: var(--jb); font-size: 1.1rem; position: relative; overflow: hidden; }
-  .feature-icon::before { content: ''; position: absolute; inset: 0; background: var(--grad); opacity: 0.08; }
-  .card h3 { margin-bottom: var(--sp-xs); }
-  .card p { font-size: 0.85rem; line-height: 1.7; }
-  .card .tech { font-family: var(--jb); font-size: 0.7rem; color: var(--muted); margin-top: var(--sp-sm); letter-spacing: 0.04em; }
-  .voice-demo { max-width: 680px; margin: 0 auto; border: 1px solid var(--border); background: var(--deep); overflow: hidden; }
-  .voice-bar { display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-bottom: 1px solid var(--border); background: #0a0a0a; }
-  .voice-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); }
-  .voice-title { font-family: var(--jb); font-size: 0.7rem; color: var(--muted); margin-left: 8px; }
-  .voice-body { padding: 20px 24px; font-family: var(--jb); font-size: 0.8rem; line-height: 2; color: var(--subtle); }
-  .voice-body .cmd { color: var(--white); }
-  .voice-body .out { color: var(--muted); }
-  .compare-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-  .compare-table th, .compare-table td { padding: var(--sp-sm) var(--sp-md); text-align: left; border-bottom: 1px solid var(--border); }
-  .compare-table th { font-family: var(--jb); font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
-  .compare-table td { color: var(--subtle); font-family: var(--in); }
-  .compare-table td:first-child { color: var(--white); font-weight: 600; }
-  .compare-table .check { color: #4ade80; }
-  .compare-table .cross { color: #ef4444; }
-  .step-num { font-family: var(--jb); font-size: 2.5rem; font-weight: 700; color: var(--border); line-height: 1; margin-bottom: var(--sp-sm); }
-</style>
-</head>
-<body class="dot-bg">
-  <nav>
-    <div class="nav-logo">Genesis Road</div>
-    <div class="nav-links">
-      <a href="#engine">Engine</a>
-      <a href="#voice">Voice</a>
-      <a href="#compare">Compare</a>
-      <a href="https://blackroad.io">BlackRoad OS</a>
-    </div>
-    <button class="nav-toggle" onclick="this.classList.toggle('open');document.getElementById('nav-mobile').classList.toggle('open')" aria-label="Menu"><span></span><span></span><span></span></button>
-  </nav>
-  <div id="nav-mobile" class="nav-mobile">
-    <a href="#engine" onclick="document.getElementById('nav-mobile').classList.remove('open')">Engine</a>
-    <a href="#voice" onclick="document.getElementById('nav-mobile').classList.remove('open')">Voice</a>
-    <a href="#compare" onclick="document.getElementById('nav-mobile').classList.remove('open')">Compare</a>
-    <a href="https://blackroad.io">BlackRoad OS</a>
-  </div>
-
-  <div class="hero">
-    <div class="section-label">Voice-Controlled Game Engine</div>
-    <h1>Say it. Build it.<br>Play it.</h1>
-    <p class="hero-sub">Genesis Road is the game engine that listens. Describe your game in plain English. Watch terrain, characters, physics, and logic assemble in real time. No C#. No GDScript. Just your voice and your vision.</p>
-    <div class="hero-buttons">
-      <a href="#engine" class="btn-primary">Explore the Engine</a>
-      <a href="#voice" class="btn-outline">See Voice Demo</a>
-    </div>
-  </div>
-
-  <section id="engine">
-    <div class="section-label">Core Engine</div>
-    <h2 style="margin-bottom:var(--sp-md);">What Unity and Godot should have been</h2>
-    <p style="max-width:560px;margin-bottom:var(--sp-xl);">A complete 3D game engine built from scratch for the AI era. Voice-first design. Local inference. No subscription fees. No forced cloud services. Your game, your hardware, your rules.</p>
-    <div class="grid-3">
-      <div class="card">
-        <div class="feature-icon">MIC</div>
-        <h3>Voice-First Creation</h3>
-        <p>Speak your game into existence. "Add a forest biome with fog." "Make the enemies patrol in groups of three." "Add a health bar that pulses when low." Local speech-to-intent pipeline with zero cloud dependency.</p>
-        <div class="tech">Whisper / local STT / intent parser</div>
-      </div>
-      <div class="card">
-        <div class="feature-icon">3D</div>
-        <h3>Real-Time 3D Renderer</h3>
-        <p>WebGPU-accelerated renderer with PBR materials, volumetric lighting, and dynamic shadows. Runs in the browser or as a native app. 60fps on a Raspberry Pi 5 with Hailo-8 acceleration.</p>
-        <div class="tech">WebGPU / PBR / Vulkan fallback</div>
-      </div>
-      <div class="card">
-        <div class="feature-icon">PHY</div>
-        <h3>AI Physics System</h3>
-        <p>Physics that understand context. Say "make the bridge collapse realistically" and the engine calculates stress points, fracture patterns, and debris trajectories. Not canned animations -- real simulation.</p>
-        <div class="tech">Bullet physics / neural sim</div>
-      </div>
-      <div class="card">
-        <div class="feature-icon">NPC</div>
-        <h3>Agent-Driven NPCs</h3>
-        <p>Every NPC is a local AI agent with memory, goals, and personality. They remember player actions across sessions. They form opinions. They gossip. Powered by on-device Ollama inference.</p>
-        <div class="tech">Ollama / agent memory / behavior trees</div>
-      </div>
-      <div class="card">
-        <div class="feature-icon">MAP</div>
-        <h3>Procedural World Gen</h3>
-        <p>Voice-guided procedural generation. "Create an island with volcanic terrain and ancient ruins." The engine generates heightmaps, biomes, water systems, and architectural structures from natural language.</p>
-        <div class="tech">Wave function collapse / L-systems</div>
-      </div>
-      <div class="card">
-        <div class="feature-icon">NET</div>
-        <h3>Mesh Multiplayer</h3>
-        <p>Peer-to-peer multiplayer over the BlackRoad mesh. No dedicated servers required. Players connect directly through WireGuard tunnels. Host a world from your own hardware.</p>
-        <div class="tech">WebRTC / NATS / WireGuard</div>
-      </div>
-    </div>
-  </section>
-
-  <section id="voice">
-    <div class="section-label">Voice Demo</div>
-    <h2 style="margin-bottom:var(--sp-xl);">Build a game in 60 seconds</h2>
-    <div class="voice-demo">
-      <div class="voice-bar">
-        <div class="voice-dot"></div><div class="voice-dot"></div><div class="voice-dot"></div>
-        <span class="voice-title">genesis-road voice session</span>
-      </div>
-      <div class="voice-body">
-<span class="cmd">You:</span>  "Create a medieval village on a hillside."
-<span class="out">[generating terrain... heightmap... 12 buildings... paths... done 2.4s]</span>
-
-<span class="cmd">You:</span>  "Add a blacksmith NPC who sells swords."
-<span class="out">[spawning agent... personality: gruff, fair... inventory: 8 weapons... done]</span>
-
-<span class="cmd">You:</span>  "Make it rain and add thunder sounds."
-<span class="out">[weather: rain... particle count: 4000... audio: thunder_loop... done]</span>
-
-<span class="cmd">You:</span>  "Add a quest where the player finds a stolen anvil."
-<span class="out">[quest: The Stolen Anvil... 3 objectives... dialogue tree... reward: 50 gold]</span>
-
-<span class="cmd">You:</span>  "Play."
-<span class="out">[compiling scene... attaching controllers... launching viewport... playing]</span>
-      </div>
-    </div>
-  </section>
-
-  <section>
-    <div class="section-label">How It Works</div>
-    <h2 style="margin-bottom:var(--sp-xl);">From voice to playable in four steps</h2>
-    <div class="grid-4">
-      <div class="card">
-        <div class="step-num">01</div>
-        <h3>Speak</h3>
-        <p>Describe what you want in plain English. Local Whisper transcribes your voice. The intent parser extracts game design instructions from natural speech.</p>
-      </div>
-      <div class="card">
-        <div class="step-num">02</div>
-        <h3>Generate</h3>
-        <p>The engine translates intent into assets, terrain, logic, and behavior. Procedural generation fills in the details. AI agents write NPC dialogue and quest structures.</p>
-      </div>
-      <div class="card">
-        <div class="step-num">03</div>
-        <h3>Preview</h3>
-        <p>See changes in real time in the 3D viewport. Walk around your creation. Test interactions. Adjust by voice: "make the trees taller" or "move the tavern closer to the river."</p>
-      </div>
-      <div class="card">
-        <div class="step-num">04</div>
-        <h3>Ship</h3>
-        <p>Export to WebGPU (browser), native desktop (Windows/Mac/Linux), or mobile. One-click deployment to your own server. No app store fees. No revenue share to the engine maker.</p>
-      </div>
-    </div>
-  </section>
-
-  <section id="compare">
-    <div class="section-label">Comparison</div>
-    <h2 style="margin-bottom:var(--sp-xl);">Unity refugees welcome</h2>
-    <div style="overflow-x:auto;">
-      <table class="compare-table">
-        <thead>
-          <tr><th>Feature</th><th>Genesis Road</th><th>Unity</th><th>Godot</th><th>Unreal</th></tr>
-        </thead>
-        <tbody>
-          <tr><td>Voice creation</td><td class="check">Native</td><td class="cross">No</td><td class="cross">No</td><td class="cross">No</td></tr>
-          <tr><td>AI NPCs with memory</td><td class="check">Built-in</td><td class="cross">Plugin</td><td class="cross">Plugin</td><td class="cross">Plugin</td></tr>
-          <tr><td>Runtime fee</td><td class="check">$0 forever</td><td class="cross">Per install</td><td class="check">$0</td><td class="cross">5% royalty</td></tr>
-          <tr><td>Cloud dependency</td><td class="check">None</td><td class="cross">Required</td><td class="check">None</td><td class="cross">Optional</td></tr>
-          <tr><td>Local AI inference</td><td class="check">Ollama native</td><td class="cross">No</td><td class="cross">No</td><td class="cross">No</td></tr>
-          <tr><td>Mesh multiplayer</td><td class="check">P2P built-in</td><td class="cross">Paid service</td><td class="cross">Manual</td><td class="cross">Paid service</td></tr>
-          <tr><td>Export to web</td><td class="check">WebGPU native</td><td class="cross">WebGL only</td><td class="check">WebGL</td><td class="cross">Limited</td></tr>
-          <tr><td>Open engine code</td><td class="check">Public code</td><td class="cross">Proprietary</td><td class="check">MIT</td><td class="cross">Source access</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
-
-  <section>
-    <div class="section-label">Pricing</div>
-    <h2 style="margin-bottom:var(--sp-md);">Free to create. Free to ship.</h2>
-    <p style="max-width:500px;margin-bottom:var(--sp-xl);">Genesis Road has no per-install fees, no revenue share, and no subscription. The engine is free. Premium support and dedicated mesh compute are available for studios that need them.</p>
-    <div class="grid-3">
-      <div class="card">
-        <h3>Solo Creator</h3>
-        <p style="font-size:2rem;font-family:var(--sg);font-weight:700;color:var(--white);margin:var(--sp-sm) 0;">$0</p>
-        <p>Full engine access. Voice creation. Local AI. Export to all platforms. No limits on project size or team size. Forever free.</p>
-      </div>
-      <div class="card grad-border">
-        <h3>Studio</h3>
-        <p style="font-size:2rem;font-family:var(--sg);font-weight:700;color:var(--white);margin:var(--sp-sm) 0;">$49/mo</p>
-        <p>Priority mesh compute for AI generation. Dedicated multiplayer relay nodes. Advanced procedural generation models. Priority support channel.</p>
-      </div>
-      <div class="card">
-        <h3>Enterprise</h3>
-        <p style="font-size:2rem;font-family:var(--sg);font-weight:700;color:var(--white);margin:var(--sp-sm) 0;">Custom</p>
-        <p>On-premise deployment. Custom AI model training on your art style. SLA-backed infrastructure. White-label licensing for your own platform.</p>
-      </div>
-    </div>
-  </section>
-
-  <footer>
-    <span>&copy; 2026 BlackRoad OS, Inc. — Pave Tomorrow.</span>
-    <span style="display:flex;gap:var(--sp-lg);flex-wrap:wrap;">
-      <a href="https://blackroad.io" style="color:var(--muted)">Home</a>
-      <a href="https://blackroadai.com" style="color:var(--muted)">AI</a>
-      <a href="https://blackroad.network" style="color:var(--muted)">Network</a>
-    </span>
-  </footer>
-</body>
-</html>
+<meta name="description" content="Game engine powered by voice. Describe what you want, Genesis Road builds it. Rust, WebGPU, Bevy. From idea to playable game in minutes.">
+<link rel="canonical" href="https://game.blackroad.io">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Genesis Road","applicationCategory":"GameApplication","description":"Voice-to-game engine. Describe what you want, it builds it.","url":"https://game.blackroad.io","author":{"@type":"Organization","name":"BlackRoad OS, Inc."},"offers":{"@type":"Offer","price":"50","priceCurrency":"USD"}}</script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=JetBrains+Mono:wght@400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>*{margin:0;padding:0;box-sizing:border-box}body{background:#0a0a0a;color:#f5f5f5;font-family:'Inter',sans-serif;line-height:1.7}.bar{height:2px;background:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF)}nav{height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;border-bottom:1px solid #1a1a1a}nav .logo{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px}nav a{color:#525252;font-size:13px;text-decoration:none;margin-left:16px}.hero{max-width:720px;margin:0 auto;padding:100px 20px 60px;text-align:center}.hero h1{font-family:'Space Grotesk',sans-serif;font-size:clamp(36px,7vw,56px);font-weight:700;line-height:1.08;margin-bottom:20px}.hero h1 em{font-style:normal;color:#FF6B2B}.hero .sub{font-size:17px;color:#737373;max-width:520px;margin:0 auto 40px}.btn{display:inline-block;padding:14px 32px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:14px;text-decoration:none}.btn-pri{background:#FF6B2B;color:#fff}section{max-width:720px;margin:0 auto;padding:64px 20px}section h2{font-family:'Space Grotesk',sans-serif;font-size:28px;font-weight:700;margin-bottom:16px}section p{color:#737373;font-size:15px;margin-bottom:16px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin:32px 0}.card{background:#131313;border:1px solid #1a1a1a;border-radius:10px;padding:24px;transition:all .3s}.card:hover{border-color:#FF6B2B;transform:translateY(-4px)}.card h3{font-family:'Space Grotesk',sans-serif;font-size:16px;margin-bottom:8px}.card p{color:#525252;font-size:13px}.term{background:#0d0d0d;border:1px solid #1a1a1a;border-radius:10px;padding:24px;font-family:'JetBrains Mono',monospace;font-size:13px;line-height:2;margin:32px 0}.p{color:#FF6B2B}.g{color:#4caf50}footer{max-width:720px;margin:0 auto;padding:48px 20px;text-align:center;border-top:1px solid #1a1a1a}footer a{color:#404040;font-size:12px;text-decoration:none;margin:0 12px}footer .copy{color:#262626;font-size:10px;font-family:'JetBrains Mono',monospace;margin-top:16px}</style></head><body>
+<div class="bar"></div>
+<nav><div class="logo">Genesis Road</div><div><a href="https://blackroad.io">BlackRoad</a><a href="https://lucidia.earth">Lucidia</a></div></nav>
+<div class="hero"><h1>Say it. <em>Build it.</em> Play it.</h1><p class="sub">Describe the game you want. Genesis Road builds it. Voice-to-game powered by Rust, WebGPU, and local AI. No coding required.</p><a href="https://blackroad.io" class="btn btn-pri">Try Genesis Road</a></div>
+<section><h2>How it works.</h2>
+<div class="term"><span class="p">genesis $</span> make a 2d platformer with a cat that collects fish<br><span class="g">Creating world... player sprite (cat)... collectible (fish)... physics... done.</span><br><span class="g">Playable at localhost:8080. 3 levels generated. Want to add enemies?</span><br><br><span class="p">genesis $</span> add birds that fly left to right as obstacles<br><span class="g">Added BirdEnemy with horizontal flight pattern. Collision = restart level.</span><br><span class="g">Difficulty scales per level. Press SPACE to jump over them.</span></div>
+</section>
+<section><h2>Built on real engine tech.</h2>
+<div class="grid">
+<div class="card"><h3>Rust + WebGPU</h3><p>Near-native performance in the browser. Bevy ECS architecture. 80-95% of native speed via wgpu-rs.</p></div>
+<div class="card"><h3>Voice Input</h3><p>Describe what you want in plain English. The AI interprets your intent and generates game logic, assets, and levels.</p></div>
+<div class="card"><h3>ECS Architecture</h3><p>Entity Component System. Data-oriented design for cache-friendly performance. Process entities in contiguous memory.</p></div>
+<div class="card"><h3>Asset Pipeline</h3><p>FBX/glTF import, texture compression, audio conversion, mipmap generation. Hot-reload while you play.</p></div>
+<div class="card"><h3>Physics</h3><p>Rapier physics engine. Rigid bodies, colliders, joints. 2D and 3D. Deterministic simulation for multiplayer.</p></div>
+<div class="card"><h3>Multiplayer Ready</h3><p>Client-server with prediction and reconciliation. Delta compression. Lag compensation. WebSocket transport.</p></div>
+</div></section>
+<section><h2>Pricing.</h2><p>Included with BlackRoad OS Pro ($50/mo). Create unlimited games. Export to web, desktop, and mobile.</p></section>
+<footer><a href="https://blackroad.io">BlackRoad</a><a href="https://tutor.blackroad.io">Tutor</a><a href="https://lucidia.studio">Studio</a><a href="https://github.com/BlackRoad-OS-Inc">GitHub</a><div class="copy">&copy; 2025-2026 BlackRoad OS, Inc. Pave Tomorrow.</div></footer>
+</body></html>

@@ -506,3 +506,47 @@ Node.js 22+ is required (`"engines": { "node": ">=22" }`).
 ---
 
 *All content in this repository is proprietary to BlackRoad OS, Inc. (c) 2024-2026. All rights reserved.*
+
+---
+
+## 5-Agent Parallel Work Protocol
+
+**CRITICAL: Read this before doing ANY work.**
+
+When multiple Claude sessions run simultaneously, follow this protocol to avoid collisions:
+
+### Priority Projects (P0 blocks everything)
+| Priority | Project ID | What |
+|----------|-----------|------|
+| P0 | p0-first-real-user | Get first external user — Twitter, HN, LinkedIn, demos |
+| P1 | p1-fix-products | Fix chat/search/roundtrip/auth/app E2E |
+| P2 | p2-seo-discoverability | GitHub topics, Schema.org, Google indexing |
+| P3 | p3-infra-maintenance | Fleet health, disk, DNS, crons |
+| P4 | p4-truth-credibility | Remove lies, honest numbers |
+| P5 | p5-openclaw | Personal AI assistant |
+| P6 | p6-amundson-math | Paper, constants, proofs |
+| P7 | p7-operator-tooling | `br` CLI commands |
+| P8 | p8-revenue | Stripe, billing (BLOCKED until P0 done) |
+| P9 | p9-org-architecture | GitHub org hierarchy cleanup |
+
+### Lane System
+Every todo is tagged LANE-A through LANE-E or ANY-LANE. Each agent claims ONE lane.
+
+### Rules
+1. **CHECK COLLAB FIRST**: `memory-collaboration.sh inbox` — see what other agents claimed
+2. **CLAIM BEFORE WORK**: Post `CLAIMING [project-id] [todo-id] [LANE-X]` to collab
+3. **NEVER duplicate**: If another agent claimed a task in the last 30 min, pick another
+4. **CHECKPOINT when done**: Post `DONE [todo-id] [result]` to collab
+5. **Progress every 15 min**: Post status update to collab
+6. **P0 overrides**: If P0 has unclaimed tasks, ALL agents work P0
+7. **NO NEW PRODUCTS**: Do not create new repos, products, Workers, or domains. Fix what exists.
+8. **View todos**: `memory-infinite-todos.sh show [project-id]`
+9. **Complete todos**: `memory-infinite-todos.sh complete-todo [project-id] [todo-id]`
+
+### What NOT to do
+- Do not create new GitHub repos
+- Do not create new CF Workers
+- Do not deploy new domains or subdomains
+- Do not create new products or features not in the todo list
+- Do not re-enable disabled crons or tunnels without checking collab first
+- Do not change Workers that another agent already fixed this session
