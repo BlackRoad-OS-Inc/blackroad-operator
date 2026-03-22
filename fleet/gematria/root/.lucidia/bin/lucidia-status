@@ -1,0 +1,28 @@
+#!/bin/bash
+# Lucidia Status - Show system information
+# BlackRoad OS, Inc.
+
+set -euo pipefail
+
+echo "Lucidia Status"
+echo "=============="
+echo ""
+echo "Host:     $(hostname)"
+echo "Version:  ${LUCIDIA_VERSION:-unknown}"
+echo "Uptime:   $(uptime | sed 's/.*up //' | sed 's/,.*//')"
+echo "User:     $(whoami)"
+echo ""
+
+# Disk usage
+echo "Disk:"
+df -h / 2>/dev/null | tail -1 | awk '{print "  " $5 " used (" $3 "/" $2 ")"}'
+echo ""
+
+# Check for AI backends
+echo "AI Backends:"
+command -v ollama >/dev/null 2>&1 && echo "  - Ollama: installed" || echo "  - Ollama: not found"
+command -v claude >/dev/null 2>&1 && echo "  - Claude: installed" || echo "  - Claude: not found"
+[ -d /dev/hailo* ] 2>/dev/null && echo "  - Hailo: detected" || true
+
+echo ""
+echo "BlackRoad OS, Inc. | AI-Native"

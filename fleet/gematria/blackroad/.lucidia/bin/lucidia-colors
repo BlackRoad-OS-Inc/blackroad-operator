@@ -1,0 +1,48 @@
+#!/bin/bash
+# Lucidia Colors - Display all 256 terminal colors
+# BlackRoad OS, Inc.
+
+echo ""
+echo "  256 TERMINAL COLORS"
+echo "  ==================="
+echo ""
+
+# Standard colors (0-15)
+echo "  STANDARD (0-15)"
+printf "  "
+for code in $(seq 0 15); do
+    printf "\033[48;5;${code}m %3s \033[0m" "$code"
+    [ $((($code + 1) % 8)) -eq 0 ] && echo "" && [ $code -lt 15 ] && printf "  "
+done
+echo ""
+
+# Color cube (16-231)
+echo "  COLOR CUBE (16-231)"
+for code in $(seq 16 231); do
+    [ $((($code - 16) % 18)) -eq 0 ] && printf "  "
+    printf "\033[48;5;${code}m %3s \033[0m" "$code"
+    [ $((($code - 15) % 18)) -eq 0 ] && echo ""
+done
+echo ""
+
+# Grayscale (232-255)
+echo "  GRAYSCALE (232-255)"
+printf "  "
+for code in $(seq 232 255); do
+    printf "\033[48;5;${code}m %3s \033[0m" "$code"
+    [ $((($code - 231) % 12)) -eq 0 ] && echo "" && [ $code -lt 255 ] && printf "  "
+done
+echo ""
+
+# BlackRoad brand
+echo "  BLACKROAD BRAND PALETTE"
+echo "  ─────────────────────────"
+printf "  Hot Pink:      "
+for c in 197 198 199 200 205 206; do printf "\033[48;5;${c}m %3s \033[0m" "$c"; done; echo ""
+printf "  Amber:         "
+for c in 208 214 220 221; do printf "\033[48;5;${c}m %3s \033[0m" "$c"; done; echo ""
+printf "  Electric Blue: "
+for c in 27 33 39 45 75 81; do printf "\033[48;5;${c}m %3s \033[0m" "$c"; done; echo ""
+printf "  Violet:        "
+for c in 128 129 134 135 140 141; do printf "\033[48;5;${c}m %3s \033[0m" "$c"; done; echo ""
+echo ""
