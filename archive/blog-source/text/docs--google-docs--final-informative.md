@@ -1,0 +1,53 @@
+# final informative
+
+**Source:** google-docs
+
+---
+
+The red numbers are where visuals are. The number corelates to each picture after the conclusion.
+
+This is Erin Cross. 1 She is now 6 years old and living in the United Kingdom. She was first diagnosed with a type of leukemia in 2012 and has been receiving treatment for three years. Not a single treatment was working. However, Erin's parents were told that their only hope for beating this leukemia was to receive a new type of treatment, gene therapy. The doctors of Royal Manchester Children's Hospital in the United Kingdom said that this therapy was only being done in the United States and that they only had 8 weeks until they would lose her. Her family decided it was worth a shot and flew to Seattle. In August of 2016, Erin received gene therapy at Seattle Children's Hospital. She was one of the first in the world to trial this new gene-therapy treatment. And as of December 26th, her family has been told by the doctors that blood tests reveal the cancer has completely disappeared. This is one cancer success of gene-therapy. However, there are other diseases that are also finding hope in gene-therapy. Gene therapy is a process where doctors use a corrective gene, created in a laboratory, and insert it into a patient's diseased cell. In order to understand this promising treatment and it's benefits, we will first explain: what gene therapy is, what it can cure, and what the future holds for it.
+
+As I was sitting in accounting doing well basically anything besides accounting I strangely landed on the CNN News website and a bolded title read "biggest science successes of 2016" I clicked on the link and of course most of them were titled with some new discovery in space and it wasn't until I scrolled a little more that I found a selection that read "Gene Therapy reaches success in 2015 and 2016". So as my accounting teacher went on to say that assets = liabilities + owner's equity for I swear the 10th time that day, I decided that literally anything had to be better than hearing that another time. So I clicked on the link and it brought me to a page with a ton of scientific words and if you're anything like me, you just kind of scroll past huge words and hope you'll still get the same information... maybe that's why I didn't do the best on my ACT... but anyhow the article explained that in gene therapy a gene somehow finds its way to a cell, and then magically poof you're all of a sudden just cured of whatever disease you had. Believe it or not, there was actually more to that process and it wasn't just magic. Okay you look like I just told you that Santa isn't actually real. I'm honestly sorry to disappoint you but I promise if you let me explain how gene therapy works, you just might find it in your heart to forgive me. Okay so first thing's first 2, this visual from St. Jude's Research Hospital shows what gene therapy is. If a cell has DNA that doesn’t work it is known as a defective gene. A corrective gene is a gene with healthy DNA. In order to fix the functions that the gene doesn't have, a corrective gene is introduced into the cell. When the corrective gene is introduced into the cell, it takes place of the defective gene. If this goes smoothly, cell function is restored. Now that we understand the bigger picture we need to actually go more in depth on the overall process. 3 First off in gene therapy, a doctor draws blood from a patient. The doctor then takes the blood into a laboratory to see what is wrong with the cell and what type of gene is needed to replace the defective gene. After they do this, 4 they introduce a vector into the process. a gene that is inserted directly into a cell usually does not function. Therefore, a carrier called a vector is introduced. A vector is a virus that has been modified so it is able to deliver a gene to a cell because it can merge into the cell without causing harm. 5 Once a vector is introduced, the gene is inserted inside of it. 6 After this, they release the vector into the blood in hopes of it merging into a cell. As we can see, the vector merges into the cell and releases the gene into the nucleus. The cell then reproduces. 7When the cell reproduces enough, the blood gets injected back into the body and then continues to replace the defective cells.
+
+Now that we understand the process of creating a healthy gene, we can relate the good news for people suffering from some common fatal diseases. Erin was not the only one receiving good news. Two professors at the University of Texas were treating five leukemia patients with gene therapy. Of those 5 patients, 4 of them remained in complete remission five months later. This caught the University of Pennsylvania's eye in 2015 and they started their own trial involving 59 leukemia patients. According to Laurence Cooper MD, These patients were facing a certain death when they received the gene therapy. 26 of the 59 patients, including 19 children, are now cancer-free.
+
+Another serious health concern is a severe combined immunodeficiency. This is David Vetter. 8  He was born in 1971 and had to live in this bubble his entire life. He was a sufferer of SCID, a disease that leaves males with little to no immune protection. Due to this, kids like David would have to take major precautions so they wouldn't die. There wasn't a cure and kids would just have to deal with it. However,  St. Jude Children's Research Hospital had recent results from April of 2016 that gave SCID patients a promising hope so they no longer have to live with these conditions. Two patients were first given the therapy and they showed high levels of immune cells and corrected cells. After the success in this trial, they had three other patients and they also showed promising changes in their immune system.
+
+At approximately the same time, a team at Oxford University was wrapping up a gene therapy trial dealing with a rare case disorder involving blindness. Until now, there has been no treatment and the young men with this disorder gradually become blind. The University of Oxford examined the vision of six patients. They decided to do the gene therapy on these patients. Dr. Stephen Caddick said that this was the first time they've seen a permanent change in vision with gene therapy. All of the patients saw a great improvement. 9 In looking at these pictures of a patient's brain before and 3 months after gene therapy, The brain's responses are shown in yellow and orange and are located in the area of the brain responsible for visual function.
+
+Since 2006, doctors were unable to understand why patients were getting immune diseases like leukemia as a result of gene therapy. Researchers decided it was time to take a step back and that it was smarter to proceed more slowly toward gene therapy so they could do some more thorough research. However in 2015, researchers and doctors were starting to figure out where their main problem was.....it was within the vectors. Once researchers and doctors figured this out, they got to work right away and looked for ways to improve vectors. As of 2016, Dr. Bennett of University of Pennsylvania, says that the development of new vectors is one of the areas of gene therapy that’s moving quickly. In the next 5 years, doctors and researchers will be improving vectors in a very basic yet important way....their size. As of now, one of the biggest issues with vectors is the size of gene that can fit inside of them. According to Dr. Bennett "it would be great if there were further developments that allowed these vectors to package larger amounts of cargo. For an example, if doctors are able to double the size of what could be packaged inside of a vector, it would be wonderful."  After hearing his input, we realize that there are so many types of genes and that some of them are just simply too large to fit into the current vectors developed. Once the improvements with the vectors are made, Dr. MacLaren, professor of ophthalmology at the University of Oxford believes that in less than five years as of 2016, the vectors we are currently seeing trials of now, we will be seeing in the market just like any other treatment. However, when we see these vectors being sold just like any other drug, it will cause a dramatic change in the pharmaceutical business. The future appearance of vector treatments will require an entirely new business model for the pharmaceutical industry. This is due to the fact that drug companies currently get money for every single pill you buy. However with gene therapy, vectors take over the cell and just continue reproducing on their own to cure the patient of whatever disease they might have. So if we stop to think about this for a second, we can see how the drug companies wouldn't be able to collect money for every pill. They would only be able to sell the vectors once to each patient. Therefore, the cost of this therapy is currently through the rough and will still be in the future. The healthcare system and government are currently trying to find a business plan that would work to fund gene therapy and make the drug companies get on board with it even if they can't collect patients' money more than once. Professor Elizabeth Rakoczy of the University of Western Australia remarks that "even if the solution on funding right now is uncertain, it is certain that gene therapy will be used for treating a tremendous amount of different diseases."
+
+Now as we come to an end on this journey, we must take a look back at the knowledge we obtained, we first talked about what gene therapy is, we then discussed what it can cure and lastly we explored what the future holds. After educating ourselves on gene therapy, we can leave here today with the assurance that there will be many other Erin Cross' to come.
+
+1.
+
+://www.google.com/search?q=pics+of+erin+cross&espv=2&biw=1280&bih=703&source=lnms&tbm=isch&sa=X&ved=0ahUKEwikzqrnsN3RAhUX9mMKHaimAQcQ_AUIBygC#imgrc=pwC5UycQLlIWEM%3A
+
+2.
+
+http://www.biospace.com/News/gene-therapy-pioneered-at-st-jude-childrens/416454
+
+3.
+
+http://wbsm.com/wearable-sensors-could-end-needle-blood-tests/
+
+5.
+
+https://www.dreamstime.com/royalty-free-stock-images-structure-adenovirus-vector-diagram-morphology-adenoviruses-most-commonly-cause-respiratory-illness-upper-respiratory-tract-image34731829
+
+6.
+
+http://learn.genetics.utah.edu/content/genetherapy/tools/
+
+7.
+
+http://www.yourgenome.org/facts/what-is-gene-therapy
+
+8.
+
+http://www.cbsnews.com/pictures/bubble-boy-40-years-later-look-back-at-heartbreaking-case/
+
+9.
+
+http://learn.genetics.utah.edu/content/genetherapy/success/images/3_vision.jpg

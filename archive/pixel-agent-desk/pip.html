@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Office PiP</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #050709; overflow: hidden; width: 100vw; height: 100vh; }
+    #office-canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+
+    /* ─── Hover Overlay ─── */
+    .pip-overlay {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 10px;
+      background: linear-gradient(transparent, rgba(0,0,0,0.75));
+      opacity: 0;
+      transition: opacity 0.2s;
+      pointer-events: none;
+      z-index: 100;
+    }
+    body:hover .pip-overlay {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .pip-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      font-family: system-ui, sans-serif;
+      font-size: 12px;
+      color: #fff;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 6px;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      transition: background 0.15s;
+    }
+    .pip-btn:hover {
+      background: rgba(255,255,255,0.22);
+    }
+    .pip-btn svg {
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="office-canvas"></canvas>
+
+  <!-- Hover Overlay -->
+  <div class="pip-overlay">
+    <button class="pip-btn" id="btnBack" title="Back to Dashboard">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+        <rect x="1" y="2" width="14" height="11" rx="1.5"/>
+        <path d="M5 8h6M5 8l2.5-2.5M5 8l2.5 2.5"/>
+      </svg>
+      Dashboard
+    </button>
+    <button class="pip-btn" id="btnClose" title="Close PiP">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="4" y1="4" x2="12" y2="12"/>
+        <line x1="12" y1="4" x2="4" y2="12"/>
+      </svg>
+    </button>
+  </div>
+
+  <script src="/src/office/office-config.js?v=6"></script>
+  <script src="/src/office/office-layers.js?v=6"></script>
+  <script src="/src/office/office-coords.js?v=6"></script>
+  <script src="/src/office/office-pathfinder.js?v=6"></script>
+  <script src="/src/office/office-sprite.js?v=6"></script>
+  <script src="/src/office/office-character.js?v=6"></script>
+  <script src="/src/office/office-renderer.js?v=6"></script>
+  <script src="/src/office/office-ui.js?v=6"></script>
+  <script src="/src/office/office-init.js?v=6"></script>
+  <script>
+    // Minimal boot: init office + connect SSE for agent updates
+    (function () {
+      var sseDelay = 1000;
+      var sseSource = null;
+
+      function connectSSE() {
+        if (sseSource) { sseSource.close(); sseSource = null; }
+        var es = new EventSource('/api/events');
+        sseSource = es;
+
+        es.onerror = function () {
+          es.close();
+          sseSource = null;
+          console.warn('[PiP] SSE disconnected, retrying in', sseDelay, 'ms');
+          setTimeout(connectSSE, sseDelay);
+          sseDelay = Math.min(sseDelay * 2, 30000);
+        };
+
+        es.addEventListener('connected', function () {
+          sseDelay = 1000;
+          fetch('/api/agents').then(function (r) { return r.json(); })
+            .then(function (agents) {
+              agents.forEach(function (a) { officeOnAgentCreated(a); });
+            });
+        });
+        es.addEventListener('agent.created', function (e) {
+          officeOnAgentCreated(JSON.parse(e.data).data);
+        });
+        es.addEventListener('agent.updated', function (e) {
+          officeOnAgentUpdated(JSON.parse(e.data).data);
+        });
+        es.addEventListener('agent.removed', function (e) {
+          officeOnAgentRemoved(JSON.parse(e.data).data);
+        });
+      }
+
+      function boot() {
+        console.log('[PiP] boot start');
+        initOffice().then(function () {
+          console.log('[PiP] office initialized, canvas:',
+            document.getElementById('office-canvas').width, 'x',
+            document.getElementById('office-canvas').height);
+          connectSSE();
+        }).catch(function (e) {
+          console.error('[PiP] init failed:', e);
+        });
+      }
+
+      // Overlay buttons
+      document.getElementById('btnClose').addEventListener('click', function () {
+        if (typeof pipAPI !== 'undefined') pipAPI.close();
+        else window.close();
+      });
+      document.getElementById('btnBack').addEventListener('click', function () {
+        if (typeof pipAPI !== 'undefined') pipAPI.backToDashboard();
+        else window.close();
+      });
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', boot);
+      } else {
+        boot();
+      }
+    })();
+  </script>
+</body>
+</html>

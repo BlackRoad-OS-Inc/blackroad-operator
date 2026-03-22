@@ -1,0 +1,67 @@
+"BLACKROAD OS - SUBSCRIPTION BILLING MANAGER",,,,,,,,,,,,,,,,,,,,
+"Version: 1.0 | After import: Extensions > Apps Script > Paste code from subscription-billing.gs",,,,,,,,,,,,,,,,,,,,
+"Total MRR:","=SUMIF(Subscriptions!N:N,""Active"",Subscriptions!M:M)","ARR:","=B3*12","Active Subs:","=COUNTIF(Subscriptions!N:N,""Active"")","Trials:","=COUNTIF(Subscriptions!N:N,""Trial"")","Past Due:","=COUNTIF(Subscriptions!N:N,""Past Due"")","Churn (Month):","=COUNTIFS(Churn!A:A,"">=""&DATE(YEAR(TODAY()),MONTH(TODAY()),1))",,,,,,,,
+"Pending Invoices:","=COUNTIF(Invoices!O:O,""Sent"")","Overdue Invoices:","=COUNTIF(Invoices!O:O,""Overdue"")","Collected MTD:","=SUMIFS(Payments!E:E,Payments!F:F,"">=""&DATE(YEAR(TODAY()),MONTH(TODAY()),1))",,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,
+"=== PLANS ===",,,,,,,,,,,,,,,,,,,,,
+"Plan ID","Name","Code","Description","Monthly Price","Annual Price","Setup Fee","Interval","Seats","Storage (GB)","Features","Trial Days","Status","Subscribers","Created Date"
+"PLAN-001","Starter","START","Basic plan for small teams","$29.00","$290.00","$0.00","Monthly","3","10","Email Support, Basic Reports","14","Active","0","=NOW()"
+"PLAN-002","Professional","PRO","Most popular plan","$99.00","$990.00","$0.00","Monthly","10","100","Priority Support, Advanced Reports, API Access","14","Active","0",""
+"PLAN-003","Enterprise","ENT","Full-featured enterprise solution","$299.00","$2,990.00","$500.00","Monthly","Unlimited","1000","Dedicated Support, Custom Integrations, SLA, SSO","30","Active","0",""
+"PLAN-004","Startup","STARTUP","Special pricing for startups","$49.00","$490.00","$0.00","Monthly","5","50","Email Support, Standard Reports, API Access","30","Active","0",""
+"","","","","","","","Quarterly","","","","","Inactive","",""
+"","","","","","","","Annual","","","","","Archived","",""
+,,,,,,,,,,,,,,,,,,,,,
+"=== SUBSCRIPTIONS ===",,,,,,,,,,,,,,,,,,,,,
+"Subscription ID","Customer ID","Company","Contact","Email","Phone","Plan ID","Plan Name","Interval","Quantity","Unit Price","Discount %","MRR","Status","Payment Method","Start Date","Trial End","Next Billing","Last Payment","Cancel Date","Cancel Reason","Created"
+"SUB-001","CUST-00001","[Company Name]","[Contact Name]","billing@example.com","(555) 123-4567","PLAN-002","Professional","Monthly","1","$99.00","0","$99.00","Active","Credit Card","","","","","","","=NOW()"
+"","","","","","","","","Quarterly","","","","","Trial","ACH/Bank Transfer","","","","","","",""
+"","","","","","","","","Annual","","","","","Past Due","PayPal","","","","","","",""
+"","","","","","","","","","","","","","Cancelled","Wire Transfer","","","","","","",""
+"","","","","","","","","","","","","","Paused","Check","","","","","","",""
+"","","","","","","","","","","","","","Expired","","","","","","","",""
+,,,,,,,,,,,,,,,,,,,,,
+"=== INVOICES ===",,,,,,,,,,,,,,,,,,,,,
+"Invoice ID","Subscription ID","Customer","Email","Invoice Date","Due Date","Period Start","Period End","Subtotal","Discount","Tax","Total","Amount Paid","Balance","Status","Payment Date","Payment Method","Notes","Created"
+"INV-2024-00001","SUB-001","[Company Name]","billing@example.com","","","","","$99.00","$0.00","$0.00","$99.00","$0.00","$99.00","Draft","","","","=NOW()"
+"","","","","","","","","","","","","","","Sent","","","",""
+"","","","","","","","","","","","","","","Paid","","","",""
+"","","","","","","","","","","","","","","Partial","","","",""
+"","","","","","","","","","","","","","","Overdue","","","",""
+"","","","","","","","","","","","","","","Void","","","",""
+"","","","","","","","","","","","","","","Uncollectible","","","",""
+,,,,,,,,,,,,,,,,,,,,,
+"=== PAYMENTS ===",,,,,,,,,,,,,,,,,,,,,
+"Payment ID","Invoice ID","Subscription ID","Customer","Amount","Payment Date","Method","Reference","Status","Created"
+"PMT-001","INV-2024-00001","SUB-001","[Company Name]","$99.00","","Credit Card","txn_12345","Paid","=NOW()"
+"","","","","","","ACH/Bank Transfer","","Pending",""
+"","","","","","","PayPal","","Failed",""
+"","","","","","","Wire Transfer","","Refunded",""
+"","","","","","","Check","","Voided",""
+,,,,,,,,,,,,,,,,,,,,,
+"=== CHURN ===",,,,,,,,,,,,,,,,,,,,,
+"Date","Subscription ID","Customer","Plan","MRR Lost","Reason","Tenure (months)"
+"","SUB-XXX","[Company]","[Plan]","$0.00","Too expensive","0"
+"","","","","","Not using enough",""
+"","","","","","Missing features",""
+"","","","","","Switching to competitor",""
+"","","","","","Going out of business",""
+"","","","","","Other",""
+,,,,,,,,,,,,,,,,,,,,,
+"=== METRICS REFERENCE ===",,,,,,,,,,,,,,,,,,,,,
+"Metric","Formula","Description",,,,,,,,,,,,,,,,,,,
+"MRR","Sum of active subscription monthly values","Monthly Recurring Revenue",,,,,,,,,,,,,,,,,,,
+"ARR","MRR × 12","Annual Recurring Revenue",,,,,,,,,,,,,,,,,,,
+"Net MRR","New MRR + Expansion - Contraction - Churn","Month-over-month change",,,,,,,,,,,,,,,,,,,
+"Churn Rate","Lost MRR / Starting MRR × 100","Percentage of MRR lost",,,,,,,,,,,,,,,,,,,
+"LTV","Average MRR × Average Lifetime (months)","Customer Lifetime Value",,,,,,,,,,,,,,,,,,,
+"CAC","Total Sales & Marketing / New Customers","Customer Acquisition Cost",,,,,,,,,,,,,,,,,,,
+"ARPU","Total MRR / Active Customers","Average Revenue Per User",,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,
+"=== BILLING INTERVALS ===",,,,,,,,,,,,,,,,,,,,,
+"Interval","Months","Typical Discount","Notes",,,,,,,,,,,,,,,,,,
+"Monthly","1","0%","Most flexible, highest per-month cost",,,,,,,,,,,,,,,,,,
+"Quarterly","3","5-10%","Balance of commitment and flexibility",,,,,,,,,,,,,,,,,,
+"Semi-Annual","6","10-15%","Medium commitment",,,,,,,,,,,,,,,,,,
+"Annual","12","15-20%","Best value, longest commitment",,,,,,,,,,,,,,,,,,
+"Lifetime","∞","50-70%","One-time purchase, perpetual access",,,,,,,,,,,,,,,,,,

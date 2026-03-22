@@ -1,0 +1,10 @@
+# requirements.txt
+
+**Source:** br-drive
+
+---
+
+stripe==11.3.0
+flask==3.1.0
+gunicorn==21.2.0
+python-dotenv==1.0.0

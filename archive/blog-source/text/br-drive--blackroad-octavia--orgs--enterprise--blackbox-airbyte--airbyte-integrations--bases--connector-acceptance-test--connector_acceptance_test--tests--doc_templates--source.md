@@ -1,0 +1,12 @@
+# source.txt
+
+**Source:** br-drive
+
+---
+
+
+<HideInUI>
+
+This page contains the setup guide and reference information for the [{connector_name}]({docs_link}) source connector.
+
+</HideInUI>

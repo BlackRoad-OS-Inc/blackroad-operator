@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Complete your BlackRoad OS purchase. Secure checkout powered by Stripe.">
+<title>Purchase | BlackRoad OS</title>
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="stylesheet" href="/_shared/design.css">
+<style>
+  .page-wrap {
+    min-height: calc(100vh - var(--nav-height));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--sp-xl) var(--sp-lg);
+  }
+  .purchase-card {
+    width: 100%;
+    max-width: 460px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-large);
+    padding: var(--sp-xl);
+    text-align: center;
+  }
+  .purchase-card h1 {
+    font-size: 1.75rem;
+    margin-bottom: var(--sp-sm);
+  }
+  .purchase-card .subtitle {
+    color: var(--subtle);
+    font-size: 0.9rem;
+    margin-bottom: var(--sp-xl);
+  }
+  .plan-summary {
+    background: var(--inset);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    padding: var(--sp-lg);
+    margin-bottom: var(--sp-lg);
+  }
+  .plan-name {
+    font-family: var(--font-headline);
+    font-weight: 700;
+    font-size: 1.25rem;
+    text-transform: capitalize;
+    margin-bottom: var(--sp-xs);
+  }
+  .plan-price {
+    font-family: var(--font-mono);
+    font-size: 2rem;
+    font-weight: 700;
+  }
+  .plan-price .period {
+    font-size: 0.85rem;
+    font-weight: 400;
+    color: var(--subtle);
+  }
+  .checkout-btn {
+    display: block;
+    width: 100%;
+    padding: 16px;
+    background: var(--grad);
+    color: var(--white);
+    border: none;
+    border-radius: var(--radius-btn);
+    font-family: var(--font-headline);
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.2s var(--ease-spring);
+    text-align: center;
+  }
+  .checkout-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+  }
+  .trust-badges {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-sm);
+    margin-top: var(--sp-lg);
+    padding-top: var(--sp-lg);
+    border-top: 1px solid var(--border);
+  }
+  .trust-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 0.8rem;
+    color: var(--subtle);
+  }
+  .trust-badge svg {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+  }
+</style>
+</head>
+<body>
+
+<nav class="br-nav">
+  <a href="/" class="nav-brand">
+    <div class="spectrum-mark">
+      <span></span><span></span><span></span><span></span><span></span><span></span>
+    </div>
+    BlackRoad
+  </a>
+  <div class="nav-links">
+    <a href="/pricing.html">Pricing</a>
+    <a href="/login.html">Log in</a>
+  </div>
+</nav>
+
+<div class="page-wrap">
+  <div class="purchase-card">
+    <h1>Complete Your Purchase</h1>
+    <p class="subtitle">You're one step away from sovereign AI.</p>
+
+    <div class="plan-summary">
+      <div class="plan-name" id="plan-name">Pro</div>
+      <div class="plan-price" id="plan-price">$29<span class="period">/mo</span></div>
+    </div>
+
+    <a id="checkout-link" href="#">
+      <button class="checkout-btn">Continue to Checkout &rarr;</button>
+    </a>
+
+    <div class="trust-badges">
+      <div class="trust-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Secure checkout via Stripe
+      </div>
+      <div class="trust-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12l2 2 4-4"/></svg>
+        Cancel anytime
+      </div>
+      <div class="trust-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        30-day money-back guarantee
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="grad-bar"></div>
+
+<footer>
+  <span>BlackRoad OS, Inc.</span>
+  <span>Pave Tomorrow.</span>
+</footer>
+
+<script>
+const plans = {
+  starter:    { name: 'Starter',    price: '$9',   period: '/mo' },
+  pro:        { name: 'Pro',        price: '$29',  period: '/mo' },
+  team:       { name: 'Team',       price: '$79',  period: '/mo' },
+  enterprise: { name: 'Enterprise', price: '$249', period: '/mo' }
+};
+
+const params = new URLSearchParams(window.location.search);
+const planKey = (params.get('plan') || 'pro').toLowerCase();
+const plan = plans[planKey] || plans.pro;
+
+document.getElementById('plan-name').textContent = plan.name;
+document.getElementById('plan-price').innerHTML = plan.price + '<span class="period">' + plan.period + '</span>';
+document.getElementById('checkout-link').href = 'https://roadpay.amundsonalexa.workers.dev/checkout?plan=' + encodeURIComponent(planKey);
+</script>
+</body>
+</html>

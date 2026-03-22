@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>BlackRoad Tower</title>
+<link rel="icon" type="image/png" sizes="32x32" href="https://images.blackroad.io/brand/br-square-32.png">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#111;overflow:hidden;font-family:'JetBrains Mono',monospace;color:#fff}
+canvas{display:block;cursor:grab}
+canvas:active{cursor:grabbing}
+#hud{position:fixed;top:0;left:0;right:0;z-index:10;padding:8px 16px;
+  background:rgba(0,0,0,0.92);border-bottom:1px solid rgba(255,29,108,0.15);
+  display:flex;align-items:center;justify-content:space-between;font-size:11px}
+.hud-t{color:#FF1D6C;font-family:'Space Grotesk';font-weight:700;font-size:15px;letter-spacing:1px}
+.hud-i{color:#555;font-size:9px}
+#nav{position:fixed;right:10px;top:50%;transform:translateY(-50%);z-index:10;
+  display:flex;flex-direction:column;gap:2px}
+.nav-btn{padding:4px 8px;font-size:7px;letter-spacing:1px;
+  background:rgba(0,0,0,0.85);border:1px solid rgba(255,255,255,0.06);
+  border-radius:3px;cursor:pointer;color:#555;transition:all 0.2s;
+  font-family:'JetBrains Mono';text-align:right}
+.nav-btn:hover,.nav-btn.active{border-color:#FF1D6C;color:#FF1D6C}
+#bot{position:fixed;bottom:0;left:0;right:0;z-index:10;padding:5px;
+  background:rgba(0,0,0,0.9);font-size:8px;color:#333;text-align:center;letter-spacing:1px}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="hud">
+  <div class="hud-t">BLACKROAD TOWER</div>
+  <div class="hud-i">SCROLL ZOOM · DRAG PAN · CLICK FLOOR LABELS</div>
+</div>
+<div id="nav"></div>
+<div id="bot">BLACKROAD OS — PAVE TOMORROW</div>
+
+<script>
+const C = document.getElementById('c');
+const ctx = C.getContext('2d');
+const R2 = 'https://images.blackroad.io/pixel-art';
+const BG_URL = R2 + '/floor-clean-office.png';
+
+const FLOORS = [
+  { name:'ROOFTOP', tag:'CEO Suite', agents:['alexa'] },
+  { name:'F12 MESH', tag:'Network Ops', agents:['shellfish','alice'] },
+  { name:'F11 LUCIDIA', tag:'AI Research', agents:['lucidia','cecilia'] },
+  { name:'F10 SERVER', tag:'Node Farm', agents:['alice','octavia'] },
+  { name:'F9 SECURITY', tag:'Shellfish Den', agents:['shellfish'] },
+  { name:'F8 ENGINEERING', tag:'Dev Floor', agents:['caddy','aria','cecilia'] },
+  { name:'F7 DESIGN', tag:'Aria Studio', agents:['aria'] },
+  { name:'F6 AGENTS', tag:'Agent Academy', agents:['lucidia','alice','octavia'] },
+  { name:'F5 DATA', tag:'Vault', agents:['octavia','shellfish'] },
+  { name:'F4 COLLAB', tag:'Open Floor', agents:['alexa','lucidia','alice','octavia','aria','shellfish','cecilia'] },
+  { name:'F3 QUANTUM', tag:'Research Lab', agents:['lucidia','cecilia'] },
+  { name:'F2 COMMAND', tag:'Fleet Ops', agents:['alice','octavia'] },
+  { name:'F1 LOBBY', tag:'Reception', agents:['alexa'] },
+];
+
+const COLORS = {
+  alice:'#4CAF50', cecilia:'#9C27B0', octavia:'#7B1FA2',
+  aria:'#2979FF', lucidia:'#00BCD4', shellfish:'#F44336',
+  alexa:'#FF1D6C', caddy:'#FF9800'
+};
+const ROLES = {
+  alice:'The Operator', cecilia:'The AI Engine', octavia:'The Architect',
+  aria:'The Interface', lucidia:'The Dreamer', shellfish:'The Hacker',
+  alexa:'Founder & CEO', caddy:'The Builder'
+};
+const SPEECH = [
+  'Fleet health 100%.','Models warm.','Mesh stable.','Pave tomorrow.',
+  'Node hellas.','Deploying...','52 TOPS ready.','All nodes online.',
+  'Pipeline green.','Let\'s ride.','Reviewing PR.','Inference at 40 tok/s.',
+  'WireGuard connected.','207 repos synced.','Building the future.',
+];
+
+let W, H, dpr;
+let bgImg = null;
+const FW = 1600, FH = 670, GAP = 10;
+const TOTAL = FLOORS.length * (FH + GAP);
+
+let camX = FW/2, camY = TOTAL/2, zoom = 0.3;
+let tX = FW/2, tY = TOTAL/2, tZ = 0.3;
+let drag = false, lx = 0, ly = 0;
+let t = 0;
+
+// Agents
+let agents = [];
+class Agent {
+  constructor(name, floor) {
+    this.name = name;
+    this.color = COLORS[name] || '#888';
+    this.floor = floor;
+    this.x = 100 + Math.random() * (FW - 200);
+    this.y = 180 + Math.random() * (FH - 300);
+    this.tx = this.x; this.dir = 1;
+    this.state = 'idle'; this.timer = 50 + Math.random() * 200;
+    this.bob = Math.random() * Math.PI * 2;
+    this.frame = 0; this.ft = 0;
+    this.speech = ''; this.speechT = 0;
+    this.size = 24;
+  }
+  update(dt) {
+    this.ft += dt; this.timer -= dt; this.bob += dt * 0.05;
+    this.speechT -= dt;
+    if (this.timer <= 0) {
+      const r = Math.random();
+      this.state = r < 0.4 ? 'walking' : r < 0.7 ? 'typing' : 'idle';
+      this.timer = 80 + Math.random() * 250;
+      if (this.state === 'walking') {
+        this.tx = 80 + Math.random() * (FW - 160);
+        this.dir = this.tx > this.x ? 1 : -1;
+      }
+      if (Math.random() < 0.3) {
+        this.speech = SPEECH[Math.floor(Math.random() * SPEECH.length)];
+        this.speechT = 180;
+      }
+    }
+    if (this.state === 'walking') {
+      const dx = this.tx - this.x;
+      if (Math.abs(dx) > 2) { this.x += Math.sign(dx) * 1.1; this.dir = Math.sign(dx); }
+      else this.state = 'idle';
+    }
+    if (this.ft > 10) { this.frame = (this.frame + 1) % 4; this.ft = 0; }
+  }
+  draw(ctx, fy) {
+    const bobY = Math.sin(this.bob * 3) * (this.state === 'walking' ? 2.5 : 0.6);
+    const x = this.x, y = fy + this.y + bobY, s = this.size;
+
+    // Shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.15)';
+    ctx.beginPath(); ctx.ellipse(x, y + s + 2, s*0.45, 2.5, 0, 0, Math.PI*2); ctx.fill();
+
+    // Body
+    ctx.fillStyle = this.color;
+    ctx.fillRect(x - s/3, y + s*0.2, s*0.66, s*0.5);
+
+    // Head
+    ctx.fillStyle = '#FFD5B4';
+    ctx.fillRect(x - s*0.28, y - s*0.12, s*0.56, s*0.42);
+
+    // Hair
+    ctx.fillStyle = this.name === 'alexa' ? '#FF1D6C' : this.darken(this.color, 40);
+    ctx.fillRect(x - s*0.32, y - s*0.22, s*0.64, s*0.14);
+
+    // Eyes
+    ctx.fillStyle = '#111';
+    const eo = this.dir > 0 ? 2 : -2;
+    ctx.fillRect(x - 3 + eo, y + 3, 2, 2);
+    ctx.fillRect(x + 4 + eo, y + 3, 2, 2);
+
+    // Legs
+    ctx.fillStyle = '#2a2a3a';
+    if (this.state === 'walking') {
+      const lp = Math.sin(this.bob * 8);
+      ctx.fillRect(x - 4, y + s*0.65, 3.5, s*0.28 + lp*3);
+      ctx.fillRect(x + 1, y + s*0.65, 3.5, s*0.28 - lp*3);
+    } else {
+      ctx.fillRect(x - 4, y + s*0.65, 3.5, s*0.28);
+      ctx.fillRect(x + 1, y + s*0.65, 3.5, s*0.28);
+    }
+
+    // Typing sparkles
+    if (this.state === 'typing' && Math.sin(this.bob * 10) > 0.3) {
+      ctx.fillStyle = 'rgba(255,255,255,0.5)';
+      ctx.fillRect(x + s*0.45, y + s*0.15, 2, 2);
+      ctx.fillRect(x + s*0.55, y + s*0.25, 2, 2);
+    }
+
+    // Name
+    ctx.font = '9px "JetBrains Mono"'; ctx.textAlign = 'center';
+    const tw = ctx.measureText(this.name).width + 8;
+    ctx.fillStyle = 'rgba(0,0,0,0.7)';
+    ctx.fillRect(x - tw/2, y - s*0.55, tw, 13);
+    ctx.fillStyle = this.color;
+    ctx.fillText(this.name, x, y - s*0.55 + 10);
+
+    // Speech bubble
+    if (this.speechT > 0 && this.speech) {
+      ctx.font = '9px "JetBrains Mono"';
+      const bw = ctx.measureText(this.speech).width + 12;
+      const bx = x - bw/2, by = y - s - 20;
+      ctx.fillStyle = 'rgba(0,0,0,0.85)';
+      ctx.beginPath(); ctx.roundRect(bx, by, bw, 18, 4); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(x-4, by+18); ctx.lineTo(x+4, by+18); ctx.lineTo(x, by+23); ctx.fill();
+      ctx.fillStyle = '#ddd';
+      ctx.fillText(this.speech, x, by + 13);
+    }
+  }
+  darken(hex, a) {
+    const n = parseInt(hex.slice(1), 16);
+    return '#' + [n>>16, (n>>8)&0xFF, n&0xFF].map(c => Math.max(0, c-a).toString(16).padStart(2,'0')).join('');
+  }
+}
+
+function spawnAgents() {
+  agents = [];
+  FLOORS.forEach((f, i) => {
+    f.agents.forEach(name => {
+      agents.push(new Agent(name, i));
+    });
+  });
+}
+
+function resize() {
+  dpr = window.devicePixelRatio || 1;
+  W = window.innerWidth; H = window.innerHeight;
+  C.width = W * dpr; C.height = H * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+window.addEventListener('resize', resize);
+
+// Input
+C.addEventListener('mousedown', e => { drag = true; lx = e.clientX; ly = e.clientY; });
+C.addEventListener('mousemove', e => {
+  if (!drag) return;
+  tX -= (e.clientX - lx) / zoom; tY -= (e.clientY - ly) / zoom;
+  lx = e.clientX; ly = e.clientY;
+});
+C.addEventListener('mouseup', () => drag = false);
+C.addEventListener('mouseleave', () => drag = false);
+C.addEventListener('wheel', e => { e.preventDefault(); tZ = Math.max(0.1, Math.min(1.5, tZ - e.deltaY*0.001)); }, {passive:false});
+
+let td = 0;
+C.addEventListener('touchstart', e => {
+  if (e.touches.length === 1) { drag = true; lx = e.touches[0].clientX; ly = e.touches[0].clientY; }
+  if (e.touches.length === 2) td = Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY);
+});
+C.addEventListener('touchmove', e => {
+  e.preventDefault();
+  if (e.touches.length === 1 && drag) {
+    tX -= (e.touches[0].clientX - lx)/zoom; tY -= (e.touches[0].clientY - ly)/zoom;
+    lx = e.touches[0].clientX; ly = e.touches[0].clientY;
+  }
+  if (e.touches.length === 2) {
+    const d = Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY);
+    tZ = Math.max(0.1, Math.min(1.5, tZ*(d/td))); td = d;
+  }
+}, {passive:false});
+C.addEventListener('touchend', () => drag = false);
+
+window.addEventListener('keydown', e => {
+  const s = 200/zoom;
+  if (e.key==='ArrowUp'||e.key==='w') tY-=s;
+  if (e.key==='ArrowDown'||e.key==='s') tY+=s;
+  if (e.key==='ArrowLeft'||e.key==='a') tX-=s;
+  if (e.key==='ArrowRight'||e.key==='d') tX+=s;
+});
+
+function loop() {
+  t++;
+  camX += (tX-camX)*0.1; camY += (tY-camY)*0.1; zoom += (tZ-zoom)*0.1;
+  tX = Math.max(-100, Math.min(FW+100, tX));
+  tY = Math.max(-300, Math.min(TOTAL+300, tY));
+
+  agents.forEach(a => a.update(1));
+
+  ctx.fillStyle = '#080808';
+  ctx.fillRect(0, 0, W, H);
+
+  ctx.save();
+  ctx.translate(W/2 - camX*zoom, H/2 - camY*zoom);
+  ctx.scale(zoom, zoom);
+
+  // Sky
+  const grd = ctx.createLinearGradient(0, -500, 0, 0);
+  grd.addColorStop(0, '#01010a'); grd.addColorStop(1, '#0a1020');
+  ctx.fillStyle = grd; ctx.fillRect(-200, -500, FW+400, 500);
+
+  // Stars
+  ctx.fillStyle = '#fff';
+  for (let i = 0; i < 40; i++) {
+    const sx = (i*173+30) % (FW+300) - 150;
+    const sy = -500 + (i*97+10) % 480;
+    ctx.globalAlpha = Math.sin(t*0.02+i) > 0.3 ? 0.8 : 0.3;
+    ctx.fillRect(sx, sy, 1.5, 1.5);
+  }
+  ctx.globalAlpha = 1;
+
+  // Building
+  for (let i = 0; i < FLOORS.length; i++) {
+    const fy = i * (FH + GAP);
+
+    // Floor image
+    if (bgImg && bgImg.complete) {
+      ctx.drawImage(bgImg, 0, fy, FW, FH);
+    } else {
+      ctx.fillStyle = '#1a1a2e'; ctx.fillRect(0, fy, FW, FH);
+    }
+
+    // Floor label overlay (top-left of each floor)
+    ctx.fillStyle = 'rgba(0,0,0,0.75)';
+    ctx.fillRect(15, fy + 12, 180, 32);
+    ctx.fillStyle = '#FF1D6C';
+    ctx.font = 'bold 11px "Space Grotesk"';
+    ctx.textAlign = 'left';
+    ctx.fillText(FLOORS[i].name, 22, fy + 28);
+    ctx.fillStyle = '#666';
+    ctx.font = '9px "JetBrains Mono"';
+    ctx.fillText(FLOORS[i].tag, 22, fy + 40);
+
+    // Separator beams
+    if (i < FLOORS.length - 1) {
+      ctx.fillStyle = '#1a1a1a'; ctx.fillRect(0, fy + FH, FW, GAP);
+      for (let bx = 0; bx < FW; bx += 160) {
+        ctx.fillStyle = '#252525'; ctx.fillRect(bx, fy + FH, 6, GAP);
+      }
+    }
+
+    // Agents
+    const fa = agents.filter(a => a.floor === i).sort((a,b) => a.y - b.y);
+    fa.forEach(a => a.draw(ctx, fy));
+  }
+
+  // Building edges
+  ctx.fillStyle = '#151515';
+  ctx.fillRect(-6, 0, 6, TOTAL); ctx.fillRect(FW, 0, 6, TOTAL);
+
+  // Ground
+  ctx.fillStyle = '#1a1208'; ctx.fillRect(-150, TOTAL, FW+300, 120);
+  ctx.fillStyle = '#333'; ctx.font = 'bold 14px "Space Grotesk"'; ctx.textAlign = 'center';
+  ctx.fillText('BLACKROAD TOWER — MINNEAPOLIS, MN', FW/2, TOTAL + 50);
+  ctx.fillStyle = '#222'; ctx.font = '10px "JetBrains Mono"';
+  ctx.fillText('Pave Tomorrow.', FW/2, TOTAL + 70);
+
+  ctx.restore();
+  requestAnimationFrame(loop);
+}
+
+// Build nav
+function buildNav() {
+  const nav = document.getElementById('nav');
+  FLOORS.forEach((f, i) => {
+    const btn = document.createElement('div');
+    btn.className = 'nav-btn';
+    btn.textContent = f.name;
+    btn.onclick = () => { tY = i*(FH+GAP) + FH/2; tX = FW/2; tZ = 0.45; };
+    nav.appendChild(btn);
+  });
+}
+
+// Init
+resize();
+buildNav();
+
+bgImg = new Image();
+bgImg.crossOrigin = 'anonymous';
+bgImg.onload = () => {
+  spawnAgents();
+  requestAnimationFrame(loop);
+};
+bgImg.onerror = () => {
+  spawnAgents();
+  requestAnimationFrame(loop);
+};
+bgImg.src = BG_URL;
+</script>
+</body>
+</html>

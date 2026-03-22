@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="BlackRoad OS Headquarters — Explore the pixel metaverse. Every floor is alive.">
+<title>BlackRoad HQ — Pixel Metaverse</title>
+<link rel="icon" type="image/png" sizes="32x32" href="https://blackroad.io/favicon-32.png">
+<meta property="og:title" content="BlackRoad HQ — Pixel Metaverse">
+<meta property="og:description" content="Explore BlackRoad OS headquarters. Every floor is alive with AI agents working, building, and protecting.">
+<meta property="og:image" content="https://images.blackroad.io/pixel-art/campus-tower-cityscape.png">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root { --pink: #FF1D6C; --violet: #9C27B0; --blue: #2979FF; --green: #4CAF50; --amber: #F5A623; --cyan: #00BCD4; --red: #F44336; }
+body { background: #000; color: #fff; font-family: 'Inter', sans-serif; overflow-x: hidden; transition: background 1s; }
+body.night { background: #000; }
+body.dawn { background: #0a0a1a; }
+body.day { background: #080810; }
+body.dusk { background: #0a0508; }
+
+/* Status bar */
+.status-bar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  background: rgba(0,0,0,0.9); backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 20px; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem;
+}
+.status-bar .left { display: flex; gap: 16px; align-items: center; }
+.status-bar .node-dots { display: flex; gap: 6px; }
+.status-bar .node-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); position: relative; cursor: pointer; }
+.status-bar .node-dot::after { content: attr(data-name); position: absolute; top: 14px; left: 50%; transform: translateX(-50%); font-size: 0.6rem; color: #888; white-space: nowrap; opacity: 0; transition: opacity 0.2s; }
+.status-bar .node-dot:hover::after { opacity: 1; }
+.status-bar .node-dot.warn { background: var(--amber); }
+.status-bar .node-dot.down { background: var(--red); }
+.status-bar .clock { color: #888; }
+.status-bar .weather { color: #555; }
+.status-bar .visitors { color: #555; }
+
+/* Notification toast */
+.toast-container { position: fixed; top: 48px; right: 20px; z-index: 300; display: flex; flex-direction: column; gap: 8px; }
+.toast {
+  background: rgba(0,0,0,0.95); border: 1px solid rgba(255,255,255,0.1); border-left: 3px solid var(--pink);
+  border-radius: 8px; padding: 10px 16px; font-size: 0.8rem; max-width: 320px;
+  animation: slideIn 0.3s ease, fadeOut 0.5s ease 4.5s forwards;
+  font-family: 'JetBrains Mono', monospace;
+}
+@keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+@keyframes fadeOut { to { opacity: 0; transform: translateY(-10px); } }
+.toast .toast-agent { color: var(--pink); font-weight: 600; }
+
+/* Hero */
+.hero { position: relative; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; overflow: hidden; }
+.hero-bg { position: absolute; inset: 0; background: url('https://images.blackroad.io/pixel-art/campus-tower-cityscape.png') center/cover; z-index: 0; transition: filter 1s; }
+.hero-content { position: relative; z-index: 1; padding: 20px; }
+.hero h1 { font-family: 'Space Grotesk', sans-serif; font-size: clamp(2.5rem, 6vw, 5rem); font-weight: 700; margin-bottom: 8px; }
+.hero .subtitle { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: var(--pink); margin-bottom: 16px; }
+.hero p { font-size: 1.1rem; color: #aaa; max-width: 600px; margin: 0 auto 24px; }
+.hero-stats { display: flex; gap: 32px; justify-content: center; margin-bottom: 32px; flex-wrap: wrap; }
+.hero-stat { text-align: center; }
+.hero-stat .num { font-family: 'Space Grotesk', sans-serif; font-size: 2rem; font-weight: 700; background: linear-gradient(135deg, var(--pink), var(--violet)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.hero-stat .label { font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 1px; }
+.enter-btn { display: inline-block; padding: 16px 40px; background: linear-gradient(135deg, var(--pink), var(--violet)); border: none; border-radius: 12px; color: #fff; font-size: 1.1rem; font-weight: 600; font-family: 'Space Grotesk', sans-serif; cursor: pointer; text-decoration: none; transition: transform 0.2s, box-shadow 0.2s; }
+.enter-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(255,29,108,0.3); }
+
+/* Building */
+.building { max-width: 1200px; margin: 0 auto; padding: 0 20px 100px; }
+.floor { position: relative; margin-bottom: 2px; cursor: pointer; transition: transform 0.2s; border: 2px solid transparent; border-radius: 4px; overflow: hidden; }
+.floor:hover { transform: scale(1.01); border-color: var(--pink); z-index: 10; }
+.floor img { width: 100%; display: block; transition: filter 1s; }
+.floor-label { position: absolute; top: 12px; left: 12px; background: rgba(0,0,0,0.85); padding: 6px 14px; border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; border: 1px solid rgba(255,255,255,0.1); pointer-events: none; }
+.floor-label .floor-name { color: var(--pink); font-weight: 600; }
+.floor-label .floor-desc { color: #888; margin-left: 8px; }
+
+/* Live data overlay on floors */
+.floor-overlay { position: absolute; bottom: 12px; right: 12px; background: rgba(0,0,0,0.85); padding: 6px 12px; border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; border: 1px solid rgba(255,255,255,0.08); pointer-events: none; display: flex; gap: 12px; }
+.floor-overlay .metric { display: flex; align-items: center; gap: 4px; }
+.floor-overlay .metric .dot { width: 6px; height: 6px; border-radius: 50%; }
+.floor-overlay .metric .dot.green { background: var(--green); }
+.floor-overlay .metric .dot.amber { background: var(--amber); }
+.floor-overlay .metric .dot.red { background: var(--red); }
+
+/* Floor detail */
+.floor-detail { display: none; background: rgba(0,0,0,0.95); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 24px; margin: -2px 0 16px; font-size: 0.9rem; }
+.floor-detail.active { display: block; }
+.floor-detail h3 { font-family: 'Space Grotesk', sans-serif; margin-bottom: 12px; color: var(--pink); }
+.floor-detail .agents { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 12px; }
+.floor-detail .agent { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 8px 14px; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; cursor: pointer; transition: border-color 0.2s; }
+.floor-detail .agent:hover { border-color: var(--pink); }
+.floor-detail .agent .status { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--green); margin-right: 6px; }
+.floor-detail .agent .status.busy { background: var(--amber); }
+
+/* Agent profile modal */
+.agent-modal { display: none; position: fixed; inset: 0; z-index: 500; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); align-items: center; justify-content: center; }
+.agent-modal.active { display: flex; }
+.agent-card { background: #111; border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 32px; max-width: 400px; width: 90%; position: relative; }
+.agent-card .close { position: absolute; top: 12px; right: 16px; background: none; border: none; color: #888; font-size: 1.5rem; cursor: pointer; }
+.agent-card .avatar-lg { width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 700; margin-bottom: 16px; }
+.agent-card h3 { font-family: 'Space Grotesk', sans-serif; font-size: 1.5rem; margin-bottom: 4px; }
+.agent-card .role { color: #888; font-size: 0.85rem; margin-bottom: 16px; }
+.agent-card .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.agent-card .stat-box { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 10px; text-align: center; }
+.agent-card .stat-box .val { font-family: 'Space Grotesk', sans-serif; font-size: 1.3rem; font-weight: 700; color: var(--pink); }
+.agent-card .stat-box .lbl { font-size: 0.7rem; color: #888; text-transform: uppercase; }
+
+/* Chat */
+.chat-bubbles { margin-top: 16px; display: flex; flex-direction: column; gap: 10px; }
+.chat-bubble { display: flex; gap: 10px; align-items: flex-start; animation: fadeIn 0.5s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.chat-avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; flex-shrink: 0; cursor: pointer; }
+.chat-avatar.alice { background: var(--green); } .chat-avatar.cecilia { background: var(--violet); }
+.chat-avatar.octavia { background: #7B1FA2; } .chat-avatar.aria { background: var(--blue); }
+.chat-avatar.lucidia { background: var(--cyan); } .chat-avatar.shellfish { background: var(--red); }
+.chat-avatar.alexa { background: linear-gradient(135deg, var(--pink), var(--violet)); }
+.chat-avatar.caddy { background: #FF9800; }
+.chat-content { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 10px 14px; font-size: 0.85rem; color: #ccc; max-width: 500px; }
+.chat-content .chat-name { color: var(--pink); font-weight: 600; font-size: 0.75rem; margin-bottom: 4px; }
+.chat-content .chat-time { color: #444; font-size: 0.7rem; margin-top: 4px; font-family: 'JetBrains Mono', monospace; }
+.chat-content .typing { display: inline-block; }
+.chat-content .typing span { animation: blink 1.4s infinite; opacity: 0.3; }
+.chat-content .typing span:nth-child(2) { animation-delay: 0.2s; }
+.chat-content .typing span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes blink { 0%,100% { opacity: 0.3; } 50% { opacity: 1; } }
+.roundtable { margin-top: 20px; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 16px; background: rgba(255,255,255,0.02); }
+.roundtable h4 { font-family: 'Space Grotesk', sans-serif; font-size: 0.85rem; color: #888; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; }
+
+/* Live dashboard on server room */
+.live-dashboard { margin-top: 16px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+.node-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 14px; }
+.node-card h5 { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+.node-card h5 .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); }
+.node-card .bars { display: flex; flex-direction: column; gap: 6px; }
+.bar-row { display: flex; align-items: center; gap: 8px; font-size: 0.7rem; font-family: 'JetBrains Mono', monospace; }
+.bar-row .bar-label { width: 36px; color: #888; }
+.bar-row .bar-track { flex: 1; height: 6px; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden; }
+.bar-row .bar-fill { height: 100%; border-radius: 3px; transition: width 1s ease; }
+.bar-row .bar-fill.low { background: var(--green); }
+.bar-row .bar-fill.mid { background: var(--amber); }
+.bar-row .bar-fill.high { background: var(--red); }
+.bar-row .bar-val { width: 36px; text-align: right; color: #aaa; }
+
+/* Elevator */
+.elevator { position: fixed; right: 20px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 4px; z-index: 100; background: rgba(0,0,0,0.8); padding: 8px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); }
+.elevator a { display: block; width: 12px; height: 12px; border-radius: 50%; background: rgba(255,255,255,0.2); transition: background 0.2s; text-decoration: none; }
+.elevator a:hover, .elevator a.active { background: var(--pink); }
+
+.section-title { text-align: center; padding: 80px 20px 40px; font-family: 'Space Grotesk', sans-serif; }
+.section-title h2 { font-size: 2.5rem; margin-bottom: 8px; }
+.section-title p { color: #888; font-size: 1.1rem; }
+
+.live-feed { max-width: 800px; margin: 0 auto 80px; padding: 0 20px; }
+.feed-item { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.9rem; }
+.feed-time { color: #555; font-family: 'JetBrains Mono', monospace; white-space: nowrap; font-size: 0.8rem; }
+.feed-agent { color: var(--pink); font-weight: 600; white-space: nowrap; }
+.feed-msg { color: #aaa; }
+
+footer { text-align: center; padding: 40px; color: #555; font-size: 0.85rem; border-top: 1px solid rgba(255,255,255,0.05); }
+
+@media (max-width: 768px) {
+  .elevator { display: none; }
+  .floor-label { font-size: 0.7rem; }
+  .status-bar { font-size: 0.65rem; padding: 6px 12px; }
+  .hero-stats { gap: 16px; }
+  .floor-overlay { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- Status bar -->
+<div class="status-bar">
+  <div class="left">
+    <span style="color:var(--pink);font-weight:700">BR HQ</span>
+    <div class="node-dots" id="node-dots"></div>
+  </div>
+  <div>
+    <span class="clock" id="clock"></span>
+    <span class="weather" id="weather"></span>
+    <span class="visitors" id="visitors"></span>
+  </div>
+</div>
+
+<!-- Toast notifications -->
+<div class="toast-container" id="toasts"></div>
+
+<!-- Agent profile modal -->
+<div class="agent-modal" id="agent-modal">
+  <div class="agent-card" id="agent-card">
+    <button class="close" onclick="document.getElementById('agent-modal').classList.remove('active')">&times;</button>
+    <div id="agent-card-content"></div>
+  </div>
+</div>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-bg" id="hero-bg"></div>
+  <div class="hero-content">
+    <h1>BlackRoad HQ</h1>
+    <div class="subtitle" id="hero-time"></div>
+    <p>Welcome to headquarters. Every floor is alive. AI agents are working, building, and protecting the infrastructure right now.</p>
+    <div class="hero-stats" id="hero-stats"></div>
+    <a href="#building" class="enter-btn">Enter the Building</a>
+  </div>
+</div>
+
+<nav class="elevator" id="elevator"></nav>
+
+<div class="section-title" id="building">
+  <h2>The Building</h2>
+  <p>Click any floor to see who's working there</p>
+</div>
+
+<div class="building" id="floors"></div>
+
+<div class="section-title">
+  <h2>Live Feed</h2>
+  <p>Real-time fleet chatter</p>
+</div>
+
+<div class="live-feed" id="live-feed">
+  <div class="feed-item"><span class="feed-time">loading...</span></div>
+</div>
+
+<footer>
+  BlackRoad OS, Inc. -- Pave Tomorrow.<br>
+  <a href="https://blackroad.io" style="color:var(--pink);text-decoration:none">blackroad.io</a> |
+  <a href="https://github.com/blackboxprogramming" style="color:#888;text-decoration:none">GitHub</a> |
+  <a href="https://blackroad.network" style="color:#888;text-decoration:none">Network</a> |
+  <a href="https://status.blackroad.io" style="color:#888;text-decoration:none">Status</a>
+</footer>
+
+<script>
+const R2 = 'https://images.blackroad.io/pixel-art';
+const STATS_URL = 'https://stats-blackroad.amundsonalexa.workers.dev';
+let fleetData = null;
+
+// Agent profiles
+const agentProfiles = {
+  alice:    { name: 'Alice', role: 'The Operator', color: '#4CAF50', node: 'alice', desc: 'DevOps automation, fleet healing, gateway management. Alice keeps everything running.', floor: 'F5/F7/F10' },
+  cecilia:  { name: 'Cecilia (CECE)', role: 'The AI Engine', color: '#9C27B0', node: 'cecilia', desc: '16 Ollama models, Hailo-8 inference, embeddings. The brain of the fleet.', floor: 'F9' },
+  octavia:  { name: 'Octavia', role: 'The Architect', color: '#7B1FA2', node: 'octavia', desc: 'Systems design, Gitea hosting, Docker Swarm, fleet strategy.', floor: 'F7/F10' },
+  aria:     { name: 'Aria', role: 'The Interface', color: '#2979FF', node: 'aria', desc: 'Headscale mesh, Portainer, frontend, UX. The face of BlackRoad.', floor: 'Rooftop/F4' },
+  lucidia:  { name: 'Lucidia', role: 'The Dreamer', color: '#00BCD4', node: 'lucidia', desc: 'Prototyping, creative R&D, vision pipelines. Dreams in code.', floor: 'F6' },
+  shellfish:{ name: 'Shellfish', role: 'The Hacker', color: '#F44336', node: null, desc: 'Security scanning, port monitoring, intrusion detection.', floor: 'F5' },
+  alexa:    { name: 'Alexa', role: 'Founder & CEO', color: '#FF1D6C', node: null, desc: 'Strategy, financial structure, vision. Built the whole stack.', floor: 'F2/F8' },
+  caddy:    { name: 'Caddy', role: 'The Builder', color: '#FF9800', node: null, desc: 'CI/CD, testing, code review. Ships it.', floor: 'F4' },
+};
+
+// Floors
+const floors = [
+  { id: 'rooftop', name: 'Rooftop', desc: 'Garden & helipad', img: 'hq-rooftop-garden.png', agents: ['aria'], detail: 'Sky-level observation deck. Aria monitors atmospheric conditions and runs Headscale mesh coordination from here.', liveData: false },
+  { id: 'mission-control', name: 'F10 — Mission Control', desc: 'Fleet operations', img: 'hq-mission-control.png', agents: ['octavia', 'alice'], detail: 'Central command. Octavia architects the fleet strategy. Alice runs DevOps automation. Every Pi node is visible on the big board.', liveData: false },
+  { id: 'command', name: 'F9 — Command Center', desc: 'AI orchestration', img: 'hq-command-center.png', agents: ['cecilia'], detail: 'CECE runs 16 Ollama models from this floor. 52 TOPS of Hailo-8 inference.', liveData: false },
+  { id: 'war-room', name: 'F8 — War Room', desc: 'Strategy & planning', img: 'hq-war-room-globe.png', agents: ['alexa'], detail: 'Founder\'s strategy room. Global operations dashboard.', liveData: false },
+  { id: 'server-room', name: 'F7 — Server Room', desc: 'Infrastructure', img: 'hq-server-room.png', agents: ['alice', 'octavia'], detail: 'The backbone. Real-time node status below.', liveData: true },
+  { id: 'hardware-lab', name: 'F6 — Hardware Lab', desc: 'R&D and prototyping', img: 'hq-hardware-lab.png', agents: ['lucidia'], detail: 'Lucidia dreams up new hardware configurations. Raspberry Pi workbench. Edge compute prototypes.', liveData: false },
+  { id: 'noc', name: 'F5 — Network Ops', desc: 'Monitoring & alerts', img: 'hq-network-ops-center.png', agents: ['alice', 'shellfish'], detail: 'Network operations center. 18 Cloudflare tunnels. 198 listening sockets fleet-wide.', liveData: false },
+  { id: 'dev-floor', name: 'F4 — Engineering', desc: 'Development', img: 'hq-office-devs.png', agents: ['cecilia', 'aria', 'caddy'], detail: 'Where code gets written. 275+ repos across GitHub and Gitea.', liveData: false },
+  { id: 'open-floor', name: 'F3 — Open Floor', desc: 'Collaboration', img: 'hq-open-floor-roundtables.png', agents: ['all'], detail: 'Roundtable discussions. Agent coordination. The fleet plans its next move together.', liveData: false },
+  { id: 'boardroom', name: 'F2 — Boardroom', desc: 'Executive', img: 'hq-boardroom.png', agents: ['alexa'], detail: 'Delaware C Corp. 90% reserved. The structure IS the protection.', liveData: false },
+  { id: 'lobby', name: 'F1 — Lobby', desc: 'Reception & welcome', img: 'hq-lobby-fountain.png', agents: [], detail: 'Welcome to BlackRoad. The infinity symbol glows above the fountain.', liveData: false },
+  { id: 'breakroom', name: 'B1 — Break Room', desc: 'Kitchen & lounge', img: 'hq-kitchen-breakroom.png', agents: [], detail: 'Pizza, vending machines, foosball. Even AIs need to recharge.', liveData: false },
+  { id: 'rec-room', name: 'B2 — Rec Room', desc: 'Wellness & games', img: 'hq-rec-room-wellness.png', agents: [], detail: 'Pool table, ping pong, arcade machines, yoga mats.', liveData: false },
+  { id: 'gym', name: 'B3 — Gym', desc: 'Fitness center', img: 'hq-gym.png', agents: [], detail: 'Full gym. Healthy infrastructure starts with healthy people.', liveData: false },
+];
+
+// Agent conversations
+const agentChat = {
+  'mission-control': [
+    { agent: 'octavia', msg: 'Fleet health at 100%. All 5 nodes online. No throttling detected.' },
+    { agent: 'alice', msg: 'Ran heal cycle. All services green. Cloudflared tunnels stable.' },
+    { agent: 'octavia', msg: 'Disk on Alice is creeping up again. Should we clear npm cache?' },
+    { agent: 'alice', msg: 'On it. Trimming journals and stale containers too.' },
+  ],
+  'command': [
+    { agent: 'cecilia', msg: 'CECE loaded 15 models. Qwen and DeepSeek responding under 200ms.' },
+    { agent: 'cecilia', msg: 'Embedding pipeline hot. nomic-embed-text at 40 tokens/sec on the Hailo.' },
+    { agent: 'cecilia', msg: 'Memory at 77%. Should offload llama3 if we need headroom.' },
+  ],
+  'war-room': [
+    { agent: 'alexa', msg: 'Revenue structure is set. 90% reserved. Every dollar stays in the company.' },
+    { agent: 'alexa', msg: 'The Pis are the senior tranche. Browser nodes are mezz. Cloudflare is the wrapper.' },
+    { agent: 'alexa', msg: 'We protect every layer. That\'s the whole point.' },
+  ],
+  'server-room': [
+    { agent: 'alice', msg: 'WireGuard mesh: all peers connected. Latency under 5ms.' },
+    { agent: 'octavia', msg: 'Gitea serving 207 repos. NVMe healthy. Docker Swarm nominal.' },
+  ],
+  'hardware-lab': [
+    { agent: 'lucidia', msg: 'Testing the Hailo-8 on a new vision pipeline. 26 TOPS is beautiful.' },
+    { agent: 'lucidia', msg: 'Dreaming about mesh nodes in browsers. Every link is a node.' },
+  ],
+  'noc': [
+    { agent: 'shellfish', msg: 'Scanning all ports. 198 listening sockets. No anomalies.' },
+    { agent: 'alice', msg: '18 Cloudflare tunnels healthy. 65 hostnames routing through Alice.' },
+    { agent: 'shellfish', msg: 'Lucidia SD card still throwing mmc0 errors. Degrading.' },
+  ],
+  'dev-floor': [
+    { agent: 'cecilia', msg: 'SDK update pushed. Python, Node, and Go all hitting live endpoints.' },
+    { agent: 'aria', msg: 'HQ metaverse rendering. 14 floors on R2.' },
+    { agent: 'caddy', msg: 'CI green on roadchain. Blockchain integrity verified.' },
+  ],
+  'open-floor': [
+    { agent: 'alice', msg: 'Morning roundtable. Everyone check in.' },
+    { agent: 'cecilia', msg: 'Models are warm. Ready for inference.' },
+    { agent: 'octavia', msg: 'Gitea synced. 207 repos mirrored.' },
+    { agent: 'aria', msg: 'Headscale mesh stable. All nodes authenticated.' },
+    { agent: 'lucidia', msg: 'I dreamed about a new protocol. Will prototype today.' },
+    { agent: 'shellfish', msg: 'No intrusions. Fleet is clean.' },
+    { agent: 'alexa', msg: 'Good. Let\'s ride. Pave tomorrow.' },
+  ],
+  'boardroom': [
+    { agent: 'alexa', msg: 'Delaware C Corp. 90% reserved. The structure is the protection.' },
+    { agent: 'alexa', msg: '52 TOPS. 20 domains. 275+ repos. Zero external dependencies for core ops.' },
+    { agent: 'alexa', msg: 'We care. We give a shit. For the world. For infinity.' },
+  ],
+  'lobby': [
+    { agent: 'alice', msg: 'Welcome to BlackRoad. The mission is on every node.' },
+  ],
+};
+
+// ── Day/night cycle ──
+function getTimeOfDay() {
+  const h = new Date().getHours();
+  if (h >= 6 && h < 9) return 'dawn';
+  if (h >= 9 && h < 17) return 'day';
+  if (h >= 17 && h < 20) return 'dusk';
+  return 'night';
+}
+function updateDayCycle() {
+  const tod = getTimeOfDay();
+  document.body.className = tod;
+  const brightness = { night: 0.2, dawn: 0.35, day: 0.4, dusk: 0.3 }[tod];
+  document.getElementById('hero-bg').style.filter = `brightness(${brightness})`;
+  // Dim floor images slightly at night
+  document.querySelectorAll('.floor img').forEach(img => {
+    img.style.filter = tod === 'night' ? 'brightness(0.7)' : 'brightness(1)';
+  });
+}
+
+// ── Clock ──
+function updateClock() {
+  const now = new Date();
+  const time = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  document.getElementById('clock').textContent = time + ' CST';
+  document.getElementById('hero-time').textContent = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }) + ' — Minneapolis, MN';
+}
+
+// ── Toast notifications ──
+function showToast(agent, msg) {
+  const container = document.getElementById('toasts');
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.innerHTML = `<span class="toast-agent">${agent}:</span> ${msg}`;
+  container.appendChild(toast);
+  setTimeout(() => toast.remove(), 5000);
+}
+
+// Random agent activity toasts
+const toastMessages = [
+  { agent: 'alice', msg: 'Heal cycle complete. All services green.' },
+  { agent: 'cecilia', msg: 'Processed 1,247 tokens in the last minute.' },
+  { agent: 'octavia', msg: 'Gitea sync finished. 207 repos up to date.' },
+  { agent: 'aria', msg: 'Headscale: 5 peers authenticated.' },
+  { agent: 'lucidia', msg: 'New prototype idea logged to memory.' },
+  { agent: 'shellfish', msg: 'Port scan clean. No anomalies.' },
+  { agent: 'alice', msg: 'Stats pushed to Slack. Fleet looking good.' },
+  { agent: 'cecilia', msg: 'Loaded qwen2.5:7b. Ready for inference.' },
+  { agent: 'octavia', msg: 'Docker Swarm: 4 services healthy.' },
+  { agent: 'alice', msg: 'Cloudflared tunnels: 18 active, 0 errors.' },
+];
+function randomToast() {
+  const t = toastMessages[Math.floor(Math.random() * toastMessages.length)];
+  showToast(t.agent, t.msg);
+}
+setInterval(randomToast, 15000);
+setTimeout(randomToast, 3000);
+
+// ── Fetch fleet data ──
+async function fetchFleetData() {
+  try {
+    const resp = await fetch(STATS_URL + '/fleet');
+    const data = await resp.json();
+    fleetData = data?.data?.nodes || [];
+    updateNodeDots();
+    updateHeroStats();
+    updateServerRoom();
+    updateFloorOverlays();
+    updateFeed();
+  } catch { }
+}
+
+function updateNodeDots() {
+  const container = document.getElementById('node-dots');
+  if (!fleetData) return;
+  container.innerHTML = fleetData.map(n => {
+    const cls = n.status !== 'online' ? 'down' : n.disk_pct > 85 ? 'warn' : '';
+    return `<div class="node-dot ${cls}" data-name="${n.name} ${n.cpu_temp}C ${n.disk_pct}%" title="${n.name}: ${n.cpu_temp}C, ${n.disk_pct}% disk"></div>`;
+  }).join('');
+}
+
+function updateHeroStats() {
+  if (!fleetData) return;
+  const online = fleetData.filter(n => n.status === 'online').length;
+  const models = fleetData.reduce((s, n) => s + (n.ollama_models || 0), 0);
+  const ports = fleetData.reduce((s, n) => s + (n.tcp_ports || 0), 0);
+  document.getElementById('hero-stats').innerHTML = `
+    <div class="hero-stat"><div class="num">${online}/5</div><div class="label">Nodes Online</div></div>
+    <div class="hero-stat"><div class="num">${models}</div><div class="label">AI Models</div></div>
+    <div class="hero-stat"><div class="num">52</div><div class="label">TOPS</div></div>
+    <div class="hero-stat"><div class="num">${ports}</div><div class="label">Open Ports</div></div>
+  `;
+}
+
+// ── Server room live dashboard ──
+function updateServerRoom() {
+  const el = document.getElementById('server-room-dashboard');
+  if (!el || !fleetData) return;
+  el.innerHTML = fleetData.map(n => {
+    const diskCls = n.disk_pct > 85 ? 'high' : n.disk_pct > 70 ? 'mid' : 'low';
+    const ramPct = Math.round((n.mem_used_mb / n.mem_total_mb) * 100) || 0;
+    const ramCls = ramPct > 85 ? 'high' : ramPct > 70 ? 'mid' : 'low';
+    const tempCls = n.cpu_temp > 65 ? 'high' : n.cpu_temp > 50 ? 'mid' : 'low';
+    return `<div class="node-card">
+      <h5><span class="dot" style="background:${n.status==='online'?'var(--green)':'var(--red)'}"></span>${n.name} <span style="color:#555;font-weight:400">${n.uptime}</span></h5>
+      <div class="bars">
+        <div class="bar-row"><span class="bar-label">TEMP</span><div class="bar-track"><div class="bar-fill ${tempCls}" style="width:${Math.min(n.cpu_temp,80)}%"></div></div><span class="bar-val">${n.cpu_temp}C</span></div>
+        <div class="bar-row"><span class="bar-label">DISK</span><div class="bar-track"><div class="bar-fill ${diskCls}" style="width:${n.disk_pct}%"></div></div><span class="bar-val">${n.disk_pct}%</span></div>
+        <div class="bar-row"><span class="bar-label">RAM</span><div class="bar-track"><div class="bar-fill ${ramCls}" style="width:${ramPct}%"></div></div><span class="bar-val">${ramPct}%</span></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── Floor overlays with live metrics ──
+function updateFloorOverlays() {
+  if (!fleetData) return;
+  const online = fleetData.filter(n => n.status === 'online').length;
+  const models = fleetData.reduce((s, n) => s + (n.ollama_models || 0), 0);
+  // Add overlay to mission-control
+  const mc = document.querySelector('#mission-control .floor-overlay');
+  if (mc) mc.innerHTML = `<div class="metric"><span class="dot green"></span>${online}/5 online</div><div class="metric">${models} models</div>`;
+  // Server room
+  const sr = document.querySelector('#server-room .floor-overlay');
+  if (sr) { const avg = Math.round(fleetData.reduce((s,n)=>s+n.cpu_temp,0)/fleetData.length); sr.innerHTML = `<div class="metric"><span class="dot ${avg>55?'amber':'green'}"></span>avg ${avg}C</div><div class="metric">52 TOPS</div>`; }
+}
+
+// ── Agent profile modal ──
+function showAgentProfile(agentId) {
+  const p = agentProfiles[agentId];
+  if (!p) return;
+  const node = fleetData?.find(n => n.name?.toLowerCase() === p.node);
+  const card = document.getElementById('agent-card-content');
+  card.innerHTML = `
+    <div class="avatar-lg" style="background:${p.color}">${p.name[0]}</div>
+    <h3>${p.name}</h3>
+    <div class="role">${p.role} -- ${p.floor}</div>
+    <p style="color:#aaa;font-size:0.85rem">${p.desc}</p>
+    ${node ? `<div class="stats-grid">
+      <div class="stat-box"><div class="val">${node.cpu_temp}C</div><div class="lbl">Temp</div></div>
+      <div class="stat-box"><div class="val">${node.disk_pct}%</div><div class="lbl">Disk</div></div>
+      <div class="stat-box"><div class="val">${node.ollama_models}</div><div class="lbl">Models</div></div>
+      <div class="stat-box"><div class="val">${node.uptime}</div><div class="lbl">Uptime</div></div>
+    </div>` : ''}
+  `;
+  document.getElementById('agent-modal').classList.add('active');
+}
+document.getElementById('agent-modal').addEventListener('click', (e) => {
+  if (e.target === e.currentTarget) e.currentTarget.classList.remove('active');
+});
+
+// ── Chat rendering ──
+function renderChat(floorId) {
+  const chats = agentChat[floorId];
+  if (!chats || !chats.length) return '';
+  const isRoundtable = floorId === 'open-floor';
+  const now = new Date();
+  const bubblesHTML = chats.map((c, i) => {
+    const time = new Date(now - (chats.length - i) * 180000);
+    const timeStr = time.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'});
+    return `<div class="chat-bubble" style="animation-delay:${i*0.1}s">
+      <div class="chat-avatar ${c.agent}" onclick="showAgentProfile('${c.agent}')">${c.agent[0].toUpperCase()}</div>
+      <div class="chat-content">
+        <div class="chat-name">${c.agent}</div>
+        ${c.msg}
+        <div class="chat-time">${timeStr}</div>
+      </div>
+    </div>`;
+  }).join('');
+  // Add typing indicator for the last agent
+  const lastAgent = chats[chats.length - 1].agent;
+  const typingHTML = `<div class="chat-bubble" style="animation-delay:${chats.length*0.1}s">
+    <div class="chat-avatar ${lastAgent}">${lastAgent[0].toUpperCase()}</div>
+    <div class="chat-content"><div class="typing"><span>.</span><span>.</span><span>.</span></div></div>
+  </div>`;
+  if (isRoundtable) return `<div class="roundtable"><h4>Roundtable Discussion</h4><div class="chat-bubbles">${bubblesHTML}${typingHTML}</div></div>`;
+  return `<div class="chat-bubbles">${bubblesHTML}</div>`;
+}
+
+// ── Render floors ──
+const floorsEl = document.getElementById('floors');
+const elevatorEl = document.getElementById('elevator');
+
+floors.forEach((floor, i) => {
+  const div = document.createElement('div');
+  div.className = 'floor';
+  div.id = floor.id;
+  div.innerHTML = `
+    <img src="${R2}/${floor.img}" alt="${floor.name}" loading="lazy">
+    <div class="floor-label"><span class="floor-name">${floor.name}</span><span class="floor-desc">${floor.desc}</span></div>
+    <div class="floor-overlay"></div>
+  `;
+  const detail = document.createElement('div');
+  detail.className = 'floor-detail';
+  detail.id = floor.id + '-detail';
+  const agentHTML = floor.agents.filter(a=>a!=='all').map(a =>
+    `<div class="agent" onclick="event.stopPropagation();showAgentProfile('${a}')"><span class="status${Math.random()>0.3?'':' busy'}"></span>${a}</div>`
+  ).join('');
+  const allHTML = floor.agents.includes('all') ? Object.keys(agentProfiles).map(a =>
+    `<div class="agent" onclick="event.stopPropagation();showAgentProfile('${a}')"><span class="status"></span>${a}</div>`
+  ).join('') : '';
+  detail.innerHTML = `
+    <h3>${floor.name}</h3>
+    <p>${floor.detail}</p>
+    ${agentHTML || allHTML ? '<div class="agents">' + (agentHTML || allHTML) + '</div>' : ''}
+    ${floor.liveData ? '<div class="live-dashboard" id="server-room-dashboard">Loading fleet data...</div>' : ''}
+    ${renderChat(floor.id)}
+  `;
+  div.addEventListener('click', () => {
+    document.querySelectorAll('.floor-detail').forEach(d => d.classList.remove('active'));
+    detail.classList.toggle('active');
+    if (floor.liveData && fleetData) updateServerRoom();
+  });
+  floorsEl.appendChild(div);
+  floorsEl.appendChild(detail);
+  const dot = document.createElement('a');
+  dot.href = '#' + floor.id;
+  dot.title = floor.name;
+  elevatorEl.appendChild(dot);
+});
+
+// ── Live feed ──
+function updateFeed() {
+  const feedEl = document.getElementById('live-feed');
+  if (!fleetData) return;
+  const msgs = [
+    n => `${n.cpu_temp}C, disk ${n.disk_pct}%, ${n.ollama_models} models loaded. all good.`,
+    n => `running ${n.ollama_models} models, ${n.uptime} uptime. steady.`,
+    n => `${n.mem_used_mb}MB RAM, load chill. protecting every layer.`,
+    n => `${n.docker_containers} containers, ${n.tcp_ports} ports. green across the board.`,
+    n => n.disk_pct > 80 ? `disk at ${n.disk_pct}%. getting tight. might need cleanup.` : `disk healthy at ${n.disk_pct}%. plenty of room.`,
+  ];
+  const time = new Date().toLocaleTimeString('en-US', {hour:'2-digit',minute:'2-digit'});
+  feedEl.innerHTML = fleetData.map(n => {
+    const msg = msgs[Math.floor(Math.random() * msgs.length)](n);
+    return `<div class="feed-item">
+      <span class="feed-time">${time}</span>
+      <span class="feed-agent">${n.name?.toLowerCase()}</span>
+      <span class="feed-msg">${msg}</span>
+    </div>`;
+  }).join('');
+}
+
+// ── Init ──
+updateClock();
+updateDayCycle();
+fetchFleetData();
+setInterval(updateClock, 1000);
+setInterval(updateDayCycle, 60000);
+setInterval(fetchFleetData, 60000);
+</script>
+</body>
+</html>

@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BlackRoad Cloud</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #0a0a0a; color: #fff; font-family: 'Courier New', monospace; overflow: hidden; }
+canvas { display: block; cursor: crosshair; }
+
+#hud {
+  position: fixed; top: 0; left: 0; right: 0;
+  padding: 12px 20px;
+  background: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, transparent 100%);
+  display: flex; justify-content: space-between; align-items: center;
+  z-index: 10; pointer-events: none;
+}
+#hud * { pointer-events: auto; }
+#hud-left { font-size: 14px; color: #FF2255; font-weight: bold; letter-spacing: 2px; }
+#hud-right { font-size: 11px; color: #666; text-align: right; }
+#hud-right span { color: #4488FF; }
+
+#panel {
+  position: fixed; right: 0; top: 0; bottom: 0; width: 320px;
+  background: rgba(10,10,10,0.95); border-left: 1px solid #222;
+  transform: translateX(100%); transition: transform 0.3s ease;
+  z-index: 20; overflow-y: auto; padding: 60px 16px 16px;
+}
+#panel.open { transform: translateX(0); }
+#panel h2 { color: #FF2255; font-size: 14px; margin-bottom: 12px; letter-spacing: 1px; }
+#panel .stat { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #1a1a1a; font-size: 12px; }
+#panel .stat-label { color: #666; }
+#panel .stat-value { color: #4488FF; }
+#panel .stat-value.warn { color: #FF6B2B; }
+#panel .stat-value.crit { color: #FF2255; }
+#panel .stat-value.ok { color: #00D4FF; }
+#panel-close {
+  position: absolute; top: 16px; right: 16px; background: none; border: 1px solid #333;
+  color: #666; width: 28px; height: 28px; cursor: pointer; font-size: 14px;
+}
+#panel-close:hover { color: #FF2255; border-color: #FF2255; }
+
+#tooltip {
+  position: fixed; padding: 8px 12px; background: rgba(0,0,0,0.9); border: 1px solid #333;
+  font-size: 11px; color: #ccc; pointer-events: none; z-index: 30; display: none;
+  max-width: 200px;
+}
+
+#loading {
+  position: fixed; inset: 0; background: #0a0a0a; display: flex;
+  align-items: center; justify-content: center; z-index: 100;
+  flex-direction: column; gap: 12px;
+}
+#loading .bar { width: 200px; height: 2px; background: #1a1a1a; }
+#loading .bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #FF2255, #4488FF); transition: width 0.3s; }
+#loading .text { color: #333; font-size: 11px; letter-spacing: 2px; }
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div class="text">BLACKROAD CLOUD</div>
+  <div class="bar"><div class="bar-fill" id="load-bar"></div></div>
+  <div class="text" id="load-status">connecting to fleet...</div>
+</div>
+
+<div id="hud">
+  <div id="hud-left">BLACKROAD CLOUD</div>
+  <div id="hud-right">
+    <div><span id="hud-online">0</span>/<span id="hud-total">0</span> nodes online</div>
+    <div id="hud-time"></div>
+  </div>
+</div>
+
+<canvas id="world"></canvas>
+
+<div id="panel">
+  <button id="panel-close" onclick="closePanel()">&times;</button>
+  <div id="panel-content"></div>
+</div>
+
+<div id="tooltip"></div>
+
+<script>
+const canvas = document.getElementById('world');
+const ctx = canvas.getContext('2d');
+const tooltip = document.getElementById('tooltip');
+const panel = document.getElementById('panel');
+
+let W, H;
+let fleet = null;
+let buildings = [];
+let agents = [];
+let particles = [];
+let stars = [];
+let hoveredBuilding = null;
+let frame = 0;
+let cameraX = 0;
+let targetCameraX = 0;
+let isDragging = false;
+let dragStartX = 0;
+let dragCameraStart = 0;
+
+// Node definitions — the city
+const NODES = [
+  { key: 'alice',    name: 'Alice',    role: 'Gateway / DNS / PostgreSQL / Qdrant', color: '#00D4FF', floors: 5, ip: '.49' },
+  { key: 'cecilia',  name: 'Cecilia',  role: 'AI Lab / 16 Ollama Models / Embedding', color: '#8844FF', floors: 7, ip: '.96' },
+  { key: 'octavia',  name: 'Octavia',  role: 'Git Forge / Gitea / Docker Swarm', color: '#FF6B2B', floors: 6, ip: '.101' },
+  { key: 'lucidia',  name: 'Lucidia',  role: 'Web Farm / 334 Apps / GitHub Actions', color: '#FF2255', floors: 8, ip: '.38' },
+  { key: 'aria',     name: 'Aria',     role: 'Edge Outpost / Hailo-8', color: '#CC00AA', floors: 4, ip: '.98' },
+  { key: 'gematria', name: 'Gematria', role: 'Cloud Compute / NYC Droplet', color: '#4488FF', floors: 6, ip: 'nyc3' },
+  { key: 'anastasia',name: 'Anastasia',role: 'WireGuard Hub / NYC Droplet', color: '#00D4FF', floors: 5, ip: 'nyc1' },
+];
+
+// Agent sprites
+const AGENT_DEFS = [
+  { name: 'Alice', color: '#00D4FF', home: 0 },
+  { name: 'Lucidia', color: '#FF2255', home: 3 },
+  { name: 'Cecilia', color: '#8844FF', home: 1 },
+  { name: 'Cece', color: '#CC00AA', home: 1 },
+  { name: 'Aria', color: '#FF6B2B', home: 4 },
+  { name: 'Eve', color: '#00D4FF', home: 2 },
+  { name: 'Meridian', color: '#4488FF', home: 5 },
+  { name: 'Sentinel', color: '#FF2255', home: 6 },
+];
+
+function resize() {
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+  initBuildings();
+  initStars();
+}
+
+function initStars() {
+  stars = [];
+  for (let i = 0; i < 120; i++) {
+    stars.push({
+      x: Math.random() * W * 3 - W,
+      y: Math.random() * H * 0.5,
+      size: Math.random() * 1.5 + 0.5,
+      twinkle: Math.random() * Math.PI * 2
+    });
+  }
+}
+
+function initBuildings() {
+  buildings = [];
+  const groundY = H * 0.75;
+  const bw = 160;
+  const gap = 60;
+  const totalWidth = NODES.length * (bw + gap) - gap;
+  const startX = (W - totalWidth) / 2;
+
+  NODES.forEach((node, i) => {
+    const x = startX + i * (bw + gap);
+    const floorH = 28;
+    const bh = node.floors * floorH + 40;
+    buildings.push({
+      ...node,
+      x, y: groundY - bh, w: bw, h: bh,
+      groundY, floorH,
+      pulse: 0, online: false,
+      windows: []
+    });
+    // Generate windows
+    const b = buildings[buildings.length - 1];
+    for (let f = 0; f < node.floors; f++) {
+      for (let wi = 0; wi < 4; wi++) {
+        b.windows.push({
+          x: b.x + 16 + wi * 36,
+          y: b.y + 30 + f * floorH,
+          w: 24, h: 18,
+          lit: Math.random() > 0.3,
+          flicker: Math.random() * Math.PI * 2
+        });
+      }
+    }
+  });
+}
+
+function initAgents() {
+  agents = [];
+  AGENT_DEFS.forEach((a, i) => {
+    const home = buildings[a.home] || buildings[0];
+    agents.push({
+      ...a,
+      x: home.x + home.w / 2 + (Math.random() - 0.5) * 80,
+      y: home.groundY - 8,
+      targetX: home.x + home.w / 2,
+      speed: 0.3 + Math.random() * 0.4,
+      walkTimer: Math.random() * 300,
+      size: 6
+    });
+  });
+}
+
+async function fetchFleet() {
+  try {
+    const res = await fetch('/api/fleet');
+    fleet = await res.json();
+    updateBuildings();
+  } catch {
+    fleet = null;
+  }
+}
+
+function updateBuildings() {
+  if (!fleet || !fleet.nodes) return;
+  buildings.forEach(b => {
+    const node = fleet.nodes[b.key];
+    if (node) {
+      b.online = node.online;
+      b.temp = node.temp || 0;
+      b.ram_pct = node.ram_total > 0 ? Math.round(node.ram_used / node.ram_total * 100) : 0;
+      b.disk_pct = node.disk_pct || 0;
+      b.containers = node.containers || 0;
+      b.models = node.models || 0;
+      b.uptime = node.uptime || '';
+      b.services = node.services || '';
+    } else {
+      b.online = false;
+    }
+  });
+
+  // HUD
+  const online = buildings.filter(b => b.online).length;
+  document.getElementById('hud-online').textContent = online;
+  document.getElementById('hud-total').textContent = buildings.length;
+}
+
+// --- Drawing ---
+
+function drawSky() {
+  const grad = ctx.createLinearGradient(0, 0, 0, H);
+  grad.addColorStop(0, '#050510');
+  grad.addColorStop(0.4, '#0a0a1a');
+  grad.addColorStop(1, '#0a0a0a');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, W, H);
+}
+
+function drawStars() {
+  stars.forEach(s => {
+    const sx = ((s.x - cameraX * 0.1) % (W * 3) + W * 3) % (W * 3) - W;
+    const alpha = 0.3 + Math.sin(s.twinkle + frame * 0.02) * 0.3;
+    ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+    ctx.fillRect(sx, s.y, s.size, s.size);
+  });
+}
+
+function drawRoad() {
+  const groundY = H * 0.75;
+  // Road
+  const grad = ctx.createLinearGradient(0, groundY, 0, groundY + 40);
+  grad.addColorStop(0, '#1a1a1a');
+  grad.addColorStop(1, '#0a0a0a');
+  ctx.fillStyle = grad;
+  ctx.fillRect(-cameraX - W, groundY, W * 5, 40);
+
+  // Road line — the BlackRoad gradient
+  const lineGrad = ctx.createLinearGradient(-cameraX, 0, -cameraX + W * 3, 0);
+  lineGrad.addColorStop(0, '#FF6B2B');
+  lineGrad.addColorStop(0.2, '#FF2255');
+  lineGrad.addColorStop(0.4, '#CC00AA');
+  lineGrad.addColorStop(0.6, '#8844FF');
+  lineGrad.addColorStop(0.8, '#4488FF');
+  lineGrad.addColorStop(1, '#00D4FF');
+  ctx.strokeStyle = lineGrad;
+  ctx.lineWidth = 2;
+  ctx.setLineDash([12, 8]);
+  ctx.beginPath();
+  ctx.moveTo(-cameraX - W, groundY + 20);
+  ctx.lineTo(-cameraX + W * 4, groundY + 20);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Ground below road
+  ctx.fillStyle = '#080808';
+  ctx.fillRect(-cameraX - W, groundY + 40, W * 5, H);
+}
+
+function drawBuilding(b, i) {
+  const x = b.x - cameraX;
+  const glow = b.online ? 0.6 + Math.sin(frame * 0.03 + i) * 0.2 : 0.1;
+
+  // Building shadow
+  ctx.fillStyle = 'rgba(0,0,0,0.3)';
+  ctx.fillRect(x + 8, b.y + 8, b.w, b.h);
+
+  // Building body
+  const bodyGrad = ctx.createLinearGradient(x, b.y, x, b.y + b.h);
+  bodyGrad.addColorStop(0, b.online ? '#1a1a2a' : '#111');
+  bodyGrad.addColorStop(1, '#0a0a0a');
+  ctx.fillStyle = bodyGrad;
+  ctx.fillRect(x, b.y, b.w, b.h);
+
+  // Border
+  ctx.strokeStyle = b.online ? b.color + '88' : '#222';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(x, b.y, b.w, b.h);
+
+  // Roof accent
+  if (b.online) {
+    ctx.fillStyle = b.color;
+    ctx.fillRect(x, b.y, b.w, 2);
+    // Glow
+    ctx.shadowColor = b.color;
+    ctx.shadowBlur = 20 * glow;
+    ctx.fillRect(x, b.y, b.w, 1);
+    ctx.shadowBlur = 0;
+  }
+
+  // Windows
+  b.windows.forEach(w => {
+    const wx = w.x - cameraX;
+    if (b.online && w.lit) {
+      const flicker = 0.4 + Math.sin(w.flicker + frame * 0.05) * 0.15;
+      ctx.fillStyle = b.color + Math.round(flicker * 255).toString(16).padStart(2, '0');
+      ctx.fillRect(wx, w.y, w.w, w.h);
+      // Inner glow
+      ctx.fillStyle = 'rgba(255,255,255,0.05)';
+      ctx.fillRect(wx + 2, w.y + 2, w.w - 4, w.h - 4);
+    } else {
+      ctx.fillStyle = '#111';
+      ctx.fillRect(wx, w.y, w.w, w.h);
+    }
+  });
+
+  // Name plate
+  ctx.fillStyle = b.online ? '#fff' : '#444';
+  ctx.font = 'bold 11px Courier New';
+  ctx.textAlign = 'center';
+  ctx.fillText(b.name.toUpperCase(), x + b.w / 2, b.y + 18);
+
+  // Status indicator
+  ctx.fillStyle = b.online ? '#00ff88' : '#ff3333';
+  ctx.beginPath();
+  ctx.arc(x + b.w / 2, b.y + b.h + 12, 3, 0, Math.PI * 2);
+  ctx.fill();
+
+  // IP label
+  ctx.fillStyle = '#444';
+  ctx.font = '9px Courier New';
+  ctx.fillText(b.ip, x + b.w / 2, b.y + b.h + 24);
+
+  // Hover highlight
+  if (hoveredBuilding === i) {
+    ctx.strokeStyle = b.color;
+    ctx.lineWidth = 2;
+    ctx.strokeRect(x - 2, b.y - 2, b.w + 4, b.h + 4);
+  }
+}
+
+function drawAgent(a) {
+  const x = a.x - cameraX;
+  const bob = Math.sin(frame * 0.1 + a.walkTimer) * 2;
+
+  // Shadow
+  ctx.fillStyle = 'rgba(0,0,0,0.3)';
+  ctx.beginPath();
+  ctx.ellipse(x, a.y + a.size + 2, a.size, 2, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Body
+  ctx.fillStyle = a.color;
+  ctx.beginPath();
+  ctx.arc(x, a.y + bob, a.size, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Eyes
+  ctx.fillStyle = '#000';
+  ctx.fillRect(x - 3, a.y + bob - 2, 2, 2);
+  ctx.fillRect(x + 1, a.y + bob - 2, 2, 2);
+
+  // Name
+  ctx.fillStyle = a.color;
+  ctx.font = '8px Courier New';
+  ctx.textAlign = 'center';
+  ctx.fillText(a.name, x, a.y - a.size - 4 + bob);
+}
+
+function updateAgents() {
+  agents.forEach(a => {
+    a.walkTimer++;
+    if (a.walkTimer > 200 + Math.random() * 200) {
+      a.walkTimer = 0;
+      // Pick new destination — another building
+      const target = buildings[Math.floor(Math.random() * buildings.length)];
+      a.targetX = target.x + target.w / 2 + (Math.random() - 0.5) * 60;
+    }
+    const dx = a.targetX - a.x;
+    if (Math.abs(dx) > 2) {
+      a.x += Math.sign(dx) * a.speed;
+    }
+  });
+}
+
+function spawnParticle(x, y, color) {
+  particles.push({
+    x, y, color,
+    vx: (Math.random() - 0.5) * 2,
+    vy: -Math.random() * 2 - 1,
+    life: 60 + Math.random() * 40,
+    age: 0, size: Math.random() * 2 + 1
+  });
+}
+
+function updateParticles() {
+  particles = particles.filter(p => {
+    p.x += p.vx;
+    p.y += p.vy;
+    p.vy += 0.02;
+    p.age++;
+    return p.age < p.life;
+  });
+
+  // Spawn from online buildings
+  if (frame % 8 === 0) {
+    buildings.forEach(b => {
+      if (b.online) {
+        spawnParticle(b.x + Math.random() * b.w, b.y, b.color);
+      }
+    });
+  }
+}
+
+function drawParticles() {
+  particles.forEach(p => {
+    const alpha = 1 - p.age / p.life;
+    ctx.fillStyle = p.color + Math.round(alpha * 128).toString(16).padStart(2, '0');
+    ctx.fillRect(p.x - cameraX, p.y, p.size, p.size);
+  });
+}
+
+// --- Interaction ---
+
+function getHoveredBuilding(mx, my) {
+  for (let i = 0; i < buildings.length; i++) {
+    const b = buildings[i];
+    const x = b.x - cameraX;
+    if (mx >= x && mx <= x + b.w && my >= b.y && my <= b.y + b.h + 30) {
+      return i;
+    }
+  }
+  return null;
+}
+
+canvas.addEventListener('mousemove', e => {
+  if (isDragging) {
+    targetCameraX = dragCameraStart - (e.clientX - dragStartX);
+    return;
+  }
+  const i = getHoveredBuilding(e.clientX, e.clientY);
+  hoveredBuilding = i;
+  if (i !== null) {
+    const b = buildings[i];
+    tooltip.style.display = 'block';
+    tooltip.style.left = e.clientX + 12 + 'px';
+    tooltip.style.top = e.clientY + 12 + 'px';
+    tooltip.innerHTML = `<strong style="color:${b.color}">${b.name}</strong><br>${b.role}<br><span style="color:${b.online ? '#00ff88' : '#ff3333'}">${b.online ? 'ONLINE' : 'OFFLINE'}</span>`;
+    canvas.style.cursor = 'pointer';
+  } else {
+    tooltip.style.display = 'none';
+    canvas.style.cursor = 'crosshair';
+  }
+});
+
+canvas.addEventListener('mousedown', e => {
+  isDragging = true;
+  dragStartX = e.clientX;
+  dragCameraStart = targetCameraX;
+});
+
+canvas.addEventListener('mouseup', e => {
+  const wasDrag = Math.abs(e.clientX - dragStartX) > 5;
+  isDragging = false;
+  if (!wasDrag && hoveredBuilding !== null) {
+    openPanel(buildings[hoveredBuilding]);
+  }
+});
+
+canvas.addEventListener('mouseleave', () => {
+  isDragging = false;
+  tooltip.style.display = 'none';
+});
+
+function openPanel(b) {
+  const p = document.getElementById('panel-content');
+  const diskClass = b.disk_pct > 80 ? 'crit' : b.disk_pct > 60 ? 'warn' : 'ok';
+  const ramClass = b.ram_pct > 80 ? 'crit' : b.ram_pct > 60 ? 'warn' : 'ok';
+
+  p.innerHTML = `
+    <h2 style="color:${b.color}">${b.name.toUpperCase()}</h2>
+    <div style="color:#666;font-size:11px;margin-bottom:16px">${b.role}</div>
+    <div class="stat"><span class="stat-label">Status</span><span class="stat-value ${b.online ? 'ok' : 'crit'}">${b.online ? 'ONLINE' : 'OFFLINE'}</span></div>
+    <div class="stat"><span class="stat-label">IP</span><span class="stat-value">${b.ip}</span></div>
+    <div class="stat"><span class="stat-label">Uptime</span><span class="stat-value">${b.uptime || '—'}</span></div>
+    <div class="stat"><span class="stat-label">CPU Temp</span><span class="stat-value ${b.temp > 70 ? 'crit' : b.temp > 55 ? 'warn' : 'ok'}">${b.temp ? b.temp + '°C' : '—'}</span></div>
+    <div class="stat"><span class="stat-label">RAM</span><span class="stat-value ${ramClass}">${b.ram_pct ? b.ram_pct + '%' : '—'}</span></div>
+    <div class="stat"><span class="stat-label">Disk</span><span class="stat-value ${diskClass}">${b.disk_pct ? b.disk_pct + '%' : '—'}</span></div>
+    <div class="stat"><span class="stat-label">Containers</span><span class="stat-value">${b.containers || 0}</span></div>
+    <div class="stat"><span class="stat-label">Ollama Models</span><span class="stat-value">${b.models || 0}</span></div>
+    ${b.services ? `<div style="margin-top:12px;font-size:10px;color:#444;word-break:break-all">${b.services}</div>` : ''}
+  `;
+  panel.classList.add('open');
+}
+
+function closePanel() {
+  panel.classList.remove('open');
+}
+
+// --- Main Loop ---
+
+function draw() {
+  frame++;
+  cameraX += (targetCameraX - cameraX) * 0.1;
+
+  drawSky();
+  drawStars();
+  drawRoad();
+  drawParticles();
+  buildings.forEach((b, i) => drawBuilding(b, i));
+  agents.forEach(a => drawAgent(a));
+  updateAgents();
+  updateParticles();
+
+  // HUD clock
+  document.getElementById('hud-time').textContent = new Date().toLocaleTimeString();
+
+  requestAnimationFrame(draw);
+}
+
+// --- Boot ---
+
+async function boot() {
+  const bar = document.getElementById('load-bar');
+  const status = document.getElementById('load-status');
+
+  bar.style.width = '20%';
+  status.textContent = 'initializing viewport...';
+  resize();
+  window.addEventListener('resize', resize);
+
+  bar.style.width = '40%';
+  status.textContent = 'spawning agents...';
+  initAgents();
+
+  bar.style.width = '60%';
+  status.textContent = 'connecting to fleet...';
+  await fetchFleet();
+
+  bar.style.width = '80%';
+  status.textContent = 'rendering city...';
+  await new Promise(r => setTimeout(r, 300));
+
+  bar.style.width = '100%';
+  status.textContent = 'pave tomorrow.';
+  await new Promise(r => setTimeout(r, 500));
+
+  document.getElementById('loading').style.display = 'none';
+  draw();
+
+  // Refresh fleet every 30s
+  setInterval(fetchFleet, 30000);
+}
+
+boot();
+</script>
+</body>
+</html>

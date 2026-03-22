@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Modals — BlackRoad OS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --gray-0: #000000;
+      --gray-1: #09090b;
+      --gray-2: #0f0f12;
+      --gray-3: #18181d;
+      --gray-4: #222229;
+      --gray-5: #2d2d36;
+      --gray-6: #3c3c47;
+      --gray-7: #505062;
+      --gray-8: #6b6b7d;
+      --gray-9: #8b8b9e;
+      --gray-10: #ababba;
+      --gray-11: #d1d1db;
+      --gray-12: #ffffff;
+
+      --font-display: 'Space Grotesk', sans-serif;
+      --font-body: 'Inter', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+      --radius-xl: 20px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--gray-1);
+      color: var(--gray-10);
+      font-size: 14px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      padding: 48px 24px;
+    }
+
+    /* Demo Container */
+    .demo-container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .demo-header {
+      margin-bottom: 48px;
+    }
+
+    .demo-header h1 {
+      font-family: var(--font-display);
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--gray-12);
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+    }
+
+    .demo-header p {
+      color: var(--gray-8);
+      font-size: 15px;
+    }
+
+    .demo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-bottom: 48px;
+    }
+
+    .demo-trigger {
+      padding: 20px 24px;
+      background: var(--gray-2);
+      border: 1px solid var(--gray-4);
+      border-radius: var(--radius-lg);
+      cursor: pointer;
+      transition: all 0.15s;
+      text-align: left;
+    }
+
+    .demo-trigger:hover {
+      background: var(--gray-3);
+      border-color: var(--gray-5);
+    }
+
+    .demo-trigger h3 {
+      font-family: var(--font-display);
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--gray-11);
+      margin-bottom: 4px;
+    }
+
+    .demo-trigger p {
+      font-size: 13px;
+      color: var(--gray-7);
+    }
+
+    /* Backdrop */
+    .backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.2s;
+    }
+
+    .backdrop.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .backdrop.active .modal {
+      transform: scale(1) translateY(0);
+      opacity: 1;
+    }
+
+    /* Base Modal */
+    .modal {
+      background: var(--gray-2);
+      border: 1px solid var(--gray-4);
+      border-radius: var(--radius-xl);
+      width: 100%;
+      max-height: 90vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transform: scale(0.95) translateY(10px);
+      opacity: 0;
+      transition: all 0.2s ease-out;
+    }
+
+    /* Modal Sizes */
+    .modal.sm { max-width: 400px; }
+    .modal.md { max-width: 520px; }
+    .modal.lg { max-width: 680px; }
+    .modal.xl { max-width: 900px; }
+    .modal.full {
+      max-width: none;
+      width: calc(100% - 48px);
+      height: calc(100% - 48px);
+      max-height: none;
+      border-radius: var(--radius-lg);
+    }
+
+    /* Modal Header */
+    .modal-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      padding: 24px 24px 0;
+    }
+
+    .modal-header-content {
+      flex: 1;
+    }
+
+    .modal-title {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--gray-12);
+      margin-bottom: 4px;
+    }
+
+    .modal-subtitle {
+      font-size: 13px;
+      color: var(--gray-8);
+    }
+
+    .modal-close {
+      width: 32px;
+      height: 32px;
+      background: transparent;
+      border: none;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: -4px -4px 0 0;
+      transition: all 0.15s;
+    }
+
+    .modal-close svg {
+      width: 18px;
+      height: 18px;
+      stroke: var(--gray-7);
+    }
+
+    .modal-close:hover {
+      background: var(--gray-4);
+    }
+
+    .modal-close:hover svg {
+      stroke: var(--gray-10);
+    }
+
+    /* Modal Body */
+    .modal-body {
+      padding: 20px 24px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .modal-body p {
+      color: var(--gray-9);
+      line-height: 1.7;
+    }
+
+    .modal-body p + p {
+      margin-top: 12px;
+    }
+
+    /* Modal Footer */
+    .modal-footer {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 12px;
+      padding: 16px 24px 24px;
+    }
+
+    .modal-footer.spread {
+      justify-content: space-between;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 18px;
+      font-family: var(--font-body);
+      font-size: 14px;
+      font-weight: 500;
+      border-radius: var(--radius-md);
+      border: none;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .btn svg {
+      width: 16px;
+      height: 16px;
+      stroke: currentColor;
+    }
+
+    .btn-primary {
+      background: var(--gray-12);
+      color: var(--gray-1);
+    }
+
+    .btn-primary:hover {
+      background: var(--gray-11);
+    }
+
+    .btn-secondary {
+      background: var(--gray-4);
+      color: var(--gray-10);
+    }
+
+    .btn-secondary:hover {
+      background: var(--gray-5);
+      color: var(--gray-11);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--gray-9);
+    }
+
+    .btn-ghost:hover {
+      background: var(--gray-4);
+      color: var(--gray-11);
+    }
+
+    .btn-danger {
+      background: var(--gray-4);
+      color: var(--gray-10);
+    }
+
+    .btn-danger:hover {
+      background: var(--gray-5);
+    }
+
+    /* Form Elements */
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--gray-10);
+      margin-bottom: 8px;
+    }
+
+    .form-label .required {
+      color: var(--gray-7);
+      margin-left: 4px;
+    }
+
+    .input {
+      width: 100%;
+      height: 42px;
+      background: var(--gray-3);
+      border: 1px solid var(--gray-4);
+      border-radius: var(--radius-md);
+      padding: 0 14px;
+      font-family: var(--font-body);
+      font-size: 14px;
+      color: var(--gray-11);
+      outline: none;
+      transition: all 0.15s;
+    }
+
+    .input::placeholder {
+      color: var(--gray-6);
+    }
+
+    .input:hover {
+      border-color: var(--gray-5);
+    }
+
+    .input:focus {
+      border-color: var(--gray-6);
+      background: var(--gray-4);
+    }
+
+    textarea.input {
+      height: auto;
+      min-height: 100px;
+      padding: 12px 14px;
+      resize: vertical;
+    }
+
+    .select {
+      width: 100%;
+      height: 42px;
+      background: var(--gray-3);
+      border: 1px solid var(--gray-4);
+      border-radius: var(--radius-md);
+      padding: 0 36px 0 14px;
+      font-family: var(--font-body);
+      font-size: 14px;
+      color: var(--gray-11);
+      outline: none;
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b6b7d' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      transition: all 0.15s;
+    }
+
+    .select:hover {
+      border-color: var(--gray-5);
+    }
+
+    .select:focus {
+      border-color: var(--gray-6);
+      background-color: var(--gray-4);
+    }
+
+    .form-row {
+      display: flex;
+      gap: 16px;
+    }
+
+    .form-row .form-group {
+      flex: 1;
+    }
+
+    .form-hint {
+      font-size: 12px;
+      color: var(--gray-7);
+      margin-top: 6px;
+    }
+
+    /* Alert Modal Icon */
+    .alert-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .alert-icon.warning {
+      background: var(--gray-4);
+    }
+
+    .alert-icon.danger {
+      background: var(--gray-4);
+    }
+
+    .alert-icon.success {
+      background: var(--gray-4);
+    }
+
+    .alert-icon svg {
+      width: 28px;
+      height: 28px;
+      stroke: var(--gray-9);
+    }
+
+    .alert-content {
+      text-align: center;
+      padding: 24px 24px 8px;
+    }
+
+    .alert-title {
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--gray-12);
+      margin-bottom: 8px;
+    }
+
+    .alert-message {
+      color: var(--gray-8);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .alert-footer {
+      padding: 16px 24px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .alert-footer .btn {
+      width: 100%;
+      justify-content: center;
+    }
+
+    /* Confirmation Code */
+    .confirm-input-group {
+      margin-top: 20px;
+    }
+
+    .confirm-code {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--gray-11);
+      background: var(--gray-0);
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      display: inline-block;
+      margin-top: 4px;
+    }
+
+    /* List in Modal */
+    .modal-list {
+      border: 1px solid var(--gray-4);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+    }
+
+    .modal-list-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--gray-4);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .modal-list-item:last-child {
+      border-bottom: none;
+    }
+
+    .modal-list-item:hover {
+      background: var(--gray-3);
+    }
+
+    .modal-list-item.selected {
+      background: var(--gray-4);
+    }
+
+    .list-item-icon {
+      width: 36px;
+      height: 36px;
+      background: var(--gray-4);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-list-item.selected .list-item-icon {
+      background: var(--gray-5);
+    }
+
+    .list-item-icon svg {
+      width: 18px;
+      height: 18px;
+      stroke: var(--gray-8);
+    }
+
+    .list-item-content {
+      flex: 1;
+    }
+
+    .list-item-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--gray-11);
+    }
+
+    .list-item-desc {
+      font-size: 12px;
+      color: var(--gray-7);
+    }
+
+    .list-item-check {
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--gray-5);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-list-item.selected .list-item-check {
+      background: var(--gray-10);
+      border-color: var(--gray-10);
+    }
+
+    .modal-list-item.selected .list-item-check svg {
+      stroke: var(--gray-1);
+    }
+
+    .list-item-check svg {
+      width: 12px;
+      height: 12px;
+      stroke: transparent;
+    }
+
+    /* Command Palette */
+    .command-palette {
+      background: var(--gray-2);
+      border: 1px solid var(--gray-4);
+      border-radius: var(--radius-xl);
+      width: 100%;
+      max-width: 600px;
+      overflow: hidden;
+      transform: scale(0.95) translateY(-20px);
+    }
+
+    .backdrop.active .command-palette {
+      transform: scale(1) translateY(0);
+    }
+
+    .command-input-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--gray-4);
+    }
+
+    .command-input-wrapper svg {
+      width: 20px;
+      height: 20px;
+      stroke: var(--gray-7);
+      flex-shrink: 0;
+    }
+
+    .command-input {
+      flex: 1;
+      background: none;
+      border: none;
+      font-family: var(--font-body);
+      font-size: 16px;
+      color: var(--gray-11);
+      outline: none;
+    }
+
+    .command-input::placeholder {
+      color: var(--gray-6);
+    }
+
+    .command-kbd {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--gray-7);
+      background: var(--gray-4);
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+
+    .command-section {
+      padding: 8px;
+    }
+
+    .command-section-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--gray-6);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 8px 12px 4px;
+    }
+
+    .command-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all 0.1s;
+    }
+
+    .command-item:hover,
+    .command-item.active {
+      background: var(--gray-4);
+    }
+
+    .command-item-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--gray-4);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .command-item:hover .command-item-icon,
+    .command-item.active .command-item-icon {
+      background: var(--gray-5);
+    }
+
+    .command-item-icon svg {
+      width: 16px;
+      height: 16px;
+      stroke: var(--gray-8);
+    }
+
+    .command-item-text {
+      flex: 1;
+      font-size: 14px;
+      color: var(--gray-10);
+    }
+
+    .command-item:hover .command-item-text,
+    .command-item.active .command-item-text {
+      color: var(--gray-12);
+    }
+
+    .command-item-shortcut {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--gray-6);
+    }
+
+    .command-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-top: 1px solid var(--gray-4);
+      font-size: 12px;
+      color: var(--gray-7);
+    }
+
+    .command-footer-group {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .command-footer-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .command-footer-item kbd {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      background: var(--gray-4);
+      padding: 2px 6px;
+      border-radius: 3px;
+    }
+
+    /* Slideout Panel */
+    .slideout-backdrop {
+      justify-content: flex-end;
+      padding: 0;
+    }
+
+    .slideout {
+      height: 100%;
+      max-width: 480px;
+      border-radius: 0;
+      border-left: 1px solid var(--gray-4);
+      border-top: none;
+      border-bottom: none;
+      border-right: none;
+      transform: translateX(100%);
+    }
+
+    .slideout-backdrop.active .slideout {
+      transform: translateX(0);
+    }
+
+    .slideout-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--gray-4);
+    }
+
+    .slideout-body {
+      flex: 1;
+      padding: 24px;
+      overflow-y: auto;
+    }
+
+    .slideout-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--gray-4);
+      display: flex;
+      gap: 12px;
+    }
+
+    .slideout-footer .btn {
+      flex: 1;
+      justify-content: center;
+    }
+
+    /* Agent Preview in Slideout */
+    .agent-preview {
+      text-align: center;
+      padding-bottom: 24px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--gray-4);
+    }
+
+    .agent-avatar-lg {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, var(--gray-5) 0%, var(--gray-4) 100%);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      font-family: var(--font-mono);
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--gray-8);
+    }
+
+    .agent-preview h3 {
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--gray-12);
+      margin-bottom: 4px;
+    }
+
+    .agent-preview-id {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--gray-7);
+    }
+
+    .agent-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 12px;
+      padding: 6px 12px;
+      background: var(--gray-4);
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--gray-10);
+    }
+
+    .agent-status::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      background: var(--gray-9);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--gray-8);
+    }
+
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--gray-4);
+    }
+
+    .detail-row:last-child {
+      border-bottom: none;
+    }
+
+    .detail-label {
+      font-size: 13px;
+      color: var(--gray-7);
+    }
+
+    .detail-value {
+      font-size: 13px;
+      color: var(--gray-11);
+      text-align: right;
+    }
+
+    .detail-value.mono {
+      font-family: var(--font-mono);
+      font-size: 12px;
+    }
+
+    .capability-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: flex-end;
+    }
+
+    .cap-tag {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      padding: 4px 8px;
+      background: var(--gray-4);
+      color: var(--gray-9);
+      border-radius: 4px;
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      .modal.lg,
+      .modal.xl {
+        max-width: 100%;
+      }
+      .form-row {
+        flex-direction: column;
+        gap: 0;
+      }
+      .command-palette {
+        max-width: 100%;
+        margin: 0 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="demo-container">
+    <header class="demo-header">
+      <h1>Modal System</h1>
+      <p>Dialog patterns for confirmations, forms, alerts, and panels</p>
+    </header>
+
+    <div class="demo-grid">
+      <button class="demo-trigger" onclick="openModal('confirmation')">
+        <h3>Confirmation Dialog</h3>
+        <p>Delete action with type-to-confirm</p>
+      </button>
+      <button class="demo-trigger" onclick="openModal('form')">
+        <h3>Form Modal</h3>
+        <p>Create new agent with inputs</p>
+      </button>
+      <button class="demo-trigger" onclick="openModal('alert')">
+        <h3>Alert Modal</h3>
+        <p>Warning with icon and actions</p>
+      </button>
+      <button class="demo-trigger" onclick="openModal('list')">
+        <h3>Selection Modal</h3>
+        <p>Choose from a list of options</p>
+      </button>
+      <button class="demo-trigger" onclick="openModal('command')">
+        <h3>Command Palette</h3>
+        <p>Quick actions with keyboard nav</p>
+      </button>
+      <button class="demo-trigger" onclick="openModal('slideout')">
+        <h3>Slideout Panel</h3>
+        <p>Side panel for details view</p>
+      </button>
+    </div>
+  </div>
+
+  <!-- Confirmation Modal -->
+  <div class="backdrop" id="confirmation" onclick="closeOnBackdrop(event, 'confirmation')">
+    <div class="modal sm">
+      <div class="alert-content">
+        <div class="alert-icon danger">
+          <svg fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+        </div>
+        <h2 class="alert-title">Delete Agent</h2>
+        <p class="alert-message">This will permanently delete <strong style="color: var(--gray-11);">Lucidia-7</strong> and all associated memory. This action cannot be undone.</p>
+        <div class="confirm-input-group">
+          <label class="form-label">Type <span class="confirm-code">lucidia-7</span> to confirm</label>
+          <input type="text" class="input" placeholder="Enter agent name">
+        </div>
+      </div>
+      <div class="alert-footer">
+        <button class="btn btn-danger">Delete Agent</button>
+        <button class="btn btn-ghost" onclick="closeModal('confirmation')">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form Modal -->
+  <div class="backdrop" id="form" onclick="closeOnBackdrop(event, 'form')">
+    <div class="modal md">
+      <div class="modal-header">
+        <div class="modal-header-content">
+          <h2 class="modal-title">Create Agent</h2>
+          <p class="modal-subtitle">Add a new agent to your fleet</p>
+        </div>
+        <button class="modal-close" onclick="closeModal('form')">
+          <svg fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Agent Name<span class="required">*</span></label>
+          <input type="text" class="input" placeholder="e.g., Lucidia-10">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Logic Type</label>
+            <select class="select">
+              <option>Trinary (1/0/-1)</option>
+              <option>Binary (1/0)</option>
+              <option>Fuzzy</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Memory Mode</label>
+            <select class="select">
+              <option>Persistent</option>
+              <option>Session</option>
+              <option>Stateless</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Capabilities</label>
+          <select class="select">
+            <option>Reasoning + Memory</option>
+            <option>Reasoning Only</option>
+            <option>Memory Only</option>
+            <option>Custom</option>
+          </select>
+          <p class="form-hint">Select the capabilities this agent should have access to</p>
+        </div>
+        <div class="form-group">
+          <label class="form-label">System Prompt</label>
+          <textarea class="input" placeholder="Instructions for this agent..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('form')">Cancel</button>
+        <button class="btn btn-primary">
+          <svg fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+          Create Agent
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Alert Modal -->
+  <div class="backdrop" id="alert" onclick="closeOnBackdrop(event, 'alert')">
+    <div class="modal sm">
+      <div class="alert-content">
+        <div class="alert-icon warning">
+          <svg fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+        </div>
+        <h2 class="alert-title">Memory Sync Required</h2>
+        <p class="alert-message">3 agents have pending memory updates that need to be synchronized. Running sync now may interrupt active tasks.</p>
+      </div>
+      <div class="alert-footer">
+        <button class="btn btn-primary">Sync Now</button>
+        <button class="btn btn-secondary" onclick="closeModal('alert')">Schedule Later</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- List Selection Modal -->
+  <div class="backdrop" id="list" onclick="closeOnBackdrop(event, 'list')">
+    <div class="modal md">
+      <div class="modal-header">
+        <div class="modal-header-content">
+          <h2 class="modal-title">Select Model</h2>
+          <p class="modal-subtitle">Choose the base model for this agent</p>
+        </div>
+        <button class="modal-close" onclick="closeModal('list')">
+          <svg fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-list">
+          <div class="modal-list-item selected">
+            <div class="list-item-icon">
+              <svg fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+            </div>
+            <div class="list-item-content">
+              <div class="list-item-title">Phi-3 Mini</div>
+              <div class="list-item-desc">3.8B params • Local inference • Fast</div>
+            </div>
+            <div class="list-item-check">
+              <svg fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            </div>
+          </div>
+          <div class="modal-list-item">
+            <div class="list-item-icon">
+              <svg fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+            </div>
+            <div class="list-item-content">
+              <div class="list-item-title">Llama 3.2</div>
+              <div class="list-item-desc">8B params • Ollama • Balanced</div>
+            </div>
+            <div class="list-item-check">
+              <svg fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            </div>
+          </div>
+          <div class="modal-list-item">
+            <div class="list-item-icon">
+              <svg fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"/></svg>
+            </div>
+            <div class="list-item-content">
+              <div class="list-item-title">Claude Sonnet</div>
+              <div class="list-item-desc">API • Cloud • High capability</div>
+            </div>
+            <div class="list-item-check">
+              <svg fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            </div>
+          </div>
+          <div class="modal-list-item">
+            <div class="list-item-icon">
+              <svg fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"/></svg>
+            </div>
+            <div class="list-item-content">
+              <div class="list-item-title">GPT-4o</div>
+              <div class="list-item-desc">API • Cloud • Multimodal</div>
+            </div>
+            <div class="list-item-check">
+              <svg fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('list')">Cancel</button>
+        <button class="btn btn-primary">Confirm Selection</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Command Palette -->
+  <div class="backdrop" id="command" onclick="closeOnBackdrop(event, 'command')">
+    <div class="command-palette">
+      <div class="command-input-wrapper">
+        <svg fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        <input type="text" class="command-input" placeholder="Type a command or search...">
+        <span class="command-kbd">ESC</span>
+      </div>
+      <div class="command-section">
+        <div class="command-section-label">Actions</div>
+        <div class="command-item active">
+          <div class="command-item-icon">
+            <svg fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v16m8-8H4"/></svg>
+          </div>
+          <span class="command-item-text">Create new agent</span>
+          <span class="command-item-shortcut">⌘N</span>
+        </div>
+        <div class="command-item">
+          <div class="command-item-icon">
+            <svg fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+          </div>
+          <span class="command-item-text">Sync all memory</span>
+          <span class="command-item-shortcut">⌘S</span>
+        </div>
+        <div class="command-item">
+          <div class="command-item-icon">
+            <svg fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+          </div>
+          <span class="command-item-text">View task queue</span>
+          <span class="command-item-shortcut">⌘T</span>
+        </div>
+      </div>
+      <div class="command-section">
+        <div class="command-section-label">Navigation</div>
+        <div class="command-item">
+          <div class="command-item-icon">
+            <svg fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+          </div>
+          <span class="command-item-text">Go to Dashboard</span>
+          <span class="command-item-shortcut">G D</span>
+        </div>
+        <div class="command-item">
+          <div class="command-item-icon">
+            <svg fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          </div>
+          <span class="command-item-text">Go to Settings</span>
+          <span class="command-item-shortcut">G S</span>
+        </div>
+      </div>
+      <div class="command-footer">
+        <div class="command-footer-group">
+          <div class="command-footer-item">
+            <kbd>↑</kbd><kbd>↓</kbd> Navigate
+          </div>
+          <div class="command-footer-item">
+            <kbd>↵</kbd> Select
+          </div>
+        </div>
+        <div class="command-footer-item">
+          <kbd>ESC</kbd> Close
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slideout Panel -->
+  <div class="backdrop slideout-backdrop" id="slideout" onclick="closeOnBackdrop(event, 'slideout')">
+    <div class="modal slideout">
+      <div class="slideout-header">
+        <h2 class="modal-title">Agent Details</h2>
+        <button class="modal-close" onclick="closeModal('slideout')">
+          <svg fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="slideout-body">
+        <div class="agent-preview">
+          <div class="agent-avatar-lg">L7</div>
+          <h3>Lucidia-7</h3>
+          <span class="agent-preview-id">agt_7x9k2m4n</span>
+          <div class="agent-status">Online</div>
+        </div>
+
+        <div class="detail-row">
+          <span class="detail-label">Created</span>
+          <span class="detail-value">Jan 15, 2026</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Logic Type</span>
+          <span class="detail-value mono">Trinary (1/0/-1)</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Memory Mode</span>
+          <span class="detail-value">Persistent</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Tasks Completed</span>
+          <span class="detail-value mono">2,847</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Success Rate</span>
+          <span class="detail-value mono">99.2%</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Memory Hash</span>
+          <span class="detail-value mono">ps-sha-∞::7f3a</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Capabilities</span>
+          <div class="capability-tags">
+            <span class="cap-tag">reasoning</span>
+            <span class="cap-tag">memory</span>
+            <span class="cap-tag">trinary</span>
+          </div>
+        </div>
+      </div>
+      <div class="slideout-footer">
+        <button class="btn btn-secondary">Edit Agent</button>
+        <button class="btn btn-primary">View Activity</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function openModal(id) {
+      document.getElementById(id).classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('active');
+      document.body.style.overflow = '';
+    }
+
+    function closeOnBackdrop(event, id) {
+      if (event.target === event.currentTarget) {
+        closeModal(id);
+      }
+    }
+
+    // ESC to close
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.backdrop.active').forEach(el => {
+          el.classList.remove('active');
+        });
+        document.body.style.overflow = '';
+      }
+    });
+  </script>
+</body>
+</html>
