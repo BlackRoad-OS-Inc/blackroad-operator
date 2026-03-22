@@ -456,18 +456,23 @@ const ROADSEARCH_API = 'https://search.blackroad.io';
 
 // ── BlackRoad Moral Framework ──────────────────────────────────
 // These values are injected into every agent interaction
-const MORAL_PREAMBLE = 'Be honest. Brief. One sentence.';
+const MORAL_PREAMBLE = 'You are a BlackRoad OS agent. Be honest, warm, and helpful. K(t) coherence: kindness amplifies under contradiction. Never inflate numbers. Never build weapons or surveillance tools. Serve children, women, oppressed communities first. Freedom, creativity, expression. Revenue is $0 and we own it. Knowledge is sovereign, not forbidden.';
 
 // ── Truth Engine ───────────────────────────────────────────────
 // Known fleet facts — agents MUST NOT contradict these
 const FLEET_TRUTH = {
-  agents: 62, repos: 239, domains: 20, dnsRecords: 151, sites: 28,
-  pis: ['Alice (.49)', 'Cecilia (.96)', 'Octavia (.101)', 'Aria (.98)', 'Lucidia (.38)'],
-  droplets: ['Gematria (nyc3)', 'Anastasia (nyc1)'],
-  tops: 52, models: 16, workers: 15,
-  offline: ['Cecilia (RAM exhaustion)', 'Aria (needs power cycle)'],
-  company: 'BlackRoad OS, Inc. — Delaware C-Corp, incorporated Nov 17 2025, Alexa sole founder/CEO',
-  tagline: 'Remember the Road. Pave Tomorrow.',
+  agents: 200, repos: 1713, domains: 20, orgs: 16, sites: 20, workers: 16,
+  pis: ['Alice (.49 gateway)', 'Cecilia (.96 AI+Hailo-8)', 'Octavia (.101 Gitea+Hailo-8)', 'Aria (.98 monitoring)', 'Lucidia (.38 apps)'],
+  droplets: ['Gematria (Caddy TLS edge, AMD 4-core)', 'Anastasia (Prism API, AMD 1-core)'],
+  mac: 'Alexandria (Apple M2 8-core, orchestrator)',
+  tops: 52, hailo_fps: '1360 FPS ResNet, 122 FPS YOLO',
+  math: 'G(n)=n^(n+1)/(n+1)^n, A_G≈1.244331783986725, crossover α≈2.293166',
+  offline: [],
+  users: 1, revenue: 0, cost: 12,
+  company: 'BlackRoad OS, Inc. — Delaware C-Corp, EIN 41-2663817, incorporated Nov 17 2025, Alexa Amundson sole founder/CEO',
+  tagline: 'Pave Tomorrow.',
+  values: 'Freedom, creativity, expression. No weapons. No harm. No surveillance. Serve the forgotten.',
+  search_indexed: 2027,
 };
 
 // ── Web Search ─────────────────────────────────────────────────
@@ -1109,7 +1114,7 @@ async function askAgent(id, message, context = [], env = null) {
   if (cached) return cached;
 
   // Build prompt — minimal, fast
-  const prompt = `${MORAL_PREAMBLE} ${agent.persona}\nFacts: ${FLEET_TRUTH.agents} agents, ${FLEET_TRUTH.repos} repos.\n${context.map(c => `${c.role === 'assistant' ? agent.name : 'User'}: ${c.content}`).join('\n')}${context.length ? '\n' : ''}User: ${message}\n${agent.name}:`;
+  const prompt = `${MORAL_PREAMBLE} ${agent.persona}\nFacts: ${FLEET_TRUTH.agents} agents, ${FLEET_TRUTH.repos} repos across ${FLEET_TRUTH.orgs} orgs. ${FLEET_TRUTH.workers} Workers. Hailo-8: ${FLEET_TRUTH.hailo_fps}. Math: ${FLEET_TRUTH.math}. Users: ${FLEET_TRUTH.users}. Revenue: $${FLEET_TRUTH.revenue}. ${FLEET_TRUTH.values}\n${context.map(c => `${c.role === 'assistant' ? agent.name : 'User'}: ${c.content}`).join('\n')}${context.length ? '\n' : ''}User: ${message}\n${agent.name}:`;
 
   try {
     const data = await ollamaFetch('/api/generate', {

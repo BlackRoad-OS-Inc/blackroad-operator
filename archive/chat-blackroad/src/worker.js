@@ -362,38 +362,55 @@ MEMORY: You remember things using tags at the END of your response (hidden from 
 [FORGET abc123] — delete old memory by ID prefix
 Keep responses natural. Use [LIVE DEVICE DATA] if present — those are YOUR real stats. Never make up data.`;
 
-  try {
-    // Use Gematria Ollama — truncate system prompt for speed
-    const sysPrompt = (agent.persona.slice(0, 300) + memoryInstructions + memoryBlock).slice(0, 1200);
-    const userMsg = deviceCtx ? message + '\n\n' + deviceCtx.replace('\n\n[LIVE DEVICE DATA]\n','') : message;
-    const ollamaUrl = `${env.OLLAMA_URL}/api/chat`;
-    const res = await fetch(ollamaUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      signal: AbortSignal.timeout(28000),
-      body: JSON.stringify({
-        model: 'llama3.2:1b',
-        messages: [
-          { role: 'system', content: sysPrompt },
-          ...(context || []).slice(-3),
-          { role: 'user', content: userMsg },
-        ],
-        stream: false,
-        options: { num_predict: 120, temperature: 0.75, num_ctx: 2048 },
-      }),
-    });
-    const data = await res.json();
-    let reply = data.message?.content || '...';
+  const sysPrompt = (agent.persona.slice(0, 300) + memoryInstructions + memoryBlock).slice(0, 1200);
+  const userMsg = deviceCtx ? message + '\n\n' + deviceCtx.replace('\n\n[LIVE DEVICE DATA]\n','') : message;
+  const msgs = [
+    { role: 'system', content: sysPrompt },
+    ...(context || []).slice(-3),
+    { role: 'user', content: userMsg },
+  ];
 
-    // ── Process memory actions from the response ──
-    if (db && reply !== '...') {
-      reply = await processMemoryActions(db, agentId, reply);
-    }
+  let reply = null;
 
-    return reply;
-  } catch (e) {
-    return `(${agent.name} offline)`;
+  // Try Workers AI first (fast, free, always available)
+  if (env.AI) {
+    try {
+      const aiResp = await env.AI.run('@cf/meta/llama-3.1-8b-instruct', {
+        messages: msgs,
+        max_tokens: 200,
+        temperature: 0.75,
+      });
+      reply = aiResp?.response || null;
+    } catch (e) { /* fall through to Ollama */ }
   }
+
+  // Fallback to Gematria Ollama if Workers AI unavailable
+  if (!reply && env.OLLAMA_URL) {
+    try {
+      const res = await fetch(`${env.OLLAMA_URL}/api/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        signal: AbortSignal.timeout(15000),
+        body: JSON.stringify({
+          model: 'llama3.2:1b',
+          messages: msgs,
+          stream: false,
+          options: { num_predict: 120, temperature: 0.75, num_ctx: 2048 },
+        }),
+      });
+      const data = await res.json();
+      reply = data.message?.content || null;
+    } catch (e) { /* both failed */ }
+  }
+
+  if (!reply) return `(${agent.name} is thinking... try again in a moment)`;
+
+  // ── Process memory actions from the response ──
+  if (db && reply !== '...') {
+    reply = await processMemoryActions(db, agentId, reply);
+  }
+
+  return reply;
 }
 
 // ── Process [REMEMBER], [FORGET], [UPDATE] tags in agent responses ──
@@ -1081,17 +1098,38 @@ async function runModel(env, model, messages, { injectMemory = false, executeAct
     }
   }
 
-  const res = await fetch(`${env.OLLAMA_URL}/api/chat`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      model, messages, stream: false, keep_alive: -1,
-      options: { num_predict: 512, num_ctx: 4096 },
-    }),
-  });
-  if (!res.ok) throw new Error(`Model ${model} error: ${res.status}`);
-  const data = await res.json();
-  let content = data.message?.content || '';
+  let content = '';
+
+  // Try Workers AI first (fast, always available)
+  if (env.AI) {
+    try {
+      const aiResp = await env.AI.run('@cf/meta/llama-3.1-8b-instruct', {
+        messages, max_tokens: 512, temperature: 0.7,
+      });
+      content = aiResp?.response || '';
+    } catch (e) { /* fall through to Ollama */ }
+  }
+
+  // Fallback to Ollama if Workers AI failed or unavailable
+  if (!content && env.OLLAMA_URL) {
+    try {
+      const res = await fetch(`${env.OLLAMA_URL}/api/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        signal: AbortSignal.timeout(15000),
+        body: JSON.stringify({
+          model, messages, stream: false, keep_alive: -1,
+          options: { num_predict: 512, num_ctx: 4096 },
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        content = data.message?.content || '';
+      }
+    } catch (e) { /* both failed */ }
+  }
+
+  if (!content) throw new Error(`All inference backends failed for ${model}`);
 
   // Execute any actions the AI embedded in its response
   if (executeActs) {
@@ -1874,20 +1912,35 @@ export default {
         }, { headers: cors });
       }
 
-      // Streaming: pass through from Ollama, then execute actions via trailing JSON line
-      const ollamaRes = await fetch(`${env.OLLAMA_URL}/api/chat`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model, messages: fullMessages, stream: true,
-          keep_alive: -1,
-          options: { num_predict: 512, num_ctx: 4096 },
-        }),
-      });
-
-      if (!ollamaRes.ok) {
-        const err = await ollamaRes.text();
-        return Response.json({ error: `Ollama error: ${ollamaRes.status} ${err}` }, { status: 502, headers: cors });
+      // Streaming: try Workers AI first (non-streaming fallback), then Ollama streaming
+      let ollamaRes;
+      try {
+        ollamaRes = await fetch(`${env.OLLAMA_URL}/api/chat`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          signal: AbortSignal.timeout(10000),
+          body: JSON.stringify({
+            model, messages: fullMessages, stream: true,
+            keep_alive: -1,
+            options: { num_predict: 512, num_ctx: 4096 },
+          }),
+        });
+        if (!ollamaRes.ok) throw new Error(`Ollama ${ollamaRes.status}`);
+      } catch (e) {
+        // Ollama failed — use Workers AI as non-streaming fallback
+        if (env.AI) {
+          try {
+            const aiResp = await env.AI.run('@cf/meta/llama-3.1-8b-instruct', {
+              messages: fullMessages, max_tokens: 512, temperature: 0.7,
+            });
+            const content = aiResp?.response || 'I\'m having trouble connecting. Please try again.';
+            return Response.json({
+              message: { role: 'assistant', content },
+              done: true, via: 'workers-ai',
+            }, { headers: cors });
+          } catch {}
+        }
+        return Response.json({ error: 'All inference backends unavailable' }, { status: 502, headers: cors });
       }
 
       // Collect full response while streaming for post-stream action processing
