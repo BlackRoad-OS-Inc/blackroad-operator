@@ -1,0 +1,166 @@
+# .github/workflows/connector-linear.yml
+# Linear connector — syncs git issues/PRs to Linear workspace
+# Set org secrets: LINEAR_API_KEY, LINEAR_TEAM_ID
+
+name: "Connector: Linear"
+
+on:
+  issues:
+    types: [opened, closed, reopened, labeled]
+  pull_request:
+    types: [opened, closed]
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Action'
+        default: 'sync_issues'
+        type: choice
+        options:
+          - sync_issues
+          - test
+
+permissions:
+  contents: read
+  issues: read
+
+jobs:
+  sync-to-linear:
+    name: "Sync to Linear"
+    runs-on: ubuntu-latest
+    if: secrets.LINEAR_API_KEY != ''
+
+    steps:
+      - name: Sync event to Linear
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        env:
+          LINEAR_KEY: ${{ secrets.LINEAR_API_KEY }}
+          LINEAR_TEAM: ${{ secrets.LINEAR_TEAM_ID }}
+        with:
+          script: |
+            const apiKey = process.env.LINEAR_KEY;
+            const teamId = process.env.LINEAR_TEAM;
+            if (!apiKey || !teamId) { console.log('Linear not configured'); return; }
+
+            const linear = async (query, variables = {}) => {
+              const resp = await fetch('https://api.linear.app/graphql', {
+                method: 'POST',
+                headers: { 'Authorization': apiKey, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query, variables })
+              });
+              return resp.json();
+            };
+
+            const event = context.eventName;
+            const repo = `${context.repo.owner}/${context.repo.repo}`;
+
+            if (event === 'issues') {
+              const issue = context.payload.issue;
+              const action = context.payload.action;
+
+              if (action === 'opened') {
+                const priorityMap = { 'critical': 1, 'urgent': 1, 'high': 2, 'medium': 3, 'low': 4 };
+                let priority = 3;
+                for (const label of issue.labels) {
+                  for (const [key, val] of Object.entries(priorityMap)) {
+                    if (label.name.toLowerCase().includes(key)) priority = Math.min(priority, val);
+                  }
+                }
+
+                const labelNames = issue.labels.map(l => l.name);
+                let linearLabel = 'Bug';
+                if (labelNames.some(l => l.includes('feature') || l.includes('enhancement'))) linearLabel = 'Feature';
+                if (labelNames.some(l => l.includes('agent') || l.includes('automated'))) linearLabel = 'Improvement';
+
+                const result = await linear(`
+                  mutation CreateIssue($input: IssueCreateInput!) {
+                    issueCreate(input: $input) {
+                      success
+                      issue { id identifier url }
+                    }
+                  }
+                `, {
+                  input: {
+                    teamId,
+                    title: `[${repo.split('/')[1]}] ${issue.title}`,
+                    description: `${issue.body?.substring(0, 4000) || ''}\n\n---\nGitHub: ${issue.html_url}`,
+                    priority
+                  }
+                });
+
+                const created = result.data?.issueCreate?.issue;
+                if (created) {
+                  console.log(`Created Linear issue: ${created.identifier} — ${created.url}`);
+
+                  // Comment back on GitHub with Linear link
+                  await github.rest.issues.createComment({
+                    owner: context.repo.owner, repo: context.repo.repo,
+                    issue_number: issue.number,
+                    body: `Tracked in Linear: [${created.identifier}](${created.url})\n\n*Synced by BlackRoad Connector*`
+                  });
+                }
+              }
+
+              else if (action === 'closed') {
+                // Find and close Linear issue by searching title
+                const searchResult = await linear(`
+                  query SearchIssues($term: String!) {
+                    issueSearch(term: $term, first: 1) {
+                      nodes { id identifier title }
+                    }
+                  }
+                `, { term: issue.title });
+
+                const found = searchResult.data?.issueSearch?.nodes?.[0];
+                if (found) {
+                  // Get "Done" state
+                  const states = await linear(`
+                    query TeamStates($teamId: String!) {
+                      team(id: $teamId) {
+                        states { nodes { id name type } }
+                      }
+                    }
+                  `, { teamId });
+                  const doneState = states.data?.team?.states?.nodes?.find(s => s.type === 'completed');
+
+                  if (doneState) {
+                    await linear(`
+                      mutation UpdateIssue($id: String!, $input: IssueUpdateInput!) {
+                        issueUpdate(id: $id, input: $input) { success }
+                      }
+                    `, { id: found.id, input: { stateId: doneState.id } });
+                    console.log(`Closed Linear issue: ${found.identifier}`);
+                  }
+                }
+              }
+            }
+
+            else if (event === 'pull_request') {
+              const pr = context.payload.pull_request;
+              if (context.payload.action !== 'opened') return;
+
+              // Link PR to any Linear issues mentioned in branch name or body
+              const branchMatch = pr.head.ref.match(/([A-Z]+-\d+)/);
+              if (branchMatch) {
+                const identifier = branchMatch[1];
+                console.log(`PR linked to Linear issue: ${identifier}`);
+
+                // Attach PR to the issue
+                const search = await linear(`
+                  query FindIssue($term: String!) {
+                    issueSearch(term: $term, first: 1) {
+                      nodes { id identifier }
+                    }
+                  }
+                `, { term: identifier });
+
+                const found = search.data?.issueSearch?.nodes?.[0];
+                if (found) {
+                  await linear(`
+                    mutation AttachLink($issueId: String!, $url: String!, $title: String!) {
+                      attachmentCreate(input: { issueId: $issueId, url: $url, title: $title }) { success }
+                    }
+                  `, { issueId: found.id, url: pr.html_url, title: `PR: ${pr.title}` });
+                  console.log(`Attached PR to ${found.identifier}`);
+                }
+              }
+            }

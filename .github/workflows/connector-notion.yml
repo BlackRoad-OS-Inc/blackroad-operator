@@ -1,0 +1,214 @@
+# .github/workflows/connector-notion.yml
+# Notion connector — syncs git events to a Notion database
+# Set org secrets: NOTION_API_KEY, NOTION_DATABASE_ID
+
+name: "Connector: Notion"
+
+on:
+  issues:
+    types: [opened, closed, reopened, labeled]
+  pull_request:
+    types: [opened, closed, merged]
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Action'
+        default: 'sync_open_issues'
+        type: choice
+        options:
+          - sync_open_issues
+          - sync_repos
+          - test
+
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+
+jobs:
+  sync-to-notion:
+    name: "Sync to Notion"
+    runs-on: ubuntu-latest
+    if: secrets.NOTION_API_KEY != ''
+
+    steps:
+      - name: Sync event to Notion
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        env:
+          NOTION_KEY: ${{ secrets.NOTION_API_KEY }}
+          NOTION_DB: ${{ secrets.NOTION_DATABASE_ID }}
+        with:
+          script: |
+            const notionKey = process.env.NOTION_KEY;
+            const dbId = process.env.NOTION_DB;
+            if (!notionKey || !dbId) { console.log('Notion not configured — skipping'); return; }
+
+            const notion = async (method, path, body) => {
+              const resp = await fetch(`https://api.notion.com/v1${path}`, {
+                method,
+                headers: {
+                  'Authorization': `Bearer ${notionKey}`,
+                  'Content-Type': 'application/json',
+                  'Notion-Version': '2022-06-28'
+                },
+                body: body ? JSON.stringify(body) : undefined
+              });
+              return resp.json();
+            };
+
+            const event = context.eventName;
+            const repo = `${context.repo.owner}/${context.repo.repo}`;
+
+            // Helper to find existing page by GitHub URL
+            const findPage = async (url) => {
+              const result = await notion('POST', `/databases/${dbId}/query`, {
+                filter: { property: 'GitHub URL', url: { equals: url } }
+              });
+              return result.results?.[0];
+            };
+
+            if (event === 'issues') {
+              const issue = context.payload.issue;
+              const action = context.payload.action;
+
+              const statusMap = {
+                'opened': 'Open',
+                'reopened': 'Open',
+                'closed': 'Done'
+              };
+
+              const existing = await findPage(issue.html_url);
+
+              if (existing && (action === 'closed' || action === 'reopened')) {
+                // Update status
+                await notion('PATCH', `/pages/${existing.id}`, {
+                  properties: {
+                    'Status': { select: { name: statusMap[action] || 'Open' } }
+                  }
+                });
+                console.log(`Updated: ${issue.title} → ${statusMap[action]}`);
+              } else if (!existing && action === 'opened') {
+                // Create new page
+                await notion('POST', '/pages', {
+                  parent: { database_id: dbId },
+                  properties: {
+                    'Name': { title: [{ text: { content: issue.title } }] },
+                    'Type': { select: { name: 'Issue' } },
+                    'Status': { select: { name: 'Open' } },
+                    'Repo': { rich_text: [{ text: { content: repo } }] },
+                    'GitHub URL': { url: issue.html_url },
+                    'Labels': { multi_select: issue.labels.map(l => ({ name: l.name })) },
+                    'Priority': { select: { name: issue.labels.some(l => l.name.includes('urgent') || l.name.includes('critical')) ? 'High' : 'Medium' } }
+                  },
+                  children: [{
+                    object: 'block', type: 'paragraph',
+                    paragraph: { rich_text: [{ text: { content: issue.body?.substring(0, 2000) || 'No description' } }] }
+                  }]
+                });
+                console.log(`Created: ${issue.title}`);
+              }
+            }
+
+            else if (event === 'pull_request') {
+              const pr = context.payload.pull_request;
+              const action = context.payload.action;
+
+              if (action === 'opened') {
+                await notion('POST', '/pages', {
+                  parent: { database_id: dbId },
+                  properties: {
+                    'Name': { title: [{ text: { content: `PR: ${pr.title}` } }] },
+                    'Type': { select: { name: 'PR' } },
+                    'Status': { select: { name: 'In Review' } },
+                    'Repo': { rich_text: [{ text: { content: repo } }] },
+                    'GitHub URL': { url: pr.html_url }
+                  }
+                });
+                console.log(`Created PR: ${pr.title}`);
+              } else if (action === 'closed') {
+                const existing = await findPage(pr.html_url);
+                if (existing) {
+                  await notion('PATCH', `/pages/${existing.id}`, {
+                    properties: {
+                      'Status': { select: { name: pr.merged ? 'Merged' : 'Closed' } }
+                    }
+                  });
+                  console.log(`Updated PR: ${pr.title} → ${pr.merged ? 'Merged' : 'Closed'}`);
+                }
+              }
+            }
+
+            else if (event === 'release') {
+              const release = context.payload.release;
+              await notion('POST', '/pages', {
+                parent: { database_id: dbId },
+                properties: {
+                  'Name': { title: [{ text: { content: `Release: ${release.tag_name}` } }] },
+                  'Type': { select: { name: 'Release' } },
+                  'Status': { select: { name: 'Done' } },
+                  'Repo': { rich_text: [{ text: { content: repo } }] },
+                  'GitHub URL': { url: release.html_url }
+                }
+              });
+              console.log(`Created release: ${release.tag_name}`);
+            }
+
+  bulk-sync:
+    name: "Bulk Sync Issues"
+    runs-on: ubuntu-latest
+    if: inputs.action == 'sync_open_issues' || inputs.action == 'sync_repos'
+
+    steps:
+      - name: Sync all open issues to Notion
+        if: inputs.action == 'sync_open_issues'
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        env:
+          NOTION_KEY: ${{ secrets.NOTION_API_KEY }}
+          NOTION_DB: ${{ secrets.NOTION_DATABASE_ID }}
+        with:
+          script: |
+            const notionKey = process.env.NOTION_KEY;
+            const dbId = process.env.NOTION_DB;
+            if (!notionKey || !dbId) return;
+
+            const notion = async (method, path, body) => {
+              const resp = await fetch(`https://api.notion.com/v1${path}`, {
+                method,
+                headers: { 'Authorization': `Bearer ${notionKey}`, 'Content-Type': 'application/json', 'Notion-Version': '2022-06-28' },
+                body: body ? JSON.stringify(body) : undefined
+              });
+              return resp.json();
+            };
+
+            // Get all open issues across key repos
+            const repos = ['blackroad-operator', 'blackroad', 'RoadCode', 'road-search', 'openclaw'];
+            let synced = 0;
+
+            for (const repo of repos) {
+              try {
+                const { data: issues } = await github.rest.issues.listForRepo({
+                  owner: 'BlackRoad-OS-Inc', repo, state: 'open', per_page: 50
+                });
+
+                for (const issue of issues) {
+                  if (issue.pull_request) continue;
+                  try {
+                    await notion('POST', '/pages', {
+                      parent: { database_id: dbId },
+                      properties: {
+                        'Name': { title: [{ text: { content: issue.title } }] },
+                        'Type': { select: { name: 'Issue' } },
+                        'Status': { select: { name: 'Open' } },
+                        'Repo': { rich_text: [{ text: { content: `BlackRoad-OS-Inc/${repo}` } }] },
+                        'GitHub URL': { url: issue.html_url },
+                        'Labels': { multi_select: issue.labels.map(l => ({ name: l.name })).slice(0, 5) }
+                      }
+                    });
+                    synced++;
+                  } catch (e) { console.log(`Skip: ${issue.title} — ${e.message}`); }
+                }
+              } catch {}
+            }
+            console.log(`Synced ${synced} issues to Notion`);

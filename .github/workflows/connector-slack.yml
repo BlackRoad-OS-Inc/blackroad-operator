@@ -1,0 +1,126 @@
+# .github/workflows/connector-slack.yml
+# Slack connector — posts to Slack on all important git events
+# Set org secret: SLACK_WEBHOOK_URL (Incoming Webhook URL)
+
+name: "Connector: Slack"
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [opened, closed, merged]
+  issues:
+    types: [opened, closed]
+  release:
+    types: [published]
+  workflow_run:
+    workflows: ["Agent: Org Health Monitor", "Agent: Repo Improver"]
+    types: [completed]
+  schedule:
+    - cron: '0 14 * * 1-5'  # Weekdays 2pm UTC — daily digest
+
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+
+jobs:
+  notify:
+    name: "Slack Notify"
+    runs-on: ubuntu-latest
+    if: vars.SLACK_ENABLED == 'true' || secrets.SLACK_WEBHOOK_URL != ''
+
+    steps:
+      - name: Build and send Slack message
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+        with:
+          script: |
+            const webhook = process.env.SLACK_WEBHOOK;
+            if (!webhook) { console.log('No SLACK_WEBHOOK_URL set — skipping'); return; }
+
+            const event = context.eventName;
+            const repo = `${context.repo.owner}/${context.repo.repo}`;
+            const repoUrl = `https://github.com/${repo}`;
+            let blocks = [];
+
+            if (event === 'push') {
+              const commits = context.payload.commits || [];
+              const branch = context.ref.replace('refs/heads/', '');
+              blocks = [{
+                type: 'section',
+                text: { type: 'mrkdwn', text: `*Push to ${repo}* (${branch})\n${commits.map(c => `• <${c.url}|${c.message.split('\n')[0].substring(0, 80)}>`).join('\n')}` }
+              }];
+            }
+
+            else if (event === 'pull_request') {
+              const pr = context.payload.pull_request;
+              const action = context.payload.action;
+              const emoji = action === 'opened' ? '🔀' : action === 'closed' && pr.merged ? '✅' : '❌';
+              blocks = [{
+                type: 'section',
+                text: { type: 'mrkdwn', text: `${emoji} *PR ${action}:* <${pr.html_url}|${pr.title}>\n${repo} • ${pr.additions}+ ${pr.deletions}- • ${pr.changed_files} files` }
+              }];
+            }
+
+            else if (event === 'issues') {
+              const issue = context.payload.issue;
+              const emoji = context.payload.action === 'opened' ? '🆕' : '✅';
+              blocks = [{
+                type: 'section',
+                text: { type: 'mrkdwn', text: `${emoji} *Issue ${context.payload.action}:* <${issue.html_url}|${issue.title}>\n${repo} • Labels: ${issue.labels.map(l => l.name).join(', ') || 'none'}` }
+              }];
+            }
+
+            else if (event === 'release') {
+              const release = context.payload.release;
+              blocks = [{
+                type: 'section',
+                text: { type: 'mrkdwn', text: `🚀 *Release published:* <${release.html_url}|${release.tag_name}>\n${repo} • ${release.name || release.tag_name}` }
+              }];
+            }
+
+            else if (event === 'workflow_run') {
+              const run = context.payload.workflow_run;
+              const emoji = run.conclusion === 'success' ? '✅' : '❌';
+              blocks = [{
+                type: 'section',
+                text: { type: 'mrkdwn', text: `${emoji} *Agent completed:* ${run.name}\n${repo} • ${run.conclusion} • <${run.html_url}|View run>` }
+              }];
+            }
+
+            else if (event === 'schedule') {
+              // Daily digest
+              const { data: repos } = await github.rest.repos.listForOrg({
+                org: 'BlackRoad-OS-Inc', per_page: 5, sort: 'pushed', direction: 'desc'
+              });
+              const { data: issues } = await github.rest.issues.listForRepo({
+                owner: context.repo.owner, repo: context.repo.repo, state: 'open', per_page: 5
+              });
+
+              blocks = [
+                { type: 'header', text: { type: 'plain_text', text: '📊 BlackRoad Daily Digest' } },
+                { type: 'section', text: { type: 'mrkdwn', text:
+                  `*Recently active repos:*\n${repos.map(r => `• <${r.html_url}|${r.name}> — ${r.description?.substring(0, 60) || 'no description'}`).join('\n')}`
+                }},
+                { type: 'section', text: { type: 'mrkdwn', text:
+                  `*Open issues (${issues.length}):*\n${issues.map(i => `• <${i.html_url}|${i.title}>`).join('\n') || 'None'}`
+                }}
+              ];
+            }
+
+            if (blocks.length === 0) return;
+
+            // Add footer
+            blocks.push({
+              type: 'context',
+              elements: [{ type: 'mrkdwn', text: `BlackRoad OS • <${repoUrl}|${repo}> • ${new Date().toISOString().split('T')[0]}` }]
+            });
+
+            const resp = await fetch(webhook, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ blocks })
+            });
+            console.log(`Slack: ${resp.status}`);

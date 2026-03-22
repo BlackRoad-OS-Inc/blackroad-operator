@@ -1,0 +1,117 @@
+# .github/workflows/connector-stripe.yml
+# Stripe connector — syncs product/pricing changes from git to Stripe
+# When pricing configs change, auto-updates Stripe products
+# Set org secret: STRIPE_SECRET_KEY
+
+name: "Connector: Stripe"
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '**/pricing.json'
+      - '**/products.json'
+      - '**/stripe-config.json'
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Action'
+        default: 'sync'
+        type: choice
+        options:
+          - sync
+          - audit
+
+permissions:
+  contents: read
+
+jobs:
+  sync-pricing:
+    name: "Sync Products to Stripe"
+    runs-on: ubuntu-latest
+    if: secrets.STRIPE_SECRET_KEY != ''
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Sync products and prices
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        env:
+          STRIPE_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+        with:
+          script: |
+            const stripeKey = process.env.STRIPE_KEY;
+            if (!stripeKey) return;
+
+            const stripe = async (method, path, body) => {
+              const resp = await fetch(`https://api.stripe.com/v1${path}`, {
+                method,
+                headers: {
+                  'Authorization': `Bearer ${stripeKey}`,
+                  'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: body ? new URLSearchParams(body).toString() : undefined
+              });
+              return resp.json();
+            };
+
+            // Read pricing config if it exists
+            const fs = require('fs');
+            const configPaths = [
+              'workers/blackroad-products/pricing.json',
+              'config/stripe-products.json',
+              'stripe-config.json'
+            ];
+
+            let config;
+            for (const p of configPaths) {
+              try {
+                config = JSON.parse(fs.readFileSync(p, 'utf8'));
+                console.log(`Found pricing config: ${p}`);
+                break;
+              } catch {}
+            }
+
+            if (!config) {
+              console.log('No pricing config found — auditing existing Stripe products');
+
+              // Audit mode — list existing products
+              const products = await stripe('GET', '/products?limit=20');
+              console.log(`Stripe products: ${products.data?.length || 0}`);
+              for (const p of (products.data || [])) {
+                console.log(`  ${p.name}: ${p.active ? 'active' : 'inactive'} — ${p.description?.substring(0, 60) || 'no desc'}`);
+              }
+
+              const prices = await stripe('GET', '/prices?limit=20');
+              console.log(`\nStripe prices: ${prices.data?.length || 0}`);
+              for (const p of (prices.data || [])) {
+                const amount = p.unit_amount ? `$${p.unit_amount / 100}` : 'custom';
+                console.log(`  ${p.product}: ${amount}/${p.recurring?.interval || 'one-time'}`);
+              }
+              return;
+            }
+
+            // Sync products from config
+            console.log(`Syncing ${config.products?.length || 0} products...`);
+            for (const product of (config.products || [])) {
+              try {
+                if (product.stripe_id) {
+                  // Update existing
+                  await stripe('POST', `/products/${product.stripe_id}`, {
+                    name: product.name,
+                    description: product.description,
+                    active: product.active !== false ? 'true' : 'false'
+                  });
+                  console.log(`Updated: ${product.name}`);
+                } else {
+                  // Create new
+                  const created = await stripe('POST', '/products', {
+                    name: product.name,
+                    description: product.description || `${product.name} — BlackRoad OS`
+                  });
+                  console.log(`Created: ${product.name} → ${created.id}`);
+                }
+              } catch (e) {
+                console.log(`Error: ${product.name} — ${e.message}`);
+              }
+            }

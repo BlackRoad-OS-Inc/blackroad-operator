@@ -1,0 +1,74 @@
+# .github/workflows/connector-discord.yml
+# Discord connector — posts to Discord on git events
+# Set org secret: DISCORD_WEBHOOK_URL
+
+name: "Connector: Discord"
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [opened, closed]
+  issues:
+    types: [opened, closed]
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  notify:
+    name: "Discord Notify"
+    runs-on: ubuntu-latest
+    if: secrets.DISCORD_WEBHOOK_URL != ''
+
+    steps:
+      - name: Send Discord notification
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        with:
+          script: |
+            const webhook = process.env.DISCORD_WEBHOOK;
+            if (!webhook) return;
+
+            const event = context.eventName;
+            const repo = `${context.repo.owner}/${context.repo.repo}`;
+            let embed = { color: 0xFF2255, footer: { text: 'BlackRoad OS' }, timestamp: new Date().toISOString() };
+
+            if (event === 'push') {
+              const commits = context.payload.commits || [];
+              embed.title = `Push to ${repo}`;
+              embed.description = commits.map(c => `[\`${c.id.substring(0,7)}\`](${c.url}) ${c.message.split('\n')[0].substring(0, 80)}`).join('\n');
+              embed.color = 0x4488FF;
+            }
+            else if (event === 'pull_request') {
+              const pr = context.payload.pull_request;
+              const merged = context.payload.action === 'closed' && pr.merged;
+              embed.title = `PR ${merged ? 'merged' : context.payload.action}: ${pr.title}`;
+              embed.url = pr.html_url;
+              embed.description = `${repo} • +${pr.additions} -${pr.deletions} • ${pr.changed_files} files`;
+              embed.color = merged ? 0x22C55E : context.payload.action === 'opened' ? 0x8844FF : 0xFF6B2B;
+            }
+            else if (event === 'issues') {
+              const issue = context.payload.issue;
+              embed.title = `Issue ${context.payload.action}: ${issue.title}`;
+              embed.url = issue.html_url;
+              embed.description = `${repo} • ${issue.labels.map(l => l.name).join(', ') || 'no labels'}`;
+              embed.color = context.payload.action === 'opened' ? 0xFF2255 : 0x22C55E;
+            }
+            else if (event === 'release') {
+              const release = context.payload.release;
+              embed.title = `Release: ${release.tag_name}`;
+              embed.url = release.html_url;
+              embed.description = release.body?.substring(0, 500) || repo;
+              embed.color = 0x00D4FF;
+            }
+
+            await fetch(webhook, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ embeds: [embed] })
+            });
+            console.log('Discord notification sent');
