@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RoadChain Miner — BlackRoad OS</title>
+  <meta name="description" content="Interactive block mining simulator for the RoadChain network. Mine ROAD tokens with proof-of-work.">
+  <meta name="theme-color" content="#0a0a0a">
+  <meta property="og:title" content="RoadChain Miner — BlackRoad OS">
+  <meta property="og:description" content="Interactive block mining simulator for the RoadChain network.">
+  <meta property="og:type" content="website">
+  <link rel="stylesheet" href="/_shared/design.css">
+  <style>
+    /* ── Page Layout ── */
+    .page-wrap {
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 0 var(--sp-lg);
+    }
+
+    /* ── Mining Control ── */
+    .mine-section {
+      padding: var(--sp-xl) 0;
+    }
+    .mine-toggle {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-md);
+      padding: 14px 32px;
+      border-radius: var(--radius-btn);
+      border: none;
+      font-family: var(--font-headline);
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.2s var(--ease-spring);
+      color: var(--white);
+      width: 100%;
+      justify-content: center;
+    }
+    .mine-toggle.idle {
+      background: var(--grad);
+    }
+    .mine-toggle.active {
+      background: var(--rose);
+      animation: pulse-btn 1.5s ease-in-out infinite;
+    }
+    .mine-toggle:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+    @keyframes pulse-btn {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(255, 34, 85, 0.4); }
+      50% { box-shadow: 0 0 0 8px rgba(255, 34, 85, 0); }
+    }
+
+    /* ── Hash Visualization ── */
+    .hash-viz {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: var(--sp-lg);
+      margin-top: var(--sp-md);
+      overflow: hidden;
+      position: relative;
+      min-height: 96px;
+    }
+    .hash-viz-idle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      min-height: 64px;
+    }
+    .hash-scroll {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      line-height: 1.7;
+      color: var(--subtle);
+      word-break: break-all;
+      max-height: 120px;
+      overflow: hidden;
+      position: relative;
+    }
+    .hash-scroll::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 32px;
+      background: linear-gradient(transparent, var(--surface));
+      pointer-events: none;
+    }
+    .hash-scroll .match {
+      color: #22c55e;
+      font-weight: 700;
+    }
+
+    /* ── Mining Live Stats ── */
+    .mine-live {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: var(--sp-sm);
+      margin-top: var(--sp-md);
+    }
+    .mine-live-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-small);
+      padding: var(--sp-sm) var(--sp-md);
+      text-align: center;
+    }
+    .mine-live-item .val {
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--white);
+    }
+    .mine-live-item .lbl {
+      font-size: 0.65rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-top: 2px;
+    }
+
+    /* ── Stats Grid ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--sp-md);
+      padding: var(--sp-lg) 0;
+    }
+    @media (max-width: 560px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .mine-live { grid-template-columns: 1fr; }
+    }
+
+    /* ── Block Card ── */
+    .block-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: var(--sp-lg);
+      margin-bottom: var(--sp-sm);
+      transition: border-color 0.2s;
+      animation: block-in 0.4s var(--ease-spring);
+    }
+    .block-item:hover {
+      border-color: var(--border-hover);
+    }
+    @keyframes block-in {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .block-item.celebrate {
+      border-color: #22c55e;
+      box-shadow: 0 0 20px rgba(34, 197, 94, 0.15);
+      animation: block-in 0.4s var(--ease-spring), celebrate-glow 1.5s ease-out;
+    }
+    @keyframes celebrate-glow {
+      0% { box-shadow: 0 0 40px rgba(34, 197, 94, 0.4); }
+      100% { box-shadow: 0 0 20px rgba(34, 197, 94, 0.15); }
+    }
+    .block-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .block-num {
+      font-family: var(--font-headline);
+      font-weight: 700;
+      font-size: 1rem;
+    }
+    .block-time {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--muted);
+    }
+    .block-reward {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: #22c55e;
+      font-weight: 600;
+    }
+    .block-hash-line {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      color: var(--subtle);
+      word-break: break-all;
+      margin-top: var(--sp-xs);
+      padding: var(--sp-sm);
+      background: var(--inset);
+      border-radius: var(--radius-small);
+    }
+    .block-meta {
+      display: flex;
+      gap: var(--sp-lg);
+      margin-top: var(--sp-sm);
+      font-size: 0.72rem;
+      color: var(--muted);
+      font-family: var(--font-mono);
+    }
+
+    /* ── Celebration Particles ── */
+    .particle-container {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+      z-index: 200;
+      overflow: hidden;
+    }
+    .particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      animation: particle-fall 1.5s ease-out forwards;
+    }
+    @keyframes particle-fall {
+      0% { opacity: 1; transform: translateY(0) scale(1); }
+      100% { opacity: 0; transform: translateY(120px) scale(0); }
+    }
+
+    /* ── Empty State ── */
+    .empty-state {
+      text-align: center;
+      padding: var(--sp-xl);
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+  </style>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0a0a0a">
+</head>
+<body>
+
+  <!-- ── Nav ── -->
+  <nav class="br-nav">
+    <a href="/" class="nav-brand">
+      <div class="spectrum-mark">
+        <span></span><span></span><span></span><span></span><span></span><span></span>
+      </div>
+      RoadChain Miner
+    </a>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/blockchain-live.html">Explorer</a>
+      <a href="/wallet.html">Wallet</a>
+    </div>
+  </nav>
+
+  <div class="grad-bar"></div>
+
+  <div class="page-wrap">
+
+    <!-- ── Stats ── -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value" id="statBlocks">0</div>
+        <div class="stat-label">Blocks Mined</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="statRoad">0</div>
+        <div class="stat-label">ROAD Earned</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="statHashRate">0</div>
+        <div class="stat-label">Hash Rate</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="statDifficulty">3</div>
+        <div class="stat-label">Difficulty</div>
+      </div>
+    </div>
+
+    <div class="grad-bar"></div>
+
+    <!-- ── Mining Interface ── -->
+    <section class="mine-section">
+      <div class="section-label">Mining Interface</div>
+      <h2 class="section-title">Proof of Work</h2>
+
+      <button class="mine-toggle idle" id="mineBtn" onclick="toggleMining()">
+        Start Mining
+      </button>
+
+      <!-- Live mining stats (visible while mining) -->
+      <div class="mine-live" id="mineLive" style="display:none;">
+        <div class="mine-live-item">
+          <div class="val" id="liveNonce">0</div>
+          <div class="lbl">Nonce</div>
+        </div>
+        <div class="mine-live-item">
+          <div class="val" id="liveAttempts">0</div>
+          <div class="lbl">Attempts</div>
+        </div>
+        <div class="mine-live-item">
+          <div class="val" id="liveDifficulty">3</div>
+          <div class="lbl">Target</div>
+        </div>
+      </div>
+
+      <!-- Hash visualization -->
+      <div class="hash-viz" id="hashViz">
+        <div class="hash-viz-idle">Idle — press Start Mining to begin hashing</div>
+      </div>
+    </section>
+
+    <div class="grad-bar"></div>
+
+    <!-- ── Recent Blocks ── -->
+    <section>
+      <div class="section-label">Chain</div>
+      <h2 class="section-title">Recent Blocks</h2>
+      <div id="blocksList">
+        <div class="empty-state">No blocks mined yet. Start mining to build the chain.</div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- ── Footer ── -->
+  <footer>
+    <span>BlackRoad OS</span>
+    <span>RoadChain Miner v1.0</span>
+  </footer>
+
+  <!-- Particle container for celebrations -->
+  <div class="particle-container" id="particles"></div>
+
+  <script>
+    // ── State ──
+    const STORAGE_KEY = 'roadchain_miner';
+    const WALLET_KEY = 'roadchain_wallet_balance';
+    const REWARD = 10;
+    const DIFFICULTY_ADJUST_INTERVAL = 5;
+    const BASE_DIFFICULTY = 3;
+    const HASHES_PER_TICK = 800;
+    const TICK_MS = 12;
+    const MIN_BLOCK_TIME = 10000;
+    const MAX_BLOCK_TIME = 30000;
+
+    let state = loadState();
+    let mining = false;
+    let mineTimer = null;
+    let nonce = 0;
+    let attempts = 0;
+    let mineStartTime = 0;
+    let hashLines = [];
+    let targetDelay = 0;
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && Array.isArray(parsed.blocks)) return parsed;
+        }
+      } catch (e) { /* ignore */ }
+      return { blocks: [], totalMined: 0, totalRoad: 0 };
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      // Also update wallet balance
+      const currentBalance = parseFloat(localStorage.getItem(WALLET_KEY) || '0');
+      localStorage.setItem(WALLET_KEY, String(state.totalRoad));
+    }
+
+    // ── Difficulty ──
+    function getDifficulty() {
+      const adjustments = Math.floor(state.totalMined / DIFFICULTY_ADJUST_INTERVAL);
+      return Math.min(BASE_DIFFICULTY + adjustments, 6);
+    }
+
+    // ── SHA-256 (Web Crypto fallback to simple hash) ──
+    function sha256(str) {
+      // Fast inline hash for simulation — not cryptographic, but visually correct hex
+      let h0 = 0x6a09e667, h1 = 0xbb67ae85, h2 = 0x3c6ef372, h3 = 0xa54ff53a;
+      let h4 = 0x510e527f, h5 = 0x9b05688c, h6 = 0x1f83d9ab, h7 = 0x5be0cd19;
+      for (let i = 0; i < str.length; i++) {
+        const c = str.charCodeAt(i);
+        h0 = (h0 ^ c) * 0x01000193 >>> 0;
+        h1 = (h1 ^ (c << 3)) * 0x01000193 >>> 0;
+        h2 = (h2 ^ (c << 7)) * 0x01000193 >>> 0;
+        h3 = (h3 ^ (c << 11)) * 0x01000193 >>> 0;
+        h4 = (h4 ^ (c << 5)) * 0x01000193 >>> 0;
+        h5 = (h5 ^ (c << 9)) * 0x01000193 >>> 0;
+        h6 = (h6 ^ (c << 13)) * 0x01000193 >>> 0;
+        h7 = (h7 ^ (c << 1)) * 0x01000193 >>> 0;
+      }
+      return [h0, h1, h2, h3, h4, h5, h6, h7]
+        .map(v => v.toString(16).padStart(8, '0')).join('');
+    }
+
+    // ── Render ──
+    function renderStats() {
+      document.getElementById('statBlocks').textContent = state.totalMined;
+      document.getElementById('statRoad').textContent = state.totalRoad.toLocaleString();
+      const diff = getDifficulty();
+      document.getElementById('statDifficulty').textContent = diff;
+      document.getElementById('liveDifficulty').textContent = '0'.repeat(diff) + '...';
+      document.getElementById('statHashRate').textContent = mining
+        ? formatHashRate(calcHashRate()) : formatHashRate(0);
+    }
+
+    function formatHashRate(rate) {
+      if (rate >= 1e6) return (rate / 1e6).toFixed(1) + ' MH/s';
+      if (rate >= 1e3) return (rate / 1e3).toFixed(1) + ' kH/s';
+      return rate + ' H/s';
+    }
+
+    function calcHashRate() {
+      const elapsed = (Date.now() - mineStartTime) / 1000;
+      if (elapsed <= 0) return 0;
+      return Math.floor(attempts / elapsed);
+    }
+
+    function renderBlocks() {
+      const el = document.getElementById('blocksList');
+      const blocks = state.blocks.slice(0, 10);
+      if (blocks.length === 0) {
+        el.innerHTML = '<div class="empty-state">No blocks mined yet. Start mining to build the chain.</div>';
+        return;
+      }
+      el.innerHTML = blocks.map((b, i) => `
+        <div class="block-item${i === 0 && b._new ? ' celebrate' : ''}">
+          <div class="block-row">
+            <span class="block-num">Block #${b.number}</span>
+            <span class="block-reward">+${b.reward} ROAD</span>
+          </div>
+          <div class="block-row" style="margin-top:4px;">
+            <span class="block-time">${formatTime(b.timestamp)}</span>
+          </div>
+          <div class="block-hash-line">
+            <div style="color:var(--tertiary);margin-bottom:2px;">Hash</div>
+            ${b.hash}
+          </div>
+          <div class="block-meta">
+            <span>Nonce: ${b.nonce.toLocaleString()}</span>
+            <span>Difficulty: ${b.difficulty}</span>
+          </div>
+        </div>
+      `).join('');
+      // Clear _new flag after render
+      if (blocks[0]) blocks[0]._new = false;
+    }
+
+    function formatTime(ts) {
+      const d = new Date(ts);
+      return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+        + ' ' + d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+    }
+
+    // ── Hash Visualization ──
+    function pushHashLine(hash, isMatch) {
+      const prefix = hash.substring(0, getDifficulty());
+      const rest = hash.substring(getDifficulty());
+      const line = isMatch
+        ? `<span class="match">${prefix}</span>${rest}`
+        : hash;
+      hashLines.push(line);
+      if (hashLines.length > 12) hashLines.shift();
+    }
+
+    function renderHashViz() {
+      const el = document.getElementById('hashViz');
+      if (!mining && hashLines.length === 0) {
+        el.innerHTML = '<div class="hash-viz-idle">Idle — press Start Mining to begin hashing</div>';
+        return;
+      }
+      el.innerHTML = '<div class="hash-scroll">' + hashLines.join('<br>') + '</div>';
+    }
+
+    // ── Mining ──
+    function toggleMining() {
+      if (mining) {
+        stopMining();
+      } else {
+        startMining();
+      }
+    }
+
+    function startMining() {
+      mining = true;
+      nonce = 0;
+      attempts = 0;
+      mineStartTime = Date.now();
+      hashLines = [];
+      // Random target delay between MIN and MAX block time
+      targetDelay = MIN_BLOCK_TIME + Math.random() * (MAX_BLOCK_TIME - MIN_BLOCK_TIME);
+
+      const btn = document.getElementById('mineBtn');
+      btn.textContent = 'Stop Mining';
+      btn.classList.remove('idle');
+      btn.classList.add('active');
+
+      document.getElementById('mineLive').style.display = '';
+
+      mineTimer = setInterval(mineTick, TICK_MS);
+      renderStats();
+    }
+
+    function stopMining() {
+      mining = false;
+      if (mineTimer) { clearInterval(mineTimer); mineTimer = null; }
+
+      const btn = document.getElementById('mineBtn');
+      btn.textContent = 'Start Mining';
+      btn.classList.remove('active');
+      btn.classList.add('idle');
+
+      document.getElementById('mineLive').style.display = 'none';
+      renderStats();
+    }
+
+    function mineTick() {
+      const diff = getDifficulty();
+      const target = '0'.repeat(diff);
+      const prevHash = state.blocks.length > 0 ? state.blocks[0].hash : '0'.repeat(64);
+      const blockNum = state.totalMined + 1;
+      const elapsed = Date.now() - mineStartTime;
+
+      for (let i = 0; i < HASHES_PER_TICK; i++) {
+        nonce++;
+        attempts++;
+        const input = `${blockNum}:${prevHash}:${Date.now()}:${nonce}:${Math.random()}`;
+        const hash = sha256(input);
+
+        // Show some hashes in viz (every ~200 attempts)
+        if (attempts % 197 === 0) {
+          pushHashLine(hash, false);
+          renderHashViz();
+        }
+
+        // Check if we should "find" a block (time-based + hash prefix match simulation)
+        if (elapsed >= targetDelay) {
+          // Force a valid hash by prepending zeros
+          const validHash = target + hash.substring(diff);
+          foundBlock(blockNum, nonce, validHash, diff);
+          return;
+        }
+      }
+
+      // Update live counters
+      document.getElementById('liveNonce').textContent = nonce.toLocaleString();
+      document.getElementById('liveAttempts').textContent = attempts.toLocaleString();
+      renderStats();
+    }
+
+    function foundBlock(number, foundNonce, hash, difficulty) {
+      clearInterval(mineTimer);
+      mineTimer = null;
+
+      // Show matching hash in viz
+      pushHashLine(hash, true);
+      renderHashViz();
+
+      const block = {
+        number,
+        nonce: foundNonce,
+        hash,
+        difficulty,
+        reward: REWARD,
+        timestamp: new Date().toISOString(),
+        _new: true
+      };
+
+      state.blocks.unshift(block);
+      if (state.blocks.length > 50) state.blocks.pop();
+      state.totalMined++;
+      state.totalRoad += REWARD;
+      saveState();
+
+      renderBlocks();
+      renderStats();
+      celebrate();
+
+      // Continue mining after a brief pause
+      setTimeout(() => {
+        if (mining) {
+          nonce = 0;
+          attempts = 0;
+          mineStartTime = Date.now();
+          hashLines = [];
+          targetDelay = MIN_BLOCK_TIME + Math.random() * (MAX_BLOCK_TIME - MIN_BLOCK_TIME);
+          mineTimer = setInterval(mineTick, TICK_MS);
+        }
+      }, 1200);
+    }
+
+    // ── Celebration Particles ──
+    function celebrate() {
+      const container = document.getElementById('particles');
+      const colors = ['#FF6B2B', '#FF2255', '#CC00AA', '#8844FF', '#4488FF', '#00D4FF', '#22c55e'];
+      const count = 40;
+      for (let i = 0; i < count; i++) {
+        const p = document.createElement('div');
+        p.className = 'particle';
+        p.style.left = (20 + Math.random() * 60) + 'vw';
+        p.style.top = (10 + Math.random() * 30) + 'vh';
+        p.style.background = colors[Math.floor(Math.random() * colors.length)];
+        p.style.animationDuration = (1 + Math.random()) + 's';
+        p.style.animationDelay = (Math.random() * 0.3) + 's';
+        p.style.width = (3 + Math.random() * 4) + 'px';
+        p.style.height = p.style.width;
+        container.appendChild(p);
+      }
+      setTimeout(() => { container.innerHTML = ''; }, 2000);
+    }
+
+    // ── Init ──
+    renderStats();
+    renderBlocks();
+    renderHashViz();
+  </script>
+<script>if("serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js").catch(()=>{});</script>
+</body>
+</html>

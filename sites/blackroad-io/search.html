@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="canonical" href="https://blackroad.io/search">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:image" content="https://images.blackroad.io/brand/br-square-512.png">
+  <meta property="og:image" content="https://images.blackroad.io/brand/br-square-512.png">
+  <title>Search — BlackRoad OS</title>
+  <meta name="description" content="Search across all BlackRoad OS apps, docs, and tools.">
+  <meta name="author" content="Alexa Louise Amundson">
+  <meta property="og:title" content="Search — BlackRoad OS">
+  <meta property="og:description" content="Search across all BlackRoad OS apps, docs, and tools.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://blackroad.io/search.html">
+  <link rel="stylesheet" href="/_shared/design.css">
+  <style>
+    .search-hero {
+      padding: var(--sp-2xl) var(--sp-xl);
+      text-align: center;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .search-hero h1 {
+      margin-bottom: var(--sp-lg);
+    }
+
+    .search-wrap {
+      position: relative;
+      max-width: 600px;
+      margin: 0 auto var(--sp-lg);
+    }
+    .search-wrap svg {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      pointer-events: none;
+    }
+    .search-input {
+      width: 100%;
+      padding: 16px 16px 16px 48px;
+      font-family: var(--font-body);
+      font-size: 1.05rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-large);
+      color: var(--white);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .search-input::placeholder {
+      color: var(--muted);
+    }
+    .search-input:focus {
+      border-color: var(--violet);
+    }
+    .search-shortcut {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-small);
+      padding: 2px 8px;
+      pointer-events: none;
+    }
+
+    .search-results {
+      max-width: 600px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-sm);
+    }
+    .search-empty {
+      text-align: center;
+      color: var(--subtle);
+      font-size: 0.95rem;
+      padding: var(--sp-xl) 0;
+    }
+    .result-card {
+      display: block;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: var(--sp-md) var(--sp-lg);
+      transition: border-color 0.2s, transform 0.15s var(--ease-spring);
+      cursor: pointer;
+    }
+    .result-card:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-1px);
+    }
+    .result-card h3 {
+      font-size: 1rem;
+      margin-bottom: 4px;
+    }
+    .result-card p {
+      color: var(--subtle);
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+    .result-card .result-url {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+    .result-count {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-align: center;
+      margin-bottom: var(--sp-md);
+    }
+
+    @media (max-width: 560px) {
+      .search-hero { padding: var(--sp-xl) var(--sp-md); }
+      .search-shortcut { display: none; }
+    }
+  </style>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0a0a0a">
+</head>
+<body>
+
+  <!-- Nav -->
+  <nav class="br-nav">
+    <a href="/" class="nav-brand">
+      <div class="spectrum-mark">
+        <span></span><span></span><span></span><span></span><span></span><span></span>
+      </div>
+      Search
+    </a>
+    <div class="nav-links">
+      <a href="/">Home</a>
+    </div>
+  </nav>
+
+  <div class="grad-bar"></div>
+
+  <!-- Search -->
+  <section class="search-hero">
+    <h1 class="grad-text">Search</h1>
+
+    <div class="search-wrap">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" class="search-input" id="searchInput" placeholder="Search apps, docs, tools..." autofocus>
+      <span class="search-shortcut">/</span>
+    </div>
+
+    <div id="resultCount" class="result-count" style="display:none;"></div>
+    <div id="searchResults" class="search-results"></div>
+    <div id="searchEmpty" class="search-empty">Search across all BlackRoad apps, docs, and tools.</div>
+  </section>
+
+  <!-- Footer -->
+  <div class="grad-bar"></div>
+  <footer>
+    <span>BlackRoad OS, Inc.</span>
+    <span>Pave Tomorrow.</span>
+  </footer>
+
+  <script>
+    const pages = [
+      { name: 'Dashboard', desc: 'Master control panel for your BlackRoad OS instance.', url: '/dashboard.html' },
+      { name: 'Agents', desc: 'Live agent dashboard with status, tasks, and spawning.', url: '/agents.html' },
+      { name: 'Chat', desc: 'AI chat interface powered by local inference.', url: '/chat.html' },
+      { name: 'Terminal', desc: 'Web terminal for shell access and commands.', url: '/terminal.html' },
+      { name: 'Status', desc: 'System health, uptime, and service monitoring.', url: '/status.html' },
+      { name: 'Console', desc: 'Admin console for managing infrastructure.', url: '/console.html' },
+      { name: 'Docs', desc: 'Documentation for BlackRoad OS APIs and systems.', url: '/docs.html' },
+      { name: 'API Explorer', desc: 'Interactive API explorer with live endpoints.', url: '/api-mock.html' },
+      { name: 'Pricing', desc: 'Plans and pricing for BlackRoad OS services.', url: '/pricing.html' },
+      { name: 'Social', desc: 'Social feed and community activity stream.', url: '/social.html' },
+      { name: 'Blockchain', desc: 'RoadChain blockchain explorer and transactions.', url: '/blockchain.html' },
+      { name: 'Miner', desc: 'Mine RoadChain blocks with your hardware.', url: '/miner.html' },
+      { name: 'Wallet', desc: 'Crypto wallet management and balances.', url: '/wallet.html' },
+      { name: 'Ledger', desc: 'Hardware wallet integration via WebUSB.', url: '/ledger.html' },
+      { name: 'Files', desc: 'File manager for your sovereign storage.', url: '/files.html' },
+      { name: 'Integrations', desc: 'Connect external services and APIs.', url: '/integrations.html' },
+      { name: 'Math Lab', desc: 'Amundson Framework interactive math environment.', url: '/math-lab.html' },
+      { name: 'Apps', desc: 'Installed applications and marketplace.', url: '/apps.html' },
+      { name: 'Design System', desc: 'Brand colors, typography, and component reference.', url: '/design-system.html' },
+      { name: 'Getting Started', desc: 'Quick start guide for new users.', url: '/getting-started.html' },
+      { name: 'Changelog', desc: 'Release notes and version history.', url: '/changelog.html' },
+      { name: 'About', desc: 'Learn about BlackRoad OS and the team behind it.', url: '/about.html' },
+      { name: 'Login', desc: 'Sign in to your BlackRoad OS account.', url: '/login.html' },
+      { name: 'Signup', desc: 'Create a new BlackRoad OS account.', url: '/signup.html' },
+      { name: 'Buy', desc: 'Purchase BlackRoad OS licenses and hardware.', url: '/buy.html' },
+      { name: 'Terms', desc: 'Terms of service and legal agreements.', url: '/terms.html' },
+      { name: 'Privacy', desc: 'Privacy policy and data handling practices.', url: '/privacy.html' },
+      { name: 'Brand', desc: 'Brand guidelines, logos, and assets.', url: '/brand.html' },
+      { name: 'Roadmap', desc: 'Product roadmap and upcoming features.', url: '/roadmap.html' },
+      { name: 'Contact', desc: 'Get in touch with the BlackRoad team.', url: '/contact.html' },
+      { name: 'Search', desc: 'Search across all BlackRoad apps, docs, and tools.', url: '/search.html' },
+      { name: 'Settings', desc: 'User preferences, appearance, notifications, and data.', url: '/settings.html' },
+    ];
+
+    const input = document.getElementById('searchInput');
+    const resultsEl = document.getElementById('searchResults');
+    const emptyEl = document.getElementById('searchEmpty');
+    const countEl = document.getElementById('resultCount');
+
+    function search(query) {
+      const q = query.toLowerCase().trim();
+      if (!q) {
+        resultsEl.innerHTML = '';
+        countEl.style.display = 'none';
+        emptyEl.style.display = 'block';
+        emptyEl.textContent = 'Search across all BlackRoad apps, docs, and tools.';
+        return;
+      }
+      const results = pages.filter(p =>
+        p.name.toLowerCase().includes(q) ||
+        p.desc.toLowerCase().includes(q) ||
+        p.url.toLowerCase().includes(q)
+      );
+      emptyEl.style.display = results.length ? 'none' : 'block';
+      if (!results.length) {
+        emptyEl.innerHTML = 'No results for \u2018' + escapeHtml(query) + '\u2019. Try a different search.';
+        countEl.style.display = 'none';
+        resultsEl.innerHTML = '';
+        return;
+      }
+      countEl.style.display = 'block';
+      countEl.textContent = results.length + ' result' + (results.length !== 1 ? 's' : '');
+      resultsEl.innerHTML = results.map(p =>
+        '<a href="' + p.url + '" class="result-card">' +
+          '<h3>' + highlight(p.name, q) + '</h3>' +
+          '<p>' + highlight(p.desc, q) + '</p>' +
+          '<div class="result-url">' + p.url + '</div>' +
+        '</a>'
+      ).join('');
+    }
+
+    function highlight(text, q) {
+      const idx = text.toLowerCase().indexOf(q);
+      if (idx === -1) return escapeHtml(text);
+      return escapeHtml(text.slice(0, idx)) +
+        '<span style="color:var(--white);background:rgba(136,68,255,0.2);border-radius:2px;padding:0 2px;">' +
+        escapeHtml(text.slice(idx, idx + q.length)) + '</span>' +
+        escapeHtml(text.slice(idx + q.length));
+    }
+
+    function escapeHtml(t) {
+      const d = document.createElement('div');
+      d.textContent = t;
+      return d.innerHTML;
+    }
+
+    input.addEventListener('input', () => search(input.value));
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === '/' && document.activeElement !== input) {
+        e.preventDefault();
+        input.focus();
+      }
+    });
+  </script>
+<script>if("serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js").catch(()=>{});</script>
+<script src="/_shared/feedback.js" defer></script>
+<script src="/_shared/crosslinks.js" defer></script>
+</body>
+</html>

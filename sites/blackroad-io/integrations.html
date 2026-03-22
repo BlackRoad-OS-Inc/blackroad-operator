@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Integrations — BlackRoad OS</title>
+  <meta name="description" content="BlackRoad OS integrates with your existing tools and infrastructure. 18 live integrations, 100% self-hosted, zero cloud lock-in.">
+  <meta name="theme-color" content="#0a0a0a">
+  <meta property="og:title" content="BlackRoad Ecosystem — Integrations">
+  <meta property="og:description" content="Everything connects. 18 live integrations, 100% self-hosted.">
+  <meta property="og:type" content="website">
+  <link rel="stylesheet" href="/_shared/design.css">
+  <style>
+    /* ── Filter Tabs ── */
+    .filter-bar {
+      display: flex;
+      gap: var(--sp-sm);
+      flex-wrap: wrap;
+      margin-bottom: var(--sp-xl);
+    }
+    .filter-tab {
+      padding: 8px 18px;
+      border-radius: var(--radius-pill);
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--subtle);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .filter-tab:hover {
+      border-color: var(--border-hover);
+      color: var(--white);
+    }
+    .filter-tab.active {
+      background: var(--surface);
+      border-color: var(--border-hover);
+      color: var(--white);
+    }
+
+    /* ── Integration Grid ── */
+    .integrations-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--sp-lg);
+    }
+
+    /* ── Integration Card ── */
+    .integration-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: var(--sp-lg);
+      transition: border-color 0.2s, transform 0.25s var(--ease-spring), opacity 0.3s;
+    }
+    .integration-card:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-2px);
+    }
+    .integration-card.hidden {
+      display: none;
+    }
+    .integration-card .card-icon {
+      font-size: 1.75rem;
+      margin-bottom: var(--sp-md);
+      display: block;
+      line-height: 1;
+    }
+    .integration-card .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--sp-sm);
+    }
+    .integration-card h3 {
+      font-family: var(--font-headline);
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--white);
+    }
+    .integration-card .card-desc {
+      font-size: 0.85rem;
+      color: var(--subtle);
+      line-height: 1.5;
+    }
+
+    /* ── Status Badges ── */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 10px;
+      border-radius: var(--radius-pill);
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+    }
+    .badge-live {
+      background: rgba(34, 197, 94, 0.12);
+      color: #22c55e;
+      border: 1px solid rgba(34, 197, 94, 0.2);
+    }
+    .badge-live::before {
+      content: '';
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #22c55e;
+      box-shadow: 0 0 6px #22c55e66;
+    }
+    .badge-soon {
+      background: rgba(245, 158, 11, 0.12);
+      color: #f59e0b;
+      border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+    .badge-selfhosted {
+      background: rgba(136, 68, 255, 0.12);
+      color: #8844FF;
+      border: 1px solid rgba(136, 68, 255, 0.2);
+    }
+
+    /* ── Stats Bar ── */
+    .stats-bar {
+      display: flex;
+      justify-content: center;
+      gap: var(--sp-xl);
+      padding: var(--sp-xl) var(--sp-lg);
+      margin-top: var(--sp-xl);
+    }
+    .stats-bar .stat-item {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--subtle);
+      display: flex;
+      align-items: center;
+      gap: var(--sp-sm);
+    }
+    .stats-bar .stat-item strong {
+      color: var(--white);
+      font-weight: 700;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      text-align: center;
+      padding: var(--sp-2xl) var(--sp-lg);
+    }
+    .hero h1 {
+      margin-bottom: var(--sp-md);
+    }
+    .hero .subtitle {
+      font-size: 1.1rem;
+      color: var(--subtle);
+      max-width: 520px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 900px) {
+      .integrations-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    @media (max-width: 560px) {
+      .integrations-grid {
+        grid-template-columns: 1fr;
+      }
+      .stats-bar {
+        flex-direction: column;
+        align-items: center;
+        gap: var(--sp-md);
+      }
+      .hero {
+        padding: var(--sp-xl) var(--sp-md);
+      }
+    }
+  </style>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0a0a0a">
+</head>
+<body>
+
+  <!-- ── Nav ── -->
+  <nav class="br-nav">
+    <a href="/" class="nav-brand">
+      <div class="spectrum-mark">
+        <span></span><span></span><span></span><span></span><span></span><span></span>
+      </div>
+      BlackRoad Ecosystem
+    </a>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/dashboard.html">Dashboard</a>
+      <a href="/docs.html">Docs</a>
+    </div>
+  </nav>
+
+  <!-- ── Hero ── -->
+  <section class="hero">
+    <h1>Everything connects.</h1>
+    <p class="subtitle">BlackRoad OS integrates with your existing tools and infrastructure.</p>
+  </section>
+
+  <div class="grad-bar"></div>
+
+  <!-- ── Main Content ── -->
+  <section>
+    <div class="container-wide">
+
+      <!-- ── Filter Tabs ── -->
+      <div class="filter-bar" role="tablist">
+        <button class="filter-tab active" data-filter="all" role="tab" aria-selected="true">All</button>
+        <button class="filter-tab" data-filter="infrastructure" role="tab">Infrastructure</button>
+        <button class="filter-tab" data-filter="ai" role="tab">AI</button>
+        <button class="filter-tab" data-filter="developer" role="tab">Developer Tools</button>
+        <button class="filter-tab" data-filter="communication" role="tab">Communication</button>
+        <button class="filter-tab" data-filter="storage" role="tab">Storage</button>
+      </div>
+
+      <!-- ── Integration Grid ── -->
+      <div class="integrations-grid" id="grid">
+
+        <!-- Gitea -->
+        <div class="integration-card" data-category="developer">
+          <span class="card-icon">&#128230;</span>
+          <div class="card-header">
+            <h3>Gitea</h3>
+            <span class="badge badge-live">Live</span>
+          </div>
+          <p class="card-desc">Self-hosted Git forge with 239 repos across 8 orgs</p>
+        </div>
+
+        <!-- Ollama -->
+        <div class="integration-card" data-category="ai">
+          <span class="card-icon">&#129302;</span>
+          <div class="card-header">
+            <h3>Ollama</h3>
+            <span class="badge badge-live">Live</span>
+          </div>
+          <p class="card-desc">Local AI inference across 4 nodes with 16 models</p>
+        </div>
+
+        <!-- WireGuard -->
+        <div class="integration-card" data-category="infrastructure">
+          <span class="card-icon">&#128274;</span>
+          <div class="card-header">
+            <h3>WireGuard</h3>
+            <span class="badge badge-live">Live</span>
+          </div>
+          <p class="card-desc">Encrypted VPN mesh connecting all nodes</p>
+        </div>
+
+        <!-- MinIO -->
+        <div class="integration-card" data-category="storage">
+          <span class="card-icon">&#128451;</span>
+          <div class="card-header">
+            <h3>MinIO</h3>
+            <span class="badge badge-live">Live</span>
+          </div>
+          <p class="card-desc">S3-compatible object storage for assets and backups</p>
+        </div>
+
+        <!-- PostgreSQL -->
+        <div class="integration-card" data-category="storage">
+          <span class="card-icon">&#128450;</span>
+          <div class="card-header">
+            <h3>PostgreSQL</h3>
+            <span class="badge badge-live">Live</span>
+          </div>
+          <p class="card-desc">Primary relational database on 3 nodes</p>
+        </div>
+
+        <!-- Redis -->
+        <div class="integration-card" data-category="storage">
+          <span class="card-icon">&#9889;</span>
+          <div class="card-header">
+            <h3>Redis</h3>
+            <span class="badge badge-live">Live</span>
+          </div>
+          <p class="card-desc">In-memory cache and session store</p>
+        </div>
+
+        <!-- PowerDNS -->
+        <div class="integration-card" data-category="infrastructure">
+          <span class="card-icon">&#127760;</span>
+          <div class="card-header">
+            <h3>PowerDNS</h3>
+            <span class="badge badge-selfhosted">Self-Hosted</span>
+          </div>
+          <p class="card-desc">Authoritative DNS for all BlackRoad domains</p>
+        </div>
+
+        <!-- Caddy -->
+        <div class="integration-card" data-category="infrastructure">
+          <span class="card-icon">&#128737;</span>
+          <div class="card-header">
+            <h3>Caddy</h3>
+            <span class="badge badge-live">Live</span>
+          </div>
+          <p class="card-desc">Automatic TLS edge serving 151 domains</p>
+        </div>
+
+        <!-- NATS -->
+        <div class="integration-card" data-category="communication">
+          <span class="card-icon">&#128232;</span>
+          <div class="card-header">
+            <h3>NATS</h3>
+            <span class="badge badge-live">Live</span>
+          </div>
+          <p class="card-desc">Lightweight message mesh for agent communication</p>
+        </div>
+
+        <!-- Pi-hole -->
+        <div class="integration-card" data-category="infrastructure">
+          <span class="card-icon">&#128683;</span>
+          <div class="card-header">
+            <h3>Pi-hole</h3>
+            <span class="badge badge-live">Live</span>
+          </div>
+          <p class="card-desc">Network-wide ad blocking and DNS sinkhole</p>
+        </div>
+
+        <!-- Qdrant -->
+        <div class="integration-card" data-category="ai">
+          <span class="card-icon">&#128269;</span>
+          <div class="card-header">
+            <h3>Qdrant</h3>
+            <span class="badge badge-live">Live</span>
+          </div>
+          <p class="card-desc">Vector search engine for RAG and semantic queries</p>
+        </div>
+
+        <!-- Docker -->
+        <div class="integration-card" data-category="developer">
+          <span class="card-icon">&#128227;</span>
+          <div class="card-header">
+            <h3>Docker</h3>
+            <span class="badge badge-live">Live</span>
+          </div>
+          <p class="card-desc">Container runtime for isolated service deployments</p>
+        </div>
+
+        <!-- Stripe -->
+        <div class="integration-card" data-category="infrastructure">
+          <span class="card-icon">&#128179;</span>
+          <div class="card-header">
+            <h3>Stripe</h3>
+            <span class="badge badge-live">Live</span>
+          </div>
+          <p class="card-desc">Payment processing for subscriptions and invoices</p>
+        </div>
+
+        <!-- GitHub -->
+        <div class="integration-card" data-category="developer">
+          <span class="card-icon">&#128025;</span>
+          <div class="card-header">
+            <h3>GitHub</h3>
+            <span class="badge badge-live">Live</span>
+          </div>
+          <p class="card-desc">Mirror host synced from Gitea across 17 orgs</p>
+        </div>
+
+        <!-- Cloudflare -->
+        <div class="integration-card" data-category="infrastructure">
+          <span class="card-icon">&#9729;</span>
+          <div class="card-header">
+            <h3>Cloudflare</h3>
+            <span class="badge badge-live">Live</span>
+          </div>
+          <p class="card-desc">Legacy CDN and DNS being migrated to self-hosted</p>
+        </div>
+
+        <!-- Hailo-8 -->
+        <div class="integration-card" data-category="ai">
+          <span class="card-icon">&#129518;</span>
+          <div class="card-header">
+            <h3>Hailo-8</h3>
+            <span class="badge badge-selfhosted">Self-Hosted</span>
+          </div>
+          <p class="card-desc">26 TOPS AI accelerator across 2 edge nodes</p>
+        </div>
+
+        <!-- n8n -->
+        <div class="integration-card" data-category="developer">
+          <span class="card-icon">&#9881;</span>
+          <div class="card-header">
+            <h3>n8n</h3>
+            <span class="badge badge-soon">Coming Soon</span>
+          </div>
+          <p class="card-desc">Visual workflow automation for fleet orchestration</p>
+        </div>
+
+        <!-- Grafana -->
+        <div class="integration-card" data-category="infrastructure">
+          <span class="card-icon">&#128200;</span>
+          <div class="card-header">
+            <h3>Grafana</h3>
+            <span class="badge badge-soon">Coming Soon</span>
+          </div>
+          <p class="card-desc">Monitoring and observability dashboards</p>
+        </div>
+
+      </div>
+
+      <!-- ── Stats Bar ── -->
+      <div class="stats-bar">
+        <div class="stat-item"><strong>18</strong> live integrations</div>
+        <div class="stat-item"><strong>100%</strong> self-hosted</div>
+        <div class="stat-item"><strong>Zero</strong> cloud lock-in</div>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="grad-bar"></div>
+
+  <!-- ── Footer ── -->
+  <footer>
+    <span>BlackRoad OS, Inc.</span>
+    <span>Pave Tomorrow.</span>
+  </footer>
+
+  <script>
+    /* ── Filter Logic ── */
+    const tabs = document.querySelectorAll('.filter-tab');
+    const cards = document.querySelectorAll('.integration-card');
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected', 'false'); });
+        tab.classList.add('active');
+        tab.setAttribute('aria-selected', 'true');
+
+        const filter = tab.dataset.filter;
+
+        cards.forEach(card => {
+          if (filter === 'all' || card.dataset.category === filter) {
+            card.classList.remove('hidden');
+            card.style.animation = 'fadeIn 0.3s ease forwards';
+          } else {
+            card.classList.add('hidden');
+          }
+        });
+      });
+    });
+
+    /* ── Fade-in keyframe ── */
+    const style = document.createElement('style');
+    style.textContent = '@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }';
+    document.head.appendChild(style);
+  </script>
+
+<script>if("serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js").catch(()=>{});</script>
+</body>
+</html>

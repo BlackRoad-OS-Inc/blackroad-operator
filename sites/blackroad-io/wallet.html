@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RoadCoin Wallet — BlackRoad OS</title>
+  <meta name="description" content="RoadCoin Wallet — send, receive, and track ROAD tokens on BlackRoad OS.">
+  <meta name="theme-color" content="#0a0a0a">
+  <link rel="stylesheet" href="/_shared/design.css">
+  <style>
+    /* ── Wallet Layout ── */
+    .wallet-page { padding: var(--sp-lg) var(--sp-lg) var(--sp-2xl); max-width: 860px; margin: 0 auto; }
+
+    /* ── Balance Card ── */
+    .balance-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-large);
+      padding: var(--sp-xl) var(--sp-lg);
+      text-align: center;
+      margin-bottom: var(--sp-lg);
+      position: relative;
+      overflow: hidden;
+    }
+    .balance-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: var(--grad);
+    }
+    .balance-label {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--muted);
+      margin-bottom: var(--sp-sm);
+    }
+    .balance-value {
+      font-family: var(--font-mono);
+      font-size: clamp(2.5rem, 6vw, 3.5rem);
+      font-weight: 800;
+      color: var(--white);
+      line-height: 1.1;
+    }
+    .balance-value .currency {
+      font-size: 0.45em;
+      font-weight: 500;
+      color: var(--subtle);
+      margin-left: 6px;
+    }
+    .balance-usd {
+      font-family: var(--font-mono);
+      font-size: 1rem;
+      color: var(--tertiary);
+      margin-top: var(--sp-sm);
+    }
+
+    /* ── Ticker Strip ── */
+    .ticker-strip {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--sp-lg);
+      margin-top: var(--sp-md);
+      flex-wrap: wrap;
+    }
+    .ticker-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--subtle);
+    }
+    .ticker-item .ticker-val { color: var(--white); font-weight: 600; }
+    .ticker-change.up { color: #22c55e; }
+    .ticker-change.down { color: #ef4444; }
+
+    /* ── Grid ── */
+    .wallet-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--sp-md);
+      margin-bottom: var(--sp-lg);
+    }
+    @media (max-width: 640px) {
+      .wallet-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ── Panel ── */
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: var(--sp-lg);
+    }
+    .panel-title {
+      font-family: var(--font-headline);
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--white);
+      margin-bottom: var(--sp-md);
+      display: flex;
+      align-items: center;
+      gap: var(--sp-sm);
+    }
+    .panel-title .icon {
+      width: 18px;
+      height: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+    }
+
+    /* ── Wallet Address ── */
+    .address-display {
+      background: var(--inset);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-input);
+      padding: 12px 14px;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--tertiary);
+      word-break: break-all;
+      line-height: 1.6;
+      margin-bottom: var(--sp-sm);
+    }
+    .copy-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-btn);
+      color: var(--subtle);
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      padding: 6px 14px;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .copy-btn:hover { border-color: var(--muted); color: var(--white); }
+    .copy-btn.copied { border-color: #22c55e; color: #22c55e; }
+
+    /* ── Form Inputs ── */
+    .form-group { margin-bottom: var(--sp-md); }
+    .form-label {
+      display: block;
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .form-input {
+      width: 100%;
+      background: var(--inset);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-input);
+      padding: 12px 14px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      color: var(--white);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-input::placeholder { color: var(--dim); }
+    .form-input:focus { border-color: var(--violet); }
+    .send-btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: var(--grad);
+      color: var(--white);
+      padding: 14px;
+      border-radius: var(--radius-btn);
+      font-family: var(--font-headline);
+      font-weight: 700;
+      font-size: 0.9rem;
+      border: none;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.15s var(--ease-spring);
+    }
+    .send-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+    .send-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+    /* ── Transaction History ── */
+    .tx-list { list-style: none; }
+    .tx-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border-subtle);
+      gap: var(--sp-sm);
+    }
+    .tx-item:last-child { border-bottom: none; }
+    .tx-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .tx-direction {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      flex-shrink: 0;
+    }
+    .tx-direction.sent { background: rgba(255, 34, 85, 0.12); color: var(--rose); }
+    .tx-direction.received { background: rgba(34, 197, 94, 0.12); color: #22c55e; }
+    .tx-meta { min-width: 0; }
+    .tx-addr {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--tertiary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 180px;
+    }
+    .tx-time {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: var(--dim);
+      margin-top: 2px;
+    }
+    .tx-right { text-align: right; flex-shrink: 0; }
+    .tx-amount {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    .tx-amount.sent { background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .tx-amount.received { color: #22c55e; }
+    .tx-empty {
+      text-align: center;
+      padding: var(--sp-xl) 0;
+      color: var(--dim);
+      font-size: 0.8rem;
+    }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-btn);
+      padding: 12px 24px;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--white);
+      z-index: 200;
+      opacity: 0;
+      transition: transform 0.3s var(--ease-spring), opacity 0.3s;
+      pointer-events: none;
+    }
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+    .toast.success { border-color: #22c55e; }
+    .toast.error { border-color: #ef4444; }
+
+    /* ── Skeleton overrides ── */
+    .skel-balance { width: 220px; height: 48px; margin: 0 auto var(--sp-sm); }
+    .skel-usd { width: 120px; height: 18px; margin: 0 auto; }
+    .skel-addr { width: 100%; height: 40px; }
+    .skel-tx { width: 100%; height: 52px; margin-bottom: var(--sp-sm); }
+
+    /* ── Tx history panel full-width ── */
+    .history-panel { grid-column: 1 / -1; }
+  </style>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0a0a0a">
+</head>
+<body>
+
+  <!-- ── Nav ── -->
+  <nav class="br-nav">
+    <a href="/" class="nav-brand">
+      <div class="spectrum-mark">
+        <span></span><span></span><span></span><span></span><span></span><span></span>
+      </div>
+      RoadCoin Wallet
+    </a>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/blockchain-live.html">Blockchain</a>
+      <a href="/dashboard.html">Dashboard</a>
+    </div>
+  </nav>
+
+  <div class="wallet-page" id="app">
+
+    <!-- ── Balance Card ── -->
+    <div class="balance-card">
+      <div class="balance-label">Total Balance</div>
+      <div class="balance-value" id="balance-display">
+        <span class="skeleton skel-balance" id="skel-bal">&nbsp;</span>
+      </div>
+      <div class="balance-usd" id="usd-display">
+        <span class="skeleton skel-usd" id="skel-usd">&nbsp;</span>
+      </div>
+      <div class="ticker-strip">
+        <div class="ticker-item">
+          ROAD/USD
+          <span class="ticker-val" id="price-display">--</span>
+          <span class="ticker-change" id="price-change">--</span>
+        </div>
+        <div class="ticker-item">
+          <span class="status-dot live"></span>
+          <span style="color:#22c55e;">LIVE</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="grad-bar" style="margin-bottom:var(--sp-lg);"></div>
+
+    <!-- ── Send / Receive Grid ── -->
+    <div class="wallet-grid">
+
+      <!-- Send Panel -->
+      <div class="panel">
+        <div class="panel-title"><span class="icon">&#8593;</span> Send ROAD</div>
+        <form id="send-form" autocomplete="off">
+          <div class="form-group">
+            <label class="form-label" for="send-to">Recipient Address</label>
+            <input class="form-input" type="text" id="send-to" placeholder="0x..." required minlength="10" spellcheck="false">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="send-amount">Amount (ROAD)</label>
+            <input class="form-input" type="number" id="send-amount" placeholder="0.00" required min="0.01" step="0.01">
+          </div>
+          <button type="submit" class="send-btn" id="send-btn">Send ROAD</button>
+        </form>
+      </div>
+
+      <!-- Receive Panel -->
+      <div class="panel">
+        <div class="panel-title"><span class="icon">&#8595;</span> Receive ROAD</div>
+        <div class="form-label" style="margin-bottom:8px;">Your Wallet Address</div>
+        <div class="address-display" id="my-address">
+          <span class="skeleton skel-addr" id="skel-addr">&nbsp;</span>
+        </div>
+        <button class="copy-btn" id="copy-btn" type="button">Copy Address</button>
+        <div style="margin-top:var(--sp-lg);">
+          <div class="form-label">Simulate Receive</div>
+          <div class="form-group" style="margin-top:6px;">
+            <input class="form-input" type="number" id="receive-amount" placeholder="Amount to receive" min="0.01" step="0.01">
+          </div>
+          <button class="copy-btn" type="button" id="receive-btn" style="width:100%;justify-content:center;">Receive ROAD</button>
+        </div>
+      </div>
+
+      <!-- Transaction History -->
+      <div class="panel history-panel">
+        <div class="panel-title"><span class="icon">&#8644;</span> Transaction History</div>
+        <ul class="tx-list" id="tx-list">
+          <li><span class="skeleton skel-tx">&nbsp;</span></li>
+          <li><span class="skeleton skel-tx">&nbsp;</span></li>
+          <li><span class="skeleton skel-tx">&nbsp;</span></li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <footer>
+    <span>BlackRoad OS &mdash; Pave Tomorrow.</span>
+    <span class="text-mono text-xs">RoadCoin Wallet v1.0</span>
+  </footer>
+
+<script>
+(function () {
+  'use strict';
+
+  // ── Constants ──
+  const LS_BALANCE  = 'roadcoin_balance';
+  const LS_TX       = 'roadcoin_tx';
+  const LS_WALLET   = 'roadcoin_address';
+  const LS_PRICE    = 'roadcoin_price';
+  const INIT_BALANCE = 1000.00;
+  const INIT_PRICE   = 0.42;
+  const PRICE_INTERVAL = 30000;
+
+  // ── DOM refs ──
+  const $balance   = document.getElementById('balance-display');
+  const $usd       = document.getElementById('usd-display');
+  const $price     = document.getElementById('price-display');
+  const $change    = document.getElementById('price-change');
+  const $addr      = document.getElementById('my-address');
+  const $txList    = document.getElementById('tx-list');
+  const $sendForm  = document.getElementById('send-form');
+  const $sendTo    = document.getElementById('send-to');
+  const $sendAmt   = document.getElementById('send-amount');
+  const $sendBtn   = document.getElementById('send-btn');
+  const $copyBtn   = document.getElementById('copy-btn');
+  const $recvAmt   = document.getElementById('receive-amount');
+  const $recvBtn   = document.getElementById('receive-btn');
+  const $toast     = document.getElementById('toast');
+
+  // ── Helpers ──
+  function fmt(n) { return parseFloat(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+  function fmtUsd(n) { return '$' + fmt(n); }
+  function shortAddr(a) { return a.length > 16 ? a.slice(0, 8) + '...' + a.slice(-6) : a; }
+
+  function toast(msg, type) {
+    $toast.textContent = msg;
+    $toast.className = 'toast ' + (type || '') + ' show';
+    clearTimeout(toast._t);
+    toast._t = setTimeout(function () { $toast.classList.remove('show'); }, 2800);
+  }
+
+  function timeAgo(ts) {
+    var diff = Date.now() - ts;
+    var s = Math.floor(diff / 1000);
+    if (s < 60) return s + 's ago';
+    var m = Math.floor(s / 60);
+    if (m < 60) return m + 'm ago';
+    var h = Math.floor(m / 60);
+    if (h < 24) return h + 'h ago';
+    var d = Math.floor(h / 24);
+    return d + 'd ago';
+  }
+
+  // ── Deterministic wallet address ──
+  function generateAddress() {
+    var stored = localStorage.getItem(LS_WALLET);
+    if (stored) return stored;
+    // Use a seeded approach from user agent + timestamp to create a stable address
+    var seed = navigator.userAgent + screen.width + screen.height + 'roadcoin';
+    var hash = 0;
+    for (var i = 0; i < seed.length; i++) {
+      hash = ((hash << 5) - hash) + seed.charCodeAt(i);
+      hash |= 0;
+    }
+    var hex = '0x';
+    var state = Math.abs(hash);
+    for (var j = 0; j < 40; j++) {
+      state = (state * 1103515245 + 12345) & 0x7fffffff;
+      hex += (state % 16).toString(16);
+    }
+    localStorage.setItem(LS_WALLET, hex);
+    return hex;
+  }
+
+  // ── State ──
+  var walletAddr = generateAddress();
+  var balance = parseFloat(localStorage.getItem(LS_BALANCE));
+  if (isNaN(balance)) { balance = INIT_BALANCE; localStorage.setItem(LS_BALANCE, balance); }
+
+  var price = parseFloat(localStorage.getItem(LS_PRICE));
+  if (isNaN(price)) { price = INIT_PRICE; localStorage.setItem(LS_PRICE, price); }
+  var prevPrice = price;
+
+  var txHistory = [];
+  try { txHistory = JSON.parse(localStorage.getItem(LS_TX)) || []; } catch (e) { txHistory = []; }
+
+  // ── Render ──
+  function renderBalance() {
+    $balance.innerHTML = fmt(balance) + '<span class="currency">ROAD</span>';
+    $usd.textContent = fmtUsd(balance * price);
+  }
+
+  function renderPrice() {
+    $price.textContent = fmtUsd(price);
+    var pct = ((price - prevPrice) / prevPrice * 100);
+    var sign = pct >= 0 ? '+' : '';
+    $change.textContent = sign + pct.toFixed(2) + '%';
+    $change.className = 'ticker-change ' + (pct >= 0 ? 'up' : 'down');
+  }
+
+  function renderAddress() {
+    $addr.textContent = walletAddr;
+  }
+
+  function renderTx() {
+    if (txHistory.length === 0) {
+      $txList.innerHTML = '<li class="tx-empty">No transactions yet. Send or receive ROAD to get started.</li>';
+      return;
+    }
+    var html = '';
+    // Show newest first
+    var sorted = txHistory.slice().reverse();
+    for (var i = 0; i < sorted.length; i++) {
+      var tx = sorted[i];
+      var isSent = tx.dir === 'sent';
+      var dirClass = isSent ? 'sent' : 'received';
+      var arrow = isSent ? '&#8593;' : '&#8595;';
+      var prefix = isSent ? '-' : '+';
+      html += '<li class="tx-item">' +
+        '<div class="tx-left">' +
+          '<div class="tx-direction ' + dirClass + '">' + arrow + '</div>' +
+          '<div class="tx-meta">' +
+            '<div class="tx-addr" title="' + tx.addr + '">' + shortAddr(tx.addr) + '</div>' +
+            '<div class="tx-time">' + timeAgo(tx.ts) + '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="tx-right">' +
+          '<div class="tx-amount ' + dirClass + '">' + prefix + fmt(tx.amount) + ' ROAD</div>' +
+        '</div>' +
+      '</li>';
+    }
+    $txList.innerHTML = html;
+  }
+
+  function saveTx() { localStorage.setItem(LS_TX, JSON.stringify(txHistory)); }
+  function saveBalance() { localStorage.setItem(LS_BALANCE, balance); }
+
+  // ── Actions ──
+  $sendForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var to = $sendTo.value.trim();
+    var amt = parseFloat($sendAmt.value);
+    if (!to || isNaN(amt) || amt <= 0) { toast('Enter a valid address and amount.', 'error'); return; }
+    if (amt > balance) { toast('Insufficient balance.', 'error'); return; }
+
+    balance -= amt;
+    saveBalance();
+    txHistory.push({ dir: 'sent', addr: to, amount: amt, ts: Date.now() });
+    saveTx();
+    renderBalance();
+    renderTx();
+    $sendForm.reset();
+    toast('Sent ' + fmt(amt) + ' ROAD', 'success');
+  });
+
+  $copyBtn.addEventListener('click', function () {
+    navigator.clipboard.writeText(walletAddr).then(function () {
+      $copyBtn.textContent = 'Copied';
+      $copyBtn.classList.add('copied');
+      toast('Address copied to clipboard.', 'success');
+      setTimeout(function () {
+        $copyBtn.textContent = 'Copy Address';
+        $copyBtn.classList.remove('copied');
+      }, 2000);
+    });
+  });
+
+  $recvBtn.addEventListener('click', function () {
+    var amt = parseFloat($recvAmt.value);
+    if (isNaN(amt) || amt <= 0) { toast('Enter a valid amount.', 'error'); return; }
+    // Generate a random sender address
+    var sender = '0x';
+    for (var i = 0; i < 40; i++) sender += Math.floor(Math.random() * 16).toString(16);
+    balance += amt;
+    saveBalance();
+    txHistory.push({ dir: 'received', addr: sender, amount: amt, ts: Date.now() });
+    saveTx();
+    renderBalance();
+    renderTx();
+    $recvAmt.value = '';
+    toast('Received ' + fmt(amt) + ' ROAD', 'success');
+  });
+
+  // ── Price Ticker ──
+  function fluctuatePrice() {
+    prevPrice = price;
+    var delta = (Math.random() - 0.5) * 0.1; // +/- 5%
+    price = Math.max(0.01, price * (1 + delta));
+    price = Math.round(price * 10000) / 10000;
+    localStorage.setItem(LS_PRICE, price);
+    renderPrice();
+    renderBalance(); // update USD value
+  }
+
+  // ── Init ──
+  // Simulate skeleton loading
+  setTimeout(function () {
+    renderBalance();
+    renderPrice();
+    renderAddress();
+    renderTx();
+  }, 400);
+
+  setInterval(fluctuatePrice, PRICE_INTERVAL);
+
+})();
+</script>
+<script>if("serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js").catch(()=>{});</script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+# Ternary Routing — BlackBox Protocol in RoadC
+# Three paths, first arrival cancels the rest
+
+let t1 = trit(1)
+let t0 = trit(0)
+let tn = trit(-1)
+
+print("=== Ternary Logic ===")
+print(t1)
+print(t0)
+print(tn)
+
+# Balanced ternary number
+let word = tword(42, 8)
+print("42 in ternary:")
+print(word)
+
+# Route a request through 3 paths
+let r = route("req-001", ["tor", "wireguard", "direct"])
+print("Route spawned")
+
+# Direct path arrives first — cancels tor and wireguard
+let result = resolve("req-001", "direct", "Hello from the fleet")
+print("Resolved via direct path")
+print(route_status())

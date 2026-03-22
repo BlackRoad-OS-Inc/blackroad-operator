@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Explorer — BlackRoad OS</title>
+  <meta name="description" content="Interactive API Explorer for BlackRoad OS. Test endpoints, view responses, and generate code snippets.">
+  <meta name="theme-color" content="#0a0a0a">
+  <link rel="stylesheet" href="/_shared/design.css">
+  <style>
+    /* ── Layout ── */
+    .api-layout {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      min-height: calc(100vh - var(--nav-height));
+    }
+    @media (max-width: 860px) {
+      .api-layout { grid-template-columns: 1fr; }
+      .history-sidebar { display: none; }
+      .history-toggle { display: flex !important; }
+      .history-sidebar.open { display: block; position: fixed; top: var(--nav-height); left: 0; right: 0; bottom: 0; z-index: 90; background: var(--bg); overflow-y: auto; }
+    }
+
+    /* ── Sidebar ── */
+    .history-sidebar {
+      border-right: 1px solid var(--border);
+      padding: var(--sp-md);
+      overflow-y: auto;
+      max-height: calc(100vh - var(--nav-height));
+      position: sticky;
+      top: var(--nav-height);
+    }
+    .history-sidebar h3 {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--muted);
+      margin-bottom: var(--sp-md);
+      font-family: var(--font-mono);
+    }
+    .history-item {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-sm);
+      padding: 8px 10px;
+      border-radius: var(--radius-small);
+      cursor: pointer;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--tertiary);
+      transition: background 0.15s;
+      margin-bottom: 2px;
+    }
+    .history-item:hover { background: var(--surface); }
+    .history-method {
+      font-weight: 700;
+      font-size: 0.6rem;
+      padding: 2px 5px;
+      border-radius: 3px;
+      background: rgba(68, 136, 255, 0.15);
+      color: var(--azure);
+      flex-shrink: 0;
+    }
+    .history-path { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .history-status {
+      font-size: 0.6rem;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+    .history-status.s2xx { color: #22c55e; }
+    .history-status.s4xx { color: #f59e0b; }
+    .history-status.s5xx { color: #ef4444; }
+    .history-time { color: var(--muted); font-size: 0.6rem; flex-shrink: 0; }
+    .history-empty { color: var(--muted); font-size: 0.75rem; padding: var(--sp-md); text-align: center; }
+    .history-clear {
+      display: block;
+      width: 100%;
+      margin-top: var(--sp-md);
+      padding: 6px;
+      border: 1px solid var(--border);
+      background: none;
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      border-radius: var(--radius-small);
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .history-clear:hover { border-color: var(--muted); color: var(--subtle); }
+    .history-toggle {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      margin: var(--sp-md);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--subtle);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      border-radius: var(--radius-btn);
+      cursor: pointer;
+    }
+
+    /* ── Main Panel ── */
+    .api-main {
+      padding: var(--sp-xl) var(--sp-lg);
+      max-width: 900px;
+    }
+
+    /* ── Request Builder ── */
+    .request-builder {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-large);
+      padding: var(--sp-lg);
+      margin-bottom: var(--sp-lg);
+    }
+    .request-row {
+      display: flex;
+      gap: var(--sp-sm);
+      align-items: stretch;
+    }
+    .method-badge {
+      display: flex;
+      align-items: center;
+      padding: 0 14px;
+      background: rgba(68, 136, 255, 0.12);
+      color: var(--azure);
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 0.8rem;
+      border-radius: var(--radius-input);
+      border: 1px solid rgba(68, 136, 255, 0.2);
+      flex-shrink: 0;
+    }
+    .endpoint-select {
+      flex: 1;
+      background: var(--inset);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-input);
+      padding: 12px 14px;
+      color: var(--white);
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      appearance: none;
+      -webkit-appearance: none;
+      cursor: pointer;
+      background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23737373'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+    }
+    .endpoint-select:focus { border-color: var(--violet); outline: none; }
+    .send-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--grad);
+      color: var(--white);
+      padding: 12px 24px;
+      border-radius: var(--radius-btn);
+      font-weight: 700;
+      font-size: 0.85rem;
+      font-family: var(--font-body);
+      border: none;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.2s var(--ease-spring);
+      flex-shrink: 0;
+    }
+    .send-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+    .send-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+    .send-btn .spinner {
+      width: 14px; height: 14px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      display: none;
+    }
+    .send-btn.loading .spinner { display: block; }
+    .send-btn.loading .btn-text { display: none; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .query-row {
+      display: flex;
+      gap: var(--sp-sm);
+      align-items: center;
+      margin-top: var(--sp-sm);
+    }
+    .query-row label {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+    .query-input {
+      flex: 1;
+      background: var(--inset);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-input);
+      padding: 8px 12px;
+      color: var(--white);
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+    }
+    .query-input:focus { border-color: var(--violet); outline: none; }
+    .base-url {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--muted);
+      margin-top: var(--sp-sm);
+    }
+
+    /* ── Response Viewer ── */
+    .response-viewer {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-large);
+      overflow: hidden;
+      margin-bottom: var(--sp-lg);
+    }
+    .response-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px var(--sp-md);
+      border-bottom: 1px solid var(--border);
+    }
+    .response-meta {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-md);
+    }
+    .status-badge {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 0.75rem;
+      padding: 3px 10px;
+      border-radius: var(--radius-pill);
+    }
+    .status-badge.s2xx { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
+    .status-badge.s4xx { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+    .status-badge.s5xx { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+    .response-time {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--subtle);
+    }
+    .copy-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--subtle);
+      padding: 4px 10px;
+      border-radius: var(--radius-small);
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .copy-btn:hover { border-color: var(--muted); color: var(--white); }
+    .response-body {
+      padding: var(--sp-md);
+      max-height: 420px;
+      overflow-y: auto;
+    }
+    .response-body pre {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .response-placeholder {
+      padding: var(--sp-xl);
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+    /* JSON syntax colors */
+    .json-key { color: #8844FF; }
+    .json-string { color: #22c55e; }
+    .json-number { color: #FF6B2B; }
+    .json-bool { color: #FF2255; }
+    .json-null { color: var(--muted); }
+    .json-bracket { color: var(--subtle); }
+
+    /* ── Code Generation ── */
+    .codegen {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-large);
+      overflow: hidden;
+    }
+    .codegen-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+    }
+    .codegen-tab {
+      padding: 10px 20px;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--muted);
+      cursor: pointer;
+      border: none;
+      background: none;
+      transition: color 0.15s, background 0.15s;
+      border-bottom: 2px solid transparent;
+    }
+    .codegen-tab:hover { color: var(--subtle); }
+    .codegen-tab.active {
+      color: var(--white);
+      border-bottom-color: var(--violet);
+      background: rgba(136, 68, 255, 0.05);
+    }
+    .codegen-body {
+      padding: var(--sp-md);
+      position: relative;
+    }
+    .codegen-body pre {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      line-height: 1.7;
+      color: var(--tertiary);
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .codegen-copy {
+      position: absolute;
+      top: var(--sp-md);
+      right: var(--sp-md);
+    }
+
+    /* ── Page Header ── */
+    .page-header {
+      margin-bottom: var(--sp-xl);
+    }
+    .page-header h1 {
+      font-size: clamp(1.75rem, 3vw, 2.25rem);
+      margin-bottom: var(--sp-sm);
+    }
+    .page-header p {
+      color: var(--subtle);
+      font-size: 0.9rem;
+    }
+  </style>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0a0a0a">
+</head>
+<body>
+
+  <!-- ── Nav ── -->
+  <nav class="br-nav">
+    <a href="/" class="nav-brand">
+      <div class="spectrum-mark">
+        <span></span><span></span><span></span><span></span><span></span><span></span>
+      </div>
+      API Explorer
+    </a>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/docs.html">Docs</a>
+      <a href="/dashboard.html">Dashboard</a>
+    </div>
+  </nav>
+
+  <div class="api-layout">
+
+    <!-- ── History Sidebar ── -->
+    <aside class="history-sidebar" id="historySidebar">
+      <h3>Request History</h3>
+      <div id="historyList"></div>
+      <button class="history-clear" id="clearHistory">Clear History</button>
+    </aside>
+
+    <!-- ── Main ── -->
+    <main class="api-main">
+
+      <button class="history-toggle" id="historyToggle">History</button>
+
+      <div class="page-header">
+        <div class="section-label">Interactive</div>
+        <h1>API Explorer</h1>
+        <p>Test live endpoints and generate integration code.</p>
+      </div>
+
+      <!-- Request Builder -->
+      <div class="request-builder">
+        <div class="request-row">
+          <div class="method-badge">GET</div>
+          <select class="endpoint-select" id="endpointSelect">
+            <option value="/api/stats">GET /api/stats</option>
+            <option value="/api/agents">GET /api/agents</option>
+            <option value="/api/search?q=">GET /api/search?q=</option>
+            <option value="/api/social">GET /api/social</option>
+            <option value="/api/education">GET /api/education</option>
+            <option value="/api/finance">GET /api/finance</option>
+            <option value="/api/infra">GET /api/infra</option>
+            <option value="/api/memory">GET /api/memory</option>
+          </select>
+          <button class="send-btn" id="sendBtn">
+            <span class="spinner"></span>
+            <span class="btn-text">Send Request</span>
+          </button>
+        </div>
+        <div class="query-row" id="queryRow" style="display:none;">
+          <label for="queryInput">q =</label>
+          <input type="text" class="query-input" id="queryInput" placeholder="Enter search query...">
+        </div>
+        <div class="base-url">Base: https://blackroad-live-stats.amundsonalexa.workers.dev</div>
+      </div>
+
+      <div class="grad-bar"></div>
+
+      <!-- Response Viewer -->
+      <div class="response-viewer" id="responseViewer">
+        <div class="response-header" id="responseHeader" style="display:none;">
+          <div class="response-meta">
+            <span class="status-badge" id="statusBadge"></span>
+            <span class="response-time" id="responseTime"></span>
+          </div>
+          <button class="copy-btn" id="copyResponse">Copy</button>
+        </div>
+        <div class="response-body" id="responseBody">
+          <div class="response-placeholder">Select an endpoint and click Send Request to see the response.</div>
+        </div>
+      </div>
+
+      <div class="grad-bar" style="margin-bottom: var(--sp-lg);"></div>
+
+      <!-- Code Generation -->
+      <div class="codegen" id="codegen">
+        <div class="codegen-tabs">
+          <button class="codegen-tab active" data-lang="curl">curl</button>
+          <button class="codegen-tab" data-lang="js">JavaScript</button>
+          <button class="codegen-tab" data-lang="python">Python</button>
+        </div>
+        <div class="codegen-body">
+          <button class="copy-btn codegen-copy" id="copyCode">Copy</button>
+          <pre id="codeOutput"></pre>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ── Footer ── -->
+  <footer>
+    <span>BlackRoad OS</span>
+    <span>Pave Tomorrow.</span>
+  </footer>
+
+  <script>
+    const BASE = 'https://blackroad-live-stats.amundsonalexa.workers.dev';
+    const HISTORY_KEY = 'br_api_history';
+    const MAX_HISTORY = 20;
+
+    const els = {
+      select: document.getElementById('endpointSelect'),
+      sendBtn: document.getElementById('sendBtn'),
+      queryRow: document.getElementById('queryRow'),
+      queryInput: document.getElementById('queryInput'),
+      responseHeader: document.getElementById('responseHeader'),
+      responseBody: document.getElementById('responseBody'),
+      statusBadge: document.getElementById('statusBadge'),
+      responseTime: document.getElementById('responseTime'),
+      copyResponse: document.getElementById('copyResponse'),
+      historyList: document.getElementById('historyList'),
+      clearHistory: document.getElementById('clearHistory'),
+      historySidebar: document.getElementById('historySidebar'),
+      historyToggle: document.getElementById('historyToggle'),
+      codeOutput: document.getElementById('codeOutput'),
+      copyCode: document.getElementById('copyCode'),
+    };
+
+    let currentLang = 'curl';
+    let lastResponseText = '';
+
+    // ── Endpoint selector logic ──
+    function getFullUrl() {
+      let path = els.select.value;
+      if (path === '/api/search?q=') {
+        const q = els.queryInput.value.trim();
+        path = '/api/search?q=' + encodeURIComponent(q);
+      }
+      return BASE + path;
+    }
+
+    els.select.addEventListener('change', () => {
+      const needsQuery = els.select.value === '/api/search?q=';
+      els.queryRow.style.display = needsQuery ? 'flex' : 'none';
+      updateCodegen();
+    });
+
+    // ── Send Request ──
+    els.sendBtn.addEventListener('click', sendRequest);
+    els.queryInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendRequest(); });
+
+    async function sendRequest() {
+      const url = getFullUrl();
+      els.sendBtn.classList.add('loading');
+      els.sendBtn.disabled = true;
+
+      const start = performance.now();
+      let status = 0;
+      let body = '';
+
+      try {
+        const res = await fetch(url);
+        status = res.status;
+        body = await res.text();
+        try { body = JSON.stringify(JSON.parse(body), null, 2); } catch(e) {}
+      } catch (err) {
+        status = 0;
+        body = JSON.stringify({ error: 'Network error', message: err.message }, null, 2);
+      }
+
+      const elapsed = Math.round(performance.now() - start);
+
+      els.sendBtn.classList.remove('loading');
+      els.sendBtn.disabled = false;
+
+      displayResponse(status, elapsed, body);
+      addHistory(els.select.value, status, elapsed);
+      updateCodegen();
+    }
+
+    // ── Display response ──
+    function displayResponse(status, ms, body) {
+      lastResponseText = body;
+      els.responseHeader.style.display = 'flex';
+
+      // Status badge
+      const cls = status >= 500 ? 's5xx' : status >= 400 ? 's4xx' : status > 0 ? 's2xx' : 's5xx';
+      els.statusBadge.className = 'status-badge ' + cls;
+      els.statusBadge.textContent = status > 0 ? status : 'ERR';
+
+      // Time
+      els.responseTime.textContent = ms + ' ms';
+
+      // Body with syntax highlighting
+      els.responseBody.innerHTML = '<pre>' + syntaxHighlight(body) + '</pre>';
+    }
+
+    function syntaxHighlight(json) {
+      return json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"([^"\\]*(\\.[^"\\]*)*)"\s*:/g, '<span class="json-key">"$1"</span>:')
+        .replace(/:\s*"([^"\\]*(\\.[^"\\]*)*)"/g, ': <span class="json-string">"$1"</span>')
+        .replace(/:\s*(-?\d+\.?\d*([eE][+-]?\d+)?)/g, ': <span class="json-number">$1</span>')
+        .replace(/:\s*(true|false)/g, ': <span class="json-bool">$1</span>')
+        .replace(/:\s*(null)/g, ': <span class="json-null">null</span>')
+        .replace(/[\[\]{}]/g, '<span class="json-bracket">$&</span>');
+    }
+
+    // ── Copy ──
+    els.copyResponse.addEventListener('click', () => {
+      navigator.clipboard.writeText(lastResponseText);
+      els.copyResponse.textContent = 'Copied';
+      setTimeout(() => { els.copyResponse.textContent = 'Copy'; }, 1500);
+    });
+
+    // ── History ──
+    function getHistory() {
+      try { return JSON.parse(localStorage.getItem(HISTORY_KEY)) || []; }
+      catch { return []; }
+    }
+
+    function addHistory(path, status, ms) {
+      const history = getHistory();
+      history.unshift({ path, status, ms, ts: Date.now() });
+      if (history.length > MAX_HISTORY) history.length = MAX_HISTORY;
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+      renderHistory();
+    }
+
+    function renderHistory() {
+      const history = getHistory();
+      if (!history.length) {
+        els.historyList.innerHTML = '<div class="history-empty">No requests yet.</div>';
+        return;
+      }
+      els.historyList.innerHTML = history.map((h, i) => {
+        const cls = h.status >= 500 ? 's5xx' : h.status >= 400 ? 's4xx' : h.status > 0 ? 's2xx' : 's5xx';
+        const display = h.path.replace('/api/', '');
+        return `<div class="history-item" data-idx="${i}">
+          <span class="history-method">GET</span>
+          <span class="history-path" title="${h.path}">${display}</span>
+          <span class="history-status ${cls}">${h.status || 'ERR'}</span>
+          <span class="history-time">${h.ms}ms</span>
+        </div>`;
+      }).join('');
+
+      els.historyList.querySelectorAll('.history-item').forEach(item => {
+        item.addEventListener('click', () => {
+          const h = history[item.dataset.idx];
+          // Set the select to the matching endpoint
+          const base = h.path.split('?')[0] + (h.path.includes('search?q=') ? '?q=' : '');
+          for (const opt of els.select.options) {
+            if (opt.value === base) { els.select.value = base; break; }
+          }
+          els.select.dispatchEvent(new Event('change'));
+          if (h.path.includes('search?q=')) {
+            const q = new URLSearchParams(h.path.split('?')[1]).get('q') || '';
+            els.queryInput.value = q;
+          }
+          sendRequest();
+        });
+      });
+    }
+
+    els.clearHistory.addEventListener('click', () => {
+      localStorage.removeItem(HISTORY_KEY);
+      renderHistory();
+    });
+
+    els.historyToggle.addEventListener('click', () => {
+      els.historySidebar.classList.toggle('open');
+    });
+
+    // ── Code Generation ──
+    document.querySelectorAll('.codegen-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.codegen-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        currentLang = tab.dataset.lang;
+        updateCodegen();
+      });
+    });
+
+    function updateCodegen() {
+      const url = getFullUrl();
+      let code = '';
+
+      if (currentLang === 'curl') {
+        code = `curl -s "${url}" | python3 -m json.tool`;
+      } else if (currentLang === 'js') {
+        code = `const response = await fetch("${url}");
+const data = await response.json();
+console.log(data);`;
+      } else if (currentLang === 'python') {
+        code = `import requests
+
+response = requests.get("${url}")
+data = response.json()
+print(data)`;
+      }
+
+      els.codeOutput.textContent = code;
+    }
+
+    els.copyCode.addEventListener('click', () => {
+      navigator.clipboard.writeText(els.codeOutput.textContent);
+      els.copyCode.textContent = 'Copied';
+      setTimeout(() => { els.copyCode.textContent = 'Copy'; }, 1500);
+    });
+
+    // ── Init ──
+    renderHistory();
+    updateCodegen();
+  </script>
+<script>if("serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js").catch(()=>{});</script>
+</body>
+</html>

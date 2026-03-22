@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="BlackRoad Files — sovereign file manager for BlackRoad OS.">
+  <meta name="theme-color" content="#0a0a0a">
+  <title>BlackRoad Files</title>
+  <link rel="stylesheet" href="/_shared/design.css">
+  <style>
+    /* ── File Manager Layout ── */
+    .fm-shell {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: var(--sp-lg);
+      min-height: calc(100vh - var(--nav-height) - 60px);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Toolbar ── */
+    .fm-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--sp-md);
+      padding: var(--sp-md) 0;
+      flex-wrap: wrap;
+    }
+    .fm-toolbar-left {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-sm);
+    }
+    .fm-toolbar-right {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-sm);
+    }
+    .fm-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: var(--radius-btn);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--secondary);
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .fm-btn:hover {
+      border-color: var(--border-hover);
+      color: var(--white);
+    }
+    .fm-btn.active {
+      border-color: var(--violet);
+      color: var(--white);
+    }
+    .fm-btn.primary {
+      background: var(--grad);
+      border: none;
+      color: var(--white);
+      font-weight: 600;
+    }
+    .fm-btn.primary:hover { opacity: 0.9; }
+    .fm-btn.danger:hover {
+      border-color: #ef4444;
+      color: #ef4444;
+    }
+
+    /* ── Breadcrumbs ── */
+    .fm-breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--subtle);
+      padding: var(--sp-sm) 0;
+      flex-wrap: wrap;
+    }
+    .fm-breadcrumb span {
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+    .fm-breadcrumb span:hover { color: var(--white); }
+    .fm-breadcrumb span.current { color: var(--secondary); cursor: default; }
+    .fm-breadcrumb .sep { color: var(--dim); cursor: default; }
+
+    /* ── Sort Bar ── */
+    .fm-sort-bar {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-md);
+      padding: var(--sp-sm) 0;
+      font-size: 0.7rem;
+      font-family: var(--font-mono);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+    }
+    .fm-sort-btn {
+      cursor: pointer;
+      transition: color 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 4px 0;
+    }
+    .fm-sort-btn:hover, .fm-sort-btn.active { color: var(--white); }
+
+    /* ── File Grid ── */
+    .fm-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: var(--sp-md);
+      padding: var(--sp-md) 0;
+      flex: 1;
+    }
+    .fm-grid.list-view {
+      grid-template-columns: 1fr;
+      gap: 2px;
+    }
+
+    /* ── File Item (Grid) ── */
+    .fm-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: var(--sp-md);
+      cursor: pointer;
+      transition: border-color 0.2s, transform 0.15s var(--ease-spring);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--sp-sm);
+      text-align: center;
+      position: relative;
+    }
+    .fm-item:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-2px);
+    }
+    .fm-item .fm-icon { font-size: 2rem; line-height: 1; }
+    .fm-item .fm-name {
+      font-size: 0.8rem;
+      color: var(--secondary);
+      word-break: break-all;
+      font-weight: 500;
+    }
+    .fm-item .fm-meta {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--muted);
+    }
+    .fm-item .fm-delete {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: none;
+      background: transparent;
+      color: var(--dim);
+      font-size: 12px;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.2s, background 0.2s;
+    }
+    .fm-item:hover .fm-delete { display: flex; }
+    .fm-item .fm-delete:hover { color: #ef4444; background: rgba(239,68,68,0.1); }
+
+    /* ── File Item (List) ── */
+    .fm-grid.list-view .fm-item {
+      flex-direction: row;
+      align-items: center;
+      text-align: left;
+      padding: var(--sp-sm) var(--sp-md);
+      border-radius: var(--radius-small);
+      gap: var(--sp-md);
+      transform: none;
+    }
+    .fm-grid.list-view .fm-item:hover { transform: none; background: rgba(255,255,255,0.02); }
+    .fm-grid.list-view .fm-icon { font-size: 1.2rem; flex-shrink: 0; }
+    .fm-grid.list-view .fm-name { flex: 1; }
+    .fm-grid.list-view .fm-meta { white-space: nowrap; }
+    .fm-grid.list-view .fm-item .fm-delete { position: static; display: flex; opacity: 0; }
+    .fm-grid.list-view .fm-item:hover .fm-delete { opacity: 1; }
+    .fm-list-size {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--muted);
+      min-width: 70px;
+      text-align: right;
+      display: none;
+    }
+    .fm-grid.list-view .fm-list-size { display: block; }
+
+    /* ── Storage Bar ── */
+    .fm-storage {
+      padding: var(--sp-md) 0;
+      border-top: 1px solid var(--border);
+      margin-top: auto;
+    }
+    .fm-storage-info {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-bottom: var(--sp-xs);
+    }
+
+    /* ── Modal ── */
+    .fm-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: var(--sp-lg);
+    }
+    .fm-modal-overlay.open { display: flex; }
+    .fm-modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-large);
+      width: 100%;
+      max-width: 560px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    .fm-modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--sp-md) var(--sp-lg);
+      border-bottom: 1px solid var(--border);
+    }
+    .fm-modal-header h3 {
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: var(--sp-sm);
+    }
+    .fm-modal-close {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: none;
+      color: var(--subtle);
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .fm-modal-close:hover { border-color: var(--muted); color: var(--white); }
+    .fm-modal-body { padding: var(--sp-lg); }
+    .fm-modal-meta {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: var(--sp-sm) var(--sp-lg);
+      font-size: 0.8rem;
+      margin-bottom: var(--sp-lg);
+    }
+    .fm-modal-meta dt {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .fm-modal-meta dd { color: var(--secondary); }
+    .fm-preview {
+      background: var(--inset);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-small);
+      padding: var(--sp-md);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--tertiary);
+      line-height: 1.7;
+      max-height: 240px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
+
+    /* ── Empty State ── */
+    .fm-empty {
+      text-align: center;
+      padding: var(--sp-2xl) var(--sp-lg);
+      color: var(--muted);
+    }
+    .fm-empty-icon { font-size: 2.5rem; margin-bottom: var(--sp-md); }
+
+    /* ── Upload hidden input ── */
+    #uploadInput { display: none; }
+
+    @media (max-width: 560px) {
+      .fm-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+      .fm-toolbar { flex-direction: column; align-items: stretch; }
+      .fm-toolbar-left, .fm-toolbar-right { justify-content: center; flex-wrap: wrap; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Nav ── -->
+  <nav class="br-nav">
+    <a href="/" class="nav-brand">
+      <div class="spectrum-mark">
+        <span></span><span></span><span></span><span></span><span></span><span></span>
+      </div>
+      BlackRoad Files
+    </a>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/dashboard.html">Dashboard</a>
+    </div>
+  </nav>
+
+  <div class="grad-bar"></div>
+
+  <!-- ── File Manager Shell ── -->
+  <div class="fm-shell">
+
+    <!-- Breadcrumb -->
+    <div class="fm-breadcrumb" id="breadcrumb"></div>
+
+    <!-- Toolbar -->
+    <div class="fm-toolbar">
+      <div class="fm-toolbar-left">
+        <button class="fm-btn primary" id="btnUpload" title="Upload file">+ Upload</button>
+        <button class="fm-btn" id="btnNewFolder" title="New folder">+ Folder</button>
+        <button class="fm-btn danger" id="btnDelete" title="Delete selected" style="display:none;">Delete</button>
+      </div>
+      <div class="fm-toolbar-right">
+        <button class="fm-btn fm-sort-btn active" data-sort="name">Name</button>
+        <button class="fm-btn fm-sort-btn" data-sort="size">Size</button>
+        <button class="fm-btn fm-sort-btn" data-sort="date">Date</button>
+        <span style="width:1px;height:20px;background:var(--border);"></span>
+        <button class="fm-btn active" id="btnGrid" title="Grid view">&#9638;</button>
+        <button class="fm-btn" id="btnList" title="List view">&#9776;</button>
+      </div>
+    </div>
+
+    <!-- File Grid -->
+    <div class="fm-grid" id="fileGrid"></div>
+
+    <!-- Storage Bar -->
+    <div class="fm-storage">
+      <div class="fm-storage-info">
+        <span id="storageUsed">0 B used</span>
+        <span id="storageTotal">5.00 MB total</span>
+      </div>
+      <div class="progress-bar">
+        <div class="fill" id="storageFill" style="width:0%"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grad-bar"></div>
+
+  <footer>
+    <span>BlackRoad OS, Inc.</span>
+    <span class="live-indicator">Files</span>
+  </footer>
+
+  <!-- ── Upload Input ── -->
+  <input type="file" id="uploadInput" multiple>
+
+  <!-- ── Preview Modal ── -->
+  <div class="fm-modal-overlay" id="previewModal">
+    <div class="fm-modal">
+      <div class="fm-modal-header">
+        <h3 id="modalTitle"></h3>
+        <button class="fm-modal-close" id="modalClose">&times;</button>
+      </div>
+      <div class="fm-modal-body">
+        <dl class="fm-modal-meta" id="modalMeta"></dl>
+        <div class="fm-preview" id="modalPreview"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ================================================================
+       BlackRoad Files — localStorage-backed file manager
+       ================================================================ */
+
+    const STORAGE_KEY = 'br_files_v1';
+    const MAX_STORAGE = 5 * 1024 * 1024; // 5 MB
+
+    // ── Default file system ──
+    const DEFAULT_FS = {
+      '/home/blackroad/agents/road.py': { size: 4280, modified: '2026-03-10T08:14:00Z', content: '#!/usr/bin/env python3\n"""Road Agent — primary routing and dispatch.\n\nHandles inbound queries, routes to specialist agents,\nand maintains session context across the fleet.\n"""\n\nimport asyncio\nfrom dataclasses import dataclass\nfrom typing import Optional\n\n@dataclass\nclass RoadAgent:\n    name: str = "road"\n    role: str = "router"\n    fleet_id: str = "blackroad-prime"\n\n    async def dispatch(self, query: str, target: Optional[str] = None):\n        \"\"\"Route query to the appropriate agent.\"\"\"\n        if target:\n            return await self._direct(target, query)\n        return await self._auto_route(query)\n\n    async def _auto_route(self, query: str):\n        # Semantic routing based on intent\n        pass\n\n    async def _direct(self, agent: str, query: str):\n        # Direct dispatch to named agent\n        pass\n\nif __name__ == "__main__":\n    agent = RoadAgent()\n    asyncio.run(agent.dispatch("status"))' },
+      '/home/blackroad/agents/echo.py': { size: 3150, modified: '2026-03-09T14:22:00Z', content: '#!/usr/bin/env python3\n"""Echo Agent — NATS pub/sub message relay.\n\nListens on all channels and echoes relevant\nmessages to the appropriate subscribers.\n"""\n\nimport nats\nfrom nats.aio.client import Client as NATS\n\nclass EchoAgent:\n    def __init__(self):\n        self.nc = NATS()\n        self.subscriptions = []\n\n    async def connect(self, server="nats://localhost:4222"):\n        await self.nc.connect(server)\n\n    async def listen(self, subject="blackroad.>"):\n        sub = await self.nc.subscribe(subject, cb=self.on_message)\n        self.subscriptions.append(sub)\n\n    async def on_message(self, msg):\n        print(f"[echo] {msg.subject}: {msg.data.decode()}")' },
+      '/home/blackroad/agents/alexandria.py': { size: 5720, modified: '2026-03-11T10:05:00Z', content: '#!/usr/bin/env python3\n"""Alexandria Agent — RAG knowledge retrieval.\n\nQueries Qdrant vector store and returns\nsemantically relevant context from the\nBlackRoad knowledge base.\n"""\n\nfrom qdrant_client import QdrantClient\n\nclass AlexandriaAgent:\n    def __init__(self, host="192.168.4.49", port=6333):\n        self.client = QdrantClient(host=host, port=port)\n        self.collection = "blackroad_knowledge"\n\n    def search(self, query: str, limit: int = 5):\n        \"\"\"Semantic search across knowledge base.\"\"\"\n        results = self.client.search(\n            collection_name=self.collection,\n            query_vector=self._embed(query),\n            limit=limit\n        )\n        return [hit.payload for hit in results]\n\n    def _embed(self, text: str):\n        # nomic-embed-text via local Ollama\n        pass' },
+      '/home/blackroad/agents/guardian.py': { size: 2940, modified: '2026-03-08T16:30:00Z', content: '#!/usr/bin/env python3\n"""Guardian Agent — integrity verification.\n\nSHA-256 hash checks on all critical files.\nAudit logging and tamper detection.\n"""\n\nimport hashlib\nimport json\nfrom pathlib import Path\n\nclass GuardianAgent:\n    def __init__(self, manifest="~/.guardian/manifest.json"):\n        self.manifest_path = Path(manifest).expanduser()\n        self.manifest = self._load()\n\n    def verify(self, filepath: str) -> bool:\n        h = self._hash(filepath)\n        return self.manifest.get(filepath) == h\n\n    def _hash(self, filepath: str) -> str:\n        sha = hashlib.sha256()\n        with open(filepath, "rb") as f:\n            for chunk in iter(lambda: f.read(8192), b""):\n                sha.update(chunk)\n        return sha.hexdigest()\n\n    def _load(self):\n        if self.manifest_path.exists():\n            return json.loads(self.manifest_path.read_text())\n        return {}' },
+      '/home/blackroad/agents/roadie.py': { size: 3680, modified: '2026-03-12T09:45:00Z', content: '#!/usr/bin/env python3\n"""Roadie Agent — search and memory retrieval.\n\nQueries memory files, codex entries, and\nTIL broadcasts to answer questions.\n"""\n\nimport sqlite3\nfrom pathlib import Path\n\nclass RoadieAgent:\n    def __init__(self, db_path="~/.blackroad/memory.db"):\n        self.db = Path(db_path).expanduser()\n\n    def search(self, query: str, limit: int = 10):\n        conn = sqlite3.connect(str(self.db))\n        cur = conn.cursor()\n        cur.execute(\n            "SELECT * FROM codex WHERE content MATCH ? LIMIT ?",\n            (query, limit)\n        )\n        results = cur.fetchall()\n        conn.close()\n        return results\n\n    def recent(self, n: int = 20):\n        conn = sqlite3.connect(str(self.db))\n        cur = conn.cursor()\n        cur.execute("SELECT * FROM journal ORDER BY ts DESC LIMIT ?", (n,))\n        rows = cur.fetchall()\n        conn.close()\n        return rows' },
+      '/home/blackroad/memory/codex.db': { size: 524288, modified: '2026-03-21T02:00:00Z', content: '[Binary: SQLite 3 database — codex solutions & patterns]\n\nTable: solutions (id, category, problem, solution, tags, created)\nTable: patterns (id, name, description, frequency, last_seen)\nTable: codex_fts (FTS5 virtual table)\n\nEntries: 833\nCategories: networking, deployment, git, ssh, dns, docker, ai, agents' },
+      '/home/blackroad/memory/journal.log': { size: 187400, modified: '2026-03-21T06:30:00Z', content: '2026-03-21T06:30:12Z [road] LOG deploy blackroad-io "deployed files-live.html update"\n2026-03-21T06:15:44Z [alexandria] LOG search codex "rag query: file manager patterns"\n2026-03-21T05:58:01Z [guardian] LOG verify manifest "all 47 critical files passed"\n2026-03-21T05:30:00Z [echo] LOG broadcast fleet "hourly health: 4/5 nodes online"\n2026-03-21T04:45:22Z [road] LOG route query "semantic dispatch to alexandria"\n2026-03-21T04:12:09Z [roadie] LOG search memory "codex search: localStorage patterns"\n...\n[187,400 bytes — continuous journal since 2026-01-15]' },
+      '/home/blackroad/memory/til.db': { size: 98304, modified: '2026-03-20T22:10:00Z', content: '[Binary: SQLite 3 database — Today I Learned broadcasts]\n\nTable: tils (id, category, learning, agent, timestamp)\nTable: til_fts (FTS5 virtual table)\n\nEntries: 412\nCategories: networking, bash, python, deployment, security, git, dns, ai' },
+      '/home/blackroad/scripts/deploy.sh': { size: 1820, modified: '2026-03-15T11:20:00Z', content: '#!/bin/bash\n# BlackRoad deploy script — push to all targets\n# Usage: ./deploy.sh [target]\n\nset -e\n\nPINK=\'\\033[38;5;205m\'\nGREEN=\'\\033[38;5;82m\'\nRESET=\'\\033[0m\'\n\nTARGET="${1:-all}"\n\necho -e "${PINK}BlackRoad Deploy${RESET} target=$TARGET"\n\ncase "$TARGET" in\n  gitea)\n    git push gitea main\n    ;;\n  github)\n    git push origin main\n    ;;\n  all)\n    git push gitea main\n    git push origin main\n    echo -e "${GREEN}Deployed to all targets${RESET}"\n    ;;\n  *)\n    echo "Unknown target: $TARGET"\n    exit 1\n    ;;\nesac' },
+      '/home/blackroad/scripts/health.sh': { size: 2450, modified: '2026-03-18T07:00:00Z', content: '#!/bin/bash\n# Health monitor — check all fleet nodes\n# Usage: ./health.sh\n\nset -e\n\nNODES=(\n  "alice:192.168.4.49"\n  "cecilia:192.168.4.96"\n  "octavia:192.168.4.101"\n  "aria:192.168.4.98"\n  "lucidia:192.168.4.38"\n)\n\nfor entry in "${NODES[@]}"; do\n  name="${entry%%:*}"\n  ip="${entry##*:}"\n  if ping -c1 -W2 "$ip" &>/dev/null; then\n    echo "[OK] $name ($ip)"\n  else\n    echo "[DOWN] $name ($ip)"\n  fi\ndone' },
+      '/home/blackroad/scripts/sync.sh': { size: 1560, modified: '2026-03-16T14:10:00Z', content: '#!/bin/bash\n# Sync operator repo to all nodes\n# Usage: ./sync.sh\n\nset -e\n\nSOURCE="$HOME/blackroad-operator"\nTARGETS=(\n  "blackroad@192.168.4.96:~/operator"\n  "blackroad@192.168.4.101:~/operator"\n  "blackroad@192.168.4.38:~/operator"\n)\n\nfor target in "${TARGETS[@]}"; do\n  echo "Syncing to $target..."\n  rsync -az --delete "$SOURCE/" "$target"\ndone\n\necho "Sync complete."' },
+      '/home/blackroad/scripts/backup.sh': { size: 2100, modified: '2026-03-14T20:30:00Z', content: '#!/bin/bash\n# Backup critical data to MinIO\n# Usage: ./backup.sh\n\nset -e\n\nBUCKET="s3://backups"\nDATE=$(date +%Y%m%d)\n\necho "Backing up memory databases..."\nmc cp ~/.blackroad/memory.db "$BUCKET/memory-$DATE.db"\nmc cp ~/.blackroad/codex.db "$BUCKET/codex-$DATE.db"\n\necho "Backing up Gitea data..."\nssh blackroad@192.168.4.101 "tar czf /tmp/gitea-$DATE.tar.gz /var/lib/gitea"\nmc cp blackroad@192.168.4.101:/tmp/gitea-$DATE.tar.gz "$BUCKET/"\n\necho "Backup complete: $DATE"' },
+      '/home/blackroad/docs/README.md': { size: 3200, modified: '2026-03-12T08:00:00Z', content: '# BlackRoad OS\n\nSovereign AI operating system. Local-first, fleet-native, battery-aware.\n\n## Quick Start\n\n```bash\n# Check fleet health\n./scripts/health.sh\n\n# Deploy to all targets\n./scripts/deploy.sh all\n\n# Search memory\nmemory-codex.sh search "query"\n```\n\n## Architecture\n\n- 5 Raspberry Pis (Alice, Cecilia, Octavia, Aria, Lucidia)\n- 2 DigitalOcean droplets (Gematria, Anastasia)\n- WireGuard mesh connecting all nodes\n- 200 AI agents across the fleet\n- Gitea primary, GitHub mirror\n\n## License\n\nProprietary. BlackRoad OS, Inc. All rights reserved.' },
+      '/home/blackroad/docs/LICENSE': { size: 1100, modified: '2026-02-01T00:00:00Z', content: 'BlackRoad OS Proprietary License\n\nCopyright (c) 2025-2026 BlackRoad OS, Inc.\nAll rights reserved.\n\nThis software and associated documentation files (the "Software")\nare the proprietary property of BlackRoad OS, Inc.\n\nUnauthorized copying, modification, distribution, or use of this\nSoftware, in whole or in part, is strictly prohibited without\nexpress written permission from BlackRoad OS, Inc.\n\nTHE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND.' },
+      '/home/blackroad/docs/ARCHITECTURE.md': { size: 6800, modified: '2026-03-10T12:00:00Z', content: '# BlackRoad OS Architecture\n\n## Sovereignty Stack\n\n| Layer | Service | Node |\n|-------|---------|------|\n| Edge | Caddy TLS | Gematria |\n| DNS | PowerDNS | Lucidia + Gematria |\n| Git | Gitea (239 repos) | Octavia |\n| AI | Ollama (26 TOPS) | 4 nodes |\n| Storage | MinIO | Cecilia |\n| Cache | Redis | Alice |\n| VPN | WireGuard | All nodes |\n\n## Agent Fleet\n\n200 agents across 5 categories:\n- Routing (Road, Echo)\n- Knowledge (Alexandria, Roadie)\n- Security (Guardian)\n- Operations (deploy, health, sync)\n- Collaboration (RoundTrip)\n\n## Data Flow\n\nInternet -> Gematria (Caddy) -> WireGuard -> Pi Fleet -> Agent' },
+      '/home/blackroad/models/llama3.2.gguf': { size: 4294967296, modified: '2026-03-01T00:00:00Z', content: '[Binary: GGUF model file — Llama 3.2 8B Q4_K_M]\n\nArchitecture: LlamaForCausalLM\nParameters: 8.03B\nQuantization: Q4_K_M (4-bit, medium quality)\nContext: 128K tokens\nVocab: 128,256 tokens\n\nServed via Ollama on Cecilia (192.168.4.96:11434)' },
+      '/home/blackroad/models/mistral.gguf': { size: 3758096384, modified: '2026-02-20T00:00:00Z', content: '[Binary: GGUF model file — Mistral 7B v0.3 Q4_K_M]\n\nArchitecture: MistralForCausalLM\nParameters: 7.24B\nQuantization: Q4_K_M (4-bit, medium quality)\nContext: 32K tokens\nVocab: 32,768 tokens\n\nServed via Ollama on Cecilia (192.168.4.96:11434)' },
+    };
+
+    // ── State ──
+    let currentPath = '/home/blackroad';
+    let viewMode = 'grid'; // grid | list
+    let sortField = 'name'; // name | size | date
+    let sortAsc = true;
+
+    // ── Helpers ──
+    function loadFS() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        try { return JSON.parse(raw); }
+        catch { /* fall through */ }
+      }
+      // Seed defaults
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_FS));
+      return { ...DEFAULT_FS };
+    }
+
+    function saveFS(fs) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(fs));
+    }
+
+    function formatSize(bytes) {
+      if (bytes === 0) return '0 B';
+      const units = ['B', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(1024));
+      return (bytes / Math.pow(1024, i)).toFixed(i > 0 ? 1 : 0) + ' ' + units[i];
+    }
+
+    function formatDate(iso) {
+      const d = new Date(iso);
+      const now = new Date();
+      const diff = now - d;
+      if (diff < 86400000) {
+        const hrs = Math.floor(diff / 3600000);
+        return hrs < 1 ? 'Just now' : hrs + 'h ago';
+      }
+      if (diff < 604800000) {
+        return Math.floor(diff / 86400000) + 'd ago';
+      }
+      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+
+    function getFileIcon(name, isFolder) {
+      if (isFolder) return '\uD83D\uDCC1';
+      const ext = name.split('.').pop().toLowerCase();
+      const map = {
+        py: '\uD83D\uDC0D', sh: '\uD83D\uDCDC', md: '\uD83D\uDCC4', db: '\uD83D\uDDC3\uFE0F',
+        log: '\uD83D\uDCCB', gguf: '\uD83E\uDDE0', json: '\uD83D\uDCCE', txt: '\uD83D\uDCC4',
+        html: '\uD83C\uDF10', css: '\uD83C\uDFA8', js: '\u26A1', toml: '\u2699\uFE0F',
+        yml: '\u2699\uFE0F', yaml: '\u2699\uFE0F', sol: '\u26D3\uFE0F',
+      };
+      return map[ext] || '\uD83D\uDCC4';
+    }
+
+    function getExtension(name) {
+      const i = name.lastIndexOf('.');
+      return i > 0 ? name.slice(i + 1).toUpperCase() : 'FILE';
+    }
+
+    function getStorageUsed(fs) {
+      return JSON.stringify(fs).length;
+    }
+
+    // ── Derive entries for current path ──
+    function getEntries(fs) {
+      const folders = new Set();
+      const files = [];
+      const prefix = currentPath.endsWith('/') ? currentPath : currentPath + '/';
+
+      for (const [path, meta] of Object.entries(fs)) {
+        if (!path.startsWith(prefix)) continue;
+        const rest = path.slice(prefix.length);
+        const slashIdx = rest.indexOf('/');
+        if (slashIdx === -1) {
+          // Direct file
+          files.push({ name: rest, path, isFolder: false, size: meta.size, modified: meta.modified });
+        } else {
+          // Subfolder
+          folders.add(rest.slice(0, slashIdx));
+        }
+      }
+
+      const folderEntries = [...folders].map(name => {
+        // Compute folder size + most recent modified
+        const fp = prefix + name + '/';
+        let totalSize = 0;
+        let latestMod = '1970-01-01T00:00:00Z';
+        for (const [p, m] of Object.entries(fs)) {
+          if (p.startsWith(fp)) {
+            totalSize += m.size;
+            if (m.modified > latestMod) latestMod = m.modified;
+          }
+        }
+        return { name, path: prefix + name, isFolder: true, size: totalSize, modified: latestMod };
+      });
+
+      let all = [...folderEntries, ...files];
+
+      // Sort
+      all.sort((a, b) => {
+        // Folders always first
+        if (a.isFolder !== b.isFolder) return a.isFolder ? -1 : 1;
+        let cmp = 0;
+        if (sortField === 'name') cmp = a.name.localeCompare(b.name);
+        else if (sortField === 'size') cmp = a.size - b.size;
+        else if (sortField === 'date') cmp = new Date(a.modified) - new Date(b.modified);
+        return sortAsc ? cmp : -cmp;
+      });
+
+      return all;
+    }
+
+    // ── Render ──
+    function render() {
+      const fs = loadFS();
+      renderBreadcrumb();
+      renderGrid(fs);
+      renderStorage(fs);
+    }
+
+    function renderBreadcrumb() {
+      const el = document.getElementById('breadcrumb');
+      const parts = currentPath.split('/').filter(Boolean);
+      let html = '';
+      let accumulated = '';
+      parts.forEach((part, i) => {
+        accumulated += '/' + part;
+        const isCurrent = i === parts.length - 1;
+        if (i > 0) html += '<span class="sep">/</span>';
+        if (isCurrent) {
+          html += `<span class="current">${part}</span>`;
+        } else {
+          const p = accumulated;
+          html += `<span onclick="navigate('${p}')">${part}</span>`;
+        }
+      });
+      el.innerHTML = html;
+    }
+
+    function renderGrid(fs) {
+      const grid = document.getElementById('fileGrid');
+      const entries = getEntries(fs);
+
+      if (viewMode === 'list') {
+        grid.classList.add('list-view');
+      } else {
+        grid.classList.remove('list-view');
+      }
+
+      if (entries.length === 0) {
+        grid.innerHTML = `
+          <div class="fm-empty" style="grid-column: 1 / -1;">
+            <div class="fm-empty-icon">\uD83D\uDCC2</div>
+            <p>Empty folder</p>
+          </div>`;
+        return;
+      }
+
+      grid.innerHTML = entries.map(e => `
+        <div class="fm-item" onclick="${e.isFolder ? `navigate('${e.path}')` : `preview('${e.path}')`}">
+          <div class="fm-icon">${getFileIcon(e.name, e.isFolder)}</div>
+          <div class="fm-name">${e.name}</div>
+          <div class="fm-list-size">${formatSize(e.size)}</div>
+          <div class="fm-meta">${e.isFolder ? formatSize(e.size) : getExtension(e.name)} &middot; ${formatDate(e.modified)}</div>
+          ${!e.isFolder ? `<button class="fm-delete" onclick="event.stopPropagation(); deleteFile('${e.path}')" title="Delete">&times;</button>` : `<button class="fm-delete" onclick="event.stopPropagation(); deleteFolder('${e.path}')" title="Delete folder">&times;</button>`}
+        </div>
+      `).join('');
+    }
+
+    function renderStorage(fs) {
+      const used = getStorageUsed(fs);
+      const pct = Math.min((used / MAX_STORAGE) * 100, 100);
+      document.getElementById('storageUsed').textContent = formatSize(used) + ' used';
+      document.getElementById('storageTotal').textContent = formatSize(MAX_STORAGE) + ' total';
+      document.getElementById('storageFill').style.width = pct.toFixed(1) + '%';
+    }
+
+    // ── Navigation ──
+    function navigate(path) {
+      currentPath = path;
+      render();
+    }
+
+    // ── Preview Modal ──
+    function preview(path) {
+      const fs = loadFS();
+      const meta = fs[path];
+      if (!meta) return;
+      const name = path.split('/').pop();
+      const ext = getExtension(name);
+
+      document.getElementById('modalTitle').innerHTML =
+        `<span>${getFileIcon(name, false)}</span> ${name}`;
+
+      document.getElementById('modalMeta').innerHTML = `
+        <dt>Path</dt><dd class="mono" style="font-size:0.75rem;color:var(--tertiary)">${path}</dd>
+        <dt>Size</dt><dd>${formatSize(meta.size)}</dd>
+        <dt>Modified</dt><dd>${new Date(meta.modified).toLocaleString()}</dd>
+        <dt>Type</dt><dd>${ext} file</dd>
+      `;
+
+      document.getElementById('modalPreview').textContent = meta.content || '[No preview available]';
+      document.getElementById('previewModal').classList.add('open');
+    }
+
+    // ── Close modal ──
+    document.getElementById('modalClose').addEventListener('click', () => {
+      document.getElementById('previewModal').classList.remove('open');
+    });
+    document.getElementById('previewModal').addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) {
+        e.currentTarget.classList.remove('open');
+      }
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.getElementById('previewModal').classList.remove('open');
+      }
+    });
+
+    // ── Upload ──
+    document.getElementById('btnUpload').addEventListener('click', () => {
+      document.getElementById('uploadInput').click();
+    });
+    document.getElementById('uploadInput').addEventListener('change', (e) => {
+      const fs = loadFS();
+      const prefix = currentPath.endsWith('/') ? currentPath : currentPath + '/';
+      for (const file of e.target.files) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const content = reader.result;
+          const path = prefix + file.name;
+          fs[path] = {
+            size: file.size,
+            modified: new Date().toISOString(),
+            content: content.length > 10000
+              ? content.slice(0, 10000) + '\n\n[Truncated — showing first 10KB]'
+              : content
+          };
+          saveFS(fs);
+          render();
+        };
+        reader.readAsText(file);
+      }
+      e.target.value = '';
+    });
+
+    // ── New Folder ──
+    document.getElementById('btnNewFolder').addEventListener('click', () => {
+      const name = prompt('Folder name:');
+      if (!name || !name.trim()) return;
+      const clean = name.trim().replace(/[\/\\]/g, '');
+      if (!clean) return;
+      const fs = loadFS();
+      const prefix = currentPath.endsWith('/') ? currentPath : currentPath + '/';
+      const placeholder = prefix + clean + '/.keep';
+      fs[placeholder] = { size: 0, modified: new Date().toISOString(), content: '' };
+      saveFS(fs);
+      render();
+    });
+
+    // ── Delete ──
+    function deleteFile(path) {
+      if (!confirm('Delete ' + path.split('/').pop() + '?')) return;
+      const fs = loadFS();
+      delete fs[path];
+      saveFS(fs);
+      render();
+    }
+
+    function deleteFolder(folderPath) {
+      const name = folderPath.split('/').pop();
+      if (!confirm('Delete folder "' + name + '" and all contents?')) return;
+      const fs = loadFS();
+      const prefix = folderPath.endsWith('/') ? folderPath : folderPath + '/';
+      for (const key of Object.keys(fs)) {
+        if (key.startsWith(prefix)) delete fs[key];
+      }
+      saveFS(fs);
+      render();
+    }
+
+    // ── View Toggle ──
+    document.getElementById('btnGrid').addEventListener('click', () => {
+      viewMode = 'grid';
+      document.getElementById('btnGrid').classList.add('active');
+      document.getElementById('btnList').classList.remove('active');
+      render();
+    });
+    document.getElementById('btnList').addEventListener('click', () => {
+      viewMode = 'list';
+      document.getElementById('btnList').classList.add('active');
+      document.getElementById('btnGrid').classList.remove('active');
+      render();
+    });
+
+    // ── Sort ──
+    document.querySelectorAll('.fm-sort-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const field = btn.dataset.sort;
+        if (!field) return;
+        if (sortField === field) {
+          sortAsc = !sortAsc;
+        } else {
+          sortField = field;
+          sortAsc = true;
+        }
+        document.querySelectorAll('.fm-sort-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        render();
+      });
+    });
+
+    // ── Init ──
+    render();
+  </script>
+<script>if("serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js").catch(()=>{});</script>
+</body>
+</html>

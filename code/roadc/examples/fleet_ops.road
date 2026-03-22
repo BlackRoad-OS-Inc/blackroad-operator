@@ -1,0 +1,61 @@
+# Fleet Operations in RoadC
+# Real BlackRoad infrastructure management
+
+let node_names = ["Alice", "Cecilia", "Octavia", "Lucidia", "Aria"]
+let node_ips = ["192.168.4.49", "192.168.4.96", "192.168.4.101", "192.168.4.38", "192.168.4.98"]
+let node_status = ["online", "offline", "online", "online", "offline"]
+
+# SV — check fleet (no args)
+fun check_fleet():
+    let online = 0
+    let offline = 0
+    let i = 0
+    while i < len(node_names):
+        if node_status[i] == "online":
+            online = online + 1
+        else:
+            offline = offline + 1
+        i = i + 1
+    print("Fleet: {online} online, {offline} offline")
+
+# SVO — deploy a worker
+fun deploy(worker):
+    print("Deploying {worker} to Cloudflare...")
+
+# SVOA — store backup in location
+fun backup(node_name, destination):
+    print("Backing up {node_name} to {destination}")
+
+# SVOO — send alert to channel
+fun alert(channel, message):
+    print("#{channel}: {message}")
+
+# SVC — check status
+fun status(name):
+    let i = 0
+    while i < len(node_names):
+        if node_names[i] == name:
+            print("{name} is {node_status[i]}")
+            return node_status[i]
+        i = i + 1
+    return "unknown"
+
+# SVOC — promote node
+fun promote(name, role):
+    print("{name} -> {role}")
+
+# Run it
+check_fleet()
+print("")
+deploy("blackroad-slack")
+deploy("roadpay")
+print("")
+backup("Alice", "/backups/alice-20260316")
+print("")
+alert("fleet-ops", "Cecilia is offline")
+alert("engineering", "LLM v4 trained")
+print("")
+status("Alice")
+status("Cecilia")
+print("")
+promote("Octavia", "primary inference")

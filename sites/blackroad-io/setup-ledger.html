@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hardware Setup -- BlackRoad OS</title>
+  <meta name="description" content="Step-by-step guide to setting up a BlackRoad OS node on a Raspberry Pi. From flash to fleet in minutes.">
+  <link rel="stylesheet" href="/_shared/design.css">
+  <style>
+    .setup-layout {
+      display: grid;
+      grid-template-columns: 1fr 280px;
+      gap: var(--sp-xl);
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: var(--sp-xl) var(--sp-lg);
+    }
+
+    .steps-panel { display: flex; flex-direction: column; gap: var(--sp-xl); }
+
+    .hero-section {
+      margin-bottom: var(--sp-lg);
+    }
+    .hero-section .section-label { margin-bottom: var(--sp-sm); }
+    .hero-section p {
+      color: var(--secondary);
+      font-size: 0.95rem;
+      line-height: 1.7;
+      max-width: 600px;
+    }
+
+    /* Steps */
+    .step {
+      display: flex;
+      gap: var(--sp-lg);
+    }
+    .step-marker {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .step-number {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--grad);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: var(--white);
+    }
+    .step-line {
+      flex: 1;
+      width: 1px;
+      background: var(--border);
+      margin-top: var(--sp-sm);
+    }
+    .step-content {
+      flex: 1;
+      padding-bottom: var(--sp-lg);
+    }
+    .step-content h3 {
+      font-family: var(--font-headline);
+      font-size: 1.15rem;
+      margin-bottom: var(--sp-sm);
+    }
+    .step-content p {
+      color: var(--secondary);
+      font-size: 0.875rem;
+      line-height: 1.7;
+      margin-bottom: var(--sp-md);
+    }
+    .step-content ul {
+      list-style: none;
+      margin-bottom: var(--sp-md);
+    }
+    .step-content li {
+      position: relative;
+      padding-left: 18px;
+      color: var(--tertiary);
+      font-size: 0.85rem;
+      line-height: 1.8;
+    }
+    .step-content li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 10px;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--muted);
+    }
+
+    /* Terminal code block with copy */
+    .code-block {
+      position: relative;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      overflow: hidden;
+    }
+    .code-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .code-dots {
+      display: flex;
+      gap: 6px;
+    }
+    .code-dots span {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+    .code-dots span:nth-child(1) { background: #ff5f57; }
+    .code-dots span:nth-child(2) { background: #febc2e; }
+    .code-dots span:nth-child(3) { background: #28c840; }
+
+    .copy-btn {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-small);
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      padding: 4px 10px;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .copy-btn:hover { color: var(--white); border-color: var(--border-hover); }
+
+    .code-body {
+      padding: 14px;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      line-height: 1.8;
+      color: var(--tertiary);
+      overflow-x: auto;
+      white-space: pre;
+    }
+    .code-body .prompt { color: var(--cyan); }
+    .code-body .comment { color: var(--muted); }
+    .code-body .output { color: var(--subtle); }
+
+    /* Sidebar */
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-lg);
+    }
+    .sidebar-section h3 {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--muted);
+      margin-bottom: var(--sp-sm);
+    }
+
+    .hw-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: var(--sp-md);
+      margin-bottom: var(--sp-sm);
+      transition: border-color 0.2s;
+    }
+    .hw-card:hover { border-color: var(--border-hover); }
+    .hw-card .hw-name {
+      font-family: var(--font-headline);
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--white);
+      margin-bottom: 4px;
+    }
+    .hw-card .hw-desc {
+      font-size: 0.75rem;
+      color: var(--subtle);
+      line-height: 1.5;
+    }
+    .hw-card .hw-tag {
+      display: inline-block;
+      margin-top: 8px;
+      padding: 2px 8px;
+      border-radius: var(--radius-small);
+      background: var(--inset);
+      border: 1px solid var(--border);
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .req-list {
+      list-style: none;
+    }
+    .req-list li {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.8rem;
+      color: var(--tertiary);
+    }
+    .req-list li:last-child { border-bottom: none; }
+    .req-check {
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 0.6rem;
+      color: var(--muted);
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .req-check.checked {
+      background: #22c55e22;
+      border-color: #22c55e;
+      color: #22c55e;
+    }
+
+    @media (max-width: 760px) {
+      .setup-layout {
+        grid-template-columns: 1fr;
+        padding: var(--sp-lg) var(--sp-md);
+      }
+      .sidebar { order: -1; }
+    }
+  </style>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0a0a0a">
+</head>
+<body>
+
+  <!-- Nav -->
+  <nav class="br-nav">
+    <a href="/" class="nav-brand">
+      <div class="spectrum-mark">
+        <span></span><span></span><span></span><span></span><span></span><span></span>
+      </div>
+      Hardware Setup
+    </a>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/docs.html">Docs</a>
+    </div>
+  </nav>
+
+  <div class="grad-bar"></div>
+
+  <div class="setup-layout">
+
+    <!-- Steps -->
+    <div class="steps-panel">
+      <div class="hero-section">
+        <div class="section-label">Setup Guide</div>
+        <h1 class="section-title">Deploy a BlackRoad Node</h1>
+        <p>From bare metal to a fully connected fleet node in six steps. Every BlackRoad node is sovereign -- your hardware, your data, your rules.</p>
+      </div>
+
+      <!-- Step 1 -->
+      <div class="step">
+        <div class="step-marker">
+          <div class="step-number">1</div>
+          <div class="step-line"></div>
+        </div>
+        <div class="step-content">
+          <h3>Get a Raspberry Pi</h3>
+          <p>Raspberry Pi 5 (8 GB) is recommended for best performance. Pi 4 (4 GB+) works for lighter workloads. Any ARM64 SBC with Debian support will work.</p>
+          <div class="code-block">
+            <div class="code-header">
+              <div class="code-dots"><span></span><span></span><span></span></div>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+            <div class="code-body"><span class="comment"># Recommended hardware</span>
+Raspberry Pi 5 (8 GB)      <span class="comment"># primary recommendation</span>
+Raspberry Pi 4 (4 GB+)     <span class="comment"># budget option</span>
+NVMe HAT + 256 GB SSD      <span class="comment"># required for fleet nodes</span>
+USB-C power supply (27W)   <span class="comment"># official Pi 5 PSU</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step">
+        <div class="step-marker">
+          <div class="step-number">2</div>
+          <div class="step-line"></div>
+        </div>
+        <div class="step-content">
+          <h3>Flash Raspberry Pi OS</h3>
+          <p>Use the Raspberry Pi Imager to flash Raspberry Pi OS Lite (64-bit, Bookworm). Lite is preferred -- no desktop overhead means more resources for your agents.</p>
+          <div class="code-block">
+            <div class="code-header">
+              <div class="code-dots"><span></span><span></span><span></span></div>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+            <div class="code-body"><span class="comment"># Download Raspberry Pi Imager</span>
+<span class="comment"># https://www.raspberrypi.com/software/</span>
+
+<span class="comment"># Or flash from the command line (macOS/Linux)</span>
+<span class="prompt">$</span> wget https://downloads.raspberrypi.com/raspios_lite_arm64/images/raspios_lite_arm64-2024-11-19/2024-11-19-raspios-bookworm-arm64-lite.img.xz
+<span class="prompt">$</span> xz -d 2024-11-19-raspios-bookworm-arm64-lite.img.xz
+<span class="prompt">$</span> sudo dd if=2024-11-19-raspios-bookworm-arm64-lite.img of=/dev/sdX bs=4M status=progress</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="step">
+        <div class="step-marker">
+          <div class="step-number">3</div>
+          <div class="step-line"></div>
+        </div>
+        <div class="step-content">
+          <h3>Enable SSH and Set Hostname</h3>
+          <p>Before booting, configure SSH access and a hostname. If you used the Imager, you can set these in the advanced options. Otherwise, create the config files on the boot partition.</p>
+          <div class="code-block">
+            <div class="code-header">
+              <div class="code-dots"><span></span><span></span><span></span></div>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+            <div class="code-body"><span class="comment"># Enable SSH (create empty file on boot partition)</span>
+<span class="prompt">$</span> touch /Volumes/bootfs/ssh
+
+<span class="comment"># Set hostname after first boot</span>
+<span class="prompt">$</span> ssh pi@raspberrypi.local
+<span class="prompt">pi@raspberrypi:~$</span> sudo hostnamectl set-hostname mynode
+<span class="prompt">pi@mynode:~$</span> sudo nano /etc/hosts
+<span class="comment"># Replace "raspberrypi" with "mynode"</span>
+
+<span class="comment"># Set a strong password</span>
+<span class="prompt">pi@mynode:~$</span> passwd
+
+<span class="comment"># (Optional) Add your SSH key for passwordless login</span>
+<span class="prompt">$</span> ssh-copy-id pi@mynode.local</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4 -->
+      <div class="step">
+        <div class="step-marker">
+          <div class="step-number">4</div>
+          <div class="step-line"></div>
+        </div>
+        <div class="step-content">
+          <h3>Install BlackRoad OS</h3>
+          <p>The install script handles everything: system packages, agent runtime, WireGuard config, fleet registration, and the BlackRoad CLI. Takes about 5 minutes on a fresh Pi.</p>
+          <div class="code-block">
+            <div class="code-header">
+              <div class="code-dots"><span></span><span></span><span></span></div>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+            <div class="code-body"><span class="prompt">pi@mynode:~$</span> curl -sSL https://blackroad.io/install | bash
+
+<span class="output">BlackRoad OS Installer v2.1</span>
+<span class="output">--------------------------</span>
+<span class="output">[1/6] Updating system packages...</span>
+<span class="output">[2/6] Installing dependencies (git, python3, wireguard, jq)...</span>
+<span class="output">[3/6] Cloning blackroad-operator...</span>
+<span class="output">[4/6] Configuring WireGuard mesh...</span>
+<span class="output">[5/6] Registering node with fleet...</span>
+<span class="output">[6/6] Starting agent runtime...</span>
+<span class="output"></span>
+<span class="output">BlackRoad OS installed. Run `br status` to verify.</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 5 -->
+      <div class="step">
+        <div class="step-marker">
+          <div class="step-number">5</div>
+          <div class="step-line"></div>
+        </div>
+        <div class="step-content">
+          <h3>Connect to Fleet via WireGuard</h3>
+          <p>The installer generates a WireGuard keypair and requests a peer config from the fleet gateway. Once connected, your node can reach every other node on the mesh.</p>
+          <div class="code-block">
+            <div class="code-header">
+              <div class="code-dots"><span></span><span></span><span></span></div>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+            <div class="code-body"><span class="comment"># Check WireGuard status</span>
+<span class="prompt">pi@mynode:~$</span> sudo wg show
+<span class="output">interface: wg0</span>
+<span class="output">  public key: aBcDeFgHiJkLmNoPqRsTuVwXyZ...</span>
+<span class="output">  listening port: 51820</span>
+<span class="output"></span>
+<span class="output">peer: xYzAbCdEfGhIjKlMnOpQrStUvW...</span>
+<span class="output">  endpoint: gateway.blackroad.io:51820</span>
+<span class="output">  latest handshake: 4 seconds ago</span>
+<span class="output">  transfer: 1.24 MiB received, 892 KiB sent</span>
+
+<span class="comment"># Verify fleet connectivity</span>
+<span class="prompt">pi@mynode:~$</span> br fleet ping
+<span class="output">alice     10.10.0.49    2ms   online</span>
+<span class="output">cecilia   10.10.0.96    3ms   online</span>
+<span class="output">octavia   10.10.0.101   2ms   online</span>
+<span class="output">mynode    10.10.0.200   0ms   local</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 6 -->
+      <div class="step">
+        <div class="step-marker">
+          <div class="step-number">6</div>
+        </div>
+        <div class="step-content">
+          <h3>Deploy Your First Agent</h3>
+          <p>Use the BlackRoad CLI to spawn an agent on your new node. Agents run as lightweight processes, coordinated through the fleet mesh.</p>
+          <div class="code-block">
+            <div class="code-header">
+              <div class="code-dots"><span></span><span></span><span></span></div>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+            <div class="code-body"><span class="comment"># Check node status</span>
+<span class="prompt">pi@mynode:~$</span> br status
+<span class="output">Node:     mynode</span>
+<span class="output">Fleet:    connected (4 peers)</span>
+<span class="output">Agents:   0 running</span>
+<span class="output">Uptime:   12 minutes</span>
+<span class="output">Memory:   412 MB / 8192 MB</span>
+
+<span class="comment"># Deploy a monitor agent</span>
+<span class="prompt">pi@mynode:~$</span> br agent spawn monitor
+<span class="output">Spawned agent "monitor" (pid 4821)</span>
+<span class="output">Reporting to fleet dashboard...</span>
+
+<span class="comment"># List running agents</span>
+<span class="prompt">pi@mynode:~$</span> br agent list
+<span class="output">ID       NAME       STATUS    UPTIME</span>
+<span class="output">a-001    monitor    running   30s</span>
+
+<span class="comment"># View agent logs</span>
+<span class="prompt">pi@mynode:~$</span> br agent logs monitor
+<span class="output">[2026-03-21 14:22:01] Monitor agent started</span>
+<span class="output">[2026-03-21 14:22:02] CPU: 4.2% | Mem: 5.0% | Temp: 48C</span>
+<span class="output">[2026-03-21 14:22:32] CPU: 3.8% | Mem: 5.1% | Temp: 47C</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grad-bar mt-lg"></div>
+
+      <div class="cta-band" style="padding: var(--sp-lg) 0;">
+        <p class="text-subtle text-sm" style="margin-bottom: var(--sp-md);">Your node is live. Welcome to the fleet.</p>
+        <a href="/" class="btn-primary btn-sm">Back to Home</a>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+
+      <div class="sidebar-section">
+        <h3>Recommended Hardware</h3>
+
+        <div class="hw-card">
+          <div class="hw-name">Raspberry Pi 5 (8 GB)</div>
+          <div class="hw-desc">Quad-core Cortex-A76 @ 2.4 GHz. Best performance for multi-agent workloads and local inference.</div>
+          <span class="hw-tag">recommended</span>
+        </div>
+
+        <div class="hw-card">
+          <div class="hw-name">Hailo-8 M.2 Module</div>
+          <div class="hw-desc">26 TOPS neural accelerator. Enables on-device AI inference without GPU. Plugs into Pi 5 M.2 HAT.</div>
+          <span class="hw-tag">ai accelerator</span>
+        </div>
+
+        <div class="hw-card">
+          <div class="hw-name">NVMe SSD (256 GB+)</div>
+          <div class="hw-desc">10x faster than SD card. Required for Gitea, databases, and agent state. Use with Pi 5 M.2 HAT or USB 3.0 enclosure.</div>
+          <span class="hw-tag">storage</span>
+        </div>
+
+        <div class="hw-card">
+          <div class="hw-name">Raspberry Pi 4 (4 GB)</div>
+          <div class="hw-desc">Quad-core Cortex-A72 @ 1.8 GHz. Suitable for lightweight agents, DNS, or monitoring nodes.</div>
+          <span class="hw-tag">budget</span>
+        </div>
+
+        <div class="hw-card">
+          <div class="hw-name">PoE+ HAT</div>
+          <div class="hw-desc">Power over Ethernet. Single cable for power and data. Clean deployments, no wall adapter needed.</div>
+          <span class="hw-tag">optional</span>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <h3>Checklist</h3>
+        <ul class="req-list">
+          <li><div class="req-check" onclick="toggleCheck(this)"></div>Raspberry Pi with power supply</li>
+          <li><div class="req-check" onclick="toggleCheck(this)"></div>NVMe or high-endurance SD card</li>
+          <li><div class="req-check" onclick="toggleCheck(this)"></div>Ethernet cable or Wi-Fi configured</li>
+          <li><div class="req-check" onclick="toggleCheck(this)"></div>Raspberry Pi OS Lite flashed</li>
+          <li><div class="req-check" onclick="toggleCheck(this)"></div>SSH enabled</li>
+          <li><div class="req-check" onclick="toggleCheck(this)"></div>BlackRoad OS installed</li>
+          <li><div class="req-check" onclick="toggleCheck(this)"></div>WireGuard connected</li>
+          <li><div class="req-check" onclick="toggleCheck(this)"></div>First agent deployed</li>
+        </ul>
+      </div>
+
+    </div>
+
+  </div>
+
+  <footer>
+    <span>BlackRoad OS, Inc.</span>
+    <span class="text-mono">Pave Tomorrow.</span>
+  </footer>
+
+<script>
+function copyCode(btn) {
+  const body = btn.closest('.code-block').querySelector('.code-body');
+  const text = body.textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'Copied';
+    setTimeout(() => { btn.textContent = 'Copy'; }, 1800);
+  });
+}
+
+function toggleCheck(el) {
+  el.classList.toggle('checked');
+  el.textContent = el.classList.contains('checked') ? '\u2713' : '';
+}
+</script>
+
+<script>if("serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js").catch(()=>{});</script>
+</body>
+</html>

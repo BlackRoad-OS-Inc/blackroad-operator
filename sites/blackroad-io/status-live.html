@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>System Status — BlackRoad OS</title>
+  <meta name="description" content="Live status of all BlackRoad OS products. Real-time health checks.">
+  <link rel="stylesheet" href="/_shared/design.css">
+  <style>
+    .status-page { max-width: 700px; margin: 0 auto; padding: var(--sp-2xl) var(--sp-lg); }
+    .status-page h1 { font-family: var(--font-headline); font-size: 1.8rem; font-weight: 700; color: var(--white); margin-bottom: var(--sp-sm); }
+    .status-page .sub { color: var(--subtle); font-size: 0.9rem; margin-bottom: var(--sp-xl); }
+    .overall { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: var(--sp-xl); display: flex; align-items: center; gap: 14px; }
+    .overall .dot { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; }
+    .overall .dot.green { background: #22c55e; box-shadow: 0 0 8px rgba(34,197,94,0.4); }
+    .overall .dot.yellow { background: #eab308; box-shadow: 0 0 8px rgba(234,179,8,0.4); }
+    .overall .dot.red { background: #ef4444; box-shadow: 0 0 8px rgba(239,68,68,0.4); }
+    .overall .text { font-family: var(--font-headline); font-size: 1.1rem; font-weight: 700; color: var(--white); }
+    .overall .detail { font-size: 0.8rem; color: var(--muted); margin-top: 2px; }
+    .check-list { display: flex; flex-direction: column; gap: 8px; }
+    .check { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; }
+    .check .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .check .name { font-weight: 600; font-size: 0.9rem; color: var(--white); flex: 1; }
+    .check .url { font-family: var(--font-mono); font-size: 0.7rem; color: var(--muted); }
+    .check .latency { font-family: var(--font-mono); font-size: 0.75rem; color: var(--subtle); min-width: 60px; text-align: right; }
+    .check .status-text { font-family: var(--font-mono); font-size: 0.7rem; min-width: 50px; text-align: right; }
+    .check .status-text.up { color: #22c55e; }
+    .check .status-text.down { color: #ef4444; }
+    .check .status-text.checking { color: var(--muted); }
+    .timestamp { font-family: var(--font-mono); font-size: 0.7rem; color: var(--muted); margin-top: var(--sp-lg); text-align: center; }
+    .refresh-btn { font-family: var(--font-mono); font-size: 0.7rem; color: var(--muted); background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 4px 12px; cursor: pointer; margin-top: var(--sp-md); display: block; margin-left: auto; margin-right: auto; }
+    .refresh-btn:hover { color: var(--white); border-color: var(--muted); }
+    .section-label { font-family: var(--font-mono); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.2em; color: var(--muted); margin-top: var(--sp-xl); margin-bottom: var(--sp-md); }
+  </style>
+</head>
+<body>
+  <nav class="br-nav">
+    <a href="/" class="nav-brand">
+      <div class="spectrum-mark"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+      Status
+    </a>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="https://social.blackroad.io">Social</a>
+      <a href="https://chat.blackroad.io">Chat</a>
+      <a href="/blogs">Blog</a>
+    </div>
+  </nav>
+  <div class="grad-bar"></div>
+
+  <div class="status-page">
+    <h1>System Status</h1>
+    <p class="sub">Live health checks across all BlackRoad OS products. Auto-refreshes every 30 seconds.</p>
+
+    <div class="overall" id="overall">
+      <div class="dot checking" id="overall-dot" style="background:var(--muted)"></div>
+      <div>
+        <div class="text" id="overall-text">Checking...</div>
+        <div class="detail" id="overall-detail">Running health checks</div>
+      </div>
+    </div>
+
+    <div class="section-label">Products</div>
+    <div class="check-list" id="checks"></div>
+
+    <div class="section-label">Infrastructure</div>
+    <div class="check-list" id="infra-checks"></div>
+
+    <div class="timestamp" id="timestamp"></div>
+    <button class="refresh-btn" onclick="runChecks()">Refresh</button>
+  </div>
+
+  <div class="grad-bar"></div>
+  <footer>
+    <span>BlackRoad OS, Inc.</span>
+    <span>Pave Tomorrow.</span>
+  </footer>
+
+  <script>
+    const PRODUCTS = [
+      { name: 'BackRoad Social', url: 'https://social.blackroad.io/api/health', display: 'social.blackroad.io' },
+      { name: 'AI Chat', url: 'https://chat.blackroad.io/api/health', display: 'chat.blackroad.io' },
+      { name: 'Search', url: 'https://search.blackroad.io/health', display: 'search.blackroad.io' },
+      { name: 'RoundTrip Agents', url: 'https://roundtrip.blackroad.io/api/health', display: 'roundtrip.blackroad.io' },
+      { name: 'Auth', url: 'https://auth.blackroad.io/api/health', display: 'auth.blackroad.io' },
+      { name: 'Pay', url: 'https://pay.blackroad.io/health', display: 'pay.blackroad.io' },
+    ];
+
+    const INFRA = [
+      { name: 'Main Site', url: 'https://blackroad.io/', display: 'blackroad.io', checkSize: true },
+      { name: 'RSS Feed', url: 'https://blackroad.io/feed.xml', display: 'blackroad.io/feed.xml', checkSize: true },
+      { name: 'Blog', url: 'https://blackroad.io/blogs', display: 'blackroad.io/blogs', checkSize: true },
+      { name: 'API Docs', url: 'https://blackroad.io/api-docs', display: 'blackroad.io/api-docs', checkSize: true },
+    ];
+
+    function renderChecks(containerId, items) {
+      document.getElementById(containerId).innerHTML = items.map((item, i) =>
+        '<div class="check" id="check-' + containerId + '-' + i + '">' +
+        '<div class="dot" style="background:var(--muted)"></div>' +
+        '<div class="name">' + item.name + '<div class="url">' + item.display + '</div></div>' +
+        '<div class="latency">—</div>' +
+        '<div class="status-text checking">...</div>' +
+        '</div>'
+      ).join('');
+    }
+
+    async function checkEndpoint(item, containerId, index) {
+      const el = document.getElementById('check-' + containerId + '-' + index);
+      const dot = el.querySelector('.dot');
+      const latency = el.querySelector('.latency');
+      const status = el.querySelector('.status-text');
+      const start = Date.now();
+      try {
+        const r = await fetch(item.url, { signal: AbortSignal.timeout(5000) });
+        const ms = Date.now() - start;
+        if (r.ok) {
+          if (item.checkSize) {
+            const text = await r.text();
+            if (text.length < 100) throw new Error('empty');
+          }
+          dot.style.background = '#22c55e';
+          dot.style.boxShadow = '0 0 8px rgba(34,197,94,0.4)';
+          latency.textContent = ms + 'ms';
+          status.textContent = 'UP';
+          status.className = 'status-text up';
+          return true;
+        } else { throw new Error(r.status); }
+      } catch (e) {
+        const ms = Date.now() - start;
+        dot.style.background = '#ef4444';
+        dot.style.boxShadow = '0 0 8px rgba(239,68,68,0.4)';
+        latency.textContent = ms + 'ms';
+        status.textContent = 'DOWN';
+        status.className = 'status-text down';
+        return false;
+      }
+    }
+
+    async function runChecks() {
+      renderChecks('checks', PRODUCTS);
+      renderChecks('infra-checks', INFRA);
+      const results = await Promise.all([
+        ...PRODUCTS.map((p, i) => checkEndpoint(p, 'checks', i)),
+        ...INFRA.map((p, i) => checkEndpoint(p, 'infra-checks', i)),
+      ]);
+      const up = results.filter(Boolean).length;
+      const total = results.length;
+      const dot = document.getElementById('overall-dot');
+      const text = document.getElementById('overall-text');
+      const detail = document.getElementById('overall-detail');
+      if (up === total) {
+        dot.style.background = '#22c55e'; dot.style.boxShadow = '0 0 12px rgba(34,197,94,0.5)';
+        text.textContent = 'All Systems Operational';
+        detail.textContent = up + '/' + total + ' checks passing';
+      } else if (up > total / 2) {
+        dot.style.background = '#eab308'; dot.style.boxShadow = '0 0 12px rgba(234,179,8,0.5)';
+        text.textContent = 'Partial Outage';
+        detail.textContent = up + '/' + total + ' checks passing';
+      } else {
+        dot.style.background = '#ef4444'; dot.style.boxShadow = '0 0 12px rgba(239,68,68,0.5)';
+        text.textContent = 'Major Outage';
+        detail.textContent = up + '/' + total + ' checks passing';
+      }
+      document.getElementById('timestamp').textContent = 'Last checked: ' + new Date().toLocaleString();
+    }
+
+    runChecks();
+    setInterval(runChecks, 30000);
+  </script>
+</body>
+</html>

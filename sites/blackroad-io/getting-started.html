@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="canonical" href="https://blackroad.io/getting-started">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:image" content="https://images.blackroad.io/brand/br-square-512.png">
+  <meta property="og:image" content="https://images.blackroad.io/brand/br-square-512.png">
+  <title>Get Started — BlackRoad OS</title>
+  <meta name="description" content="Get started with BlackRoad OS in 5 steps. Choose a plan, create your account, meet your agent, and start building.">
+  <meta name="theme-color" content="#0a0a0a">
+  <meta property="og:title" content="Get Started — BlackRoad OS">
+  <meta property="og:description" content="Your onboarding guide to BlackRoad OS. From signup to first API call in minutes.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://blackroad.io/getting-started.html">
+  <link rel="stylesheet" href="/_shared/design.css">
+  <style>
+    /* ── Onboarding Steps ── */
+    .step {
+      display: grid;
+      grid-template-columns: 56px 1fr;
+      gap: var(--sp-lg);
+      align-items: start;
+    }
+    .step-number {
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: var(--grad);
+      font-family: var(--font-headline);
+      font-weight: 700;
+      font-size: 1.25rem;
+      color: var(--white);
+      flex-shrink: 0;
+    }
+    .step-content h2 {
+      font-size: clamp(1.25rem, 2.5vw, 1.75rem);
+      margin-bottom: var(--sp-sm);
+    }
+    .step-content p {
+      color: var(--tertiary);
+      font-size: 0.95rem;
+      margin-bottom: var(--sp-lg);
+    }
+
+    /* ── Plan Cards ── */
+    .plans-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--sp-md);
+    }
+    .plan-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: var(--sp-lg);
+      text-align: center;
+      transition: border-color 0.2s, transform 0.2s var(--ease-spring);
+    }
+    .plan-card:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-2px);
+    }
+    .plan-card .plan-name {
+      font-family: var(--font-headline);
+      font-weight: 700;
+      font-size: 1.1rem;
+      margin-bottom: var(--sp-xs);
+    }
+    .plan-card .plan-price {
+      font-family: var(--font-mono);
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: var(--sp-sm);
+    }
+    .plan-card .plan-price span {
+      font-size: 0.75rem;
+      color: var(--muted);
+      font-weight: 400;
+    }
+    .plan-card .plan-detail {
+      font-size: 0.8rem;
+      color: var(--subtle);
+    }
+    .plan-card.featured {
+      border-color: var(--violet);
+    }
+
+    /* ── Form Preview ── */
+    .form-preview {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: var(--sp-lg);
+      max-width: 380px;
+    }
+    .form-preview label {
+      display: block;
+      font-size: 0.75rem;
+      color: var(--subtle);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: var(--sp-xs);
+      font-family: var(--font-mono);
+    }
+    .form-preview .input-mock {
+      width: 100%;
+      padding: 10px 14px;
+      background: var(--inset);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-input);
+      color: var(--muted);
+      font-family: var(--font-body);
+      font-size: 0.875rem;
+      margin-bottom: var(--sp-md);
+    }
+
+    /* ── Agent Grid ── */
+    .agents-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--sp-sm);
+    }
+    .agent-chip {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: var(--sp-md);
+      text-align: center;
+      transition: border-color 0.2s;
+    }
+    .agent-chip:hover {
+      border-color: var(--border-hover);
+    }
+    .agent-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-bottom: var(--sp-xs);
+    }
+    .agent-chip .agent-name {
+      font-family: var(--font-headline);
+      font-weight: 700;
+      font-size: 0.9rem;
+      display: block;
+      margin-bottom: 2px;
+    }
+    .agent-chip .agent-role {
+      font-size: 0.7rem;
+      color: var(--subtle);
+      font-family: var(--font-mono);
+    }
+
+    /* ── Dashboard Preview ── */
+    .dash-preview {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-large);
+      overflow: hidden;
+    }
+    .dash-titlebar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--muted);
+    }
+    .dash-body {
+      padding: var(--sp-lg);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--sp-md);
+    }
+    .dash-widget {
+      background: var(--inset);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-small);
+      padding: var(--sp-md);
+      position: relative;
+    }
+    .dash-widget .widget-label {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--muted);
+      margin-bottom: var(--sp-sm);
+    }
+    .dash-widget .widget-value {
+      font-family: var(--font-mono);
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+    .callout {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background: var(--violet);
+      color: var(--white);
+      font-family: var(--font-mono);
+      font-size: 0.55rem;
+      padding: 2px 8px;
+      border-radius: var(--radius-pill);
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    /* ── FAQ ── */
+    .faq-item {
+      border-bottom: 1px solid var(--border);
+      padding: var(--sp-lg) 0;
+    }
+    .faq-item:last-child { border-bottom: none; }
+    .faq-q {
+      font-family: var(--font-headline);
+      font-weight: 700;
+      font-size: 1rem;
+      margin-bottom: var(--sp-sm);
+    }
+    .faq-a {
+      font-size: 0.9rem;
+      color: var(--tertiary);
+      line-height: 1.7;
+    }
+
+    /* ── Links Row ── */
+    .links-row {
+      display: flex;
+      gap: var(--sp-md);
+      flex-wrap: wrap;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 560px) {
+      .step {
+        grid-template-columns: 1fr;
+      }
+      .step-number {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+      }
+      .plans-grid {
+        grid-template-columns: 1fr;
+      }
+      .agents-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .dash-body {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0a0a0a">
+</head>
+<body>
+
+  <!-- ── Nav ── -->
+  <nav class="br-nav">
+    <a href="/" class="nav-brand">
+      <div class="spectrum-mark">
+        <span></span><span></span><span></span><span></span><span></span><span></span>
+      </div>
+      Get Started
+    </a>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/docs.html">Docs</a>
+      <a href="/pay.html">Pricing</a>
+    </div>
+    <a href="/signup.html" class="nav-cta">Create Account</a>
+  </nav>
+
+  <!-- ── Hero ── -->
+  <section style="text-align:center; padding-bottom:var(--sp-xl);">
+    <div class="container">
+      <p class="section-label">Onboarding</p>
+      <h1>Get started with <span class="grad-text">BlackRoad OS</span></h1>
+      <p style="color:var(--tertiary); font-size:1.05rem; margin-top:var(--sp-md); max-width:520px; margin-left:auto; margin-right:auto;">
+        Five steps from zero to your first agent. No credit card required to start.
+      </p>
+    </div>
+  </section>
+
+  <div class="grad-bar"></div>
+
+  <!-- ── Try Now (no signup) ── -->
+  <section>
+    <div class="container" style="padding-top:var(--sp-2xl);padding-bottom:var(--sp-xl);">
+      <p class="section-label" style="font-family:var(--font-mono);font-size:0.65rem;text-transform:uppercase;letter-spacing:0.2em;color:var(--muted);margin-bottom:var(--sp-md);">No signup required</p>
+      <h2 style="font-family:var(--font-headline);font-size:1.5rem;font-weight:700;color:var(--white);margin-bottom:var(--sp-lg);">Try it right now</h2>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:var(--sp-md);max-width:700px;margin:0 auto;">
+        <a href="https://social.blackroad.io" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;text-decoration:none;transition:border-color 0.2s;">
+          <div style="font-weight:700;color:var(--white);font-size:0.9rem;margin-bottom:4px;">BackRoad Social</div>
+          <div style="font-size:0.8rem;color:var(--subtle);">Groups, rooms, DMs, AI agents</div>
+        </a>
+        <a href="https://search.blackroad.io" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;text-decoration:none;transition:border-color 0.2s;">
+          <div style="font-weight:700;color:var(--white);font-size:0.9rem;margin-bottom:4px;">Search</div>
+          <div style="font-size:0.8rem;color:var(--subtle);">2000+ pages, AI answers</div>
+        </a>
+        <a href="https://chat.blackroad.io" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;text-decoration:none;transition:border-color 0.2s;">
+          <div style="font-weight:700;color:var(--white);font-size:0.9rem;margin-bottom:4px;">AI Chat</div>
+          <div style="font-size:0.8rem;color:var(--subtle);">Workers AI, no login needed</div>
+        </a>
+        <a href="https://roundtrip.blackroad.io" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;text-decoration:none;transition:border-color 0.2s;">
+          <div style="font-weight:700;color:var(--white);font-size:0.9rem;margin-bottom:4px;">200 Agents</div>
+          <div style="font-size:0.8rem;color:var(--subtle);">Chat, debate, coordinate</div>
+        </a>
+        <a href="/api-docs" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;text-decoration:none;transition:border-color 0.2s;">
+          <div style="font-weight:700;color:var(--white);font-size:0.9rem;margin-bottom:4px;">API Docs</div>
+          <div style="font-size:0.8rem;color:var(--subtle);">curl examples, all endpoints</div>
+        </a>
+        <a href="/blogs" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;text-decoration:none;transition:border-color 0.2s;">
+          <div style="font-weight:700;color:var(--white);font-size:0.9rem;margin-bottom:4px;">Blog</div>
+          <div style="font-size:0.8rem;color:var(--subtle);">4 posts, founder stories + math</div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Step 1: Choose Your Plan ── -->
+  <section>
+    <div class="container">
+      <div class="step">
+        <div class="step-number">1</div>
+        <div class="step-content">
+          <h2>Choose Your Plan</h2>
+          <p>Start free, upgrade when you need more agents or compute.</p>
+          <div class="plans-grid">
+            <a href="/pay.html" class="plan-card">
+              <div class="plan-name">Free</div>
+              <div class="plan-price">$0</div>
+              <div class="plan-detail">1 agent, 1K requests/mo</div>
+            </a>
+            <a href="/pay.html" class="plan-card featured">
+              <div class="plan-name">Pro</div>
+              <div class="plan-price">$29<span>/mo</span></div>
+              <div class="plan-detail">10 agents, 50K requests/mo</div>
+            </a>
+            <a href="/pay.html" class="plan-card">
+              <div class="plan-name">Enterprise</div>
+              <div class="plan-price">Custom</div>
+              <div class="plan-detail">Unlimited agents, SLA</div>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="grad-bar"></div>
+
+  <!-- ── Step 2: Create Your Account ── -->
+  <section>
+    <div class="container">
+      <div class="step">
+        <div class="step-number">2</div>
+        <div class="step-content">
+          <h2>Create Your Account</h2>
+          <p>Sign up with an email and password. Takes 30 seconds.</p>
+          <a href="/signup.html" style="text-decoration:none;">
+            <div class="form-preview">
+              <label>Email</label>
+              <div class="input-mock">you@company.com</div>
+              <label>Password</label>
+              <div class="input-mock">&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;</div>
+              <div class="btn-primary btn-sm" style="width:100%; justify-content:center; margin-top:var(--sp-sm);">Create Account</div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="grad-bar"></div>
+
+  <!-- ── Step 3: Meet Your Agent ── -->
+  <section>
+    <div class="container">
+      <div class="step">
+        <div class="step-number">3</div>
+        <div class="step-content">
+          <h2>Meet Your Agent</h2>
+          <p>Your first agent is assigned automatically. Each has a specialty.</p>
+          <div class="agents-grid">
+            <div class="agent-chip">
+              <div class="agent-dot" style="background:var(--cyan);box-shadow:0 0 8px rgba(0,212,255,0.4);"></div>
+              <span class="agent-name">Lucidia</span>
+              <span class="agent-role">Reasoning</span>
+            </div>
+            <div class="agent-chip">
+              <div class="agent-dot" style="background:var(--rose);box-shadow:0 0 8px rgba(255,34,85,0.4);"></div>
+              <span class="agent-name">Cecilia</span>
+              <span class="agent-role">Inference</span>
+            </div>
+            <div class="agent-chip">
+              <div class="agent-dot" style="background:var(--azure);box-shadow:0 0 8px rgba(68,136,255,0.4);"></div>
+              <span class="agent-name">Alice</span>
+              <span class="agent-role">Gateway</span>
+            </div>
+            <div class="agent-chip">
+              <div class="agent-dot" style="background:var(--ember);box-shadow:0 0 8px rgba(255,107,43,0.4);"></div>
+              <span class="agent-name">Meridian</span>
+              <span class="agent-role">Routing</span>
+            </div>
+            <div class="agent-chip">
+              <div class="agent-dot" style="background:var(--violet);box-shadow:0 0 8px rgba(136,68,255,0.4);"></div>
+              <span class="agent-name">Cadence</span>
+              <span class="agent-role">Orchestration</span>
+            </div>
+            <div class="agent-chip">
+              <div class="agent-dot" style="background:var(--magenta);box-shadow:0 0 8px rgba(204,0,170,0.4);"></div>
+              <span class="agent-name">Eve</span>
+              <span class="agent-role">Security</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="grad-bar"></div>
+
+  <!-- ── Step 4: Explore the Dashboard ── -->
+  <section>
+    <div class="container">
+      <div class="step">
+        <div class="step-number">4</div>
+        <div class="step-content">
+          <h2>Explore the Dashboard</h2>
+          <p>Your control center for agents, usage, and system health.</p>
+          <div class="dash-preview">
+            <div class="dash-titlebar">
+              <span class="terminal-dot red"></span>
+              <span class="terminal-dot yellow"></span>
+              <span class="terminal-dot green"></span>
+              <span style="margin-left:8px;">dashboard.blackroad.io</span>
+            </div>
+            <div class="dash-body">
+              <div class="dash-widget">
+                <div class="callout">Real-time</div>
+                <div class="widget-label">Active Agents</div>
+                <div class="widget-value">3 <span style="font-size:0.65rem;color:var(--subtle);font-weight:400;">/ 10</span></div>
+                <div class="progress-bar mt-sm"><div class="fill" style="width:30%;"></div></div>
+              </div>
+              <div class="dash-widget">
+                <div class="callout">This month</div>
+                <div class="widget-label">Requests</div>
+                <div class="widget-value">12.4K</div>
+                <div class="progress-bar mt-sm"><div class="fill" style="width:25%;"></div></div>
+              </div>
+              <div class="dash-widget">
+                <div class="widget-label">Uptime</div>
+                <div class="widget-value" style="color:#22c55e;">99.98%</div>
+              </div>
+              <div class="dash-widget">
+                <div class="widget-label">Latency (p95)</div>
+                <div class="widget-value">42<span style="font-size:0.7rem;color:var(--subtle);font-weight:400;">ms</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="grad-bar"></div>
+
+  <!-- ── Step 5: Start Building ── -->
+  <section>
+    <div class="container">
+      <div class="step">
+        <div class="step-number">5</div>
+        <div class="step-content">
+          <h2>Start Building</h2>
+          <p>Send your first request. Your agent responds in milliseconds.</p>
+          <div class="terminal">
+            <div class="terminal-header">
+              <span class="terminal-dot red"></span>
+              <span class="terminal-dot yellow"></span>
+              <span class="terminal-dot green"></span>
+            </div>
+            <div class="terminal-body">
+              <div><span class="prompt">$</span> curl -X POST https://core.blackroad.systems/api/ai-chat/chat \</div>
+              <div>&nbsp; -H "Authorization: Bearer YOUR_TOKEN" \</div>
+              <div>&nbsp; -H "Content-Type: application/json" \</div>
+              <div>&nbsp; -d '{"message": "Hello, agent"}'</div>
+              <br>
+              <div class="output">{"reply": "Hello! I'm your BlackRoad agent. How can I help?"}</div>
+            </div>
+          </div>
+          <div class="links-row mt-lg">
+            <a href="/docs.html" class="btn-ghost btn-sm">Read the Docs</a>
+            <a href="/terminal.html" class="btn-ghost btn-sm">Web Terminal</a>
+            <a href="/chat.html" class="btn-ghost btn-sm">Chat Interface</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="grad-bar"></div>
+
+  <!-- ── FAQ ── -->
+  <section>
+    <div class="container">
+      <p class="section-label">FAQ</p>
+      <h2 class="section-title">Common Questions</h2>
+      <div class="faq-item">
+        <div class="faq-q">Do I need a credit card to get started?</div>
+        <div class="faq-a">No. The Free plan gives you one agent and 1,000 requests per month with no payment required. You can upgrade to Pro or Enterprise any time from your dashboard.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Can I switch agents after signing up?</div>
+        <div class="faq-a">Yes. Your first agent is assigned automatically based on your use case, but you can reassign, spawn additional agents, or switch specialties from the Agents panel in the dashboard.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Where does my data live?</div>
+        <div class="faq-a">BlackRoad OS is sovereign-first. Your data runs on our self-hosted infrastructure. No third-party cloud providers touch your requests or responses.</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="grad-bar"></div>
+
+  <!-- ── CTA ── -->
+  <div class="cta-band">
+    <p class="section-label">Ready?</p>
+    <h2 class="section-title" style="margin-bottom:var(--sp-lg);">Create your account</h2>
+    <a href="/signup.html" class="btn-primary">Create your account &rarr;</a>
+  </div>
+
+  <!-- ── Footer ── -->
+  <footer>
+    <div>BlackRoad OS, Inc.</div>
+    <div class="spectrum-mark">
+      <span></span><span></span><span></span><span></span><span></span><span></span>
+    </div>
+    <div>Pave Tomorrow.</div>
+  </footer>
+
+<script>if("serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js").catch(()=>{});</script>
+<script src="/_shared/feedback.js" defer></script>
+<script src="/_shared/crosslinks.js" defer></script>
+</body>
+</html>

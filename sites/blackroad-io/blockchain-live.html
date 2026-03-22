@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="RoadChain Explorer — Browse blocks, transactions, and network stats on the RoadChain.">
+  <meta name="theme-color" content="#0a0a0a">
+  <meta property="og:title" content="RoadChain Explorer — BlackRoad OS">
+  <meta property="og:description" content="Real-time blockchain explorer for RoadChain. View blocks, transactions, hash rates, and network topology.">
+  <meta property="og:type" content="website">
+  <title>RoadChain Explorer — BlackRoad OS</title>
+  <link rel="stylesheet" href="/_shared/design.css">
+  <style>
+    /* ── Page-specific styles ── */
+    .explorer-container { max-width: 1200px; margin: 0 auto; padding: 0 var(--sp-lg); }
+
+    /* ── Search ── */
+    .search-wrap {
+      position: relative;
+      max-width: 640px;
+      margin: var(--sp-xl) auto var(--sp-lg);
+    }
+    .search-wrap input {
+      width: 100%;
+      padding: 14px 18px 14px 44px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-input);
+      color: var(--white);
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .search-wrap input::placeholder { color: var(--muted); }
+    .search-wrap input:focus { border-color: var(--violet); }
+    .search-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      font-size: 1rem;
+      pointer-events: none;
+    }
+
+    /* ── Stats Grid ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--sp-md);
+      margin-bottom: var(--sp-xl);
+    }
+
+    /* ── Section Headers ── */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--sp-md);
+    }
+
+    /* ── Block Cards ── */
+    .block-list { display: flex; flex-direction: column; gap: var(--sp-sm); }
+
+    .block-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: var(--sp-md) var(--sp-lg);
+      display: grid;
+      grid-template-columns: 80px 1fr 140px 80px 80px;
+      align-items: center;
+      gap: var(--sp-md);
+      transition: border-color 0.2s, transform 0.3s var(--ease-spring);
+    }
+    .block-card:hover { border-color: var(--border-hover); }
+    .block-card.entering {
+      animation: slideIn 0.5s var(--ease-spring) forwards;
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .block-number {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--white);
+    }
+    .block-number span {
+      font-size: 0.7rem;
+      color: var(--muted);
+      display: block;
+      margin-bottom: 2px;
+    }
+    .block-hash {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--subtle);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .block-time {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--muted);
+      text-align: right;
+    }
+    .block-meta {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--tertiary);
+      text-align: center;
+    }
+    .block-meta span {
+      font-size: 0.6rem;
+      color: var(--muted);
+      display: block;
+    }
+
+    /* ── Transaction Feed ── */
+    .tx-list { display: flex; flex-direction: column; gap: var(--sp-sm); }
+
+    .tx-row {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: var(--sp-md) var(--sp-lg);
+      display: grid;
+      grid-template-columns: 1fr 1fr 100px 80px;
+      align-items: center;
+      gap: var(--sp-md);
+      transition: border-color 0.2s;
+    }
+    .tx-row:hover { border-color: var(--border-hover); }
+
+    .tx-addr {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--subtle);
+    }
+    .tx-addr .label {
+      font-size: 0.6rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      display: block;
+      margin-bottom: 2px;
+    }
+    .tx-amount {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--white);
+      text-align: right;
+    }
+    .tx-status {
+      text-align: center;
+    }
+    .tx-status-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: var(--radius-pill);
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .tx-status-badge.confirmed {
+      background: rgba(34,197,94,0.12);
+      color: #22c55e;
+    }
+    .tx-status-badge.pending {
+      background: rgba(245,158,11,0.12);
+      color: #f59e0b;
+    }
+
+    /* ── Network Stats ── */
+    .network-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--sp-md);
+    }
+
+    /* ── Two Column Layout ── */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--sp-xl);
+    }
+
+    /* ── Skeleton overrides ── */
+    .skeleton-line {
+      height: 14px;
+      margin-bottom: 10px;
+      border-radius: var(--radius-small);
+    }
+    .skeleton-block {
+      height: 60px;
+      border-radius: var(--radius-card);
+      margin-bottom: var(--sp-sm);
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 900px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .two-col { grid-template-columns: 1fr; }
+      .network-grid { grid-template-columns: 1fr; }
+      .block-card {
+        grid-template-columns: 80px 1fr 80px;
+      }
+      .block-card .block-time,
+      .block-card .block-meta:last-child { display: none; }
+    }
+    @media (max-width: 560px) {
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+      .tx-row {
+        grid-template-columns: 1fr 1fr;
+        gap: var(--sp-sm);
+      }
+      .block-card {
+        grid-template-columns: 1fr 1fr;
+        gap: var(--sp-sm);
+      }
+    }
+  </style>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0a0a0a">
+</head>
+<body>
+
+  <!-- ── Nav ── -->
+  <nav class="br-nav">
+    <a href="/" class="nav-brand">
+      <div class="spectrum-mark">
+        <span></span><span></span><span></span><span></span><span></span><span></span>
+      </div>
+      RoadChain Explorer
+    </a>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/dashboard.html">Dashboard</a>
+      <a href="/wallet.html">Wallet</a>
+    </div>
+    <div class="live-indicator">Live</div>
+  </nav>
+  <div class="grad-bar"></div>
+
+  <div class="explorer-container">
+
+    <!-- ── Search ── -->
+    <div class="search-wrap">
+      <span class="search-icon">&#x1F50D;</span>
+      <input type="text" id="searchInput" placeholder="Search by block, tx hash, or address..." autocomplete="off">
+    </div>
+
+    <!-- ── Chain Stats ── -->
+    <div class="stats-grid" id="statsGrid">
+      <div class="stat-card">
+        <div class="stat-value" id="statHeight">
+          <div class="skeleton skeleton-line" style="width:80%;margin:0 auto"></div>
+        </div>
+        <div class="stat-label">Block Height</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="statTx">
+          <div class="skeleton skeleton-line" style="width:60%;margin:0 auto"></div>
+        </div>
+        <div class="stat-label">Transactions</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="statHashRate">
+          <div class="skeleton skeleton-line" style="width:70%;margin:0 auto"></div>
+        </div>
+        <div class="stat-label">Hash Rate</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="statDifficulty">
+          <div class="skeleton skeleton-line" style="width:50%;margin:0 auto"></div>
+        </div>
+        <div class="stat-label">Difficulty</div>
+      </div>
+    </div>
+
+    <div class="grad-bar"></div>
+
+    <!-- ── Two Column: Blocks + Transactions ── -->
+    <section style="padding-left:0;padding-right:0">
+      <div class="two-col">
+
+        <!-- Blocks -->
+        <div>
+          <div class="section-header">
+            <div>
+              <div class="section-label">Latest Blocks</div>
+              <h3>Recent Blocks</h3>
+            </div>
+            <div class="live-indicator">Mining</div>
+          </div>
+          <div class="block-list" id="blockList">
+            <div class="skeleton skeleton-block"></div>
+            <div class="skeleton skeleton-block"></div>
+            <div class="skeleton skeleton-block"></div>
+            <div class="skeleton skeleton-block"></div>
+            <div class="skeleton skeleton-block"></div>
+          </div>
+        </div>
+
+        <!-- Transactions -->
+        <div>
+          <div class="section-header">
+            <div>
+              <div class="section-label">Transaction Feed</div>
+              <h3>Recent Transactions</h3>
+            </div>
+            <div class="live-indicator">Streaming</div>
+          </div>
+          <div class="tx-list" id="txList">
+            <div class="skeleton skeleton-block"></div>
+            <div class="skeleton skeleton-block"></div>
+            <div class="skeleton skeleton-block"></div>
+            <div class="skeleton skeleton-block"></div>
+            <div class="skeleton skeleton-block"></div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <div class="grad-bar"></div>
+
+    <!-- ── Network Stats ── -->
+    <section style="padding-left:0;padding-right:0">
+      <div class="section-label">Infrastructure</div>
+      <h3 style="margin-bottom:var(--sp-lg)">Network Stats</h3>
+      <div class="network-grid" id="networkGrid">
+        <div class="stat-card">
+          <div class="stat-value" id="netNodes">--</div>
+          <div class="stat-label">Active Nodes</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="netPeers">--</div>
+          <div class="stat-label">Connected Peers</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="netSize">--</div>
+          <div class="stat-label">Chain Size</div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- ── Footer ── -->
+  <div class="grad-bar"></div>
+  <footer>
+    <span>BlackRoad OS &mdash; Pave Tomorrow.</span>
+    <span class="text-mono text-xs" id="footerClock"></span>
+  </footer>
+
+  <script>
+    /* ──────────────────────────────────────────
+       RoadChain Explorer — Simulated Chain Data
+       ────────────────────────────────────────── */
+
+    // ── Helpers ──
+    function hexHash(len) {
+      const chars = '0123456789abcdef';
+      let h = '0x';
+      for (let i = 0; i < len; i++) h += chars[Math.floor(Math.random() * 16)];
+      return h;
+    }
+    function truncHash(h, pre, suf) {
+      pre = pre || 10; suf = suf || 6;
+      if (h.length <= pre + suf + 3) return h;
+      return h.slice(0, pre) + '...' + h.slice(-suf);
+    }
+    function fmtNum(n) { return n.toLocaleString('en-US'); }
+    function fmtTime(d) {
+      const s = Math.floor((Date.now() - d) / 1000);
+      if (s < 60) return s + 's ago';
+      if (s < 3600) return Math.floor(s / 60) + 'm ago';
+      return Math.floor(s / 3600) + 'h ago';
+    }
+
+    // Agent names used as transaction sources
+    const AGENTS = [
+      'road','echo','cecilia','aria','lucidia','alice','octavia',
+      'gematria','anastasia','prism','cherub','olympia','atlas',
+      'pixel','mesh','beacon','signal','aurora','nova','sentinel'
+    ];
+
+    function agentAddr(name) {
+      return '0x' + Array.from(name + 'road').map(function(c) {
+        return c.charCodeAt(0).toString(16);
+      }).join('').padEnd(40, '0').slice(0, 40);
+    }
+
+    // ── State ──
+    const BASE_HEIGHT = 4817293;
+    let currentHeight = BASE_HEIGHT;
+    let totalTx = 1283947;
+    let blocks = [];
+    let txs = [];
+
+    // ── Generate initial data ──
+    function genBlock(height, ageMs) {
+      const txCount = 3 + Math.floor(Math.random() * 18);
+      totalTx += txCount;
+      return {
+        number: height,
+        hash: hexHash(64),
+        timestamp: Date.now() - ageMs,
+        txCount: txCount,
+        size: (12 + Math.random() * 48).toFixed(1)
+      };
+    }
+
+    function genTx(ageMs) {
+      const fromAgent = AGENTS[Math.floor(Math.random() * AGENTS.length)];
+      let toAgent = AGENTS[Math.floor(Math.random() * AGENTS.length)];
+      while (toAgent === fromAgent) toAgent = AGENTS[Math.floor(Math.random() * AGENTS.length)];
+      return {
+        hash: hexHash(64),
+        from: agentAddr(fromAgent),
+        to: agentAddr(toAgent),
+        fromName: fromAgent,
+        toName: toAgent,
+        amount: (0.001 + Math.random() * 24.999).toFixed(4),
+        status: Math.random() > 0.15 ? 'confirmed' : 'pending',
+        timestamp: Date.now() - ageMs
+      };
+    }
+
+    // Seed blocks
+    for (let i = 9; i >= 0; i--) {
+      blocks.push(genBlock(currentHeight - i, i * 30000 + Math.random() * 5000));
+    }
+    currentHeight++;
+
+    // Seed transactions
+    for (let i = 14; i >= 0; i--) {
+      txs.push(genTx(i * 8000 + Math.random() * 3000));
+    }
+
+    // ── Render ──
+    const blockListEl = document.getElementById('blockList');
+    const txListEl = document.getElementById('txList');
+
+    function renderBlocks() {
+      const visible = blocks.slice(-10).reverse();
+      blockListEl.innerHTML = visible.map(function(b, idx) {
+        return '<div class="block-card' + (idx === 0 ? ' entering' : '') + '">' +
+          '<div class="block-number"><span>Block</span>#' + fmtNum(b.number) + '</div>' +
+          '<div class="block-hash" title="' + b.hash + '">' + truncHash(b.hash, 14, 8) + '</div>' +
+          '<div class="block-time">' + fmtTime(b.timestamp) + '</div>' +
+          '<div class="block-meta">' + b.txCount + '<span>txns</span></div>' +
+          '<div class="block-meta">' + b.size + ' KB<span>size</span></div>' +
+        '</div>';
+      }).join('');
+    }
+
+    function renderTxs() {
+      const visible = txs.slice(-12).reverse();
+      txListEl.innerHTML = visible.map(function(t) {
+        return '<div class="tx-row">' +
+          '<div class="tx-addr"><span class="label">From (' + t.fromName + ')</span>' + truncHash(t.from, 8, 6) + '</div>' +
+          '<div class="tx-addr"><span class="label">To (' + t.toName + ')</span>' + truncHash(t.to, 8, 6) + '</div>' +
+          '<div class="tx-amount">' + t.amount + ' ROAD</div>' +
+          '<div class="tx-status"><span class="tx-status-badge ' + t.status + '">' + t.status + '</span></div>' +
+        '</div>';
+      }).join('');
+    }
+
+    function updateStats() {
+      document.getElementById('statHeight').textContent = fmtNum(currentHeight - 1);
+      document.getElementById('statTx').textContent = fmtNum(totalTx);
+      var hr = (142 + Math.random() * 18).toFixed(1);
+      document.getElementById('statHashRate').textContent = hr + ' TH/s';
+      var diff = (8.34 + Math.random() * 0.5).toFixed(2);
+      document.getElementById('statDifficulty').textContent = diff + 'T';
+
+      document.getElementById('netNodes').textContent = String(7 + Math.floor(Math.random() * 3));
+      document.getElementById('netPeers').textContent = String(23 + Math.floor(Math.random() * 12));
+      var chainMB = (2847 + blocks.length * 0.04).toFixed(1);
+      document.getElementById('netSize').textContent = chainMB + ' MB';
+    }
+
+    // ── Initial render ──
+    renderBlocks();
+    renderTxs();
+    updateStats();
+
+    // ── Mining loop: new block every 30s ──
+    setInterval(function() {
+      var newBlock = genBlock(currentHeight, 0);
+      blocks.push(newBlock);
+      if (blocks.length > 50) blocks.shift();
+      currentHeight++;
+
+      // Generate 2-5 transactions per block
+      var newTxCount = 2 + Math.floor(Math.random() * 4);
+      for (var i = 0; i < newTxCount; i++) {
+        txs.push(genTx(Math.random() * 2000));
+      }
+      if (txs.length > 60) txs.splice(0, txs.length - 60);
+
+      renderBlocks();
+      renderTxs();
+      updateStats();
+    }, 30000);
+
+    // Refresh timestamps every 5s
+    setInterval(function() {
+      renderBlocks();
+      renderTxs();
+    }, 5000);
+
+    // ── Search ──
+    document.getElementById('searchInput').addEventListener('keydown', function(e) {
+      if (e.key !== 'Enter') return;
+      var q = this.value.trim().toLowerCase();
+      if (!q) return;
+
+      // Search blocks by number
+      var num = parseInt(q.replace(/[#,]/g, ''), 10);
+      if (!isNaN(num)) {
+        var found = blocks.find(function(b) { return b.number === num; });
+        if (found) {
+          blockListEl.innerHTML = '<div class="block-card entering">' +
+            '<div class="block-number"><span>Block</span>#' + fmtNum(found.number) + '</div>' +
+            '<div class="block-hash" title="' + found.hash + '">' + truncHash(found.hash, 14, 8) + '</div>' +
+            '<div class="block-time">' + fmtTime(found.timestamp) + '</div>' +
+            '<div class="block-meta">' + found.txCount + '<span>txns</span></div>' +
+            '<div class="block-meta">' + found.size + ' KB<span>size</span></div>' +
+          '</div>';
+          return;
+        }
+      }
+
+      // Search transactions by hash fragment or address
+      var matchedTx = txs.filter(function(t) {
+        return t.hash.includes(q) || t.from.includes(q) || t.to.includes(q) ||
+               t.fromName.includes(q) || t.toName.includes(q);
+      });
+      if (matchedTx.length > 0) {
+        txListEl.innerHTML = matchedTx.slice(0, 10).map(function(t) {
+          return '<div class="tx-row">' +
+            '<div class="tx-addr"><span class="label">From (' + t.fromName + ')</span>' + truncHash(t.from, 8, 6) + '</div>' +
+            '<div class="tx-addr"><span class="label">To (' + t.toName + ')</span>' + truncHash(t.to, 8, 6) + '</div>' +
+            '<div class="tx-amount">' + t.amount + ' ROAD</div>' +
+            '<div class="tx-status"><span class="tx-status-badge ' + t.status + '">' + t.status + '</span></div>' +
+          '</div>';
+        }).join('');
+      }
+    });
+
+    // Clear search restores full view
+    document.getElementById('searchInput').addEventListener('input', function() {
+      if (this.value === '') {
+        renderBlocks();
+        renderTxs();
+      }
+    });
+
+    // ── Footer clock ──
+    function tickClock() {
+      document.getElementById('footerClock').textContent = new Date().toISOString().replace('T', ' ').slice(0, 19) + ' UTC';
+    }
+    tickClock();
+    setInterval(tickClock, 1000);
+  </script>
+<script>if("serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js").catch(()=>{});</script>
+</body>
+</html>

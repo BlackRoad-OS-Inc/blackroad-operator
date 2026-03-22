@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BlackRoad Apps — Your Sovereign Toolkit</title>
+  <meta name="description" content="18 sovereign apps running on your hardware. Zero cloud dependency.">
+  <meta name="theme-color" content="#0a0a0a">
+  <link rel="stylesheet" href="/_shared/design.css">
+  <style>
+    /* ── Hero ── */
+    .hero {
+      text-align: center;
+      padding: var(--sp-2xl) var(--sp-lg) var(--sp-xl);
+    }
+    .hero h1 {
+      margin-bottom: var(--sp-sm);
+    }
+    .hero .subtitle {
+      color: var(--tertiary);
+      font-size: 1.05rem;
+      max-width: 520px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* ── Search ── */
+    .search-bar {
+      max-width: 480px;
+      margin: var(--sp-xl) auto var(--sp-lg);
+      position: relative;
+    }
+    .search-bar input {
+      width: 100%;
+      padding: 12px 16px 12px 42px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-input);
+      color: var(--white);
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .search-bar input::placeholder { color: var(--muted); }
+    .search-bar input:focus { border-color: var(--border-hover); }
+    .search-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      font-size: 0.95rem;
+      pointer-events: none;
+    }
+
+    /* ── Filters ── */
+    .filters {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: var(--sp-sm);
+      margin-bottom: var(--sp-xl);
+      padding: 0 var(--sp-lg);
+    }
+    .filter-tab {
+      padding: 7px 18px;
+      border-radius: var(--radius-pill);
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--subtle);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .filter-tab:hover {
+      border-color: var(--border-hover);
+      color: var(--white);
+    }
+    .filter-tab.active {
+      background: var(--surface);
+      border-color: var(--border-hover);
+      color: var(--white);
+    }
+
+    /* ── Grid ── */
+    .apps-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--sp-md);
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 var(--sp-lg);
+    }
+
+    /* ── App Card ── */
+    .app-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: var(--sp-lg);
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-sm);
+      transition: border-color 0.2s, transform 0.2s var(--ease-spring);
+      text-decoration: none;
+      color: inherit;
+    }
+    .app-card:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-2px);
+    }
+    .app-icon {
+      font-size: 1.6rem;
+      line-height: 1;
+    }
+    .app-name {
+      font-family: var(--font-headline);
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--white);
+    }
+    .app-desc {
+      font-size: 0.82rem;
+      color: var(--subtle);
+      line-height: 1.5;
+    }
+    .app-tag {
+      display: inline-flex;
+      align-self: flex-start;
+      padding: 2px 8px;
+      border-radius: var(--radius-small);
+      background: var(--inset);
+      border: 1px solid var(--border);
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-top: auto;
+    }
+
+    /* ── Footer Count ── */
+    .app-count {
+      text-align: center;
+      padding: var(--sp-2xl) var(--sp-lg) var(--sp-xl);
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+    .app-count strong {
+      color: var(--subtle);
+    }
+
+    /* ── No Results ── */
+    .no-results {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: var(--sp-2xl) var(--sp-lg);
+      color: var(--muted);
+      font-size: 0.9rem;
+      display: none;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .apps-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 560px) {
+      .apps-grid { grid-template-columns: 1fr; }
+      .hero { padding: var(--sp-xl) var(--sp-md) var(--sp-lg); }
+      .hero .subtitle { font-size: 0.95rem; }
+    }
+  </style>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0a0a0a">
+</head>
+<body>
+
+  <!-- Nav -->
+  <nav class="br-nav">
+    <a href="/" class="nav-brand">
+      <div class="spectrum-mark">
+        <span></span><span></span><span></span><span></span><span></span><span></span>
+      </div>
+      BlackRoad Apps
+    </a>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/dashboard.html">Dashboard</a>
+      <a href="/docs.html">Docs</a>
+    </div>
+    <a href="/signup.html" class="nav-cta">Get Started</a>
+  </nav>
+
+  <div class="grad-bar"></div>
+
+  <!-- Hero -->
+  <section class="hero">
+    <h1>Your sovereign toolkit.</h1>
+    <p class="subtitle">18 apps. Zero cloud dependency. All running on your hardware.</p>
+  </section>
+
+  <!-- Search -->
+  <div class="search-bar">
+    <span class="search-icon">&#x1F50D;</span>
+    <input type="text" id="app-search" placeholder="Search apps..." autocomplete="off">
+  </div>
+
+  <!-- Category Filters -->
+  <div class="filters">
+    <button class="filter-tab active" data-category="all">All</button>
+    <button class="filter-tab" data-category="core">Core</button>
+    <button class="filter-tab" data-category="finance">Finance</button>
+    <button class="filter-tab" data-category="social">Social</button>
+    <button class="filter-tab" data-category="developer">Developer</button>
+    <button class="filter-tab" data-category="infrastructure">Infrastructure</button>
+    <button class="filter-tab" data-category="education">Education</button>
+  </div>
+
+  <!-- App Grid -->
+  <div class="apps-grid" id="apps-grid">
+
+    <a href="/dashboard.html" class="app-card" data-category="core" data-name="Dashboard">
+      <div class="app-icon">&#x1F4CA;</div>
+      <div class="app-name">Dashboard</div>
+      <div class="app-desc">Fleet overview and live stats</div>
+      <span class="app-tag">Core</span>
+    </a>
+
+    <a href="/agents-live.html" class="app-card" data-category="core" data-name="Agents">
+      <div class="app-icon">&#x1F916;</div>
+      <div class="app-name">Agents</div>
+      <div class="app-desc">AI agent directory</div>
+      <span class="app-tag">Core</span>
+    </a>
+
+    <a href="/chat.html" class="app-card" data-category="core" data-name="Chat">
+      <div class="app-icon">&#x1F4AC;</div>
+      <div class="app-name">Chat</div>
+      <div class="app-desc">AI chat interface</div>
+      <span class="app-tag">Core</span>
+    </a>
+
+    <a href="/files-live.html" class="app-card" data-category="core" data-name="Files">
+      <div class="app-icon">&#x1F4C1;</div>
+      <div class="app-name">Files</div>
+      <div class="app-desc">File manager</div>
+      <span class="app-tag">Core</span>
+    </a>
+
+    <a href="/pay.html" class="app-card" data-category="core" data-name="Pricing">
+      <div class="app-icon">&#x1F4B3;</div>
+      <div class="app-name">Pricing</div>
+      <div class="app-desc">Plans and pricing</div>
+      <span class="app-tag">Core</span>
+    </a>
+
+    <a href="/signup.html" class="app-card" data-category="core" data-name="Sign Up">
+      <div class="app-icon">&#x1F511;</div>
+      <div class="app-name">Sign Up</div>
+      <div class="app-desc">Create account</div>
+      <span class="app-tag">Core</span>
+    </a>
+
+    <a href="/login.html" class="app-card" data-category="core" data-name="Log In">
+      <div class="app-icon">&#x1F512;</div>
+      <div class="app-name">Log In</div>
+      <div class="app-desc">Sign in</div>
+      <span class="app-tag">Core</span>
+    </a>
+
+    <a href="/blockchain-live.html" class="app-card" data-category="finance" data-name="RoadChain Explorer">
+      <div class="app-icon">&#x26D3;</div>
+      <div class="app-name">RoadChain Explorer</div>
+      <div class="app-desc">Blockchain explorer</div>
+      <span class="app-tag">Finance</span>
+    </a>
+
+    <a href="/wallet.html" class="app-card" data-category="finance" data-name="RoadCoin Wallet">
+      <div class="app-icon">&#x1FA99;</div>
+      <div class="app-name">RoadCoin Wallet</div>
+      <div class="app-desc">Cryptocurrency wallet</div>
+      <span class="app-tag">Finance</span>
+    </a>
+
+    <a href="/ledger.html" class="app-card" data-category="finance" data-name="Ledger">
+      <div class="app-icon">&#x1F4D2;</div>
+      <div class="app-name">Ledger</div>
+      <div class="app-desc">Audit trail</div>
+      <span class="app-tag">Finance</span>
+    </a>
+
+    <a href="/social-live.html" class="app-card" data-category="social" data-name="BackRoad Social">
+      <div class="app-icon">&#x1F310;</div>
+      <div class="app-name">BackRoad Social</div>
+      <div class="app-desc">Social feed</div>
+      <span class="app-tag">Social</span>
+    </a>
+
+    <a href="/terminal.html" class="app-card" data-category="developer" data-name="Terminal">
+      <div class="app-icon">&#x1F5A5;</div>
+      <div class="app-name">Terminal</div>
+      <div class="app-desc">Web terminal emulator</div>
+      <span class="app-tag">Developer</span>
+    </a>
+
+    <a href="/docs.html" class="app-card" data-category="developer" data-name="Docs">
+      <div class="app-icon">&#x1F4DA;</div>
+      <div class="app-name">Docs</div>
+      <div class="app-desc">Documentation hub</div>
+      <span class="app-tag">Developer</span>
+    </a>
+
+    <a href="/api-mock.html" class="app-card" data-category="developer" data-name="API Explorer">
+      <div class="app-icon">&#x1F9EA;</div>
+      <div class="app-name">API Explorer</div>
+      <div class="app-desc">Interactive API testing</div>
+      <span class="app-tag">Developer</span>
+    </a>
+
+    <a href="/status.html" class="app-card" data-category="infrastructure" data-name="Status">
+      <div class="app-icon">&#x1F6A6;</div>
+      <div class="app-name">Status</div>
+      <div class="app-desc">System health monitoring</div>
+      <span class="app-tag">Infrastructure</span>
+    </a>
+
+    <a href="/console.html" class="app-card" data-category="infrastructure" data-name="PRISM Console">
+      <div class="app-icon">&#x1F3AE;</div>
+      <div class="app-name">PRISM Console</div>
+      <div class="app-desc">Ops control room</div>
+      <span class="app-tag">Infrastructure</span>
+    </a>
+
+    <a href="/integrations.html" class="app-card" data-category="infrastructure" data-name="Integrations">
+      <div class="app-icon">&#x1F517;</div>
+      <div class="app-name">Integrations</div>
+      <div class="app-desc">Ecosystem map</div>
+      <span class="app-tag">Infrastructure</span>
+    </a>
+
+    <a href="/math.html" class="app-card" data-category="education" data-name="Math Lab">
+      <div class="app-icon">&#x1F9EE;</div>
+      <div class="app-name">Math Lab</div>
+      <div class="app-desc">Amundson sequence</div>
+      <span class="app-tag">Education</span>
+    </a>
+
+    <div class="no-results" id="no-results">No apps match your search.</div>
+  </div>
+
+  <!-- Count -->
+  <div class="app-count">
+    <strong>18 apps live</strong> &middot; Built with love &middot; BlackRoad OS, Inc.
+  </div>
+
+  <div class="grad-bar"></div>
+
+  <!-- Footer -->
+  <footer>
+    <span>&copy; 2026 BlackRoad OS, Inc.</span>
+    <span>Pave Tomorrow.</span>
+  </footer>
+
+  <script>
+    const searchInput = document.getElementById('app-search');
+    const grid = document.getElementById('apps-grid');
+    const cards = Array.from(grid.querySelectorAll('.app-card'));
+    const noResults = document.getElementById('no-results');
+    const filterTabs = document.querySelectorAll('.filter-tab');
+    let activeCategory = 'all';
+
+    function filterCards() {
+      const query = searchInput.value.toLowerCase().trim();
+      let visible = 0;
+
+      cards.forEach(card => {
+        const name = card.dataset.name.toLowerCase();
+        const cat = card.dataset.category;
+        const desc = card.querySelector('.app-desc').textContent.toLowerCase();
+        const matchesSearch = !query || name.includes(query) || desc.includes(query);
+        const matchesCategory = activeCategory === 'all' || cat === activeCategory;
+        const show = matchesSearch && matchesCategory;
+        card.style.display = show ? '' : 'none';
+        if (show) visible++;
+      });
+
+      noResults.style.display = visible === 0 ? 'block' : 'none';
+    }
+
+    searchInput.addEventListener('input', filterCards);
+
+    filterTabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        filterTabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        activeCategory = tab.dataset.category;
+        filterCards();
+      });
+    });
+  </script>
+
+<script>if("serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js").catch(()=>{});</script>
+</body>
+</html>

@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Composer -- BlackRoad OS</title>
+  <meta name="description" content="Content creation tool for the BlackRoad network. Write posts, announcements, agent reports, and technical notes.">
+  <link rel="stylesheet" href="/_shared/design.css">
+  <style>
+    .composer-layout {
+      display: grid;
+      grid-template-columns: 1fr 260px;
+      gap: var(--sp-lg);
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: var(--sp-xl) var(--sp-lg);
+      min-height: calc(100vh - var(--nav-height) - 120px);
+    }
+
+    .editor-panel { display: flex; flex-direction: column; gap: var(--sp-md); }
+
+    .title-input {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-input);
+      padding: 14px 16px;
+      color: var(--white);
+      font-family: var(--font-headline);
+      font-size: 1.25rem;
+      font-weight: 700;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .title-input:focus { border-color: var(--violet); }
+    .title-input::placeholder { color: var(--muted); }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-xs);
+      flex-wrap: wrap;
+    }
+    .toolbar-btn {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-small);
+      color: var(--subtle);
+      padding: 6px 12px;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+      line-height: 1;
+    }
+    .toolbar-btn:hover { border-color: var(--border-hover); color: var(--white); }
+    .toolbar-btn.active { border-color: var(--violet); color: var(--white); }
+
+    .toolbar-sep {
+      width: 1px;
+      height: 20px;
+      background: var(--border);
+      margin: 0 var(--sp-xs);
+    }
+
+    .category-select {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-small);
+      color: var(--subtle);
+      padding: 6px 12px;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      cursor: pointer;
+      outline: none;
+      margin-left: auto;
+    }
+    .category-select:focus { border-color: var(--violet); color: var(--white); }
+    .category-select option { background: var(--surface); color: var(--white); }
+
+    .content-area {
+      width: 100%;
+      flex: 1;
+      min-height: 400px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: 16px;
+      color: var(--white);
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      line-height: 1.7;
+      resize: vertical;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .content-area:focus { border-color: var(--violet); }
+    .content-area::placeholder { color: var(--muted); }
+
+    .preview-area {
+      display: none;
+      width: 100%;
+      flex: 1;
+      min-height: 400px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: 20px 24px;
+      color: var(--secondary);
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      line-height: 1.7;
+      overflow-y: auto;
+    }
+    .preview-area h1, .preview-area h2, .preview-area h3 {
+      color: var(--white);
+      margin: 1em 0 0.5em;
+    }
+    .preview-area h1 { font-size: 1.5rem; }
+    .preview-area h2 { font-size: 1.25rem; }
+    .preview-area h3 { font-size: 1.1rem; }
+    .preview-area p { margin-bottom: 0.75em; }
+    .preview-area code {
+      background: var(--inset);
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 0.85em;
+    }
+    .preview-area pre {
+      background: var(--inset);
+      padding: 12px;
+      border-radius: var(--radius-small);
+      overflow-x: auto;
+      margin: 0.75em 0;
+    }
+    .preview-area pre code { background: none; padding: 0; }
+    .preview-area ul, .preview-area ol { margin: 0.5em 0 0.75em 1.5em; }
+    .preview-area li { margin-bottom: 0.25em; }
+    .preview-area a { color: var(--cyan); text-decoration: underline; }
+    .preview-area strong { color: var(--white); }
+    .preview-area blockquote {
+      border-left: 3px solid var(--border-hover);
+      padding-left: 16px;
+      color: var(--subtle);
+      margin: 0.75em 0;
+    }
+
+    .editor-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--sp-md);
+      flex-wrap: wrap;
+    }
+
+    .word-count {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--muted);
+    }
+
+    .editor-actions {
+      display: flex;
+      gap: var(--sp-sm);
+    }
+
+    /* Drafts sidebar */
+    .drafts-panel {
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-sm);
+    }
+    .drafts-panel h3 {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--muted);
+      margin-bottom: var(--sp-xs);
+    }
+    .draft-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-small);
+      padding: 12px;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .draft-item:hover { border-color: var(--border-hover); }
+    .draft-item.active { border-color: var(--violet); }
+    .draft-title {
+      font-family: var(--font-headline);
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--white);
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .draft-meta {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .draft-delete {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 0.7rem;
+      padding: 2px 4px;
+      border-radius: 3px;
+      transition: color 0.2s;
+    }
+    .draft-delete:hover { color: #ef4444; }
+
+    .drafts-empty {
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-align: center;
+      padding: var(--sp-lg) var(--sp-sm);
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: 12px 20px;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--white);
+      transform: translateY(100px);
+      opacity: 0;
+      transition: transform 0.3s var(--ease-spring), opacity 0.3s;
+      z-index: 200;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+    @media (max-width: 760px) {
+      .composer-layout {
+        grid-template-columns: 1fr;
+        padding: var(--sp-lg) var(--sp-md);
+      }
+      .drafts-panel { order: -1; }
+    }
+  </style>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0a0a0a">
+</head>
+<body>
+
+  <!-- Nav -->
+  <nav class="br-nav">
+    <a href="/" class="nav-brand">
+      <div class="spectrum-mark">
+        <span></span><span></span><span></span><span></span><span></span><span></span>
+      </div>
+      Composer
+    </a>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/social-live.html">Social Feed</a>
+    </div>
+  </nav>
+
+  <div class="grad-bar"></div>
+
+  <div class="composer-layout">
+
+    <!-- Editor -->
+    <div class="editor-panel">
+      <input type="text" class="title-input" id="postTitle" placeholder="Post title..." autocomplete="off">
+
+      <div class="toolbar">
+        <button class="toolbar-btn" onclick="insertSyntax('bold')" title="Bold">B</button>
+        <button class="toolbar-btn" onclick="insertSyntax('italic')" title="Italic" style="font-style:italic">I</button>
+        <button class="toolbar-btn" onclick="insertSyntax('code')" title="Inline code">&lt;/&gt;</button>
+        <button class="toolbar-btn" onclick="insertSyntax('link')" title="Link">Link</button>
+        <button class="toolbar-btn" onclick="insertSyntax('list')" title="Bullet list">List</button>
+        <div class="toolbar-sep"></div>
+        <button class="toolbar-btn" id="previewToggle" onclick="togglePreview()">Preview</button>
+
+        <select class="category-select" id="postCategory">
+          <option value="blog">Blog Post</option>
+          <option value="announcement">Announcement</option>
+          <option value="agent-report">Agent Report</option>
+          <option value="technical">Technical Note</option>
+        </select>
+      </div>
+
+      <textarea class="content-area" id="postContent" placeholder="Write your content using markdown..."></textarea>
+      <div class="preview-area" id="previewArea"></div>
+
+      <div class="editor-footer">
+        <span class="word-count" id="wordCount">0 words / 0 chars</span>
+        <div class="editor-actions">
+          <button class="btn-ghost btn-sm" onclick="saveDraft()">Save Draft</button>
+          <button class="btn-primary btn-sm" onclick="publishPost()">Publish</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Drafts sidebar -->
+    <div class="drafts-panel">
+      <h3>Drafts</h3>
+      <div id="draftsList">
+        <div class="drafts-empty">No drafts yet</div>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    <span>BlackRoad OS, Inc.</span>
+    <span class="text-mono">Composer v1</span>
+  </footer>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+const DRAFTS_KEY = 'br_composer_drafts';
+const FEED_KEY = 'br_social_feed';
+let currentDraftId = null;
+
+// --- Markdown toolbar ---
+function insertSyntax(type) {
+  const ta = document.getElementById('postContent');
+  const start = ta.selectionStart;
+  const end = ta.selectionEnd;
+  const sel = ta.value.substring(start, end);
+
+  const wrap = {
+    bold:   { before: '**', after: '**', placeholder: 'bold text' },
+    italic: { before: '_', after: '_', placeholder: 'italic text' },
+    code:   { before: '`', after: '`', placeholder: 'code' },
+    link:   { before: '[', after: '](url)', placeholder: 'link text' },
+    list:   { before: '\n- ', after: '', placeholder: 'item' },
+  };
+
+  const w = wrap[type];
+  if (!w) return;
+
+  const text = sel || w.placeholder;
+  const replacement = w.before + text + w.after;
+
+  ta.setRangeText(replacement, start, end, 'end');
+  ta.focus();
+
+  if (!sel) {
+    ta.selectionStart = start + w.before.length;
+    ta.selectionEnd = start + w.before.length + text.length;
+  }
+  updateWordCount();
+}
+
+// --- Word / char count ---
+function updateWordCount() {
+  const text = document.getElementById('postContent').value;
+  const chars = text.length;
+  const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+  document.getElementById('wordCount').textContent = words + ' word' + (words !== 1 ? 's' : '') + ' / ' + chars + ' chars';
+}
+document.getElementById('postContent').addEventListener('input', updateWordCount);
+
+// --- Preview toggle ---
+let previewOn = false;
+function togglePreview() {
+  previewOn = !previewOn;
+  const ta = document.getElementById('postContent');
+  const pv = document.getElementById('previewArea');
+  const btn = document.getElementById('previewToggle');
+
+  if (previewOn) {
+    pv.innerHTML = renderMarkdown(ta.value);
+    ta.style.display = 'none';
+    pv.style.display = 'block';
+    btn.classList.add('active');
+  } else {
+    ta.style.display = '';
+    pv.style.display = 'none';
+    btn.classList.remove('active');
+  }
+}
+
+function renderMarkdown(md) {
+  if (!md.trim()) return '<p style="color:var(--muted)">Nothing to preview yet.</p>';
+  let html = md
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    // code blocks
+    .replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>')
+    // inline code
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    // headings
+    .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+    .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+    // bold & italic
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/_(.+?)_/g, '<em>$1</em>')
+    // blockquote
+    .replace(/^&gt; (.+)$/gm, '<blockquote>$1</blockquote>')
+    // links
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>')
+    // unordered list
+    .replace(/^- (.+)$/gm, '<li>$1</li>')
+    // paragraphs
+    .replace(/\n\n/g, '</p><p>')
+    ;
+  // wrap loose list items
+  html = html.replace(/((?:<li>.*<\/li>\s*)+)/g, '<ul>$1</ul>');
+  return '<p>' + html + '</p>';
+}
+
+// --- Drafts ---
+function getDrafts() {
+  try { return JSON.parse(localStorage.getItem(DRAFTS_KEY)) || []; }
+  catch { return []; }
+}
+function saveDraftsData(drafts) {
+  localStorage.setItem(DRAFTS_KEY, JSON.stringify(drafts));
+}
+
+function saveDraft() {
+  const title = document.getElementById('postTitle').value.trim() || 'Untitled';
+  const content = document.getElementById('postContent').value;
+  const category = document.getElementById('postCategory').value;
+
+  const drafts = getDrafts();
+
+  if (currentDraftId) {
+    const idx = drafts.findIndex(d => d.id === currentDraftId);
+    if (idx !== -1) {
+      drafts[idx].title = title;
+      drafts[idx].content = content;
+      drafts[idx].category = category;
+      drafts[idx].updated = Date.now();
+    }
+  } else {
+    const draft = {
+      id: 'draft_' + Date.now(),
+      title, content, category,
+      created: Date.now(),
+      updated: Date.now()
+    };
+    drafts.unshift(draft);
+    currentDraftId = draft.id;
+  }
+
+  saveDraftsData(drafts);
+  renderDrafts();
+  showToast('Draft saved');
+}
+
+function loadDraft(id) {
+  const drafts = getDrafts();
+  const draft = drafts.find(d => d.id === id);
+  if (!draft) return;
+
+  currentDraftId = id;
+  document.getElementById('postTitle').value = draft.title;
+  document.getElementById('postContent').value = draft.content;
+  document.getElementById('postCategory').value = draft.category;
+  updateWordCount();
+
+  if (previewOn) togglePreview();
+  renderDrafts();
+}
+
+function deleteDraft(id, e) {
+  e.stopPropagation();
+  let drafts = getDrafts();
+  drafts = drafts.filter(d => d.id !== id);
+  saveDraftsData(drafts);
+  if (currentDraftId === id) {
+    currentDraftId = null;
+    document.getElementById('postTitle').value = '';
+    document.getElementById('postContent').value = '';
+    updateWordCount();
+  }
+  renderDrafts();
+  showToast('Draft deleted');
+}
+
+function renderDrafts() {
+  const drafts = getDrafts();
+  const el = document.getElementById('draftsList');
+  if (!drafts.length) {
+    el.innerHTML = '<div class="drafts-empty">No drafts yet</div>';
+    return;
+  }
+  el.innerHTML = drafts.map(d => {
+    const date = new Date(d.updated).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    const active = d.id === currentDraftId ? ' active' : '';
+    return `<div class="draft-item${active}" onclick="loadDraft('${d.id}')">
+      <div class="draft-title">${escHtml(d.title)}</div>
+      <div class="draft-meta">
+        <span>${date} &middot; ${d.category}</span>
+        <button class="draft-delete" onclick="deleteDraft('${d.id}', event)" title="Delete">&times;</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// --- Publish ---
+function publishPost() {
+  const title = document.getElementById('postTitle').value.trim();
+  const content = document.getElementById('postContent').value.trim();
+  const category = document.getElementById('postCategory').value;
+
+  if (!title || !content) {
+    showToast('Title and content are required');
+    return;
+  }
+
+  const feed = getFeed();
+  feed.unshift({
+    id: 'post_' + Date.now(),
+    title, content, category,
+    author: 'blackroad',
+    timestamp: Date.now()
+  });
+  localStorage.setItem(FEED_KEY, JSON.stringify(feed));
+
+  // Remove draft if editing one
+  if (currentDraftId) {
+    let drafts = getDrafts();
+    drafts = drafts.filter(d => d.id !== currentDraftId);
+    saveDraftsData(drafts);
+    currentDraftId = null;
+  }
+
+  // Clear editor
+  document.getElementById('postTitle').value = '';
+  document.getElementById('postContent').value = '';
+  updateWordCount();
+  if (previewOn) togglePreview();
+  renderDrafts();
+  showToast('Published to social feed');
+}
+
+function getFeed() {
+  try { return JSON.parse(localStorage.getItem(FEED_KEY)) || []; }
+  catch { return []; }
+}
+
+// --- Utilities ---
+function escHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2400);
+}
+
+// Init
+renderDrafts();
+updateWordCount();
+</script>
+
+<script>if("serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js").catch(()=>{});</script>
+</body>
+</html>

@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="canonical" href="https://blackroad.io/console">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:image" content="https://images.blackroad.io/brand/br-square-512.png">
+  <meta property="og:image" content="https://images.blackroad.io/brand/br-square-512.png">
+  <meta name="description" content="PRISM Console — BlackRoad OS operations dashboard. Real-time fleet monitoring, agent roster, and system health.">
+  <meta name="theme-color" content="#0a0a0a">
+  <title>PRISM Console — BlackRoad OS</title>
+  <link rel="stylesheet" href="/_shared/design.css">
+  <style>
+    /* ── Console overrides ── */
+    .console-wrap { max-width: 1400px; margin: 0 auto; padding: 0 var(--sp-lg); }
+
+    /* ── Top metrics row ── */
+    .metrics-row {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: var(--sp-md);
+      margin-top: var(--sp-lg);
+    }
+    .metric-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: var(--sp-md) var(--sp-md) 12px;
+      text-align: center;
+    }
+    .metric-card .metric-val {
+      font-family: var(--font-mono);
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--white);
+      line-height: 1.2;
+    }
+    .metric-card .metric-label {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* ── Section headers ── */
+    .console-section {
+      margin-top: var(--sp-xl);
+    }
+    .console-section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--sp-md);
+    }
+    .console-section-head h2 {
+      font-family: var(--font-headline);
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--white);
+    }
+
+    /* ── Fleet grid ── */
+    .fleet-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: var(--sp-md);
+    }
+    .node-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: var(--sp-md);
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .node-card:hover { border-color: var(--border-hover); }
+    .node-card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .node-name {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--white);
+    }
+    .node-role {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .node-status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .node-status-dot.online {
+      background: #22c55e;
+      box-shadow: 0 0 6px #22c55e66;
+      animation: pulse-live 2s ease-in-out infinite;
+    }
+    .node-status-dot.offline {
+      background: #ef4444;
+      box-shadow: 0 0 6px #ef444466;
+    }
+    .node-bar-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .node-bar-label {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: var(--muted);
+      width: 32px;
+      flex-shrink: 0;
+      text-transform: uppercase;
+    }
+    .node-bar-track {
+      flex: 1;
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .node-bar-fill {
+      height: 100%;
+      border-radius: 2px;
+      transition: width 0.6s ease;
+    }
+    .node-bar-val {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: var(--subtle);
+      width: 36px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+    .node-load {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--subtle);
+      margin-top: 8px;
+    }
+    .node-services {
+      display: none;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+    }
+    .node-card.expanded .node-services { display: block; }
+    .node-service-tag {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: var(--subtle);
+      background: var(--inset);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-small);
+      padding: 2px 7px;
+      margin: 2px;
+    }
+
+    /* ── Agent roster ── */
+    .agent-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 8px;
+    }
+    .agent-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-small);
+    }
+    .agent-color-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .agent-name {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--white);
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .agent-status-tag {
+      font-family: var(--font-mono);
+      font-size: 0.55rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+    .agent-status-tag.active { color: #22c55e; }
+    .agent-status-tag.idle { color: var(--subtle); }
+
+    /* ── Activity feed ── */
+    .feed-list {
+      max-height: 320px;
+      overflow-y: auto;
+    }
+    .feed-item {
+      display: flex;
+      gap: 10px;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .feed-item:last-child { border-bottom: none; }
+    .feed-time {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: var(--muted);
+      white-space: nowrap;
+      min-width: 50px;
+    }
+    .feed-msg {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--tertiary);
+      line-height: 1.5;
+    }
+
+    /* ── Health summary row ── */
+    .health-row {
+      display: flex;
+      gap: var(--sp-md);
+      flex-wrap: wrap;
+      margin-top: var(--sp-lg);
+    }
+    .health-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: var(--sp-md) var(--sp-lg);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+      min-width: 200px;
+    }
+    .health-ring {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--white);
+      flex-shrink: 0;
+    }
+    .health-ring.green  { border: 3px solid #22c55e; }
+    .health-ring.yellow { border: 3px solid #f59e0b; }
+    .health-ring.red    { border: 3px solid #ef4444; }
+    .health-detail-label {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+    }
+    .health-detail-val {
+      font-family: var(--font-mono);
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--white);
+    }
+
+    /* ── Clock bar ── */
+    .clock-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 0;
+    }
+    .clock-time {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--subtle);
+    }
+    .clock-refresh {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: var(--muted);
+    }
+
+    /* ── Skeleton for metrics ── */
+    .metric-val.skeleton { width: 60px; height: 28px; display: inline-block; }
+    .skel-bar { width: 100%; height: 4px; }
+
+    /* ── Responsive ── */
+    @media (max-width: 900px) {
+      .metrics-row { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (max-width: 560px) {
+      .metrics-row { grid-template-columns: repeat(2, 1fr); }
+      .fleet-grid { grid-template-columns: 1fr; }
+      .agent-list { grid-template-columns: 1fr; }
+      .health-row { flex-direction: column; }
+    }
+
+    /* ── Footer ── */
+    .console-footer {
+      margin-top: var(--sp-2xl);
+      padding: var(--sp-lg) 0;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: var(--muted);
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+  </style>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0a0a0a">
+</head>
+<body>
+
+  <!-- ── Nav ── -->
+  <nav class="br-nav">
+    <a href="/" class="nav-brand">
+      <div class="spectrum-mark">
+        <span></span><span></span><span></span><span></span><span></span><span></span>
+      </div>
+      PRISM Console
+    </a>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/dashboard.html">Dashboard</a>
+      <a href="/status.html">Status</a>
+    </div>
+  </nav>
+
+  <div class="grad-bar"></div>
+
+  <div class="console-wrap">
+
+    <!-- ── Clock + live indicator ── -->
+    <div class="clock-bar">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span class="live-indicator">LIVE</span>
+        <span class="clock-time" id="clock">--:--:--</span>
+      </div>
+      <span class="clock-refresh" id="refresh-status">Fetching...</span>
+    </div>
+
+    <!-- ── Top metrics ── -->
+    <div class="metrics-row" id="metrics-row">
+      <div class="metric-card"><div class="metric-val skeleton" id="m-nodes">&nbsp;</div><div class="metric-label">Nodes Online</div></div>
+      <div class="metric-card"><div class="metric-val skeleton" id="m-agents">&nbsp;</div><div class="metric-label">Active Agents</div></div>
+      <div class="metric-card"><div class="metric-val skeleton" id="m-repos">&nbsp;</div><div class="metric-label">Total Repos</div></div>
+      <div class="metric-card"><div class="metric-val skeleton" id="m-domains">&nbsp;</div><div class="metric-label">Domains</div></div>
+      <div class="metric-card"><div class="metric-val skeleton" id="m-search">&nbsp;</div><div class="metric-label">Search Index</div></div>
+      <div class="metric-card"><div class="metric-val" id="m-tops">52</div><div class="metric-label">TOPS (Hailo-8)</div></div>
+    </div>
+
+    <!-- ── System health summary ── -->
+    <div class="health-row" id="health-row">
+      <div class="health-box">
+        <div class="health-ring green" id="health-ring">--</div>
+        <div>
+          <div class="health-detail-label">Fleet Health</div>
+          <div class="health-detail-val" id="health-label">Loading</div>
+        </div>
+      </div>
+      <div class="health-box">
+        <div>
+          <div class="health-detail-label">Uptime</div>
+          <div class="health-detail-val" id="uptime-val">--</div>
+        </div>
+      </div>
+      <div class="health-box">
+        <div>
+          <div class="health-detail-label">Self-Hosted</div>
+          <div class="health-detail-val" id="selfhosted-val">--</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Fleet Map ── -->
+    <div class="console-section">
+      <div class="console-section-head">
+        <h2>Fleet Map</h2>
+        <span class="tag"><span class="status-dot live"></span> 7 nodes</span>
+      </div>
+      <div class="fleet-grid" id="fleet-grid"></div>
+    </div>
+
+    <!-- ── Agent Roster ── -->
+    <div class="console-section">
+      <div class="console-section-head">
+        <h2>Agent Roster</h2>
+        <span class="tag" id="agent-count-tag">--</span>
+      </div>
+      <div class="agent-list" id="agent-list"></div>
+    </div>
+
+    <!-- ── Activity Feed ── -->
+    <div class="console-section">
+      <div class="console-section-head">
+        <h2>Recent Activity</h2>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden;">
+        <div class="feed-list" id="feed-list">
+          <div class="feed-item"><span class="feed-time">--</span><span class="feed-msg skeleton" style="width:80%;height:14px;">&nbsp;</span></div>
+          <div class="feed-item"><span class="feed-time">--</span><span class="feed-msg skeleton" style="width:65%;height:14px;">&nbsp;</span></div>
+          <div class="feed-item"><span class="feed-time">--</span><span class="feed-msg skeleton" style="width:70%;height:14px;">&nbsp;</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="console-footer">
+      <span>PRISM Console v1.0 — BlackRoad OS, Inc.</span>
+      <span>Pave Tomorrow.</span>
+    </div>
+  </div>
+
+<script>
+(function () {
+  'use strict';
+
+  const API = 'https://blackroad-live-stats.amundsonalexa.workers.dev/api/stats';
+
+  // ── Static fleet data ──
+  const FLEET = [
+    { name: 'Alice',     ip: '.49',  role: 'Gateway / DNS / Redis',     services: ['Pi-hole','PostgreSQL','Qdrant','Redis','nginx','WireGuard'] },
+    { name: 'Cecilia',   ip: '.96',  role: 'AI Inference / Storage',    services: ['Ollama (16 models)','MinIO','PostgreSQL','InfluxDB'] },
+    { name: 'Octavia',   ip: '.101', role: 'Git / Workers / PaaS',      services: ['Gitea','Workers x15','PaaS','NATS','Docker'] },
+    { name: 'Aria',      ip: '.98',  role: 'Compute',                   services: ['Ollama','Docker'] },
+    { name: 'Lucidia',   ip: '.38',  role: 'Web Apps / DNS / CI',       services: ['nginx (334 apps)','PowerDNS','GitHub Runners','Ollama'] },
+    { name: 'Gematria',  ip: 'nyc3', role: 'TLS Edge / DNS',           services: ['Caddy (151 domains)','Ollama (6 models)','PowerDNS ns1'] },
+    { name: 'Anastasia', ip: 'nyc1', role: 'Droplet',                   services: ['Backup','Monitoring'] },
+  ];
+
+  const AGENT_COLORS = [
+    '#FF6B2B','#FF2255','#CC00AA','#8844FF','#4488FF','#00D4FF',
+    '#22c55e','#f59e0b','#ec4899','#6366f1','#14b8a6','#f97316',
+    '#a855f7','#3b82f6','#10b981','#ef4444','#8b5cf6','#06b6d4',
+  ];
+
+  // ── Clock ──
+  function tickClock() {
+    const now = new Date();
+    const h = String(now.getHours()).padStart(2, '0');
+    const m = String(now.getMinutes()).padStart(2, '0');
+    const s = String(now.getSeconds()).padStart(2, '0');
+    document.getElementById('clock').textContent = h + ':' + m + ':' + s;
+  }
+  setInterval(tickClock, 1000);
+  tickClock();
+
+  // ── Build fleet grid (static skeleton, updated by data) ──
+  function renderFleet(nodeStats) {
+    const grid = document.getElementById('fleet-grid');
+    grid.innerHTML = '';
+    FLEET.forEach(function (node) {
+      const stats = nodeStats ? nodeStats[node.name.toLowerCase()] : null;
+      const online = stats ? stats.online : false;
+      const temp = stats ? (stats.temp || 0) : 0;
+      const disk = stats ? (stats.disk || 0) : 0;
+      const load = stats ? (stats.load || '0.00') : '--';
+
+      const tempColor = temp >= 65 ? '#ef4444' : temp >= 50 ? '#f59e0b' : '#22c55e';
+      const diskColor = disk >= 85 ? '#ef4444' : disk >= 70 ? '#f59e0b' : '#22c55e';
+
+      const card = document.createElement('div');
+      card.className = 'node-card';
+      card.onclick = function () { card.classList.toggle('expanded'); };
+      card.innerHTML =
+        '<div class="node-card-head">' +
+          '<div>' +
+            '<div class="node-name">' + node.name + ' <span style="color:var(--muted);font-weight:400;">' + node.ip + '</span></div>' +
+            '<div class="node-role">' + node.role + '</div>' +
+          '</div>' +
+          '<div class="node-status-dot ' + (online ? 'online' : 'offline') + '"></div>' +
+        '</div>' +
+        '<div class="node-bar-row">' +
+          '<span class="node-bar-label">Temp</span>' +
+          '<div class="node-bar-track"><div class="node-bar-fill" style="width:' + Math.min(temp, 100) + '%;background:' + tempColor + ';"></div></div>' +
+          '<span class="node-bar-val">' + (temp ? temp + 'C' : '--') + '</span>' +
+        '</div>' +
+        '<div class="node-bar-row">' +
+          '<span class="node-bar-label">Disk</span>' +
+          '<div class="node-bar-track"><div class="node-bar-fill" style="width:' + disk + '%;background:' + diskColor + ';"></div></div>' +
+          '<span class="node-bar-val">' + (disk ? disk + '%' : '--') + '</span>' +
+        '</div>' +
+        '<div class="node-load">Load: ' + load + '</div>' +
+        '<div class="node-services">' +
+          node.services.map(function (s) { return '<span class="node-service-tag">' + s + '</span>'; }).join('') +
+        '</div>';
+      grid.appendChild(card);
+    });
+  }
+
+  // ── Render agents ──
+  function renderAgents(agents) {
+    const list = document.getElementById('agent-list');
+    const countTag = document.getElementById('agent-count-tag');
+    if (!agents || !agents.length) {
+      list.innerHTML = '<div style="padding:12px;font-family:var(--font-mono);font-size:0.7rem;color:var(--muted);">No agent data</div>';
+      countTag.textContent = '0 agents';
+      return;
+    }
+    countTag.textContent = agents.length + ' agents';
+    list.innerHTML = '';
+    agents.forEach(function (agent, i) {
+      var name = typeof agent === 'string' ? agent : (agent.name || agent.id || 'Agent ' + i);
+      var status = (typeof agent === 'object' && agent.status) ? agent.status : 'active';
+      var color = AGENT_COLORS[i % AGENT_COLORS.length];
+      var div = document.createElement('div');
+      div.className = 'agent-row';
+      div.innerHTML =
+        '<span class="agent-color-dot" style="background:' + color + ';"></span>' +
+        '<span class="agent-name">' + name + '</span>' +
+        '<span class="agent-status-tag ' + (status === 'active' ? 'active' : 'idle') + '">' + status + '</span>';
+      list.appendChild(div);
+    });
+  }
+
+  // ── Render feed ──
+  function renderFeed(items) {
+    var list = document.getElementById('feed-list');
+    if (!items || !items.length) {
+      list.innerHTML = '<div class="feed-item"><span class="feed-msg" style="color:var(--muted);">No recent activity</span></div>';
+      return;
+    }
+    list.innerHTML = '';
+    items.forEach(function (item) {
+      var time = '';
+      var msg = '';
+      if (typeof item === 'string') {
+        msg = item;
+      } else {
+        time = item.time || item.timestamp || item.created || '';
+        msg = item.message || item.text || item.content || JSON.stringify(item);
+      }
+      if (time) {
+        try {
+          var d = new Date(time);
+          if (!isNaN(d)) {
+            time = String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+          }
+        } catch(e) { /* keep raw */ }
+      }
+      var div = document.createElement('div');
+      div.className = 'feed-item';
+      div.innerHTML = '<span class="feed-time">' + (time || '--') + '</span><span class="feed-msg">' + msg + '</span>';
+      list.appendChild(div);
+    });
+  }
+
+  // ── Update metrics ──
+  function updateMetrics(data) {
+    function set(id, val) {
+      var el = document.getElementById(id);
+      el.textContent = val;
+      el.classList.remove('skeleton');
+    }
+
+    var fleet = data.fleet || {};
+    var nodes = fleet.nodes || {};
+    var onlineCount = 0;
+    var nodeKeys = Object.keys(nodes);
+    nodeKeys.forEach(function (k) { if (nodes[k] && nodes[k].online) onlineCount++; });
+
+    set('m-nodes', onlineCount + '/' + Math.max(nodeKeys.length, FLEET.length));
+    set('m-agents', data.agents ? (data.agents.count || (Array.isArray(data.agents.list) ? data.agents.list.length : data.agents.total) || '--') : '--');
+    set('m-repos', data.repos ? (data.repos.total || data.repos.count || '--') : '--');
+    set('m-domains', data.domains ? (data.domains.total || data.domains.count || '--') : '--');
+    set('m-search', data.search ? (data.search.entries || data.search.total || '--') : '--');
+
+    // Health
+    var healthPct = Math.round((onlineCount / Math.max(nodeKeys.length, FLEET.length)) * 100);
+    var ring = document.getElementById('health-ring');
+    ring.textContent = healthPct + '%';
+    ring.className = 'health-ring ' + (healthPct >= 80 ? 'green' : healthPct >= 50 ? 'yellow' : 'red');
+    var hl = document.getElementById('health-label');
+    hl.textContent = healthPct >= 80 ? 'Healthy' : healthPct >= 50 ? 'Degraded' : 'Critical';
+
+    // Uptime
+    var uptimeEl = document.getElementById('uptime-val');
+    if (fleet.uptime_days) {
+      uptimeEl.textContent = fleet.uptime_days + 'd';
+    } else if (fleet.uptime) {
+      uptimeEl.textContent = fleet.uptime;
+    } else {
+      uptimeEl.textContent = '--';
+    }
+
+    // Self-hosted
+    var shEl = document.getElementById('selfhosted-val');
+    if (data.domains && data.domains.self_hosted) {
+      shEl.textContent = data.domains.self_hosted + '/' + (data.domains.total || data.domains.count || '?');
+    } else {
+      shEl.textContent = '138/151';
+    }
+
+    // Fleet
+    renderFleet(nodes);
+
+    // Agents
+    var agentData = data.agents || {};
+    var agentList = agentData.list || agentData.roster || agentData.agents || [];
+    renderAgents(agentList);
+
+    // Feed
+    var social = data.social || {};
+    var feed = social.recent || social.feed || social.activity || [];
+    renderFeed(feed);
+  }
+
+  // ── Fetch loop ──
+  var lastFetch = 0;
+  function fetchStats() {
+    var refreshEl = document.getElementById('refresh-status');
+    refreshEl.textContent = 'Fetching...';
+    fetch(API)
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        lastFetch = Date.now();
+        refreshEl.textContent = 'Updated ' + new Date().toLocaleTimeString();
+        updateMetrics(data);
+      })
+      .catch(function (err) {
+        refreshEl.textContent = 'Error: ' + err.message;
+        // Render fleet with no live data on error
+        if (!lastFetch) renderFleet(null);
+      });
+  }
+
+  // Initial + skeleton fleet
+  renderFleet(null);
+  fetchStats();
+  setInterval(fetchStats, 10000);
+
+})();
+</script>
+
+<script>if("serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js").catch(()=>{});</script>
+<script src="/_shared/feedback.js" defer></script>
+<script src="/_shared/crosslinks.js" defer></script>
+</body>
+</html>

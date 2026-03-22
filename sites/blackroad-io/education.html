@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="canonical" href="https://blackroad.io/education">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:image" content="https://images.blackroad.io/brand/br-square-512.png">
+  <meta property="og:image" content="https://images.blackroad.io/brand/br-square-512.png">
+  <meta name="description" content="RoadWork Education — AI-powered tutoring across every subject. Learn at your own pace with step-by-step solutions.">
+  <meta name="theme-color" content="#0a0a0a">
+  <title>RoadWork Education — BlackRoad OS</title>
+  <link rel="stylesheet" href="/_shared/design.css">
+  <style>
+    .hero { text-align: center; padding: var(--sp-2xl) var(--sp-xl); }
+    .hero p { color: var(--tertiary); font-size: 1.1rem; margin-top: var(--sp-md); max-width: 520px; margin-left: auto; margin-right: auto; }
+
+    .subjects-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--sp-md);
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .subject-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: var(--sp-lg);
+      transition: border-color 0.2s, transform 0.2s var(--ease-spring);
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-sm);
+    }
+    .subject-card:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-2px);
+    }
+    .subject-icon { font-size: 2rem; }
+    .subject-name {
+      font-family: var(--font-headline);
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+    .subject-meta {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-sm);
+      margin-top: auto;
+    }
+    .subject-count {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--subtle);
+    }
+    .difficulty-tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: var(--radius-small);
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      border: 1px solid var(--border);
+      color: var(--subtle);
+    }
+    .subject-card .btn-ghost {
+      margin-top: var(--sp-sm);
+      padding: 8px 14px;
+      font-size: 0.8rem;
+      width: 100%;
+      justify-content: center;
+    }
+
+    /* Demo section */
+    .demo-section {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .demo-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-large);
+      padding: var(--sp-lg);
+    }
+    .demo-problem {
+      font-family: var(--font-mono);
+      font-size: 1.1rem;
+      color: var(--white);
+      margin-bottom: var(--sp-md);
+    }
+    .demo-input-row {
+      display: flex;
+      gap: var(--sp-sm);
+    }
+    .demo-input {
+      flex: 1;
+      background: var(--inset);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-input);
+      padding: 10px 14px;
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      color: var(--white);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .demo-input:focus {
+      border-color: var(--violet);
+    }
+    .demo-input::placeholder { color: var(--muted); }
+    .demo-check {
+      background: var(--grad);
+      border: none;
+      border-radius: var(--radius-btn);
+      padding: 10px 20px;
+      color: var(--white);
+      font-weight: 700;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      white-space: nowrap;
+    }
+    .demo-check:hover { opacity: 0.9; }
+    .demo-solution {
+      margin-top: var(--sp-md);
+      padding: var(--sp-md);
+      background: var(--inset);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      display: none;
+    }
+    .demo-solution.show { display: block; }
+    .demo-solution .step {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--tertiary);
+      padding: 4px 0;
+    }
+    .demo-solution .step-label {
+      color: var(--muted);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+    .demo-result {
+      margin-top: var(--sp-sm);
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+    }
+    .demo-result.correct { color: #22c55e; }
+    .demo-result.incorrect { color: #ef4444; }
+
+    /* Features */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--sp-md);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .feature-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: var(--sp-lg);
+    }
+    .feature-item h3 {
+      font-size: 0.95rem;
+      margin-bottom: var(--sp-xs);
+    }
+    .feature-item p {
+      font-size: 0.8rem;
+      color: var(--subtle);
+    }
+    .feature-item .coming-soon {
+      display: inline-block;
+      margin-top: var(--sp-sm);
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    /* Stats */
+    .stats-row {
+      display: flex;
+      gap: var(--sp-md);
+      justify-content: center;
+      flex-wrap: wrap;
+      max-width: 600px;
+      margin: var(--sp-lg) auto 0;
+    }
+
+    @media (max-width: 560px) {
+      .subjects-grid { grid-template-columns: 1fr; }
+      .features-grid { grid-template-columns: 1fr; }
+      .demo-input-row { flex-direction: column; }
+    }
+  </style>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0a0a0a">
+</head>
+<body>
+
+  <!-- Nav -->
+  <nav class="br-nav">
+    <a href="/" class="nav-brand">
+      <div class="spectrum-mark">
+        <span></span><span></span><span></span><span></span><span></span><span></span>
+      </div>
+      RoadWork Education
+    </a>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/math.html">Math</a>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <h1 class="grad-text">Learn anything.</h1>
+    <p>AI-powered tutoring that adapts to you. Step-by-step solutions, personalized pacing, real understanding.</p>
+  </section>
+
+  <div class="grad-bar"></div>
+
+  <!-- Subject Grid -->
+  <section>
+    <div class="text-center mb-lg">
+      <span class="section-label">Subjects</span>
+      <h2 class="section-title">Pick a subject</h2>
+    </div>
+    <div class="subjects-grid" id="subjects-grid">
+      <!-- Algebra -->
+      <div class="subject-card">
+        <div class="subject-icon">&#x1D465;</div>
+        <div class="subject-name">Algebra</div>
+        <div class="subject-meta">
+          <span class="subject-count">12 lessons</span>
+          <span class="difficulty-tag">Beginner</span>
+        </div>
+        <a href="/chat.html" class="btn-ghost">Start Learning &rarr;</a>
+      </div>
+      <!-- Geometry -->
+      <div class="subject-card">
+        <div class="subject-icon">&#x25B3;</div>
+        <div class="subject-name">Geometry</div>
+        <div class="subject-meta">
+          <span class="subject-count">12 lessons</span>
+          <span class="difficulty-tag">Intermediate</span>
+        </div>
+        <a href="/chat.html" class="btn-ghost">Start Learning &rarr;</a>
+      </div>
+      <!-- Physics -->
+      <div class="subject-card">
+        <div class="subject-icon">&#x2699;</div>
+        <div class="subject-name">Physics</div>
+        <div class="subject-meta">
+          <span class="subject-count">12 lessons</span>
+          <span class="difficulty-tag">Intermediate</span>
+        </div>
+        <a href="/chat.html" class="btn-ghost">Start Learning &rarr;</a>
+      </div>
+      <!-- Chemistry -->
+      <div class="subject-card">
+        <div class="subject-icon">&#x2697;</div>
+        <div class="subject-name">Chemistry</div>
+        <div class="subject-meta">
+          <span class="subject-count">12 lessons</span>
+          <span class="difficulty-tag">Intermediate</span>
+        </div>
+        <a href="/chat.html" class="btn-ghost">Start Learning &rarr;</a>
+      </div>
+      <!-- Biology -->
+      <div class="subject-card">
+        <div class="subject-icon">&#x1F9EC;</div>
+        <div class="subject-name">Biology</div>
+        <div class="subject-meta">
+          <span class="subject-count">12 lessons</span>
+          <span class="difficulty-tag">Beginner</span>
+        </div>
+        <a href="/chat.html" class="btn-ghost">Start Learning &rarr;</a>
+      </div>
+      <!-- History -->
+      <div class="subject-card">
+        <div class="subject-icon">&#x1F3DB;</div>
+        <div class="subject-name">History</div>
+        <div class="subject-meta">
+          <span class="subject-count">12 lessons</span>
+          <span class="difficulty-tag">Beginner</span>
+        </div>
+        <a href="/chat.html" class="btn-ghost">Start Learning &rarr;</a>
+      </div>
+    </div>
+  </section>
+
+  <div class="grad-bar"></div>
+
+  <!-- Interactive Demo -->
+  <section>
+    <div class="demo-section">
+      <span class="section-label">Try it</span>
+      <h2 class="section-title">Solve a problem</h2>
+      <div class="demo-card">
+        <div class="demo-problem">Solve for x: &nbsp; 2x + 5 = 13</div>
+        <div class="demo-input-row">
+          <input type="text" class="demo-input" id="demo-answer" placeholder="x = ?" autocomplete="off">
+          <button class="demo-check" id="demo-check-btn">Check Answer</button>
+        </div>
+        <div class="demo-result" id="demo-result"></div>
+        <div class="demo-solution" id="demo-solution">
+          <div class="step"><span class="step-label">Step 1</span><br>2x + 5 = 13</div>
+          <div class="step"><span class="step-label">Step 2</span><br>Subtract 5 from both sides: 2x = 8</div>
+          <div class="step"><span class="step-label">Step 3</span><br>Divide both sides by 2: x = 4</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="grad-bar"></div>
+
+  <!-- Features -->
+  <section>
+    <div class="text-center mb-lg">
+      <span class="section-label">Features</span>
+      <h2 class="section-title">How RoadWork teaches</h2>
+    </div>
+    <div class="features-grid">
+      <div class="feature-item">
+        <h3>Personalized pacing</h3>
+        <p>Lessons adapt to your speed. No one gets left behind, no one gets held back.</p>
+      </div>
+      <div class="feature-item">
+        <h3>Step-by-step solutions</h3>
+        <p>Every answer comes with a full breakdown so you understand the why, not just the what.</p>
+      </div>
+      <div class="feature-item">
+        <h3>Progress tracking</h3>
+        <p>See where you stand across every subject with real-time mastery metrics.</p>
+      </div>
+      <div class="feature-item">
+        <h3>Parent dashboard</h3>
+        <p>Monitor your learner's progress, set goals, and get weekly reports.</p>
+        <span class="coming-soon">Coming soon</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="grad-bar"></div>
+
+  <!-- Stats (from API) -->
+  <section>
+    <div class="text-center mb-lg">
+      <span class="section-label">Platform</span>
+      <h2 class="section-title">By the numbers</h2>
+    </div>
+    <div class="stats-row" id="stats-row">
+      <div class="stat-card">
+        <div class="stat-value" id="stat-subjects">--</div>
+        <div class="stat-label">Subjects</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-lessons">--</div>
+        <div class="stat-label">Lessons</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-learners">--</div>
+        <div class="stat-label">Learners</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="grad-bar"></div>
+
+  <!-- CTA -->
+  <section class="cta-band">
+    <h2 class="section-title">Ready to learn?</h2>
+    <a href="/signup.html" class="btn-primary">Start learning free &rarr;</a>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <span>BlackRoad OS &mdash; RoadWork Education</span>
+    <span class="text-mono text-xs">Pave Tomorrow.</span>
+  </footer>
+
+  <script>
+    // Interactive demo
+    const checkBtn = document.getElementById('demo-check-btn');
+    const answerInput = document.getElementById('demo-answer');
+    const resultEl = document.getElementById('demo-result');
+    const solutionEl = document.getElementById('demo-solution');
+
+    checkBtn.addEventListener('click', function () {
+      const raw = answerInput.value.trim().replace(/[xX]\s*=\s*/, '').trim();
+      const val = parseFloat(raw);
+      solutionEl.classList.add('show');
+      if (val === 4) {
+        resultEl.textContent = 'Correct! x = 4';
+        resultEl.className = 'demo-result correct';
+      } else {
+        resultEl.textContent = 'Not quite — see the steps below.';
+        resultEl.className = 'demo-result incorrect';
+      }
+    });
+
+    answerInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') checkBtn.click();
+    });
+
+    // Fetch stats from API
+    (async function () {
+      try {
+        const res = await fetch('/api/education');
+        if (!res.ok) throw new Error('API unavailable');
+        const data = await res.json();
+        if (data.subjects) {
+          document.getElementById('stat-subjects').textContent = Array.isArray(data.subjects) ? data.subjects.length : data.subjects;
+        }
+        if (data.lessons) document.getElementById('stat-lessons').textContent = data.lessons;
+        if (data.learners) document.getElementById('stat-learners').textContent = data.learners;
+      } catch (e) {
+        document.getElementById('stat-subjects').textContent = '6';
+        document.getElementById('stat-lessons').textContent = '72';
+        document.getElementById('stat-learners').textContent = '0';
+      }
+    })();
+  </script>
+
+<script>if("serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js").catch(()=>{});</script>
+<script src="/_shared/feedback.js" defer></script>
+<script src="/_shared/crosslinks.js" defer></script>
+</body>
+</html>

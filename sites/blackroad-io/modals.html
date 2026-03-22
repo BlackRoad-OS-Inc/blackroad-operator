@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="BlackRoad OS Design System — Colors, typography, components, spacing, and layout tokens.">
+  <meta name="theme-color" content="#0a0a0a">
+  <meta property="og:title" content="BlackRoad Design System">
+  <meta property="og:description" content="Component showcase and design token reference for BlackRoad OS.">
+  <meta property="og:type" content="website">
+  <title>BlackRoad Design System</title>
+  <link rel="stylesheet" href="/_shared/design.css">
+  <style>
+    .showcase-section {
+      padding: var(--sp-2xl) var(--sp-lg);
+      max-width: 960px;
+      margin: 0 auto;
+    }
+    .showcase-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: var(--sp-md);
+      margin-top: var(--sp-lg);
+    }
+    .swatch {
+      border-radius: var(--radius-card);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: border-color 0.2s, transform 0.15s var(--ease-spring);
+    }
+    .swatch:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-2px);
+    }
+    .swatch-color { height: 80px; }
+    .swatch-info {
+      padding: 10px 12px;
+      background: var(--surface);
+    }
+    .swatch-name {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--white);
+    }
+    .swatch-hex {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+    .gray-strip {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-md);
+      padding: 10px 14px;
+      border-radius: var(--radius-small);
+      border: 1px solid var(--border);
+      margin-bottom: var(--sp-sm);
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .gray-strip:hover { border-color: var(--border-hover); }
+    .gray-strip .preview {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-small);
+      flex-shrink: 0;
+    }
+    .gray-strip .label {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--subtle);
+      min-width: 90px;
+    }
+    .gray-strip .hex {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--muted);
+    }
+    .gray-strip .sample {
+      font-size: 0.85rem;
+      margin-left: auto;
+    }
+    .component-block {
+      margin-top: var(--sp-lg);
+      padding: var(--sp-lg);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+    }
+    .component-label {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--muted);
+      margin-bottom: var(--sp-md);
+    }
+    .component-row {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-md);
+      flex-wrap: wrap;
+    }
+    .class-tag {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--subtle);
+      background: var(--inset);
+      border: 1px solid var(--border);
+      padding: 2px 8px;
+      border-radius: var(--radius-small);
+      margin-top: var(--sp-sm);
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+      user-select: all;
+    }
+    .class-tag:hover {
+      color: var(--white);
+      border-color: var(--border-hover);
+    }
+    .class-tag.copied {
+      color: #22c55e;
+      border-color: #22c55e44;
+    }
+    .component-desc {
+      font-size: 0.8rem;
+      color: var(--subtle);
+      margin-top: var(--sp-sm);
+      line-height: 1.5;
+    }
+    .spacing-demo {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-md);
+      margin-bottom: var(--sp-sm);
+    }
+    .spacing-bar {
+      height: 24px;
+      background: var(--grad);
+      border-radius: 3px;
+      opacity: 0.6;
+    }
+    .spacing-label {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--subtle);
+      min-width: 70px;
+    }
+    .spacing-value {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--muted);
+      min-width: 40px;
+    }
+    .radius-demo {
+      display: flex;
+      gap: var(--sp-md);
+      flex-wrap: wrap;
+      margin-top: var(--sp-lg);
+    }
+    .radius-box {
+      width: 80px;
+      height: 80px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .radius-box:hover { border-color: var(--border-hover); }
+    .radius-box .r-name {
+      font-family: var(--font-mono);
+      font-size: 0.55rem;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+    .radius-box .r-val {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: var(--subtle);
+    }
+    .type-sample {
+      margin-top: var(--sp-md);
+      padding: var(--sp-lg);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+    }
+    .type-label {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      margin-bottom: var(--sp-sm);
+    }
+    .size-row {
+      display: flex;
+      align-items: baseline;
+      gap: var(--sp-md);
+      margin-bottom: var(--sp-sm);
+      flex-wrap: wrap;
+    }
+    .size-label {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: var(--muted);
+      min-width: 120px;
+      flex-shrink: 0;
+    }
+    .container-demo { margin-top: var(--sp-lg); }
+    .container-bar {
+      height: 36px;
+      border: 1px dashed var(--border);
+      border-radius: var(--radius-small);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: var(--sp-sm);
+    }
+    .container-bar span {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--muted);
+    }
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: var(--sp-md);
+    }
+    .hero-ds {
+      text-align: center;
+      padding: var(--sp-2xl) var(--sp-lg);
+      max-width: 960px;
+      margin: 0 auto;
+    }
+    .hero-ds p {
+      color: var(--subtle);
+      font-size: 1rem;
+      max-width: 520px;
+      margin: var(--sp-md) auto 0;
+      line-height: 1.6;
+    }
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 10px 20px;
+      border-radius: var(--radius-btn);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: #22c55e;
+      z-index: 9999;
+      opacity: 0;
+      transition: transform 0.3s var(--ease-spring), opacity 0.3s;
+      pointer-events: none;
+    }
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+    @media (max-width: 560px) {
+      .showcase-grid { grid-template-columns: repeat(2, 1fr); }
+      .gray-strip .sample { display: none; }
+      .component-row { flex-direction: column; align-items: flex-start; }
+      .stat-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0a0a0a">
+</head>
+<body>
+
+  <!-- Nav -->
+  <nav class="br-nav">
+    <a href="/" class="nav-brand">
+      <div class="spectrum-mark">
+        <span></span><span></span><span></span><span></span><span></span><span></span>
+      </div>
+      Design System
+    </a>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/docs.html">Docs</a>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <div class="hero-ds">
+    <div class="section-label">design tokens + components</div>
+    <h1>BlackRoad <span class="grad-text">Design System</span></h1>
+    <p>The canonical reference for colors, typography, components, spacing, and layout used across all BlackRoad OS surfaces.</p>
+  </div>
+
+  <div class="grad-bar"></div>
+
+  <!-- ═══ COLORS ═══ -->
+  <section class="showcase-section" id="colors">
+    <div class="section-label">01 / Colors</div>
+    <h2 class="section-title">Chromatic Palette</h2>
+
+    <div class="showcase-grid">
+      <div class="swatch" onclick="copyClass('--ember')" title="Click to copy">
+        <div class="swatch-color" style="background:#FF6B2B"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">ember</div>
+          <div class="swatch-hex">#FF6B2B</div>
+        </div>
+      </div>
+      <div class="swatch" onclick="copyClass('--rose')" title="Click to copy">
+        <div class="swatch-color" style="background:#FF2255"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">rose</div>
+          <div class="swatch-hex">#FF2255</div>
+        </div>
+      </div>
+      <div class="swatch" onclick="copyClass('--magenta')" title="Click to copy">
+        <div class="swatch-color" style="background:#CC00AA"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">magenta</div>
+          <div class="swatch-hex">#CC00AA</div>
+        </div>
+      </div>
+      <div class="swatch" onclick="copyClass('--violet')" title="Click to copy">
+        <div class="swatch-color" style="background:#8844FF"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">violet</div>
+          <div class="swatch-hex">#8844FF</div>
+        </div>
+      </div>
+      <div class="swatch" onclick="copyClass('--azure')" title="Click to copy">
+        <div class="swatch-color" style="background:#4488FF"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">azure</div>
+          <div class="swatch-hex">#4488FF</div>
+        </div>
+      </div>
+      <div class="swatch" onclick="copyClass('--cyan')" title="Click to copy">
+        <div class="swatch-color" style="background:#00D4FF"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">cyan</div>
+          <div class="swatch-hex">#00D4FF</div>
+        </div>
+      </div>
+    </div>
+
+    <h3 style="margin-top:var(--sp-xl); margin-bottom:var(--sp-md);">Text Hierarchy (Grayscale)</h3>
+
+    <div class="gray-strip" onclick="copyClass('--white')">
+      <div class="preview" style="background:#f5f5f5"></div>
+      <div class="label">--white</div>
+      <div class="hex">#f5f5f5</div>
+      <div class="sample" style="color:#f5f5f5">Primary text</div>
+    </div>
+    <div class="gray-strip" onclick="copyClass('--secondary')">
+      <div class="preview" style="background:#d4d4d4"></div>
+      <div class="label">--secondary</div>
+      <div class="hex">#d4d4d4</div>
+      <div class="sample" style="color:#d4d4d4">Secondary text</div>
+    </div>
+    <div class="gray-strip" onclick="copyClass('--tertiary')">
+      <div class="preview" style="background:#a3a3a3"></div>
+      <div class="label">--tertiary</div>
+      <div class="hex">#a3a3a3</div>
+      <div class="sample" style="color:#a3a3a3">Tertiary text</div>
+    </div>
+    <div class="gray-strip" onclick="copyClass('--subtle')">
+      <div class="preview" style="background:#737373"></div>
+      <div class="label">--subtle</div>
+      <div class="hex">#737373</div>
+      <div class="sample" style="color:#737373">Subtle text</div>
+    </div>
+    <div class="gray-strip" onclick="copyClass('--muted')">
+      <div class="preview" style="background:#525252"></div>
+      <div class="label">--muted</div>
+      <div class="hex">#525252</div>
+      <div class="sample" style="color:#525252">Muted text</div>
+    </div>
+    <div class="gray-strip" onclick="copyClass('--dim')">
+      <div class="preview" style="background:#404040"></div>
+      <div class="label">--dim</div>
+      <div class="hex">#404040</div>
+      <div class="sample" style="color:#404040">Dim text</div>
+    </div>
+    <div class="gray-strip" onclick="copyClass('--ghost')">
+      <div class="preview" style="background:#333333"></div>
+      <div class="label">--ghost</div>
+      <div class="hex">#333333</div>
+      <div class="sample" style="color:#333333">Ghost text</div>
+    </div>
+    <div class="gray-strip" onclick="copyClass('--invisible')">
+      <div class="preview" style="background:#262626"></div>
+      <div class="label">--invisible</div>
+      <div class="hex">#262626</div>
+      <div class="sample" style="color:#262626">Invisible text</div>
+    </div>
+
+    <h3 style="margin-top:var(--sp-xl); margin-bottom:var(--sp-md);">Gradient Bar</h3>
+    <div class="grad-bar" style="height:8px; border-radius:4px;"></div>
+    <span class="class-tag" onclick="copyClass('.grad-bar')">.grad-bar</span>
+  </section>
+
+  <div class="grad-bar"></div>
+
+  <!-- ═══ TYPOGRAPHY ═══ -->
+  <section class="showcase-section" id="typography">
+    <div class="section-label">02 / Typography</div>
+    <h2 class="section-title">Type Scale</h2>
+
+    <div class="type-sample">
+      <div class="type-label">Space Grotesk 700 — Headlines</div>
+      <h1 style="margin-bottom:var(--sp-sm);">Pave Tomorrow</h1>
+      <span class="class-tag" onclick="copyClass('h1')">h1 — clamp(2.5rem, 5vw, 4rem)</span>
+    </div>
+
+    <div class="type-sample">
+      <div class="type-label">Space Grotesk 700 — Section Title</div>
+      <h2 style="margin-bottom:var(--sp-sm);">Remember the Road</h2>
+      <span class="class-tag" onclick="copyClass('h2')">h2 — clamp(1.75rem, 3vw, 2.5rem)</span>
+    </div>
+
+    <div class="type-sample">
+      <div class="type-label">Space Grotesk 700 — Subheading</div>
+      <h3 style="margin-bottom:var(--sp-sm);">Ride the BlackRoad together</h3>
+      <span class="class-tag" onclick="copyClass('h3')">h3 — 1.25rem</span>
+    </div>
+
+    <div class="type-sample">
+      <div class="type-label">Inter — Body Text</div>
+      <p style="color:var(--secondary); margin-bottom:var(--sp-sm);">BlackRoad OS is a sovereign AI operating system. Every component is self-hosted, every connection is encrypted, every agent is accountable. This is body text set in Inter at the default size with 1.6 line-height.</p>
+      <span class="class-tag" onclick="copyClass('var(--font-body)')">var(--font-body) — 16px / 1.6</span>
+    </div>
+
+    <div class="type-sample">
+      <div class="type-label">JetBrains Mono — Code / Data</div>
+      <pre style="color:var(--tertiary); font-family:var(--font-mono); font-size:0.85rem; line-height:1.7; margin-bottom:var(--sp-sm);">const agent = await spawn("road", { model: "llama3" });
+agent.send("status");
+// -> { uptime: "47d 12h", tasks: 1283, health: "nominal" }</pre>
+      <span class="class-tag" onclick="copyClass('var(--font-mono)')">var(--font-mono) — JetBrains Mono</span>
+    </div>
+
+    <h3 style="margin-top:var(--sp-xl); margin-bottom:var(--sp-md);">Font Sizes</h3>
+    <div class="type-sample">
+      <div class="size-row">
+        <span class="size-label">h1</span>
+        <span style="font-family:var(--font-headline); font-weight:700; font-size:2.5rem;">Aa</span>
+      </div>
+      <div class="size-row">
+        <span class="size-label">h2</span>
+        <span style="font-family:var(--font-headline); font-weight:700; font-size:1.75rem;">Aa</span>
+      </div>
+      <div class="size-row">
+        <span class="size-label">h3 / 1.25rem</span>
+        <span style="font-family:var(--font-headline); font-weight:700; font-size:1.25rem;">Aa</span>
+      </div>
+      <div class="size-row">
+        <span class="size-label">body / 1rem</span>
+        <span style="font-size:1rem;">Aa — The quick brown fox</span>
+      </div>
+      <div class="size-row">
+        <span class="size-label">.btn / 0.95rem</span>
+        <span style="font-size:0.95rem; font-weight:700;">Aa</span>
+      </div>
+      <div class="size-row">
+        <span class="size-label">.text-sm / 0.875rem</span>
+        <span style="font-size:0.875rem; color:var(--secondary);">Aa — Secondary reading size</span>
+      </div>
+      <div class="size-row">
+        <span class="size-label">.text-xs / 0.75rem</span>
+        <span style="font-size:0.75rem; color:var(--subtle);">Aa — Captions, metadata</span>
+      </div>
+      <div class="size-row">
+        <span class="size-label">.tag / 0.7rem</span>
+        <span style="font-family:var(--font-mono); font-size:0.7rem; color:var(--muted);">Aa — Labels, tags</span>
+      </div>
+      <div class="size-row">
+        <span class="size-label">.section-label / 0.65rem</span>
+        <span style="font-family:var(--font-mono); font-size:0.65rem; text-transform:uppercase; letter-spacing:0.2em; color:var(--muted);">SECTION LABEL</span>
+      </div>
+    </div>
+
+    <h3 style="margin-top:var(--sp-xl); margin-bottom:var(--sp-md);">Gradient Text</h3>
+    <div class="type-sample">
+      <span class="grad-text" style="font-family:var(--font-headline); font-weight:700; font-size:2rem;">BlackRoad OS</span>
+      <br>
+      <span class="class-tag" onclick="copyClass('.grad-text')">.grad-text</span>
+    </div>
+  </section>
+
+  <div class="grad-bar"></div>
+
+  <!-- ═══ COMPONENTS ═══ -->
+  <section class="showcase-section" id="components">
+    <div class="section-label">03 / Components</div>
+    <h2 class="section-title">UI Components</h2>
+
+    <!-- Buttons -->
+    <div class="component-block">
+      <div class="component-label">Buttons</div>
+      <div class="component-row">
+        <button class="btn-primary">Primary Action</button>
+        <button class="btn-ghost">Ghost Button</button>
+        <button class="btn-primary btn-sm">Small Primary</button>
+        <button class="btn-ghost btn-sm">Small Ghost</button>
+      </div>
+      <div class="component-desc">Gradient primary for CTAs. Ghost for secondary actions. Add <code>.btn-sm</code> for compact variant.</div>
+      <span class="class-tag" onclick="copyClass('.btn-primary')">.btn-primary</span>
+      <span class="class-tag" onclick="copyClass('.btn-ghost')">.btn-ghost</span>
+      <span class="class-tag" onclick="copyClass('.btn-sm')">.btn-sm</span>
+    </div>
+
+    <!-- Cards -->
+    <div class="component-block">
+      <div class="component-label">Cards</div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--sp-md);">
+        <div class="card">
+          <h3>Standard Card</h3>
+          <p class="text-subtle text-sm" style="margin-top:var(--sp-sm);">Surface background, border, 10px radius. Hover lifts border color.</p>
+        </div>
+        <div class="card card-large">
+          <h3>Large Card</h3>
+          <p class="text-subtle text-sm" style="margin-top:var(--sp-sm);">Same as standard with 14px radius via <code>.card-large</code>.</p>
+        </div>
+      </div>
+      <span class="class-tag" onclick="copyClass('.card')">.card</span>
+      <span class="class-tag" onclick="copyClass('.card-large')">.card-large</span>
+    </div>
+
+    <!-- Stat Cards -->
+    <div class="component-block">
+      <div class="component-label">Stat Cards</div>
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-value">239</div>
+          <div class="stat-label">Repositories</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">35</div>
+          <div class="stat-label">Agents</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">52</div>
+          <div class="stat-label">TOPS</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">151</div>
+          <div class="stat-label">Domains</div>
+        </div>
+      </div>
+      <span class="class-tag" onclick="copyClass('.stat-card')">.stat-card</span>
+      <span class="class-tag" onclick="copyClass('.stat-value')">.stat-value</span>
+      <span class="class-tag" onclick="copyClass('.stat-label')">.stat-label</span>
+    </div>
+
+    <!-- Tags -->
+    <div class="component-block">
+      <div class="component-label">Tags</div>
+      <div class="component-row">
+        <span class="tag">default</span>
+        <span class="tag"><span class="status-dot live"></span> production</span>
+        <span class="tag"><span class="status-dot warning"></span> staging</span>
+        <span class="tag"><span class="status-dot offline"></span> offline</span>
+        <span class="tag">v2.1.0</span>
+        <span class="tag">sovereign</span>
+      </div>
+      <div class="component-desc">Monospace labels at 0.7rem with optional status dots. Used for metadata and status badges.</div>
+      <span class="class-tag" onclick="copyClass('.tag')">.tag</span>
+    </div>
+
+    <!-- Status Dots -->
+    <div class="component-block">
+      <div class="component-label">Status Dots</div>
+      <div class="component-row" style="gap:var(--sp-lg);">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span class="status-dot live"></span>
+          <span class="text-sm" style="color:var(--secondary);">Live</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span class="status-dot warning"></span>
+          <span class="text-sm" style="color:var(--secondary);">Warning</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span class="status-dot offline"></span>
+          <span class="text-sm" style="color:var(--secondary);">Offline</span>
+        </div>
+      </div>
+      <div class="component-desc">6px circles with state-specific colors. Live includes a glow shadow.</div>
+      <span class="class-tag" onclick="copyClass('.status-dot.live')">.status-dot.live</span>
+      <span class="class-tag" onclick="copyClass('.status-dot.warning')">.status-dot.warning</span>
+      <span class="class-tag" onclick="copyClass('.status-dot.offline')">.status-dot.offline</span>
+    </div>
+
+    <!-- Terminal -->
+    <div class="component-block">
+      <div class="component-label">Terminal</div>
+      <div class="terminal">
+        <div class="terminal-header">
+          <div class="terminal-dot red"></div>
+          <div class="terminal-dot yellow"></div>
+          <div class="terminal-dot green"></div>
+        </div>
+        <div class="terminal-body">
+          <div><span class="prompt">blackroad@alice ~</span> $ br status</div>
+          <div class="output">Fleet: 5 nodes | Agents: 35 | Uptime: 47d 12h</div>
+          <div class="output">Sovereignty: 91% self-hosted (138/151 domains)</div>
+          <div><span class="prompt">blackroad@alice ~</span> $ _</div>
+        </div>
+      </div>
+      <span class="class-tag" onclick="copyClass('.terminal')">.terminal</span>
+      <span class="class-tag" onclick="copyClass('.terminal-header')">.terminal-header</span>
+      <span class="class-tag" onclick="copyClass('.terminal-body')">.terminal-body</span>
+      <span class="class-tag" onclick="copyClass('.prompt')">.prompt</span>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="component-block">
+      <div class="component-label">Progress Bar</div>
+      <div style="margin-bottom:var(--sp-md);">
+        <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+          <span class="text-xs text-muted">Sovereignty migration</span>
+          <span class="text-xs text-muted" style="font-family:var(--font-mono);">91%</span>
+        </div>
+        <div class="progress-bar">
+          <div class="fill" style="width:91%"></div>
+        </div>
+      </div>
+      <div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+          <span class="text-xs text-muted">Agent deployment</span>
+          <span class="text-xs text-muted" style="font-family:var(--font-mono);">64%</span>
+        </div>
+        <div class="progress-bar">
+          <div class="fill" style="width:64%"></div>
+        </div>
+      </div>
+      <span class="class-tag" onclick="copyClass('.progress-bar')">.progress-bar</span>
+      <span class="class-tag" onclick="copyClass('.fill')">.fill</span>
+    </div>
+
+    <!-- Gradient Bar -->
+    <div class="component-block">
+      <div class="component-label">Gradient Bar</div>
+      <div class="grad-bar" style="margin-bottom:var(--sp-sm);"></div>
+      <div class="grad-bar" style="height:4px; border-radius:2px; margin-bottom:var(--sp-sm);"></div>
+      <div class="grad-bar" style="height:8px; border-radius:4px;"></div>
+      <div class="component-desc">1px default. Use between major sections as a visual separator. Customize height with inline styles.</div>
+      <span class="class-tag" onclick="copyClass('.grad-bar')">.grad-bar</span>
+    </div>
+
+    <!-- Spectrum Mark -->
+    <div class="component-block">
+      <div class="component-label">Spectrum Mark (Logo)</div>
+      <div class="component-row" style="gap:var(--sp-xl);">
+        <div>
+          <div class="spectrum-mark">
+            <span></span><span></span><span></span><span></span><span></span><span></span>
+          </div>
+          <div class="text-xs text-muted" style="margin-top:6px;">Default (14px)</div>
+        </div>
+        <div>
+          <div class="spectrum-mark" style="gap:3px;">
+            <span style="width:5px; height:24px; border-radius:2.5px;"></span>
+            <span style="width:5px; height:24px; border-radius:2.5px;"></span>
+            <span style="width:5px; height:24px; border-radius:2.5px;"></span>
+            <span style="width:5px; height:24px; border-radius:2.5px;"></span>
+            <span style="width:5px; height:24px; border-radius:2.5px;"></span>
+            <span style="width:5px; height:24px; border-radius:2.5px;"></span>
+          </div>
+          <div class="text-xs text-muted" style="margin-top:6px;">Large (24px)</div>
+        </div>
+      </div>
+      <div class="component-desc">Six vertical bars in spectrum order: ember, rose, magenta, violet, azure, cyan.</div>
+      <span class="class-tag" onclick="copyClass('.spectrum-mark')">.spectrum-mark</span>
+    </div>
+
+    <!-- Skeleton Loading -->
+    <div class="component-block">
+      <div class="component-label">Skeleton Loading</div>
+      <div style="display:flex; gap:var(--sp-md); align-items:flex-start;">
+        <div class="skeleton" style="width:48px; height:48px; border-radius:50%; flex-shrink:0;"></div>
+        <div style="flex:1;">
+          <div class="skeleton" style="width:60%; height:14px; margin-bottom:8px;"></div>
+          <div class="skeleton" style="width:90%; height:10px; margin-bottom:6px;"></div>
+          <div class="skeleton" style="width:40%; height:10px;"></div>
+        </div>
+      </div>
+      <div class="component-desc">Shimmer animation for content placeholders. Apply to any element.</div>
+      <span class="class-tag" onclick="copyClass('.skeleton')">.skeleton</span>
+    </div>
+
+    <!-- Live Indicator -->
+    <div class="component-block">
+      <div class="component-label">Live Indicator</div>
+      <div class="component-row">
+        <span class="live-indicator">Systems Operational</span>
+      </div>
+      <div class="component-desc">Pulsing green dot with uppercase mono label. Auto-animates via CSS.</div>
+      <span class="class-tag" onclick="copyClass('.live-indicator')">.live-indicator</span>
+    </div>
+
+    <!-- Section Components -->
+    <div class="component-block">
+      <div class="component-label">Section Labels</div>
+      <div class="section-label">section label / 0.65rem mono uppercase</div>
+      <div class="section-title" style="margin-bottom:0;">Section Title</div>
+      <span class="class-tag" onclick="copyClass('.section-label')">.section-label</span>
+      <span class="class-tag" onclick="copyClass('.section-title')">.section-title</span>
+    </div>
+  </section>
+
+  <div class="grad-bar"></div>
+
+  <!-- ═══ SPACING & LAYOUT ═══ -->
+  <section class="showcase-section" id="spacing">
+    <div class="section-label">04 / Spacing &amp; Layout</div>
+    <h2 class="section-title">Spacing Scale</h2>
+
+    <div class="component-block">
+      <div class="component-label">Spacing Tokens</div>
+      <div class="spacing-demo">
+        <span class="spacing-label">--sp-xs</span>
+        <span class="spacing-value">4px</span>
+        <div class="spacing-bar" style="width:4px;"></div>
+      </div>
+      <div class="spacing-demo">
+        <span class="spacing-label">--sp-sm</span>
+        <span class="spacing-value">8px</span>
+        <div class="spacing-bar" style="width:8px;"></div>
+      </div>
+      <div class="spacing-demo">
+        <span class="spacing-label">--sp-md</span>
+        <span class="spacing-value">16px</span>
+        <div class="spacing-bar" style="width:16px;"></div>
+      </div>
+      <div class="spacing-demo">
+        <span class="spacing-label">--sp-lg</span>
+        <span class="spacing-value">24px</span>
+        <div class="spacing-bar" style="width:24px;"></div>
+      </div>
+      <div class="spacing-demo">
+        <span class="spacing-label">--sp-xl</span>
+        <span class="spacing-value">48px</span>
+        <div class="spacing-bar" style="width:48px;"></div>
+      </div>
+      <div class="spacing-demo">
+        <span class="spacing-label">--sp-2xl</span>
+        <span class="spacing-value">80px</span>
+        <div class="spacing-bar" style="width:80px;"></div>
+      </div>
+    </div>
+
+    <div class="component-block">
+      <div class="component-label">Border Radius</div>
+      <div class="radius-demo">
+        <div class="radius-box" style="border-radius:var(--radius-small);" onclick="copyClass('--radius-small')">
+          <div class="r-val">5px</div>
+          <div class="r-name">small</div>
+        </div>
+        <div class="radius-box" style="border-radius:var(--radius-pill);" onclick="copyClass('--radius-pill')">
+          <div class="r-val">6px</div>
+          <div class="r-name">pill</div>
+        </div>
+        <div class="radius-box" style="border-radius:var(--radius-btn);" onclick="copyClass('--radius-btn')">
+          <div class="r-val">7px</div>
+          <div class="r-name">btn</div>
+        </div>
+        <div class="radius-box" style="border-radius:var(--radius-input);" onclick="copyClass('--radius-input')">
+          <div class="r-val">8px</div>
+          <div class="r-name">input</div>
+        </div>
+        <div class="radius-box" style="border-radius:var(--radius-card);" onclick="copyClass('--radius-card')">
+          <div class="r-val">10px</div>
+          <div class="r-name">card</div>
+        </div>
+        <div class="radius-box" style="border-radius:var(--radius-large);" onclick="copyClass('--radius-large')">
+          <div class="r-val">14px</div>
+          <div class="r-name">large</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="component-block">
+      <div class="component-label">Max-Width Containers</div>
+      <div class="container-demo">
+        <div class="container-bar" style="max-width:720px; margin:0 auto var(--sp-sm);">
+          <span>.container — 720px</span>
+        </div>
+        <div class="container-bar" style="max-width:1200px; margin:0 auto var(--sp-sm);">
+          <span>.container-wide — 1200px</span>
+        </div>
+        <div class="container-bar" style="max-width:100%;">
+          <span>full width (no container)</span>
+        </div>
+      </div>
+      <span class="class-tag" onclick="copyClass('.container')">.container</span>
+      <span class="class-tag" onclick="copyClass('.container-wide')">.container-wide</span>
+    </div>
+
+    <div class="component-block">
+      <div class="component-label">Surfaces</div>
+      <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:var(--sp-md); margin-top:var(--sp-sm);">
+        <div style="text-align:center;">
+          <div style="height:60px; background:var(--bg); border:1px solid var(--border); border-radius:var(--radius-small);"></div>
+          <div class="text-xs text-muted" style="margin-top:6px;">--bg<br>#0a0a0a</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="height:60px; background:var(--inset); border:1px solid var(--border); border-radius:var(--radius-small);"></div>
+          <div class="text-xs text-muted" style="margin-top:6px;">--inset<br>#0f0f0f</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="height:60px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-small);"></div>
+          <div class="text-xs text-muted" style="margin-top:6px;">--surface<br>#131313</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="height:60px; background:var(--border-hover); border:1px solid var(--border); border-radius:var(--radius-small);"></div>
+          <div class="text-xs text-muted" style="margin-top:6px;">--border-hover<br>#262626</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="component-block">
+      <div class="component-label">Utility Classes</div>
+      <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(160px,1fr)); gap:var(--sp-sm); margin-top:var(--sp-sm);">
+        <span class="class-tag" onclick="copyClass('.flex')">.flex</span>
+        <span class="class-tag" onclick="copyClass('.flex-center')">.flex-center</span>
+        <span class="class-tag" onclick="copyClass('.gap-sm')">.gap-sm</span>
+        <span class="class-tag" onclick="copyClass('.gap-md')">.gap-md</span>
+        <span class="class-tag" onclick="copyClass('.gap-lg')">.gap-lg</span>
+        <span class="class-tag" onclick="copyClass('.text-center')">.text-center</span>
+        <span class="class-tag" onclick="copyClass('.text-mono')">.text-mono</span>
+        <span class="class-tag" onclick="copyClass('.text-muted')">.text-muted</span>
+        <span class="class-tag" onclick="copyClass('.text-subtle')">.text-subtle</span>
+        <span class="class-tag" onclick="copyClass('.text-sm')">.text-sm</span>
+        <span class="class-tag" onclick="copyClass('.text-xs')">.text-xs</span>
+        <span class="class-tag" onclick="copyClass('.mt-sm')">.mt-sm</span>
+        <span class="class-tag" onclick="copyClass('.mt-md')">.mt-md</span>
+        <span class="class-tag" onclick="copyClass('.mt-lg')">.mt-lg</span>
+        <span class="class-tag" onclick="copyClass('.mb-md')">.mb-md</span>
+        <span class="class-tag" onclick="copyClass('.mb-lg')">.mb-lg</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="grad-bar"></div>
+
+  <!-- Footer -->
+  <footer>
+    <div style="display:flex; align-items:center; gap:var(--sp-sm);">
+      <div class="spectrum-mark">
+        <span></span><span></span><span></span><span></span><span></span><span></span>
+      </div>
+      <span>BlackRoad OS Design System</span>
+    </div>
+    <span class="live-indicator">canonical</span>
+    <span>Source: <code>/_shared/design.css</code></span>
+  </footer>
+
+  <!-- Toast -->
+  <div class="toast" id="toast">Copied!</div>
+
+  <script>
+    function copyClass(text) {
+      navigator.clipboard.writeText(text).then(show).catch(function() {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        show();
+      });
+      function show() {
+        var toast = document.getElementById('toast');
+        toast.textContent = 'Copied: ' + text;
+        toast.classList.add('show');
+        setTimeout(function() { toast.classList.remove('show'); }, 1600);
+      }
+    }
+    document.querySelectorAll('.class-tag').forEach(function(tag) {
+      tag.addEventListener('click', function() {
+        tag.classList.add('copied');
+        setTimeout(function() { tag.classList.remove('copied'); }, 1600);
+      });
+    });
+  </script>
+<script>if("serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js").catch(()=>{});</script>
+</body>
+</html>

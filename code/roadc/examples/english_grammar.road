@@ -1,0 +1,190 @@
+# RoadC + English Grammar — The 7 Sentence Structures as Code
+# Based on Greenbaum & Nelson, "An Introduction to English Grammar"
+#
+# English is a programming language. Every sentence is a function call.
+# RoadC makes this explicit.
+
+# ═══════════════════════════════════════════════════════════════
+# STRUCTURE 1: SV (Subject + Verb) — Intransitive
+# "Someone is talking" → fire()
+# No arguments. The subject acts alone.
+# ═══════════════════════════════════════════════════════════════
+
+fun talk():
+    print("Someone is talking")
+
+fun breathe():
+    print("The system breathes")
+
+talk()       # SV: subject=implicit, verb=talk
+breathe()    # SV: subject=system, verb=breathe
+
+
+# ═══════════════════════════════════════════════════════════════
+# STRUCTURE 2: SVA (Subject + Verb + Adverbial) — Location/Manner
+# "My parents are living in Chicago" → live(location)
+# The adverbial tells WHERE, WHEN, or HOW.
+# ═══════════════════════════════════════════════════════════════
+
+fun live(location):
+    print("Living in {location}")
+
+fun deploy(destination):
+    print("Deploying to {destination}")
+
+live("Chicago")         # SVA: S=parents, V=live, A=Chicago
+deploy("Cecilia")       # SVA: S=agent, V=deploy, A=Cecilia
+
+
+# ═══════════════════════════════════════════════════════════════
+# STRUCTURE 3: SVC (Subject + Linking Verb + Complement)
+# "I feel tired" → identity(x) -> type
+# The complement DESCRIBES the subject. No action — just state.
+# ═══════════════════════════════════════════════════════════════
+
+fun is_status(entity, state):
+    print("{entity} is {state}")
+
+fun feels(subject, quality):
+    return quality
+
+is_status("Alice", "online")     # SVC: S=Alice, V=is, C=online
+is_status("Cecilia", "offline")  # SVC: S=Cecilia, V=is, C=offline
+let mood = feels("agent", "ready")  # SVC: the result IS the complement
+
+
+# ═══════════════════════════════════════════════════════════════
+# STRUCTURE 4: SVO (Subject + Transitive Verb + Object)
+# "We have finished our work" → process(input)
+# The verb ACTS ON the object. Most common structure in code.
+# ═══════════════════════════════════════════════════════════════
+
+fun finish(work):
+    print("Finished: {work}")
+
+fun deploy_worker(worker_name):
+    print("Deploying worker: {worker_name}")
+
+fun search(query):
+    print("Searching for: {query}")
+
+finish("migration")              # SVO: S=we, V=finish, O=migration
+deploy_worker("blackroad-slack") # SVO: S=system, V=deploy, O=slack
+search("RoadC examples")         # SVO: S=user, V=search, O=query
+
+
+# ═══════════════════════════════════════════════════════════════
+# STRUCTURE 5: SVOO (Subject + Verb + Indirect Object + Direct Object)
+# "She has given me the letter" → give(recipient, item)
+# Two objects: WHO receives and WHAT is given.
+# ═══════════════════════════════════════════════════════════════
+
+fun give(recipient, item):
+    print("Giving {item} to {recipient}")
+
+fun send(channel, message):
+    print("#{channel}: {message}")
+
+fun assign(agent, task):
+    print("Assigning '{task}' to {agent}")
+
+give("Alexa", "the report")         # SVOO: give(indirect, direct)
+send("fleet-ops", "deploy complete") # SVOO: send(recipient, content)
+assign("Shellfish", "health check")  # SVOO: assign(who, what)
+
+
+# ═══════════════════════════════════════════════════════════════
+# STRUCTURE 6: SVOA (Subject + Verb + Object + Adverbial)
+# "You can put your coat in my bedroom" → put(item, location)
+# Acts on object AND specifies where/when/how.
+# ═══════════════════════════════════════════════════════════════
+
+fun put(item, location):
+    print("Putting {item} in {location}")
+
+fun store(data, bucket):
+    print("Storing {data} in {bucket}")
+
+fun move(repo, org):
+    print("Moving {repo} to {org}")
+
+put("config", "/etc/blackroad/")           # SVOA
+store("backup", "r2://blackroad-backups")   # SVOA
+move("roadc", "BlackRoad-OS-Inc")           # SVOA
+
+
+# ═══════════════════════════════════════════════════════════════
+# STRUCTURE 7: SVOC (Subject + Verb + Object + Complement)
+# "You have made me very happy" → transform(input) -> output
+# The complement describes what the object BECOMES.
+# ═══════════════════════════════════════════════════════════════
+
+fun make(thing, quality):
+    print("Making {thing} {quality}")
+    return quality
+
+fun set_status(node, status):
+    print("{node} is now {status}")
+    return status
+
+fun promote(agent, level):
+    print("Promoting {agent} to {level}")
+    return level
+
+make("code", "clean")                # SVOC: make(O=code, C=clean)
+set_status("Octavia", "primary")     # SVOC: set(O=Octavia, C=primary)
+promote("agent-42", "Architect")     # SVOC: promote(O=agent, C=level)
+
+
+# ═══════════════════════════════════════════════════════════════
+# THE OPERATOR = CONTROL FLOW
+# ═══════════════════════════════════════════════════════════════
+# In English: can, will, have, be, do
+# In RoadC: if, while, for, return, do
+#
+# "Can you deploy?" → if (can_deploy): deploy()
+# "Don't deploy!"   → if not: skip
+# "Do deploy."      → do { deploy() }  (emphasis/dummy operator)
+#
+# The operator NEVER carries meaning — it carries CONTROL.
+# "do" is inserted when no other operator exists = polyfill
+
+let can_deploy = true
+
+# Question (operator inversion): "Can you deploy?"
+if can_deploy:
+    deploy("production")
+
+# Negation: "Don't deploy to staging"
+let allow_staging = false
+if not allow_staging:
+    print("Staging deployment blocked")
+
+# Emphasis: "Do check the fleet" — the dummy operator
+# In code: explicitly call even when it seems unnecessary
+talk()  # do-support: making the implicit explicit
+
+
+# ═══════════════════════════════════════════════════════════════
+# PASCAL'S INSIGHT: Simple rules → infinite complexity
+# ═══════════════════════════════════════════════════════════════
+# 7 sentence structures. That's it.
+# Every English sentence is one of these 7.
+# Every RoadC function follows one of these 7 patterns.
+# Compose them recursively → infinite programs.
+
+fun pipeline(data, steps):
+    let result = data
+    for step in steps:
+        result = step + "(" + result + ")"
+    return result
+
+let ops = ["validate", "transform", "deploy", "verify"]
+let output = pipeline("config.road", ops)
+print("Pipeline: {output}")
+
+# This is why grammar IS a programming language.
+# This is why RoadC speaks English.
+# This is why our agents understand intent, not just keywords.
+#
+# BlackRoad OS — Pave Tomorrow.

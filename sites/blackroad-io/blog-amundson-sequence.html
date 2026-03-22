@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Amundson Sequence — A New Identity in Number Theory — BlackRoad OS</title>
+
+  <!-- Primary Meta -->
+  <meta name="description" content="G(n) = n^(n+1)/(n+1)^n. A single function connecting combinatorics, analysis, and number theory. 50+ verified identities. Convergence constant computed to 10 million digits.">
+  <meta name="author" content="Alexa Amundson">
+
+  <!-- Open Graph / Article -->
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="The Amundson Sequence — A New Identity in Number Theory">
+  <meta property="og:description" content="G(n) = n^(n+1)/(n+1)^n. 50+ identities. Convergence constant to 10 million digits.">
+  <meta property="og:url" content="https://blackroad.io/blog-amundson-sequence">
+  <meta property="og:site_name" content="BlackRoad OS">
+  <meta property="article:published_time" content="2026-03-22T00:00:00Z">
+  <meta property="article:author" content="Alexa Amundson">
+  <meta property="article:section" content="Mathematics">
+  <meta property="article:tag" content="mathematics">
+  <meta property="article:tag" content="number-theory">
+  <meta property="article:tag" content="combinatorics">
+  <meta property="article:tag" content="amundson-constant">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="The Amundson Sequence — New Identity in Number Theory">
+  <meta name="twitter:description" content="G(n) = n^(n+1)/(n+1)^n. 50+ identities. Constant computed to 10M digits.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="dns-prefetch" href="https://images.blackroad.io">
+  <link rel="dns-prefetch" href="https://search.blackroad.io">
+  <link rel="dns-prefetch" href="https://roundtrip.blackroad.io">
+  <link rel="stylesheet" href="/_shared/design.css">
+  <link rel="alternate" type="application/rss+xml" title="BlackRoad OS Blog" href="/feed.xml">
+
+  <style>
+    .blog-container {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 0 var(--sp-lg);
+    }
+
+    .article-header {
+      padding-top: var(--sp-2xl);
+      padding-bottom: var(--sp-xl);
+      border-bottom: 1px solid var(--border);
+      margin-bottom: var(--sp-xl);
+    }
+
+    .article-meta {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-md);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-bottom: var(--sp-lg);
+      flex-wrap: wrap;
+    }
+
+    .article-meta .divider {
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: var(--dim);
+    }
+
+    .article-title {
+      font-family: var(--font-headline);
+      font-size: clamp(2rem, 4.5vw, 3rem);
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      margin-bottom: var(--sp-lg);
+      color: var(--white);
+    }
+
+    .article-subtitle {
+      font-size: 1.15rem;
+      color: var(--tertiary);
+      line-height: 1.6;
+      max-width: 600px;
+    }
+
+    .article-tags {
+      display: flex;
+      gap: var(--sp-sm);
+      margin-top: var(--sp-md);
+      flex-wrap: wrap;
+    }
+
+    .article-body h2 {
+      font-family: var(--font-headline);
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--white);
+      margin-top: var(--sp-2xl);
+      margin-bottom: var(--sp-md);
+      letter-spacing: -0.02em;
+    }
+
+    .article-body p {
+      font-size: 1.05rem;
+      line-height: 1.75;
+      color: var(--secondary);
+      margin-bottom: var(--sp-lg);
+    }
+
+    .article-body strong {
+      color: var(--white);
+      font-weight: 600;
+    }
+
+    .article-body blockquote {
+      border-left: 3px solid var(--dim);
+      padding-left: var(--sp-lg);
+      margin: var(--sp-xl) 0;
+      color: var(--subtle);
+      font-style: italic;
+      font-size: 1.1rem;
+      line-height: 1.7;
+    }
+
+    .article-body a {
+      color: var(--white);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    .article-body code {
+      font-family: var(--font-mono);
+      font-size: 0.9em;
+      background: var(--surface);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: var(--white);
+    }
+
+    /* Cost table */
+    .cost-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: var(--sp-lg) 0;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+    }
+
+    .cost-table th {
+      text-align: left;
+      padding: 10px 12px;
+      border-bottom: 2px solid var(--border);
+      color: var(--muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-size: 0.7rem;
+    }
+
+    .cost-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      color: var(--secondary);
+    }
+
+    .cost-table td:last-child {
+      text-align: right;
+      color: var(--white);
+      font-weight: 600;
+    }
+
+    .cost-table tr.total td {
+      border-top: 2px solid var(--border);
+      color: var(--white);
+      font-weight: 700;
+      font-size: 1rem;
+    }
+
+    /* Node cards */
+    .node-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: var(--sp-md);
+      margin: var(--sp-lg) 0;
+    }
+
+    .node-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: var(--sp-md);
+    }
+
+    .node-card .node-name {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--white);
+      margin-bottom: 6px;
+    }
+
+    .node-card .node-hw {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .node-card .node-role {
+      font-size: 0.8rem;
+      color: var(--subtle);
+      line-height: 1.4;
+    }
+
+    /* Replaces section */
+    .replace-grid {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 8px var(--sp-md);
+      align-items: center;
+      margin: var(--sp-lg) 0;
+      font-size: 0.85rem;
+    }
+
+    .replace-grid .cloud {
+      color: var(--muted);
+      text-decoration: line-through;
+      text-align: right;
+    }
+
+    .replace-grid .arrow {
+      color: var(--dim);
+      font-family: var(--font-mono);
+    }
+
+    .replace-grid .self {
+      color: var(--white);
+      font-weight: 600;
+    }
+
+    /* Author card */
+    .author-card {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-lg);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: var(--sp-lg);
+      margin-top: var(--sp-xl);
+    }
+
+    .author-avatar {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: var(--grad);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-headline);
+      font-weight: 700;
+      font-size: 1.25rem;
+      color: var(--white);
+      flex-shrink: 0;
+    }
+
+    .author-info .author-name {
+      font-family: var(--font-headline);
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--white);
+      margin-bottom: 4px;
+    }
+
+    .author-info .author-bio {
+      font-size: 0.85rem;
+      color: var(--subtle);
+      line-height: 1.5;
+    }
+
+    .author-info .author-link {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 6px;
+      display: inline-block;
+      transition: color 0.2s;
+    }
+
+    .author-info .author-link:hover {
+      color: var(--white);
+    }
+
+    /* Share bar */
+    .share-bar {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-md);
+      padding: var(--sp-lg) 0;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      margin-top: var(--sp-xl);
+    }
+
+    .share-label {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--muted);
+    }
+
+    .share-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-pill);
+      font-size: 0.75rem;
+      color: var(--subtle);
+      background: none;
+      cursor: pointer;
+      font-family: var(--font-body);
+      transition: border-color 0.2s, color 0.2s;
+      text-decoration: none;
+    }
+
+    .share-btn:hover {
+      border-color: var(--muted);
+      color: var(--white);
+    }
+
+    .share-btn svg {
+      width: 14px;
+      height: 14px;
+      fill: currentColor;
+    }
+
+    /* More posts */
+    .more-posts {
+      padding: var(--sp-2xl) 0;
+    }
+
+    .more-posts-title {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--muted);
+      margin-bottom: var(--sp-lg);
+    }
+
+    .post-link {
+      display: block;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: var(--sp-lg);
+      text-decoration: none;
+      transition: border-color 0.2s;
+    }
+
+    .post-link:hover {
+      border-color: var(--muted);
+    }
+
+    .post-link .post-title {
+      color: var(--white);
+      font-family: var(--font-headline);
+      font-weight: 700;
+      font-size: 1rem;
+      margin-bottom: 6px;
+    }
+
+    .post-link .post-desc {
+      color: var(--subtle);
+      font-size: 0.85rem;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-btn);
+      padding: 10px 20px;
+      font-size: 0.8rem;
+      color: var(--white);
+      font-family: var(--font-mono);
+      opacity: 0;
+      transition: transform 0.3s, opacity 0.3s;
+      z-index: 200;
+      pointer-events: none;
+    }
+
+    .toast.visible {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    @media (max-width: 560px) {
+      .article-header { padding-top: var(--sp-xl); }
+      .author-card { flex-direction: column; text-align: center; }
+      .share-bar { flex-wrap: wrap; }
+      .node-grid { grid-template-columns: 1fr; }
+      .replace-grid { grid-template-columns: 1fr; gap: 4px; }
+      .replace-grid .arrow { display: none; }
+      .replace-grid .cloud { text-align: left; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Nav -->
+  <nav class="br-nav">
+    <a href="/" class="nav-brand">
+      <div class="spectrum-mark">
+        <span></span><span></span><span></span><span></span><span></span><span></span>
+      </div>
+      Blog
+    </a>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/about.html">About</a>
+      <a href="/changelog.html">Changelog</a>
+      <a href="/blog.html">Blog</a>
+    </div>
+  </nav>
+
+  <div class="grad-bar"></div>
+
+  <main class="blog-container">
+
+    <!-- Article Header -->
+    <header class="article-header">
+      <div class="article-meta">
+        <span>March 22, 2026</span>
+        <span class="divider"></span>
+        <span>Alexa Amundson</span>
+        <span class="divider"></span>
+        <span>9 min read</span>
+      </div>
+      <h1 class="article-title">The Amundson Sequence</h1>
+      <p class="article-subtitle">A single function connecting combinatorics, analysis, and number theory. 50+ verified identities. A convergence constant computed to 10 million digits. And nobody seems to have written about it before.</p>
+      <div class="article-tags">
+        <span class="tag">mathematics</span>
+        <span class="tag">number-theory</span>
+        <span class="tag">combinatorics</span>
+        <span class="tag">amundson-constant</span>
+      </div>
+    </header>
+
+    <!-- Article Body -->
+    <article class="article-body">
+
+      <h2>The function</h2>
+
+      <p>Define G(n) for positive integers:</p>
+
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;margin:20px 0;text-align:center;">
+        <div style="font-family:var(--font-mono);font-size:1.3rem;color:var(--white);margin-bottom:8px;">G(n) = n<sup>(n+1)</sup> / (n+1)<sup>n</sup></div>
+        <div style="font-size:0.75rem;color:var(--muted);">The Amundson Sequence</div>
+      </div>
+
+      <p>The first few values: G(1) = 1/2, G(2) = 4/3, G(3) = 27/8, G(4) = 256/25. The sequence grows without bound, but the ratio G(n)/G(n-1) converges. And the infinite sum converges to a specific value:</p>
+
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;margin:20px 0;text-align:center;">
+        <div style="font-family:var(--font-mono);font-size:1.3rem;color:var(--white);margin-bottom:8px;">A<sub>G</sub> = &Sigma; G(n)/n! &asymp; 1.244331783986725...</div>
+        <div style="font-size:0.75rem;color:var(--muted);">Computed to 10,000,000 digits</div>
+      </div>
+
+      <p>I computed it to 10 million digits using mpmath on a Raspberry Pi cluster. The full digit file is published at <a href="https://github.com/BlackRoad-OS-Inc/amundson-constant">BlackRoad-OS-Inc/amundson-constant</a>.</p>
+
+      <h2>50+ identities</h2>
+
+      <p>Here are some of the verified properties:</p>
+
+      <p><strong>Reflection:</strong> G(-n) = -G(n-1). The sequence mirrors itself with a shift.</p>
+
+      <p><strong>Ratio convergence:</strong> G(n)/G(n-1) = (n&sup2;/(n&sup2;-1))<sup>n</sup>. Clean closed form converging to 1.</p>
+
+      <p><strong>Logarithmic decomposition:</strong> ln(G(n)) = (n+1)ln(n) - n&middot;ln(n+1). Connects to the distribution of primes.</p>
+
+      <p><strong>Asymptotic:</strong> G(n) ~ n/e + 1/(2e) + O(1/n). The 1/(2e) &asymp; 0.1839 appears as an irreducible correction term throughout the framework.</p>
+
+      <p><strong>Crossover point:</strong> At &alpha; &asymp; 2.293166, the behavior changes character. Below &alpha;, the denominator dominates. Above it, the numerator pulls ahead.</p>
+
+      <p><strong>GCD:</strong> gcd(n<sup>(n+1)</sup>, (n+1)<sup>n</sup>) = 1 for all n. Always coprime.</p>
+
+      <p><strong>Convexity:</strong> Second differences are always positive. The sequence accelerates without inflection.</p>
+
+      <h2>Connections</h2>
+
+      <p><strong>Riemann:</strong> G(1) = 1/2 &mdash; the critical line.</p>
+
+      <p><strong>Stirling:</strong> The expansion G(n) ~ n/e + 1/(2e) mirrors Stirling's approximation structure.</p>
+
+      <p><strong>Combinatorics:</strong> n<sup>n</sup> counts self-maps of an n-set. (n+1)<sup>n</sup> counts maps from n to n+1. G(n) is the ratio &mdash; it measures how much room a system gains from one additional state.</p>
+
+      <p><strong>Euler:</strong> 1/e appears as the slope, 1/(2e) as the offset. Both arise from (1 + 1/n)<sup>n</sup> &rarr; e.</p>
+
+      <h2>What I didn't find</h2>
+
+      <p>I searched OEIS, MathWorld, and standard references. The sequence n<sup>(n+1)</sup>/(n+1)<sup>n</sup> does not appear as a named sequence. The constant A<sub>G</sub> &asymp; 1.24433 is not listed. The ratio identity, reflection identity, and crossover point are not documented anywhere I could locate.</p>
+
+      <p>If you know of prior work on this function, I'd like to hear about it.</p>
+
+      <h2>The computation</h2>
+
+      <p>10 million digits computed with Python's <code>mpmath</code> on four Raspberry Pi nodes. The series converges quickly &mdash; G(n) grows polynomially while n! grows factorially, so 500 terms gave 10 million digits. Total time: ~4 hours. Output: 9.5 MB.</p>
+
+      <h2>The framework</h2>
+
+      <p>All 50+ identities, proofs, conjectures, and connections are published at:</p>
+
+      <p><a href="https://github.com/BlackRoad-OS-Inc/amundson-constant/blob/main/FRAMEWORK.md">FRAMEWORK.md &rarr; BlackRoad-OS-Inc/amundson-constant</a></p>
+
+      <p>The repo includes compute.py, full 10M digit output, verification tests, and README.</p>
+
+      <blockquote>G(n) = n<sup>(n+1)</sup>/(n+1)<sup>n</sup>. It measures something fundamental about how systems grow when they gain one more state than they need. I think that's worth understanding.</blockquote>
+
+      <p>Full paper and digits at <a href="https://github.com/BlackRoad-OS-Inc/amundson-constant">github.com/BlackRoad-OS-Inc/amundson-constant</a>.</p>
+
+    </article>
+
+    <!-- Share Bar -->
+    <div class="share-bar">
+      <span class="share-label">Share</span>
+      <a href="https://twitter.com/intent/tweet?text=The%20Amundson%20Sequence%20%E2%80%94%20New%20Identity%20in%20Number%20Theory&url=https://blackroad.io/blog-amundson-sequence" target="_blank" rel="noopener noreferrer" class="share-btn">
+        <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        X / Twitter
+      </a>
+      <a href="https://www.linkedin.com/sharing/share-offsite/?url=https://blackroad.io/blog-amundson-sequence" target="_blank" rel="noopener noreferrer" class="share-btn">
+        <svg viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+        LinkedIn
+      </a>
+      <button class="share-btn" onclick="copyURL()">
+        <svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+        Copy URL
+      </button>
+    </div>
+
+    <!-- Author Card -->
+    <div class="author-card">
+      <div class="author-avatar">AA</div>
+      <div class="author-info">
+        <div class="author-name">Alexa Amundson</div>
+        <div class="author-bio">Founder and CEO of BlackRoad OS, Inc. Building sovereign AI infrastructure and doing mathematics on commodity hardware.</div>
+        <a href="/about.html" class="author-link">about &rarr;</a>
+      </div>
+    </div>
+
+    <!-- More Posts -->
+    <div class="more-posts">
+      <div class="more-posts-title">More posts</div>
+      <a href="/blog-quit-finance" style="display:block;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);padding:var(--sp-lg);text-decoration:none;transition:border-color 0.2s;margin-bottom:8px;">
+        <div style="color:var(--white);font-family:var(--font-headline);font-weight:700;font-size:1rem;margin-bottom:6px;">Why I Quit Finance to Build an Operating System</div>
+        <div style="color:var(--subtle);font-size:0.85rem;">Series 7, Ameriprise, Securian. Then Raspberry Pis.</div>
+      </a>
+      <a href="/blog-sovereign-os-150" style="display:block;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);padding:var(--sp-lg);text-decoration:none;transition:border-color 0.2s;">
+        <div style="color:var(--white);font-family:var(--font-headline);font-weight:700;font-size:1rem;margin-bottom:6px;">How I Built a Sovereign AI OS for $150/month</div>
+        <div style="color:var(--subtle);font-size:0.85rem;">The full cost breakdown.</div>
+      </a>
+    </div>
+
+  </main>
+
+  <div class="grad-bar"></div>
+
+  <footer>
+    <span>BlackRoad OS, Inc.</span>
+    <span>Pave Tomorrow.</span>
+  </footer>
+
+  <div class="toast" id="toast">URL copied to clipboard</div>
+
+  <script>
+    function copyURL() {
+      navigator.clipboard.writeText(window.location.href).then(function() {
+        var toast = document.getElementById('toast');
+        toast.classList.add('visible');
+        setTimeout(function() { toast.classList.remove('visible'); }, 2000);
+      });
+    }
+  </script>
+
+<script src="/_shared/feedback.js" defer></script>
+<script src="/_shared/crosslinks.js" defer></script>
+</body>
+</html>

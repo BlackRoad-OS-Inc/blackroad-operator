@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="BlackRoad OS Agent Spawner — Create, monitor, and manage AI agents in real time.">
+  <meta name="theme-color" content="#0a0a0a">
+  <meta property="og:title" content="Agent Spawner — BlackRoad OS">
+  <meta property="og:description" content="Spawn and manage AI agents on the BlackRoad mesh.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://blackroad.io/agents-dynamic.html">
+  <title>Agent Spawner — BlackRoad OS</title>
+  <link rel="stylesheet" href="/_shared/design.css">
+  <style>
+    .spawner-layout {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: var(--sp-xl) var(--sp-lg);
+    }
+
+    /* Stats bar */
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--sp-md);
+      margin-bottom: var(--sp-xl);
+    }
+
+    /* Form */
+    .spawn-form {
+      display: grid;
+      gap: var(--sp-md);
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--sp-md);
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-xs);
+    }
+    .form-group label {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+    }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      background: var(--inset);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-input);
+      padding: 12px 14px;
+      color: var(--white);
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      transition: border-color 0.2s;
+    }
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--violet);
+    }
+    .form-group select {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23525252'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 36px;
+      cursor: pointer;
+    }
+    .form-group textarea {
+      resize: vertical;
+      min-height: 80px;
+      font-family: var(--font-body);
+    }
+    .form-group select option {
+      background: var(--surface);
+      color: var(--white);
+    }
+
+    .spawn-btn {
+      width: 100%;
+      justify-content: center;
+      font-family: var(--font-headline);
+      font-size: 1rem;
+      padding: 16px;
+    }
+
+    /* Agent cards */
+    .agents-section-title {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-sm);
+      margin-bottom: var(--sp-md);
+    }
+    .agents-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: var(--sp-md);
+    }
+    .agent-card {
+      position: relative;
+    }
+    .agent-card .agent-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: var(--sp-sm);
+    }
+    .agent-card .agent-name {
+      font-family: var(--font-headline);
+      font-weight: 700;
+      font-size: 1rem;
+    }
+    .agent-card .agent-role {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--subtle);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-top: 2px;
+    }
+    .agent-card .agent-model {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: var(--sp-xs);
+    }
+    .agent-card .agent-desc {
+      font-size: 0.8rem;
+      color: var(--tertiary);
+      margin-top: var(--sp-sm);
+      line-height: 1.5;
+    }
+    .agent-card .agent-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: var(--sp-md);
+      padding-top: var(--sp-sm);
+      border-top: 1px solid var(--border);
+    }
+    .agent-card .agent-uptime {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--subtle);
+    }
+    .btn-terminate {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 12px;
+      border-radius: var(--radius-small);
+      border: 1px solid #ef444466;
+      background: transparent;
+      color: #ef4444;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .btn-terminate:hover {
+      background: #ef444418;
+      border-color: #ef4444;
+    }
+    .system-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      border-radius: var(--radius-small);
+      background: var(--inset);
+      border: 1px solid var(--border);
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: var(--subtle);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: 16px 24px;
+      font-size: 0.85rem;
+      color: var(--white);
+      z-index: 1000;
+      transform: translateY(120%);
+      opacity: 0;
+      transition: transform 0.3s var(--ease-spring), opacity 0.3s;
+      max-width: 360px;
+    }
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    .toast .toast-title {
+      font-family: var(--font-headline);
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .toast .toast-body {
+      font-size: 0.8rem;
+      color: var(--tertiary);
+    }
+    .toast-bar {
+      height: 2px;
+      background: var(--grad);
+      margin-top: 12px;
+      border-radius: 1px;
+      animation: toast-drain 3s linear forwards;
+    }
+    @keyframes toast-drain {
+      from { width: 100%; }
+      to { width: 0; }
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: var(--sp-xl) var(--sp-lg);
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    @media (max-width: 560px) {
+      .stats-bar { grid-template-columns: 1fr; }
+      .form-row { grid-template-columns: 1fr; }
+      .agents-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0a0a0a">
+</head>
+<body>
+
+  <!-- Nav -->
+  <nav class="br-nav">
+    <a href="/" class="nav-brand">
+      <div class="spectrum-mark">
+        <span></span><span></span><span></span><span></span><span></span><span></span>
+      </div>
+      Agent Spawner
+    </a>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/agents-live.html">Live Agents</a>
+      <a href="/dashboard.html">Dashboard</a>
+    </div>
+  </nav>
+
+  <div class="grad-bar"></div>
+
+  <div class="spawner-layout">
+
+    <!-- Stats Bar -->
+    <div class="stats-bar">
+      <div class="stat-card">
+        <div class="stat-value" id="stat-total">0</div>
+        <div class="stat-label">Total Agents</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-user">0</div>
+        <div class="stat-label">User Spawned</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-system">0</div>
+        <div class="stat-label">System Agents</div>
+      </div>
+    </div>
+
+    <!-- Spawn Form -->
+    <section>
+      <div class="section-label">Deploy</div>
+      <h2 class="section-title">Create a New Agent</h2>
+      <form class="spawn-form" id="spawn-form" autocomplete="off">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="agent-name">Agent Name</label>
+            <input type="text" id="agent-name" placeholder="e.g. Sentinel" required>
+          </div>
+          <div class="form-group">
+            <label for="agent-role">Role</label>
+            <select id="agent-role" required>
+              <option value="" disabled selected>Select role</option>
+              <option value="Gateway">Gateway</option>
+              <option value="Memory">Memory</option>
+              <option value="Search">Search</option>
+              <option value="Monitor">Monitor</option>
+              <option value="Creative">Creative</option>
+              <option value="Security">Security</option>
+              <option value="Infrastructure">Infrastructure</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="agent-model">Model</label>
+            <select id="agent-model" required>
+              <option value="" disabled selected>Select model</option>
+              <option value="llama3.2">llama3.2</option>
+              <option value="mistral">mistral</option>
+              <option value="gemma2">gemma2</option>
+              <option value="deepseek-r1">deepseek-r1</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="agent-desc">Description</label>
+            <textarea id="agent-desc" placeholder="What does this agent do?"></textarea>
+          </div>
+        </div>
+        <button type="submit" class="btn-primary spawn-btn">Spawn Agent</button>
+      </form>
+    </section>
+
+    <div class="grad-bar"></div>
+
+    <!-- Running Agents (user-spawned) -->
+    <section>
+      <div class="agents-section-title">
+        <div class="section-label" style="margin-bottom:0">Your Agents</div>
+        <span class="live-indicator">live</span>
+      </div>
+      <div class="agents-grid" id="user-agents-grid">
+        <div class="empty-state">No agents spawned yet. Use the form above to create one.</div>
+      </div>
+    </section>
+
+    <div class="grad-bar"></div>
+
+    <!-- System Agents -->
+    <section>
+      <div class="agents-section-title">
+        <div class="section-label" style="margin-bottom:0">System Agents</div>
+        <span class="system-badge">read-only</span>
+      </div>
+      <div class="agents-grid" id="system-agents-grid">
+        <div class="empty-state skeleton" style="height:120px"></div>
+        <div class="empty-state skeleton" style="height:120px"></div>
+        <div class="empty-state skeleton" style="height:120px"></div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="grad-bar"></div>
+  <footer>
+    <span>BlackRoad OS — Pave Tomorrow.</span>
+    <span class="text-mono">agent-spawner v1.0</span>
+  </footer>
+
+  <!-- Toast -->
+  <div class="toast" id="toast">
+    <div class="toast-title" id="toast-title"></div>
+    <div class="toast-body" id="toast-body"></div>
+    <div class="toast-bar"></div>
+  </div>
+
+  <script>
+    (() => {
+      'use strict';
+
+      const LS_KEY = 'blackroad_spawned_agents';
+      const SYSTEM_API = 'https://blackroad-live-stats.amundsonalexa.workers.dev/api/agents';
+
+      // ── State ──
+      let userAgents = loadUserAgents();
+      let systemAgents = [];
+      let uptimeIntervals = {};
+
+      // ── LocalStorage ──
+      function loadUserAgents() {
+        try {
+          const raw = localStorage.getItem(LS_KEY);
+          return raw ? JSON.parse(raw) : [];
+        } catch { return []; }
+      }
+
+      function saveUserAgents() {
+        localStorage.setItem(LS_KEY, JSON.stringify(userAgents));
+      }
+
+      // ── Toast ──
+      function showToast(title, body) {
+        const el = document.getElementById('toast');
+        document.getElementById('toast-title').textContent = title;
+        document.getElementById('toast-body').textContent = body;
+        // Reset animation
+        const bar = el.querySelector('.toast-bar');
+        bar.style.animation = 'none';
+        void bar.offsetHeight;
+        bar.style.animation = '';
+        el.classList.add('show');
+        setTimeout(() => el.classList.remove('show'), 3200);
+      }
+
+      // ── Uptime formatting ──
+      function formatUptime(ms) {
+        const s = Math.floor(ms / 1000);
+        const h = Math.floor(s / 3600);
+        const m = Math.floor((s % 3600) / 60);
+        const sec = s % 60;
+        const pad = n => String(n).padStart(2, '0');
+        return `${pad(h)}:${pad(m)}:${pad(sec)}`;
+      }
+
+      // ── Stats ──
+      function updateStats() {
+        document.getElementById('stat-user').textContent = userAgents.length;
+        document.getElementById('stat-system').textContent = systemAgents.length;
+        document.getElementById('stat-total').textContent = userAgents.length + systemAgents.length;
+      }
+
+      // ── Render user agents ──
+      function renderUserAgents() {
+        const grid = document.getElementById('user-agents-grid');
+
+        // Clear old intervals
+        Object.values(uptimeIntervals).forEach(clearInterval);
+        uptimeIntervals = {};
+
+        if (userAgents.length === 0) {
+          grid.innerHTML = '<div class="empty-state">No agents spawned yet. Use the form above to create one.</div>';
+          updateStats();
+          return;
+        }
+
+        grid.innerHTML = '';
+        userAgents.forEach(agent => {
+          const card = document.createElement('div');
+          card.className = 'card agent-card';
+          card.innerHTML = `
+            <div class="agent-header">
+              <div>
+                <div class="agent-name">${escapeHtml(agent.name)}</div>
+                <div class="agent-role">${escapeHtml(agent.role)}</div>
+              </div>
+              <span class="tag"><span class="status-dot live"></span> active</span>
+            </div>
+            <div class="agent-model">model: ${escapeHtml(agent.model)}</div>
+            ${agent.description ? `<div class="agent-desc">${escapeHtml(agent.description)}</div>` : ''}
+            <div class="agent-footer">
+              <span class="agent-uptime" data-uptime-id="${agent.id}">00:00:00</span>
+              <button class="btn-terminate" data-agent-id="${agent.id}">Terminate</button>
+            </div>
+          `;
+          grid.appendChild(card);
+
+          // Start uptime counter
+          const uptimeEl = card.querySelector(`[data-uptime-id="${agent.id}"]`);
+          const updateUptime = () => {
+            uptimeEl.textContent = formatUptime(Date.now() - agent.spawnedAt);
+          };
+          updateUptime();
+          uptimeIntervals[agent.id] = setInterval(updateUptime, 1000);
+
+          // Terminate handler
+          card.querySelector(`[data-agent-id="${agent.id}"]`).addEventListener('click', () => {
+            if (!confirm(`Terminate agent "${agent.name}"? This cannot be undone.`)) return;
+            userAgents = userAgents.filter(a => a.id !== agent.id);
+            saveUserAgents();
+            renderUserAgents();
+            showToast('Agent Terminated', `${agent.name} has been shut down.`);
+          });
+        });
+
+        updateStats();
+      }
+
+      // ── Render system agents ──
+      function renderSystemAgents(agents) {
+        const grid = document.getElementById('system-agents-grid');
+        if (!agents || agents.length === 0) {
+          grid.innerHTML = '<div class="empty-state">No system agents found.</div>';
+          return;
+        }
+        grid.innerHTML = '';
+        agents.forEach(agent => {
+          const card = document.createElement('div');
+          card.className = 'card agent-card';
+          const name = agent.name || agent.id || 'Unknown';
+          const role = agent.role || agent.type || 'System';
+          const model = agent.model || 'system';
+          const status = agent.status || 'active';
+          const dotClass = status === 'active' || status === 'online' ? 'live' : status === 'idle' ? 'warning' : 'offline';
+          card.innerHTML = `
+            <div class="agent-header">
+              <div>
+                <div class="agent-name">${escapeHtml(name)}</div>
+                <div class="agent-role">${escapeHtml(role)}</div>
+              </div>
+              <span class="tag"><span class="status-dot ${dotClass}"></span> ${escapeHtml(status)}</span>
+            </div>
+            <div class="agent-model">model: ${escapeHtml(model)}</div>
+            <div class="agent-footer">
+              <span class="system-badge">system agent</span>
+            </div>
+          `;
+          grid.appendChild(card);
+        });
+      }
+
+      // ── Fetch system agents ──
+      async function fetchSystemAgents() {
+        try {
+          const res = await fetch(SYSTEM_API);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const data = await res.json();
+          systemAgents = Array.isArray(data) ? data : (data.agents || data.data || []);
+          renderSystemAgents(systemAgents);
+        } catch (err) {
+          console.warn('Could not fetch system agents:', err.message);
+          const grid = document.getElementById('system-agents-grid');
+          grid.innerHTML = '<div class="empty-state">Unable to reach system agents endpoint.</div>';
+          systemAgents = [];
+        }
+        updateStats();
+      }
+
+      // ── Escape HTML ──
+      function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+      }
+
+      // ── Form submit ──
+      document.getElementById('spawn-form').addEventListener('submit', e => {
+        e.preventDefault();
+        const name = document.getElementById('agent-name').value.trim();
+        const role = document.getElementById('agent-role').value;
+        const model = document.getElementById('agent-model').value;
+        const description = document.getElementById('agent-desc').value.trim();
+
+        if (!name || !role || !model) return;
+
+        const agent = {
+          id: 'usr_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8),
+          name,
+          role,
+          model,
+          description,
+          status: 'active',
+          spawnedAt: Date.now()
+        };
+
+        userAgents.push(agent);
+        saveUserAgents();
+        renderUserAgents();
+        showToast('Agent Spawned', `${name} is now running on ${model}.`);
+
+        // Reset form
+        e.target.reset();
+      });
+
+      // ── Init ──
+      renderUserAgents();
+      fetchSystemAgents();
+
+      // Refresh system agents every 30s
+      setInterval(fetchSystemAgents, 30000);
+    })();
+  </script>
+<script>if("serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js").catch(()=>{});</script>
+</body>
+</html>

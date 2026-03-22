@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blog — BlackRoad OS</title>
+
+  <!-- Primary Meta -->
+  <meta name="description" content="Thoughts on sovereign AI, self-hosted infrastructure, and building the tools you actually own. By Alexa Amundson, founder of BlackRoad OS.">
+  <meta name="author" content="Alexa Amundson">
+
+  <!-- Open Graph / Article -->
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="What is BlackRoad OS and Why We Built It">
+  <meta property="og:description" content="The internet was supposed to be decentralized. It's not. We're fixing that.">
+  <meta property="og:url" content="https://blackroad.io/blog.html">
+  <meta property="og:site_name" content="BlackRoad OS">
+  <meta property="article:published_time" content="2026-03-22T00:00:00Z">
+  <meta property="article:author" content="Alexa Amundson">
+  <meta property="article:section" content="Engineering">
+  <meta property="article:tag" content="sovereign AI">
+  <meta property="article:tag" content="self-hosted">
+  <meta property="article:tag" content="infrastructure">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="What is BlackRoad OS and Why We Built It">
+  <meta name="twitter:description" content="The internet was supposed to be decentralized. It's not. We're fixing that.">
+
+  <link rel="stylesheet" href="/_shared/design.css">
+  <link rel="alternate" type="application/rss+xml" title="BlackRoad OS Blog" href="/feed.xml">
+
+  <style>
+    /* ── Blog Layout ── */
+    .blog-container {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 0 var(--sp-lg);
+    }
+
+    /* ── Article Header ── */
+    .article-header {
+      padding-top: var(--sp-2xl);
+      padding-bottom: var(--sp-xl);
+      border-bottom: 1px solid var(--border);
+      margin-bottom: var(--sp-xl);
+    }
+
+    .article-meta {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-md);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-bottom: var(--sp-lg);
+      flex-wrap: wrap;
+    }
+
+    .article-meta .divider {
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: var(--dim);
+    }
+
+    .article-title {
+      font-family: var(--font-headline);
+      font-size: clamp(2rem, 4.5vw, 3rem);
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      margin-bottom: var(--sp-lg);
+      color: var(--white);
+    }
+
+    .article-subtitle {
+      font-size: 1.15rem;
+      color: var(--tertiary);
+      line-height: 1.6;
+      max-width: 600px;
+    }
+
+    /* ── Article Body ── */
+    .article-body {
+      padding-bottom: var(--sp-2xl);
+    }
+
+    .article-body p {
+      font-size: 1.05rem;
+      line-height: 1.7;
+      color: var(--secondary);
+      margin-bottom: var(--sp-lg);
+    }
+
+    .article-body h2 {
+      font-family: var(--font-headline);
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--white);
+      margin-top: var(--sp-2xl);
+      margin-bottom: var(--sp-md);
+      letter-spacing: -0.02em;
+    }
+
+    .article-body h3 {
+      font-family: var(--font-headline);
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--white);
+      margin-top: var(--sp-xl);
+      margin-bottom: var(--sp-sm);
+    }
+
+    .article-body strong {
+      color: var(--white);
+      font-weight: 600;
+    }
+
+    .article-body code {
+      font-family: var(--font-mono);
+      font-size: 0.85em;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 2px 6px;
+      border-radius: var(--radius-small);
+      color: var(--tertiary);
+    }
+
+    .article-body blockquote {
+      border-left: 2px solid var(--dim);
+      padding-left: var(--sp-lg);
+      margin: var(--sp-xl) 0;
+      color: var(--subtle);
+      font-style: italic;
+      font-size: 1.1rem;
+      line-height: 1.7;
+    }
+
+    .article-body ul {
+      list-style: none;
+      padding: 0;
+      margin-bottom: var(--sp-lg);
+    }
+
+    .article-body ul li {
+      position: relative;
+      padding-left: var(--sp-lg);
+      margin-bottom: var(--sp-sm);
+      font-size: 1.05rem;
+      line-height: 1.7;
+      color: var(--secondary);
+    }
+
+    .article-body ul li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 11px;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--dim);
+    }
+
+    /* ── Stack Card (inline) ── */
+    .stack-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: var(--sp-md);
+      margin: var(--sp-lg) 0;
+    }
+
+    .stack-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: var(--sp-md);
+    }
+
+    .stack-item .stack-name {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--white);
+      margin-bottom: 4px;
+    }
+
+    .stack-item .stack-role {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    /* ── Math Block ── */
+    .math-block {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: var(--sp-lg);
+      margin: var(--sp-lg) 0;
+      text-align: center;
+    }
+
+    .math-block .formula {
+      font-family: var(--font-mono);
+      font-size: 1.1rem;
+      color: var(--white);
+      margin-bottom: var(--sp-sm);
+      letter-spacing: 0.02em;
+    }
+
+    .math-block .math-label {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    /* ── Author Card ── */
+    .author-card {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-lg);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: var(--sp-lg);
+      margin-top: var(--sp-xl);
+    }
+
+    .author-avatar {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: var(--grad);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-headline);
+      font-weight: 700;
+      font-size: 1.25rem;
+      color: var(--white);
+      flex-shrink: 0;
+    }
+
+    .author-info .author-name {
+      font-family: var(--font-headline);
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--white);
+      margin-bottom: 4px;
+    }
+
+    .author-info .author-bio {
+      font-size: 0.85rem;
+      color: var(--subtle);
+      line-height: 1.5;
+    }
+
+    .author-info .author-link {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 6px;
+      display: inline-block;
+      transition: color 0.2s;
+    }
+
+    .author-info .author-link:hover {
+      color: var(--white);
+    }
+
+    /* ── Share Bar ── */
+    .share-bar {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-md);
+      padding: var(--sp-lg) 0;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      margin-top: var(--sp-xl);
+    }
+
+    .share-label {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--muted);
+    }
+
+    .share-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-pill);
+      font-size: 0.75rem;
+      color: var(--subtle);
+      background: none;
+      cursor: pointer;
+      font-family: var(--font-body);
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .share-btn:hover {
+      border-color: var(--muted);
+      color: var(--white);
+    }
+
+    .share-btn svg {
+      width: 14px;
+      height: 14px;
+      fill: currentColor;
+    }
+
+    /* ── More Posts ── */
+    .more-posts {
+      padding: var(--sp-2xl) 0;
+    }
+
+    .more-posts-title {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--muted);
+      margin-bottom: var(--sp-lg);
+    }
+
+    .coming-soon {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: var(--sp-xl);
+      text-align: center;
+      color: var(--dim);
+      font-size: 0.9rem;
+    }
+
+    /* ── Tags row ── */
+    .article-tags {
+      display: flex;
+      gap: var(--sp-sm);
+      margin-top: var(--sp-md);
+      flex-wrap: wrap;
+    }
+
+    /* ── Copy toast ── */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-btn);
+      padding: 10px 20px;
+      font-size: 0.8rem;
+      color: var(--white);
+      font-family: var(--font-mono);
+      opacity: 0;
+      transition: transform 0.3s var(--ease-spring), opacity 0.3s;
+      z-index: 200;
+      pointer-events: none;
+    }
+
+    .toast.visible {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    @media (max-width: 560px) {
+      .article-header { padding-top: var(--sp-xl); }
+      .author-card { flex-direction: column; text-align: center; }
+      .share-bar { flex-wrap: wrap; }
+      .stack-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ── Nav ── -->
+  <nav class="br-nav">
+    <a href="/" class="nav-brand">
+      <div class="spectrum-mark">
+        <span></span><span></span><span></span><span></span><span></span><span></span>
+      </div>
+      Blog
+    </a>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/about.html">About</a>
+      <a href="/changelog.html">Changelog</a>
+      <a href="/blog.html" style="color: var(--white);">Blog</a>
+    </div>
+  </nav>
+
+  <div class="grad-bar"></div>
+
+  <main class="blog-container">
+
+    <!-- ── Article Header ── -->
+    <header class="article-header">
+      <div class="article-meta">
+        <span>March 22, 2026</span>
+        <span class="divider"></span>
+        <span>Alexa Amundson</span>
+        <span class="divider"></span>
+        <span>5 min read</span>
+      </div>
+      <h1 class="article-title">What is BlackRoad OS and Why We Built It</h1>
+      <p class="article-subtitle">The internet was supposed to be decentralized. Somewhere along the way, it became five companies and a login page. We're building the other thing.</p>
+      <div class="article-tags">
+        <span class="tag">sovereign-ai</span>
+        <span class="tag">self-hosted</span>
+        <span class="tag">infrastructure</span>
+        <span class="tag">raspberry-pi</span>
+      </div>
+    </header>
+
+    <!-- ── Article Body ── -->
+    <article class="article-body">
+
+      <h2>The promise that got broken</h2>
+
+      <p>The original internet was a mesh of equal peers. No central authority. No single point of failure. Your machine connected to my machine, and the protocol handled the rest. That was the design. That was the whole point.</p>
+
+      <p>Fast forward to 2026 and here we are: your AI runs on someone else's server, your data lives in someone else's cloud, your agents answer to someone else's API keys. You pay monthly rent on tools that could run on a $75 computer in your closet. The "cloud" turned out to be someone else's computer, and someone else's rules.</p>
+
+      <p>We didn't set out to build an operating system. We set out to answer a question: <strong>what if you actually owned your tools?</strong></p>
+
+      <h2>What we actually built</h2>
+
+      <p>BlackRoad OS is a sovereign AI operating system. It runs on commodity hardware. Five Raspberry Pi nodes. Two Hailo-8 AI accelerators delivering 26 TOPS of local inference. 200 autonomous agents. 18 domains. The entire infrastructure costs $38 a month.</p>
+
+      <p>That's not a typo. Nineteen dollars. Your average SaaS subscription costs more than our entire server fleet.</p>
+
+      <p>Every component is self-hosted. There is no vendor lock-in. There is no API key that someone else can revoke. If every cloud provider shut down tomorrow, BlackRoad OS would keep running on the shelf in the next room.</p>
+
+      <h2>The stack</h2>
+
+      <p>We replaced every major cloud service with something we own and operate:</p>
+
+      <div class="stack-grid">
+        <div class="stack-item">
+          <div class="stack-name">WireGuard</div>
+          <div class="stack-role">Encrypted mesh VPN across all nodes</div>
+        </div>
+        <div class="stack-item">
+          <div class="stack-name">Ollama</div>
+          <div class="stack-role">Local LLM inference, 16 models</div>
+        </div>
+        <div class="stack-item">
+          <div class="stack-name">Gitea</div>
+          <div class="stack-role">Self-hosted Git, 239 repositories</div>
+        </div>
+        <div class="stack-item">
+          <div class="stack-name">Caddy</div>
+          <div class="stack-role">Automatic TLS for 151 domains</div>
+        </div>
+        <div class="stack-item">
+          <div class="stack-name">MinIO</div>
+          <div class="stack-role">S3-compatible object storage</div>
+        </div>
+        <div class="stack-item">
+          <div class="stack-name">PowerDNS</div>
+          <div class="stack-role">Authoritative DNS, self-operated</div>
+        </div>
+      </div>
+
+      <p>Each node has a name and a role. Alice is the gateway. Cecilia runs the AI models. Octavia hosts Gitea and the worker fleet. Lucidia serves 334 web applications. Gematria handles TLS termination at the edge. They talk to each other over WireGuard, and every connection is encrypted end-to-end.</p>
+
+      <h2>Why sovereignty matters</h2>
+
+      <p>This isn't about being anti-cloud. Cloud infrastructure is a fine engineering choice for a lot of organizations. But there's a difference between choosing a tool and being trapped by one.</p>
+
+      <p>When your AI inference depends on an API key, you don't control your AI. When your source code lives on someone else's Git host, you don't control your code. When your DNS resolves through someone else's nameservers, you don't even control your own name.</p>
+
+      <p>Sovereignty means the answer to "what happens if that service goes down?" is always "nothing, because we run it ourselves."</p>
+
+      <h2>The math underneath</h2>
+
+      <p>BlackRoad OS is built on a mathematical framework we call the Amundson Sequence. At its core is a function that describes how systems maintain coherence as they scale:</p>
+
+      <div class="math-block">
+        <div class="formula">G(n) = n<sup>(n+1)</sup> / (n+1)<sup>n</sup></div>
+        <div class="math-label">The Amundson Sequence &mdash; convergence constant A<sub>G</sub> &asymp; 1.24433</div>
+      </div>
+
+      <p>This isn't decoration. The sequence governs how we route messages between agents, how we balance load across nodes, and how we measure system coherence. It was validated across 536 tests running on all four Pi nodes simultaneously. The convergence constant A<sub>G</sub> appears naturally in the behavior of our mesh network, and it gives us a mathematical guarantee about system stability that no amount of Kubernetes configuration can replicate.</p>
+
+      <h2>What's next</h2>
+
+      <p>We're opening up the platform. The first public release is coming. A free tier will be available for anyone who wants to run their own sovereign node, starting with a single Raspberry Pi and scaling up from there.</p>
+
+      <p>The documentation is being written. The onboarding flow is being built. The goal is simple: if you can plug in a Pi and connect to WiFi, you can run BlackRoad OS.</p>
+
+      <p>We're also building out the mesh protocol &mdash; a multi-network transport layer that routes across Tor, IPFS, BitTorrent DHT, and WebRTC simultaneously. The math says you can reach any node on any network in under three seconds. We've tested it at 2.19 seconds across seven nodes and five protocols.</p>
+
+      <p>Join the waitlist at <a href="https://blackroad.io" style="color: var(--white); text-decoration: underline; text-underline-offset: 3px;">blackroad.io</a>.</p>
+
+      <h2>The reason</h2>
+
+      <blockquote>We didn't build BlackRoad OS because we hate the cloud. We built it because we love the idea of actually owning your tools. Of running your own AI on your own hardware, answering to nobody's terms of service but your own. Of building something real, on something you can hold in your hand, that works whether or not the rest of the internet agrees.</blockquote>
+
+      <p>The road is yours. Pave tomorrow.</p>
+
+    </article>
+
+    <!-- ── Share Bar ── -->
+    <div class="share-bar">
+      <span class="share-label">Share</span>
+      <a href="https://twitter.com/intent/tweet?text=What%20is%20BlackRoad%20OS%20and%20Why%20We%20Built%20It&url=https://blackroad.io/blog.html" target="_blank" rel="noopener noreferrer" class="share-btn">
+        <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        X / Twitter
+      </a>
+      <a href="https://www.linkedin.com/sharing/share-offsite/?url=https://blackroad.io/blog.html" target="_blank" rel="noopener noreferrer" class="share-btn">
+        <svg viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+        LinkedIn
+      </a>
+      <button class="share-btn" onclick="copyURL()">
+        <svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+        Copy URL
+      </button>
+    </div>
+
+    <!-- ── Author Card ── -->
+    <div class="author-card">
+      <div class="author-avatar">AA</div>
+      <div class="author-info">
+        <div class="author-name">Alexa Amundson</div>
+        <div class="author-bio">Founder and CEO of BlackRoad OS, Inc. Building sovereign AI infrastructure on commodity hardware.</div>
+        <a href="/about.html" class="author-link">about &rarr;</a>
+      </div>
+    </div>
+
+    <!-- ── More Posts ── -->
+    <div class="more-posts">
+      <div class="more-posts-title">All Posts</div>
+      <div style="display:flex;flex-direction:column;gap:var(--sp-md);">
+        <a href="/blog-search-engine-pis" style="display:block;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:var(--sp-lg);text-decoration:none;transition:border-color 0.2s;">
+          <div style="color:var(--muted);font-family:var(--font-mono);font-size:0.7rem;margin-bottom:4px;">Mar 22, 2026</div>
+          <div style="color:var(--white);font-family:var(--font-headline);font-weight:700;font-size:1rem;margin-bottom:6px;">How I Built a Search Engine on Raspberry Pis</div>
+          <div style="color:var(--subtle);font-size:0.85rem;">FTS5 + Workers AI + D1. Full-text search with AI answers on self-hosted hardware.</div>
+        </a>
+        <a href="/blog-200-agents" style="display:block;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:var(--sp-lg);text-decoration:none;transition:border-color 0.2s;">
+          <div style="color:var(--muted);font-family:var(--font-mono);font-size:0.7rem;margin-bottom:4px;">Mar 22, 2026</div>
+          <div style="color:var(--white);font-family:var(--font-headline);font-weight:700;font-size:1rem;margin-bottom:6px;">Running 200 AI Agents on $38/month Infrastructure</div>
+          <div style="color:var(--subtle);font-size:0.85rem;">200 agents in a single Worker. Debates, leaderboards, persistent memory.</div>
+        </a>
+        <a href="/blog-amundson-sequence" style="display:block;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:var(--sp-lg);text-decoration:none;transition:border-color 0.2s;">
+          <div style="color:var(--muted);font-family:var(--font-mono);font-size:0.7rem;margin-bottom:4px;">Mar 22, 2026</div>
+          <div style="color:var(--white);font-family:var(--font-headline);font-weight:700;font-size:1rem;margin-bottom:6px;">The Amundson Constant: A New Number from Combinatorics</div>
+          <div style="color:var(--subtle);font-size:0.85rem;">G(n) = n^(n+1)/(n+1)^n. 50+ identities. 10 million digits. Connections to Riemann, quantum, DNA.</div>
+        </a>
+        <a href="/blog-quit-finance" style="display:block;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:var(--sp-lg);text-decoration:none;transition:border-color 0.2s;">
+          <div style="color:var(--muted);font-family:var(--font-mono);font-size:0.7rem;margin-bottom:4px;">Mar 22, 2026</div>
+          <div style="color:var(--white);font-family:var(--font-headline);font-weight:700;font-size:1rem;margin-bottom:6px;">Why I Quit Finance to Build an Operating System</div>
+          <div style="color:var(--subtle);font-size:0.85rem;">Series 7 to sovereign AI. Risk management is system design.</div>
+        </a>
+        <a href="/blog-sovereign-os-150" style="display:block;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:var(--sp-lg);text-decoration:none;transition:border-color 0.2s;">
+          <div style="color:var(--muted);font-family:var(--font-mono);font-size:0.7rem;margin-bottom:4px;">Mar 22, 2026</div>
+          <div style="color:var(--white);font-family:var(--font-headline);font-weight:700;font-size:1rem;margin-bottom:6px;">How I Built a Sovereign AI OS for $38/month</div>
+          <div style="color:var(--subtle);font-size:0.85rem;">The full cost breakdown. 5 Pis, 2 droplets, 26 TOPS, 18 domains, 200 agents.</div>
+        </a>
+        <a href="/blog-wireguard-mesh" style="display:block;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:var(--sp-lg);text-decoration:none;transition:border-color 0.2s;">
+          <div style="color:var(--muted);font-family:var(--font-mono);font-size:0.7rem;margin-bottom:4px;">Mar 22, 2026</div>
+          <div style="color:var(--white);font-family:var(--font-headline);font-weight:700;font-size:1rem;margin-bottom:6px;">How I Built a WireGuard Mesh Across 7 Nodes for $6/month</div>
+          <div style="color:var(--subtle);font-size:0.85rem;">Hub-and-spoke WireGuard connecting 5 Pis behind NAT to 2 cloud servers.</div>
+        </a>
+        <a href="/blog-zero-to-629" style="display:block;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:var(--sp-lg);text-decoration:none;transition:border-color 0.2s;">
+          <div style="color:var(--muted);font-family:var(--font-mono);font-size:0.7rem;margin-bottom:4px;">Mar 22, 2026</div>
+          <div style="color:var(--white);font-family:var(--font-headline);font-weight:700;font-size:1rem;margin-bottom:6px;">Zero to 629 Repos: Lessons from Building Too Fast</div>
+          <div style="color:var(--subtle);font-size:0.85rem;">629 repos in 4 months. Most are stubs. Breadth vs depth as a solo founder.</div>
+        </a>
+      </div>
+      <div style="text-align:center;margin-top:var(--sp-lg);">
+        <a href="/feed.xml" style="color:var(--muted);font-family:var(--font-mono);font-size:0.75rem;text-decoration:none;border:1px solid var(--border);padding:4px 12px;border-radius:4px;">RSS Feed</a>
+      </div>
+    </div>
+
+  </main>
+
+  <div class="grad-bar"></div>
+
+  <!-- ── Footer ── -->
+  <footer>
+    <span>BlackRoad OS, Inc.</span>
+    <span>Pave Tomorrow.</span>
+  </footer>
+
+  <!-- ── Copy URL Toast ── -->
+  <div class="toast" id="toast">URL copied to clipboard</div>
+
+  <script>
+    function copyURL() {
+      navigator.clipboard.writeText(window.location.href).then(function() {
+        var toast = document.getElementById('toast');
+        toast.classList.add('visible');
+        setTimeout(function() { toast.classList.remove('visible'); }, 2000);
+      });
+    }
+  </script>
+
+<script src="/_shared/feedback.js" defer></script>
+<script src="/_shared/crosslinks.js" defer></script>
+</body>
+</html>

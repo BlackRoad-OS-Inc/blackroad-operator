@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="canonical" href="https://blackroad.io/pricing">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:image" content="https://images.blackroad.io/brand/br-square-512.png">
+  <meta property="og:image" content="https://images.blackroad.io/brand/br-square-512.png">
+  <title>BlackRoad OS — Pricing</title>
+  <meta name="description" content="Simple, transparent pricing for BlackRoad OS. Operator free, Rider $29/mo, Paver $99/mo. No lock-in, no surprises. Try it free — no signup needed.">
+  <meta name="theme-color" content="#0a0a0a">
+  <meta property="og:title" content="BlackRoad OS — Pricing">
+  <meta property="og:description" content="Your hardware, your rules. Choose a plan that fits.">
+  <meta property="og:type" content="website">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="dns-prefetch" href="https://images.blackroad.io">
+  <link rel="dns-prefetch" href="https://search.blackroad.io">
+  <link rel="dns-prefetch" href="https://roundtrip.blackroad.io">
+  <link rel="stylesheet" href="/_shared/design.css">
+  <style>
+    /* ── Pricing Grid ── */
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--sp-lg);
+      margin-top: var(--sp-xl);
+      align-items: start;
+    }
+
+    /* ── Pricing Card ── */
+    .pricing-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-large);
+      padding: var(--sp-xl) var(--sp-lg);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      transition: border-color 0.2s, transform 0.2s var(--ease-spring);
+    }
+    .pricing-card:hover {
+      border-color: var(--border-hover);
+    }
+
+    /* ── Pro Card (elevated) ── */
+    .pricing-card.popular {
+      border: 2px solid transparent;
+      background-origin: border-box;
+      background-clip: padding-box, border-box;
+      background-image:
+        linear-gradient(var(--surface), var(--surface)),
+        var(--grad);
+      transform: scale(1.04);
+      z-index: 2;
+    }
+    .pricing-card.popular:hover {
+      transform: scale(1.06);
+    }
+
+    .popular-badge {
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--grad);
+      color: var(--white);
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      padding: 4px 16px;
+      border-radius: var(--radius-pill);
+    }
+
+    .tier-name {
+      font-family: var(--font-headline);
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--white);
+    }
+    .tier-desc {
+      font-size: 0.85rem;
+      color: var(--subtle);
+      margin-top: var(--sp-xs);
+    }
+    .tier-price {
+      margin-top: var(--sp-lg);
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+    }
+    .tier-price .amount {
+      font-family: var(--font-mono);
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--white);
+    }
+    .tier-price .period {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .tier-features {
+      list-style: none;
+      margin-top: var(--sp-lg);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      flex: 1;
+    }
+    .tier-features li {
+      font-size: 0.875rem;
+      color: var(--secondary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .tier-features li::before {
+      content: '';
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--subtle);
+      flex-shrink: 0;
+    }
+
+    .tier-cta {
+      margin-top: var(--sp-xl);
+    }
+    .tier-cta a {
+      display: block;
+      text-align: center;
+      padding: 14px 28px;
+      border-radius: var(--radius-btn);
+      font-weight: 700;
+      font-size: 0.95rem;
+      transition: opacity 0.2s, transform 0.2s var(--ease-spring);
+    }
+    .tier-cta a:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+    .tier-cta .cta-primary {
+      background: var(--grad);
+      color: var(--white);
+    }
+    .tier-cta .cta-ghost {
+      border: 1px solid var(--border);
+      color: var(--subtle);
+    }
+    .tier-cta .cta-ghost:hover {
+      border-color: var(--muted);
+      color: var(--white);
+    }
+
+    /* ── Comparison Table ── */
+    .comparison-wrapper {
+      overflow-x: auto;
+      margin-top: var(--sp-xl);
+    }
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      min-width: 600px;
+    }
+    .comparison-table th,
+    .comparison-table td {
+      padding: 14px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    .comparison-table thead th {
+      font-family: var(--font-headline);
+      font-weight: 700;
+      color: var(--white);
+      font-size: 0.9rem;
+      border-bottom: 1px solid var(--border-hover);
+    }
+    .comparison-table tbody td {
+      color: var(--secondary);
+    }
+    .comparison-table tbody td:first-child {
+      color: var(--subtle);
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+    }
+    .comparison-table .check {
+      color: var(--tertiary);
+    }
+    .comparison-table .dash {
+      color: var(--ghost);
+    }
+
+    /* ── FAQ ── */
+    .faq-list {
+      max-width: var(--max-width);
+      margin: var(--sp-xl) auto 0;
+    }
+    .faq-item {
+      border-bottom: 1px solid var(--border);
+    }
+    .faq-question {
+      width: 100%;
+      background: none;
+      border: none;
+      color: var(--white);
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      font-weight: 600;
+      padding: 20px 0;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--sp-md);
+    }
+    .faq-question:hover {
+      color: var(--secondary);
+    }
+    .faq-icon {
+      font-size: 1.2rem;
+      color: var(--muted);
+      transition: transform 0.2s;
+      flex-shrink: 0;
+    }
+    .faq-item.open .faq-icon {
+      transform: rotate(45deg);
+    }
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease, padding 0.3s ease;
+    }
+    .faq-item.open .faq-answer {
+      max-height: 300px;
+    }
+    .faq-answer p {
+      font-size: 0.875rem;
+      color: var(--subtle);
+      line-height: 1.7;
+      padding-bottom: 20px;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 860px) {
+      .pricing-grid {
+        grid-template-columns: 1fr;
+        max-width: 420px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .pricing-card.popular {
+        transform: none;
+        order: -1;
+      }
+      .pricing-card.popular:hover {
+        transform: translateY(-2px);
+      }
+    }
+  </style>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0a0a0a">
+</head>
+<body>
+
+  <!-- ── Nav ── -->
+  <nav class="br-nav">
+    <div class="nav-brand">
+      <div class="spectrum-mark">
+        <span></span><span></span><span></span><span></span><span></span><span></span>
+      </div>
+      BlackRoad Pricing
+    </div>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/dashboard.html">Dashboard</a>
+    </div>
+  </nav>
+
+  <!-- ── Hero ── -->
+  <section class="text-center" style="padding-top: var(--sp-2xl); padding-bottom: var(--sp-lg);">
+    <div class="container-wide">
+      <p class="section-label">Pricing</p>
+      <h1 class="section-title">Simple, transparent pricing.</h1>
+      <p class="text-subtle" style="font-size: 1.1rem; max-width: 520px; margin: 0 auto;">
+        No lock-in. No surprises. Your hardware, your rules.
+      </p>
+    </div>
+  </section>
+
+  <div class="grad-bar"></div>
+
+  <!-- ── Pricing Cards ── -->
+  <section>
+    <div class="container-wide">
+      <div class="pricing-grid">
+
+        <!-- Operator -->
+        <div class="pricing-card">
+          <div class="tier-name">Operator</div>
+          <div class="tier-desc">Try everything. No credit card needed.</div>
+          <div class="tier-price">
+            <span class="amount">Free</span>
+          </div>
+          <ul class="tier-features">
+            <li>Search, Chat, RoundTrip access</li>
+            <li>200 AI agents</li>
+            <li>Community support</li>
+            <li>No signup required</li>
+          </ul>
+          <div class="tier-cta">
+            <a href="https://search.blackroad.io" class="cta-ghost">Try It Free &rarr;</a>
+          </div>
+        </div>
+
+        <!-- Rider -->
+        <div class="pricing-card popular">
+          <div class="popular-badge">Popular</div>
+          <div class="tier-name">Rider</div>
+          <div class="tier-desc">For developers and creators</div>
+          <div class="tier-price">
+            <span class="amount">$29</span>
+            <span class="period">/mo</span>
+          </div>
+          <ul class="tier-features">
+            <li>Everything in Operator</li>
+            <li>Priority AI inference</li>
+            <li>Full API access</li>
+            <li>Custom agent training</li>
+            <li>Email support</li>
+          </ul>
+          <div class="tier-cta">
+            <a href="https://pay.blackroad.io" class="cta-primary">Start Rider &rarr;</a>
+          </div>
+        </div>
+
+        <!-- Paver -->
+        <div class="pricing-card">
+          <div class="tier-name">Paver</div>
+          <div class="tier-desc">For teams and businesses</div>
+          <div class="tier-price">
+            <span class="amount">$99</span>
+            <span class="period">/mo</span>
+          </div>
+          <ul class="tier-features">
+            <li>Everything in Rider</li>
+            <li>Dedicated fleet capacity</li>
+            <li>Custom models on your hardware</li>
+            <li>Priority support</li>
+            <li>SLA</li>
+          </ul>
+          <div class="tier-cta">
+            <a href="mailto:alexa@blackroad.io" class="cta-ghost">Contact Us &rarr;</a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <div class="grad-bar"></div>
+
+  <!-- ── Feature Comparison ── -->
+  <section>
+    <div class="container-wide">
+      <p class="section-label text-center">Compare</p>
+      <h2 class="section-title text-center">Feature comparison</h2>
+      <div class="comparison-wrapper">
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Feature</th>
+              <th>Operator</th>
+              <th>Rider</th>
+              <th>Paver</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>AI Agents</td>
+              <td>200 (shared)</td>
+              <td>200 (priority)</td>
+              <td>Dedicated</td>
+            </tr>
+            <tr>
+              <td>Search + Chat</td>
+              <td class="check">Yes</td>
+              <td class="check">Yes</td>
+              <td class="check">Yes</td>
+            </tr>
+            <tr>
+              <td>API Access</td>
+              <td class="dash">&mdash;</td>
+              <td class="check">Yes</td>
+              <td class="check">Yes</td>
+            </tr>
+            <tr>
+              <td>Custom Models</td>
+              <td class="dash">&mdash;</td>
+              <td class="dash">&mdash;</td>
+              <td class="check">Yes</td>
+              <td class="check">Yes</td>
+            </tr>
+            <tr>
+              <td>Agent Training</td>
+              <td class="dash">&mdash;</td>
+              <td class="check">Yes</td>
+              <td class="check">Yes</td>
+            </tr>
+            <tr>
+              <td>Custom Models</td>
+              <td class="dash">&mdash;</td>
+              <td class="dash">&mdash;</td>
+              <td class="check">Yes</td>
+            </tr>
+            <tr>
+              <td>Fleet Access</td>
+              <td class="dash">&mdash;</td>
+              <td class="dash">&mdash;</td>
+              <td class="check">Yes</td>
+            </tr>
+            <tr>
+              <td>Support</td>
+              <td>Community</td>
+              <td>Priority</td>
+              <td>Dedicated</td>
+            </tr>
+            <tr>
+              <td>SLA</td>
+              <td class="dash">&mdash;</td>
+              <td class="dash">&mdash;</td>
+              <td class="check">Yes</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <div class="grad-bar"></div>
+
+  <!-- ── FAQ ── -->
+  <section>
+    <div class="container-wide">
+      <p class="section-label text-center">FAQ</p>
+      <h2 class="section-title text-center">Frequently asked questions</h2>
+      <div class="faq-list">
+
+        <div class="faq-item">
+          <button class="faq-question" aria-expanded="false">
+            What's included in the free tier?
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <p>The Starter plan gives you one AI agent, basic CLI tools, 5GB of storage, and access to community support channels. It is free forever with no credit card required.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" aria-expanded="false">
+            Can I cancel anytime?
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <p>Yes. There are no contracts or cancellation fees. You can downgrade or cancel your plan at any time from your dashboard and you will retain access through the end of your billing period.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" aria-expanded="false">
+            Do you offer annual billing?
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <p>Annual billing is coming soon. When available, yearly plans will include two months free. Contact alexa@blackroad.io if you would like to set up annual billing now.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" aria-expanded="false">
+            What payment methods do you accept?
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <p>We accept all major credit and debit cards through Stripe. Bitcoin payments are also accepted for annual plans. All transactions are processed securely.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" aria-expanded="false">
+            Is my data stored on your servers?
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <p>BlackRoad OS is built on a sovereign-first philosophy. Your data stays on your hardware. Our infrastructure handles agent orchestration and updates, but your files, models, and configurations live on machines you control.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <div class="grad-bar"></div>
+
+  <!-- ── CTA Band ── -->
+  <div class="cta-band">
+    <p class="section-label">Get Started</p>
+    <h2 class="section-title">Ready to pave tomorrow?</h2>
+    <p class="text-subtle mb-lg">Join BlackRoad OS and take control of your AI infrastructure.</p>
+    <a href="/" class="btn-primary">Get Started Free &rarr;</a>
+  </div>
+
+  <!-- ── Footer ── -->
+  <footer>
+    <div>
+      <div class="spectrum-mark" style="margin-bottom: 8px;">
+        <span></span><span></span><span></span><span></span><span></span><span></span>
+      </div>
+      BlackRoad OS, Inc.
+    </div>
+    <div>Pave Tomorrow.</div>
+  </footer>
+
+  <!-- ── Skeleton Loading ── -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // FAQ accordion
+      document.querySelectorAll('.faq-question').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const item = btn.closest('.faq-item');
+          const isOpen = item.classList.contains('open');
+          // Close all
+          document.querySelectorAll('.faq-item.open').forEach(el => el.classList.remove('open'));
+          // Toggle clicked
+          if (!isOpen) item.classList.add('open');
+          btn.setAttribute('aria-expanded', !isOpen);
+        });
+      });
+    });
+  </script>
+
+<script>if("serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js").catch(()=>{});</script>
+<script src="/_shared/feedback.js" defer></script>
+<script src="/_shared/crosslinks.js" defer></script>
+</body>
+</html>

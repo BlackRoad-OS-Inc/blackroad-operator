@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How I Built a Search Engine on Raspberry Pis — BlackRoad OS</title>
+  <meta name="description" content="A full-text search engine with AI-powered answers, running on self-hosted infrastructure. FTS5, Workers AI, and D1. No Elasticsearch, no Algolia.">
+  <meta name="author" content="Alexa Amundson">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="How I Built a Search Engine on Raspberry Pis">
+  <meta property="og:description" content="FTS5 + Workers AI + D1. Full-text search with AI answers on self-hosted hardware.">
+  <meta property="og:url" content="https://blackroad.io/blog-search-engine-pis">
+  <meta property="article:published_time" content="2026-03-22T00:00:00Z">
+  <meta property="article:author" content="Alexa Amundson">
+  <meta property="article:tag" content="search-engine">
+  <meta property="article:tag" content="raspberry-pi">
+  <meta property="article:tag" content="self-hosted">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://images.blackroad.io/brand/br-square-32.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="dns-prefetch" href="https://images.blackroad.io">
+  <link rel="dns-prefetch" href="https://search.blackroad.io">
+  <link rel="dns-prefetch" href="https://roundtrip.blackroad.io">
+  <link rel="stylesheet" href="/_shared/design.css">
+  <link rel="alternate" type="application/rss+xml" title="BlackRoad OS Blog" href="/feed.xml">
+  <style>
+    .blog-container { max-width: 720px; margin: 0 auto; padding: 0 var(--sp-lg); }
+    .article-header { padding-top: var(--sp-2xl); padding-bottom: var(--sp-xl); border-bottom: 1px solid var(--border); margin-bottom: var(--sp-xl); }
+    .article-meta { display: flex; align-items: center; gap: var(--sp-md); font-family: var(--font-mono); font-size: 0.75rem; color: var(--muted); margin-bottom: var(--sp-lg); flex-wrap: wrap; }
+    .article-meta .divider { width: 3px; height: 3px; border-radius: 50%; background: var(--dim); }
+    .article-title { font-family: var(--font-headline); font-size: clamp(2rem, 4.5vw, 3rem); font-weight: 700; line-height: 1.1; letter-spacing: -0.03em; margin-bottom: var(--sp-lg); color: var(--white); }
+    .article-subtitle { font-size: 1.15rem; color: var(--tertiary); line-height: 1.6; max-width: 600px; }
+    .article-body { padding-bottom: var(--sp-2xl); }
+    .article-body p { font-size: 1.05rem; line-height: 1.7; color: var(--secondary); margin-bottom: var(--sp-lg); }
+    .article-body h2 { font-family: var(--font-headline); font-size: 1.5rem; font-weight: 700; color: var(--white); margin-top: var(--sp-2xl); margin-bottom: var(--sp-md); }
+    .article-body strong { color: var(--white); font-weight: 600; }
+    .article-body code { font-family: var(--font-mono); font-size: 0.85em; background: var(--surface); border: 1px solid var(--border); padding: 2px 6px; border-radius: 4px; color: var(--tertiary); }
+    .article-body a { color: #4488FF; text-decoration: underline; text-underline-offset: 3px; }
+    .article-body a:hover { color: var(--white); }
+    .article-body ul { list-style: none; padding: 0; margin-bottom: var(--sp-lg); }
+    .article-body ul li { position: relative; padding-left: var(--sp-lg); margin-bottom: var(--sp-sm); font-size: 1.05rem; color: var(--secondary); line-height: 1.6; }
+    .article-body ul li::before { content: ''; position: absolute; left: 0; top: 10px; width: 4px; height: 4px; border-radius: 50%; background: var(--muted); }
+    .code-block { background: #0d0d0d; border: 1px solid var(--border); border-radius: 10px; padding: var(--sp-lg); font-family: var(--font-mono); font-size: 0.82rem; line-height: 1.8; overflow-x: auto; color: var(--tertiary); margin: var(--sp-lg) 0; }
+    .cta-box { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: var(--sp-xl); text-align: center; margin-top: var(--sp-2xl); }
+    .cta-box p { color: var(--subtle); font-size: 0.9rem; margin-bottom: var(--sp-md); }
+    .cta-box a.btn { display: inline-block; background: var(--grad); color: var(--white); padding: 12px 24px; border-radius: 8px; font-weight: 700; text-decoration: none; }
+  </style>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://blackroad.io/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://blackroad.io/blog"},{"@type":"ListItem","position":3,"name":"Search Engine on Pis","item":"https://blackroad.io/blog-search-engine-pis"}]}
+</script>
+</head>
+<body>
+<nav class="br-nav">
+  <a href="/" class="nav-brand" style="text-decoration:none;">
+    <div class="spectrum-mark"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+    Blog
+  </a>
+  <div class="nav-links"><a href="/">Home</a><a href="/demo">Try It</a><a href="/blog">All Posts</a></div>
+</nav>
+<div class="grad-bar"></div>
+<main class="blog-container">
+  <div class="article-header">
+    <div class="article-meta">
+      <span>Alexa Amundson</span><div class="divider"></div>
+      <span>March 22, 2026</span><div class="divider"></div>
+      <span>5 min read</span>
+    </div>
+    <h1 class="article-title">How I Built a Search Engine on Raspberry Pis</h1>
+    <p class="article-subtitle">FTS5, D1, Workers AI. Full-text search with AI-generated answers, running on self-hosted infrastructure for effectively $0 marginal cost.</p>
+  </div>
+  <div class="article-body">
+
+    <h2>The Problem</h2>
+
+    <p>BlackRoad OS has 629 repos, 200 agents, 18 domains, and 45 web pages. Finding anything meant grep or memory. I needed a search engine that could answer questions like "how does the WireGuard mesh work?" with actual context, not just keyword matches.</p>
+
+    <p>The options were Algolia ($250+/month at scale), Elasticsearch (heavy, needs dedicated servers), or Meilisearch (good but another service to manage). All of them add a dependency I don't control.</p>
+
+    <h2>The Stack</h2>
+
+    <ul>
+      <li><strong>FTS5</strong> — SQLite's full-text search extension, built into D1 (Cloudflare's serverless SQLite)</li>
+      <li><strong>D1</strong> — stores the search index, zero maintenance, $0 up to 5GB</li>
+      <li><strong>Workers AI</strong> — Llama 3.1 8B generates human-readable answers from search results</li>
+      <li><strong>KV</strong> — caches popular queries for 1 hour</li>
+    </ul>
+
+    <p>The entire search engine is a single Cloudflare Worker. No servers. No containers. Under 50KB of code.</p>
+
+    <h2>How It Works</h2>
+
+    <p>When you search, the Worker:</p>
+
+    <ul>
+      <li>Checks KV cache first (cache hit = instant response)</li>
+      <li>Runs an FTS5 query against the D1 index: <code>SELECT * FROM pages WHERE pages MATCH ? ORDER BY rank</code></li>
+      <li>Takes the top 5 results and constructs a context prompt</li>
+      <li>Sends context + question to Workers AI (Llama 3.1 8B) for answer generation</li>
+      <li>Returns both the AI answer and the raw search results</li>
+      <li>Caches the response in KV for 1 hour</li>
+    </ul>
+
+    <p>Response time for a cache miss: 800ms-1.5s. Cache hit: under 50ms.</p>
+
+    <h2>The Index</h2>
+
+    <p>The search index contains 200+ pages crawled from all 18 domains. Each page is stored with its title, URL, content (stripped of HTML), and a summary. The indexer runs every 6 hours via cron on the Mac, rebuilding the FTS5 index from scratch.</p>
+
+    <p>For local search (the <code>br search-all</code> CLI), there's a separate Python FTS5 index with 1,383 entries from 23 different sources: codex, TILs, journal, websites, repos, tools, agents, wiki, scripts, and more.</p>
+
+    <h2>Why FTS5 Over Everything Else</h2>
+
+    <p>FTS5 is underrated. It handles boolean queries, phrase matching, prefix matching, and BM25 ranking — all in SQLite. No separate service. No cluster. No configuration.</p>
+
+    <p>Since D1 is just SQLite under the hood, FTS5 works natively. Creating the index is a single SQL statement:</p>
+
+    <div class="code-block">CREATE VIRTUAL TABLE pages USING fts5(title, url, content, summary);</div>
+
+    <p>That's it. Insert your pages. Query with <code>MATCH</code>. SQLite handles tokenization, stemming, and ranking.</p>
+
+    <p>For vector search (semantic similarity), we use Qdrant on Alice (the gateway Pi) with nomic-embed-text embeddings. But for 95% of queries, FTS5 keyword matching is faster and more predictable than vector search.</p>
+
+    <h2>What It Costs</h2>
+
+    <p>Effectively nothing beyond the Cloudflare Workers plan ($5/month, shared with all other Workers):</p>
+
+    <ul>
+      <li>D1: free up to 5GB (index is under 10MB)</li>
+      <li>Workers AI: included in the plan</li>
+      <li>KV: free tier covers caching</li>
+      <li>Worker execution: well within free tier limits</li>
+    </ul>
+
+    <p>Compare that to Algolia at $1/1000 search requests, or running your own Elasticsearch cluster.</p>
+
+    <h2>Try It</h2>
+
+    <p>The search engine is live right now. No signup, no API key, no account. Just type a question.</p>
+
+    <div class="cta-box">
+      <p>Search the entire BlackRoad ecosystem.</p>
+      <a href="https://search.blackroad.io" class="btn">Try Search</a>
+    </div>
+
+  </div>
+<div style="max-width:720px;margin:0 auto;padding:0 var(--sp-lg) var(--sp-xl);"><div style="border-top:1px solid var(--border);padding-top:var(--sp-lg);margin-top:var(--sp-lg);"><div style="font-family:var(--font-mono);font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:var(--sp-sm);">Related Posts</div><a href="/blog-200-agents" style="display:block;padding:8px 0;color:#4488FF;text-decoration:underline;text-underline-offset:3px;font-size:0.9rem;">Running 200 AI Agents on $38/month</a><a href="/blog-wireguard-mesh" style="display:block;padding:8px 0;color:#4488FF;text-decoration:underline;text-underline-offset:3px;font-size:0.9rem;">How I Built a WireGuard Mesh for $6/month</a></div></div></main>
+<div class="grad-bar"></div>
+<footer>
+  <span>&copy; 2026 BlackRoad OS, Inc.</span>
+  <span style="color:var(--muted);font-size:0.8rem;">Remember the Road. Pave Tomorrow.</span>
+</footer>
+<script src="/_shared/feedback.js" defer></script>
+<script src="/_shared/crosslinks.js" defer></script>
+</body>
+</html>

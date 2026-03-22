@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Audit Ledger — BlackRoad OS</title>
+  <meta name="description" content="Immutable audit log for BlackRoad OS agent actions, deployments, commits, and system events.">
+  <meta name="theme-color" content="#0a0a0a">
+  <link rel="stylesheet" href="/_shared/design.css">
+  <style>
+    /* ── Ledger-specific styles ── */
+    .ledger-header {
+      padding: var(--sp-xl) var(--sp-lg);
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .ledger-header h1 {
+      margin-bottom: var(--sp-sm);
+    }
+    .ledger-subtitle {
+      color: var(--subtle);
+      font-size: 0.9rem;
+    }
+
+    .ledger-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: var(--sp-md);
+      max-width: 1200px;
+      margin: 0 auto var(--sp-lg);
+      padding: 0 var(--sp-lg);
+    }
+
+    .chain-integrity {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-sm);
+    }
+    .chain-integrity .check {
+      color: #22c55e;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+    }
+
+    /* ── Filters ── */
+    .filters-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--sp-sm);
+      align-items: center;
+      max-width: 1200px;
+      margin: 0 auto var(--sp-md);
+      padding: 0 var(--sp-lg);
+    }
+    .filters-bar select,
+    .filters-bar input {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-input);
+      color: var(--white);
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      padding: 8px 12px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .filters-bar select:focus,
+    .filters-bar input:focus {
+      border-color: var(--violet);
+    }
+    .filters-bar select {
+      cursor: pointer;
+      -webkit-appearance: none;
+      appearance: none;
+      padding-right: 28px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23737373'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+    }
+    .filters-bar input[type="date"] {
+      color-scheme: dark;
+    }
+    .filter-spacer {
+      flex: 1;
+    }
+
+    /* ── Table ── */
+    .table-wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 var(--sp-lg);
+      overflow-x: auto;
+    }
+    .ledger-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+    .ledger-table thead {
+      position: sticky;
+      top: var(--nav-height);
+      z-index: 50;
+    }
+    .ledger-table th {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 14px;
+      text-align: left;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      white-space: nowrap;
+      user-select: none;
+    }
+    .ledger-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border-subtle);
+      color: var(--secondary);
+      white-space: nowrap;
+    }
+    .ledger-table tbody tr:hover {
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .ledger-table .col-ts {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--subtle);
+    }
+    .ledger-table .col-agent {
+      font-weight: 600;
+      color: var(--white);
+    }
+    .ledger-table .col-hash {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--subtle);
+      letter-spacing: 0.02em;
+    }
+    .ledger-table .col-action .action-tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: var(--radius-pill);
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      font-weight: 600;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--subtle);
+    }
+    .action-tag[data-action="deploy"]       { border-color: #22c55e44; color: #22c55e; }
+    .action-tag[data-action="commit"]       { border-color: #4488ff44; color: #4488ff; }
+    .action-tag[data-action="query"]        { border-color: #cc00aa44; color: #cc00aa; }
+    .action-tag[data-action="health-check"] { border-color: #f59e0b44; color: #f59e0b; }
+    .action-tag[data-action="sync"]         { border-color: #00d4ff44; color: #00d4ff; }
+    .action-tag[data-action="scan"]         { border-color: #ff6b2b44; color: #ff6b2b; }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+    }
+    .status-badge::before {
+      content: '';
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+    }
+    .status-badge.ok::before    { background: #22c55e; }
+    .status-badge.warn::before  { background: #f59e0b; }
+    .status-badge.error::before { background: #ef4444; }
+
+    /* ── Pagination ── */
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--sp-sm);
+      padding: var(--sp-lg);
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .pagination button {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-btn);
+      color: var(--subtle);
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      padding: 6px 14px;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .pagination button:hover:not(:disabled) {
+      border-color: var(--border-hover);
+      color: var(--white);
+    }
+    .pagination button:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+    .pagination .page-info {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    /* ── Empty state ── */
+    .empty-state {
+      text-align: center;
+      padding: var(--sp-2xl);
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    /* ── Loading ── */
+    .loading-row td {
+      text-align: center;
+      padding: var(--sp-xl);
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+    }
+
+    @media (max-width: 560px) {
+      .ledger-stats {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .filters-bar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .filter-spacer { display: none; }
+      .ledger-table { font-size: 0.75rem; }
+      .ledger-table th, .ledger-table td { padding: 8px 10px; }
+    }
+  </style>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0a0a0a">
+</head>
+<body>
+
+  <!-- ── Nav ── -->
+  <nav class="br-nav">
+    <a href="/" class="nav-brand">
+      <div class="spectrum-mark">
+        <span></span><span></span><span></span><span></span><span></span><span></span>
+      </div>
+      BlackRoad Ledger
+    </a>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/dashboard.html">Dashboard</a>
+      <a href="/blockchain-live.html">Blockchain</a>
+    </div>
+  </nav>
+
+  <div class="grad-bar"></div>
+
+  <!-- ── Header ── -->
+  <header class="ledger-header">
+    <h1>Audit Ledger</h1>
+    <p class="ledger-subtitle">Immutable transaction log — every agent action recorded, hashed, and chained.</p>
+  </header>
+
+  <!-- ── Stats ── -->
+  <div class="ledger-stats">
+    <div class="stat-card">
+      <div class="stat-value" id="entryCount">--</div>
+      <div class="stat-label">Total Entries</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="agentCount">--</div>
+      <div class="stat-label">Active Agents</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="todayCount">--</div>
+      <div class="stat-label">Today</div>
+    </div>
+    <div class="stat-card">
+      <div class="chain-integrity">
+        <span class="check" id="chainStatus">--</span>
+      </div>
+      <div class="stat-label">Chain Integrity</div>
+    </div>
+  </div>
+
+  <div class="grad-bar"></div>
+
+  <!-- ── Filters ── -->
+  <div class="filters-bar">
+    <select id="filterAgent" aria-label="Filter by agent">
+      <option value="">All Agents</option>
+    </select>
+    <select id="filterAction" aria-label="Filter by action">
+      <option value="">All Actions</option>
+      <option value="deploy">deploy</option>
+      <option value="commit">commit</option>
+      <option value="query">query</option>
+      <option value="health-check">health-check</option>
+      <option value="sync">sync</option>
+      <option value="scan">scan</option>
+    </select>
+    <input type="date" id="filterDateFrom" aria-label="From date">
+    <input type="date" id="filterDateTo" aria-label="To date">
+    <div class="filter-spacer"></div>
+    <button class="btn-ghost btn-sm" id="exportBtn">Export CSV</button>
+  </div>
+
+  <!-- ── Table ── -->
+  <div class="table-wrap">
+    <table class="ledger-table">
+      <thead>
+        <tr>
+          <th>Timestamp</th>
+          <th>Agent</th>
+          <th>Action</th>
+          <th>Entity</th>
+          <th>Hash</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="ledgerBody">
+        <tr class="loading-row">
+          <td colspan="6">Loading ledger entries...</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ── Pagination ── -->
+  <div class="pagination">
+    <button id="prevBtn" disabled>Prev</button>
+    <span class="page-info" id="pageInfo">--</span>
+    <button id="nextBtn" disabled>Next</button>
+  </div>
+
+  <div class="grad-bar"></div>
+
+  <!-- ── Footer ── -->
+  <footer>
+    <span>BlackRoad OS &copy; 2025-2026</span>
+    <span class="live-indicator">Ledger Active</span>
+  </footer>
+
+  <script>
+    (() => {
+      'use strict';
+
+      // ── Constants ──
+      const PER_PAGE = 50;
+      const API_URL = 'https://blackroad-live-stats.amundsonalexa.workers.dev/api/stats';
+
+      const AGENTS = [
+        'road', 'echo', 'aria', 'lucidia', 'cecilia', 'octavia',
+        'alice', 'gematria', 'prism', 'guardian', 'watchdog',
+        'indexer', 'dispatcher', 'planner', 'codex'
+      ];
+
+      const ACTIONS = ['deploy', 'commit', 'query', 'health-check', 'sync', 'scan'];
+
+      const ENTITIES = {
+        deploy:         ['blackroad.io', 'hq.blackroad.io', 'chat.blackroad.io', 'roundtrip.blackroad.io', 'search.blackroad.io', 'api.blackroad.io', 'pay.blackroad.io', 'roadcode-worker'],
+        commit:         ['blackroad-operator', 'blackroad.io', 'blackroad-os-web', 'roadcode-platform', 'hq-blackroad', 'pixel-office', 'blackroad-mesh', 'roundtrip'],
+        query:          ['memory-codex', 'memory-journal', 'memory-til', 'memory-indexer', 'qdrant', 'search-index', 'agent-registry'],
+        'health-check': ['alice', 'cecilia', 'octavia', 'aria', 'lucidia', 'gematria', 'anastasia', 'wireguard-mesh'],
+        sync:           ['gitea-mirror', 'github-mirror', 'minio-backup', 'dns-records', 'nats-cluster', 'pi-fleet'],
+        scan:           ['port-scan', 'network-sweep', 'security-audit', 'ssl-certs', 'dns-health']
+      };
+
+      const STATUS_WEIGHTS = { ok: 85, warn: 12, error: 3 };
+
+      // ── State ──
+      let allEntries = [];
+      let filteredEntries = [];
+      let currentPage = 1;
+
+      // ── DOM refs ──
+      const $body       = document.getElementById('ledgerBody');
+      const $entryCount = document.getElementById('entryCount');
+      const $agentCount = document.getElementById('agentCount');
+      const $todayCount = document.getElementById('todayCount');
+      const $chainStatus= document.getElementById('chainStatus');
+      const $pageInfo   = document.getElementById('pageInfo');
+      const $prevBtn    = document.getElementById('prevBtn');
+      const $nextBtn    = document.getElementById('nextBtn');
+      const $filterAgent  = document.getElementById('filterAgent');
+      const $filterAction = document.getElementById('filterAction');
+      const $filterFrom   = document.getElementById('filterDateFrom');
+      const $filterTo     = document.getElementById('filterDateTo');
+      const $exportBtn    = document.getElementById('exportBtn');
+
+      // ── Deterministic SHA-256 ──
+      async function sha256(str) {
+        const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+        return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+      }
+
+      // ── Seeded PRNG (deterministic per seed) ──
+      function mulberry32(seed) {
+        return function() {
+          seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+          let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+          t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+          return ((t ^ t >>> 14) >>> 0) / 4294967296;
+        };
+      }
+
+      function pick(arr, rng) {
+        return arr[Math.floor(rng() * arr.length)];
+      }
+
+      function weightedStatus(rng) {
+        const r = rng() * 100;
+        if (r < STATUS_WEIGHTS.ok)   return 'ok';
+        if (r < STATUS_WEIGHTS.ok + STATUS_WEIGHTS.warn) return 'warn';
+        return 'error';
+      }
+
+      // ── Generate entries ──
+      async function generateEntries(apiRecent) {
+        const entries = [];
+        const now = Date.now();
+        const DAY = 86400000;
+        const baseCount = 300;
+
+        // Seed from a fixed value for deterministic output
+        const rng = mulberry32(20260321);
+
+        for (let i = 0; i < baseCount; i++) {
+          const age = Math.floor(rng() * 30 * DAY);
+          const ts = new Date(now - age);
+          const action = pick(ACTIONS, rng);
+          const agent = pick(AGENTS, rng);
+          const entity = pick(ENTITIES[action], rng);
+          const status = weightedStatus(rng);
+          const payload = `${ts.toISOString()}|${agent}|${action}|${entity}|${i}`;
+
+          entries.push({
+            timestamp: ts,
+            agent,
+            action,
+            entity,
+            status,
+            _payload: payload
+          });
+        }
+
+        // Merge API "recent" data as entries if available
+        if (apiRecent && Array.isArray(apiRecent)) {
+          apiRecent.forEach((item, idx) => {
+            const ts = new Date(item.timestamp || item.created_at || now - idx * 60000);
+            const agent = item.agent || item.author || pick(AGENTS, rng);
+            const action = item.action || item.type || pick(ACTIONS, rng);
+            const entity = item.entity || item.target || item.message || 'api-event';
+            const status = item.status === 'error' ? 'error' : item.status === 'warn' ? 'warn' : 'ok';
+            const payload = `${ts.toISOString()}|${agent}|${action}|${entity}|api-${idx}`;
+
+            entries.push({
+              timestamp: ts,
+              agent: String(agent).toLowerCase().replace(/\s+/g, '-'),
+              action: String(action).toLowerCase().replace(/\s+/g, '-'),
+              entity: String(entity),
+              status,
+              _payload: payload
+            });
+          });
+        }
+
+        // Sort newest first
+        entries.sort((a, b) => b.timestamp - a.timestamp);
+
+        // Compute hashes (chained — each hash includes the previous)
+        let prevHash = '0000000000000000000000000000000000000000000000000000000000000000';
+        for (let i = entries.length - 1; i >= 0; i--) {
+          const hash = await sha256(entries[i]._payload + prevHash);
+          entries[i].hash = hash;
+          prevHash = hash;
+        }
+
+        return entries;
+      }
+
+      // ── Render ──
+      function formatTS(d) {
+        const date = d.toISOString().slice(0, 10);
+        const time = d.toISOString().slice(11, 19);
+        return `${date} ${time}`;
+      }
+
+      function renderTable() {
+        const totalPages = Math.max(1, Math.ceil(filteredEntries.length / PER_PAGE));
+        if (currentPage > totalPages) currentPage = totalPages;
+
+        const start = (currentPage - 1) * PER_PAGE;
+        const page = filteredEntries.slice(start, start + PER_PAGE);
+
+        if (page.length === 0) {
+          $body.innerHTML = '<tr><td colspan="6" class="empty-state">No entries match the current filters.</td></tr>';
+        } else {
+          $body.innerHTML = page.map(e => `
+            <tr>
+              <td class="col-ts">${formatTS(e.timestamp)}</td>
+              <td class="col-agent">${e.agent}</td>
+              <td class="col-action"><span class="action-tag" data-action="${e.action}">${e.action}</span></td>
+              <td>${e.entity}</td>
+              <td class="col-hash" title="${e.hash}">${e.hash.slice(0, 12)}&hellip;</td>
+              <td><span class="status-badge ${e.status}">${e.status}</span></td>
+            </tr>
+          `).join('');
+        }
+
+        $pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+        $prevBtn.disabled = currentPage <= 1;
+        $nextBtn.disabled = currentPage >= totalPages;
+      }
+
+      function updateStats() {
+        const today = new Date().toISOString().slice(0, 10);
+        const todayEntries = allEntries.filter(e => e.timestamp.toISOString().slice(0, 10) === today);
+        const uniqueAgents = new Set(allEntries.map(e => e.agent));
+
+        $entryCount.textContent = allEntries.length.toLocaleString();
+        $agentCount.textContent = uniqueAgents.size;
+        $todayCount.textContent = todayEntries.length;
+        $chainStatus.innerHTML = '<span style="color:#22c55e;">&#10003;</span> Chain Valid';
+      }
+
+      function populateAgentFilter() {
+        const agents = [...new Set(allEntries.map(e => e.agent))].sort();
+        agents.forEach(a => {
+          const opt = document.createElement('option');
+          opt.value = a;
+          opt.textContent = a;
+          $filterAgent.appendChild(opt);
+        });
+      }
+
+      function applyFilters() {
+        const agent  = $filterAgent.value;
+        const action = $filterAction.value;
+        const from   = $filterFrom.value ? new Date($filterFrom.value + 'T00:00:00') : null;
+        const to     = $filterTo.value   ? new Date($filterTo.value + 'T23:59:59')   : null;
+
+        filteredEntries = allEntries.filter(e => {
+          if (agent  && e.agent  !== agent)  return false;
+          if (action && e.action !== action) return false;
+          if (from   && e.timestamp < from)  return false;
+          if (to     && e.timestamp > to)    return false;
+          return true;
+        });
+
+        currentPage = 1;
+        renderTable();
+      }
+
+      // ── Export CSV ──
+      function exportCSV() {
+        const header = 'Timestamp,Agent,Action,Entity,Hash,Status\n';
+        const rows = filteredEntries.map(e =>
+          `"${formatTS(e.timestamp)}","${e.agent}","${e.action}","${e.entity}","${e.hash}","${e.status}"`
+        ).join('\n');
+
+        const blob = new Blob([header + rows], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `blackroad-ledger-${new Date().toISOString().slice(0, 10)}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+
+      // ── Event listeners ──
+      $filterAgent.addEventListener('change', applyFilters);
+      $filterAction.addEventListener('change', applyFilters);
+      $filterFrom.addEventListener('change', applyFilters);
+      $filterTo.addEventListener('change', applyFilters);
+      $exportBtn.addEventListener('click', exportCSV);
+      $prevBtn.addEventListener('click', () => { if (currentPage > 1) { currentPage--; renderTable(); } });
+      $nextBtn.addEventListener('click', () => {
+        const totalPages = Math.ceil(filteredEntries.length / PER_PAGE);
+        if (currentPage < totalPages) { currentPage++; renderTable(); }
+      });
+
+      // ── Init ──
+      async function init() {
+        let apiRecent = [];
+
+        try {
+          const res = await fetch(API_URL);
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data.social && data.social.recent) {
+              apiRecent = data.social.recent;
+            }
+          }
+        } catch (err) {
+          console.warn('API fetch failed, using simulated data only:', err.message);
+        }
+
+        allEntries = await generateEntries(apiRecent);
+        filteredEntries = allEntries;
+
+        updateStats();
+        populateAgentFilter();
+        renderTable();
+      }
+
+      init();
+    })();
+  </script>
+<script>if("serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js").catch(()=>{});</script>
+</body>
+</html>

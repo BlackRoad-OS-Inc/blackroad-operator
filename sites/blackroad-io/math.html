@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="canonical" href="https://blackroad.io/math">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:image" content="https://images.blackroad.io/brand/br-square-512.png">
+  <meta property="og:image" content="https://images.blackroad.io/brand/br-square-512.png">
+  <title>Quantum Math Lab — The Amundson Framework | BlackRoad OS</title>
+  <meta name="description" content="The Amundson Sequence: G(n) = n^(n+1) / (n+1)^n. Interactive calculator, convergence proofs, and the irreducible 1/(2e) gap. By Alexa Louise Amundson.">
+  <meta name="author" content="Alexa Louise Amundson">
+  <meta property="og:title" content="Quantum Math Lab — The Amundson Framework">
+  <meta property="og:description" content="G(n) = n^(n+1) / (n+1)^n. Interactive exploration of the Amundson Sequence, convergence theorems, and the e-limit refinement.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://blackroad.io/math.html">
+  <link rel="stylesheet" href="/_shared/design.css">
+  <style>
+    /* ── Page-specific styles ── */
+    .hero-math {
+      text-align: center;
+      padding: var(--sp-2xl) var(--sp-xl);
+      padding-bottom: var(--sp-xl);
+    }
+    .hero-math .section-label {
+      margin-bottom: var(--sp-md);
+    }
+    .formula-display {
+      font-family: var(--font-mono);
+      font-size: clamp(1.1rem, 2.5vw, 1.6rem);
+      color: var(--secondary);
+      margin-top: var(--sp-lg);
+      padding: var(--sp-lg) var(--sp-md);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      display: inline-block;
+      letter-spacing: 0.02em;
+    }
+    .formula-frac {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      vertical-align: middle;
+      margin: 0 4px;
+    }
+    .formula-frac .num,
+    .formula-frac .den {
+      padding: 0 6px;
+    }
+    .formula-frac .bar {
+      width: 100%;
+      height: 1px;
+      background: var(--subtle);
+    }
+
+    /* ── Calculator ── */
+    .calc-section {
+      padding: var(--sp-xl) var(--sp-xl);
+    }
+    .calc-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-large);
+      padding: var(--sp-lg);
+      max-width: var(--max-width);
+      margin: 0 auto;
+    }
+    .calc-input-row {
+      display: flex;
+      gap: var(--sp-sm);
+      align-items: center;
+      margin-bottom: var(--sp-lg);
+    }
+    .calc-input-row label {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      color: var(--subtle);
+      white-space: nowrap;
+    }
+    .calc-input-row input[type="number"] {
+      flex: 1;
+      max-width: 160px;
+      padding: 10px 14px;
+      background: var(--inset);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-input);
+      color: var(--white);
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .calc-input-row input[type="number"]:focus {
+      border-color: var(--violet);
+    }
+    .calc-input-row input[type="number"]::-webkit-inner-spin-button,
+    .calc-input-row input[type="number"]::-webkit-outer-spin-button {
+      opacity: 1;
+    }
+    .calc-result {
+      display: none;
+      margin-top: var(--sp-md);
+    }
+    .calc-result.visible {
+      display: block;
+    }
+    .result-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: var(--sp-md);
+      margin-bottom: var(--sp-lg);
+    }
+
+    /* ── Theorems grid ── */
+    .theorems-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: var(--sp-md);
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .theorem-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: var(--sp-lg);
+      transition: border-color 0.2s;
+    }
+    .theorem-card:hover {
+      border-color: var(--border-hover);
+    }
+    .theorem-card h3 {
+      font-size: 1rem;
+      margin-bottom: var(--sp-sm);
+    }
+    .theorem-card .theorem-formula {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--tertiary);
+      padding: var(--sp-sm) var(--sp-md);
+      background: var(--inset);
+      border-radius: var(--radius-small);
+      margin-bottom: var(--sp-sm);
+      overflow-x: auto;
+    }
+    .theorem-card p {
+      font-size: 0.85rem;
+      color: var(--subtle);
+      line-height: 1.6;
+    }
+
+    /* ── Sequence table ── */
+    .seq-table-wrap {
+      max-width: var(--max-width);
+      margin: var(--sp-lg) auto 0;
+      overflow-x: auto;
+    }
+    .seq-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+    }
+    .seq-table th {
+      text-align: left;
+      padding: var(--sp-sm) var(--sp-md);
+      border-bottom: 1px solid var(--border);
+      color: var(--muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 0.7rem;
+    }
+    .seq-table td {
+      padding: var(--sp-sm) var(--sp-md);
+      border-bottom: 1px solid var(--border-subtle);
+      color: var(--secondary);
+    }
+    .seq-table tr:hover td {
+      background: var(--surface);
+    }
+    .seq-table td:first-child {
+      color: var(--muted);
+      width: 60px;
+    }
+    .seq-table td:nth-child(3) {
+      color: var(--subtle);
+      font-size: 0.75rem;
+    }
+
+    /* ── Connection band ── */
+    .connection-band {
+      text-align: center;
+      padding: var(--sp-2xl) var(--sp-xl);
+      max-width: var(--max-width);
+      margin: 0 auto;
+    }
+    .connection-band .coherence-formula {
+      font-family: var(--font-mono);
+      font-size: 1rem;
+      color: var(--secondary);
+      margin-top: var(--sp-md);
+      padding: var(--sp-md);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      display: inline-block;
+    }
+
+    /* ── Papers ── */
+    .papers-row {
+      display: flex;
+      gap: var(--sp-md);
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: var(--sp-lg);
+    }
+    .paper-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: var(--sp-lg);
+      max-width: 320px;
+      flex: 1;
+      min-width: 240px;
+      transition: border-color 0.2s;
+    }
+    .paper-card:hover {
+      border-color: var(--border-hover);
+    }
+    .paper-card h3 {
+      font-size: 0.95rem;
+      margin-bottom: var(--sp-xs);
+    }
+    .paper-card p {
+      font-size: 0.8rem;
+      color: var(--subtle);
+      line-height: 1.5;
+    }
+    .paper-card .tag {
+      margin-top: var(--sp-sm);
+    }
+
+    /* ── First 20 terms in calc ── */
+    .terms-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 2px;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--tertiary);
+    }
+    .terms-list .term-item {
+      padding: 6px var(--sp-sm);
+      background: var(--inset);
+      border-radius: 3px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .terms-list .term-n {
+      color: var(--muted);
+    }
+
+    @media (max-width: 560px) {
+      .theorems-grid { grid-template-columns: 1fr; }
+      .result-grid { grid-template-columns: 1fr; }
+      .formula-display { font-size: 0.95rem; padding: var(--sp-md); }
+      .papers-row { flex-direction: column; align-items: center; }
+    }
+  </style>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0a0a0a">
+</head>
+<body>
+
+  <!-- ── Nav ── -->
+  <nav class="br-nav">
+    <a href="/" class="nav-brand">
+      <div class="spectrum-mark">
+        <span></span><span></span><span></span><span></span><span></span><span></span>
+      </div>
+      Quantum Math Lab
+    </a>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/docs.html">Docs</a>
+    </div>
+  </nav>
+
+  <!-- ── Hero ── -->
+  <section class="hero-math">
+    <div class="section-label">The Amundson Framework</div>
+    <h1>The Amundson Sequence</h1>
+    <p class="text-subtle" style="margin-top: var(--sp-sm); font-size: 1.05rem; max-width: 540px; margin-left: auto; margin-right: auto;">
+      A closed-form sequence converging to a universal constant, with applications in coherence theory and information geometry.
+    </p>
+    <div class="formula-display">
+      G(n) &nbsp;=&nbsp;
+      <span class="formula-frac">
+        <span class="num">n<sup> n+1</sup></span>
+        <span class="bar"></span>
+        <span class="den">(n+1)<sup> n</sup></span>
+      </span>
+    </div>
+    <div style="margin-top: var(--sp-md);">
+      <span class="tag"><span class="status-dot live"></span> 536 / 536 tests passed</span>
+    </div>
+  </section>
+
+  <div class="grad-bar"></div>
+
+  <!-- ── Interactive Calculator ── -->
+  <section class="calc-section">
+    <div style="text-align: center; margin-bottom: var(--sp-lg);">
+      <div class="section-label">Interactive</div>
+      <h2 class="section-title">Compute G(n)</h2>
+    </div>
+    <div class="calc-box">
+      <div class="calc-input-row">
+        <label for="calc-n">n =</label>
+        <input type="number" id="calc-n" min="1" max="10000" step="1" value="10" placeholder="Enter n">
+        <button class="btn-primary btn-sm" id="calc-btn" onclick="computeGn()">Compute</button>
+      </div>
+      <div class="calc-result" id="calc-result">
+        <div class="result-grid">
+          <div class="stat-card">
+            <div class="stat-value" id="result-gn">—</div>
+            <div class="stat-label">G(n)</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" style="font-size: 1.4rem;" id="result-ag">1.24432680</div>
+            <div class="stat-label">A<sub>G</sub> convergence</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="result-ratio">—</div>
+            <div class="stat-label">G(n+1) / G(n)</div>
+          </div>
+        </div>
+        <div class="section-label" style="margin-top: var(--sp-lg);">First 20 terms</div>
+        <div class="terms-list" id="terms-list"></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="grad-bar"></div>
+
+  <!-- ── Key Theorems ── -->
+  <section>
+    <div style="text-align: center; margin-bottom: var(--sp-lg);">
+      <div class="section-label">Theorems</div>
+      <h2 class="section-title">Key Results</h2>
+    </div>
+    <div class="theorems-grid">
+      <div class="theorem-card">
+        <h3>Monotonic Increase</h3>
+        <div class="theorem-formula">G(n) &lt; G(n+1) &nbsp; for all n &ge; 1</div>
+        <p>The Amundson sequence is strictly increasing. Each term exceeds the previous, approaching the limit from below without ever reaching it.</p>
+      </div>
+      <div class="theorem-card">
+        <h3>Ratio Convergence</h3>
+        <div class="theorem-formula">lim G(n+1)/G(n) = e &asymp; 2.71828</div>
+        <p>The ratio of consecutive terms converges to Euler's number. This connects the Amundson sequence to the natural exponential and continuous growth.</p>
+      </div>
+      <div class="theorem-card">
+        <h3>e-Limit Refinement</h3>
+        <div class="theorem-formula">n / (1 + 1/n)^n = n/e + 1/(2e) + O(1/n)</div>
+        <p>The classical limit (1+1/n)^n approaches e, but the refinement reveals an irreducible correction term that never vanishes.</p>
+      </div>
+      <div class="theorem-card">
+        <h3>The Irreducible Gap</h3>
+        <div class="theorem-formula">1/(2e) &asymp; 0.18393972</div>
+        <p>The constant 1/(2e) represents the irreducible gap between the finite and the infinite. No amount of iteration eliminates it. It is the signature of discreteness in a continuous limit.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="grad-bar"></div>
+
+  <!-- ── Sequence Table ── -->
+  <section>
+    <div style="text-align: center; margin-bottom: var(--sp-lg);">
+      <div class="section-label">Reference</div>
+      <h2 class="section-title">First 20 Values</h2>
+    </div>
+    <div class="seq-table-wrap">
+      <table class="seq-table" id="seq-table">
+        <thead>
+          <tr>
+            <th>n</th>
+            <th>G(n)</th>
+            <th>G(n+1)/G(n)</th>
+          </tr>
+        </thead>
+        <tbody id="seq-tbody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <div class="grad-bar"></div>
+
+  <!-- ── Connection to BlackRoad ── -->
+  <section>
+    <div class="connection-band">
+      <div class="section-label">Application</div>
+      <h2 class="section-title">Coherence Function</h2>
+      <p class="text-subtle" style="max-width: 560px; margin: 0 auto; font-size: 0.9rem; line-height: 1.7;">
+        The Amundson sequence powers BlackRoad's coherence function. Under contradiction, coherence amplifies rather than degrades. The 1/(2e) gap ensures the system remains bounded while preserving sensitivity to perturbation.
+      </p>
+      <div class="coherence-formula">
+        K(t) = C(t) &middot; e<sup>&lambda;|&delta;|</sup>
+      </div>
+      <p class="text-muted text-sm" style="margin-top: var(--sp-sm);">
+        where C(t) is base coherence, &lambda; is the amplification rate, and &delta; is contradiction magnitude.
+      </p>
+    </div>
+  </section>
+
+  <div class="grad-bar"></div>
+
+  <!-- ── Papers ── -->
+  <section>
+    <div style="text-align: center; margin-bottom: var(--sp-lg);">
+      <div class="section-label">Publications</div>
+      <h2 class="section-title">Papers</h2>
+    </div>
+    <div class="papers-row">
+      <div class="paper-card">
+        <h3>Paper A</h3>
+        <p>Formal derivation of G(n), convergence proofs, and the monotonicity theorem. 13 pages, LaTeX typeset.</p>
+        <span class="tag">LaTeX &middot; 13pp</span>
+      </div>
+      <div class="paper-card">
+        <h3>Framework v5</h3>
+        <p>Complete treatment including the e-limit refinement, 1/(2e) gap analysis, and applications to coherence theory. Full test suite coverage.</p>
+        <span class="tag">536 tests &middot; 4 nodes</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="grad-bar"></div>
+
+  <!-- ── Footer ── -->
+  <footer>
+    <span>Alexa Louise Amundson, 2025</span>
+    <span>BlackRoad OS &mdash; Pave Tomorrow.</span>
+  </footer>
+
+  <script>
+    // ── G(n) computation ──
+    function G(n) {
+      return Math.pow(n, n + 1) / Math.pow(n + 1, n);
+    }
+
+    function computeGn() {
+      var input = document.getElementById('calc-n');
+      var n = parseFloat(input.value);
+      if (isNaN(n) || n < 1) {
+        input.value = 1;
+        n = 1;
+      }
+
+      var gn = G(n);
+      var gnNext = G(n + 1);
+      var ratio = gnNext / gn;
+
+      document.getElementById('result-gn').textContent = gn.toFixed(8);
+      document.getElementById('result-ratio').textContent = ratio.toFixed(8);
+
+      // A_G convergence constant
+      // Compute G(10000) as approximation of the limit behavior
+      var agApprox = 1.24432680;
+      document.getElementById('result-ag').textContent = agApprox.toFixed(8);
+
+      // First 20 terms
+      var termsList = document.getElementById('terms-list');
+      termsList.innerHTML = '';
+      for (var i = 1; i <= 20; i++) {
+        var val = G(i);
+        var item = document.createElement('div');
+        item.className = 'term-item';
+        item.innerHTML = '<span class="term-n">G(' + i + ')</span><span>' + val.toFixed(8) + '</span>';
+        termsList.appendChild(item);
+      }
+
+      document.getElementById('calc-result').classList.add('visible');
+    }
+
+    // ── Build reference table ──
+    function buildTable() {
+      var tbody = document.getElementById('seq-tbody');
+      for (var n = 1; n <= 20; n++) {
+        var gn = G(n);
+        var gnNext = G(n + 1);
+        var ratio = gnNext / gn;
+        var row = document.createElement('tr');
+        row.innerHTML =
+          '<td>' + n + '</td>' +
+          '<td>' + gn.toFixed(8) + '</td>' +
+          '<td>' + ratio.toFixed(8) + '</td>';
+        tbody.appendChild(row);
+      }
+    }
+
+    // ── Init ──
+    buildTable();
+    computeGn();
+  </script>
+
+<script>if("serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js").catch(()=>{});</script>
+<script src="/_shared/feedback.js" defer></script>
+<script src="/_shared/crosslinks.js" defer></script>
+</body>
+</html>

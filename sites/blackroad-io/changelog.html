@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Changelog — BlackRoad OS</title>
+  <meta name="description" content="BlackRoad OS changelog — every milestone, sprint, and line shipped. From incorporation in November 2025 to 200 agents, 629 repos, and 18 live domains.">
+  <meta property="og:title" content="Changelog — BlackRoad OS">
+  <meta property="og:description" content="Timeline of BlackRoad OS milestones from incorporation to full sovereignty.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://blackroad.io/changelog.html">
+  <meta name="twitter:card" content="summary">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="dns-prefetch" href="https://images.blackroad.io">
+  <link rel="dns-prefetch" href="https://search.blackroad.io">
+  <link rel="dns-prefetch" href="https://roundtrip.blackroad.io">
+  <link rel="stylesheet" href="/_shared/design.css">
+  <style>
+    /* ── Filter Bar ── */
+    .filter-bar {
+      display: flex;
+      gap: var(--sp-sm);
+      flex-wrap: wrap;
+      margin-bottom: var(--sp-xl);
+    }
+    .filter-btn {
+      padding: 6px 14px;
+      border-radius: var(--radius-pill);
+      border: 1px solid var(--border);
+      background: none;
+      color: var(--subtle);
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s, background 0.2s;
+    }
+    .filter-btn:hover {
+      border-color: var(--border-hover);
+      color: var(--white);
+    }
+    .filter-btn.active {
+      background: var(--surface);
+      border-color: var(--muted);
+      color: var(--white);
+    }
+
+    /* ── Timeline ── */
+    .timeline {
+      position: relative;
+      padding-left: 36px;
+    }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 7px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(180deg, var(--ember), var(--rose), var(--magenta), var(--violet), var(--azure), var(--cyan));
+      border-radius: 1px;
+    }
+
+    .timeline-entry {
+      position: relative;
+      margin-bottom: var(--sp-xl);
+    }
+    .timeline-entry:last-child {
+      margin-bottom: 0;
+    }
+
+    /* ── Dot ── */
+    .timeline-dot {
+      position: absolute;
+      left: -32px;
+      top: 6px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: 2px solid var(--bg);
+      z-index: 2;
+    }
+    .timeline-entry:nth-child(1) .timeline-dot { background: var(--ember); box-shadow: 0 0 8px rgba(255, 107, 43, 0.4); }
+    .timeline-entry:nth-child(2) .timeline-dot { background: var(--rose); box-shadow: 0 0 8px rgba(255, 34, 85, 0.4); }
+    .timeline-entry:nth-child(3) .timeline-dot { background: var(--violet); box-shadow: 0 0 8px rgba(136, 68, 255, 0.4); }
+    .timeline-entry:nth-child(4) .timeline-dot { background: var(--azure); box-shadow: 0 0 8px rgba(68, 136, 255, 0.4); }
+
+    /* ── Entry Card ── */
+    .entry-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: var(--sp-lg);
+      transition: border-color 0.2s;
+    }
+    .entry-card:hover {
+      border-color: var(--border-hover);
+    }
+
+    .entry-date {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: var(--sp-xs);
+    }
+    .entry-title {
+      font-family: var(--font-headline);
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--white);
+      margin-bottom: var(--sp-md);
+    }
+    .entry-title .session-name {
+      background: var(--grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .entry-changes {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .entry-changes li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 0.875rem;
+      color: var(--secondary);
+      line-height: 1.5;
+    }
+    .entry-changes li::before {
+      content: '';
+      flex-shrink: 0;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--muted);
+      margin-top: 8px;
+    }
+
+    .entry-tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: var(--radius-small);
+      background: var(--inset);
+      border: 1px solid var(--border);
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: var(--subtle);
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+
+    /* ── Page Header ── */
+    .page-header {
+      padding: var(--sp-2xl) 0 var(--sp-xl);
+    }
+    .page-header h1 {
+      margin-bottom: var(--sp-sm);
+    }
+    .page-header p {
+      color: var(--subtle);
+      font-size: 0.95rem;
+      max-width: 480px;
+    }
+
+    /* ── Hidden entries ── */
+    .timeline-entry.hidden {
+      display: none;
+    }
+
+    /* ── Mobile ── */
+    @media (max-width: 560px) {
+      .timeline {
+        padding-left: 28px;
+      }
+      .timeline-dot {
+        left: -24px;
+        width: 10px;
+        height: 10px;
+      }
+      .timeline::before {
+        left: 5px;
+      }
+      .entry-card {
+        padding: var(--sp-md);
+      }
+    }
+  </style>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0a0a0a">
+</head>
+<body>
+
+  <!-- ── Nav ── -->
+  <nav class="br-nav">
+    <a href="/" class="nav-brand">
+      <div class="spectrum-mark">
+        <span></span><span></span><span></span><span></span><span></span><span></span>
+      </div>
+      Changelog
+    </a>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/docs.html">Docs</a>
+    </div>
+  </nav>
+
+  <div class="grad-bar"></div>
+
+  <!-- ── Content ── -->
+  <main class="container">
+    <div class="page-header">
+      <p class="section-label">Timeline</p>
+      <h1>Changelog</h1>
+      <p>Every sprint, every milestone, every line shipped. Newest first.</p>
+    </div>
+
+    <!-- ── Filters ── -->
+    <div class="filter-bar">
+      <button class="filter-btn active" data-filter="all">All</button>
+      <button class="filter-btn" data-filter="2026-03">Mar 2026</button>
+      <a href="/changelog.xml" style="margin-left:auto;font-family:var(--font-mono);font-size:0.7rem;color:var(--muted);text-decoration:none;border:1px solid var(--border);padding:4px 10px;border-radius:4px;">RSS</a>
+      <button class="filter-btn" data-filter="2025-11">Nov 2025</button>
+    </div>
+
+    <!-- ── Timeline ── -->
+    <div class="timeline">
+
+      <!-- March 22, 2026 -->
+      <div class="timeline-entry" data-month="2026-03">
+        <div class="timeline-dot"></div>
+        <div class="entry-card">
+          <div class="entry-date">March 22, 2026</div>
+          <div class="entry-title"><span class="session-name">Compass Session</span></div>
+          <ul class="entry-changes">
+            <li>200 AI agents deployed on RoundTrip (from 35)</li>
+            <li>All 18 root domains + 14 product subdomains verified live</li>
+            <li>OpenClaw forked, built, and running as personal assistant</li>
+            <li>79 forks enhanced across 3 GitHub orgs</li>
+            <li>Amundson Framework published (FRAMEWORK.md, 10M digits, 50+ identities)</li>
+            <li>23 product subdomains created at *.blackroad.io</li>
+            <li>GitHub push: operator repo cleaned (stripped 1.7GB bloat)</li>
+            <li>PWA deployed on all 45 pages</li>
+            <li>v0.1.0 released</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- March 21, 2026 -->
+      <div class="timeline-entry" data-month="2026-03">
+        <div class="timeline-dot"></div>
+        <div class="entry-card">
+          <div class="entry-date">March 21, 2026</div>
+          <div class="entry-title"><span class="session-name">Meridian Session</span></div>
+          <ul class="entry-changes">
+            <li>19 domain repos created</li>
+            <li>DNS subdomains configured across 18 domains</li>
+            <li>571 repos licensed with proprietary license</li>
+            <li>lucidia.earth shipped</li>
+            <li>Ecosystem index wired across all orgs</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- March 17, 2026 -->
+      <div class="timeline-entry" data-month="2026-03">
+        <div class="timeline-dot"></div>
+        <div class="entry-card">
+          <div class="entry-date">March 17, 2026</div>
+          <div class="entry-title"><span class="session-name">Sovereignty Sprint</span></div>
+          <ul class="entry-changes">
+            <li>All 15 CF Workers self-hosted on Octavia</li>
+            <li>13 Road Fleet forks completed (RoadCode, Passenger, Curb, etc.)</li>
+            <li>PowerDNS deployed on Gematria + Anastasia</li>
+            <li>WireGuard mesh: 12/12 connections</li>
+            <li>Truth Audit v2: all false claims purged</li>
+            <li>28 agents registered with real names</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- March 14, 2026 -->
+      <div class="timeline-entry" data-month="2026-03">
+        <div class="timeline-dot"></div>
+        <div class="entry-card">
+          <div class="entry-date">March 14, 2026</div>
+          <div class="entry-title"><span class="session-name">Foundation</span></div>
+          <ul class="entry-changes">
+            <li>Unified search engine: 1,383 entries from 23 indexers</li>
+            <li>50 AI skills deployed across 6 modules</li>
+            <li>RAG pipeline: Qdrant + nomic-embed-text, 32,297 chunks</li>
+            <li>NATS mesh: 4/5 nodes connected</li>
+            <li>Corporate formation docs indexed (19 PDFs)</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- November 17, 2025 -->
+      <div class="timeline-entry" data-month="2025-11">
+        <div class="timeline-dot"></div>
+        <div class="entry-card">
+          <div class="entry-date">November 17, 2025</div>
+          <div class="entry-title"><span class="session-name">Incorporation</span></div>
+          <ul class="entry-changes">
+            <li>BlackRoad OS, Inc. incorporated in Delaware</li>
+            <li>Stripe Atlas formation</li>
+            <li>10M common shares authorized</li>
+            <li>EIN obtained</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <div class="grad-bar" style="margin-top: var(--sp-2xl);"></div>
+
+  <!-- ── Footer ── -->
+  <footer>
+    <span>BlackRoad OS, Inc.</span>
+    <span>Pave Tomorrow.</span>
+  </footer>
+
+  <script>
+    // ── Filter Logic ──
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    const entries = document.querySelectorAll('.timeline-entry');
+
+    filterBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const filter = btn.dataset.filter;
+
+        filterBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        entries.forEach(entry => {
+          if (filter === 'all' || entry.dataset.month === filter) {
+            entry.classList.remove('hidden');
+          } else {
+            entry.classList.add('hidden');
+          }
+        });
+      });
+    });
+  </script>
+
+<script>if("serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js").catch(()=>{});</script>
+<script src="/_shared/feedback.js" defer></script>
+<script src="/_shared/crosslinks.js" defer></script>
+</body>
+</html>

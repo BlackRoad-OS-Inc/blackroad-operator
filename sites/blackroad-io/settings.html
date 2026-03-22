@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings — BlackRoad OS</title>
+  <meta name="description" content="User settings for BlackRoad OS. Manage profile, appearance, notifications, and data.">
+  <meta name="author" content="Alexa Louise Amundson">
+  <meta property="og:title" content="Settings — BlackRoad OS">
+  <meta property="og:description" content="Manage your BlackRoad OS preferences.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://blackroad.io/settings.html">
+  <link rel="stylesheet" href="/_shared/design.css">
+  <style>
+    .settings-page {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: var(--sp-xl) var(--sp-lg);
+    }
+    .settings-page h1 {
+      margin-bottom: var(--sp-xl);
+    }
+
+    .settings-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-large);
+      padding: var(--sp-lg);
+      margin-bottom: var(--sp-lg);
+    }
+    .settings-section h2 {
+      font-size: 1.1rem;
+      margin-bottom: var(--sp-md);
+    }
+    .section-desc {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: var(--sp-md);
+    }
+
+    .field {
+      margin-bottom: var(--sp-md);
+    }
+    .field:last-child {
+      margin-bottom: 0;
+    }
+    .field label {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--subtle);
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+    .field input[type="text"],
+    .field input[type="email"],
+    .field input[type="password"] {
+      width: 100%;
+      padding: 10px 14px;
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      background: var(--inset);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-input);
+      color: var(--white);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .field input:focus {
+      border-color: var(--violet);
+    }
+
+    /* Toggle switch */
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .toggle-row:last-child {
+      border-bottom: none;
+    }
+    .toggle-label {
+      font-size: 0.9rem;
+      color: var(--secondary);
+    }
+    .toggle-sublabel {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+    .toggle {
+      position: relative;
+      width: 44px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+    .toggle input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .toggle .slider {
+      position: absolute;
+      inset: 0;
+      background: var(--border);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .toggle .slider::before {
+      content: '';
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      left: 3px;
+      top: 3px;
+      background: var(--subtle);
+      border-radius: 50%;
+      transition: transform 0.2s var(--ease-spring), background 0.2s;
+    }
+    .toggle input:checked + .slider {
+      background: var(--violet);
+    }
+    .toggle input:checked + .slider::before {
+      transform: translateX(20px);
+      background: var(--white);
+    }
+
+    /* Theme selector */
+    .theme-options {
+      display: flex;
+      gap: var(--sp-sm);
+    }
+    .theme-opt {
+      flex: 1;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-input);
+      text-align: center;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .theme-opt.active {
+      border-color: var(--violet);
+      color: var(--white);
+    }
+    .theme-opt.disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+    .theme-opt .theme-preview {
+      width: 100%;
+      height: 32px;
+      border-radius: var(--radius-small);
+      margin-bottom: 8px;
+    }
+    .theme-dark .theme-preview {
+      background: #0a0a0a;
+      border: 1px solid #1a1a1a;
+    }
+    .theme-light .theme-preview {
+      background: #f5f5f5;
+      border: 1px solid #d4d4d4;
+    }
+
+    /* API key display */
+    .api-display {
+      display: flex;
+      gap: var(--sp-sm);
+      align-items: center;
+    }
+    .api-display input {
+      flex: 1;
+      padding: 10px 14px;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      background: var(--inset);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-input);
+      color: var(--subtle);
+      outline: none;
+    }
+
+    /* Section save button */
+    .section-actions {
+      display: flex;
+      gap: var(--sp-sm);
+      margin-top: var(--sp-md);
+      padding-top: var(--sp-md);
+      border-top: 1px solid var(--border-subtle);
+    }
+    .btn-save {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 20px;
+      background: var(--grad);
+      color: var(--white);
+      border: none;
+      border-radius: var(--radius-btn);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.15s var(--ease-spring);
+    }
+    .btn-save:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+    .btn-danger {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 20px;
+      background: none;
+      color: #ef4444;
+      border: 1px solid #ef444433;
+      border-radius: var(--radius-btn);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-danger:hover {
+      background: #ef444415;
+    }
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 20px;
+      background: none;
+      color: var(--subtle);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-btn);
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .btn-secondary:hover {
+      border-color: var(--muted);
+      color: var(--white);
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: 12px 24px;
+      font-size: 0.85rem;
+      color: var(--white);
+      z-index: 999;
+      opacity: 0;
+      transition: transform 0.3s var(--ease-spring), opacity 0.3s;
+      pointer-events: none;
+    }
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    /* Confirm dialog */
+    .confirm-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 998;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    .confirm-overlay.show {
+      display: flex;
+    }
+    .confirm-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-large);
+      padding: var(--sp-lg);
+      max-width: 400px;
+      width: 90%;
+      text-align: center;
+    }
+    .confirm-box h3 {
+      margin-bottom: var(--sp-sm);
+    }
+    .confirm-box p {
+      color: var(--subtle);
+      font-size: 0.9rem;
+      margin-bottom: var(--sp-lg);
+    }
+    .confirm-actions {
+      display: flex;
+      gap: var(--sp-sm);
+      justify-content: center;
+    }
+
+    @media (max-width: 560px) {
+      .settings-page { padding: var(--sp-lg) var(--sp-md); }
+      .api-display { flex-direction: column; }
+      .theme-options { flex-direction: column; }
+    }
+  </style>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0a0a0a">
+</head>
+<body>
+
+  <!-- Nav -->
+  <nav class="br-nav">
+    <a href="/" class="nav-brand">
+      <div class="spectrum-mark">
+        <span></span><span></span><span></span><span></span><span></span><span></span>
+      </div>
+      Settings
+    </a>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/dashboard.html">Dashboard</a>
+    </div>
+  </nav>
+
+  <div class="grad-bar"></div>
+
+  <div class="settings-page">
+    <h1 class="grad-text">Settings</h1>
+
+    <!-- Profile -->
+    <div class="settings-section" id="profileSection">
+      <h2>Profile</h2>
+      <p class="section-desc">Your account information.</p>
+      <div class="field">
+        <label for="profileName">Display name</label>
+        <input type="text" id="profileName" placeholder="Your name">
+      </div>
+      <div class="field">
+        <label for="profileEmail">Email</label>
+        <input type="email" id="profileEmail" placeholder="you@example.com">
+      </div>
+      <div class="section-actions">
+        <button class="btn-save" onclick="saveProfile()">Save profile</button>
+      </div>
+    </div>
+
+    <!-- Appearance -->
+    <div class="settings-section" id="appearanceSection">
+      <h2>Appearance</h2>
+      <p class="section-desc">Customize the look of your interface.</p>
+      <div class="field">
+        <label>Theme</label>
+        <div class="theme-options">
+          <div class="theme-opt theme-dark active" onclick="selectTheme('dark')">
+            <div class="theme-preview"></div>
+            Dark
+          </div>
+          <div class="theme-opt theme-light disabled">
+            <div class="theme-preview"></div>
+            Light (coming soon)
+          </div>
+        </div>
+      </div>
+      <div class="section-actions">
+        <button class="btn-save" onclick="saveAppearance()">Save appearance</button>
+      </div>
+    </div>
+
+    <!-- Notifications -->
+    <div class="settings-section" id="notificationsSection">
+      <h2>Notifications</h2>
+      <p class="section-desc">Control how you receive updates.</p>
+      <div class="toggle-row">
+        <div>
+          <div class="toggle-label">Email notifications</div>
+          <div class="toggle-sublabel">Receive system alerts via email</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="notifEmail">
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="toggle-row">
+        <div>
+          <div class="toggle-label">Push notifications</div>
+          <div class="toggle-sublabel">Browser push alerts for events</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="notifPush">
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="toggle-row">
+        <div>
+          <div class="toggle-label">Agent alerts</div>
+          <div class="toggle-sublabel">Notifications when agents change status</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="notifAgents" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="section-actions">
+        <button class="btn-save" onclick="saveNotifications()">Save notifications</button>
+      </div>
+    </div>
+
+    <!-- API -->
+    <div class="settings-section" id="apiSection">
+      <h2>API</h2>
+      <p class="section-desc">Manage your API access.</p>
+      <div class="field">
+        <label>Base URL</label>
+        <input type="text" value="https://core.blackroad.systems" readonly style="color:var(--muted);cursor:default;">
+      </div>
+      <div class="field">
+        <label>API key</label>
+        <div class="api-display">
+          <input type="text" id="apiKeyDisplay" value="No key generated" readonly>
+          <button class="btn-secondary" onclick="generateApiKey()">Generate</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Data -->
+    <div class="settings-section" id="dataSection">
+      <h2>Data</h2>
+      <p class="section-desc">Export or clear your locally stored data.</p>
+      <div class="section-actions" style="border-top:none;padding-top:0;">
+        <button class="btn-secondary" onclick="exportData()">Export JSON</button>
+        <button class="btn-danger" onclick="showConfirm('clearData')">Clear all data</button>
+      </div>
+    </div>
+
+    <!-- Account -->
+    <div class="settings-section" id="accountSection">
+      <h2>Account</h2>
+      <p class="section-desc">Security and account management.</p>
+      <div class="field">
+        <label for="newPassword">New password</label>
+        <input type="password" id="newPassword" placeholder="Enter new password">
+      </div>
+      <div class="field">
+        <label for="confirmPassword">Confirm password</label>
+        <input type="password" id="confirmPassword" placeholder="Confirm new password">
+      </div>
+      <div class="section-actions">
+        <button class="btn-save" onclick="changePassword()">Update password</button>
+        <button class="btn-danger" onclick="showConfirm('deleteAccount')">Delete account</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <!-- Confirm Dialog -->
+  <div class="confirm-overlay" id="confirmOverlay">
+    <div class="confirm-box">
+      <h3 id="confirmTitle">Are you sure?</h3>
+      <p id="confirmDesc">This action cannot be undone.</p>
+      <div class="confirm-actions">
+        <button class="btn-secondary" onclick="hideConfirm()">Cancel</button>
+        <button class="btn-danger" id="confirmAction">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="grad-bar"></div>
+  <footer>
+    <span>BlackRoad OS, Inc.</span>
+    <span>Pave Tomorrow.</span>
+  </footer>
+
+  <script>
+    const LS_PREFIX = 'br_settings_';
+
+    // ── Init ──
+    function init() {
+      const account = JSON.parse(localStorage.getItem('blackroad_account') || '{}');
+      document.getElementById('profileName').value = localStorage.getItem(LS_PREFIX + 'name') || account.name || '';
+      document.getElementById('profileEmail').value = localStorage.getItem(LS_PREFIX + 'email') || account.email || '';
+
+      document.getElementById('notifEmail').checked = localStorage.getItem(LS_PREFIX + 'notif_email') === 'true';
+      document.getElementById('notifPush').checked = localStorage.getItem(LS_PREFIX + 'notif_push') === 'true';
+      document.getElementById('notifAgents').checked = localStorage.getItem(LS_PREFIX + 'notif_agents') !== 'false';
+
+      const key = localStorage.getItem(LS_PREFIX + 'api_key');
+      if (key) document.getElementById('apiKeyDisplay').value = key;
+    }
+    init();
+
+    // ── Profile ──
+    function saveProfile() {
+      const name = document.getElementById('profileName').value.trim();
+      const email = document.getElementById('profileEmail').value.trim();
+      localStorage.setItem(LS_PREFIX + 'name', name);
+      localStorage.setItem(LS_PREFIX + 'email', email);
+      toast('Profile saved');
+    }
+
+    // ── Appearance ──
+    function selectTheme(theme) {
+      // Only dark is available right now
+      if (theme !== 'dark') return;
+      localStorage.setItem(LS_PREFIX + 'theme', theme);
+    }
+    function saveAppearance() {
+      toast('Appearance saved');
+    }
+
+    // ── Notifications ──
+    function saveNotifications() {
+      localStorage.setItem(LS_PREFIX + 'notif_email', document.getElementById('notifEmail').checked);
+      localStorage.setItem(LS_PREFIX + 'notif_push', document.getElementById('notifPush').checked);
+      localStorage.setItem(LS_PREFIX + 'notif_agents', document.getElementById('notifAgents').checked);
+      toast('Notification preferences saved');
+    }
+
+    // ── API ──
+    function generateApiKey() {
+      const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+      let key = 'br_live_';
+      for (let i = 0; i < 32; i++) key += chars[Math.floor(Math.random() * chars.length)];
+      localStorage.setItem(LS_PREFIX + 'api_key', key);
+      document.getElementById('apiKeyDisplay').value = key;
+      toast('API key generated');
+    }
+
+    // ── Data ──
+    function exportData() {
+      const data = {};
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        data[k] = localStorage.getItem(k);
+      }
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'blackroad-data-' + new Date().toISOString().slice(0, 10) + '.json';
+      a.click();
+      URL.revokeObjectURL(url);
+      toast('Data exported');
+    }
+
+    function clearAllData() {
+      localStorage.clear();
+      toast('All data cleared');
+      setTimeout(() => location.reload(), 600);
+    }
+
+    // ── Account ──
+    function changePassword() {
+      const pw = document.getElementById('newPassword').value;
+      const confirm = document.getElementById('confirmPassword').value;
+      if (!pw) return toast('Enter a password');
+      if (pw !== confirm) return toast('Passwords do not match');
+      localStorage.setItem(LS_PREFIX + 'password_hash', btoa(pw));
+      document.getElementById('newPassword').value = '';
+      document.getElementById('confirmPassword').value = '';
+      toast('Password updated');
+    }
+
+    function deleteAccount() {
+      localStorage.clear();
+      toast('Account deleted');
+      setTimeout(() => { window.location.href = '/'; }, 600);
+    }
+
+    // ── Confirm dialog ──
+    let pendingAction = null;
+    function showConfirm(action) {
+      pendingAction = action;
+      const overlay = document.getElementById('confirmOverlay');
+      const title = document.getElementById('confirmTitle');
+      const desc = document.getElementById('confirmDesc');
+      const btn = document.getElementById('confirmAction');
+
+      if (action === 'clearData') {
+        title.textContent = 'Clear all data?';
+        desc.textContent = 'This will remove all locally stored settings, keys, and preferences. This cannot be undone.';
+        btn.textContent = 'Clear data';
+        btn.onclick = () => { hideConfirm(); clearAllData(); };
+      } else if (action === 'deleteAccount') {
+        title.textContent = 'Delete account?';
+        desc.textContent = 'This will clear all local data and sign you out. This cannot be undone.';
+        btn.textContent = 'Delete account';
+        btn.onclick = () => { hideConfirm(); deleteAccount(); };
+      }
+      overlay.classList.add('show');
+    }
+    function hideConfirm() {
+      document.getElementById('confirmOverlay').classList.remove('show');
+      pendingAction = null;
+    }
+
+    // ── Toast ──
+    function toast(msg) {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.classList.add('show');
+      clearTimeout(el._timeout);
+      el._timeout = setTimeout(() => el.classList.remove('show'), 2200);
+    }
+  </script>
+<script>if("serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js").catch(()=>{});</script>
+</body>
+</html>

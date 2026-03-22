@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Sign in to BlackRoad OS — sovereign infrastructure for the open road." />
+  <meta name="theme-color" content="#0a0a0a" />
+  <title>Sign In — BlackRoad OS</title>
+  <link rel="stylesheet" href="/_shared/design.css" />
+  <style>
+    .login-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: calc(100vh - var(--nav-height));
+      padding: var(--sp-xl) var(--sp-lg);
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 400px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-large);
+      overflow: hidden;
+    }
+
+    .login-card .grad-bar {
+      height: 2px;
+    }
+
+    .login-card-inner {
+      padding: var(--sp-xl) var(--sp-lg);
+    }
+
+    .login-card h2 {
+      font-family: var(--font-headline);
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: var(--sp-xs);
+    }
+
+    .login-subtitle {
+      color: var(--subtle);
+      font-size: 0.875rem;
+      margin-bottom: var(--sp-lg);
+    }
+
+    .form-group {
+      margin-bottom: var(--sp-md);
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--secondary);
+      margin-bottom: var(--sp-xs);
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 12px 14px;
+      background: var(--inset);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-input);
+      color: var(--white);
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      transition: border-color 0.2s;
+    }
+
+    .form-group input::placeholder {
+      color: var(--muted);
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: var(--violet);
+    }
+
+    .login-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: 14px;
+      margin-top: var(--sp-lg);
+      background: var(--grad);
+      color: var(--white);
+      font-family: var(--font-headline);
+      font-weight: 700;
+      font-size: 0.95rem;
+      border: none;
+      border-radius: var(--radius-btn);
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.2s var(--ease-spring);
+    }
+
+    .login-btn:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+
+    .login-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .error-msg {
+      display: none;
+      padding: 10px 14px;
+      margin-top: var(--sp-md);
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.25);
+      border-radius: var(--radius-small);
+      color: #f87171;
+      font-size: 0.8rem;
+    }
+
+    .error-msg.visible {
+      display: block;
+    }
+
+    .login-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: var(--sp-lg);
+      font-size: 0.8rem;
+    }
+
+    .login-footer a {
+      color: var(--subtle);
+      transition: color 0.2s;
+    }
+
+    .login-footer a:hover {
+      color: var(--white);
+    }
+
+    .signup-link {
+      text-align: center;
+      margin-top: var(--sp-lg);
+      padding-top: var(--sp-lg);
+      border-top: 1px solid var(--border);
+      font-size: 0.85rem;
+      color: var(--subtle);
+    }
+
+    .signup-link a {
+      color: var(--white);
+      font-weight: 600;
+      transition: opacity 0.2s;
+    }
+
+    .signup-link a:hover {
+      opacity: 0.8;
+    }
+  </style>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0a0a0a">
+</head>
+<body>
+
+  <!-- Nav -->
+  <nav class="br-nav">
+    <a href="/" class="nav-brand">
+      <div class="spectrum-mark">
+        <span></span><span></span><span></span><span></span><span></span><span></span>
+      </div>
+      BlackRoad
+    </a>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/signup.html">Sign Up</a>
+    </div>
+  </nav>
+
+  <!-- Login -->
+  <div class="login-wrapper">
+    <div class="login-card">
+      <div class="grad-bar"></div>
+      <div class="login-card-inner">
+        <h2>Sign in</h2>
+        <p class="login-subtitle">Welcome back. Enter your credentials to continue.</p>
+
+        <form id="login-form" onsubmit="handleLogin(event)">
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              placeholder="you@example.com"
+              autocomplete="email"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              placeholder="Enter your password"
+              autocomplete="current-password"
+              required
+            />
+          </div>
+
+          <div id="error-msg" class="error-msg"></div>
+
+          <button type="submit" class="login-btn" id="login-btn">Sign In</button>
+
+          <div class="login-footer">
+            <a href="mailto:alexa@blackroad.io?subject=Password%20Reset%20Request">Forgot password?</a>
+          </div>
+
+          <div class="signup-link">
+            Don't have an account? <a href="/signup.html">Sign up</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function showError(msg) {
+      var el = document.getElementById('error-msg');
+      el.textContent = msg;
+      el.classList.add('visible');
+    }
+
+    function hideError() {
+      document.getElementById('error-msg').classList.remove('visible');
+    }
+
+    function handleLogin(e) {
+      e.preventDefault();
+      hideError();
+
+      var btn = document.getElementById('login-btn');
+      var email = document.getElementById('email').value.trim();
+      var password = document.getElementById('password').value;
+
+      if (!email || !password) {
+        showError('Please enter both email and password.');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Signing in...';
+
+      // Check localStorage for saved account (from signup)
+      setTimeout(function () {
+        var stored = null;
+        try {
+          stored = JSON.parse(localStorage.getItem('blackroad_account'));
+        } catch (_) {}
+
+        if (stored && stored.email === email && stored.password === password) {
+          // Generate a simple session token
+          var token = 'br_' + Date.now().toString(36) + '_' + Math.random().toString(36).substr(2, 12);
+          localStorage.setItem('blackroad_auth_token', token);
+          localStorage.setItem('blackroad_user', JSON.stringify({
+            email: stored.email,
+            name: stored.name || email.split('@')[0],
+            logged_in: Date.now()
+          }));
+          window.location.href = '/dashboard.html';
+          return;
+        }
+
+        // No match
+        btn.disabled = false;
+        btn.textContent = 'Sign In';
+        showError('Invalid email or password. Please try again or sign up for a new account.');
+      }, 600);
+    }
+
+    // If already logged in, redirect
+    (function () {
+      if (localStorage.getItem('blackroad_auth_token')) {
+        window.location.href = '/dashboard.html';
+      }
+    })();
+  </script>
+
+<script>if("serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js").catch(()=>{});</script>
+</body>
+</html>
