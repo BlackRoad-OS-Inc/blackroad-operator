@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Documentation — BlackRoad OS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --gray-0: #000000;
+      --gray-1: #0a0a0a;
+      --gray-2: #121212;
+      --gray-3: #1c1c1c;
+      --gray-4: #262626;
+      --gray-5: #3a3a3a;
+      --gray-6: #505050;
+      --gray-7: #686868;
+      --gray-8: #848484;
+      --gray-9: #a0a0a0;
+      --gray-10: #c0c0c0;
+      --gray-11: #e2e2e2;
+      --gray-12: #ffffff;
+
+      --font-display: 'Space Grotesk', sans-serif;
+      --font-body: 'Inter', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+
+      --sidebar-width: 280px;
+      --header-height: 64px;
+      --toc-width: 220px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--gray-1);
+      color: var(--gray-10);
+      font-size: 15px;
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Header */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: var(--header-height);
+      background: var(--gray-1);
+      border-bottom: 1px solid var(--gray-3);
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      z-index: 100;
+    }
+
+    .header-logo {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--gray-12);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-logo-mark {
+      width: 24px;
+      height: 24px;
+      background: var(--gray-5);
+      border-radius: 6px;
+    }
+
+    .header-nav {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: 32px;
+      padding-left: 32px;
+      border-left: 1px solid var(--gray-4);
+    }
+
+    .header-nav a {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--gray-8);
+      text-decoration: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+
+    .header-nav a:hover {
+      color: var(--gray-11);
+      background: var(--gray-3);
+    }
+
+    .header-nav a.active {
+      color: var(--gray-12);
+      background: var(--gray-4);
+    }
+
+    .header-search {
+      margin-left: auto;
+      position: relative;
+    }
+
+    .search-input {
+      width: 240px;
+      height: 36px;
+      background: var(--gray-2);
+      border: 1px solid var(--gray-4);
+      border-radius: 8px;
+      padding: 0 12px 0 36px;
+      font-family: var(--font-body);
+      font-size: 13px;
+      color: var(--gray-11);
+      outline: none;
+      transition: all 0.15s;
+    }
+
+    .search-input::placeholder {
+      color: var(--gray-6);
+    }
+
+    .search-input:focus {
+      border-color: var(--gray-5);
+      background: var(--gray-3);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 16px;
+      height: 16px;
+      stroke: var(--gray-6);
+    }
+
+    .search-shortcut {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--gray-6);
+      background: var(--gray-4);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      position: fixed;
+      top: var(--header-height);
+      left: 0;
+      width: var(--sidebar-width);
+      height: calc(100vh - var(--header-height));
+      background: var(--gray-1);
+      border-right: 1px solid var(--gray-3);
+      overflow-y: auto;
+      padding: 24px 0;
+    }
+
+    .sidebar::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .sidebar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .sidebar::-webkit-scrollbar-thumb {
+      background: var(--gray-4);
+      border-radius: 2px;
+    }
+
+    .nav-section {
+      margin-bottom: 24px;
+    }
+
+    .nav-section-title {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--gray-6);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 0 24px;
+      margin-bottom: 8px;
+    }
+
+    .nav-list {
+      list-style: none;
+    }
+
+    .nav-item a {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 24px;
+      font-size: 13px;
+      color: var(--gray-8);
+      text-decoration: none;
+      transition: all 0.15s;
+      border-left: 2px solid transparent;
+    }
+
+    .nav-item a:hover {
+      color: var(--gray-11);
+      background: var(--gray-2);
+    }
+
+    .nav-item a.active {
+      color: var(--gray-12);
+      background: var(--gray-2);
+      border-left-color: var(--gray-8);
+    }
+
+    .nav-item-icon {
+      width: 16px;
+      height: 16px;
+      stroke: currentColor;
+      opacity: 0.6;
+    }
+
+    .nav-badge {
+      margin-left: auto;
+      font-family: var(--font-mono);
+      font-size: 9px;
+      font-weight: 600;
+      color: var(--gray-7);
+      background: var(--gray-4);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    /* Main Content */
+    .main {
+      margin-left: var(--sidebar-width);
+      margin-right: var(--toc-width);
+      padding-top: var(--header-height);
+      min-height: 100vh;
+    }
+
+    .content {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 48px 40px 120px;
+    }
+
+    /* Breadcrumb */
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 24px;
+      font-size: 13px;
+    }
+
+    .breadcrumb a {
+      color: var(--gray-7);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+
+    .breadcrumb a:hover {
+      color: var(--gray-10);
+    }
+
+    .breadcrumb-sep {
+      color: var(--gray-5);
+    }
+
+    .breadcrumb-current {
+      color: var(--gray-9);
+    }
+
+    /* Typography */
+    .content h1 {
+      font-family: var(--font-display);
+      font-size: 40px;
+      font-weight: 700;
+      color: var(--gray-12);
+      letter-spacing: -1.5px;
+      line-height: 1.15;
+      margin-bottom: 16px;
+    }
+
+    .content-lead {
+      font-size: 18px;
+      color: var(--gray-8);
+      margin-bottom: 48px;
+      line-height: 1.7;
+    }
+
+    .content h2 {
+      font-family: var(--font-display);
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--gray-11);
+      letter-spacing: -0.5px;
+      margin: 48px 0 16px;
+      padding-top: 24px;
+      border-top: 1px solid var(--gray-3);
+    }
+
+    .content h3 {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--gray-11);
+      letter-spacing: -0.3px;
+      margin: 32px 0 12px;
+    }
+
+    .content p {
+      margin-bottom: 20px;
+      color: var(--gray-9);
+    }
+
+    .content a {
+      color: var(--gray-11);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+      transition: color 0.15s;
+    }
+
+    .content a:hover {
+      color: var(--gray-12);
+    }
+
+    .content ul, .content ol {
+      margin-bottom: 20px;
+      padding-left: 24px;
+    }
+
+    .content li {
+      margin-bottom: 8px;
+      color: var(--gray-9);
+    }
+
+    .content li::marker {
+      color: var(--gray-6);
+    }
+
+    /* Code */
+    .content code {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      background: var(--gray-3);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: var(--gray-11);
+    }
+
+    .code-block {
+      background: var(--gray-0);
+      border: 1px solid var(--gray-3);
+      border-radius: 10px;
+      margin: 24px 0;
+      overflow: hidden;
+    }
+
+    .code-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      background: var(--gray-2);
+      border-bottom: 1px solid var(--gray-3);
+    }
+
+    .code-lang {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--gray-7);
+      text-transform: uppercase;
+    }
+
+    .code-copy {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--gray-7);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 4px;
+      transition: all 0.15s;
+    }
+
+    .code-copy:hover {
+      color: var(--gray-10);
+      background: var(--gray-4);
+    }
+
+    .code-body {
+      padding: 20px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.7;
+      color: var(--gray-9);
+      overflow-x: auto;
+    }
+
+    .code-body .comment { color: var(--gray-6); }
+    .code-body .keyword { color: var(--gray-11); }
+    .code-body .string { color: var(--gray-8); }
+    .code-body .function { color: var(--gray-10); }
+
+    /* Callout */
+    .callout {
+      background: var(--gray-2);
+      border: 1px solid var(--gray-4);
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin: 24px 0;
+      display: flex;
+      gap: 16px;
+    }
+
+    .callout-icon {
+      width: 20px;
+      height: 20px;
+      stroke: var(--gray-8);
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .callout-content {
+      flex: 1;
+    }
+
+    .callout-title {
+      font-family: var(--font-display);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--gray-11);
+      margin-bottom: 6px;
+    }
+
+    .callout-text {
+      font-size: 14px;
+      color: var(--gray-8);
+      margin: 0;
+    }
+
+    /* Table */
+    .table-wrapper {
+      margin: 24px 0;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    th {
+      text-align: left;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--gray-7);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--gray-4);
+      background: var(--gray-2);
+    }
+
+    td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--gray-3);
+      color: var(--gray-9);
+    }
+
+    tr:hover td {
+      background: var(--gray-2);
+    }
+
+    td code {
+      font-size: 12px;
+    }
+
+    /* Table of Contents */
+    .toc {
+      position: fixed;
+      top: var(--header-height);
+      right: 0;
+      width: var(--toc-width);
+      height: calc(100vh - var(--header-height));
+      padding: 32px 24px;
+      overflow-y: auto;
+      border-left: 1px solid var(--gray-3);
+    }
+
+    .toc-title {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--gray-6);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 16px;
+    }
+
+    .toc-list {
+      list-style: none;
+    }
+
+    .toc-list li {
+      margin-bottom: 8px;
+    }
+
+    .toc-list a {
+      font-size: 12px;
+      color: var(--gray-7);
+      text-decoration: none;
+      transition: color 0.15s;
+      display: block;
+      padding: 4px 0;
+    }
+
+    .toc-list a:hover {
+      color: var(--gray-10);
+    }
+
+    .toc-list a.active {
+      color: var(--gray-12);
+    }
+
+    .toc-list .toc-h3 {
+      padding-left: 12px;
+    }
+
+    /* Navigation Footer */
+    .nav-footer {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 64px;
+      padding-top: 32px;
+      border-top: 1px solid var(--gray-3);
+    }
+
+    .nav-footer-link {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      text-decoration: none;
+      padding: 16px 20px;
+      background: var(--gray-2);
+      border: 1px solid var(--gray-3);
+      border-radius: 10px;
+      transition: all 0.15s;
+      min-width: 180px;
+    }
+
+    .nav-footer-link:hover {
+      background: var(--gray-3);
+      border-color: var(--gray-4);
+    }
+
+    .nav-footer-link.next {
+      text-align: right;
+    }
+
+    .nav-footer-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--gray-6);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .nav-footer-title {
+      font-family: var(--font-display);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--gray-11);
+    }
+
+    /* Responsive */
+    @media (max-width: 1200px) {
+      .toc { display: none; }
+      .main { margin-right: 0; }
+    }
+
+    @media (max-width: 900px) {
+      .sidebar { display: none; }
+      .main { margin-left: 0; }
+      .content { padding: 32px 24px 80px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <a href="#" class="header-logo">
+      <div class="header-logo-mark"></div>
+      BlackRoad
+    </a>
+    <nav class="header-nav">
+      <a href="#" class="active">Docs</a>
+      <a href="#">API Reference</a>
+      <a href="#">Guides</a>
+      <a href="#">Examples</a>
+    </nav>
+    <div class="header-search">
+      <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+      </svg>
+      <input type="text" class="search-input" placeholder="Search documentation...">
+      <span class="search-shortcut">⌘K</span>
+    </div>
+  </header>
+
+  <aside class="sidebar">
+    <nav>
+      <div class="nav-section">
+        <div class="nav-section-title">Getting Started</div>
+        <ul class="nav-list">
+          <li class="nav-item">
+            <a href="#">
+              <svg class="nav-item-icon" fill="none" viewBox="0 0 24 24">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+              </svg>
+              Introduction
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#">
+              <svg class="nav-item-icon" fill="none" viewBox="0 0 24 24">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+              </svg>
+              Quick Start
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#">
+              <svg class="nav-item-icon" fill="none" viewBox="0 0 24 24">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+              </svg>
+              Installation
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-title">Core Concepts</div>
+        <ul class="nav-list">
+          <li class="nav-item">
+            <a href="#" class="active">Agent Runtime</a>
+          </li>
+          <li class="nav-item">
+            <a href="#">Memory System</a>
+          </li>
+          <li class="nav-item">
+            <a href="#">Event Bus</a>
+          </li>
+          <li class="nav-item">
+            <a href="#">
+              Contradiction Handling
+              <span class="nav-badge">New</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-title">Architecture</div>
+        <ul class="nav-list">
+          <li class="nav-item"><a href="#">Universe Layer</a></li>
+          <li class="nav-item"><a href="#">Lucidia Core</a></li>
+          <li class="nav-item"><a href="#">Metaverse Platform</a></li>
+          <li class="nav-item"><a href="#">Trinary Logic</a></li>
+        </ul>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-title">Infrastructure</div>
+        <ul class="nav-list">
+          <li class="nav-item"><a href="#">Cluster Setup</a></li>
+          <li class="nav-item"><a href="#">K3s / Traefik</a></li>
+          <li class="nav-item"><a href="#">Hailo Workers</a></li>
+          <li class="nav-item"><a href="#">Deployment</a></li>
+        </ul>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-title">Reference</div>
+        <ul class="nav-list">
+          <li class="nav-item"><a href="#">API Reference</a></li>
+          <li class="nav-item"><a href="#">CLI Commands</a></li>
+          <li class="nav-item"><a href="#">Configuration</a></li>
+        </ul>
+      </div>
+    </nav>
+  </aside>
+
+  <main class="main">
+    <article class="content">
+      <nav class="breadcrumb">
+        <a href="#">Docs</a>
+        <span class="breadcrumb-sep">/</span>
+        <a href="#">Core Concepts</a>
+        <span class="breadcrumb-sep">/</span>
+        <span class="breadcrumb-current">Agent Runtime</span>
+      </nav>
+
+      <h1>Agent Runtime</h1>
+      <p class="content-lead">The BlackRoad agent runtime provides the execution environment for autonomous agents, handling orchestration, coordination, and lifecycle management.</p>
+
+      <h2 id="overview">Overview</h2>
+      <p>The runtime combines LangGraph and CrewAI for flexible agent orchestration. It supports both supervisor-based hierarchies and peer-to-peer coordination models, allowing you to choose the topology that fits your use case.</p>
+
+      <div class="callout">
+        <svg class="callout-icon" fill="none" viewBox="0 0 24 24">
+          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <div class="callout-content">
+          <div class="callout-title">Note</div>
+          <p class="callout-text">Agents require a connected memory backend before they can process tasks. See the Memory System documentation for setup instructions.</p>
+        </div>
+      </div>
+
+      <h2 id="initialization">Initialization</h2>
+      <p>Create an agent instance with the required configuration. The runtime handles connection pooling, health checks, and graceful shutdown automatically.</p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">Python</span>
+          <button class="code-copy">Copy</button>
+        </div>
+        <pre class="code-body"><span class="keyword">from</span> blackroad <span class="keyword">import</span> Agent, Memory, EventBus
+
+<span class="comment"># Initialize with memory and event bus</span>
+agent = Agent(
+    name=<span class="string">"lucidia-7"</span>,
+    memory=Memory(backend=<span class="string">"ps-sha-inf"</span>),
+    bus=EventBus(url=<span class="string">"nats://cluster.local"</span>)
+)
+
+<span class="comment"># Register capabilities</span>
+agent.<span class="function">register_capability</span>(<span class="string">"reasoning"</span>, trinary=<span class="keyword">True</span>)
+agent.<span class="function">register_capability</span>(<span class="string">"contradiction-handling"</span>)
+
+<span class="comment"># Start the agent</span>
+<span class="keyword">await</span> agent.<span class="function">start</span>()</pre>
+      </div>
+
+      <h2 id="configuration">Configuration</h2>
+      <p>The agent accepts the following configuration options:</p>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Parameter</th>
+              <th>Type</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>name</code></td>
+              <td><code>str</code></td>
+              <td>Unique identifier for the agent</td>
+            </tr>
+            <tr>
+              <td><code>memory</code></td>
+              <td><code>Memory</code></td>
+              <td>Memory backend configuration</td>
+            </tr>
+            <tr>
+              <td><code>bus</code></td>
+              <td><code>EventBus</code></td>
+              <td>Event bus connection for coordination</td>
+            </tr>
+            <tr>
+              <td><code>supervisor</code></td>
+              <td><code>str | None</code></td>
+              <td>Parent supervisor agent ID</td>
+            </tr>
+            <tr>
+              <td><code>max_retries</code></td>
+              <td><code>int</code></td>
+              <td>Maximum task retry attempts (default: 3)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="capabilities">Capabilities</h2>
+      <p>Capabilities define what an agent can do. The capability registry tracks available skills across your agent fleet, enabling dynamic task routing.</p>
+
+      <h3 id="registering">Registering Capabilities</h3>
+      <p>Register capabilities at initialization or runtime. The registry broadcasts changes to all connected agents.</p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">Python</span>
+          <button class="code-copy">Copy</button>
+        </div>
+        <pre class="code-body"><span class="comment"># Static registration</span>
+agent.<span class="function">register_capability</span>(<span class="string">"image-analysis"</span>)
+
+<span class="comment"># With configuration</span>
+agent.<span class="function">register_capability</span>(
+    <span class="string">"code-execution"</span>,
+    sandbox=<span class="keyword">True</span>,
+    timeout=<span class="number">30</span>
+)
+
+<span class="comment"># Query capabilities fleet-wide</span>
+agents = <span class="keyword">await</span> registry.<span class="function">find_agents</span>(
+    capability=<span class="string">"reasoning"</span>
+)</pre>
+      </div>
+
+      <h3 id="builtin">Built-in Capabilities</h3>
+      <p>The runtime includes several built-in capabilities that agents can opt into:</p>
+      <ul>
+        <li><strong>reasoning</strong> — Logical inference with optional trinary logic</li>
+        <li><strong>contradiction-handling</strong> — Quarantine and resolution of conflicting information</li>
+        <li><strong>memory-sync</strong> — Cross-agent memory coordination</li>
+        <li><strong>task-delegation</strong> — Hierarchical task distribution</li>
+      </ul>
+
+      <nav class="nav-footer">
+        <a href="#" class="nav-footer-link prev">
+          <span class="nav-footer-label">Previous</span>
+          <span class="nav-footer-title">Quick Start</span>
+        </a>
+        <a href="#" class="nav-footer-link next">
+          <span class="nav-footer-label">Next</span>
+          <span class="nav-footer-title">Memory System</span>
+        </a>
+      </nav>
+    </article>
+  </main>
+
+  <aside class="toc">
+    <div class="toc-title">On this page</div>
+    <ul class="toc-list">
+      <li><a href="#overview" class="active">Overview</a></li>
+      <li><a href="#initialization">Initialization</a></li>
+      <li><a href="#configuration">Configuration</a></li>
+      <li><a href="#capabilities">Capabilities</a></li>
+      <li><a href="#registering" class="toc-h3">Registering Capabilities</a></li>
+      <li><a href="#builtin" class="toc-h3">Built-in Capabilities</a></li>
+    </ul>
+  </aside>
+</body>
+</html>

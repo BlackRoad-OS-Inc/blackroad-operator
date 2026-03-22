@@ -1,0 +1,2 @@
+-- BlackRoad OS — data/indexes/fts5/schema.sql
+-- TODO: schema

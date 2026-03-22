@@ -1,0 +1,294 @@
+# BlackRoad OS Beacon - Platform Integrations Configuration
+# All supported deployment and infrastructure platforms
+
+platforms:
+  # ===================
+  # CLOUD PLATFORMS
+  # ===================
+
+  railway:
+    enabled: true
+    name: "Railway"
+    type: "paas"
+    config_file: "railway.toml"
+    health_endpoint: "/health"
+    deploy_command: "railway up"
+    env_vars:
+      - RAILWAY_TOKEN
+      - RAILWAY_PROJECT_ID
+    services:
+      - blackroad-os-beacon
+      - api-gateway
+      - agent-hub
+      - ws-server
+      - mesh-network
+      - vectordb
+      - event-stream
+      - message-queue
+      - tsdb
+      - llm-server
+      - ml-pipeline
+      - rag-service
+      - model-forge
+    regions:
+      - us-west1
+      - us-east4
+      - europe-west4
+
+  cloudflare:
+    enabled: true
+    name: "Cloudflare"
+    type: "edge"
+    config_file: "wrangler.toml"
+    services:
+      pages:
+        - blackroad-network
+        - blackroad-systems
+        - blackroad-me
+        - lucidia-earth
+        - aliceqi
+        - blackroad-inc
+        - blackroadai
+        - lucidia-studio
+        - lucidiaqi
+        - blackroad-quantum
+      workers:
+        - blackroad-os-beacon-worker
+        - api-proxy
+        - edge-cache
+    env_vars:
+      - CLOUDFLARE_API_TOKEN
+      - CLOUDFLARE_ACCOUNT_ID
+    features:
+      - pages
+      - workers
+      - kv
+      - r2
+      - d1
+      - queues
+      - durable_objects
+
+  vercel:
+    enabled: true
+    name: "Vercel"
+    type: "serverless"
+    config_file: "vercel.json"
+    deploy_command: "vercel --prod"
+    env_vars:
+      - VERCEL_TOKEN
+      - VERCEL_ORG_ID
+      - VERCEL_PROJECT_ID
+    projects:
+      - math-blackroad-io
+      - blackroadai
+      - lucidia-earth
+      - prism-console
+    features:
+      - edge_functions
+      - serverless_functions
+      - analytics
+      - cron_jobs
+
+  digitalocean:
+    enabled: true
+    name: "DigitalOcean"
+    type: "iaas"
+    services:
+      droplets:
+        - codex-primary
+        - codex-backup
+        - mesh-node-1
+        - mesh-node-2
+      apps:
+        - blackroad-api
+        - monitoring-stack
+      databases:
+        - beacon-postgres
+        - beacon-redis
+    env_vars:
+      - DIGITALOCEAN_TOKEN
+      - DROPLET_IP
+      - DROPLET_SSH_KEY
+    regions:
+      - nyc1
+      - sfo3
+      - fra1
+
+  # ===================
+  # CONTAINER PLATFORMS
+  # ===================
+
+  docker:
+    enabled: true
+    name: "Docker"
+    type: "container"
+    config_files:
+      - Dockerfile
+      - docker-compose.yml
+    registries:
+      - ghcr.io/blackroad-os
+      - docker.io/blackroad
+    images:
+      - blackroad/beacon:latest
+      - blackroad/api-gateway:latest
+      - blackroad/agent-hub:latest
+    build_platforms:
+      - linux/amd64
+      - linux/arm64
+      - linux/arm/v7
+
+  # ===================
+  # EDGE & IOT DEVICES
+  # ===================
+
+  raspberry_pi:
+    enabled: true
+    name: "Raspberry Pi Fleet"
+    type: "iot"
+    devices:
+      lucidia:
+        ip: "192.168.4.38"
+        hostname: "lucidia"
+        services:
+          - orchestrator
+          - local-agent
+          - sensor-hub
+      blackroad-edge-1:
+        ip: "192.168.4.39"
+        services:
+          - mesh-node
+          - beacon-relay
+      blackroad-edge-2:
+        ip: "192.168.4.40"
+        services:
+          - mesh-node
+          - beacon-relay
+    deploy_method: "rsync+ssh"
+    env_vars:
+      - PI_SSH_KEY
+      - PI_USER
+
+  # ===================
+  # TUNNEL SERVICES
+  # ===================
+
+  tunnels:
+    enabled: true
+    name: "Tunnel Services"
+    type: "networking"
+    providers:
+      cloudflared:
+        enabled: true
+        config_file: "cloudflared.yml"
+        tunnels:
+          - name: beacon-tunnel
+            hostname: beacon.blackroad.io
+            service: http://localhost:8080
+          - name: api-tunnel
+            hostname: api.blackroad.io
+            service: http://localhost:3000
+      ngrok:
+        enabled: true
+        config_file: ".ngrok.yml"
+        tunnels:
+          - name: beacon-dev
+            proto: http
+            addr: 8080
+          - name: api-dev
+            proto: http
+            addr: 3000
+      tailscale:
+        enabled: true
+        tailnet: "blackroad"
+        services:
+          - beacon
+          - api
+          - mesh
+
+  # ===================
+  # MOBILE/iOS APPS
+  # ===================
+
+  ios_apps:
+    enabled: true
+    name: "iOS Development Apps"
+    type: "mobile"
+    apps:
+      warp:
+        name: "Warp Terminal"
+        type: "terminal"
+        integration: "ssh"
+        features:
+          - ai_completion
+          - blocks
+          - workflows
+        config:
+          theme: "blackroad-dark"
+          font: "JetBrains Mono"
+      shellfish:
+        name: "Shellfish"
+        type: "ssh_client"
+        integration: "ssh"
+        servers:
+          - host: "${DROPLET_IP}"
+            user: "root"
+            key_file: "~/.ssh/blackroad"
+          - host: "192.168.4.38"
+            user: "pi"
+            key_file: "~/.ssh/pi"
+      working_copy:
+        name: "Working Copy"
+        type: "git_client"
+        integration: "git"
+        repositories:
+          - blackroad-os/blackroad-os-beacon
+          - blackroad-os/prism-console
+          - blackroad-os/lucidia
+      pyto:
+        name: "Pyto"
+        type: "python_ide"
+        integration: "scripts"
+        scripts_path: "scripts/ios"
+        features:
+          - shortcuts_integration
+          - files_app_access
+          - background_execution
+
+  # ===================
+  # GITHUB INTEGRATION
+  # ===================
+
+  github:
+    enabled: true
+    name: "GitHub"
+    type: "vcs"
+    organization: "BlackRoad-OS"
+    repositories:
+      - blackroad-os-beacon
+      - prism-console
+      - lucidia
+      - mesh-network
+      - agent-framework
+    features:
+      actions: true
+      packages: true
+      pages: true
+      copilot: true
+      codespaces: true
+    workflows:
+      ci:
+        - beacon-ci.yml
+        - ci.yml
+      deploy:
+        - deploy.yml
+        - deploy-railway.yml
+        - deploy-cloudflare.yml
+        - deploy-droplet.yml
+        - deploy-to-pis.yml
+      automation:
+        - auto-deploy.yml
+        - auto-merge.yml
+        - dependabot.yml
+    env_vars:
+      - GITHUB_TOKEN
+      - GH_PAT

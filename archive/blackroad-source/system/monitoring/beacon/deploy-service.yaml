@@ -1,0 +1,46 @@
+# Warp Workflow: Deploy BlackRoad Service
+# https://docs.warp.dev/features/workflows
+
+name: Deploy Service
+description: Deploy a BlackRoad service to specified platform
+tags:
+  - blackroad
+  - deploy
+  - devops
+author: BlackRoad OS
+version: 1.0.0
+
+arguments:
+  - name: platform
+    description: Target platform (railway, cloudflare, vercel, droplet, pi)
+    default_value: railway
+  - name: service
+    description: Service to deploy
+    default_value: blackroad-os-beacon
+
+command: |
+  echo "Deploying {{service}} to {{platform}}..."
+
+  case "{{platform}}" in
+    railway)
+      railway up --service {{service}}
+      ;;
+    cloudflare)
+      wrangler deploy
+      ;;
+    vercel)
+      vercel deploy --prod
+      ;;
+    droplet)
+      ssh root@$DROPLET_IP "cd /opt/blackroad && git pull && docker-compose up -d --build"
+      ;;
+    pi)
+      ssh pi@192.168.4.38 "cd /home/pi/blackroad && git pull && sudo systemctl restart blackroad-beacon"
+      ;;
+    *)
+      echo "Unknown platform: {{platform}}"
+      exit 1
+      ;;
+  esac
+
+  echo "Deployment triggered!"

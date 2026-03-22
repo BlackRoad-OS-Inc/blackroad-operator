@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BlackRoad Foundation</title>
+<meta name="description" content="BlackRoad OS — Pave Tomorrow.">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;shape-rendering:geometricPrecision}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility;-webkit-text-stroke:.2px rgba(255,255,255,.1)}
+:root{--g:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);--g135:linear-gradient(135deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);--bg:#000;--white:#fff;--black:#000;--border:#1a1a1a;--sg:'Space Grotesk',sans-serif;--jb:'JetBrains Mono',monospace}
+body{background:var(--bg);color:var(--white);font-family:var(--sg);overflow-x:hidden}
+.grad-bar{height:4px;background:var(--g);image-rendering:crisp-edges}
+nav{display:flex;align-items:center;justify-content:space-between;padding:16px 48px;border-bottom:1px solid var(--border)}
+.nav-logo{font-weight:700;font-size:20px;color:var(--white);display:flex;align-items:center;gap:10px;text-decoration:none}
+.nav-links{display:flex;gap:32px}
+.nav-links a{font-size:14px;font-weight:500;color:var(--white);opacity:.5;text-decoration:none;transition:opacity .2s}
+.nav-links a:hover{opacity:1}
+a.btn-outline,a.btn-solid,a.btn-lg{text-decoration:none;display:inline-flex;align-items:center}
+.btn-outline{padding:8px 20px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--white);font-size:13px;font-weight:600;font-family:var(--sg);transition:border-color .2s}
+.btn-outline:hover{border-color:#444}
+.btn-solid{padding:8px 20px;border:none;border-radius:6px;background:var(--white);color:var(--black);font-size:13px;font-weight:600;font-family:var(--sg)}
+.hero{text-align:center;padding:120px 48px 80px;position:relative}
+.orb{position:absolute;border-radius:50%;filter:blur(120px);opacity:.06;pointer-events:none}
+.orb-1{width:400px;height:400px;background:#FF2255;top:-150px;left:-5%}
+.orb-2{width:350px;height:350px;background:#4488FF;top:-100px;right:-5%}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border:1px solid var(--border);border-radius:20px;font-size:12px;font-weight:500;color:var(--white);margin-bottom:32px}
+.hero-badge-dot{width:8px;height:8px;border-radius:50%;background:var(--g135)}
+.hero h1{font-size:64px;font-weight:700;color:var(--white);line-height:1.08;margin-bottom:24px;max-width:780px;margin-left:auto;margin-right:auto;letter-spacing:-.02em}
+.hero p{font-size:18px;color:var(--white);opacity:.45;max-width:520px;margin:0 auto 48px;line-height:1.7}
+.hero-cta{display:flex;gap:16px;justify-content:center}
+.btn-lg{padding:14px 36px;border-radius:8px;font-size:15px;font-weight:600;font-family:var(--sg)}
+.btn-lg-solid{background:var(--white);color:var(--black);border:none}
+.btn-lg-outline{background:transparent;color:var(--white);border:1px solid var(--border);transition:border-color .2s}
+.section{max-max-width:1100px;width:100%;margin:0 auto;padding:80px 48px}
+.section-label{font-family:var(--jb);font-size:10px;color:var(--white);opacity:.25;letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px}
+.section-title{font-size:32px;font-weight:700;color:var(--white);margin-bottom:12px;letter-spacing:-.015em}
+.section-desc{font-size:14px;color:var(--white);opacity:.4;max-width:460px;margin-bottom:48px}
+.metrics-strip{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.metric-cell{padding:28px 24px;border-right:1px solid var(--border)}
+.metric-cell:last-child{border-right:none}
+.metric-value{font-size:32px;font-weight:700;color:var(--white);margin-bottom:4px;letter-spacing:-.02em}
+.metric-label{font-family:var(--jb);font-size:10px;color:var(--white);opacity:.25;letter-spacing:.06em;text-transform:uppercase}
+.tool-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.tool-card{border:1px solid var(--border);border-radius:10px;padding:28px;position:relative;transition:border-color .2s}
+.tool-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--g);border-radius:10px 10px 0 0;image-rendering:crisp-edges}
+.tool-card:hover{border-color:#333}
+.tool-name{font-size:18px;font-weight:700;color:var(--white);margin-bottom:8px}
+.tool-desc{font-size:13px;color:var(--white);opacity:.4;line-height:1.7;margin-bottom:16px}
+.tool-file{font-family:var(--jb);font-size:10px;color:var(--white);opacity:.2}
+.repo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.repo-card{border:1px solid var(--border);border-radius:8px;padding:20px;position:relative}
+.repo-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--g);border-radius:8px 8px 0 0;image-rendering:crisp-edges}
+.repo-name{font-size:14px;font-weight:700;color:var(--white);margin-bottom:4px}
+.repo-desc{font-size:11px;color:var(--white);opacity:.35;line-height:1.5;margin-bottom:8px}
+.repo-tag{font-family:var(--jb);font-size:10px;color:var(--white);opacity:.2}
+.repo-stats{border-top:1px solid var(--border);margin-top:24px}
+.repo-stat-row{display:grid;grid-template-columns:160px 1fr;gap:16px;padding:12px 0;border-bottom:1px solid var(--border)}
+.repo-stat-label{font-family:var(--jb);font-size:11px;color:var(--white);opacity:.25;text-transform:uppercase;letter-spacing:.04em}
+.repo-stat-value{font-size:14px;color:var(--white);opacity:.5}
+.endow-list{border-top:1px solid var(--border)}
+.endow-row{display:grid;grid-template-columns:200px 1fr auto;gap:16px;padding:14px 0;border-bottom:1px solid var(--border);align-items:center}
+.endow-asset{font-size:14px;font-weight:600;color:var(--white)}
+.endow-desc{font-size:13px;color:var(--white);opacity:.4}
+.endow-cost{font-family:var(--jb);font-size:11px;color:var(--white);opacity:.2}
+.impact-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.impact-card{border:1px solid var(--border);border-radius:8px;padding:24px;text-align:center}
+.impact-value{font-size:28px;font-weight:700;color:var(--white);margin-bottom:4px}
+.impact-label{font-size:12px;color:var(--white);opacity:.35}
+.stack-list{border-top:1px solid var(--border)}
+.stack-row{display:grid;grid-template-columns:160px 1fr auto;gap:16px;padding:16px 0;border-bottom:1px solid var(--border);align-items:center}
+.stack-layer{font-family:var(--jb);font-size:11px;color:var(--white);opacity:.25;text-transform:uppercase;letter-spacing:.04em}
+.stack-desc{font-size:14px;color:var(--white);opacity:.5}
+.stack-file{font-family:var(--jb);font-size:10px;color:var(--white);opacity:.2}
+.mission-card{border:1px solid var(--border);border-radius:12px;padding:48px;position:relative}
+.mission-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--g);border-radius:12px 12px 0 0;image-rendering:crisp-edges}
+.mission-title{font-size:24px;font-weight:700;color:var(--white);margin-bottom:16px}
+.mission-text{font-size:14px;color:var(--white);opacity:.4;line-height:2;max-width:600px}
+.pill{text-decoration:none;padding:8px 18px;border:1px solid var(--border);border-radius:20px;font-size:12px;font-weight:500;color:var(--white);opacity:.5;display:inline-flex;align-items:center;gap:8px}
+.pill-dot{width:6px;height:6px;border-radius:50%;background:var(--g135)}
+footer{border-top:1px solid var(--border);padding:48px;display:flex;justify-content:space-between;align-items:center}
+.footer-brand{font-weight:700;font-size:16px;color:var(--white);text-decoration:none}
+.footer-links{display:flex;gap:24px}
+.footer-links a{font-size:13px;color:var(--white);opacity:.4;text-decoration:none;transition:opacity .2s}
+.footer-links a:hover{opacity:1}
+.footer-copy{font-size:12px;color:var(--white);opacity:.2}
+@media(max-width:768px){
+  nav{padding:14px 20px;flex-wrap:wrap;gap:12px}.nav-links{display:none}
+  .hero{padding:80px 20px 60px}.hero h1{font-size:36px}
+  .section{padding:48px 20px}.tool-grid,.repo-grid,.impact-grid{grid-template-columns:1fr}
+  .mission-card{padding:28px}
+  .endow-row{grid-template-columns:1fr}.endow-cost{display:none}
+  .stack-row{grid-template-columns:1fr}.stack-file{display:none}
+  .metrics-strip{grid-template-columns:repeat(2,1fr)}
+  footer{flex-direction:column;gap:16px;text-align:center;padding:32px 20px}
+}
+
+/* ═══ RESPONSIVE — fit to screen ═══ */
+@media(max-max-width:1024px;width:100%){
+  .metrics-strip{grid-template-columns:repeat(3,1fr)}
+  .org-grid,.grid-4,.tier-grid,.cap-grid,.stat-grid,.shield-grid,.surface-grid,.stats-row{grid-template-columns:repeat(2,1fr)}
+  .node-grid{grid-template-columns:repeat(3,1fr)}
+  .product-grid,.features-grid,.focus-grid,.gallery,.team-grid,.pricing{grid-template-columns:repeat(2,1fr)}
+  .footer-grid{grid-template-columns:1fr 1fr}
+  .cloud-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:768px){
+  nav{padding:14px 20px;flex-wrap:wrap;gap:12px}
+  .nav-links{display:none}
+  .hero{padding:80px 20px 60px}
+  .hero h1{font-size:36px}
+  .hero-cta{flex-direction:column;align-items:center}
+  .section,.section-wide{padding:48px 20px}
+  .metrics-strip{grid-template-columns:repeat(2,1fr)}
+  .product-featured{grid-template-columns:1fr}
+  .product-grid,.features-grid,.focus-grid,.gallery,.team-grid,.pricing,.cap-grid,.tier-grid,.shield-grid{grid-template-columns:1fr}
+  .org-grid,.grid-4,.stat-grid,.stats-row,.surface-grid{grid-template-columns:1fr}
+  .node-grid{grid-template-columns:1fr 1fr}
+  .cloud-grid{grid-template-columns:1fr}
+  footer{padding:32px 20px}
+  .footer-grid{grid-template-columns:1fr}
+  .footer-bottom{flex-direction:column;gap:12px;text-align:center}
+  .topnav{padding:10px 16px}
+  .topnav-links{gap:8px;flex-wrap:wrap}
+  .topnav-links a{font-size:11px}
+}
+</style>
+<script src="https://bb.blackroad.io/bb.js" defer></script>
+</head>
+<body>
+<div class="grad-bar"></div>
+<nav>
+  <a href="https://blackroad-io.pages.dev" class="nav-logo"><img src="blackroad-logo.png" alt="BlackRoad" style="width:32px;height:32px;border-radius:50%"> BlackRoad Foundation</a>
+  <div class="nav-links"><a href="#tools">Tools</a><a href="#portfolio">Portfolio</a><a href="#endowment">Endowment</a><a href="#impact">Impact</a><a href="#mission">Mission</a></div>
+  <div style="display:flex;gap:10px"><a href="#mission" class="btn-outline">Mission</a><a href="https://github.com/blackboxprogramming" target="_blank" class="btn-solid">GitHub</a></div>
+</nav>
+
+<section class="hero" id="hero">
+  <div class="orb orb-1"></div><div class="orb orb-2"></div>
+  <div class="hero-badge"><div class="hero-badge-dot"></div> 5 Operations Tools · 68 Active Repos · $136/mo</div>
+  <h1>Run the org like you run the code</h1>
+  <p>Five Python tools for CRM, HR, grants, donors, and events. 68 GitHub repos, 207 Gitea repos, 16 divisions — all on $136/mo infrastructure.</p>
+  <div class="hero-cta"><a href="#tools" class="btn-lg btn-lg-solid">View Tools</a><a href="#portfolio" class="btn-lg btn-lg-outline">Open Source Portfolio</a></div>
+</section>
+
+<div class="section" style="padding-bottom:0">
+  <div class="metrics-strip">
+    <div class="metric-cell"><div class="metric-value">5</div><div class="metric-label">Operations Tools</div></div>
+    <div class="metric-cell"><div class="metric-value">68</div><div class="metric-label">Active Repos</div></div>
+    <div class="metric-cell"><div class="metric-value">16</div><div class="metric-label">Divisions</div></div>
+    <div class="metric-cell"><div class="metric-value">$136</div><div class="metric-label">Monthly Cost</div></div>
+  </div>
+</div>
+
+<section class="section" id="tools">
+  <div class="section-label">Tools</div>
+  <div class="section-title">Six operations tools</div>
+  <div class="section-desc">CRM, HR, grants, donors, events, and budgets. Everything an organization needs to run, built in Python.</div>
+  <div class="tool-grid">
+    <div class="tool-card"><div class="tool-name">CRM</div><div class="tool-desc">Contact management, interaction tracking, pipeline stages, deal scoring. Your own Salesforce in a Python file.</div><div class="tool-file">crm.py</div></div>
+    <div class="tool-card"><div class="tool-name">HR System</div><div class="tool-desc">Employee records, onboarding workflows, performance reviews, time tracking. No BambooHR required.</div><div class="tool-file">hr_system.py</div></div>
+    <div class="tool-card"><div class="tool-name">Grant Tracker</div><div class="tool-desc">Grant application lifecycle management. Deadline tracking, compliance reporting, funding pipeline.</div><div class="tool-file">grant_tracker.py</div></div>
+    <div class="tool-card"><div class="tool-name">Donor Management</div><div class="tool-desc">Donor profiles, contribution tracking, recurring donations, tax receipt generation.</div><div class="tool-file">donor_management.py</div></div>
+    <div class="tool-card"><div class="tool-name">Event Manager</div><div class="tool-desc">Event planning, RSVP tracking, venue management, agenda builder. From meetups to conferences.</div><div class="tool-file">event_manager.py</div></div>
+    <div class="tool-card"><div class="tool-name">Budget Tracker</div><div class="tool-desc">Budget planning, expense categorization, variance analysis. Every dollar has a line item, every change a <a href="https://operations-blackroad-io.pages.dev" style="color:var(--white);opacity:.4;text-decoration:underline;text-underline-offset:3px">git commit</a>.</div><div class="tool-file">budget_tracker.py</div></div>
+  </div>
+</section>
+
+<section class="section" id="portfolio">
+  <div class="section-label">Open Source Portfolio</div>
+  <div class="section-title">What the Foundation stewards</div>
+  <div class="repo-grid">
+    <div class="repo-card"><div class="repo-name">BlackRoad-Operating-System</div><div class="repo-desc">400+ shell scripts, CLI tools, the entire OS layer</div><div class="repo-tag">flagship</div></div>
+    <div class="repo-card"><div class="repo-name">lucidia</div><div class="repo-desc">Lucidia API, FastAPI services, CarPool app</div><div class="repo-tag">platform</div></div>
+    <div class="repo-card"><div class="repo-name">quantum-math-lab</div><div class="repo-desc">Mathematical frameworks, quantum computing research</div><div class="repo-tag">research</div></div>
+    <div class="repo-card"><div class="repo-name">simulation-theory</div><div class="repo-desc">Simulation hypothesis mathematical models</div><div class="repo-tag">research</div></div>
+    <div class="repo-card"><div class="repo-name">blackroad-api-sdks</div><div class="repo-desc">API SDKs for BlackRoad services</div><div class="repo-tag">developer</div></div>
+    <div class="repo-card"><div class="repo-name">blackroad-operator</div><div class="repo-desc">Fleet operator — 48MB, largest repo</div><div class="repo-tag">infrastructure</div></div>
+  </div>
+  <div class="repo-stats">
+    <div class="repo-stat-row"><div class="repo-stat-label">GitHub</div><div class="repo-stat-value">68 active repos (down from ~111, ~47 archived for being duplicates/templates/empty)</div></div>
+    <div class="repo-stat-row"><div class="repo-stat-label">Gitea</div><div class="repo-stat-value">207 repos across 7 orgs on <a href="https://blackroad-infra.pages.dev#fleet" style="color:var(--white);opacity:.5;text-decoration:underline;text-underline-offset:3px">Octavia</a> (181 active, 26 empty placeholders)</div></div>
+    <div class="repo-stat-row"><div class="repo-stat-label">PRs</div><div class="repo-stat-value">All 1,200+ open PRs merged/closed across 17 owners</div></div>
+    <div class="repo-stat-row"><div class="repo-stat-label">Documentation</div><div class="repo-stat-value">22 READMEs fully rewritten, 85+ repo descriptions updated</div></div>
+  </div>
+</section>
+
+<section class="section" id="endowment">
+  <div class="section-label">Infrastructure Endowment</div>
+  <div class="section-title">Physical assets</div>
+  <div class="endow-list">
+    <div class="endow-row"><div class="endow-asset"><a href="https://blackroad-infra.pages.dev#fleet" style="color:var(--white);text-decoration:underline;text-underline-offset:3px">5 Raspberry Pis</a></div><div class="endow-desc">Alice (Pi400), Cecilia, Octavia, Aria, Lucidia (all Pi5)</div><div class="endow-cost">$40/mo power</div></div>
+    <div class="endow-row"><div class="endow-asset"><a href="https://blackroad-infra.pages.dev#accelerators" style="color:var(--white);text-decoration:underline;text-underline-offset:3px">2x Hailo-8</a></div><div class="endow-desc">26 TOPS each = 52 TOPS total, on Cecilia and Octavia</div><div class="endow-cost">included</div></div>
+    <div class="endow-row"><div class="endow-asset">1TB NVMe</div><div class="endow-desc">Primary data store on Octavia — Gitea, Docker, models</div><div class="endow-cost">included</div></div>
+    <div class="endow-row"><div class="endow-asset">2 DO Droplets</div><div class="endow-desc">gematria (NYC3, 4cpu/8GB) + anastasia (NYC1, 1cpu/1GB)</div><div class="endow-cost">$54/mo</div></div>
+    <div class="endow-row"><div class="endow-asset"><a href="https://blackroad-guardian-dashboard.pages.dev#encryption" style="color:var(--white);text-decoration:underline;text-underline-offset:3px">WireGuard Mesh</a></div><div class="endow-desc">anastasia hub → alice, cecilia, octavia, aria, gematria (10.8.0.x)</div><div class="endow-cost">included</div></div>
+    <div class="endow-row"><div class="endow-asset"><a href="https://blackroad-systems.pages.dev" style="color:var(--white);text-decoration:underline;text-underline-offset:3px">Cloudflare</a></div><div class="endow-desc">95+ Pages, 40 KV, 7 D1, 10 R2, 18 tunnels, 48+ domains</div><div class="endow-cost">$25/mo</div></div>
+    <div class="endow-row"><div class="endow-asset">Domains</div><div class="endow-desc">48+ custom domains across all orgs</div><div class="endow-cost">$17/mo</div></div>
+  </div>
+</section>
+
+<section class="section" id="impact">
+  <div class="section-label">Community Impact</div>
+  <div class="section-title">By the numbers</div>
+  <div class="impact-grid">
+    <div class="impact-card"><div class="impact-value">16</div><div class="impact-label">Organizational divisions</div></div>
+    <div class="impact-card"><div class="impact-value">400+</div><div class="impact-label">Shell scripts in <a href="https://blackroad-os-home.pages.dev" style="color:var(--white);opacity:.35;text-decoration:underline;text-underline-offset:3px">BlackRoad OS</a></div></div>
+    <div class="impact-card"><div class="impact-value">334</div><div class="impact-label">Web apps deployed</div></div>
+    <div class="impact-card"><div class="impact-value">228</div><div class="impact-label"><a href="https://blackroad-assets.pages.dev#memory" style="color:var(--white);opacity:.35;text-decoration:underline;text-underline-offset:3px">SQLite databases</a></div></div>
+    <div class="impact-card"><div class="impact-value">156K</div><div class="impact-label">Memory entries (FTS5)</div></div>
+    <div class="impact-card"><div class="impact-value">$0</div><div class="impact-label">SaaS spend</div></div>
+  </div>
+</section>
+
+<section class="section" id="operations">
+  <div class="section-label">Operations Stack</div>
+  <div class="section-title">How the tools connect</div>
+  <div class="stack-list">
+    <div class="stack-row"><div class="stack-layer">Contacts</div><div class="stack-desc">CRM tracks every person — donors, employees, partners, applicants</div><div class="stack-file">crm.py</div></div>
+    <div class="stack-row"><div class="stack-layer">People</div><div class="stack-desc">HR system manages internal team from onboarding through reviews</div><div class="stack-file">hr_system.py</div></div>
+    <div class="stack-row"><div class="stack-layer">Funding</div><div class="stack-desc">Grant tracker manages applications, donor management tracks contributions</div><div class="stack-file">grant_tracker.py + donor_management.py</div></div>
+    <div class="stack-row"><div class="stack-layer">Budget</div><div class="stack-desc">$136/mo tracked with variance analysis, versioned in <a href="https://operations-blackroad-io.pages.dev" style="color:var(--white);opacity:.5;text-decoration:underline;text-underline-offset:3px">git governance</a></div><div class="stack-file">budget_tracker.py</div></div>
+    <div class="stack-row"><div class="stack-layer">Events</div><div class="stack-desc">Event manager pulls contacts from CRM for invites and RSVP tracking</div><div class="stack-file">event_manager.py</div></div>
+    <div class="stack-row"><div class="stack-layer">Storage</div><div class="stack-desc">All data in <a href="https://blackroad-assets.pages.dev#memory" style="color:var(--white);opacity:.5;text-decoration:underline;text-underline-offset:3px">SQLite</a> — portable, backupable, no database server needed</div><div class="stack-file">~/.blackroad/</div></div>
+  </div>
+</section>
+
+<section class="section" id="mission">
+  <div class="mission-card">
+    <div class="mission-title">Open infrastructure for everyone</div>
+    <div class="mission-text">The Foundation exists to prove that organizations can run on open-source tools instead of enterprise SaaS. Every tool in this stack is a Python file backed by <a href="https://blackroad-assets.pages.dev#memory" style="color:var(--white);opacity:.4;text-decoration:underline;text-underline-offset:3px">SQLite</a>. No vendor lock-in, no per-seat pricing, no data leaving your machines. If a nonprofit can run on <a href="https://blackroad-infra.pages.dev#fleet" style="color:var(--white);opacity:.4;text-decoration:underline;text-underline-offset:3px">five Raspberry Pis</a> for <a href="https://finance-blackroad-io.pages.dev#economics" style="color:var(--white);opacity:.4;text-decoration:underline;text-underline-offset:3px">$136/mo</a>, so can yours.</div>
+  </div>
+</section>
+
+<section class="section" style="padding-bottom:0">
+  <div class="section-label">Related</div>
+  <div class="section-title">Go deeper</div>
+  <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:24px">
+    <a href="https://operations-blackroad-io.pages.dev" class="pill"><div class="pill-dot"></div> Governance &amp; Policy</a>
+    <a href="https://blackroad-assets.pages.dev#memory" class="pill"><div class="pill-dot"></div> SQLite &amp; Archive</a>
+    <a href="https://blackroad-guardian-dashboard.pages.dev" class="pill"><div class="pill-dot"></div> Security Tools</a>
+    <a href="https://finance-blackroad-io.pages.dev#economics" class="pill"><div class="pill-dot"></div> $136/mo Economics</a>
+    <a href="https://blackroad-infra.pages.dev" class="pill"><div class="pill-dot"></div> Hardware Fleet</a>
+    <a href="https://blackroad-os-home.pages.dev" class="pill"><div class="pill-dot"></div> 400+ CLI Tools</a>
+  </div>
+</section>
+
+<footer>
+  <a href="https://blackroad-io.pages.dev" class="footer-brand">BlackRoad Foundation</a>
+  <div class="footer-links"><a href="https://github.com/blackboxprogramming" target="_blank">GitHub</a><a href="https://blackroad-io.pages.dev">OS Inc</a><a href="https://finance-blackroad-io.pages.dev">Ventures</a><a href="https://operations-blackroad-io.pages.dev">Gov</a><a href="https://blackroad-assets.pages.dev">Archive</a><a href="https://blackroad-os-home.pages.dev">OS</a></div>
+  <div class="footer-copy">&copy; 2026 BlackRoad Foundation. All rights reserved.</div>
+</footer>
+<div class="grad-bar"></div>
+<script src="https://blackboard.amundsonalexa.workers.dev/bb.js"></script>
+<!-- BlackRoad Ecosystem Bar -->
+<div style="position:fixed;bottom:0;left:0;right:0;z-index:999;background:#0a0a0a;border-top:1px solid #1a1a1a;padding:8px 0;overflow-x:auto">
+<div style="display:flex;gap:16px;justify-content:center;align-items:center;padding:0 20px;white-space:nowrap">
+<a href="https://blackroad.io" style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:#555;text-decoration:none;transition:color 0.2s">Home</a>
+<a href="https://portal.blackroad.io" style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:#555;text-decoration:none;transition:color 0.2s">Portal</a>
+<a href="https://search.blackroad.io" style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:#555;text-decoration:none;transition:color 0.2s">Search</a>
+<a href="https://chat.blackroad.io" style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:#555;text-decoration:none;transition:color 0.2s">Chat</a>
+<a href="https://auth.blackroad.io" style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:#555;text-decoration:none;transition:color 0.2s">Auth</a>
+<a href="https://pay.blackroad.io" style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:#555;text-decoration:none;transition:color 0.2s">Pay</a>
+<a href="https://images.blackroad.io" style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:#555;text-decoration:none;transition:color 0.2s">Images</a>
+<a href="https://brand.blackroad.io" style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:#555;text-decoration:none;transition:color 0.2s">Brand</a>
+<a href="https://status.blackroad.io" style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:#555;text-decoration:none;transition:color 0.2s">Status</a>
+<a href="https://github.com/BlackRoad-OS-Inc" style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:#555;text-decoration:none;transition:color 0.2s">GitHub</a>
+</div>
+</div>
+<div style="height:36px"></div>
+<script>
+// BlackRoad Live Stats
+(function(){
+  const API='https://stats-blackroad.amundsonalexa.workers.dev';
+  async function load(){
+    try{
+      const r=await fetch(API+'/ecosystem');
+      const d=(await r.json())?.data||{};
+      document.querySelectorAll('[data-stat]').forEach(el=>{
+        const v=d[el.dataset.stat];
+        if(v!==undefined)el.textContent=typeof v==='number'?v.toLocaleString():v;
+      });
+    }catch(e){}
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',load);
+  else load();
+  setInterval(load,60000);
+})();
+</script>
+</body>
+</html>

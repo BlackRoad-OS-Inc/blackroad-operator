@@ -1,0 +1,19 @@
+id: weekly_content_calendar_refresh
+description: Refresh the content calendar weekly with performance insights.
+steps:
+  - id: collect_metrics
+    agent: cs-content-strategist-01
+    input: { performance_window: "last_7_days" }
+    output: performance_insights
+  - id: adjust_calendar
+    agent: cs-content-strategist-01
+    input: { current_calendar: calendar, insights: performance_insights }
+    output: updated_calendar
+  - id: propose_experiments
+    agent: cs-social-clip-alchemist-01
+    input: { updated_calendar: updated_calendar }
+    output: experiment_candidates
+  - id: finalize_week
+    agent: cs-scriptwriter-longform-01
+    input: { calendar: updated_calendar, experiments: experiment_candidates }
+    output: finalized_week_plan

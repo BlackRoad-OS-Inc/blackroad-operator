@@ -1,0 +1,48 @@
+[build]
+builder = "NIXPACKS"
+
+[deploy]
+startCommand = "npm start"
+numReplicas = 1
+healthcheckPath = "/health"
+healthcheckTimeout = 10
+healthcheckInterval = 30
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10
+builder = "dockerfile"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+numReplicas = 1
+startCommand = "node dist/app.js"
+healthcheckPath = "/health"
+healthcheckTimeout = 30
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 3
+restartPolicyMaxRetries = 3
+
+# Resource limits (prevent over-allocation)
+[deploy.resources]
+memory = "512Mi"
+cpu = "0.5"
+
+[[services]]
+name = "blackroad-os-beacon"
+
+[services.env]
+PORT = "8080"
+NODE_ENV = "production"
+REPO_NAME = "blackroad-os-beacon"
+ORG_NAME = "BlackRoad-OS"
+BEACON_SERVICES_CONFIG_PATH = "./config/services.yaml"
+DEPLOY_LOG_PATH = "./data/deploy-log.jsonl"
+
+[[services]]
+name = "blackroad-os-beacon"
+internalPort = 8080
+protocol = "TCP"
+
+[services.healthcheck]
+path = "/health"
+interval = "10s"
+timeout = "5s"

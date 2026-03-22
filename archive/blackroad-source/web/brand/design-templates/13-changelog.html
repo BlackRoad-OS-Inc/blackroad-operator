@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Changelog - BlackRoad</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --gray-950: #000000;
+            --gray-900: #0a0a0a;
+            --gray-800: #1a1a1a;
+            --gray-700: #404040;
+            --gray-600: #525252;
+            --gray-500: #737373;
+            --gray-400: #a3a3a3;
+            --gray-300: #d4d4d4;
+            --gray-100: #f5f5f5;
+            --accent-1: #ff8700;
+            --accent-2: #ff5f00;
+            --accent-3: #ff0087;
+            --accent-4: #af5fd7;
+            --accent-5: #ff00ff;
+            --accent-6: #1e90ff;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --radius-sm: 4px;
+            --radius-md: 6px;
+            --radius-lg: 8px;
+            --radius-xl: 12px;
+            --radius-2xl: 16px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--gray-950);
+            color: var(--gray-100);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* Header */
+        .header {
+            border-bottom: 1px solid var(--gray-800);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            font-size: 1.25rem;
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-3));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-decoration: none;
+        }
+
+        .header-nav {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .header-nav a {
+            color: var(--gray-400);
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: color 0.2s;
+        }
+
+        .header-nav a:hover {
+            color: var(--gray-100);
+        }
+
+        /* Hero */
+        .hero {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .hero p {
+            color: var(--gray-400);
+            font-size: 1.125rem;
+            max-width: 600px;
+            margin: 0 auto 2rem;
+        }
+
+        .subscribe-form {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .subscribe-form input {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            background: var(--gray-900);
+            border: 1px solid var(--gray-700);
+            border-radius: var(--radius-md);
+            color: var(--gray-100);
+            font-size: 0.875rem;
+        }
+
+        .subscribe-form input:focus {
+            outline: none;
+            border-color: var(--accent-1);
+        }
+
+        .subscribe-form button {
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-3));
+            border: none;
+            border-radius: var(--radius-md);
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .subscribe-form button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px rgba(255, 135, 0, 0.3);
+        }
+
+        /* Filter Tabs */
+        .filters {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+
+        .filter-btn {
+            padding: 0.5rem 1rem;
+            background: var(--gray-900);
+            border: 1px solid var(--gray-800);
+            border-radius: var(--radius-md);
+            color: var(--gray-400);
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-btn:hover {
+            background: var(--gray-800);
+            color: var(--gray-100);
+        }
+
+        .filter-btn.active {
+            background: var(--accent-1);
+            border-color: var(--accent-1);
+            color: white;
+        }
+
+        /* Timeline */
+        .timeline {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 2rem 4rem;
+        }
+
+        .version-group {
+            margin-bottom: 3rem;
+        }
+
+        .version-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .version-number {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-3));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .version-date {
+            color: var(--gray-500);
+            font-size: 0.875rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .version-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+
+        .version-badge.latest {
+            background: var(--success);
+            color: white;
+        }
+
+        .version-badge.beta {
+            background: var(--accent-6);
+            color: white;
+        }
+
+        /* Change Cards */
+        .changes-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .change-card {
+            background: var(--gray-900);
+            border: 1px solid var(--gray-800);
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            transition: all 0.2s;
+        }
+
+        .change-card:hover {
+            border-color: var(--gray-700);
+            transform: translateX(4px);
+        }
+
+        .change-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .change-type {
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            flex-shrink: 0;
+        }
+
+        .change-type.feature {
+            background: rgba(34, 197, 94, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+
+        .change-type.fix {
+            background: rgba(30, 144, 255, 0.1);
+            color: var(--accent-6);
+            border: 1px solid rgba(30, 144, 255, 0.3);
+        }
+
+        .change-type.improvement {
+            background: rgba(255, 135, 0, 0.1);
+            color: var(--accent-1);
+            border: 1px solid rgba(255, 135, 0, 0.3);
+        }
+
+        .change-type.breaking {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .change-type.security {
+            background: rgba(175, 95, 215, 0.1);
+            color: var(--accent-4);
+            border: 1px solid rgba(175, 95, 215, 0.3);
+        }
+
+        .change-type.deprecated {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .change-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.125rem;
+            font-weight: 600;
+            flex: 1;
+        }
+
+        .change-description {
+            color: var(--gray-400);
+            font-size: 0.9375rem;
+            margin-bottom: 1rem;
+        }
+
+        .change-meta {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            font-size: 0.875rem;
+        }
+
+        .change-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--gray-500);
+        }
+
+        .change-meta-item a {
+            color: var(--accent-6);
+            text-decoration: none;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .change-meta-item a:hover {
+            text-decoration: underline;
+        }
+
+        /* Code block in changes */
+        .change-code {
+            background: var(--gray-800);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            margin: 1rem 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            overflow-x: auto;
+        }
+
+        .change-code .comment {
+            color: var(--gray-500);
+        }
+
+        .change-code .keyword {
+            color: var(--accent-4);
+        }
+
+        .change-code .string {
+            color: var(--success);
+        }
+
+        .change-code .function {
+            color: var(--accent-6);
+        }
+
+        /* Contributors */
+        .contributors {
+            display: flex;
+            gap: -0.5rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--gray-800);
+        }
+
+        .contributor {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-3));
+            border: 2px solid var(--gray-900);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: -8px;
+        }
+
+        .contributor:first-child {
+            margin-left: 0;
+        }
+
+        .contributor-count {
+            color: var(--gray-500);
+            font-size: 0.875rem;
+            margin-left: 0.75rem;
+            align-self: center;
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 2rem 0;
+        }
+
+        .page-btn {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--gray-900);
+            border: 1px solid var(--gray-800);
+            border-radius: var(--radius-md);
+            color: var(--gray-400);
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .page-btn:hover {
+            background: var(--gray-800);
+            color: var(--gray-100);
+        }
+
+        .page-btn.active {
+            background: var(--accent-1);
+            border-color: var(--accent-1);
+            color: white;
+        }
+
+        /* Version Sidebar (sticky) */
+        @media (min-width: 1200px) {
+            .main-content {
+                display: grid;
+                grid-template-columns: 200px 1fr;
+                gap: 3rem;
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 0 2rem;
+            }
+
+            .version-nav {
+                position: sticky;
+                top: 100px;
+                height: fit-content;
+            }
+
+            .version-nav-title {
+                font-size: 0.75rem;
+                text-transform: uppercase;
+                color: var(--gray-500);
+                margin-bottom: 1rem;
+                letter-spacing: 0.05em;
+            }
+
+            .version-nav-list {
+                list-style: none;
+            }
+
+            .version-nav-list li {
+                margin-bottom: 0.5rem;
+            }
+
+            .version-nav-list a {
+                display: block;
+                padding: 0.5rem 0.75rem;
+                color: var(--gray-400);
+                text-decoration: none;
+                border-radius: var(--radius-md);
+                font-size: 0.875rem;
+                transition: all 0.2s;
+            }
+
+            .version-nav-list a:hover {
+                background: var(--gray-900);
+                color: var(--gray-100);
+            }
+
+            .version-nav-list a.active {
+                background: rgba(255, 135, 0, 0.1);
+                color: var(--accent-1);
+            }
+
+            .timeline {
+                padding: 0;
+            }
+
+            .filters {
+                padding: 0;
+                margin-bottom: 2rem;
+            }
+        }
+
+        /* Responsive */
+        .version-nav {
+            display: none;
+        }
+
+        @media (min-width: 1200px) {
+            .version-nav {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="#" class="logo">BlackRoad</a>
+            <nav class="header-nav">
+                <a href="#">Docs</a>
+                <a href="#">API</a>
+                <a href="#">Blog</a>
+                <a href="#">GitHub</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero -->
+    <section class="hero">
+        <h1>Changelog</h1>
+        <p>Stay up to date with the latest features, improvements, and fixes. Subscribe to get notified about new releases.</p>
+        <form class="subscribe-form">
+            <input type="email" placeholder="your@email.com">
+            <button type="submit">Subscribe</button>
+        </form>
+    </section>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Version Navigation (Desktop) -->
+        <aside class="version-nav">
+            <h4 class="version-nav-title">Versions</h4>
+            <ul class="version-nav-list">
+                <li><a href="#v2.4.0" class="active">v2.4.0</a></li>
+                <li><a href="#v2.3.0">v2.3.0</a></li>
+                <li><a href="#v2.2.0">v2.2.0</a></li>
+                <li><a href="#v2.1.0">v2.1.0</a></li>
+                <li><a href="#v2.0.0">v2.0.0</a></li>
+            </ul>
+        </aside>
+
+        <div>
+            <!-- Filters -->
+            <div class="filters">
+                <button class="filter-btn active">All</button>
+                <button class="filter-btn">Features</button>
+                <button class="filter-btn">Fixes</button>
+                <button class="filter-btn">Improvements</button>
+                <button class="filter-btn">Breaking</button>
+                <button class="filter-btn">Security</button>
+            </div>
+
+            <!-- Timeline -->
+            <div class="timeline">
+                <!-- Version 2.4.0 -->
+                <div class="version-group" id="v2.4.0">
+                    <div class="version-header">
+                        <span class="version-number">v2.4.0</span>
+                        <span class="version-date">February 5, 2026</span>
+                        <span class="version-badge latest">Latest</span>
+                    </div>
+                    <div class="changes-grid">
+                        <div class="change-card">
+                            <div class="change-header">
+                                <span class="change-type feature">Feature</span>
+                                <h3 class="change-title">WebSocket Real-time Sync</h3>
+                            </div>
+                            <p class="change-description">
+                                Added real-time synchronization support via WebSockets. Data now syncs instantly across all connected clients without polling.
+                            </p>
+                            <div class="change-code">
+                                <span class="keyword">const</span> ws = <span class="keyword">new</span> <span class="function">BlackRoadSocket</span>(<span class="string">'wss://api.blackroad.io'</span>);<br>
+                                ws.<span class="function">subscribe</span>(<span class="string">'changes'</span>, (data) => {<br>
+                                &nbsp;&nbsp;<span class="comment">// Handle real-time updates</span><br>
+                                });
+                            </div>
+                            <div class="change-meta">
+                                <span class="change-meta-item">
+                                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+                                    <a href="#">#PR-847</a>
+                                </span>
+                                <span class="change-meta-item">
+                                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                                    @alexa
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="change-card">
+                            <div class="change-header">
+                                <span class="change-type improvement">Improvement</span>
+                                <h3 class="change-title">50% Faster Cold Starts</h3>
+                            </div>
+                            <p class="change-description">
+                                Optimized the initialization process to reduce cold start times by 50%. Workers now boot in under 5ms on average.
+                            </p>
+                            <div class="change-meta">
+                                <span class="change-meta-item">
+                                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+                                    <a href="#">#PR-852</a>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="change-card">
+                            <div class="change-header">
+                                <span class="change-type security">Security</span>
+                                <h3 class="change-title">Enhanced API Key Rotation</h3>
+                            </div>
+                            <p class="change-description">
+                                API keys can now be rotated without downtime. New keys are immediately active while old keys remain valid for a configurable grace period.
+                            </p>
+                            <div class="change-meta">
+                                <span class="change-meta-item">
+                                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+                                    <a href="#">#PR-849</a>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Version 2.3.0 -->
+                <div class="version-group" id="v2.3.0">
+                    <div class="version-header">
+                        <span class="version-number">v2.3.0</span>
+                        <span class="version-date">January 15, 2026</span>
+                    </div>
+                    <div class="changes-grid">
+                        <div class="change-card">
+                            <div class="change-header">
+                                <span class="change-type feature">Feature</span>
+                                <h3 class="change-title">Multi-Region Deployment</h3>
+                            </div>
+                            <p class="change-description">
+                                Deploy your applications to multiple regions simultaneously. Traffic is automatically routed to the nearest healthy region.
+                            </p>
+                            <div class="change-meta">
+                                <span class="change-meta-item">
+                                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+                                    <a href="#">#PR-798</a>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="change-card">
+                            <div class="change-header">
+                                <span class="change-type fix">Fix</span>
+                                <h3 class="change-title">Memory Leak in Long-Running Workers</h3>
+                            </div>
+                            <p class="change-description">
+                                Fixed a memory leak that occurred in workers running for more than 24 hours. Memory usage now remains stable indefinitely.
+                            </p>
+                            <div class="change-meta">
+                                <span class="change-meta-item">
+                                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+                                    <a href="#">#PR-801</a>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="change-card">
+                            <div class="change-header">
+                                <span class="change-type breaking">Breaking</span>
+                                <h3 class="change-title">Deprecated v1 API Endpoints Removed</h3>
+                            </div>
+                            <p class="change-description">
+                                The deprecated v1 API endpoints have been removed. Please migrate to v2 endpoints. See migration guide for details.
+                            </p>
+                            <div class="change-meta">
+                                <span class="change-meta-item">
+                                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                    <a href="#">Migration Guide</a>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Version 2.2.0 -->
+                <div class="version-group" id="v2.2.0">
+                    <div class="version-header">
+                        <span class="version-number">v2.2.0</span>
+                        <span class="version-date">December 20, 2025</span>
+                    </div>
+                    <div class="changes-grid">
+                        <div class="change-card">
+                            <div class="change-header">
+                                <span class="change-type feature">Feature</span>
+                                <h3 class="change-title">Custom Domain SSL</h3>
+                            </div>
+                            <p class="change-description">
+                                Automatic SSL certificate provisioning for custom domains. Certificates are renewed automatically 30 days before expiration.
+                            </p>
+                            <div class="change-meta">
+                                <span class="change-meta-item">
+                                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+                                    <a href="#">#PR-756</a>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="change-card">
+                            <div class="change-header">
+                                <span class="change-type deprecated">Deprecated</span>
+                                <h3 class="change-title">Legacy Auth Tokens</h3>
+                            </div>
+                            <p class="change-description">
+                                Legacy authentication tokens are now deprecated. Please migrate to the new JWT-based authentication by March 2026.
+                            </p>
+                            <div class="change-meta">
+                                <span class="change-meta-item">
+                                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    Sunset: March 2026
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pagination -->
+                <div class="pagination">
+                    <button class="page-btn">&larr;</button>
+                    <button class="page-btn active">1</button>
+                    <button class="page-btn">2</button>
+                    <button class="page-btn">3</button>
+                    <button class="page-btn">4</button>
+                    <button class="page-btn">&rarr;</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Filter functionality
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            });
+        });
+
+        // Version nav active state
+        const versionLinks = document.querySelectorAll('.version-nav-list a');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    versionLinks.forEach(link => link.classList.remove('active'));
+                    const activeLink = document.querySelector(`.version-nav-list a[href="#${entry.target.id}"]`);
+                    if (activeLink) activeLink.classList.add('active');
+                }
+            });
+        }, { threshold: 0.5 });
+
+        document.querySelectorAll('.version-group').forEach(group => {
+            observer.observe(group);
+        });
+    </script>
+</body>
+</html>

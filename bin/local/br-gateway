@@ -1,0 +1,218 @@
+#!/usr/bin/env bash
+# ============================================================================
+# BLACKROAD OS, INC. - PROPRIETARY AND CONFIDENTIAL
+# Copyright (c) 2025-2026 BlackRoad OS, Inc. All Rights Reserved.
+# ============================================================================
+# br-gateway - Manage the BlackRoad AI Gateway (api.blackroad.io)
+# Generate API keys, check usage, monitor providers, deploy updates
+
+set -eo pipefail
+
+GATEWAY_URL="${BLACKROAD_GATEWAY_URL:-https://api.blackroad.io}"
+ADMIN_KEY="${BLACKROAD_ADMIN_KEY:-}"
+
+PINK='\033[38;5;205m'
+AMBER='\033[38;5;214m'
+GREEN='\033[38;5;82m'
+BLUE='\033[38;5;69m'
+RED='\033[38;5;196m'
+DIM='\033[38;5;240m'
+RESET='\033[0m'
+
+show_banner() {
+  echo -e "${PINK}╔══════════════════════════════════════════════════════════╗${RESET}"
+  echo -e "${PINK}║${RESET}     ${PINK}BLACKROAD AI GATEWAY${RESET} — api.blackroad.io"
+  echo -e "${PINK}║${RESET}     One key. 30+ models. 7 providers."
+  echo -e "${PINK}╚══════════════════════════════════════════════════════════╝${RESET}"
+}
+
+# Health check
+cmd_health() {
+  echo -e "${DIM}Checking gateway...${RESET}"
+  local response
+  response=$(curl -sf --max-time 5 "${GATEWAY_URL}/healthz" 2>/dev/null)
+  if [[ -n "$response" ]]; then
+    echo -e "${GREEN}●${RESET} Gateway is UP"
+    echo "$response" | jq . 2>/dev/null || echo "$response"
+  else
+    echo -e "${RED}●${RESET} Gateway unreachable at ${GATEWAY_URL}"
+  fi
+}
+
+# Generate a new API key
+cmd_keygen() {
+  if [[ -z "$ADMIN_KEY" ]]; then
+    echo -e "${RED}Error:${RESET} Set BLACKROAD_ADMIN_KEY to generate keys" >&2
+    exit 1
+  fi
+
+  local name="${1:-}"
+  local tier="${2:-free}"
+  local email="${3:-}"
+
+  [[ -z "$name" ]] && { echo "Usage: br-gateway keygen <name> [tier] [email]"; exit 1; }
+
+  echo -e "${DIM}Generating ${tier} tier API key for '${name}'...${RESET}"
+
+  local response
+  response=$(curl -sf --max-time 10 "${GATEWAY_URL}/v1/keys/create" \
+    -H "Authorization: Bearer ${ADMIN_KEY}" \
+    -H "Content-Type: application/json" \
+    -d "$(jq -n --arg name "$name" --arg tier "$tier" --arg email "$email" \
+      '{name: $name, tier: $tier, user_id: $email}')")
+
+  if [[ -n "$response" ]]; then
+    echo ""
+    echo -e "${GREEN}API Key Created${RESET}"
+    echo "$response" | jq -r '"  Key:    \(.key)\n  Name:   \(.name)\n  Tier:   \(.tier)\n  RPM:    \(.rate_limit)\n  Daily:  \(.daily_limit)"' 2>/dev/null
+    echo ""
+    echo -e "${AMBER}Save this key now — it will not be shown again.${RESET}"
+  else
+    echo -e "${RED}Failed to generate key${RESET}" >&2
+  fi
+}
+
+# Check usage for a key
+cmd_usage() {
+  local key="${1:-}"
+  [[ -z "$key" ]] && { echo "Usage: br-gateway usage <api-key>"; exit 1; }
+
+  local response
+  response=$(curl -sf --max-time 5 "${GATEWAY_URL}/v1/keys/usage" \
+    -H "Authorization: Bearer ${key}")
+
+  if [[ -n "$response" ]]; then
+    echo -e "${BLUE}API Key Usage${RESET}"
+    echo "$response" | jq . 2>/dev/null || echo "$response"
+  else
+    echo -e "${RED}Invalid key or gateway unreachable${RESET}" >&2
+  fi
+}
+
+# List models
+cmd_models() {
+  local response
+  response=$(curl -sf --max-time 5 "${GATEWAY_URL}/v1/models")
+
+  if [[ -n "$response" ]]; then
+    echo -e "${BLUE}Available Models ($(echo "$response" | jq '.data | length') total)${RESET}"
+    echo ""
+    printf "  ${DIM}%-40s %-12s %-10s %-8s${RESET}\n" "MODEL" "PROVIDER" "SPEED" "TIER"
+    printf "  %-40s %-12s %-10s %-8s\n" "─────" "────────" "─────" "────"
+    echo "$response" | jq -r '.data[] | "  \(.id)|\(.provider)|\(.speed // "standard")|\(.tier // "standard")"' 2>/dev/null | \
+      while IFS='|' read -r id prov speed tier; do
+        printf "  %-40s %-12s %-10s %-8s\n" "$id" "$prov" "$speed" "$tier"
+      done
+  else
+    echo -e "${RED}Gateway unreachable${RESET}" >&2
+  fi
+}
+
+# Provider status
+cmd_providers() {
+  local response
+  response=$(curl -sf --max-time 5 "${GATEWAY_URL}/v1/providers")
+
+  if [[ -n "$response" ]]; then
+    echo -e "${BLUE}Providers${RESET}"
+    echo "$response" | jq -r '.providers[] | "  \(.name) (\(.format))"' 2>/dev/null
+  else
+    echo -e "${RED}Gateway unreachable${RESET}" >&2
+  fi
+}
+
+# Admin metrics
+cmd_metrics() {
+  if [[ -z "$ADMIN_KEY" ]]; then
+    echo -e "${RED}Error:${RESET} Set BLACKROAD_ADMIN_KEY" >&2
+    exit 1
+  fi
+
+  local response
+  response=$(curl -sf --max-time 5 "${GATEWAY_URL}/metrics" \
+    -H "Authorization: Bearer ${ADMIN_KEY}")
+
+  if [[ -n "$response" ]]; then
+    echo -e "${PINK}Gateway Metrics${RESET}"
+    echo "$response" | jq . 2>/dev/null || echo "$response"
+  else
+    echo -e "${RED}Failed to get metrics${RESET}" >&2
+  fi
+}
+
+# Quick test
+cmd_test() {
+  local key="${1:-}"
+  local model="${2:-llama-3.3-70b-versatile}"
+
+  [[ -z "$key" ]] && { echo "Usage: br-gateway test <api-key> [model]"; exit 1; }
+
+  echo -e "${DIM}Testing gateway with model: ${model}...${RESET}"
+
+  local start=$SECONDS
+  local response
+  response=$(curl -sf --max-time 30 "${GATEWAY_URL}/v1/chat/completions" \
+    -H "Authorization: Bearer ${key}" \
+    -H "Content-Type: application/json" \
+    -d "$(jq -n --arg model "$model" \
+      '{model: $model, messages: [{role: "user", content: "Say hello in exactly 5 words."}], max_tokens: 50}')")
+
+  local elapsed=$((SECONDS - start))
+
+  if [[ -n "$response" ]]; then
+    local content provider latency
+    content=$(echo "$response" | jq -r '.choices[0].message.content // "no response"' 2>/dev/null)
+    provider=$(echo "$response" | jq -r '._blackroad.provider // "unknown"' 2>/dev/null)
+    latency=$(echo "$response" | jq -r '._blackroad.latency_ms // "?"' 2>/dev/null)
+
+    echo -e "${GREEN}Response:${RESET} $content"
+    echo -e "${DIM}Provider: $provider | Latency: ${latency}ms | Total: ${elapsed}s${RESET}"
+  else
+    echo -e "${RED}Request failed${RESET}" >&2
+  fi
+}
+
+# Deploy
+cmd_deploy() {
+  echo -e "${AMBER}Deploying AI Gateway to Cloudflare...${RESET}"
+  cd ~/blackroad-operator/workers/ai-gateway
+  npx wrangler deploy
+}
+
+# Help
+cmd_help() {
+  show_banner
+  echo ""
+  echo -e "${BLUE}Commands:${RESET}"
+  echo "  health                        Check gateway health"
+  echo "  models                        List available models"
+  echo "  providers                     List providers"
+  echo "  test <key> [model]            Test API key with a request"
+  echo "  usage <key>                   Check usage for an API key"
+  echo "  keygen <name> [tier] [email]  Generate new API key (admin)"
+  echo "  metrics                       View request metrics (admin)"
+  echo "  deploy                        Deploy to Cloudflare Workers"
+  echo ""
+  echo -e "${AMBER}Tiers:${RESET}"
+  echo "  free        \$0/mo   10 RPM   50/day    Groq models"
+  echo "  starter     \$9/mo   30 RPM   1K/day    + Together, DeepSeek"
+  echo "  pro         \$29/mo  60 RPM   5K/day    + OpenAI, Gemini, Grok"
+  echo "  enterprise  \$99/mo  300 RPM  50K/day   + Claude, priority"
+  echo ""
+  echo -e "${DIM}Environment:${RESET}"
+  echo "  BLACKROAD_GATEWAY_URL   Gateway URL (default: https://api.blackroad.io)"
+  echo "  BLACKROAD_ADMIN_KEY     Admin API key for key management"
+}
+
+case "${1:-}" in
+  health|h)     cmd_health ;;
+  models|m)     cmd_models ;;
+  providers|p)  cmd_providers ;;
+  test|t)       shift; cmd_test "$@" ;;
+  usage|u)      shift; cmd_usage "$@" ;;
+  keygen|key|k) shift; cmd_keygen "$@" ;;
+  metrics)      cmd_metrics ;;
+  deploy|d)     cmd_deploy ;;
+  help|--help|-h|"") cmd_help ;;
+  *)            echo -e "${RED}Unknown: $1${RESET}"; cmd_help; exit 1 ;;
+esac

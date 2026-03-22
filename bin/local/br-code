@@ -1,0 +1,464 @@
+#!/usr/bin/env python3
+"""
+br-code — Sovereign coding CLI for BlackRoad OS
+Works like Claude Code but runs on your own hardware via Ollama.
+Reads files, edits files, runs commands, searches code.
+"""
+
+import sys, os, json, subprocess, re, readline, glob, signal
+
+W = "\033[1;37m"
+D = "\033[0;90m"
+N = "\033[0m"
+
+ENDPOINTS = [
+    "http://localhost:11434",
+    "http://192.168.4.38:11434",
+    "http://100.66.235.47:11434",
+    "http://192.168.4.96:11434",
+]
+
+OLLAMA = None
+MODEL = None
+
+def find_ollama():
+    global OLLAMA
+    import urllib.request
+    for ep in ENDPOINTS:
+        try:
+            urllib.request.urlopen(f"{ep}/api/tags", timeout=2)
+            OLLAMA = ep
+            return True
+        except:
+            continue
+    return False
+
+def find_model():
+    global MODEL
+    if os.environ.get("BR_CODE_MODEL"):
+        MODEL = os.environ["BR_CODE_MODEL"]
+        return
+    import urllib.request
+    try:
+        data = json.loads(urllib.request.urlopen(f"{OLLAMA}/api/tags", timeout=3).read())
+        models = [m["name"] for m in data.get("models", [])]
+        # prefer coding models, then blackroad, then anything
+        for pref in ["qwen2.5-coder", "codellama", "deepseek-coder", "starcoder",
+                      "blackroad-sophia", "blackroad-athena", "tinyllama"]:
+            for m in models:
+                if pref in m:
+                    MODEL = m
+                    return
+        if models:
+            MODEL = models[0]
+    except:
+        MODEL = "tinyllama"
+
+def ask_ollama(prompt, system="", stream=True):
+    import urllib.request
+    body = json.dumps({
+        "model": MODEL,
+        "prompt": prompt,
+        "system": system,
+        "stream": stream
+    }).encode()
+    req = urllib.request.Request(
+        f"{OLLAMA}/api/generate",
+        data=body,
+        headers={"Content-Type": "application/json"}
+    )
+    full = []
+    try:
+        with urllib.request.urlopen(req, timeout=120) as resp:
+            for line in resp:
+                line = line.decode().strip()
+                if not line:
+                    continue
+                try:
+                    d = json.loads(line)
+                    chunk = d.get("response", "")
+                    full.append(chunk)
+                    if stream:
+                        print(chunk, end="", flush=True)
+                    if d.get("done"):
+                        break
+                except:
+                    pass
+    except Exception as e:
+        print(f"\n  {D}error: {e}{N}")
+    if stream:
+        print()
+    return "".join(full)
+
+# ─── TOOLS ───
+
+def tool_read(path):
+    path = os.path.expanduser(path)
+    if not os.path.isfile(path):
+        return f"file not found: {path}"
+    try:
+        with open(path) as f:
+            lines = f.readlines()
+        numbered = []
+        for i, line in enumerate(lines[:200], 1):
+            numbered.append(f"{i:4d}  {line.rstrip()}")
+        result = "\n".join(numbered)
+        if len(lines) > 200:
+            result += f"\n  ... ({len(lines)} total lines, showing first 200)"
+        return result
+    except Exception as e:
+        return f"error reading {path}: {e}"
+
+def tool_write(path, content):
+    path = os.path.expanduser(path)
+    try:
+        os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
+        with open(path, "w") as f:
+            f.write(content)
+        return f"wrote {len(content)} bytes to {path}"
+    except Exception as e:
+        return f"error writing {path}: {e}"
+
+def tool_edit(path, old, new):
+    path = os.path.expanduser(path)
+    if not os.path.isfile(path):
+        return f"file not found: {path}"
+    try:
+        with open(path) as f:
+            content = f.read()
+        if old not in content:
+            return f"old_string not found in {path}"
+        content = content.replace(old, new, 1)
+        with open(path, "w") as f:
+            f.write(content)
+        return f"edited {path}"
+    except Exception as e:
+        return f"error editing {path}: {e}"
+
+def tool_run(cmd):
+    try:
+        result = subprocess.run(
+            cmd, shell=True, capture_output=True, text=True, timeout=30, cwd=os.getcwd()
+        )
+        out = result.stdout[:2000] if result.stdout else ""
+        err = result.stderr[:500] if result.stderr else ""
+        return f"exit {result.returncode}\n{out}{err}".strip()
+    except subprocess.TimeoutExpired:
+        return "command timed out (30s)"
+    except Exception as e:
+        return f"error: {e}"
+
+def tool_search(pattern, path="."):
+    try:
+        result = subprocess.run(
+            ["grep", "-rn", "--include=*.py", "--include=*.js", "--include=*.ts",
+             "--include=*.sh", "--include=*.go", "--include=*.rs", "--include=*.md",
+             "-l", pattern, path],
+            capture_output=True, text=True, timeout=10
+        )
+        files = result.stdout.strip().split("\n")[:20]
+        return "\n".join(f for f in files if f) or "no matches"
+    except:
+        return "search failed"
+
+def tool_ls(path="."):
+    path = os.path.expanduser(path)
+    try:
+        entries = sorted(os.listdir(path))
+        dirs = [f"{e}/" for e in entries if os.path.isdir(os.path.join(path, e)) and not e.startswith(".")]
+        files = [e for e in entries if os.path.isfile(os.path.join(path, e)) and not e.startswith(".")]
+        return "\n".join(dirs[:30] + files[:30]) or "(empty)"
+    except Exception as e:
+        return f"error: {e}"
+
+def tool_glob_find(pattern):
+    results = glob.glob(pattern, recursive=True)[:30]
+    return "\n".join(results) or "no matches"
+
+# ─── COMMAND PARSER ───
+
+def handle_command(line):
+    """Parse and execute /commands. Returns (handled, result)."""
+    line = line.strip()
+    if not line.startswith("/"):
+        return False, None
+
+    parts = line.split(None, 1)
+    cmd = parts[0].lower()
+    arg = parts[1] if len(parts) > 1 else ""
+
+    if cmd == "/read":
+        if not arg:
+            print(f"  {D}usage: /read <file>{N}")
+            return True, None
+        result = tool_read(arg)
+        print(result)
+        return True, None
+
+    elif cmd == "/edit":
+        print(f"  {D}usage: paste the edit as:{N}")
+        print(f"  {D}/edit <file>{N}")
+        print(f"  {D}then provide old and new strings in the chat{N}")
+        return True, None
+
+    elif cmd == "/write":
+        if not arg:
+            print(f"  {D}usage: /write <file>{N}")
+            print(f"  {D}then type content, end with EOF on its own line{N}")
+            return True, None
+        print(f"  {D}type content, end with EOF:{N}")
+        lines = []
+        while True:
+            try:
+                l = input()
+                if l.strip() == "EOF":
+                    break
+                lines.append(l)
+            except EOFError:
+                break
+        result = tool_write(arg, "\n".join(lines) + "\n")
+        print(f"  {result}")
+        return True, None
+
+    elif cmd == "/run" or cmd == "/!":
+        if not arg:
+            print(f"  {D}usage: /run <command>{N}")
+            return True, None
+        result = tool_run(arg)
+        print(result)
+        return True, None
+
+    elif cmd == "/search" or cmd == "/grep":
+        if not arg:
+            print(f"  {D}usage: /search <pattern>{N}")
+            return True, None
+        result = tool_search(arg)
+        print(result)
+        return True, None
+
+    elif cmd == "/ls":
+        result = tool_ls(arg or ".")
+        print(result)
+        return True, None
+
+    elif cmd == "/find":
+        if not arg:
+            print(f"  {D}usage: /find <glob-pattern>{N}")
+            return True, None
+        result = tool_glob_find(arg)
+        print(result)
+        return True, None
+
+    elif cmd == "/cd":
+        if not arg:
+            print(f"  {D}{os.getcwd()}{N}")
+            return True, None
+        try:
+            os.chdir(os.path.expanduser(arg))
+            print(f"  {D}{os.getcwd()}{N}")
+        except Exception as e:
+            print(f"  {D}error: {e}{N}")
+        return True, None
+
+    elif cmd == "/model":
+        global MODEL
+        if arg:
+            MODEL = arg
+            print(f"  {D}model: {MODEL}{N}")
+        else:
+            print(f"  {D}model: {MODEL} @ {OLLAMA}{N}")
+        return True, None
+
+    elif cmd == "/help":
+        print(f"""
+  {W}COMMANDS{N}
+
+    /read <file>          {D}read a file{N}
+    /write <file>         {D}create/overwrite a file{N}
+    /run <command>        {D}run a shell command{N}
+    /search <pattern>     {D}search code for pattern{N}
+    /find <glob>          {D}find files by pattern{N}
+    /ls [path]            {D}list directory{N}
+    /cd [path]            {D}change directory{N}
+    /model [name]         {D}show or change model{N}
+    /clear                {D}clear screen{N}
+    /help                 {D}show this{N}
+    exit                  {D}quit{N}
+
+  {D}anything else is sent to the model as a prompt{N}
+  {D}the model sees your working directory and can help with code{N}
+""")
+        return True, None
+
+    elif cmd == "/clear":
+        os.system("clear")
+        return True, None
+
+    return False, None
+
+# ─── REPL ───
+
+def get_context():
+    """Build context about the current project."""
+    cwd = os.getcwd()
+    ctx = [f"Working directory: {cwd}"]
+
+    # Git info
+    try:
+        branch = subprocess.run(["git", "branch", "--show-current"],
+                                capture_output=True, text=True, timeout=3).stdout.strip()
+        if branch:
+            ctx.append(f"Git branch: {branch}")
+    except:
+        pass
+
+    # File listing
+    try:
+        entries = os.listdir(cwd)
+        visible = [e for e in sorted(entries) if not e.startswith(".")][:20]
+        ctx.append(f"Files: {', '.join(visible)}")
+    except:
+        pass
+
+    # Package info
+    for pf in ["package.json", "pyproject.toml", "Cargo.toml", "go.mod"]:
+        if os.path.isfile(os.path.join(cwd, pf)):
+            ctx.append(f"Project type: {pf}")
+            break
+
+    return "\n".join(ctx)
+
+SYSTEM = """You are BR-CODE, a sovereign coding assistant running on BlackRoad OS hardware.
+You help write, edit, debug, and explain code. You are direct and concise.
+
+The user can use /commands to read files, run commands, etc.
+When you suggest code changes, show clear diffs or full file contents.
+When you suggest commands, show them clearly.
+
+Be helpful, warm, and direct. No fluff."""
+
+def repl():
+    context = get_context()
+    history = []
+
+    print(f"""
+  {W}BR-CODE{N}  {D}sovereign coding cli{N}
+  {D}────────────────────────────────────────────────{N}
+  {D}model: {MODEL} @ {OLLAMA}{N}
+  {D}dir:   {os.getcwd()}{N}
+  {D}/help for commands, exit to quit{N}
+""")
+
+    while True:
+        try:
+            line = input(f"  {W}>{N} ")
+        except (EOFError, KeyboardInterrupt):
+            print()
+            break
+
+        line = line.strip()
+        if not line:
+            continue
+        if line.lower() in ("exit", "quit", "/exit", "/quit"):
+            break
+
+        # Check for /commands
+        handled, _ = handle_command(line)
+        if handled:
+            continue
+
+        # Build prompt with context
+        prompt = f"[Context]\n{context}\n\n[User]\n{line}"
+        if history:
+            recent = history[-3:]  # last 3 exchanges
+            hist_str = "\n".join(f"[User] {h[0]}\n[Assistant] {h[1][:200]}" for h in recent)
+            prompt = f"[Recent conversation]\n{hist_str}\n\n{prompt}"
+
+        print()
+        print(f"  {D}br-code{N}  ", end="")
+        response = ask_ollama(prompt, system=SYSTEM)
+        print()
+
+        history.append((line, response[:500]))
+
+def main():
+    signal.signal(signal.SIGINT, lambda *_: (print(), sys.exit(0)))
+
+    if not find_ollama():
+        print(f"\n  {W}BR-CODE{N}  {D}no ollama found{N}")
+        for ep in ENDPOINTS:
+            print(f"  {D}  tried {ep}{N}")
+        sys.exit(1)
+
+    find_model()
+
+    # Direct command mode
+    if len(sys.argv) > 1:
+        cmd = sys.argv[1]
+        arg = " ".join(sys.argv[2:]) if len(sys.argv) > 2 else ""
+
+        if cmd in ("read", "cat"):
+            print(tool_read(arg))
+        elif cmd in ("run", "exec", "!"):
+            print(tool_run(arg))
+        elif cmd in ("search", "grep"):
+            print(tool_search(arg))
+        elif cmd in ("find", "glob"):
+            print(tool_glob_find(arg))
+        elif cmd in ("ls", "list"):
+            print(tool_ls(arg or "."))
+        elif cmd in ("ask", "q"):
+            context = get_context()
+            prompt = f"[Context]\n{context}\n\n[User]\n{arg}"
+            print(f"\n  {D}br-code{N}  ", end="")
+            ask_ollama(prompt, system=SYSTEM)
+            print()
+        elif cmd in ("explain", "review", "fix"):
+            if not arg:
+                print(f"  {D}usage: br-code {cmd} <file>{N}")
+                sys.exit(1)
+            content = tool_read(arg)
+            actions = {"explain": "Explain this code clearly and concisely",
+                       "review": "Review this code for bugs, security issues, and improvements",
+                       "fix": "Fix the bugs in this code. Show the corrected version"}
+            prompt = f"{actions[cmd]}:\n\n{content}"
+            print(f"\n  {D}br-code{N}  ", end="")
+            ask_ollama(prompt, system=SYSTEM)
+            print()
+        elif cmd in ("help", "--help", "-h"):
+            print(f"""
+  {W}BR-CODE{N}  {D}sovereign coding cli{N}
+
+  {W}INTERACTIVE{N}
+    br-code                    {D}start REPL{N}
+
+  {W}DIRECT{N}
+    br-code ask <question>     {D}ask anything{N}
+    br-code explain <file>     {D}explain code{N}
+    br-code review <file>      {D}code review{N}
+    br-code fix <file>         {D}find and fix bugs{N}
+    br-code read <file>        {D}read a file{N}
+    br-code run <command>      {D}run a shell command{N}
+    br-code search <pattern>   {D}search code{N}
+    br-code find <glob>        {D}find files{N}
+    br-code ls [path]          {D}list directory{N}
+
+  {W}REPL COMMANDS{N}
+    /read /write /run /search /find /ls /cd /model /clear /help
+
+  {D}BR_CODE_MODEL=codellama br-code   use a different model{N}
+""")
+        else:
+            # Treat as a question
+            context = get_context()
+            prompt = f"[Context]\n{context}\n\n[User]\n{' '.join(sys.argv[1:])}"
+            print(f"\n  {D}br-code{N}  ", end="")
+            ask_ollama(prompt, system=SYSTEM)
+            print()
+        sys.exit(0)
+
+    # Interactive REPL
+    repl()
+
+if __name__ == "__main__":
+    main()

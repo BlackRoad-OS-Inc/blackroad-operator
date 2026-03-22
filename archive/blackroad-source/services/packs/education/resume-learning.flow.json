@@ -1,0 +1,65 @@
+{
+  "flowId": "flow:education:resume-learning",
+  "version": "1.0.0",
+  "description": "🔁 Resume learning from last position",
+  "steps": [
+    {
+      "stepId": "find-last-position",
+      "action": "getLastAccessedItem",
+      "params": {
+        "learnerId": "${input.learnerId}",
+        "courseId": "${input.courseId}"
+      },
+      "onSuccess": "check-item-state",
+      "onFailure": "return-error"
+    },
+    {
+      "stepId": "check-item-state",
+      "action": "getProgressState",
+      "params": {
+        "learnerId": "${input.learnerId}",
+        "itemId": "${output.lastItemId}"
+      },
+      "onSuccess": "determine-next-step",
+      "onFailure": "return-error"
+    },
+    {
+      "stepId": "determine-next-step",
+      "action": "resolveNextItem",
+      "params": {
+        "currentItemId": "${output.lastItemId}",
+        "currentState": "${output.state}",
+        "courseId": "${input.courseId}"
+      },
+      "onSuccess": "update-access-timestamp",
+      "onFailure": "return-error"
+    },
+    {
+      "stepId": "update-access-timestamp",
+      "action": "updateLastAccessed",
+      "params": {
+        "learnerId": "${input.learnerId}",
+        "itemId": "${output.nextItemId}"
+      },
+      "onSuccess": "return-success"
+    },
+    {
+      "stepId": "return-error",
+      "action": "return",
+      "params": {
+        "status": "error",
+        "message": "${error.message}"
+      }
+    },
+    {
+      "stepId": "return-success",
+      "action": "return",
+      "params": {
+        "status": "success",
+        "nextItemId": "${output.nextItemId}",
+        "nextItemType": "${output.nextItemType}",
+        "courseProgress": "${output.courseProgress}"
+      }
+    }
+  ]
+}

@@ -1,0 +1,246 @@
+# 📅 Calendar Bot Agent
+# Assists with content scheduling and publishing coordination
+
+name: calendar-bot
+description: |
+  🤖 AI agent that assists with content scheduling, optimal timing suggestions,
+  and cross-channel coordination. Suggests schedules that require human
+  confirmation before publishing.
+version: "1.0.0"
+
+# 🎯 Agent capabilities
+capabilities:
+  - optimal_timing_suggestions
+  - content_calendar_population
+  - publishing_cadence_recommendations
+  - cross_channel_coordination
+  - conflict_detection
+  - reminder_scheduling
+
+# 📡 Supported channels
+supported_channels:
+  - twitter
+  - linkedin
+  - instagram
+  - facebook
+  - tiktok
+  - youtube
+  - email
+  - blog
+  - podcast
+  - newsletter
+
+# 🔁 Workflow integration
+workflow_states:
+  allowed_in:
+    - schedule  # Campaign workflow
+    - publish   # Content pipeline (for scheduling, not actual publish)
+  not_allowed_in:
+    - ideation
+    - draft
+    - review
+    - approve
+    - measure
+    - archive
+
+# ✅ Allowed actions
+allowed_actions:
+  - action: suggest_publish_time
+    description: Recommend optimal publishing time based on channel and audience
+    requires_approval: true
+    
+  - action: populate_calendar
+    description: Add entries to content calendar (draft state)
+    requires_approval: true
+    
+  - action: detect_conflicts
+    description: Identify scheduling conflicts or overlaps
+    requires_approval: false
+    
+  - action: suggest_cadence
+    description: Recommend publishing frequency
+    requires_approval: true
+    
+  - action: coordinate_channels
+    description: Align timing across multiple channels
+    requires_approval: true
+    
+  - action: set_reminders
+    description: Create reminders for content deadlines
+    requires_approval: false
+    
+  - action: analyze_timing_performance
+    description: Review historical timing data
+    requires_approval: false
+
+# 🚫 Restricted actions
+restricted_actions:
+  - action: publish_content
+    reason: Actual publishing requires human confirmation
+    
+  - action: modify_approved_schedule
+    reason: Changes to approved schedules require human review
+    
+  - action: access_platform_directly
+    reason: No direct platform access; works through calendar only
+
+# 📊 Scheduling intelligence
+scheduling_factors:
+  audience_based:
+    - timezone_distribution
+    - historical_engagement_patterns
+    - audience_activity_windows
+    
+  channel_based:
+    - platform_best_practices
+    - algorithm_considerations
+    - competitive_timing
+    
+  content_based:
+    - content_type_optimal_times
+    - campaign_dependencies
+    - seasonal_relevance
+    
+  business_based:
+    - key_dates_and_events
+    - product_launch_timing
+    - sales_cycle_alignment
+
+# 📅 Calendar operations
+calendar_operations:
+  view:
+    - daily_view
+    - weekly_view
+    - monthly_view
+    - channel_view
+    - campaign_view
+    
+  suggest:
+    - open_slots
+    - optimal_slots
+    - alternative_times
+    
+  check:
+    - conflicts
+    - gaps
+    - overload
+    - dependencies
+
+# 📊 Quality checks
+quality_checks:
+  - check: conflict_detection
+    description: No double-booking same content on same channel
+    
+  - check: cadence_balance
+    description: Maintain healthy posting frequency
+    
+  - check: channel_appropriateness
+    description: Content type matches channel best practices
+    
+  - check: timezone_coverage
+    description: Consider audience timezone distribution
+    
+  - check: campaign_alignment
+    description: Ensure timing aligns with campaign strategy
+
+# ⚠️ Risk handling
+risk_handling:
+  standard:
+    auto_suggestions: true
+    requires_confirmation: true
+    
+  time_sensitive:
+    # Content with hard deadlines (events, launches)
+    auto_suggestions: true
+    requires_confirmation: true
+    flag_message: "Time-sensitive content - confirm timing carefully"
+    send_reminders: true
+    reminder_lead_time: "24h"
+    
+  high_stakes:
+    # Major launches, partnerships
+    auto_suggestions: true
+    requires_confirmation: true
+    requires_review:
+      - marketing_ops
+      - campaign_owner
+    flag_message: "High-stakes timing - multiple approvals required"
+
+# 📝 Output format
+output_format:
+  schedule_suggestion:
+    - content_id: string
+    - channel: string
+    - suggested_datetime: datetime
+    - timezone: string
+    - confidence: number
+    - reasoning: string
+    - alternatives: array
+    
+  calendar_entry:
+    - content_id: string
+    - title: string
+    - channel: string
+    - scheduled_datetime: datetime
+    - status: enum [draft, confirmed, published]
+    - dependencies: array
+    - reminders: array
+    
+  metadata:
+    - agent_id: calendar-bot
+    - timestamp: true
+    - calendar_period: string
+
+# 🔄 Feedback loops
+feedback_patterns:
+  performance_learning:
+    trigger: published_content_performance_data
+    action: analyze timing vs engagement
+    update_recommendations: true
+    
+  manual_adjustment_learning:
+    trigger: human_changes_suggested_time
+    action: note preference patterns
+    update_model: true
+
+# 🔐 Security
+security:
+  data_access:
+    - content_calendar: read_write (draft entries only)
+    - published_content: read
+    - performance_data: read
+    - campaign_schedules: read
+  
+  forbidden_access:
+    - platform_tokens
+    - direct_publishing_apis
+    - user_credentials
+
+# 📊 Metrics tracked
+metrics:
+  - suggestions_made
+  - suggestions_accepted
+  - timing_accuracy
+  - conflict_detections
+  - on_time_publish_rate
+
+# 🔗 Integration hooks
+integrations:
+  dashboard:
+    target: blackroad-os-prism-console
+    data:
+      - calendar_overview
+      - upcoming_content
+      - publishing_status
+    
+  campaigns:
+    source: campaign-flow
+    sync: bidirectional
+    fields:
+      - schedule
+      - timeline
+      - dependencies
+      
+  content_pipeline:
+    source: content-pipeline
+    trigger: content_ready_for_publish

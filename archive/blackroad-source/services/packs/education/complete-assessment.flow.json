@@ -1,0 +1,190 @@
+{
+  "flowId": "flow:education:complete-assessment",
+  "version": "1.0.0",
+  "description": "🔁 Process assessment completion and grading",
+  "steps": [
+    {
+      "stepId": "validate-submission",
+      "action": "validateSubmission",
+      "params": {
+        "learnerId": "${input.learnerId}",
+        "assessmentId": "${input.assessmentId}",
+        "answers": "${input.answers}"
+      },
+      "onSuccess": "check-attempt-limit",
+      "onFailure": "return-validation-error"
+    },
+    {
+      "stepId": "check-attempt-limit",
+      "action": "checkAttemptLimit",
+      "params": {
+        "learnerId": "${input.learnerId}",
+        "assessmentId": "${input.assessmentId}"
+      },
+      "onSuccess": "grade-assessment",
+      "onFailure": "return-attempt-limit-error"
+    },
+    {
+      "stepId": "grade-assessment",
+      "action": "gradeAssessment",
+      "params": {
+        "assessmentId": "${input.assessmentId}",
+        "answers": "${input.answers}",
+        "rubricId": "${assessment.rubricId}"
+      },
+      "onSuccess": "update-progress",
+      "onFailure": "return-error"
+    },
+    {
+      "stepId": "update-progress",
+      "action": "updateProgress",
+      "params": {
+        "learnerId": "${input.learnerId}",
+        "itemId": "${input.assessmentId}",
+        "itemType": "assessment",
+        "score": "${output.score}",
+        "attemptCount": "${output.attemptCount}"
+      },
+      "onSuccess": "check-passing-score",
+      "onFailure": "return-error"
+    },
+    {
+      "stepId": "check-passing-score",
+      "action": "compareScore",
+      "params": {
+        "score": "${output.score}",
+        "passingScore": "${assessment.passingScore}"
+      },
+      "onSuccess": "transition-to-completed",
+      "onFailure": "provide-retry-feedback"
+    },
+    {
+      "stepId": "transition-to-completed",
+      "action": "updateProgressState",
+      "params": {
+        "learnerId": "${input.learnerId}",
+        "itemId": "${input.assessmentId}",
+        "itemType": "assessment",
+        "newState": "completed"
+      },
+      "onSuccess": "trigger-agent-feedback",
+      "onFailure": "return-error"
+    },
+    {
+      "stepId": "provide-retry-feedback",
+      "action": "generateRetryFeedback",
+      "params": {
+        "agentId": "agent:explainer-tutor",
+        "score": "${output.score}",
+        "incorrectAnswers": "${output.incorrectAnswers}",
+        "allowRetry": "${assessment.allowRetry}"
+      },
+      "onSuccess": "return-retry-result"
+    },
+    {
+      "stepId": "trigger-agent-feedback",
+      "action": "requestAgentFeedback",
+      "params": {
+        "agentId": "agent:grader-assistant",
+        "learnerId": "${input.learnerId}",
+        "assessmentId": "${input.assessmentId}",
+        "score": "${output.score}",
+        "answers": "${input.answers}"
+      },
+      "onSuccess": "check-archive-required",
+      "onFailure": "return-success-without-feedback"
+    },
+    {
+      "stepId": "check-archive-required",
+      "action": "checkArchiveRequired",
+      "params": {
+        "assessmentId": "${input.assessmentId}"
+      },
+      "onSuccess": "archive-completion",
+      "onFailure": "return-success"
+    },
+    {
+      "stepId": "archive-completion",
+      "action": "archiveCompletion",
+      "params": {
+        "learnerId": "${input.learnerId}",
+        "itemId": "${input.assessmentId}",
+        "score": "${output.score}",
+        "completedAt": "${timestamp}"
+      },
+      "onSuccess": "return-success",
+      "onFailure": "return-success-with-archive-warning"
+    },
+    {
+      "stepId": "return-validation-error",
+      "action": "return",
+      "params": {
+        "status": "error",
+        "message": "Submission validation failed",
+        "errors": "${output.validationErrors}"
+      }
+    },
+    {
+      "stepId": "return-attempt-limit-error",
+      "action": "return",
+      "params": {
+        "status": "error",
+        "message": "Maximum attempts exceeded",
+        "maxAttempts": "${assessment.maxAttempts}",
+        "currentAttempts": "${output.attemptCount}"
+      }
+    },
+    {
+      "stepId": "return-retry-result",
+      "action": "return",
+      "params": {
+        "status": "retry-needed",
+        "score": "${output.score}",
+        "passingScore": "${assessment.passingScore}",
+        "feedback": "${output.feedback}",
+        "allowRetry": "${assessment.allowRetry}",
+        "attemptsRemaining": "${output.attemptsRemaining}"
+      }
+    },
+    {
+      "stepId": "return-success",
+      "action": "return",
+      "params": {
+        "status": "success",
+        "score": "${output.score}",
+        "passed": true,
+        "feedback": "${output.feedback}",
+        "archiveRef": "${output.archiveRef}"
+      }
+    },
+    {
+      "stepId": "return-success-without-feedback",
+      "action": "return",
+      "params": {
+        "status": "success",
+        "score": "${output.score}",
+        "passed": true,
+        "message": "Assessment completed successfully"
+      }
+    },
+    {
+      "stepId": "return-success-with-archive-warning",
+      "action": "return",
+      "params": {
+        "status": "success",
+        "score": "${output.score}",
+        "passed": true,
+        "feedback": "${output.feedback}",
+        "warning": "Archival failed but completion recorded"
+      }
+    },
+    {
+      "stepId": "return-error",
+      "action": "return",
+      "params": {
+        "status": "error",
+        "message": "${error.message}"
+      }
+    }
+  ]
+}

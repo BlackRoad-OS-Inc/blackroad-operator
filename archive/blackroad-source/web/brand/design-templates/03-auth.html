@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign In — BlackRoad OS</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --gray-950: #0a0a0a;
+  --gray-900: #171717;
+  --gray-850: #1e1e1e;
+  --gray-800: #262626;
+  --gray-700: #404040;
+  --gray-600: #525252;
+  --gray-500: #737373;
+  --gray-400: #a3a3a3;
+  --gray-300: #d4d4d4;
+  --gray-200: #e5e5e5;
+  --gray-100: #f5f5f5;
+  --white: #ffffff;
+  --accent-1: #ff8700;
+  --accent-3: #ff0087;
+  --accent-6: #1e90ff;
+  --error: #ef4444;
+  --font-headline: 'Space Grotesk', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: var(--gray-950);
+  color: var(--gray-300);
+  font-family: var(--font-body);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+body::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at 30% 30%, rgba(255,0,135,0.05) 0%, transparent 50%),
+              radial-gradient(circle at 70% 70%, rgba(30,144,255,0.05) 0%, transparent 50%);
+  animation: bgMove 20s ease-in-out infinite;
+}
+@keyframes bgMove {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(-5%, -5%); }
+}
+
+.auth-container {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 400px;
+  padding: 20px;
+}
+
+.auth-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 40px;
+}
+.auth-logo-mark {
+  width: 40px;
+  height: 40px;
+  background: var(--gray-100);
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-headline);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--gray-950);
+}
+.auth-logo-text {
+  font-family: var(--font-headline);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--gray-100);
+}
+
+.auth-card {
+  background: var(--gray-900);
+  border: 1px solid var(--gray-800);
+  border-radius: var(--radius-xl);
+  padding: 32px;
+}
+
+.auth-title {
+  font-family: var(--font-headline);
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--gray-100);
+  text-align: center;
+  margin-bottom: 8px;
+}
+.auth-subtitle {
+  font-size: 14px;
+  color: var(--gray-500);
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.input-group {
+  margin-bottom: 20px;
+}
+.input-label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--gray-500);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 8px;
+}
+.input {
+  width: 100%;
+  background: var(--gray-950);
+  border: 1px solid var(--gray-800);
+  color: var(--gray-100);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  transition: all 200ms ease;
+  outline: none;
+}
+.input:hover { border-color: var(--gray-700); }
+.input:focus {
+  border-color: var(--accent-6);
+  box-shadow: 0 0 0 3px rgba(30,144,255,0.1);
+}
+.input::placeholder { color: var(--gray-600); }
+
+.input-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.checkbox {
+  width: 18px;
+  height: 18px;
+  background: var(--gray-950);
+  border: 1.5px solid var(--gray-700);
+  border-radius: 4px;
+  cursor: pointer;
+}
+.checkbox-label {
+  font-size: 13px;
+  color: var(--gray-400);
+  cursor: pointer;
+}
+.link {
+  font-size: 13px;
+  color: var(--accent-6);
+  text-decoration: none;
+  transition: color 150ms ease;
+}
+.link:hover { color: var(--gray-100); }
+
+.btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 14px 24px;
+  border-radius: var(--radius-md);
+  border: none;
+  cursor: pointer;
+  transition: all 200ms ease;
+  text-decoration: none;
+}
+.btn-primary {
+  background: var(--gray-100);
+  color: var(--gray-900);
+}
+.btn-primary:hover {
+  background: var(--white);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+.btn-gradient {
+  background: linear-gradient(135deg, var(--accent-1), var(--accent-3), var(--accent-6));
+  color: var(--white);
+  background-size: 200% 200%;
+  animation: gradientShift 3s ease infinite;
+}
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.btn-gradient:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 24px rgba(255,0,135,0.3);
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 24px 0;
+}
+.divider-line {
+  flex: 1;
+  height: 1px;
+  background: var(--gray-800);
+}
+.divider-text {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--gray-600);
+  text-transform: uppercase;
+}
+
+.btn-oauth {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: transparent;
+  border: 1px solid var(--gray-800);
+  color: var(--gray-300);
+  font-family: var(--font-body);
+  font-size: 14px;
+  padding: 12px 24px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 150ms ease;
+  margin-bottom: 12px;
+}
+.btn-oauth:hover {
+  border-color: var(--gray-700);
+  background: var(--gray-850);
+}
+.btn-oauth:last-child { margin-bottom: 0; }
+
+.auth-footer {
+  text-align: center;
+  margin-top: 24px;
+  font-size: 14px;
+  color: var(--gray-500);
+}
+.auth-footer a {
+  color: var(--accent-6);
+  text-decoration: none;
+}
+.auth-footer a:hover { color: var(--gray-100); }
+
+.gradient-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent-1), var(--accent-3), var(--accent-6));
+}
+</style>
+</head>
+<body>
+
+<div class="gradient-bar"></div>
+
+<div class="auth-container">
+  <div class="auth-logo">
+    <div class="auth-logo-mark">B</div>
+    <span class="auth-logo-text">BlackRoad</span>
+  </div>
+
+  <div class="auth-card">
+    <h1 class="auth-title">Welcome back</h1>
+    <p class="auth-subtitle">Sign in to your account to continue</p>
+
+    <form>
+      <div class="input-group">
+        <label class="input-label">Email</label>
+        <input type="email" class="input" placeholder="name@company.com">
+      </div>
+
+      <div class="input-group">
+        <label class="input-label">Password</label>
+        <input type="password" class="input" placeholder="••••••••••••">
+      </div>
+
+      <div class="input-row">
+        <label class="checkbox-group">
+          <input type="checkbox" class="checkbox">
+          <span class="checkbox-label">Remember me</span>
+        </label>
+        <a href="#" class="link">Forgot password?</a>
+      </div>
+
+      <button type="submit" class="btn btn-primary">Sign In</button>
+    </form>
+
+    <div class="divider">
+      <div class="divider-line"></div>
+      <span class="divider-text">or continue with</span>
+      <div class="divider-line"></div>
+    </div>
+
+    <button class="btn-oauth">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      Continue with Google
+    </button>
+    <button class="btn-oauth">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+      Continue with GitHub
+    </button>
+  </div>
+
+  <p class="auth-footer">
+    Don't have an account? <a href="#">Sign up</a>
+  </p>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — BlackRoad OS</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --gray-950: #0a0a0a;
+  --gray-900: #171717;
+  --gray-850: #1e1e1e;
+  --gray-800: #262626;
+  --gray-700: #404040;
+  --gray-600: #525252;
+  --gray-500: #737373;
+  --gray-400: #a3a3a3;
+  --gray-300: #d4d4d4;
+  --gray-200: #e5e5e5;
+  --gray-100: #f5f5f5;
+  --white: #ffffff;
+  --accent-1: #ff8700;
+  --accent-2: #ff5f00;
+  --accent-3: #ff0087;
+  --accent-4: #af5fd7;
+  --accent-5: #ff00ff;
+  --accent-6: #1e90ff;
+  --success: #22c55e;
+  --warning: #eab308;
+  --error: #ef4444;
+  --font-headline: 'Space Grotesk', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-full: 9999px;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: var(--gray-950);
+  color: var(--gray-300);
+  font-family: var(--font-body);
+  line-height: 1.6;
+  display: flex;
+  min-height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 240px;
+  background: var(--gray-900);
+  border-right: 1px solid var(--gray-800);
+  padding: 20px 0;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  height: 100vh;
+}
+.sidebar-logo {
+  font-family: var(--font-headline);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--gray-100);
+  padding: 0 20px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.sidebar-logo-mark {
+  width: 24px;
+  height: 24px;
+  background: var(--gray-100);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: var(--gray-950);
+}
+.sidebar-section {
+  margin-bottom: 24px;
+}
+.sidebar-section-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--gray-600);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  padding: 0 20px;
+  margin-bottom: 8px;
+}
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  font-size: 13px;
+  color: var(--gray-400);
+  text-decoration: none;
+  transition: all 150ms ease;
+}
+.sidebar-link:hover {
+  background: var(--gray-800);
+  color: var(--gray-200);
+}
+.sidebar-link.active {
+  background: var(--gray-800);
+  color: var(--gray-100);
+  border-left: 2px solid var(--accent-6);
+}
+.sidebar-link-icon { font-size: 16px; }
+.sidebar-spacer { flex: 1; }
+.sidebar-user {
+  padding: 16px 20px;
+  border-top: 1px solid var(--gray-800);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.sidebar-avatar {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, var(--accent-1), var(--accent-3));
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-headline);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--white);
+}
+.sidebar-user-name {
+  font-size: 13px;
+  color: var(--gray-200);
+}
+.sidebar-user-email {
+  font-size: 11px;
+  color: var(--gray-500);
+}
+
+/* Main */
+.main {
+  flex: 1;
+  margin-left: 240px;
+  padding: 24px;
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+}
+.header-title {
+  font-family: var(--font-headline);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--gray-100);
+}
+.header-actions { display: flex; gap: 12px; }
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  border: none;
+  cursor: pointer;
+  transition: all 150ms ease;
+  text-decoration: none;
+}
+.btn-primary {
+  background: var(--gray-100);
+  color: var(--gray-900);
+}
+.btn-primary:hover { background: var(--white); }
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--gray-700);
+  color: var(--gray-300);
+}
+.btn-ghost:hover {
+  border-color: var(--gray-600);
+  background: var(--gray-900);
+}
+
+/* Stats Grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 32px;
+}
+.stat-card {
+  background: var(--gray-900);
+  border: 1px solid var(--gray-800);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+}
+.stat-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--gray-500);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.stat-value {
+  font-family: var(--font-mono);
+  font-size: 32px;
+  font-weight: 600;
+  color: var(--gray-100);
+  margin-top: 8px;
+}
+.stat-change {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  margin-top: 8px;
+  padding: 2px 8px;
+  border-radius: var(--radius-md);
+}
+.stat-up { color: var(--success); background: rgba(34,197,94,0.1); }
+.stat-down { color: var(--error); background: rgba(239,68,68,0.1); }
+
+/* Content Grid */
+.content-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+}
+
+/* Card */
+.card {
+  background: var(--gray-900);
+  border: 1px solid var(--gray-800);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+}
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.card-title {
+  font-family: var(--font-headline);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--gray-200);
+}
+
+/* Table */
+.table-container { overflow-x: auto; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+th {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--gray-500);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-align: left;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--gray-800);
+}
+td {
+  font-size: 13px;
+  color: var(--gray-300);
+  padding: 12px 0;
+  border-bottom: 1px solid var(--gray-800);
+}
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(255,255,255,0.02); }
+.mono { font-family: var(--font-mono); font-size: 12px; }
+
+/* Badge */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+}
+.badge-success {
+  background: rgba(34,197,94,0.15);
+  color: var(--success);
+  border: 1px solid rgba(34,197,94,0.2);
+}
+.badge-warning {
+  background: rgba(234,179,8,0.15);
+  color: var(--warning);
+  border: 1px solid rgba(234,179,8,0.2);
+}
+.badge-error {
+  background: rgba(239,68,68,0.15);
+  color: var(--error);
+  border: 1px solid rgba(239,68,68,0.2);
+}
+.badge-dot::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+/* Activity List */
+.activity-list { display: flex; flex-direction: column; gap: 12px; }
+.activity-item {
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+  border-radius: var(--radius-md);
+  background: var(--gray-850);
+}
+.activity-icon {
+  width: 32px;
+  height: 32px;
+  background: var(--gray-800);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.activity-content { flex: 1; }
+.activity-title { font-size: 13px; color: var(--gray-200); }
+.activity-time {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--gray-500);
+  margin-top: 2px;
+}
+
+/* Progress */
+.progress-bar {
+  height: 6px;
+  background: var(--gray-800);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  margin-top: 8px;
+}
+.progress-fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: linear-gradient(90deg, var(--accent-1), var(--accent-3), var(--accent-6));
+}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-mark">B</div>
+    BlackRoad
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Overview</div>
+    <a href="#" class="sidebar-link active">
+      <span class="sidebar-link-icon">📊</span>
+      Dashboard
+    </a>
+    <a href="#" class="sidebar-link">
+      <span class="sidebar-link-icon">🤖</span>
+      Agents
+    </a>
+    <a href="#" class="sidebar-link">
+      <span class="sidebar-link-icon">🌐</span>
+      Deployments
+    </a>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Infrastructure</div>
+    <a href="#" class="sidebar-link">
+      <span class="sidebar-link-icon">🖥️</span>
+      Workers
+    </a>
+    <a href="#" class="sidebar-link">
+      <span class="sidebar-link-icon">🗄️</span>
+      Storage
+    </a>
+    <a href="#" class="sidebar-link">
+      <span class="sidebar-link-icon">📡</span>
+      DNS
+    </a>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Settings</div>
+    <a href="#" class="sidebar-link">
+      <span class="sidebar-link-icon">⚙️</span>
+      Settings
+    </a>
+    <a href="#" class="sidebar-link">
+      <span class="sidebar-link-icon">🔑</span>
+      API Keys
+    </a>
+  </div>
+
+  <div class="sidebar-spacer"></div>
+
+  <div class="sidebar-user">
+    <div class="sidebar-avatar">A</div>
+    <div>
+      <div class="sidebar-user-name">Alexa</div>
+      <div class="sidebar-user-email">alexa@blackroad.io</div>
+    </div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="header">
+    <h1 class="header-title">Dashboard</h1>
+    <div class="header-actions">
+      <button class="btn btn-ghost">Export</button>
+      <button class="btn btn-primary">+ Deploy Agent</button>
+    </div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">Active Agents</div>
+      <div class="stat-value">1,247</div>
+      <div class="stat-change stat-up">↑ 12.5%</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Uptime</div>
+      <div class="stat-value">99.9%</div>
+      <div class="stat-change stat-up">↑ 0.2%</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Latency (avg)</div>
+      <div class="stat-value">23ms</div>
+      <div class="stat-change stat-up">↓ 4ms</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Requests/min</div>
+      <div class="stat-value">8.4K</div>
+      <div class="stat-change stat-up">↑ 18%</div>
+    </div>
+  </div>
+
+  <div class="content-grid">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Active Agents</span>
+        <a href="#" class="btn btn-ghost" style="padding: 6px 12px; font-size: 12px;">View All →</a>
+      </div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Agent</th>
+              <th>Status</th>
+              <th>Uptime</th>
+              <th>Memory</th>
+              <th>Region</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="mono" style="color: var(--gray-200);">Lucidia-001</span></td>
+              <td><span class="badge badge-success badge-dot">Online</span></td>
+              <td class="mono">99.9%</td>
+              <td class="mono">2.4 GB</td>
+              <td class="mono">US-CENTRAL</td>
+            </tr>
+            <tr>
+              <td><span class="mono" style="color: var(--gray-200);">Alice-GW</span></td>
+              <td><span class="badge badge-success badge-dot">Online</span></td>
+              <td class="mono">99.7%</td>
+              <td class="mono">1.8 GB</td>
+              <td class="mono">US-CENTRAL</td>
+            </tr>
+            <tr>
+              <td><span class="mono" style="color: var(--gray-200);">Octavia-W1</span></td>
+              <td><span class="badge badge-warning badge-dot">Degraded</span></td>
+              <td class="mono">97.2%</td>
+              <td class="mono">3.1 GB</td>
+              <td class="mono">US-CENTRAL</td>
+            </tr>
+            <tr>
+              <td><span class="mono" style="color: var(--gray-200);">Prism-API</span></td>
+              <td><span class="badge badge-error badge-dot">Offline</span></td>
+              <td class="mono">—</td>
+              <td class="mono">—</td>
+              <td class="mono">US-EAST</td>
+            </tr>
+            <tr>
+              <td><span class="mono" style="color: var(--gray-200);">Silas-Core</span></td>
+              <td><span class="badge badge-success badge-dot">Online</span></td>
+              <td class="mono">99.8%</td>
+              <td class="mono">2.1 GB</td>
+              <td class="mono">EU-WEST</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 24px;">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Recent Activity</span>
+        </div>
+        <div class="activity-list">
+          <div class="activity-item">
+            <div class="activity-icon">🚀</div>
+            <div class="activity-content">
+              <div class="activity-title">Lucidia-001 deployed</div>
+              <div class="activity-time">2 minutes ago</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-icon">⚠️</div>
+            <div class="activity-content">
+              <div class="activity-title">Octavia-W1 memory warning</div>
+              <div class="activity-time">15 minutes ago</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-icon">✓</div>
+            <div class="activity-content">
+              <div class="activity-title">Backup completed</div>
+              <div class="activity-time">1 hour ago</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Resource Usage</span>
+        </div>
+        <div style="margin-bottom: 16px;">
+          <div style="display: flex; justify-content: space-between; font-size: 12px;">
+            <span style="color: var(--gray-400);">CPU</span>
+            <span class="mono" style="color: var(--gray-300);">67%</span>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" style="width: 67%;"></div></div>
+        </div>
+        <div style="margin-bottom: 16px;">
+          <div style="display: flex; justify-content: space-between; font-size: 12px;">
+            <span style="color: var(--gray-400);">Memory</span>
+            <span class="mono" style="color: var(--gray-300);">84%</span>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" style="width: 84%;"></div></div>
+        </div>
+        <div>
+          <div style="display: flex; justify-content: space-between; font-size: 12px;">
+            <span style="color: var(--gray-400);">Storage</span>
+            <span class="mono" style="color: var(--gray-300);">42%</span>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" style="width: 42%;"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+</body>
+</html>

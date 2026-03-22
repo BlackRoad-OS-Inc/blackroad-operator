@@ -1,0 +1,115 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://blackroad-os.dev/schemas/education/assessment.json",
+  "title": "Assessment",
+  "description": "✅ An assessment to evaluate learner understanding",
+  "type": "object",
+  "required": ["id", "title", "type", "questions"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for the assessment",
+      "pattern": "^assessment:[a-z0-9-]+$"
+    },
+    "title": {
+      "type": "string",
+      "description": "Assessment title",
+      "minLength": 1
+    },
+    "type": {
+      "type": "string",
+      "enum": ["quiz", "exam", "project", "presentation", "portfolio"],
+      "description": "Type of assessment"
+    },
+    "description": {
+      "type": "string",
+      "description": "Assessment instructions"
+    },
+    "timeLimit": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Time limit in minutes (optional)"
+    },
+    "passingScore": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Minimum score to pass (percentage)"
+    },
+    "allowRetry": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether retries are allowed"
+    },
+    "maxAttempts": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Maximum number of attempts"
+    },
+    "questions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/question"
+      },
+      "minItems": 1,
+      "description": "Assessment questions"
+    },
+    "rubricId": {
+      "type": "string",
+      "description": "Reference to evaluation rubric for grading"
+    }
+  },
+  "definitions": {
+    "question": {
+      "type": "object",
+      "required": ["id", "type", "prompt"],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["multiple-choice", "true-false", "short-answer", "essay", "code", "practical"]
+        },
+        "prompt": {
+          "type": "string",
+          "minLength": 1
+        },
+        "points": {
+          "type": "number",
+          "minimum": 0
+        },
+        "options": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "text"],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "text": {
+                "type": "string"
+              },
+              "correct": {
+                "type": "boolean"
+              }
+            }
+          },
+          "description": "For multiple-choice questions"
+        },
+        "correctAnswer": {
+          "type": "string",
+          "description": "For non-multiple-choice questions"
+        },
+        "hints": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Progressive hints for learners"
+        }
+      }
+    }
+  }
+}

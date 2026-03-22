@@ -1,0 +1,106 @@
+#!/usr/bin/env bash
+# ============================================================================
+# BLACKROAD OS, INC. - PROPRIETARY AND CONFIDENTIAL
+# Copyright (c) 2025-2026 BlackRoad OS, Inc. All Rights Reserved.
+# ============================================================================
+# ai - Fast local AI skill router
+# Routes to best Ollama node with skill-based prompting
+# Usage: ai [deep] <skill|prompt> "text"
+set -eo pipefail
+
+source "$HOME/.blackroad/config/nodes.sh" 2>/dev/null || true
+
+FAST_MODEL="${BR_FAST_MODEL:-llama3.2}"
+DEEP_MODEL="${BR_DEEP_MODEL:-llama3.1:latest}"
+OLLAMA_NODES=(cecilia lucidia alice)
+
+# Find first available Ollama
+find_ollama() {
+  # Try local first
+  if curl -sf --connect-timeout 1 "http://localhost:11434/api/tags" &>/dev/null; then
+    echo "localhost"; return 0
+  fi
+  # Then fleet
+  for node in "${OLLAMA_NODES[@]}"; do
+    local ip="${NODE_IP[$node]:-}"
+    [[ -z "$ip" ]] && continue
+    if curl -sf --connect-timeout 2 "http://${ip}:11434/api/tags" &>/dev/null; then
+      echo "$ip"; return 0
+    fi
+  done
+  return 1
+}
+
+if [[ $# -eq 0 ]]; then
+  cat <<EOF
+${PINK:-}ai${RESET:-} - Fast local AI
+
+Usage: ai [deep] <skill|question> "text"
+
+Skills:
+  summarize   Concise summary
+  scan        High-level overview
+  explain     Step-by-step explanation
+  fix         Find issues and suggest fixes
+  review      Code review
+  test        Generate test cases
+  refactor    Suggest refactoring
+
+Options:
+  deep        Use larger model (${DEEP_MODEL})
+
+Examples:
+  ai summarize "$(cat README.md)"
+  ai fix "my function returns null"
+  ai deep explain "how does TCP work"
+  ai "what is a kubernetes pod"
+EOF
+  exit 0
+fi
+
+MODE="fast"
+if [[ "$1" == "deep" ]]; then
+  MODE="deep"; shift
+fi
+
+SKILL="$1"; shift
+PROMPT="$*"
+
+# Read from stdin if no prompt and stdin is not a terminal
+if [[ -z "$PROMPT" && ! -t 0 ]]; then
+  PROMPT=$(cat)
+fi
+
+[[ -z "$PROMPT" ]] && { echo "No input provided" >&2; exit 1; }
+
+case "$SKILL" in
+  summarize) TASK="Summarize clearly and concisely:" ;;
+  scan)      TASK="Scan and give a high-level overview:" ;;
+  explain)   TASK="Explain clearly step by step:" ;;
+  fix)       TASK="Identify issues and suggest fixes:" ;;
+  review)    TASK="Review this code for bugs, security, and quality:" ;;
+  test)      TASK="Generate comprehensive test cases for:" ;;
+  refactor)  TASK="Suggest refactoring improvements for:" ;;
+  *)         TASK=""; PROMPT="$SKILL $PROMPT" ;;
+esac
+
+MODEL="$FAST_MODEL"
+[[ "$MODE" == "deep" ]] && MODEL="$DEEP_MODEL"
+
+# Find Ollama endpoint
+HOST=$(find_ollama) || {
+  printf '%bNo Ollama available (tried local + fleet)%b\n' "${RED:-}" "${RESET:-}" >&2
+  exit 1
+}
+
+# Query via HTTP API (supports remote nodes)
+if [[ "$HOST" == "localhost" ]]; then
+  ollama run "$MODEL" <<< "$TASK $PROMPT"
+else
+  curl -sf --max-time 120 "http://${HOST}:11434/api/generate" \
+    -d "{\"model\":\"$MODEL\",\"prompt\":$(printf '%s' "$TASK $PROMPT" | jq -Rs .),\"stream\":false}" 2>/dev/null | \
+    jq -r '.response // empty' 2>/dev/null || {
+      printf '%bQuery failed on %s%b\n' "${RED:-}" "$HOST" "${RESET:-}" >&2
+      exit 1
+    }
+fi

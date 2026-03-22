@@ -1,0 +1,78 @@
+{
+  "BlackRoad Client Init": {
+    "prefix": "br-init",
+    "body": [
+      "require 'blackroad'",
+      "",
+      "client = Blackroad::Client.new(api_key: '${1:your-api-key}')"
+    ],
+    "description": "Initialize BlackRoad client"
+  },
+  "BlackRoad List Agents": {
+    "prefix": "br-agents-list",
+    "body": [
+      "agents = client.agents.list(division: '${1:AI}', level: ${2:4})",
+      "puts \"Found #{agents.length} agents\""
+    ],
+    "description": "List BlackRoad agents"
+  },
+  "BlackRoad Register Agent": {
+    "prefix": "br-agent-register",
+    "body": [
+      "agent = client.agents.register(",
+      "  name: '${1:my-agent}',",
+      "  type: '${2:ai}',",
+      "  division: '${3:Labs}',",
+      "  level: ${4:4}",
+      ")"
+    ],
+    "description": "Register a new BlackRoad agent"
+  },
+  "BlackRoad Dispatch Task": {
+    "prefix": "br-task-dispatch",
+    "body": [
+      "task = client.tasks.dispatch(",
+      "  title: '${1:Task title}',",
+      "  description: '${2:Task description}',",
+      "  priority: '${3:high}',",
+      "  division: '${4:Security}'",
+      ")",
+      "puts \"Created task: #{task['id']}\""
+    ],
+    "description": "Dispatch a new BlackRoad task"
+  },
+  "BlackRoad Log Memory": {
+    "prefix": "br-memory-log",
+    "body": [
+      "entry = client.memory.log(",
+      "  action: '${1:deployed}',",
+      "  entity: '${2:service-name}',",
+      "  details: '${3:Details about the action}',",
+      "  tags: ['${4:tag1}', '${5:tag2}']",
+      ")"
+    ],
+    "description": "Log entry to BlackRoad memory"
+  },
+  "BlackRoad TIL": {
+    "prefix": "br-til",
+    "body": [
+      "client.memory.til('${1:category}', '${2:What I learned today}')"
+    ],
+    "description": "Share a Today I Learned entry"
+  },
+  "BlackRoad Error Handling": {
+    "prefix": "br-rescue",
+    "body": [
+      "begin",
+      "  ${1:# Your BlackRoad API call}",
+      "rescue Blackroad::NotFoundError => e",
+      "  puts \"Not found: #{e.resource}\"",
+      "rescue Blackroad::RateLimitError => e",
+      "  puts \"Rate limited. Retry after #{e.retry_after}s\"",
+      "rescue Blackroad::AuthenticationError",
+      "  puts 'Invalid API key'",
+      "end"
+    ],
+    "description": "BlackRoad error handling pattern"
+  }
+}

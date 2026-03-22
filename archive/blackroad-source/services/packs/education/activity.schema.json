@@ -1,0 +1,58 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://blackroad-os.dev/schemas/education/activity.json",
+  "title": "Activity",
+  "description": "📝 A learning activity within a lesson",
+  "type": "object",
+  "required": ["id", "title", "type"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for the activity",
+      "pattern": "^activity:[a-z0-9-]+$"
+    },
+    "title": {
+      "type": "string",
+      "description": "Activity title",
+      "minLength": 1
+    },
+    "description": {
+      "type": "string",
+      "description": "Activity instructions"
+    },
+    "type": {
+      "type": "string",
+      "enum": ["quiz", "exercise", "project", "reflection", "discussion", "lab"],
+      "description": "Type of activity"
+    },
+    "estimatedMinutes": {
+      "type": "number",
+      "minimum": 1,
+      "description": "Estimated time to complete in minutes"
+    },
+    "rubricId": {
+      "type": "string",
+      "description": "Reference to evaluation rubric"
+    },
+    "allowRetry": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether learners can retry after failure"
+    },
+    "maxAttempts": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Maximum number of attempts (unlimited if not specified)"
+    },
+    "passingScore": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Minimum score to pass (percentage)"
+    },
+    "content": {
+      "type": "object",
+      "description": "Activity-specific content (varies by type)"
+    }
+  }
+}

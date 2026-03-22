@@ -1,0 +1,140 @@
+{
+  "flowId": "flow:education:archive-completion",
+  "version": "1.0.0",
+  "description": "🧾 Archive course/assessment completion for compliance and audit trail",
+  "steps": [
+    {
+      "stepId": "gather-completion-data",
+      "action": "getCompletionData",
+      "params": {
+        "learnerId": "${input.learnerId}",
+        "itemId": "${input.itemId}",
+        "itemType": "${input.itemType}"
+      },
+      "onSuccess": "check-compliance-category",
+      "onFailure": "return-error"
+    },
+    {
+      "stepId": "check-compliance-category",
+      "action": "getComplianceCategory",
+      "params": {
+        "itemId": "${input.itemId}"
+      },
+      "onSuccess": "prepare-archive-record",
+      "onFailure": "return-error"
+    },
+    {
+      "stepId": "prepare-archive-record",
+      "action": "buildArchiveRecord",
+      "params": {
+        "learnerId": "${input.learnerId}",
+        "itemId": "${input.itemId}",
+        "itemType": "${input.itemType}",
+        "completedAt": "${output.completedAt}",
+        "score": "${output.score}",
+        "complianceCategory": "${output.complianceCategory}",
+        "tags": {
+          "category": "education",
+          "subcategory": "completion",
+          "complianceLevel": "${output.complianceLevel}",
+          "retentionYears": "${output.retentionYears}"
+        }
+      },
+      "onSuccess": "call-archive-service",
+      "onFailure": "return-error"
+    },
+    {
+      "stepId": "call-archive-service",
+      "action": "callIntegration",
+      "params": {
+        "integration": "blackroad-os-archive",
+        "method": "createRecord",
+        "data": "${output.archiveRecord}"
+      },
+      "onSuccess": "store-archive-reference",
+      "onFailure": "return-archive-error"
+    },
+    {
+      "stepId": "store-archive-reference",
+      "action": "updateProgressMetadata",
+      "params": {
+        "learnerId": "${input.learnerId}",
+        "itemId": "${input.itemId}",
+        "metadata": {
+          "archiveRef": "${output.archiveId}",
+          "archivedAt": "${timestamp}"
+        }
+      },
+      "onSuccess": "check-certificate-required",
+      "onFailure": "return-success-without-metadata"
+    },
+    {
+      "stepId": "check-certificate-required",
+      "action": "shouldIssueCertificate",
+      "params": {
+        "itemId": "${input.itemId}",
+        "score": "${output.score}"
+      },
+      "onSuccess": "issue-certificate",
+      "onFailure": "return-success"
+    },
+    {
+      "stepId": "issue-certificate",
+      "action": "issueCertificate",
+      "params": {
+        "learnerId": "${input.learnerId}",
+        "itemId": "${input.itemId}",
+        "completedAt": "${output.completedAt}",
+        "score": "${output.score}",
+        "archiveRef": "${output.archiveId}"
+      },
+      "onSuccess": "return-success-with-certificate",
+      "onFailure": "return-success"
+    },
+    {
+      "stepId": "return-error",
+      "action": "return",
+      "params": {
+        "status": "error",
+        "message": "${error.message}"
+      }
+    },
+    {
+      "stepId": "return-archive-error",
+      "action": "return",
+      "params": {
+        "status": "error",
+        "message": "Failed to archive completion record",
+        "details": "${error.message}"
+      }
+    },
+    {
+      "stepId": "return-success-without-metadata",
+      "action": "return",
+      "params": {
+        "status": "success",
+        "archiveRef": "${output.archiveId}",
+        "warning": "Could not update progress metadata"
+      }
+    },
+    {
+      "stepId": "return-success",
+      "action": "return",
+      "params": {
+        "status": "success",
+        "archiveRef": "${output.archiveId}",
+        "certificateIssued": false
+      }
+    },
+    {
+      "stepId": "return-success-with-certificate",
+      "action": "return",
+      "params": {
+        "status": "success",
+        "archiveRef": "${output.archiveId}",
+        "certificateIssued": true,
+        "certificateId": "${output.certificateId}"
+      }
+    }
+  ]
+}

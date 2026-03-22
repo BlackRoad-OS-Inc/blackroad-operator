@@ -1,0 +1,90 @@
+{
+  "flowId": "flow:education:start-course",
+  "version": "1.0.0",
+  "description": "🔁 Initialize a new course for a learner",
+  "steps": [
+    {
+      "stepId": "validate-prerequisites",
+      "action": "checkPrerequisites",
+      "params": {
+        "courseId": "${input.courseId}",
+        "learnerId": "${input.learnerId}"
+      },
+      "onSuccess": "create-course-progress",
+      "onFailure": "return-prerequisite-error"
+    },
+    {
+      "stepId": "create-course-progress",
+      "action": "initializeProgress",
+      "params": {
+        "learnerId": "${input.learnerId}",
+        "itemId": "${input.courseId}",
+        "itemType": "course",
+        "state": "not-started"
+      },
+      "onSuccess": "create-module-progress",
+      "onFailure": "return-error"
+    },
+    {
+      "stepId": "create-module-progress",
+      "action": "initializeModuleProgress",
+      "params": {
+        "learnerId": "${input.learnerId}",
+        "courseId": "${input.courseId}"
+      },
+      "onSuccess": "transition-to-in-progress",
+      "onFailure": "return-error"
+    },
+    {
+      "stepId": "transition-to-in-progress",
+      "action": "updateProgressState",
+      "params": {
+        "learnerId": "${input.learnerId}",
+        "itemId": "${input.courseId}",
+        "itemType": "course",
+        "newState": "in-progress"
+      },
+      "onSuccess": "notify-dashboard",
+      "onFailure": "return-error"
+    },
+    {
+      "stepId": "notify-dashboard",
+      "action": "notifyIntegration",
+      "params": {
+        "integration": "blackroad-os-prism-console",
+        "event": "course-started",
+        "data": {
+          "learnerId": "${input.learnerId}",
+          "courseId": "${input.courseId}"
+        }
+      },
+      "onSuccess": "return-success"
+    },
+    {
+      "stepId": "return-prerequisite-error",
+      "action": "return",
+      "params": {
+        "status": "error",
+        "message": "Prerequisites not met",
+        "missingPrerequisites": "${output.missingPrerequisites}"
+      }
+    },
+    {
+      "stepId": "return-error",
+      "action": "return",
+      "params": {
+        "status": "error",
+        "message": "${error.message}"
+      }
+    },
+    {
+      "stepId": "return-success",
+      "action": "return",
+      "params": {
+        "status": "success",
+        "courseId": "${input.courseId}",
+        "firstLessonId": "${course.modules[0].lessons[0]}"
+      }
+    }
+  ]
+}

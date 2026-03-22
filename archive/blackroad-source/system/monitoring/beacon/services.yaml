@@ -1,0 +1,403 @@
+# BlackRoad OS Beacon - Third-Party Service Integrations
+# Authentication, billing, productivity, and AI services
+
+services:
+  # ===================
+  # AUTHENTICATION
+  # ===================
+
+  clerk:
+    enabled: true
+    name: "Clerk"
+    type: "auth"
+    description: "Authentication and user management"
+    features:
+      - user_management
+      - sso
+      - mfa
+      - session_management
+      - organizations
+      - webhooks
+    config:
+      frontend_api: "${CLERK_FRONTEND_API}"
+      api_key: "${CLERK_API_KEY}"
+      webhook_secret: "${CLERK_WEBHOOK_SECRET}"
+    endpoints:
+      users: "/v1/users"
+      sessions: "/v1/sessions"
+      organizations: "/v1/organizations"
+    webhook_events:
+      - user.created
+      - user.updated
+      - user.deleted
+      - session.created
+      - session.ended
+      - organization.created
+    env_vars:
+      - CLERK_SECRET_KEY
+      - CLERK_PUBLISHABLE_KEY
+      - CLERK_WEBHOOK_SECRET
+
+  # ===================
+  # BILLING & PAYMENTS
+  # ===================
+
+  stripe:
+    enabled: true
+    name: "Stripe"
+    type: "billing"
+    description: "Payment processing and subscriptions"
+    features:
+      - payments
+      - subscriptions
+      - invoicing
+      - customer_portal
+      - webhooks
+      - usage_metering
+    config:
+      api_key: "${STRIPE_SECRET_KEY}"
+      webhook_secret: "${STRIPE_WEBHOOK_SECRET}"
+      public_key: "${STRIPE_PUBLISHABLE_KEY}"
+    products:
+      - id: prod_beacon_free
+        name: "Beacon Free"
+        price: 0
+        features:
+          - "5 services"
+          - "Basic health checks"
+          - "7-day history"
+      - id: prod_beacon_pro
+        name: "Beacon Pro"
+        price: 29
+        features:
+          - "Unlimited services"
+          - "Advanced health checks"
+          - "90-day history"
+          - "Slack/Discord alerts"
+      - id: prod_beacon_enterprise
+        name: "Beacon Enterprise"
+        price: 199
+        features:
+          - "Everything in Pro"
+          - "Custom integrations"
+          - "Unlimited history"
+          - "Priority support"
+          - "SLA guarantees"
+    webhook_events:
+      - checkout.session.completed
+      - customer.subscription.created
+      - customer.subscription.updated
+      - customer.subscription.deleted
+      - invoice.paid
+      - invoice.payment_failed
+    env_vars:
+      - STRIPE_SECRET_KEY
+      - STRIPE_PUBLISHABLE_KEY
+      - STRIPE_WEBHOOK_SECRET
+
+  # ===================
+  # PRODUCTIVITY
+  # ===================
+
+  asana:
+    enabled: true
+    name: "Asana"
+    type: "project_management"
+    description: "Task and project tracking"
+    features:
+      - tasks
+      - projects
+      - teams
+      - webhooks
+      - custom_fields
+    config:
+      api_key: "${ASANA_ACCESS_TOKEN}"
+      workspace_gid: "${ASANA_WORKSPACE_GID}"
+    sync:
+      github_issues: true
+      deploy_notifications: true
+    projects:
+      - gid: "${ASANA_BEACON_PROJECT_GID}"
+        name: "Beacon Development"
+      - gid: "${ASANA_OPS_PROJECT_GID}"
+        name: "Operations"
+    webhook_events:
+      - task:created
+      - task:completed
+      - task:updated
+    env_vars:
+      - ASANA_ACCESS_TOKEN
+      - ASANA_WORKSPACE_GID
+
+  notion:
+    enabled: true
+    name: "Notion"
+    type: "knowledge_base"
+    description: "Documentation and knowledge management"
+    features:
+      - databases
+      - pages
+      - blocks
+      - search
+      - webhooks
+    config:
+      api_key: "${NOTION_API_KEY}"
+      version: "2022-06-28"
+    databases:
+      services:
+        id: "${NOTION_SERVICES_DB_ID}"
+        sync: true
+        fields:
+          - name
+          - status
+          - environment
+          - last_deploy
+          - health_status
+      incidents:
+        id: "${NOTION_INCIDENTS_DB_ID}"
+        sync: true
+        fields:
+          - title
+          - severity
+          - status
+          - affected_services
+          - resolution
+      deployments:
+        id: "${NOTION_DEPLOYS_DB_ID}"
+        sync: true
+        fields:
+          - service
+          - environment
+          - git_sha
+          - actor
+          - outcome
+    integrations:
+      deploy_log: true
+      health_status: true
+      incident_tracking: true
+    env_vars:
+      - NOTION_API_KEY
+      - NOTION_SERVICES_DB_ID
+      - NOTION_INCIDENTS_DB_ID
+      - NOTION_DEPLOYS_DB_ID
+
+  # ===================
+  # AI & ML PLATFORMS
+  # ===================
+
+  huggingface:
+    enabled: true
+    name: "Hugging Face"
+    type: "ai_platform"
+    description: "ML models and inference"
+    features:
+      - inference_api
+      - model_hub
+      - spaces
+      - datasets
+      - autotrain
+    config:
+      api_key: "${HUGGINGFACE_TOKEN}"
+      organization: "blackroad-os"
+    models:
+      # Open source models - forked for safety review
+      text_generation:
+        - id: "blackroad-os/llama-3.1-70b-instruct-safe"
+          original: "meta-llama/Llama-3.1-70B-Instruct"
+          type: "text-generation"
+          safety_reviewed: true
+        - id: "blackroad-os/mistral-7b-instruct-safe"
+          original: "mistralai/Mistral-7B-Instruct-v0.3"
+          type: "text-generation"
+          safety_reviewed: true
+        - id: "blackroad-os/qwen2.5-72b-instruct-safe"
+          original: "Qwen/Qwen2.5-72B-Instruct"
+          type: "text-generation"
+          safety_reviewed: true
+      embeddings:
+        - id: "blackroad-os/bge-large-en-safe"
+          original: "BAAI/bge-large-en-v1.5"
+          type: "embedding"
+          safety_reviewed: true
+        - id: "blackroad-os/e5-large-v2-safe"
+          original: "intfloat/e5-large-v2"
+          type: "embedding"
+          safety_reviewed: true
+      code:
+        - id: "blackroad-os/codellama-34b-safe"
+          original: "codellama/CodeLlama-34b-Instruct-hf"
+          type: "code-generation"
+          safety_reviewed: true
+        - id: "blackroad-os/starcoder2-15b-safe"
+          original: "bigcode/starcoder2-15b"
+          type: "code-generation"
+          safety_reviewed: true
+    spaces:
+      - name: "beacon-demo"
+        sdk: "gradio"
+      - name: "model-playground"
+        sdk: "streamlit"
+    env_vars:
+      - HUGGINGFACE_TOKEN
+      - HF_HOME
+
+  # ===================
+  # OPEN SOURCE LLMs
+  # ===================
+
+  oss_llm:
+    enabled: true
+    name: "Open Source LLM Integration"
+    type: "ai_inference"
+    description: "Self-hosted open source language models"
+    providers:
+      ollama:
+        enabled: true
+        endpoint: "${OLLAMA_HOST:-http://localhost:11434}"
+        models:
+          - name: "llama3.1:70b"
+            type: "text-generation"
+            parameters: 70000000000
+            safety_reviewed: true
+          - name: "qwen2.5:72b"
+            type: "text-generation"
+            parameters: 72000000000
+            safety_reviewed: true
+          - name: "codellama:34b"
+            type: "code-generation"
+            parameters: 34000000000
+            safety_reviewed: true
+          - name: "mistral:7b"
+            type: "text-generation"
+            parameters: 7000000000
+            safety_reviewed: true
+          - name: "deepseek-coder:33b"
+            type: "code-generation"
+            parameters: 33000000000
+            safety_reviewed: true
+      vllm:
+        enabled: true
+        endpoint: "${VLLM_HOST:-http://localhost:8000}"
+        models:
+          - name: "meta-llama/Llama-3.1-70B-Instruct"
+            max_tokens: 8192
+            safety_reviewed: true
+          - name: "Qwen/Qwen2.5-72B-Instruct"
+            max_tokens: 32768
+            safety_reviewed: true
+      localai:
+        enabled: true
+        endpoint: "${LOCALAI_HOST:-http://localhost:8080}"
+        models:
+          - name: "gpt4all-falcon"
+            safety_reviewed: true
+          - name: "orca-mini"
+            safety_reviewed: true
+      text_generation_inference:
+        enabled: true
+        endpoint: "${TGI_HOST:-http://localhost:8080}"
+        models:
+          - name: "meta-llama/Llama-3.1-8B-Instruct"
+            max_concurrent: 10
+            safety_reviewed: true
+
+    # 120B+ parameter models (forked for safety)
+    large_models:
+      - id: "gpt-oss-120b"
+        name: "GPT OSS 120B (Forked)"
+        original_source: "community-maintained"
+        parameters: 120000000000
+        type: "text-generation"
+        safety_reviewed: true
+        safety_audit_date: "2024-01-15"
+        safety_notes: "Code reviewed and sanitized for production use"
+        hosting:
+          - provider: "railway"
+            service: "llm-server"
+          - provider: "digitalocean"
+            droplet: "gpu-inference-1"
+      - id: "falcon-180b-safe"
+        name: "Falcon 180B (Safety Fork)"
+        original: "tiiuae/falcon-180B"
+        parameters: 180000000000
+        type: "text-generation"
+        safety_reviewed: true
+        forked: true
+      - id: "bloom-176b-safe"
+        name: "BLOOM 176B (Safety Fork)"
+        original: "bigscience/bloom"
+        parameters: 176000000000
+        type: "text-generation"
+        safety_reviewed: true
+        forked: true
+
+    # Safety configuration for all OSS models
+    safety:
+      enabled: true
+      content_filter: true
+      input_sanitization: true
+      output_validation: true
+      audit_logging: true
+      rate_limiting: true
+      max_tokens_per_request: 4096
+      blocked_patterns:
+        - "password"
+        - "secret_key"
+        - "api_key"
+        - "credential"
+      allowed_use_cases:
+        - "development"
+        - "testing"
+        - "production"
+        - "research"
+
+    env_vars:
+      - OLLAMA_HOST
+      - VLLM_HOST
+      - LOCALAI_HOST
+      - TGI_HOST
+      - LLM_API_KEY
+
+  # ===================
+  # COMMUNICATION
+  # ===================
+
+  slack:
+    enabled: true
+    name: "Slack"
+    type: "communication"
+    features:
+      - incoming_webhooks
+      - bot
+      - slash_commands
+      - events
+    config:
+      webhook_url: "${SLACK_WEBHOOK_URL}"
+      bot_token: "${SLACK_BOT_TOKEN}"
+      signing_secret: "${SLACK_SIGNING_SECRET}"
+    channels:
+      deployments: "#deployments"
+      alerts: "#alerts"
+      incidents: "#incidents"
+    env_vars:
+      - SLACK_WEBHOOK_URL
+      - SLACK_BOT_TOKEN
+      - SLACK_SIGNING_SECRET
+
+  discord:
+    enabled: true
+    name: "Discord"
+    type: "communication"
+    features:
+      - webhooks
+      - bot
+      - slash_commands
+    config:
+      webhook_url: "${DISCORD_WEBHOOK_URL}"
+      bot_token: "${DISCORD_BOT_TOKEN}"
+    channels:
+      deployments: "deployments"
+      alerts: "alerts"
+    env_vars:
+      - DISCORD_WEBHOOK_URL
+      - DISCORD_BOT_TOKEN

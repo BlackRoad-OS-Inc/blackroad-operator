@@ -1,0 +1,119 @@
+# LocalAI Docker Compose Configuration for BlackRoad OS
+#
+# Self-hosted, local-first AI inference server
+# Drop-in replacement for OpenAI API
+#
+# Usage:
+#   docker-compose -f localai-docker-compose.yml up -d
+#
+# Access:
+#   API: http://localhost:8080/v1
+#   Web UI: http://localhost:8080
+#
+# OpenAI-compatible endpoints:
+#   POST /v1/chat/completions
+#   POST /v1/completions
+#   POST /v1/embeddings
+
+version: '3.9'
+
+services:
+  localai:
+    image: localai/localai:latest-aio-gpu-nvidia-cuda-12
+    container_name: blackroad-localai
+    restart: unless-stopped
+
+    # GPU support (requires nvidia-docker2)
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+    ports:
+      - "8080:8080"
+
+    environment:
+      # LocalAI Configuration
+      - DEBUG=true
+      - MODELS_PATH=/models
+      - PRELOAD_MODELS_CONFIG=/config/preload-models.yaml
+      - THREADS=8
+      - CONTEXT_SIZE=8192
+      - GPU_LAYERS=35  # Offload layers to GPU
+
+      # BlackRoad-specific
+      - API_KEY=${LOCALAI_API_KEY:-blackroad-local-dev}
+      - CORS_ALLOW_ORIGINS=*
+
+      # Performance tuning
+      - PARALLEL_REQUESTS=4
+      - SINGLE_ACTIVE_BACKEND=false
+
+    volumes:
+      # Model storage
+      - ./models:/models:cached
+
+      # Configuration
+      - ./localai-config:/config:ro
+
+      # Persistent data
+      - localai-data:/var/lib/localai
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/readyz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Optional: PostgreSQL for conversation history
+  postgres:
+    image: postgres:16-alpine
+    container_name: blackroad-localai-db
+    restart: unless-stopped
+
+    environment:
+      - POSTGRES_USER=localai
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-localai-dev-password}
+      - POSTGRES_DB=localai
+
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U localai"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Optional: Redis for caching
+  redis:
+    image: redis:7-alpine
+    container_name: blackroad-localai-redis
+    restart: unless-stopped
+
+    command: redis-server --appendonly yes
+
+    volumes:
+      - redis-data:/data
+
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  localai-data:
+    driver: local
+  postgres-data:
+    driver: local
+  redis-data:
+    driver: local
+
+networks:
+  default:
+    name: blackroad-localai-network

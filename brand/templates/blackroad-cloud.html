@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BlackRoad Cloud</title>
+<meta name="description" content="BlackRoad OS — Pave Tomorrow.">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;shape-rendering:geometricPrecision}
+html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility;-webkit-text-stroke:.2px rgba(255,255,255,.1);scroll-behavior:smooth}
+:root{
+  --g:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);
+  --g135:linear-gradient(135deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);
+  --bg:#000;--white:#fff;--black:#000;--border:#1a1a1a;
+  --sg:'Space Grotesk',sans-serif;--jb:'JetBrains Mono',monospace;
+}
+body{background:var(--bg);color:var(--white);font-family:var(--sg);overflow-x:hidden}
+
+.grad-bar{height:4px;background:var(--g);image-rendering:crisp-edges}
+
+/* ═══ NAV ═══ */
+nav{display:flex;align-items:center;justify-content:space-between;padding:16px 48px;border-bottom:1px solid var(--border)}
+.nav-logo{font-weight:700;font-size:20px;color:var(--white);display:flex;align-items:center;gap:10px}
+.nav-logo-mark{width:28px;height:4px;border-radius:2px;background:var(--g);image-rendering:crisp-edges}
+.nav-links{display:flex;gap:32px}
+.nav-links a{font-size:14px;font-weight:500;color:var(--white);opacity:.5;text-decoration:none;transition:opacity .2s}
+.nav-links a:hover{opacity:1}
+.nav-cta{display:flex;gap:10px}
+.btn-outline{padding:8px 20px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--white);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--sg);transition:border-color .2s}
+.btn-outline:hover{border-color:#444}
+.btn-solid{padding:8px 20px;border:none;border-radius:6px;background:var(--white);color:var(--black);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--sg)}
+
+/* ═══ HERO ═══ */
+.hero{text-align:center;padding:120px 48px 80px;position:relative}
+.orb{position:absolute;border-radius:50%;filter:blur(120px);opacity:.06;pointer-events:none}
+.orb-1{width:400px;height:400px;background:#00D4FF;top:-150px;left:-5%}
+.orb-2{width:350px;height:350px;background:#8844FF;top:-100px;right:-5%}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border:1px solid var(--border);border-radius:20px;font-size:12px;font-weight:500;color:var(--white);margin-bottom:32px}
+.hero-badge-dot{width:8px;height:8px;border-radius:50%;background:var(--g135)}
+.hero h1{font-size:64px;font-weight:700;color:var(--white);line-height:1.08;margin-bottom:24px;max-width:780px;margin-left:auto;margin-right:auto;letter-spacing:-.02em}
+.hero p{font-size:18px;color:var(--white);opacity:.45;max-width:520px;margin:0 auto 48px;line-height:1.7}
+.hero-cta{display:flex;gap:16px;justify-content:center}
+.btn-lg{padding:14px 36px;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;font-family:var(--sg)}
+.btn-lg-solid{background:var(--white);color:var(--black);border:none}
+.btn-lg-outline{background:transparent;color:var(--white);border:1px solid var(--border);transition:border-color .2s}
+.btn-lg-outline:hover{border-color:#444}
+
+/* ═══ SECTIONS ═══ */
+.section{max-max-width:1100px;width:100%;margin:0 auto;padding:80px 48px}
+.section-label{font-family:var(--jb);font-size:10px;color:var(--white);opacity:.25;letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px}
+.section-title{font-size:32px;font-weight:700;color:var(--white);margin-bottom:12px;letter-spacing:-.015em}
+.section-desc{font-size:14px;color:var(--white);opacity:.4;max-width:460px;margin-bottom:48px}
+
+/* ═══ SERVICE TIERS — outlined cards, 3-col ═══ */
+.tier-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.tier-card{border:1px solid var(--border);border-radius:10px;display:flex;flex-direction:column;transition:border-color .2s}
+.tier-card:hover{border-color:#333}
+.tier-card.featured{position:relative}
+.tier-card.featured::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--g);border-radius:10px 10px 0 0;image-rendering:crisp-edges}
+.tier-header{padding:28px 24px 20px;border-bottom:1px solid var(--border)}
+.tier-name{font-family:var(--jb);font-size:10px;color:var(--white);opacity:.3;letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px}
+.tier-price{font-size:36px;font-weight:700;color:var(--white)}
+.tier-period{font-size:13px;color:var(--white);opacity:.3}
+.tier-desc{font-size:12px;color:var(--white);opacity:.35;margin-top:8px;line-height:1.6}
+.tier-body{padding:24px;flex:1}
+.tier-features{list-style:none}
+.tier-features li{font-size:13px;color:var(--white);opacity:.5;padding:8px 0;display:flex;align-items:center;gap:10px}
+.tier-features li::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--g135);flex-shrink:0}
+.tier-features li.off::before{background:none;border:1px solid var(--border);width:5px;height:5px}
+.tier-features li.off{opacity:.25}
+.tier-footer{padding:16px 24px 24px}
+.btn-tier{width:100%;padding:12px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--sg)}
+.btn-tier-outline{background:transparent;border:1px solid var(--border);color:var(--white);transition:border-color .2s}
+.btn-tier-outline:hover{border-color:#444}
+.btn-tier-solid{background:var(--white);border:none;color:var(--black)}
+
+/* ═══ REGION MAP — outlined cards with status ═══ */
+.region-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.region-card{border:1px solid var(--border);border-radius:8px;padding:20px;transition:border-color .2s}
+.region-card:hover{border-color:#333}
+.region-flag{font-size:11px;color:var(--white);opacity:.5;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.region-flag::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--g135)}
+.region-name{font-size:14px;font-weight:600;color:var(--white);margin-bottom:4px}
+.region-detail{font-family:var(--jb);font-size:10px;color:var(--white);opacity:.2;line-height:1.8}
+
+/* ═══ RESOURCE TABLE — lined rows ═══ */
+.res-table{width:100%;border-collapse:collapse}
+.res-table th{text-align:left;font-family:var(--jb);font-size:10px;color:var(--white);opacity:.25;letter-spacing:.06em;text-transform:uppercase;padding:12px 0;border-bottom:1px solid var(--border)}
+.res-table td{font-size:13px;color:var(--white);opacity:.5;padding:14px 0;border-bottom:1px solid var(--border)}
+.res-table tr:first-child td{border-top:1px solid var(--border)}
+.res-table code{font-family:var(--jb);font-size:12px;padding:2px 6px;border:1px solid var(--border);border-radius:3px;color:var(--white);opacity:.6}
+.res-table .res-bar{width:100px;height:4px;border-radius:2px;background:var(--border);overflow:hidden}
+.res-table .res-bar-fill{height:100%;border-radius:2px;background:var(--g);image-rendering:crisp-edges}
+
+/* ═══ UPTIME STRIP — gradient bars ═══ */
+.uptime-section{border:1px solid var(--border);border-radius:10px;padding:24px;overflow:hidden}
+.uptime-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.uptime-title{font-size:14px;font-weight:600;color:var(--white)}
+.uptime-pct{font-family:var(--jb);font-size:13px;color:var(--white);opacity:.4}
+.uptime-bar{display:flex;gap:2px;height:24px}
+.uptime-day{flex:1;border-radius:2px;background:var(--g135);transition:opacity .15s}
+.uptime-day:hover{opacity:.7}
+.uptime-day.warn{opacity:.4}
+.uptime-day.down{background:var(--white);opacity:.1}
+.uptime-legend{display:flex;justify-content:space-between;margin-top:6px}
+.uptime-legend span{font-family:var(--jb);font-size:10px;color:var(--white);opacity:.15}
+
+/* ═══ METRICS ═══ */
+.metrics-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;padding:48px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.metric{text-align:center}
+.metric-val{font-size:36px;font-weight:700;color:var(--white)}
+.metric-label{font-family:var(--jb);font-size:10px;color:var(--white);opacity:.3;letter-spacing:.08em;text-transform:uppercase;margin-top:4px}
+
+/* ═══ CTA ═══ */
+.cta{text-align:center;padding:80px 48px}
+.cta-box{max-width:700px;margin:0 auto;padding:64px;border:1px solid var(--border);border-radius:16px;position:relative;overflow:hidden}
+.cta-box::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--g)}
+.cta-box h2{font-size:28px;font-weight:700;color:var(--white);margin-bottom:12px;letter-spacing:-.015em}
+.cta-box p{font-size:14px;color:var(--white);opacity:.4;margin-bottom:32px;max-width:400px;margin-left:auto;margin-right:auto}
+
+/* ═══ FOOTER ═══ */
+footer{border-top:1px solid var(--border);padding:48px;display:flex;justify-content:space-between;align-items:center}
+.footer-brand{font-weight:700;font-size:16px;color:var(--white)}
+.footer-links{display:flex;gap:24px}
+.footer-links a{font-size:13px;color:var(--white);opacity:.4;text-decoration:none;transition:opacity .2s}
+.footer-links a:hover{opacity:1}
+.footer-copy{font-size:12px;color:var(--white);opacity:.2}
+
+@media(max-max-width:1024px;width:100%){.region-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:768px){
+  nav{padding:14px 20px;flex-wrap:wrap;gap:12px}.nav-links{display:none}
+  .hero{padding:80px 20px 60px}.hero h1{font-size:36px}
+  .hero-cta{flex-direction:column;align-items:center}
+  .section{padding:48px 20px}
+  .tier-grid{grid-template-columns:1fr}
+  .region-grid{grid-template-columns:1fr}
+  .metrics-bar{grid-template-columns:repeat(2,1fr);gap:24px}
+  .cta{padding:48px 20px}
+  footer{flex-direction:column;gap:16px;text-align:center;padding:32px 20px}
+}
+</style>
+<script src="https://bb.blackroad.io/bb.js" defer></script>
+<meta name="keywords" content="BlackRoad Cloud, Kubernetes, Terraform, self-hosted, cloud infrastructure">
+<meta property="og:type" content="website">
+<meta property="og:title" content="BlackRoad Cloud — Self-Hosted Cloud Infrastructure">
+<meta property="og:description" content="Kubernetes operators, Terraform modules, service mesh, and API gateway running on sovereign hardware.">
+<meta property="og:url" content="https://cloud.blackroad.io">
+<meta property="og:image" content="https://images.blackroad.io/brand/blackroad-og.png">
+<meta property="og:site_name" content="BlackRoad OS">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="BlackRoad Cloud — Self-Hosted Cloud Infrastructure">
+<meta name="twitter:description" content="Kubernetes operators, Terraform modules, service mesh, and API gateway running on sovereign hardware.">
+<meta name="twitter:image" content="https://images.blackroad.io/brand/blackroad-og.png">
+<link rel="canonical" href="https://cloud.blackroad.io">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "BlackRoad Cloud — Self-Hosted Cloud Infrastructure",
+  "description": "Kubernetes operators, Terraform modules, service mesh, and API gateway running on sovereign hardware.",
+  "url": "https://cloud.blackroad.io",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Linux, macOS",
+  "author": {
+    "@type": "Organization",
+    "name": "BlackRoad OS, Inc.",
+    "url": "https://blackroad.io",
+    "founder": {
+      "@type": "Person",
+      "name": "Alexa Louise Amundson"
+    }
+  },
+  "offers": {
+    "@type": "Offer",
+    "price": "5.00",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+<link rel="icon" type="image/png" href="https://images.blackroad.io/brand/favicon.png">
+<link rel="apple-touch-icon" href="https://images.blackroad.io/brand/apple-touch-icon.png">
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- COMPONENT: Gradient Bar                         -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="grad-bar"></div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- COMPONENT: Navigation                           -->
+<!-- Swap: logo text, link labels, CTA labels        -->
+<!-- ═══════════════════════════════════════════════ -->
+<nav>
+  <div class="nav-logo"><img src="blackroad-logo.png" alt="BlackRoad" style="width:32px;height:32px;border-radius:50%"> BlackRoad Cloud</div>
+  <div class="nav-links">
+    <a href="#services">Services</a>
+    <a href="#infra">Infrastructure</a>
+    <a href="#resources">Resources</a>
+    <a href="https://blackroad-io.pages.dev">BlackRoad OS Inc</a>
+  </div>
+  <div class="nav-cta">
+    <a class="btn-outline" href="#resources" style="text-decoration:none">Console</a>
+    <a class="btn-solid" href="https://blackroad-os-home.pages.dev" style="text-decoration:none">Deploy</a>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- COMPONENT: Hero                                 -->
+<!-- Swap: badge, h1, subtitle, CTA labels           -->
+<!-- ═══════════════════════════════════════════════ -->
+<section class="hero">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="hero-badge"><div class="hero-badge-dot"></div> 100 Pages · 43 KV · 18 D1 · 10 R2</div>
+  <h1>Sovereign cloud on Cloudflare</h1>
+  <p>100 Pages projects, 43 KV namespaces, 18 D1 databases, 10 R2 buckets, and 18 encrypted tunnels routing 48+ domains to self-hosted Pi infrastructure. $136/month total.</p>
+  <div class="hero-cta">
+    <a class="btn-lg btn-lg-solid" href="#services" style="text-decoration:none">View Services</a>
+    <a class="btn-lg btn-lg-outline" href="#resources" style="text-decoration:none">Resource Table</a>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- COMPONENT: Service Tiers (3-col)                -->
+<!-- Outlined cards. Featured gets gradient top bar. -->
+<!-- Gradient dots = included, outlined = excluded.  -->
+<!-- Swap: names, prices, descriptions, features     -->
+<!-- Always 3 tiers.                                 -->
+<!-- ═══════════════════════════════════════════════ -->
+<section class="section">
+  <div class="section-label" id="services">Cloudflare Services</div>
+  <div class="section-title">What's running</div>
+  <div class="section-desc">Three tiers of cloud infrastructure — edge compute, storage, and tunnel routing.</div>
+  <div class="tier-grid">
+    <div class="tier-card">
+      <div class="tier-header">
+        <div class="tier-name">Pages</div>
+        <div><span class="tier-price">100</span><span class="tier-period"> projects</span></div>
+        <div class="tier-desc">Static sites, dashboards, and web apps deployed globally on Cloudflare's edge network.</div>
+      </div>
+      <div class="tier-body">
+        <ul class="tier-features">
+          <li>blackroad.io — main site</li>
+          <li>blackroadai.com — AI division</li>
+          <li>lucidia.earth — AI companion</li>
+          <li>dashboard.blackroad.io</li>
+          <li>status.blackroad.io</li>
+        </ul>
+      </div>
+      <div class="tier-footer"><a class="btn-tier btn-tier-outline" href="#resources" style="text-decoration:none">View All</a></div>
+    </div>
+    <div class="tier-card featured">
+      <div class="tier-header">
+        <div class="tier-name">Storage</div>
+        <div><span class="tier-price">43 KV + 10 R2</span></div>
+        <div class="tier-desc">Key-value state, object storage, and 18 D1 SQL databases across the edge.</div>
+      </div>
+      <div class="tier-body">
+        <ul class="tier-features">
+          <li>CECE_MEMORY — AI context</li>
+          <li>AGENTS_KV — agent state</li>
+          <li>BILLING + SUBSCRIPTIONS</li>
+          <li>blackroad-models (R2) — model weights</li>
+          <li>blackroad-codex (R2) — artifacts</li>
+        </ul>
+      </div>
+      <div class="tier-footer"><a class="btn-tier btn-tier-solid" href="#resources" style="text-decoration:none">View Resources</a></div>
+    </div>
+    <div class="tier-card">
+      <div class="tier-header">
+        <div class="tier-name">Tunnels</div>
+        <div><span class="tier-price">18</span><span class="tier-period"> active</span></div>
+        <div class="tier-desc">Encrypted tunnels from Cloudflare edge to self-hosted Pi nodes. No open ports.</div>
+      </div>
+      <div class="tier-body">
+        <ul class="tier-features">
+          <li>Alice — 65+ hostname routes</li>
+          <li>Cecilia — 22 hostnames</li>
+          <li>Octavia — 10 hostnames</li>
+          <li>Lucidia — 4 hostnames</li>
+          <li>WireGuard mesh failover</li>
+        </ul>
+      </div>
+      <div class="tier-footer"><a class="btn-tier btn-tier-outline" href="#infra" style="text-decoration:none">View Topology</a></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- COMPONENT: Region Grid (4-col)                  -->
+<!-- Outlined cards. Gradient status dots.           -->
+<!-- Swap: region names, details. Use 4 or 8.        -->
+<!-- ═══════════════════════════════════════════════ -->
+<section class="section">
+  <div class="section-label" id="infra">Infrastructure</div>
+  <div class="section-title">Edge nodes</div>
+  <div class="section-desc">Four active <a href="https://blackroad-infra.pages.dev#fleet" style="color:var(--white);opacity:.5;text-decoration:underline;text-underline-offset:3px">Pi nodes</a> plus two DigitalOcean droplets behind Cloudflare tunnels.</div>
+  <div class="region-grid">
+    <a href="https://blackroad-infra.pages.dev#fleet" class="region-card" style="text-decoration:none"><div class="region-flag">●</div><div class="region-name">Alice — 192.168.4.49</div><div class="region-detail">Pi 400 · Gateway + DNS<br>65+ tunnel routes · Pi-hole · PostgreSQL</div></a>
+    <a href="https://blackroad-infra.pages.dev#fleet" class="region-card" style="text-decoration:none"><div class="region-flag" style="opacity:.3">○</div><div class="region-name">Cecilia — 192.168.4.96 (DOWN)</div><div class="region-detail">Pi 5 · <a href="https://blackroadai-com.pages.dev" style="color:var(--white);opacity:.3;text-decoration:underline;text-underline-offset:3px">AI Inference</a><br><a href="https://blackroad-infra.pages.dev#accelerators" style="color:var(--white);opacity:.3;text-decoration:underline;text-underline-offset:3px">Hailo-8</a> · 16 Ollama models · 22 hostnames</div></a>
+    <a href="https://blackroad-infra.pages.dev#fleet" class="region-card" style="text-decoration:none"><div class="region-flag">●</div><div class="region-name">Octavia — 192.168.4.100</div><div class="region-detail">Pi 5 · Storage + <a href="https://blackroad-operator.pages.dev#infrastructure" style="color:var(--white);opacity:.3;text-decoration:underline;text-underline-offset:3px">Swarm</a><br>1TB NVMe · Gitea · 10 hostnames</div></a>
+    <div class="region-card"><div class="region-flag">●</div><div class="region-name">Anastasia — DO nyc3</div><div class="region-detail">4 CPU / 8GB · WireGuard Hub<br>Headscale · Nginx · WebSockets</div></div>
+    <a href="https://blackroad-infra.pages.dev#fleet" class="region-card" style="text-decoration:none"><div class="region-flag">●</div><div class="region-name">Aria — 192.168.4.98</div><div class="region-detail">Pi 5 · Portainer + Headscale<br>1 Docker container · 6 Ollama models</div></a>
+    <a href="https://blackroad-infra.pages.dev#fleet" class="region-card" style="text-decoration:none"><div class="region-flag">●</div><div class="region-name">Lucidia — 192.168.4.38</div><div class="region-detail">Pi 5 · APIs + Web Apps<br>14 Docker containers · 6 Ollama models</div></a>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- COMPONENT: Resource Table                       -->
+<!-- Lined rows. Outlined code badges.               -->
+<!-- Gradient usage bars (decorative).               -->
+<!-- Swap: resource names, types, values             -->
+<!-- ═══════════════════════════════════════════════ -->
+<section class="section">
+  <div class="section-label" id="resources">Resources</div>
+  <div class="section-title">KV namespaces</div>
+  <div class="section-desc">44 key-value namespaces powering agent state, billing, memory, and caching.</div>
+  <table class="res-table">
+    <thead><tr><th>Resource</th><th>Type</th><th>Usage</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>CECE_MEMORY</td><td><code>KV</code></td><td><div class="res-bar"><div class="res-bar-fill" style="width:72%"></div></div></td><td>Active</td></tr>
+      <tr><td>AGENTS_KV</td><td><code>KV</code></td><td><div class="res-bar"><div class="res-bar-fill" style="width:45%"></div></div></td><td>Active</td></tr>
+      <tr><td>blackroad-models</td><td><code>R2</code></td><td><div class="res-bar"><div class="res-bar-fill" style="width:88%"></div></div></td><td>Active</td></tr>
+      <tr><td>blackroad-api-gateway</td><td><code>D1</code></td><td><div class="res-bar"><div class="res-bar-fill" style="width:31%"></div></div></td><td>Active</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- COMPONENT: Uptime Strip                         -->
+<!-- Outlined card. Gradient day bars (decorative).  -->
+<!-- Warn = faded gradient, down = faded white.      -->
+<!-- Swap: title, percentage, day count               -->
+<!-- ═══════════════════════════════════════════════ -->
+<section class="section">
+  <div class="uptime-section">
+    <div class="uptime-header"><span class="uptime-title">Tunnel Uptime (30 days)</span><span class="uptime-pct">96.2%</span></div>
+    <div class="uptime-bar">
+      <div class="uptime-day"></div><div class="uptime-day"></div><div class="uptime-day"></div><div class="uptime-day"></div><div class="uptime-day"></div>
+      <div class="uptime-day"></div><div class="uptime-day"></div><div class="uptime-day warn"></div><div class="uptime-day"></div><div class="uptime-day"></div>
+      <div class="uptime-day"></div><div class="uptime-day"></div><div class="uptime-day"></div><div class="uptime-day"></div><div class="uptime-day"></div>
+      <div class="uptime-day"></div><div class="uptime-day"></div><div class="uptime-day"></div><div class="uptime-day"></div><div class="uptime-day"></div>
+      <div class="uptime-day"></div><div class="uptime-day"></div><div class="uptime-day"></div><div class="uptime-day"></div><div class="uptime-day"></div>
+      <div class="uptime-day"></div><div class="uptime-day"></div><div class="uptime-day"></div><div class="uptime-day"></div><div class="uptime-day"></div>
+    </div>
+    <div class="uptime-legend"><span>Feb 7</span><span>Mar 9</span></div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- COMPONENT: Metrics Bar                          -->
+<!-- Lined. Always 4. Swap: values, labels           -->
+<!-- ═══════════════════════════════════════════════ -->
+<section class="section">
+  <div class="metrics-bar">
+    <div class="metric"><div class="metric-val">100</div><div class="metric-label">Pages Projects</div></div>
+    <div class="metric"><div class="metric-val">43</div><div class="metric-label">KV Namespaces</div></div>
+    <div class="metric"><div class="metric-val">10</div><div class="metric-label">R2 Buckets</div></div>
+    <div class="metric"><div class="metric-val">$136</div><div class="metric-label">Monthly Cost</div></div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- COMPONENT: CTA Box                              -->
+<!-- Swap: headline, description, button label       -->
+<!-- ═══════════════════════════════════════════════ -->
+<section class="cta">
+  <div class="cta-box">
+    <h2>$136/month runs the whole thing</h2>
+    <p>What would cost $3,756 in commercial cloud runs on <a href="https://blackroad-infra.pages.dev#fleet" style="color:var(--black);text-decoration:underline;text-underline-offset:3px">five Pis</a> and Cloudflare's free tier. See the <a href="https://finance-blackroad-io.pages.dev#economics" style="color:var(--black);text-decoration:underline;text-underline-offset:3px">full cost breakdown</a>.</p>
+    <a class="btn-lg btn-lg-solid" href="https://blackroad-os-home.pages.dev" style="text-decoration:none">Deploy Your Own</a>
+  </div>
+</section>
+
+<section class="section" style="padding-bottom:0">
+  <div class="section-label">Related</div>
+  <div class="section-title">Go deeper</div>
+  <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:24px">
+    <a href="https://blackroad-infra.pages.dev#fleet" style="text-decoration:none;padding:8px 18px;border:1px solid var(--border);border-radius:20px;font-size:12px;font-weight:500;color:var(--white);opacity:.5;display:inline-flex;align-items:center;gap:8px"><div style="width:6px;height:6px;border-radius:50%;background:var(--g135)"></div> 5-Node Fleet</a>
+    <a href="https://blackroad-guardian-dashboard.pages.dev" style="text-decoration:none;padding:8px 18px;border:1px solid var(--border);border-radius:20px;font-size:12px;font-weight:500;color:var(--white);opacity:.5;display:inline-flex;align-items:center;gap:8px"><div style="width:6px;height:6px;border-radius:50%;background:var(--g135)"></div> Security & Encryption</a>
+    <a href="https://blackroadai-com.pages.dev" style="text-decoration:none;padding:8px 18px;border:1px solid var(--border);border-radius:20px;font-size:12px;font-weight:500;color:var(--white);opacity:.5;display:inline-flex;align-items:center;gap:8px"><div style="width:6px;height:6px;border-radius:50%;background:var(--g135)"></div> AI Inference Layer</a>
+    <a href="https://finance-blackroad-io.pages.dev#economics" style="text-decoration:none;padding:8px 18px;border:1px solid var(--border);border-radius:20px;font-size:12px;font-weight:500;color:var(--white);opacity:.5;display:inline-flex;align-items:center;gap:8px"><div style="width:6px;height:6px;border-radius:50%;background:var(--g135)"></div> $136/mo Economics</a>
+    <a href="https://blackroad-assets.pages.dev" style="text-decoration:none;padding:8px 18px;border:1px solid var(--border);border-radius:20px;font-size:12px;font-weight:500;color:var(--white);opacity:.5;display:inline-flex;align-items:center;gap:8px"><div style="width:6px;height:6px;border-radius:50%;background:var(--g135)"></div> Data Archive</a>
+    <a href="https://blackroad-os-home.pages.dev" style="text-decoration:none;padding:8px 18px;border:1px solid var(--border);border-radius:20px;font-size:12px;font-weight:500;color:var(--white);opacity:.5;display:inline-flex;align-items:center;gap:8px"><div style="width:6px;height:6px;border-radius:50%;background:var(--g135)"></div> CLI Deploy Tools</a>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-brand"><a href="https://blackroad-io.pages.dev" style="color:inherit;text-decoration:none">BlackRoad Cloud</a></div>
+  <div class="footer-links">
+    <a href="#services">Services</a>
+    <a href="https://blackroad-infra.pages.dev">Hardware</a>
+    <a href="https://blackroad-guardian-dashboard.pages.dev">Security</a>
+    <a href="https://blackroad-os-home.pages.dev">OS</a>
+    <a href="https://github.com/BlackRoad-Cloud" target="_blank">GitHub</a>
+    <a href="https://blackroad-io.pages.dev">OS Inc</a>
+  </div>
+  <div class="footer-copy">&copy; 2026 BlackRoad Cloud. All rights reserved.</div>
+</footer>
+<div class="grad-bar"></div>
+
+<script src="https://blackboard.amundsonalexa.workers.dev/bb.js"></script>
+<!-- BlackRoad Ecosystem Bar -->
+<div style="position:fixed;bottom:0;left:0;right:0;z-index:999;background:#0a0a0a;border-top:1px solid #1a1a1a;padding:8px 0;overflow-x:auto">
+<div style="display:flex;gap:16px;justify-content:center;align-items:center;padding:0 20px;white-space:nowrap">
+<a href="https://blackroad.io" style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:#555;text-decoration:none;transition:color 0.2s">Home</a>
+<a href="https://portal.blackroad.io" style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:#555;text-decoration:none;transition:color 0.2s">Portal</a>
+<a href="https://search.blackroad.io" style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:#555;text-decoration:none;transition:color 0.2s">Search</a>
+<a href="https://chat.blackroad.io" style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:#555;text-decoration:none;transition:color 0.2s">Chat</a>
+<a href="https://auth.blackroad.io" style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:#555;text-decoration:none;transition:color 0.2s">Auth</a>
+<a href="https://pay.blackroad.io" style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:#555;text-decoration:none;transition:color 0.2s">Pay</a>
+<a href="https://images.blackroad.io" style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:#555;text-decoration:none;transition:color 0.2s">Images</a>
+<a href="https://brand.blackroad.io" style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:#555;text-decoration:none;transition:color 0.2s">Brand</a>
+<a href="https://status.blackroad.io" style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:#555;text-decoration:none;transition:color 0.2s">Status</a>
+<a href="https://github.com/BlackRoad-OS-Inc" style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:#555;text-decoration:none;transition:color 0.2s">GitHub</a>
+</div>
+</div>
+<div style="height:36px"></div>
+<script>
+// BlackRoad Live Stats
+(function(){
+  const API='https://stats-blackroad.amundsonalexa.workers.dev';
+  async function load(){
+    try{
+      const r=await fetch(API+'/ecosystem');
+      const d=(await r.json())?.data||{};
+      document.querySelectorAll('[data-stat]').forEach(el=>{
+        const v=d[el.dataset.stat];
+        if(v!==undefined)el.textContent=typeof v==='number'?v.toLocaleString():v;
+      });
+    }catch(e){}
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',load);
+  else load();
+  setInterval(load,60000);
+})();
+</script>
+</body>
+</html>

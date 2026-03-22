@@ -1,0 +1,91 @@
+name = "blackroad-os-beacon"
+main = "src/index.js"
+compatibility_date = "2024-12-01"
+account_id = "848cf0b18d51e0170e0d1537aec3505a"
+
+[vars]
+REPO_NAME = "blackroad-os-beacon"
+ORG_NAME = "BlackRoad-OS"
+ENVIRONMENT = "production"
+
+# Add KV, D1, R2 bindings as needed
+# [[kv_namespaces]]
+# binding = "CACHE"
+# id = "YOUR_KV_ID"
+# Cloudflare Workers configuration for blackroad-os-beacon
+# https://developers.cloudflare.com/workers/wrangler/configuration/
+
+name = "blackroad-os-beacon"
+main = "dist/worker.js"
+compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Account configuration (set via environment or secrets)
+# account_id = "" # Set via CLOUDFLARE_ACCOUNT_ID secret
+
+[vars]
+NODE_ENV = "production"
+SERVICE_NAME = "blackroad-os-beacon"
+
+# KV Namespaces for state management
+[[kv_namespaces]]
+binding = "BEACON_KV"
+id = "" # Set via Cloudflare dashboard
+
+[[kv_namespaces]]
+binding = "DEPLOY_LOG_KV"
+id = "" # Set via Cloudflare dashboard
+
+# Durable Objects for real-time coordination
+[[durable_objects.bindings]]
+name = "BEACON_STATE"
+class_name = "BeaconState"
+
+[[migrations]]
+tag = "v1"
+new_classes = ["BeaconState"]
+
+# R2 bucket for log storage
+[[r2_buckets]]
+binding = "LOGS_BUCKET"
+bucket_name = "blackroad-beacon-logs"
+
+# Queue for async processing
+[[queues.producers]]
+queue = "beacon-events"
+binding = "BEACON_QUEUE"
+
+[[queues.consumers]]
+queue = "beacon-events"
+max_batch_size = 10
+max_batch_timeout = 30
+
+# Cron triggers for health checks
+[triggers]
+crons = ["*/5 * * * *"]  # Every 5 minutes
+
+# Environment-specific configurations
+[env.staging]
+name = "blackroad-os-beacon-staging"
+vars = { NODE_ENV = "staging" }
+
+[env.production]
+name = "blackroad-os-beacon"
+vars = { NODE_ENV = "production" }
+routes = [
+  { pattern = "beacon.blackroad.io/*", zone_name = "blackroad.io" }
+]
+
+# Observability
+[observability]
+enabled = true
+
+# Limits
+[limits]
+cpu_ms = 50
+
+# Build settings
+[build]
+command = "npm run build:worker"
+cwd = "."
+watch_dir = "src"

@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact — BlackRoad OS</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --gray-950: #0a0a0a;
+  --gray-900: #171717;
+  --gray-850: #1e1e1e;
+  --gray-800: #262626;
+  --gray-700: #404040;
+  --gray-600: #525252;
+  --gray-500: #737373;
+  --gray-400: #a3a3a3;
+  --gray-300: #d4d4d4;
+  --gray-200: #e5e5e5;
+  --gray-100: #f5f5f5;
+  --white: #ffffff;
+  --accent-1: #ff8700;
+  --accent-2: #ff5f00;
+  --accent-3: #ff0087;
+  --accent-4: #af5fd7;
+  --accent-5: #ff00ff;
+  --accent-6: #1e90ff;
+  --success: #22c55e;
+  --error: #ef4444;
+  --font-headline: 'Space Grotesk', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: var(--gray-950);
+  color: var(--gray-300);
+  font-family: var(--font-body);
+  min-height: 100vh;
+}
+
+/* Nav */
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 40px;
+  border-bottom: 1px solid var(--gray-900);
+}
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+.nav-logo-mark {
+  width: 32px;
+  height: 32px;
+  background: var(--gray-100);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-headline);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--gray-950);
+}
+.nav-logo-text {
+  font-family: var(--font-headline);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--gray-100);
+}
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+.nav-link {
+  color: var(--gray-400);
+  text-decoration: none;
+  font-size: 14px;
+  transition: color 150ms ease;
+}
+.nav-link:hover { color: var(--gray-100); }
+.nav-link.active { color: var(--gray-100); }
+.nav-cta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.btn {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  padding: 10px 20px;
+  border-radius: var(--radius-md);
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 200ms ease;
+}
+.btn-ghost {
+  background: transparent;
+  color: var(--gray-300);
+}
+.btn-ghost:hover { color: var(--gray-100); }
+.btn-primary {
+  background: var(--gray-100);
+  color: var(--gray-900);
+}
+.btn-primary:hover {
+  background: var(--white);
+  transform: translateY(-1px);
+}
+
+/* Main Layout */
+.contact-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: calc(100vh - 65px);
+}
+
+/* Left Side - Info */
+.contact-info {
+  padding: 80px 60px;
+  background: var(--gray-900);
+  border-right: 1px solid var(--gray-800);
+  display: flex;
+  flex-direction: column;
+}
+.contact-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--accent-6);
+  background: rgba(30,144,255,0.1);
+  border: 1px solid rgba(30,144,255,0.2);
+  padding: 6px 12px;
+  border-radius: 50px;
+  margin-bottom: 24px;
+  width: fit-content;
+}
+.contact-badge-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--success);
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+.contact-title {
+  font-family: var(--font-headline);
+  font-size: 40px;
+  font-weight: 700;
+  color: var(--gray-100);
+  margin-bottom: 16px;
+  line-height: 1.2;
+}
+.contact-description {
+  font-size: 16px;
+  color: var(--gray-400);
+  line-height: 1.7;
+  margin-bottom: 48px;
+  max-width: 400px;
+}
+
+.contact-methods {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin-bottom: 48px;
+}
+.contact-method {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+.method-icon {
+  width: 44px;
+  height: 44px;
+  background: var(--gray-850);
+  border: 1px solid var(--gray-800);
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.method-icon svg {
+  width: 20px;
+  height: 20px;
+  color: var(--gray-400);
+}
+.method-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.method-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--gray-500);
+}
+.method-value {
+  font-size: 15px;
+  color: var(--gray-200);
+}
+.method-value a {
+  color: var(--gray-200);
+  text-decoration: none;
+}
+.method-value a:hover { color: var(--accent-6); }
+
+.social-links {
+  display: flex;
+  gap: 12px;
+  margin-top: auto;
+}
+.social-link {
+  width: 40px;
+  height: 40px;
+  background: var(--gray-850);
+  border: 1px solid var(--gray-800);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gray-400);
+  text-decoration: none;
+  transition: all 150ms ease;
+}
+.social-link:hover {
+  background: var(--gray-800);
+  border-color: var(--gray-700);
+  color: var(--gray-100);
+}
+.social-link svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Right Side - Form */
+.contact-form-section {
+  padding: 80px 60px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.form-title {
+  font-family: var(--font-headline);
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--gray-100);
+  margin-bottom: 8px;
+}
+.form-subtitle {
+  font-size: 14px;
+  color: var(--gray-500);
+  margin-bottom: 32px;
+}
+
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 480px;
+}
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.input-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--gray-500);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+.input {
+  width: 100%;
+  background: var(--gray-900);
+  border: 1px solid var(--gray-800);
+  color: var(--gray-100);
+  font-family: var(--font-body);
+  font-size: 14px;
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  transition: all 200ms ease;
+  outline: none;
+}
+.input:hover { border-color: var(--gray-700); }
+.input:focus {
+  border-color: var(--accent-6);
+  box-shadow: 0 0 0 3px rgba(30,144,255,0.1);
+}
+.input::placeholder { color: var(--gray-600); }
+
+textarea.input {
+  min-height: 140px;
+  resize: vertical;
+  font-family: var(--font-body);
+  line-height: 1.6;
+}
+
+select.input {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23737373' stroke-width='2' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  padding-right: 44px;
+  cursor: pointer;
+}
+
+.checkbox-group {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.checkbox {
+  width: 20px;
+  height: 20px;
+  background: var(--gray-900);
+  border: 1.5px solid var(--gray-700);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.checkbox-label {
+  font-size: 13px;
+  color: var(--gray-400);
+  line-height: 1.5;
+}
+.checkbox-label a {
+  color: var(--accent-6);
+  text-decoration: none;
+}
+.checkbox-label a:hover { text-decoration: underline; }
+
+.form-submit {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 8px;
+}
+.btn-submit {
+  padding: 14px 32px;
+  font-weight: 600;
+}
+.btn-gradient {
+  background: linear-gradient(135deg, var(--accent-1), var(--accent-3), var(--accent-6));
+  color: var(--white);
+  border: none;
+  background-size: 200% 200%;
+  animation: gradientShift 3s ease infinite;
+}
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.btn-gradient:hover {
+  box-shadow: 0 0 24px rgba(255,0,135,0.3);
+  transform: translateY(-1px);
+}
+.form-note {
+  font-size: 13px;
+  color: var(--gray-500);
+}
+
+/* Success State */
+.form-success {
+  display: none;
+  text-align: center;
+  padding: 48px;
+  background: var(--gray-900);
+  border: 1px solid var(--gray-800);
+  border-radius: var(--radius-xl);
+}
+.success-icon {
+  width: 64px;
+  height: 64px;
+  background: rgba(34,197,94,0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px;
+}
+.success-icon svg {
+  width: 32px;
+  height: 32px;
+  color: var(--success);
+}
+.success-title {
+  font-family: var(--font-headline);
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--gray-100);
+  margin-bottom: 8px;
+}
+.success-text {
+  font-size: 14px;
+  color: var(--gray-400);
+  margin-bottom: 24px;
+}
+
+/* Office Cards */
+.offices-section {
+  background: var(--gray-900);
+  border-top: 1px solid var(--gray-800);
+  padding: 80px 40px;
+}
+.offices-title {
+  font-family: var(--font-headline);
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--gray-100);
+  text-align: center;
+  margin-bottom: 48px;
+}
+.offices-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+.office-card {
+  background: var(--gray-850);
+  border: 1px solid var(--gray-800);
+  border-radius: var(--radius-xl);
+  padding: 28px;
+  transition: all 200ms ease;
+}
+.office-card:hover {
+  border-color: var(--gray-700);
+  transform: translateY(-2px);
+}
+.office-city {
+  font-family: var(--font-headline);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--gray-100);
+  margin-bottom: 4px;
+}
+.office-country {
+  font-size: 13px;
+  color: var(--gray-500);
+  margin-bottom: 16px;
+}
+.office-address {
+  font-size: 14px;
+  color: var(--gray-400);
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+.office-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--accent-6);
+  text-decoration: none;
+}
+.office-link:hover { text-decoration: underline; }
+.office-link svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .contact-layout {
+    grid-template-columns: 1fr;
+  }
+  .contact-info {
+    border-right: none;
+    border-bottom: 1px solid var(--gray-800);
+  }
+  .offices-grid {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="#" class="nav-logo">
+    <div class="nav-logo-mark">B</div>
+    <span class="nav-logo-text">BlackRoad</span>
+  </a>
+  <div class="nav-links">
+    <a href="#" class="nav-link">Product</a>
+    <a href="#" class="nav-link">Docs</a>
+    <a href="#" class="nav-link">Pricing</a>
+    <a href="#" class="nav-link active">Contact</a>
+  </div>
+  <div class="nav-cta">
+    <a href="#" class="btn btn-ghost">Sign In</a>
+    <a href="#" class="btn btn-primary">Get Started</a>
+  </div>
+</nav>
+
+<div class="contact-layout">
+  <div class="contact-info">
+    <span class="contact-badge">
+      <span class="contact-badge-dot"></span>
+      We typically respond within 2 hours
+    </span>
+    <h1 class="contact-title">Let's build something great together</h1>
+    <p class="contact-description">
+      Have a question about our platform? Want to explore enterprise solutions?
+      Or just want to say hello? We'd love to hear from you.
+    </p>
+
+    <div class="contact-methods">
+      <div class="contact-method">
+        <div class="method-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+            <polyline points="22,6 12,13 2,6"/>
+          </svg>
+        </div>
+        <div class="method-content">
+          <span class="method-label">Email</span>
+          <span class="method-value"><a href="mailto:hello@blackroad.io">hello@blackroad.io</a></span>
+        </div>
+      </div>
+
+      <div class="contact-method">
+        <div class="method-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+          </svg>
+        </div>
+        <div class="method-content">
+          <span class="method-label">Live Chat</span>
+          <span class="method-value">Available Mon-Fri, 9am-6pm PST</span>
+        </div>
+      </div>
+
+      <div class="contact-method">
+        <div class="method-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+          </svg>
+        </div>
+        <div class="method-content">
+          <span class="method-label">Phone</span>
+          <span class="method-value"><a href="tel:+14155551234">+1 (415) 555-1234</a></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="social-links">
+      <a href="#" class="social-link" aria-label="Twitter">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      </a>
+      <a href="#" class="social-link" aria-label="GitHub">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+      </a>
+      <a href="#" class="social-link" aria-label="Discord">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189z"/></svg>
+      </a>
+      <a href="#" class="social-link" aria-label="LinkedIn">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+      </a>
+    </div>
+  </div>
+
+  <div class="contact-form-section">
+    <h2 class="form-title">Send us a message</h2>
+    <p class="form-subtitle">Fill out the form below and we'll get back to you as soon as possible.</p>
+
+    <form class="contact-form">
+      <div class="form-row">
+        <div class="input-group">
+          <label class="input-label">First Name</label>
+          <input type="text" class="input" placeholder="John">
+        </div>
+        <div class="input-group">
+          <label class="input-label">Last Name</label>
+          <input type="text" class="input" placeholder="Doe">
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label class="input-label">Email</label>
+        <input type="email" class="input" placeholder="john@company.com">
+      </div>
+
+      <div class="input-group">
+        <label class="input-label">Company</label>
+        <input type="text" class="input" placeholder="Company name (optional)">
+      </div>
+
+      <div class="input-group">
+        <label class="input-label">Subject</label>
+        <select class="input">
+          <option value="">Select a topic...</option>
+          <option value="sales">Sales inquiry</option>
+          <option value="support">Technical support</option>
+          <option value="partnership">Partnership</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+
+      <div class="input-group">
+        <label class="input-label">Message</label>
+        <textarea class="input" placeholder="Tell us about your project or question..."></textarea>
+      </div>
+
+      <div class="checkbox-group">
+        <input type="checkbox" class="checkbox">
+        <span class="checkbox-label">
+          I agree to the <a href="#">Privacy Policy</a> and consent to receiving communications from BlackRoad.
+        </span>
+      </div>
+
+      <div class="form-submit">
+        <button type="submit" class="btn btn-gradient btn-submit">Send Message</button>
+        <span class="form-note">We'll respond within 24 hours</span>
+      </div>
+    </form>
+
+    <div class="form-success">
+      <div class="success-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+      </div>
+      <h3 class="success-title">Message sent!</h3>
+      <p class="success-text">Thanks for reaching out. We'll get back to you shortly.</p>
+      <button class="btn btn-primary">Send Another Message</button>
+    </div>
+  </div>
+</div>
+
+<section class="offices-section">
+  <h2 class="offices-title">Our Offices</h2>
+  <div class="offices-grid">
+    <div class="office-card">
+      <h3 class="office-city">San Francisco</h3>
+      <p class="office-country">United States</p>
+      <p class="office-address">
+        548 Market Street<br>
+        Suite 12345<br>
+        San Francisco, CA 94104
+      </p>
+      <a href="#" class="office-link">
+        Get directions
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="7" y1="17" x2="17" y2="7"/>
+          <polyline points="7 7 17 7 17 17"/>
+        </svg>
+      </a>
+    </div>
+
+    <div class="office-card">
+      <h3 class="office-city">London</h3>
+      <p class="office-country">United Kingdom</p>
+      <p class="office-address">
+        1 Canada Square<br>
+        Canary Wharf<br>
+        London E14 5AB
+      </p>
+      <a href="#" class="office-link">
+        Get directions
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="7" y1="17" x2="17" y2="7"/>
+          <polyline points="7 7 17 7 17 17"/>
+        </svg>
+      </a>
+    </div>
+
+    <div class="office-card">
+      <h3 class="office-city">Singapore</h3>
+      <p class="office-country">Singapore</p>
+      <p class="office-address">
+        1 Raffles Place<br>
+        Tower 2, Level 30<br>
+        Singapore 048616
+      </p>
+      <a href="#" class="office-link">
+        Get directions
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="7" y1="17" x2="17" y2="7"/>
+          <polyline points="7 7 17 7 17 17"/>
+        </svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>

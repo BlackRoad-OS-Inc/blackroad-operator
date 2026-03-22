@@ -1,0 +1,26 @@
+# BlackRoad OS Pyto Server - Railway Configuration
+# Deploy to Railway: railway up
+
+[build]
+builder = "NIXPACKS"
+
+[deploy]
+startCommand = "python main.py"
+healthcheckPath = "/health"
+healthcheckTimeout = 30
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3
+
+# Resource limits (optimize for cost)
+[[deploy.healthcheck]]
+path = "/health"
+interval = 30
+timeout = 10
+
+[env]
+# Set these in Railway dashboard
+# ANTHROPIC_API_KEY
+# OPENAI_API_KEY
+ENVIRONMENT = "production"
+PORT = "8080"
+HOST = "0.0.0.0"

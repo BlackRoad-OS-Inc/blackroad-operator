@@ -1,0 +1,26 @@
+# TruffleHog configuration for BlackRoad OS
+# Run: trufflehog git --config .trufflehog.yaml <repo>
+
+version: ''
+detectors:
+  - name: 'CustomBlackRoad'
+    keywords:
+      - 'BLACKROAD'
+      - 'blackroad'
+    regex:
+      secret: 'BLACKROAD_[A-Z_]+=["\x27]?[A-Za-z0-9\-_./]{20,}["\x27]?'
+    verify: false
+
+exclude_paths:
+  - '.git/'
+  - 'node_modules/'
+  - '__pycache__/'
+  - '*.example'
+  - '*.sample'
+  - 'tests/fixtures/'
+
+exclude_detectors:
+  - HexHighEntropy
+  - Base64HighEntropy
+
+output_format: 'json'

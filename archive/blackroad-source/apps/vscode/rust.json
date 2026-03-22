@@ -1,0 +1,80 @@
+{
+  "BlackRoad Client Init": {
+    "prefix": "br-init",
+    "body": [
+      "use blackroad::{BlackRoadClient, ClientConfig};",
+      "",
+      "let client = BlackRoadClient::new(ClientConfig {",
+      "    api_key: Some(\"${1:your-api-key}\".to_string()),",
+      "    ..Default::default()",
+      "})?;"
+    ],
+    "description": "Initialize BlackRoad client"
+  },
+  "BlackRoad List Agents": {
+    "prefix": "br-agents-list",
+    "body": [
+      "let agents = client.agents().list(Some(AgentListOptions {",
+      "    division: Some(\"${1:AI}\".to_string()),",
+      "    level: Some(${2:4}),",
+      "    ..Default::default()",
+      "})).await?;",
+      "println!(\"Found {} agents\", agents.len());"
+    ],
+    "description": "List BlackRoad agents"
+  },
+  "BlackRoad Register Agent": {
+    "prefix": "br-agent-register",
+    "body": [
+      "let agent = client.agents().register(RegisterAgentOptions {",
+      "    name: \"${1:my-agent}\".to_string(),",
+      "    agent_type: Some(\"${2:ai}\".to_string()),",
+      "    division: Some(\"${3:Labs}\".to_string()),",
+      "    level: Some(${4:4}),",
+      "    ..Default::default()",
+      "}).await?;"
+    ],
+    "description": "Register a new BlackRoad agent"
+  },
+  "BlackRoad Dispatch Task": {
+    "prefix": "br-task-dispatch",
+    "body": [
+      "let task = client.tasks().dispatch(DispatchTaskOptions {",
+      "    title: \"${1:Task title}\".to_string(),",
+      "    description: Some(\"${2:Task description}\".to_string()),",
+      "    priority: Some(\"${3:high}\".to_string()),",
+      "    division: Some(\"${4:Security}\".to_string()),",
+      "    ..Default::default()",
+      "}).await?;"
+    ],
+    "description": "Dispatch a new BlackRoad task"
+  },
+  "BlackRoad Log Memory": {
+    "prefix": "br-memory-log",
+    "body": [
+      "let entry = client.memory().log(LogMemoryOptions {",
+      "    action: \"${1:deployed}\".to_string(),",
+      "    entity: \"${2:service-name}\".to_string(),",
+      "    details: Some(\"${3:Details}\".to_string()),",
+      "    tags: Some(vec![\"${4:tag1}\".to_string()]),",
+      "    ..Default::default()",
+      "}).await?;"
+    ],
+    "description": "Log entry to BlackRoad memory"
+  },
+  "BlackRoad Error Handling": {
+    "prefix": "br-match-err",
+    "body": [
+      "match result {",
+      "    Ok(data) => println!(\"Success: {:?}\", data),",
+      "    Err(Error::NotFound(resource)) => println!(\"Not found: {}\", resource),",
+      "    Err(Error::RateLimit { retry_after }) => {",
+      "        println!(\"Rate limited. Retry after {} seconds\", retry_after);",
+      "    }",
+      "    Err(Error::Authentication(msg)) => println!(\"Auth error: {}\", msg),",
+      "    Err(e) => println!(\"Error: {}\", e),",
+      "}"
+    ],
+    "description": "BlackRoad error handling pattern"
+  }
+}

@@ -1,0 +1,133 @@
+#!/usr/bin/env bash
+# ============================================================================
+# BLACKROAD OS, INC. - PROPRIETARY AND CONFIDENTIAL
+# Copyright (c) 2025-2026 BlackRoad OS, Inc. All Rights Reserved.
+# ============================================================================
+# ask - Universal sovereign AI query
+# Zero tokenization. Routes to best available local Pi.
+#
+# Usage:
+#   ask "how do I list docker containers"
+#   ask                    # Interactive mode
+#   ask --fleet            # Show fleet AI status
+#   ask --node cecilia     # Force specific node
+set -eo pipefail
+
+# Source centralized config
+source "$HOME/.blackroad/config/nodes.sh" 2>/dev/null || {
+  echo "ERROR: Missing ~/.blackroad/config/nodes.sh" >&2; exit 1
+}
+
+MODEL="${BR_MODEL:-llama3.2}"
+TIMEOUT=60
+
+# Ollama nodes in priority order (fastest/most capable first)
+OLLAMA_NODES=(cecilia lucidia alice)
+
+# Find first available Ollama node
+find_node() {
+  for node in "${OLLAMA_NODES[@]}"; do
+    local ip="${NODE_IP[$node]:-}"
+    [[ -z "$ip" ]] && continue
+    if curl -sf --connect-timeout 2 "http://${ip}:11434/api/tags" &>/dev/null; then
+      echo "$node"
+      return 0
+    fi
+  done
+  return 1
+}
+
+# Query a node's Ollama
+query_node() {
+  local node="$1"
+  local prompt="$2"
+  local ip="${NODE_IP[$node]}"
+
+  curl -sf --max-time "$TIMEOUT" "http://${ip}:11434/api/generate" \
+    -d "{\"model\":\"$MODEL\",\"prompt\":$(printf '%s' "$prompt" | jq -Rs .),\"stream\":false}" 2>/dev/null | \
+    jq -r '.response // empty' 2>/dev/null
+}
+
+# Show fleet AI status
+fleet_status() {
+  printf '%b%-12s %-16s %-8s %s%b\n' "$BLUE" "NODE" "IP" "OLLAMA" "MODELS" "$RESET"
+  for node in "${OLLAMA_NODES[@]}"; do
+    local ip="${NODE_IP[$node]:-}"
+    [[ -z "$ip" ]] && continue
+    printf '%-12s %-16s ' "$node" "$ip"
+    local tags
+    tags=$(curl -sf --connect-timeout 2 "http://${ip}:11434/api/tags" 2>/dev/null)
+    if [[ -n "$tags" ]]; then
+      local count
+      count=$(echo "$tags" | jq '.models | length' 2>/dev/null || echo "?")
+      printf '%b%-8s%b %s models\n' "$GREEN" "UP" "$RESET" "$count"
+    else
+      printf '%b%-8s%b\n' "$RED" "DOWN" "$RESET"
+    fi
+  done
+}
+
+# Interactive mode
+interactive() {
+  local node="$1"
+  printf '%bask%b → %s (%s) [model: %s]\n' "$PINK" "$RESET" "$node" "${NODE_IP[$node]}" "$MODEL"
+  printf 'Type your question (Ctrl+D to exit):\n\n'
+  while printf '%b> %b' "$AMBER" "$RESET" && read -r line; do
+    [[ -z "$line" ]] && continue
+    local response
+    response=$(query_node "$node" "$line")
+    if [[ -n "$response" ]]; then
+      echo "$response"
+    else
+      printf '%bNo response from %s%b\n' "$RED" "$node" "$RESET"
+    fi
+    echo
+  done
+}
+
+# Parse args
+TARGET_NODE=""
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --fleet) fleet_status; exit 0 ;;
+    --node)  TARGET_NODE="$2"; shift 2 ;;
+    --model) MODEL="$2"; shift 2 ;;
+    -h|--help)
+      echo "ask - Universal sovereign AI query"
+      echo ""
+      echo "Usage:"
+      echo "  ask \"question\"         Query best available node"
+      echo "  ask                    Interactive mode"
+      echo "  ask --fleet            Show fleet AI status"
+      echo "  ask --node cecilia     Force specific node"
+      echo "  ask --model mistral    Use specific model"
+      exit 0 ;;
+    *) break ;;
+  esac
+done
+
+# Find target node
+if [[ -n "$TARGET_NODE" ]]; then
+  node="$TARGET_NODE"
+else
+  node=$(find_node) || {
+    printf '%bNo Ollama nodes available. Fleet status:%b\n' "$RED" "$RESET"
+    fleet_status
+    exit 1
+  }
+fi
+
+# Single query or interactive
+if [[ $# -gt 0 ]]; then
+  prompt="$*"
+  printf '%bask%b → %s\n' "$PINK" "$RESET" "$node"
+  response=$(query_node "$node" "$prompt")
+  if [[ -n "$response" ]]; then
+    echo "$response"
+  else
+    printf '%bNo response from %s (model: %s)%b\n' "$RED" "$node" "$MODEL" "$RESET"
+    exit 1
+  fi
+else
+  interactive "$node"
+fi

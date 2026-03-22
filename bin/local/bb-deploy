@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+# bb-deploy — Deploy BlackBoard v2 to Cloudflare (migrate + deploy)
+# Usage: bb-deploy [--migrate-only] [--deploy-only]
+
+set -e
+
+PINK='\033[38;5;205m'
+AMBER='\033[38;5;214m'
+GREEN='\033[38;5;82m'
+BLUE='\033[38;5;69m'
+RED='\033[38;5;196m'
+RESET='\033[0m'
+
+BB_DIR="$HOME/blackroad-operator/workers/blackboard"
+cd "$BB_DIR"
+
+echo -e "${PINK}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RESET}"
+echo -e "${PINK}  BlackBoard v2 — Deploy${RESET}"
+echo -e "${PINK}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RESET}"
+echo ""
+
+MIGRATE_ONLY=false
+DEPLOY_ONLY=false
+
+case "${1:-}" in
+  --migrate-only) MIGRATE_ONLY=true ;;
+  --deploy-only) DEPLOY_ONLY=true ;;
+esac
+
+# Step 1: Run migration
+if ! $DEPLOY_ONLY; then
+  echo -e "${BLUE}▸ Running D1 migration...${RESET}"
+  if npx wrangler d1 execute blackboard --file=migrations/0002_v2_enhanced.sql --remote 2>&1; then
+    echo -e "${GREEN}  ✓ Migration applied successfully${RESET}"
+  else
+    echo -e "${AMBER}  ⚠ Migration may have partial failures (columns may already exist)${RESET}"
+    echo -e "${AMBER}    This is normal for idempotent migrations. Continuing...${RESET}"
+  fi
+  echo ""
+fi
+
+if $MIGRATE_ONLY; then
+  echo -e "${GREEN}Migration complete. Run bb-deploy --deploy-only to deploy the worker.${RESET}"
+  exit 0
+fi
+
+# Step 2: Deploy worker
+echo -e "${BLUE}▸ Deploying BlackBoard v2 worker...${RESET}"
+npx wrangler deploy 2>&1
+echo -e "${GREEN}  ✓ Worker deployed${RESET}"
+echo ""
+
+# Step 3: Verify
+echo -e "${BLUE}▸ Verifying deployment...${RESET}"
+RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" "https://bb.blackroad.io/bb.js" 2>/dev/null || echo "000")
+if [[ "$RESPONSE" == "200" ]]; then
+  echo -e "${GREEN}  ✓ bb.js serving (HTTP $RESPONSE)${RESET}"
+else
+  echo -e "${AMBER}  ⚠ bb.js returned HTTP $RESPONSE — check worker logs${RESET}"
+fi
+
+echo ""
+echo -e "${PINK}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RESET}"
+echo -e "${GREEN}  BlackBoard v2 deployed!${RESET}"
+echo ""
+echo -e "  Beacon:     ${BLUE}https://bb.blackroad.io/bb.js${RESET}"
+echo -e "  Dashboard:  ${BLUE}https://bb.blackroad.io${RESET}"
+echo -e "  API:        ${BLUE}https://bb.blackroad.io/api/stats${RESET}"
+echo ""
+echo -e "  Embed:      ${AMBER}<script src=\"https://bb.blackroad.io/bb.js\" defer></script>${RESET}"
+echo -e "${PINK}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RESET}"

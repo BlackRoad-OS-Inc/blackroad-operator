@@ -1,0 +1,241 @@
+{
+  "name": "blackroad",
+  "displayName": "BlackRoad",
+  "description": "Official BlackRoad extension - manage agents, tasks, memory, and deployments from VSCode",
+  "version": "1.0.0",
+  "publisher": "blackroad-os",
+  "icon": "images/icon.png",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other",
+    "Snippets",
+    "Visualization"
+  ],
+  "keywords": [
+    "blackroad",
+    "ai",
+    "agents",
+    "infrastructure",
+    "deployment"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "blackroad.connect",
+        "title": "BlackRoad: Connect"
+      },
+      {
+        "command": "blackroad.disconnect",
+        "title": "BlackRoad: Disconnect"
+      },
+      {
+        "command": "blackroad.refresh",
+        "title": "BlackRoad: Refresh",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "blackroad.openDashboard",
+        "title": "BlackRoad: Open Dashboard"
+      },
+      {
+        "command": "blackroad.deploy",
+        "title": "BlackRoad: Deploy Project"
+      },
+      {
+        "command": "blackroad.viewLogs",
+        "title": "BlackRoad: View Logs"
+      },
+      {
+        "command": "blackroad.dispatchTask",
+        "title": "BlackRoad: Dispatch Task"
+      },
+      {
+        "command": "blackroad.registerAgent",
+        "title": "BlackRoad: Register Agent"
+      },
+      {
+        "command": "blackroad.logMemory",
+        "title": "BlackRoad: Log to Memory"
+      },
+      {
+        "command": "blackroad.searchMemory",
+        "title": "BlackRoad: Search Memory"
+      },
+      {
+        "command": "blackroad.agents.refresh",
+        "title": "Refresh Agents",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "blackroad.tasks.refresh",
+        "title": "Refresh Tasks",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "blackroad.memory.refresh",
+        "title": "Refresh Memory",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "blackroad.agent.heartbeat",
+        "title": "Send Heartbeat"
+      },
+      {
+        "command": "blackroad.task.complete",
+        "title": "Complete Task"
+      },
+      {
+        "command": "blackroad.task.assign",
+        "title": "Assign Task"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "blackroad",
+          "title": "BlackRoad",
+          "icon": "$(road)"
+        }
+      ]
+    },
+    "views": {
+      "blackroad": [
+        {
+          "id": "blackroad.agents",
+          "name": "Agents"
+        },
+        {
+          "id": "blackroad.tasks",
+          "name": "Tasks"
+        },
+        {
+          "id": "blackroad.memory",
+          "name": "Memory"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "blackroad.agents",
+        "contents": "Connect to BlackRoad to view agents.\n[Connect](command:blackroad.connect)"
+      },
+      {
+        "view": "blackroad.tasks",
+        "contents": "Connect to BlackRoad to view tasks.\n[Connect](command:blackroad.connect)"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "blackroad.agents.refresh",
+          "when": "view == blackroad.agents",
+          "group": "navigation"
+        },
+        {
+          "command": "blackroad.tasks.refresh",
+          "when": "view == blackroad.tasks",
+          "group": "navigation"
+        },
+        {
+          "command": "blackroad.memory.refresh",
+          "when": "view == blackroad.memory",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "blackroad.agent.heartbeat",
+          "when": "view == blackroad.agents && viewItem == agent"
+        },
+        {
+          "command": "blackroad.task.complete",
+          "when": "view == blackroad.tasks && viewItem == task"
+        },
+        {
+          "command": "blackroad.task.assign",
+          "when": "view == blackroad.tasks && viewItem == task"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "BlackRoad",
+      "properties": {
+        "blackroad.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "BlackRoad API key for authentication"
+        },
+        "blackroad.apiUrl": {
+          "type": "string",
+          "default": "https://api.blackroad.io/v1",
+          "description": "BlackRoad API base URL"
+        },
+        "blackroad.autoConnect": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically connect on startup"
+        },
+        "blackroad.refreshInterval": {
+          "type": "number",
+          "default": 30,
+          "description": "Auto-refresh interval in seconds (0 to disable)"
+        }
+      }
+    },
+    "snippets": [
+      {
+        "language": "typescript",
+        "path": "./snippets/typescript.json"
+      },
+      {
+        "language": "javascript",
+        "path": "./snippets/typescript.json"
+      },
+      {
+        "language": "python",
+        "path": "./snippets/python.json"
+      },
+      {
+        "language": "go",
+        "path": "./snippets/go.json"
+      },
+      {
+        "language": "rust",
+        "path": "./snippets/rust.json"
+      },
+      {
+        "language": "ruby",
+        "path": "./snippets/ruby.json"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "lint": "eslint src --ext ts",
+    "package": "vsce package",
+    "publish": "vsce publish"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "@vscode/vsce": "^2.22.0",
+    "eslint": "^8.55.0",
+    "typescript": "^5.3.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BlackRoad-OS/blackroad-vscode-extension"
+  },
+  "homepage": "https://docs.blackroad.io/tools/vscode",
+  "license": "SEE LICENSE IN LICENSE"
+}

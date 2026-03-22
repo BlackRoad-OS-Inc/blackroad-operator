@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Documentation — BlackRoad OS</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --gray-950: #0a0a0a;
+  --gray-900: #171717;
+  --gray-850: #1e1e1e;
+  --gray-800: #262626;
+  --gray-700: #404040;
+  --gray-600: #525252;
+  --gray-500: #737373;
+  --gray-400: #a3a3a3;
+  --gray-300: #d4d4d4;
+  --gray-200: #e5e5e5;
+  --gray-100: #f5f5f5;
+  --white: #ffffff;
+  --accent-1: #ff8700;
+  --accent-2: #ff5f00;
+  --accent-3: #ff0087;
+  --accent-4: #af5fd7;
+  --accent-5: #ff00ff;
+  --accent-6: #1e90ff;
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  --font-headline: 'Space Grotesk', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: var(--gray-950);
+  color: var(--gray-300);
+  font-family: var(--font-body);
+  min-height: 100vh;
+  line-height: 1.6;
+}
+
+/* Layout */
+.docs-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* Sidebar */
+.docs-sidebar {
+  width: 280px;
+  background: var(--gray-900);
+  border-right: 1px solid var(--gray-800);
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  overflow-y: auto;
+  padding: 24px 0;
+}
+.sidebar-header {
+  padding: 0 24px 24px;
+  border-bottom: 1px solid var(--gray-800);
+  margin-bottom: 16px;
+}
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+.sidebar-logo-mark {
+  width: 32px;
+  height: 32px;
+  background: var(--gray-100);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-headline);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--gray-950);
+}
+.sidebar-logo-text {
+  font-family: var(--font-headline);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--gray-100);
+}
+.sidebar-version {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--gray-500);
+  background: var(--gray-800);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  margin-left: auto;
+}
+
+.sidebar-search {
+  padding: 0 16px;
+  margin-bottom: 16px;
+}
+.search-input {
+  width: 100%;
+  background: var(--gray-950);
+  border: 1px solid var(--gray-800);
+  color: var(--gray-300);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  padding: 10px 12px 10px 36px;
+  border-radius: var(--radius-md);
+  outline: none;
+  transition: all 150ms ease;
+}
+.search-input:focus {
+  border-color: var(--accent-6);
+  box-shadow: 0 0 0 3px rgba(30,144,255,0.1);
+}
+.search-wrapper {
+  position: relative;
+}
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--gray-600);
+}
+
+.nav-section {
+  margin-bottom: 24px;
+}
+.nav-section-title {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--gray-500);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  padding: 0 24px;
+  margin-bottom: 8px;
+}
+.nav-list {
+  list-style: none;
+}
+.nav-item a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 24px;
+  color: var(--gray-400);
+  text-decoration: none;
+  font-size: 14px;
+  transition: all 150ms ease;
+}
+.nav-item a:hover {
+  color: var(--gray-100);
+  background: var(--gray-850);
+}
+.nav-item.active a {
+  color: var(--gray-100);
+  background: var(--gray-800);
+  border-right: 2px solid var(--accent-6);
+}
+.nav-item-icon {
+  width: 18px;
+  height: 18px;
+  opacity: 0.6;
+}
+.nav-badge {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  background: var(--accent-6);
+  color: var(--white);
+}
+.nav-badge.new { background: var(--success); }
+.nav-badge.beta { background: var(--accent-3); }
+
+/* Main Content */
+.docs-main {
+  flex: 1;
+  margin-left: 280px;
+  padding: 40px 60px;
+  max-width: 900px;
+}
+
+.docs-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 24px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--gray-500);
+}
+.docs-breadcrumb a {
+  color: var(--gray-500);
+  text-decoration: none;
+}
+.docs-breadcrumb a:hover { color: var(--gray-300); }
+.breadcrumb-sep { opacity: 0.5; }
+
+.docs-title {
+  font-family: var(--font-headline);
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--gray-100);
+  margin-bottom: 16px;
+}
+.docs-description {
+  font-size: 18px;
+  color: var(--gray-400);
+  margin-bottom: 32px;
+  max-width: 700px;
+}
+
+.docs-content h2 {
+  font-family: var(--font-headline);
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--gray-100);
+  margin: 40px 0 16px;
+  padding-top: 24px;
+  border-top: 1px solid var(--gray-800);
+}
+.docs-content h3 {
+  font-family: var(--font-headline);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--gray-200);
+  margin: 32px 0 12px;
+}
+.docs-content p {
+  color: var(--gray-300);
+  margin-bottom: 16px;
+  line-height: 1.7;
+}
+.docs-content ul, .docs-content ol {
+  margin: 0 0 16px 24px;
+  color: var(--gray-300);
+}
+.docs-content li {
+  margin-bottom: 8px;
+}
+.docs-content a {
+  color: var(--accent-6);
+  text-decoration: none;
+}
+.docs-content a:hover { text-decoration: underline; }
+
+/* Code Blocks */
+.code-block {
+  background: var(--gray-900);
+  border: 1px solid var(--gray-800);
+  border-radius: var(--radius-lg);
+  margin: 20px 0;
+  overflow: hidden;
+}
+.code-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: var(--gray-850);
+  border-bottom: 1px solid var(--gray-800);
+}
+.code-lang {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--gray-500);
+  text-transform: uppercase;
+}
+.code-copy {
+  background: transparent;
+  border: 1px solid var(--gray-700);
+  color: var(--gray-400);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+.code-copy:hover {
+  background: var(--gray-800);
+  color: var(--gray-200);
+}
+.code-content {
+  padding: 16px;
+  overflow-x: auto;
+}
+.code-content pre {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--gray-300);
+}
+.code-content .comment { color: var(--gray-600); }
+.code-content .keyword { color: var(--accent-3); }
+.code-content .string { color: var(--success); }
+.code-content .function { color: var(--accent-6); }
+.code-content .variable { color: var(--accent-1); }
+
+/* Inline Code */
+code {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  background: var(--gray-850);
+  color: var(--accent-3);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+}
+
+/* Callouts */
+.callout {
+  display: flex;
+  gap: 12px;
+  padding: 16px;
+  border-radius: var(--radius-lg);
+  margin: 20px 0;
+}
+.callout-icon {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+}
+.callout-content {
+  flex: 1;
+}
+.callout-title {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.callout-text {
+  font-size: 14px;
+  opacity: 0.9;
+}
+.callout.info {
+  background: rgba(30,144,255,0.1);
+  border: 1px solid rgba(30,144,255,0.2);
+  color: var(--accent-6);
+}
+.callout.warning {
+  background: rgba(245,158,11,0.1);
+  border: 1px solid rgba(245,158,11,0.2);
+  color: var(--warning);
+}
+.callout.success {
+  background: rgba(34,197,94,0.1);
+  border: 1px solid rgba(34,197,94,0.2);
+  color: var(--success);
+}
+.callout.danger {
+  background: rgba(239,68,68,0.1);
+  border: 1px solid rgba(239,68,68,0.2);
+  color: var(--error);
+}
+
+/* Table */
+.docs-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+}
+.docs-table th {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--gray-500);
+  text-align: left;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--gray-800);
+}
+.docs-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--gray-850);
+  font-size: 14px;
+}
+.docs-table tr:hover td {
+  background: var(--gray-900);
+}
+
+/* TOC Sidebar */
+.docs-toc {
+  position: fixed;
+  right: 40px;
+  top: 100px;
+  width: 200px;
+}
+.toc-title {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--gray-500);
+  margin-bottom: 12px;
+}
+.toc-list {
+  list-style: none;
+}
+.toc-item a {
+  display: block;
+  padding: 6px 0;
+  font-size: 13px;
+  color: var(--gray-500);
+  text-decoration: none;
+  border-left: 2px solid transparent;
+  padding-left: 12px;
+  transition: all 150ms ease;
+}
+.toc-item a:hover {
+  color: var(--gray-300);
+}
+.toc-item.active a {
+  color: var(--gray-100);
+  border-left-color: var(--accent-6);
+}
+
+/* Navigation Footer */
+.docs-nav-footer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 60px;
+  padding-top: 32px;
+  border-top: 1px solid var(--gray-800);
+}
+.nav-link {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px 20px;
+  background: var(--gray-900);
+  border: 1px solid var(--gray-800);
+  border-radius: var(--radius-lg);
+  text-decoration: none;
+  transition: all 150ms ease;
+  max-width: 45%;
+}
+.nav-link:hover {
+  border-color: var(--gray-700);
+  background: var(--gray-850);
+}
+.nav-link-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--gray-500);
+  text-transform: uppercase;
+}
+.nav-link-title {
+  font-family: var(--font-headline);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--gray-100);
+}
+.nav-link.next { text-align: right; margin-left: auto; }
+</style>
+</head>
+<body>
+
+<div class="docs-layout">
+  <aside class="docs-sidebar">
+    <div class="sidebar-header">
+      <a href="#" class="sidebar-logo">
+        <div class="sidebar-logo-mark">B</div>
+        <span class="sidebar-logo-text">BlackRoad</span>
+        <span class="sidebar-version">v2.0</span>
+      </a>
+    </div>
+
+    <div class="sidebar-search">
+      <div class="search-wrapper">
+        <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+        </svg>
+        <input type="text" class="search-input" placeholder="Search docs...">
+      </div>
+    </div>
+
+    <nav>
+      <div class="nav-section">
+        <div class="nav-section-title">Getting Started</div>
+        <ul class="nav-list">
+          <li class="nav-item active"><a href="#">Introduction</a></li>
+          <li class="nav-item"><a href="#">Quick Start</a></li>
+          <li class="nav-item"><a href="#">Installation</a></li>
+          <li class="nav-item"><a href="#">Configuration</a></li>
+        </ul>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-title">Core Concepts</div>
+        <ul class="nav-list">
+          <li class="nav-item"><a href="#">Architecture</a></li>
+          <li class="nav-item"><a href="#">Workers</a></li>
+          <li class="nav-item"><a href="#">Agents <span class="nav-badge new">New</span></a></li>
+          <li class="nav-item"><a href="#">Routing</a></li>
+          <li class="nav-item"><a href="#">Storage</a></li>
+        </ul>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-title">API Reference</div>
+        <ul class="nav-list">
+          <li class="nav-item"><a href="#">REST API</a></li>
+          <li class="nav-item"><a href="#">WebSocket</a></li>
+          <li class="nav-item"><a href="#">SDK <span class="nav-badge beta">Beta</span></a></li>
+          <li class="nav-item"><a href="#">CLI Reference</a></li>
+        </ul>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-title">Guides</div>
+        <ul class="nav-list">
+          <li class="nav-item"><a href="#">Deployment</a></li>
+          <li class="nav-item"><a href="#">Authentication</a></li>
+          <li class="nav-item"><a href="#">Monitoring</a></li>
+          <li class="nav-item"><a href="#">Troubleshooting</a></li>
+        </ul>
+      </div>
+    </nav>
+  </aside>
+
+  <main class="docs-main">
+    <div class="docs-breadcrumb">
+      <a href="#">Docs</a>
+      <span class="breadcrumb-sep">/</span>
+      <a href="#">Getting Started</a>
+      <span class="breadcrumb-sep">/</span>
+      <span>Introduction</span>
+    </div>
+
+    <h1 class="docs-title">Introduction to BlackRoad OS</h1>
+    <p class="docs-description">
+      BlackRoad OS is a distributed infrastructure platform for deploying and managing edge workers, AI agents, and serverless applications at scale.
+    </p>
+
+    <div class="docs-content">
+      <div class="callout info">
+        <svg class="callout-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>
+        </svg>
+        <div class="callout-content">
+          <div class="callout-title">New to BlackRoad?</div>
+          <div class="callout-text">Start with the Quick Start guide to deploy your first worker in under 5 minutes.</div>
+        </div>
+      </div>
+
+      <h2>What is BlackRoad OS?</h2>
+      <p>
+        BlackRoad OS provides a unified control plane for managing distributed infrastructure across multiple cloud providers, edge networks, and on-premise systems. It combines the simplicity of serverless with the power of container orchestration.
+      </p>
+
+      <h3>Key Features</h3>
+      <ul>
+        <li><strong>Edge Workers</strong> — Deploy JavaScript/TypeScript functions to 300+ edge locations worldwide</li>
+        <li><strong>AI Agents</strong> — Orchestrate autonomous agents with built-in memory and coordination</li>
+        <li><strong>Global Storage</strong> — Distributed KV, SQL, and object storage with automatic replication</li>
+        <li><strong>Zero Config Networking</strong> — Automatic DNS, TLS, and routing configuration</li>
+      </ul>
+
+      <h2>Quick Installation</h2>
+      <p>Install the BlackRoad CLI using npm:</p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">bash</span>
+          <button class="code-copy">Copy</button>
+        </div>
+        <div class="code-content">
+<pre><span class="comment"># Install globally</span>
+npm install -g @blackroad/cli
+
+<span class="comment"># Verify installation</span>
+blackroad --version
+
+<span class="comment"># Login to your account</span>
+blackroad login</pre>
+        </div>
+      </div>
+
+      <h2>Create Your First Worker</h2>
+      <p>Initialize a new project and deploy it to the edge:</p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">typescript</span>
+          <button class="code-copy">Copy</button>
+        </div>
+        <div class="code-content">
+<pre><span class="comment">// src/index.ts</span>
+<span class="keyword">export default</span> {
+  <span class="keyword">async</span> <span class="function">fetch</span>(<span class="variable">request</span>: Request): Promise&lt;Response&gt; {
+    <span class="keyword">return new</span> <span class="function">Response</span>(<span class="string">"Hello from BlackRoad!"</span>, {
+      headers: { <span class="string">"content-type"</span>: <span class="string">"text/plain"</span> }
+    });
+  }
+};</pre>
+        </div>
+      </div>
+
+      <div class="callout warning">
+        <svg class="callout-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
+          <path d="M12 9v4M12 17h.01"/>
+        </svg>
+        <div class="callout-content">
+          <div class="callout-title">Requires Node.js 18+</div>
+          <div class="callout-text">Make sure you have Node.js version 18 or higher installed before proceeding.</div>
+        </div>
+      </div>
+
+      <h2>Configuration Options</h2>
+      <table class="docs-table">
+        <thead>
+          <tr>
+            <th>Option</th>
+            <th>Type</th>
+            <th>Default</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>name</code></td>
+            <td>string</td>
+            <td>—</td>
+            <td>The name of your worker</td>
+          </tr>
+          <tr>
+            <td><code>main</code></td>
+            <td>string</td>
+            <td><code>src/index.ts</code></td>
+            <td>Entry point for your worker</td>
+          </tr>
+          <tr>
+            <td><code>routes</code></td>
+            <td>array</td>
+            <td><code>[]</code></td>
+            <td>Custom domain routes</td>
+          </tr>
+          <tr>
+            <td><code>vars</code></td>
+            <td>object</td>
+            <td><code>{}</code></td>
+            <td>Environment variables</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>Next Steps</h2>
+      <p>Now that you understand the basics, explore these resources:</p>
+      <ul>
+        <li><a href="#">Quick Start Guide</a> — Deploy your first worker</li>
+        <li><a href="#">Architecture Overview</a> — Understand how BlackRoad works</li>
+        <li><a href="#">API Reference</a> — Complete API documentation</li>
+        <li><a href="#">Examples</a> — Real-world project templates</li>
+      </ul>
+    </div>
+
+    <div class="docs-nav-footer">
+      <a href="#" class="nav-link prev">
+        <span class="nav-link-label">Previous</span>
+        <span class="nav-link-title">Overview</span>
+      </a>
+      <a href="#" class="nav-link next">
+        <span class="nav-link-label">Next</span>
+        <span class="nav-link-title">Quick Start</span>
+      </a>
+    </div>
+  </main>
+
+  <aside class="docs-toc">
+    <div class="toc-title">On this page</div>
+    <ul class="toc-list">
+      <li class="toc-item active"><a href="#">What is BlackRoad OS?</a></li>
+      <li class="toc-item"><a href="#">Quick Installation</a></li>
+      <li class="toc-item"><a href="#">Create Your First Worker</a></li>
+      <li class="toc-item"><a href="#">Configuration Options</a></li>
+      <li class="toc-item"><a href="#">Next Steps</a></li>
+    </ul>
+  </aside>
+</div>
+
+</body>
+</html>

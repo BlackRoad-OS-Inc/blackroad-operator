@@ -1,0 +1,95 @@
+# ngrok Configuration for BlackRoad OS Beacon
+# https://ngrok.com/docs/ngrok-agent/config/
+
+version: "2"
+authtoken: ${NGROK_AUTH_TOKEN}
+
+# Regional endpoint (optional)
+region: us
+
+# Web interface
+web_addr: 127.0.0.1:4040
+
+# Logging
+log_level: info
+log_format: json
+log: /var/log/ngrok/ngrok.log
+
+# Tunnel definitions
+tunnels:
+  # Main beacon service
+  beacon:
+    proto: http
+    addr: 8080
+    hostname: beacon-dev.ngrok.io
+    inspect: true
+    bind_tls: both
+    schemes:
+      - https
+    metadata: '{"service": "beacon", "env": "development"}'
+    traffic_policy:
+      inbound:
+        - expressions:
+            - req.method in ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
+          actions:
+            - type: rate-limit
+              config:
+                name: beacon-rate-limit
+                algorithm: sliding_window
+                capacity: 100
+                rate: 60s
+
+  # API gateway
+  api:
+    proto: http
+    addr: 3000
+    hostname: api-dev.ngrok.io
+    inspect: true
+    schemes:
+      - https
+
+  # WebSocket server
+  websocket:
+    proto: http
+    addr: 8081
+    hostname: ws-dev.ngrok.io
+    inspect: true
+    schemes:
+      - https
+      - wss
+
+  # SSH access for debugging
+  ssh:
+    proto: tcp
+    addr: 22
+    metadata: '{"service": "ssh", "env": "development"}'
+
+  # Prometheus metrics
+  metrics:
+    proto: http
+    addr: 9090
+    auth: "${NGROK_BASIC_AUTH}"
+    schemes:
+      - https
+
+  # Grafana dashboard
+  grafana:
+    proto: http
+    addr: 3000
+    auth: "${NGROK_BASIC_AUTH}"
+    schemes:
+      - https
+
+# API settings
+api_key: ${NGROK_API_KEY}
+
+# Console settings
+console_ui: true
+console_ui_color: auto
+
+# Heartbeat settings
+heartbeat_interval: 30s
+heartbeat_tolerance: 15s
+
+# Connection settings
+connect_timeout: 30s

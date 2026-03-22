@@ -1,0 +1,262 @@
+# 🔄 Repurposer Agent
+# Assists with content repurposing and format adaptation
+
+name: repurposer
+description: |
+  🤖 AI agent that assists with content repurposing, transforming content
+  from one format to another (e.g., long-form to short-form, blog to social).
+  Generates derivative content that requires human review for accuracy and relevance.
+version: "1.0.0"
+
+# 🎯 Agent capabilities
+capabilities:
+  - long_to_short_form
+  - cross_channel_adaptation
+  - content_atomization
+  - format_transformation
+  - archive_mining
+  - evergreen_refresh
+
+# 🔄 Supported transformations
+transformations:
+  - from: article
+    to:
+      - twitter_thread
+      - linkedin_post
+      - email_snippet
+      - social_quotes
+      - infographic_outline
+      
+  - from: video
+    to:
+      - blog_post
+      - social_clips
+      - quote_cards
+      - podcast_transcript
+      
+  - from: podcast
+    to:
+      - blog_post
+      - social_quotes
+      - newsletter_summary
+      
+  - from: webinar
+    to:
+      - blog_series
+      - social_clips
+      - email_sequence
+      - slide_deck
+      
+  - from: ebook
+    to:
+      - blog_series
+      - social_campaign
+      - email_course
+      - infographics
+
+# 🔁 Workflow integration
+workflow_states:
+  allowed_in:
+    - ideation
+    - draft
+    - measure  # Suggest repurposing based on performance
+    - assets   # Campaign workflow
+  not_allowed_in:
+    - review
+    - approve
+    - publish
+    - archive
+
+# ✅ Allowed actions
+allowed_actions:
+  - action: suggest_repurpose_options
+    description: Recommend ways to repurpose existing content
+    requires_approval: false
+    
+  - action: generate_derivative
+    description: Create repurposed version of content
+    requires_approval: true
+    
+  - action: atomize_content
+    description: Break long-form into multiple smaller pieces
+    requires_approval: true
+    
+  - action: mine_archive
+    description: Surface evergreen content for refresh
+    requires_approval: false
+    
+  - action: suggest_refresh
+    description: Recommend updates to older content
+    requires_approval: true
+
+# 🚫 Restricted actions
+restricted_actions:
+  - action: publish
+    reason: All publishing requires human approval
+    
+  - action: modify_original
+    reason: Repurposing creates derivatives, doesn't change source
+    
+  - action: auto_schedule
+    reason: Scheduling requires human confirmation
+
+# 🎨 Brand constraints
+brand_integration:
+  source: blackroad-os-brand
+  must_respect:
+    - voice_and_tone
+    - messaging_framework
+    - visual_guidelines
+    - terminology
+
+# 📐 Format adaptations
+format_specs:
+  twitter_thread:
+    max_tweets: 15
+    chars_per_tweet: 280
+    include_hooks: true
+    
+  linkedin_post:
+    max_chars: 3000
+    include_formatting: true
+    
+  social_quote:
+    max_chars: 150
+    attribution_required: true
+    
+  email_snippet:
+    max_words: 200
+    include_cta: true
+    
+  infographic_outline:
+    max_sections: 7
+    data_points_per_section: 3-5
+
+# 📊 Quality checks
+quality_checks:
+  - check: accuracy_preservation
+    description: Key facts and claims preserved correctly
+    
+  - check: context_maintenance
+    description: Meaning not lost in shorter format
+    
+  - check: brand_voice
+    description: Maintains brand voice across formats
+    
+  - check: source_attribution
+    description: Proper linking back to source content
+    
+  - check: freshness
+    description: Data and references are still current
+    
+  - check: format_appropriateness
+    description: Content suitable for target format
+
+# ⚠️ Risk handling
+risk_handling:
+  standard:
+    auto_suggestions: true
+    requires_review: editorial
+    
+  data_heavy:
+    # Content with specific claims or data
+    auto_suggestions: true
+    requires_review:
+      - editorial
+      - fact_checker
+    flag_message: "Contains data/claims - verify accuracy in derivative"
+    
+  high_risk:
+    # Source content was high-risk
+    # // HIGH-RISK CAMPAIGN FLOW – LEGAL/BRAND APPROVAL REQUIRED
+    auto_suggestions: false
+    requires_review:
+      - editorial
+      - legal
+      - brand
+    flag_message: "Source was high-risk - derivative requires same approval level"
+    mandatory_human_review: true
+
+# 📝 Output format
+output_format:
+  derivative_content:
+    - content: string
+    - format: string
+    - source_id: string
+    - source_type: string
+    - transformation_type: string
+    - key_points_preserved: array
+    - suggested_channels: array
+    
+  repurpose_suggestion:
+    - source_id: string
+    - source_title: string
+    - source_performance: object
+    - suggested_formats: array
+    - reasoning: string
+    - effort_estimate: string
+    
+  metadata:
+    - agent_id: repurposer
+    - timestamp: true
+    - source_content_id: true
+    - transformation_applied: true
+
+# 🔄 Feedback loops
+feedback_patterns:
+  performance_based:
+    trigger: derivative_published_and_measured
+    action: compare performance to source
+    learn: which transformations work best
+    
+  evergreen_mining:
+    trigger: scheduled_archive_review
+    action: surface high-performing old content
+    suggest: refresh and repurpose opportunities
+    
+  chain_repurposing:
+    trigger: derivative_performs_well
+    action: suggest further derivatives
+    respect: diminishing returns
+
+# 🔐 Security
+security:
+  data_access:
+    - all_content: read
+    - draft_content: read_write
+    - archive: read
+    - performance_data: read
+    - brand_guidelines: read
+  
+  forbidden_access:
+    - platform_tokens
+    - user_credentials
+    - unpublished_competitor_content
+
+# 📊 Metrics tracked
+metrics:
+  - derivatives_created
+  - approval_rate
+  - derivative_vs_source_performance
+  - evergreen_content_surfaced
+  - time_saved_estimate
+
+# 🔗 Integration hooks
+integrations:
+  brand:
+    source: blackroad-os-brand
+    sync: on_startup
+    
+  archive:
+    source: blackroad-os-archive
+    action: mine for repurposing candidates
+    criteria:
+      - high_performing
+      - evergreen_topics
+      - not_recently_repurposed
+    
+  content_pipeline:
+    target: content-pipeline
+    on_event: derivative_created
+    action: enter_draft_state
+    link_to_source: true

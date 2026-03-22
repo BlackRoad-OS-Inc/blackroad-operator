@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>404 — BlackRoad OS</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --gray-950: #000000;
+  --gray-900: #0a0a0a;
+  --gray-800: #1a1a1a;
+  --gray-700: #404040;
+  --gray-600: #525252;
+  --gray-500: #737373;
+  --gray-400: #a3a3a3;
+  --gray-300: #d4d4d4;
+  --gray-100: #f5f5f5;
+  --white: #ffffff;
+  --accent-1: #ff8700;
+  --accent-3: #ff0087;
+  --accent-6: #1e90ff;
+  --font-headline: 'Space Grotesk', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: var(--gray-950);
+  color: var(--gray-300);
+  font-family: var(--font-body);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Animated Background */
+.bg-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.02) 1px, transparent 1px);
+  background-size: 60px 60px;
+  animation: gridMove 20s linear infinite;
+}
+@keyframes gridMove {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(60px, 60px); }
+}
+
+.glitch-overlay {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,.1) 2px,
+    rgba(0,0,0,.1) 4px
+  );
+  pointer-events: none;
+  animation: scanlines 8s linear infinite;
+}
+@keyframes scanlines {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(4px); }
+}
+
+.container {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  padding: 40px;
+}
+
+.error-code {
+  font-family: var(--font-headline);
+  font-size: clamp(120px, 25vw, 240px);
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 16px;
+  position: relative;
+  background: linear-gradient(135deg, var(--accent-1), var(--accent-3), var(--accent-6));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-size: 200% 200%;
+  animation: gradientShift 4s ease infinite;
+}
+.error-code::before,
+.error-code::after {
+  content: '404';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: inherit;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.error-code::before {
+  animation: glitch1 3s infinite;
+  clip-path: polygon(0 0, 100% 0, 100% 35%, 0 35%);
+}
+.error-code::after {
+  animation: glitch2 3s infinite;
+  clip-path: polygon(0 65%, 100% 65%, 100% 100%, 0 100%);
+}
+
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+@keyframes glitch1 {
+  0%, 90%, 100% { transform: translate(0); }
+  92% { transform: translate(-5px, 2px); }
+  94% { transform: translate(5px, -2px); }
+  96% { transform: translate(-3px, 1px); }
+}
+@keyframes glitch2 {
+  0%, 90%, 100% { transform: translate(0); }
+  91% { transform: translate(4px, -1px); }
+  93% { transform: translate(-4px, 2px); }
+  95% { transform: translate(2px, -1px); }
+}
+
+.error-label {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  color: var(--gray-500);
+  margin-bottom: 32px;
+}
+
+.error-title {
+  font-family: var(--font-headline);
+  font-size: 32px;
+  font-weight: 600;
+  color: var(--gray-100);
+  margin-bottom: 16px;
+}
+
+.error-description {
+  font-size: 16px;
+  color: var(--gray-500);
+  max-width: 400px;
+  margin: 0 auto 40px;
+  line-height: 1.6;
+}
+
+.terminal-box {
+  background: var(--gray-900);
+  border: 1px solid var(--gray-800);
+  border-radius: var(--radius-lg);
+  padding: 20px 24px;
+  max-width: 400px;
+  margin: 0 auto 40px;
+  text-align: left;
+}
+.terminal-line {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--gray-400);
+  margin-bottom: 8px;
+}
+.terminal-line:last-child { margin-bottom: 0; }
+.terminal-line .prompt { color: var(--accent-1); }
+.terminal-line .path { color: var(--accent-6); }
+.terminal-line .error { color: var(--accent-3); }
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  padding: 12px 24px;
+  border-radius: var(--radius-md);
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 200ms ease;
+}
+.btn-primary {
+  background: var(--gray-100);
+  color: var(--gray-900);
+}
+.btn-primary:hover {
+  background: var(--white);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--gray-700);
+  color: var(--gray-300);
+}
+.btn-ghost:hover {
+  border-color: var(--gray-500);
+  background: var(--gray-900);
+}
+.btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.footer-links {
+  margin-top: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+}
+.footer-link {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--gray-600);
+  text-decoration: none;
+  transition: color 150ms ease;
+}
+.footer-link:hover { color: var(--gray-300); }
+
+/* Floating particles */
+.particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: var(--accent-3);
+  border-radius: 50%;
+  opacity: 0.3;
+  animation: float 15s infinite;
+}
+.particle:nth-child(1) { left: 10%; top: 20%; animation-delay: 0s; }
+.particle:nth-child(2) { left: 20%; top: 80%; animation-delay: 2s; background: var(--accent-1); }
+.particle:nth-child(3) { left: 80%; top: 30%; animation-delay: 4s; background: var(--accent-6); }
+.particle:nth-child(4) { left: 90%; top: 70%; animation-delay: 6s; }
+.particle:nth-child(5) { left: 50%; top: 10%; animation-delay: 8s; background: var(--accent-1); }
+@keyframes float {
+  0%, 100% { transform: translateY(0) scale(1); opacity: 0.3; }
+  50% { transform: translateY(-30px) scale(1.5); opacity: 0.6; }
+}
+</style>
+</head>
+<body>
+
+<div class="bg-grid"></div>
+<div class="glitch-overlay"></div>
+
+<div class="particle"></div>
+<div class="particle"></div>
+<div class="particle"></div>
+<div class="particle"></div>
+<div class="particle"></div>
+
+<div class="container">
+  <div class="error-code">404</div>
+  <div class="error-label">Page Not Found</div>
+
+  <h1 class="error-title">Lost in the void</h1>
+  <p class="error-description">
+    The page you're looking for doesn't exist or has been moved to another dimension.
+  </p>
+
+  <div class="terminal-box">
+    <div class="terminal-line"><span class="prompt">$</span> curl <span class="path">/this-page</span></div>
+    <div class="terminal-line"><span class="error">Error: ENOENT - no such file or directory</span></div>
+    <div class="terminal-line"><span class="prompt">$</span> <span style="animation: blink 1s infinite;">_</span></div>
+  </div>
+
+  <div class="actions">
+    <a href="/" class="btn btn-primary">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      Go Home
+    </a>
+    <a href="#" onclick="history.back()" class="btn btn-ghost">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="19" y1="12" x2="5" y2="12"/>
+        <polyline points="12 19 5 12 12 5"/>
+      </svg>
+      Go Back
+    </a>
+  </div>
+
+  <div class="footer-links">
+    <a href="#" class="footer-link">Status</a>
+    <a href="#" class="footer-link">Support</a>
+    <a href="#" class="footer-link">Docs</a>
+  </div>
+</div>
+
+<style>
+@keyframes blink { 50% { opacity: 0; } }
+</style>
+
+</body>
+</html>

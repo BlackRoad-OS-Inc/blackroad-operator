@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Integrations - BlackRoad</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --gray-950: #000000;
+            --gray-900: #0a0a0a;
+            --gray-800: #1a1a1a;
+            --gray-700: #404040;
+            --gray-600: #525252;
+            --gray-500: #737373;
+            --gray-400: #a3a3a3;
+            --gray-300: #d4d4d4;
+            --gray-100: #f5f5f5;
+            --accent-1: #ff8700;
+            --accent-3: #ff0087;
+            --accent-6: #1e90ff;
+            --success: #22c55e;
+            --radius-md: 6px;
+            --radius-lg: 8px;
+            --radius-xl: 12px;
+            --radius-2xl: 16px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--gray-950);
+            color: var(--gray-300);
+            line-height: 1.6;
+        }
+
+        /* Navigation */
+        .nav {
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--gray-800);
+            position: sticky;
+            top: 0;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+        }
+
+        .nav-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            font-size: 1.25rem;
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-3));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+
+        .search-bar {
+            flex: 1;
+            max-width: 400px;
+            margin: 0 2rem;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.625rem 1rem 0.625rem 2.5rem;
+            background: var(--gray-900);
+            border: 1px solid var(--gray-800);
+            border-radius: var(--radius-lg);
+            color: var(--gray-100);
+            font-size: 0.875rem;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--accent-1);
+        }
+
+        .search-input::placeholder { color: var(--gray-600); }
+
+        .search-icon {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-600);
+            width: 16px;
+            height: 16px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .nav-links a {
+            color: var(--gray-400);
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover { color: var(--gray-100); }
+
+        /* Hero */
+        .hero {
+            padding: 5rem 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 30%, rgba(255,135,0,0.1) 0%, transparent 40%),
+                        radial-gradient(circle at 70% 70%, rgba(255,0,135,0.08) 0%, transparent 40%);
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--gray-100);
+            margin-bottom: 1rem;
+        }
+
+        .hero p {
+            font-size: 1.125rem;
+            color: var(--gray-400);
+            max-width: 600px;
+            margin: 0 auto 2rem;
+        }
+
+        .hero-stats {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+        }
+
+        .hero-stat {
+            text-align: center;
+        }
+
+        .hero-stat-value {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-3));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-stat-label {
+            font-size: 0.875rem;
+            color: var(--gray-500);
+        }
+
+        /* Categories */
+        .categories {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .category-tabs {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid var(--gray-800);
+            margin-bottom: 2rem;
+        }
+
+        .category-tab {
+            padding: 0.5rem 1rem;
+            background: transparent;
+            border: 1px solid var(--gray-800);
+            border-radius: var(--radius-lg);
+            color: var(--gray-400);
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .category-tab:hover {
+            border-color: var(--gray-600);
+            color: var(--gray-100);
+        }
+
+        .category-tab.active {
+            background: var(--gray-100);
+            border-color: var(--gray-100);
+            color: var(--gray-950);
+        }
+
+        /* Integration Grid */
+        .integrations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+            padding-bottom: 4rem;
+        }
+
+        .integration-card {
+            background: var(--gray-900);
+            border: 1px solid var(--gray-800);
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .integration-card:hover {
+            border-color: var(--gray-700);
+            transform: translateY(-2px);
+        }
+
+        .integration-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .integration-logo {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-lg);
+            background: var(--gray-800);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .integration-info {
+            flex: 1;
+        }
+
+        .integration-name {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--gray-100);
+            margin-bottom: 0.125rem;
+        }
+
+        .integration-category {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .integration-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: var(--radius-md);
+            font-size: 0.6875rem;
+            font-weight: 600;
+        }
+
+        .integration-badge.official {
+            background: rgba(34, 197, 94, 0.1);
+            color: var(--success);
+        }
+
+        .integration-badge.popular {
+            background: rgba(255, 135, 0, 0.1);
+            color: var(--accent-1);
+        }
+
+        .integration-badge.new {
+            background: rgba(30, 144, 255, 0.1);
+            color: var(--accent-6);
+        }
+
+        .integration-description {
+            font-size: 0.875rem;
+            color: var(--gray-400);
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .integration-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .integration-stats {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.75rem;
+            color: var(--gray-500);
+        }
+
+        .integration-stats span {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .install-btn {
+            padding: 0.5rem 1rem;
+            background: var(--gray-800);
+            border: 1px solid var(--gray-700);
+            border-radius: var(--radius-md);
+            color: var(--gray-300);
+            font-size: 0.8125rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .install-btn:hover {
+            background: var(--accent-1);
+            border-color: var(--accent-1);
+            color: white;
+        }
+
+        .install-btn.installed {
+            background: rgba(34, 197, 94, 0.1);
+            border-color: var(--success);
+            color: var(--success);
+        }
+
+        /* Featured Section */
+        .featured-section {
+            background: linear-gradient(135deg, rgba(255,135,0,0.05), rgba(255,0,135,0.05));
+            border: 1px solid rgba(255,135,0,0.1);
+            border-radius: var(--radius-2xl);
+            padding: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .featured-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .featured-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--accent-1);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .featured-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+        }
+
+        .featured-card {
+            background: var(--gray-900);
+            border: 1px solid var(--gray-800);
+            border-radius: var(--radius-xl);
+            padding: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: all 0.2s;
+        }
+
+        .featured-card:hover {
+            border-color: var(--accent-1);
+        }
+
+        .featured-logo {
+            width: 56px;
+            height: 56px;
+            border-radius: var(--radius-lg);
+            background: var(--gray-800);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            flex-shrink: 0;
+        }
+
+        .featured-info h3 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--gray-100);
+            margin-bottom: 0.25rem;
+        }
+
+        .featured-info p {
+            font-size: 0.8125rem;
+            color: var(--gray-500);
+        }
+
+        /* Build Your Own */
+        .build-cta {
+            background: var(--gray-900);
+            border: 1px solid var(--gray-800);
+            border-radius: var(--radius-2xl);
+            padding: 3rem;
+            text-align: center;
+            margin: 0 2rem 4rem;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .build-cta h2 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--gray-100);
+            margin-bottom: 0.5rem;
+        }
+
+        .build-cta p {
+            color: var(--gray-400);
+            margin-bottom: 1.5rem;
+        }
+
+        .cta-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-3));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px rgba(255, 135, 0, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--gray-800);
+            color: var(--gray-300);
+            border: 1px solid var(--gray-700);
+        }
+
+        .btn-secondary:hover {
+            background: var(--gray-700);
+        }
+
+        /* Footer */
+        .footer {
+            padding: 2rem;
+            border-top: 1px solid var(--gray-800);
+            text-align: center;
+        }
+
+        .footer-text {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--gray-600);
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2rem; }
+            .hero-stats { flex-direction: column; gap: 1.5rem; }
+            .search-bar { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-content">
+            <a href="#" class="logo">BlackRoad</a>
+            <div class="search-bar">
+                <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+                <input type="text" class="search-input" placeholder="Search integrations...">
+            </div>
+            <div class="nav-links">
+                <a href="#">Docs</a>
+                <a href="#">API</a>
+                <a href="#">Support</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Integrations Marketplace</h1>
+            <p>Connect BlackRoad with your favorite tools. Browse our library of pre-built integrations or build your own.</p>
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <div class="hero-stat-value">150+</div>
+                    <div class="hero-stat-label">Integrations</div>
+                </div>
+                <div class="hero-stat">
+                    <div class="hero-stat-value">50K+</div>
+                    <div class="hero-stat-label">Active Installs</div>
+                </div>
+                <div class="hero-stat">
+                    <div class="hero-stat-value">99.9%</div>
+                    <div class="hero-stat-label">Uptime</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Categories & Grid -->
+    <div class="categories">
+        <!-- Featured -->
+        <div class="featured-section">
+            <div class="featured-header">
+                <span class="featured-badge">
+                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                    Featured Integrations
+                </span>
+            </div>
+            <div class="featured-grid">
+                <div class="featured-card">
+                    <div class="featured-logo">&#128736;</div>
+                    <div class="featured-info">
+                        <h3>GitHub Actions</h3>
+                        <p>Automate deployments with CI/CD</p>
+                    </div>
+                </div>
+                <div class="featured-card">
+                    <div class="featured-logo">&#9889;</div>
+                    <div class="featured-info">
+                        <h3>Vercel</h3>
+                        <p>Edge function compatibility</p>
+                    </div>
+                </div>
+                <div class="featured-card">
+                    <div class="featured-logo">&#128202;</div>
+                    <div class="featured-info">
+                        <h3>Datadog</h3>
+                        <p>Advanced monitoring & APM</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Category Tabs -->
+        <div class="category-tabs">
+            <button class="category-tab active">All</button>
+            <button class="category-tab">CI/CD</button>
+            <button class="category-tab">Monitoring</button>
+            <button class="category-tab">Databases</button>
+            <button class="category-tab">Authentication</button>
+            <button class="category-tab">Analytics</button>
+            <button class="category-tab">Communication</button>
+            <button class="category-tab">Storage</button>
+        </div>
+
+        <!-- Integrations Grid -->
+        <div class="integrations-grid">
+            <!-- GitHub -->
+            <div class="integration-card">
+                <div class="integration-header">
+                    <div class="integration-logo">&#128736;</div>
+                    <div class="integration-info">
+                        <h3 class="integration-name">GitHub</h3>
+                        <span class="integration-category">CI/CD</span>
+                    </div>
+                    <span class="integration-badge official">Official</span>
+                </div>
+                <p class="integration-description">Automatically deploy from GitHub repos. Supports branch previews and PR deployments.</p>
+                <div class="integration-footer">
+                    <div class="integration-stats">
+                        <span>&#11088; 4.9</span>
+                        <span>&#128229; 28K installs</span>
+                    </div>
+                    <button class="install-btn installed">Installed</button>
+                </div>
+            </div>
+
+            <!-- Slack -->
+            <div class="integration-card">
+                <div class="integration-header">
+                    <div class="integration-logo">&#128172;</div>
+                    <div class="integration-info">
+                        <h3 class="integration-name">Slack</h3>
+                        <span class="integration-category">Communication</span>
+                    </div>
+                    <span class="integration-badge popular">Popular</span>
+                </div>
+                <p class="integration-description">Get deployment notifications, alerts, and run commands directly from Slack.</p>
+                <div class="integration-footer">
+                    <div class="integration-stats">
+                        <span>&#11088; 4.8</span>
+                        <span>&#128229; 15K installs</span>
+                    </div>
+                    <button class="install-btn">Install</button>
+                </div>
+            </div>
+
+            <!-- PostgreSQL -->
+            <div class="integration-card">
+                <div class="integration-header">
+                    <div class="integration-logo">&#128451;</div>
+                    <div class="integration-info">
+                        <h3 class="integration-name">PostgreSQL</h3>
+                        <span class="integration-category">Database</span>
+                    </div>
+                    <span class="integration-badge official">Official</span>
+                </div>
+                <p class="integration-description">Connect to PostgreSQL databases with connection pooling and automatic TLS.</p>
+                <div class="integration-footer">
+                    <div class="integration-stats">
+                        <span>&#11088; 4.9</span>
+                        <span>&#128229; 22K installs</span>
+                    </div>
+                    <button class="install-btn">Install</button>
+                </div>
+            </div>
+
+            <!-- Auth0 -->
+            <div class="integration-card">
+                <div class="integration-header">
+                    <div class="integration-logo">&#128274;</div>
+                    <div class="integration-info">
+                        <h3 class="integration-name">Auth0</h3>
+                        <span class="integration-category">Authentication</span>
+                    </div>
+                </div>
+                <p class="integration-description">Add authentication and authorization to your applications in minutes.</p>
+                <div class="integration-footer">
+                    <div class="integration-stats">
+                        <span>&#11088; 4.7</span>
+                        <span>&#128229; 12K installs</span>
+                    </div>
+                    <button class="install-btn">Install</button>
+                </div>
+            </div>
+
+            <!-- Stripe -->
+            <div class="integration-card">
+                <div class="integration-header">
+                    <div class="integration-logo">&#128179;</div>
+                    <div class="integration-info">
+                        <h3 class="integration-name">Stripe</h3>
+                        <span class="integration-category">Payments</span>
+                    </div>
+                    <span class="integration-badge popular">Popular</span>
+                </div>
+                <p class="integration-description">Process payments with webhook integrations and automatic retries.</p>
+                <div class="integration-footer">
+                    <div class="integration-stats">
+                        <span>&#11088; 4.9</span>
+                        <span>&#128229; 18K installs</span>
+                    </div>
+                    <button class="install-btn">Install</button>
+                </div>
+            </div>
+
+            <!-- Sentry -->
+            <div class="integration-card">
+                <div class="integration-header">
+                    <div class="integration-logo">&#128027;</div>
+                    <div class="integration-info">
+                        <h3 class="integration-name">Sentry</h3>
+                        <span class="integration-category">Monitoring</span>
+                    </div>
+                </div>
+                <p class="integration-description">Track errors, performance issues, and release health in real-time.</p>
+                <div class="integration-footer">
+                    <div class="integration-stats">
+                        <span>&#11088; 4.8</span>
+                        <span>&#128229; 14K installs</span>
+                    </div>
+                    <button class="install-btn">Install</button>
+                </div>
+            </div>
+
+            <!-- Redis -->
+            <div class="integration-card">
+                <div class="integration-header">
+                    <div class="integration-logo">&#128293;</div>
+                    <div class="integration-info">
+                        <h3 class="integration-name">Redis</h3>
+                        <span class="integration-category">Database</span>
+                    </div>
+                    <span class="integration-badge new">New</span>
+                </div>
+                <p class="integration-description">High-performance caching and real-time data at the edge.</p>
+                <div class="integration-footer">
+                    <div class="integration-stats">
+                        <span>&#11088; 4.6</span>
+                        <span>&#128229; 8K installs</span>
+                    </div>
+                    <button class="install-btn">Install</button>
+                </div>
+            </div>
+
+            <!-- PlanetScale -->
+            <div class="integration-card">
+                <div class="integration-header">
+                    <div class="integration-logo">&#127757;</div>
+                    <div class="integration-info">
+                        <h3 class="integration-name">PlanetScale</h3>
+                        <span class="integration-category">Database</span>
+                    </div>
+                </div>
+                <p class="integration-description">Serverless MySQL with branching, non-blocking schema changes.</p>
+                <div class="integration-footer">
+                    <div class="integration-stats">
+                        <span>&#11088; 4.8</span>
+                        <span>&#128229; 9K installs</span>
+                    </div>
+                    <button class="install-btn">Install</button>
+                </div>
+            </div>
+
+            <!-- Twilio -->
+            <div class="integration-card">
+                <div class="integration-header">
+                    <div class="integration-logo">&#128222;</div>
+                    <div class="integration-info">
+                        <h3 class="integration-name">Twilio</h3>
+                        <span class="integration-category">Communication</span>
+                    </div>
+                </div>
+                <p class="integration-description">Send SMS, voice calls, and WhatsApp messages from your workers.</p>
+                <div class="integration-footer">
+                    <div class="integration-stats">
+                        <span>&#11088; 4.7</span>
+                        <span>&#128229; 7K installs</span>
+                    </div>
+                    <button class="install-btn">Install</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Build Your Own -->
+    <div class="build-cta">
+        <h2>Build Your Own Integration</h2>
+        <p>Create custom integrations using our SDK and publish them to the marketplace.</p>
+        <div class="cta-buttons">
+            <button class="btn btn-primary">
+                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+                View SDK Docs
+            </button>
+            <button class="btn btn-secondary">
+                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                Request Integration
+            </button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p class="footer-text">BlackRoad Integrations &middot; 2026</p>
+    </footer>
+
+    <script>
+        // Category tab switching
+        document.querySelectorAll('.category-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+            });
+        });
+
+        // Install button toggle
+        document.querySelectorAll('.install-btn:not(.installed)').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                btn.classList.toggle('installed');
+                btn.textContent = btn.classList.contains('installed') ? 'Installed' : 'Install';
+            });
+        });
+    </script>
+</body>
+</html>

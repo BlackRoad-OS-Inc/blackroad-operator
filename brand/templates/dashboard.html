@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — BlackRoad OS</title>
+<meta name="description" content="BlackRoad OS — Pave Tomorrow.">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{-webkit-font-smoothing:antialiased}
+:root{--g:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);--g135:linear-gradient(135deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);--bg:#000;--white:#fff;--black:#000;--border:#1a1a1a;--sg:'Space Grotesk',sans-serif;--jb:'JetBrains Mono',monospace}
+body{overflow-x:hidden;background:var(--bg);color:var(--white);font-family:var(--sg)}
+.grad-bar{height:3px;background:var(--g)}
+.dash-layout{display:grid;grid-template-columns:240px 1fr;min-height:100vh}
+.dash-sidebar{border-right:1px solid var(--border);padding:24px 16px;display:flex;flex-direction:column}
+.dash-logo{font-weight:700;font-size:18px;color:var(--white);display:flex;align-items:center;gap:10px;padding:0 8px;margin-bottom:32px}
+.dash-logo-mark{width:24px;height:3px;border-radius:2px;background:var(--g)}
+.dash-nav{list-style:none;flex:1}
+.dash-nav li{margin-bottom:2px}
+.dash-nav a{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:6px;font-size:13px;font-weight:500;color:var(--white);opacity:.4;text-decoration:none;transition:all .15s}
+.dash-nav a:hover{opacity:.7}
+.dash-nav a.active{opacity:1;border:1px solid var(--border)}
+.dash-nav-icon{font-size:16px;width:20px;text-align:center}
+.dash-nav-sep{height:1px;background:var(--border);margin:16px 8px}
+.dash-user{display:flex;align-items:center;gap:10px;padding:12px 8px;border-top:1px solid var(--border);margin-top:auto}
+.dash-avatar{width:32px;height:32px;border-radius:50%;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px}
+.dash-user-name{font-size:13px;font-weight:500}
+.dash-user-role{font-size:11px;opacity:.3}
+.dash-main{padding:32px}
+.dash-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:32px}
+.dash-header h1{font-size:24px;font-weight:700}
+.live-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border:1px solid var(--border);border-radius:12px;font-family:var(--jb);font-size:11px;opacity:.5}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--g135, #00D4FF);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+.stat-card{border:1px solid var(--border);border-radius:10px;padding:20px}
+.stat-label{font-family:var(--jb);font-size:10px;opacity:.3;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px}
+.stat-value{font-size:28px;font-weight:700}
+.stat-sub{font-family:var(--jb);font-size:11px;margin-top:4px;opacity:.4}
+.stat-bar{height:3px;border-radius:2px;margin-top:12px;background:var(--border);overflow:hidden}
+.stat-bar-fill{height:100%;border-radius:2px;background:var(--g);transition:width .5s}
+.table-card{border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:24px}
+.table-header{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--border)}
+.table-title{font-size:14px;font-weight:600}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font-family:var(--jb);font-size:10px;opacity:.3;letter-spacing:.06em;text-transform:uppercase;padding:10px 20px;border-bottom:1px solid var(--border)}
+td{font-size:13px;opacity:.6;padding:12px 20px;border-bottom:1px solid var(--border)}
+tr:last-child td{border-bottom:none}
+td.online{opacity:1}
+.dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:6px}
+.dot.up{background:var(--g135)}
+.dot.down{background:none;border:1px solid var(--white);opacity:.3;width:5px;height:5px}
+.dot.warn{background:var(--g135);opacity:.5}
+td code{font-family:var(--jb);font-size:12px}
+.detail-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.detail-card{border:1px solid var(--border);border-radius:10px;padding:20px}
+.detail-card h3{font-size:14px;font-weight:600;margin-bottom:16px}
+.detail-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}
+.detail-row:last-child{border-bottom:none}
+.detail-key{opacity:.4;font-family:var(--jb);font-size:12px}
+.detail-val{font-family:var(--jb);font-size:12px}
+.error-msg{text-align:center;padding:48px;opacity:.3;font-size:14px}
+@media(max-max-width:1024px;width:100%){.dash-layout{grid-template-columns:1fr}.dash-sidebar{display:none}.stat-grid{grid-template-columns:repeat(2,1fr)}.detail-grid{grid-template-columns:1fr}}
+
+/* ═══ RESPONSIVE — fit to screen ═══ */
+@media(max-max-width:1024px;width:100%){
+  .metrics-strip{grid-template-columns:repeat(3,1fr)}
+  .org-grid,.grid-4,.tier-grid,.cap-grid,.stat-grid,.shield-grid,.surface-grid,.stats-row{grid-template-columns:repeat(2,1fr)}
+  .node-grid{grid-template-columns:repeat(3,1fr)}
+  .product-grid,.features-grid,.focus-grid,.gallery,.team-grid,.pricing{grid-template-columns:repeat(2,1fr)}
+  .footer-grid{grid-template-columns:1fr 1fr}
+  .cloud-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:768px){
+  nav{padding:14px 20px;flex-wrap:wrap;gap:12px}
+  .nav-links{display:none}
+  .hero{padding:80px 20px 60px}
+  .hero h1{font-size:36px}
+  .hero-cta{flex-direction:column;align-items:center}
+  .section,.section-wide{padding:48px 20px}
+  .metrics-strip{grid-template-columns:repeat(2,1fr)}
+  .product-featured{grid-template-columns:1fr}
+  .product-grid,.features-grid,.focus-grid,.gallery,.team-grid,.pricing,.cap-grid,.tier-grid,.shield-grid{grid-template-columns:1fr}
+  .org-grid,.grid-4,.stat-grid,.stats-row,.surface-grid{grid-template-columns:1fr}
+  .node-grid{grid-template-columns:1fr 1fr}
+  .cloud-grid{grid-template-columns:1fr}
+  footer{padding:32px 20px}
+  .footer-grid{grid-template-columns:1fr}
+  .footer-bottom{flex-direction:column;gap:12px;text-align:center}
+  .topnav{padding:10px 16px}
+  .topnav-links{gap:8px;flex-wrap:wrap}
+  .topnav-links a{font-size:11px}
+}
+</style>
+<script src="https://bb.blackroad.io/bb.js" defer></script>
+<meta name="keywords" content="BlackRoad dashboard, fleet monitoring, infrastructure monitoring">
+<meta property="og:type" content="website">
+<meta property="og:title" content="BlackRoad Dashboard — Fleet Monitoring Console">
+<meta property="og:description" content="Real-time monitoring of 5 Pi nodes, 15 Workers, 67 agents, and all BlackRoad OS infrastructure.">
+<meta property="og:url" content="https://dashboard.blackroad.io">
+<meta property="og:image" content="https://images.blackroad.io/brand/blackroad-og.png">
+<meta property="og:site_name" content="BlackRoad OS">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="BlackRoad Dashboard — Fleet Monitoring Console">
+<meta name="twitter:description" content="Real-time monitoring of 5 Pi nodes, 15 Workers, 67 agents, and all BlackRoad OS infrastructure.">
+<meta name="twitter:image" content="https://images.blackroad.io/brand/blackroad-og.png">
+<link rel="canonical" href="https://dashboard.blackroad.io">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "BlackRoad Dashboard — Fleet Monitoring Console",
+  "description": "Real-time monitoring of 5 Pi nodes, 15 Workers, 67 agents, and all BlackRoad OS infrastructure.",
+  "url": "https://dashboard.blackroad.io",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Linux, macOS",
+  "author": {
+    "@type": "Organization",
+    "name": "BlackRoad OS, Inc.",
+    "url": "https://blackroad.io",
+    "founder": {
+      "@type": "Person",
+      "name": "Alexa Louise Amundson"
+    }
+  },
+  "offers": {
+    "@type": "Offer",
+    "price": "5.00",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+</head>
+<body>
+<div class="grad-bar"></div>
+<div class="dash-layout">
+  <aside class="dash-sidebar">
+    <div class="dash-logo"><div class="dash-logo-mark"></div> BlackRoad</div>
+    <ul class="dash-nav">
+      <li><a href="#" class="active"><span class="dash-nav-icon">◈</span> Dashboard</a></li>
+      <li><a href="https://blackroad-status.pages.dev"><span class="dash-nav-icon">◇</span> Status</a></li>
+      <li><a href="https://blackroad-docs-hub.pages.dev"><span class="dash-nav-icon">△</span> Docs</a></li>
+      <li><a href="https://blackroad-monitoring.pages.dev"><span class="dash-nav-icon">○</span> Monitoring</a></li>
+      <li><div class="dash-nav-sep"></div></li>
+      <li><a href="https://blackroad.io"><span class="dash-nav-icon">□</span> Home</a></li>
+      <li><a href="https://github.com/blackboxprogramming"><span class="dash-nav-icon">▽</span> GitHub</a></li>
+    </ul>
+    <div class="dash-user">
+      <div class="dash-avatar">A</div>
+      <div><div class="dash-user-name">Alexa</div><div class="dash-user-role">Admin</div></div>
+    </div>
+  </aside>
+
+  <main class="dash-main">
+    <div class="dash-header">
+      <h1>Fleet Dashboard</h1>
+      <div class="live-badge"><span class="live-dot"></span> <span id="live-ts">Connecting...</span></div>
+    </div>
+
+    <div class="stat-grid" id="stat-grid">
+      <div class="stat-card"><div class="stat-label">Active Nodes</div><div class="stat-value" id="stat-nodes">—</div><div class="stat-sub" id="stat-nodes-sub">loading</div><div class="stat-bar"><div class="stat-bar-fill" id="stat-nodes-bar" style="width:0%"></div></div></div>
+      <div class="stat-card"><div class="stat-label">Total Models</div><div class="stat-value" id="stat-models">—</div><div class="stat-sub" id="stat-models-sub">loading</div><div class="stat-bar"><div class="stat-bar-fill" id="stat-models-bar" style="width:0%"></div></div></div>
+      <div class="stat-card"><div class="stat-label">Containers</div><div class="stat-value" id="stat-containers">—</div><div class="stat-sub" id="stat-containers-sub">loading</div><div class="stat-bar"><div class="stat-bar-fill" id="stat-containers-bar" style="width:0%"></div></div></div>
+      <div class="stat-card"><div class="stat-label">Avg Temp</div><div class="stat-value" id="stat-temp">—</div><div class="stat-sub" id="stat-temp-sub">loading</div><div class="stat-bar"><div class="stat-bar-fill" id="stat-temp-bar" style="width:0%"></div></div></div>
+    </div>
+
+    <div class="table-card">
+      <div class="table-header"><span class="table-title">Nodes</span></div>
+      <table>
+        <thead><tr><th>Name</th><th>Status</th><th>IP</th><th>Temp</th><th>Load</th><th>RAM</th><th>Disk</th><th>Models</th><th>Containers</th></tr></thead>
+        <tbody id="node-table"><tr><td colspan="9" class="error-msg">Loading fleet data...</td></tr></tbody>
+      </table>
+    </div>
+
+    <div class="detail-grid" id="detail-grid"></div>
+  </main>
+</div>
+
+<script>
+const API = 'https://fleet-api.amundsonalexa.workers.dev/fleet';
+const ROLES = {alice:'Gateway',cecilia:'AI / TTS',octavia:'Storage / Git',aria:'Orchestration',lucidia:'APIs / DNS'};
+
+function fmtBytes(b){if(!b)return '—';if(b>1e9)return(b/1e9).toFixed(1)+'G';if(b>1e6)return(b/1e6).toFixed(0)+'M';return b+'B'}
+function fmtPct(used,total){if(!used||!total)return '—';return Math.round(used/total*100)+'%'}
+
+function render(data){
+  if(!data||!data.nodes) return;
+  const nodes = data.nodes;
+  const names = ['alice','cecilia','octavia','aria','lucidia'];
+  const online = names.filter(n=>nodes[n]?.status==='online');
+  const total = names.length;
+
+  // Timestamp
+  const ts = new Date(data.timestamp);
+  const ago = Math.round((Date.now() - ts.getTime())/60000);
+  document.getElementById('live-ts').textContent = 'Live · ' + (ago < 1 ? 'just now' : ago + 'm ago');
+
+  // Stats
+  const totalModels = names.reduce((s,n)=>s+(nodes[n]?.models||0),0);
+  const totalContainers = names.reduce((s,n)=>s+(nodes[n]?.containers||0),0);
+  const temps = names.filter(n=>nodes[n]?.temp).map(n=>nodes[n].temp);
+  const avgTemp = temps.length ? (temps.reduce((a,b)=>a+b,0)/temps.length).toFixed(1) : '—';
+
+  document.getElementById('stat-nodes').textContent = online.length+'/'+total;
+  document.getElementById('stat-nodes-sub').textContent = (total-online.length)+' offline';
+  document.getElementById('stat-nodes-bar').style.width = (online.length/total*100)+'%';
+
+  document.getElementById('stat-models').textContent = totalModels;
+  document.getElementById('stat-models-sub').textContent = 'across '+online.length+' nodes';
+  document.getElementById('stat-models-bar').style.width = Math.min(totalModels/30*100,100)+'%';
+
+  document.getElementById('stat-containers').textContent = totalContainers;
+  document.getElementById('stat-containers-sub').textContent = 'Docker containers';
+  document.getElementById('stat-containers-bar').style.width = Math.min(totalContainers/20*100,100)+'%';
+
+  document.getElementById('stat-temp').textContent = avgTemp+'°C';
+  document.getElementById('stat-temp-sub').textContent = 'fleet average';
+  document.getElementById('stat-temp-bar').style.width = Math.min(parseFloat(avgTemp)/80*100,100)+'%';
+
+  // Node table
+  let rows = '';
+  names.forEach(name=>{
+    const n = nodes[name]||{status:'down'};
+    const up = n.status==='online';
+    const warn = up && (n.throttle && n.throttle!=='0x0');
+    const dotClass = up ? (warn ? 'warn' : 'up') : 'down';
+    const statusText = up ? (warn ? 'Throttled' : 'Online') : 'Down';
+    rows += '<tr>'
+      +'<td style="opacity:1;font-weight:600;text-transform:capitalize">'+name+'</td>'
+      +'<td><span class="dot '+dotClass+'"></span>'+statusText+'</td>'
+      +'<td><code>'+(n.ip||'—')+'</code></td>'
+      +'<td>'+(n.temp ? n.temp+'°C' : '—')+'</td>'
+      +'<td>'+(n.load!==undefined ? n.load : '—')+'</td>'
+      +'<td>'+fmtPct(n.ram_used,n.ram_total)+'</td>'
+      +'<td>'+(n.disk_pct ? n.disk_pct+'%' : '—')+'</td>'
+      +'<td>'+(n.models!==undefined ? n.models : '—')+'</td>'
+      +'<td>'+(n.containers!==undefined ? n.containers : '—')+'</td>'
+      +'</tr>';
+  });
+  document.getElementById('node-table').innerHTML = rows;
+
+  // Detail cards
+  let details = '';
+  names.forEach(name=>{
+    const n = nodes[name]||{};
+    if(n.status!=='online') return;
+    details += '<div class="detail-card"><h3 style="text-transform:capitalize">'+name+' <span style="font-weight:400;font-size:12px;opacity:.4">'+ROLES[name]+'</span></h3>'
+      +'<div class="detail-row"><span class="detail-key">Hostname</span><span class="detail-val">'+(n.hostname||name)+'</span></div>'
+      +'<div class="detail-row"><span class="detail-key">Voltage</span><span class="detail-val">'+(n.voltage ? n.voltage+'V' : '—')+'</span></div>'
+      +'<div class="detail-row"><span class="detail-key">Throttle</span><span class="detail-val">'+(n.throttle||'0x0')+'</span></div>'
+      +'<div class="detail-row"><span class="detail-key">RAM</span><span class="detail-val">'+fmtBytes(n.ram_used)+' / '+fmtBytes(n.ram_total)+'</span></div>'
+      +'<div class="detail-row"><span class="detail-key">Disk Free</span><span class="detail-val">'+(n.disk_free||'—')+'</span></div>'
+      +'<div class="detail-row"><span class="detail-key">Ollama</span><span class="detail-val">'+(n.ollama||'—')+'</span></div>'
+      +'<div class="detail-row"><span class="detail-key">Uptime</span><span class="detail-val">'+(n.uptime_since||n.uptime||'—')+'</span></div>'
+      +'</div>';
+  });
+  document.getElementById('detail-grid').innerHTML = details;
+}
+
+function load(){fetch(API).then(r=>r.json()).then(render).catch(e=>{
+  document.getElementById('live-ts').textContent='Connection failed';
+})}
+load();
+setInterval(load, 60000);
+</script>
+<script src="https://blackboard.amundsonalexa.workers.dev/bb.js"></script>
+<!-- BlackRoad Ecosystem Bar -->
+<div style="position:fixed;bottom:0;left:0;right:0;z-index:999;background:#0a0a0a;border-top:1px solid #1a1a1a;padding:8px 0;overflow-x:auto">
+<div style="display:flex;gap:16px;justify-content:center;align-items:center;padding:0 20px;white-space:nowrap">
+<a href="https://blackroad.io" style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:#555;text-decoration:none;transition:color 0.2s">Home</a>
+<a href="https://portal.blackroad.io" style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:#555;text-decoration:none;transition:color 0.2s">Portal</a>
+<a href="https://search.blackroad.io" style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:#555;text-decoration:none;transition:color 0.2s">Search</a>
+<a href="https://chat.blackroad.io" style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:#555;text-decoration:none;transition:color 0.2s">Chat</a>
+<a href="https://auth.blackroad.io" style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:#555;text-decoration:none;transition:color 0.2s">Auth</a>
+<a href="https://pay.blackroad.io" style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:#555;text-decoration:none;transition:color 0.2s">Pay</a>
+<a href="https://images.blackroad.io" style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:#555;text-decoration:none;transition:color 0.2s">Images</a>
+<a href="https://brand.blackroad.io" style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:#555;text-decoration:none;transition:color 0.2s">Brand</a>
+<a href="https://status.blackroad.io" style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:#555;text-decoration:none;transition:color 0.2s">Status</a>
+<a href="https://github.com/BlackRoad-OS-Inc" style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:#555;text-decoration:none;transition:color 0.2s">GitHub</a>
+</div>
+</div>
+<div style="height:36px"></div>
+<script>
+// BlackRoad Live Stats
+(function(){
+  const API='https://stats-blackroad.amundsonalexa.workers.dev';
+  async function load(){
+    try{
+      const r=await fetch(API+'/ecosystem');
+      const d=(await r.json())?.data||{};
+      document.querySelectorAll('[data-stat]').forEach(el=>{
+        const v=d[el.dataset.stat];
+        if(v!==undefined)el.textContent=typeof v==='number'?v.toLocaleString():v;
+      });
+    }catch(e){}
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',load);
+  else load();
+  setInterval(load,60000);
+})();
+</script>
+</body>
+</html>

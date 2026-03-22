@@ -1,0 +1,85 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://blackroad-os.dev/schemas/education/lesson.json",
+  "title": "Lesson",
+  "description": "📓 A single lesson with content and activities",
+  "type": "object",
+  "required": ["id", "title", "type", "content", "activities"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for the lesson",
+      "pattern": "^lesson:[a-z0-9-]+$"
+    },
+    "title": {
+      "type": "string",
+      "description": "Lesson title",
+      "minLength": 1
+    },
+    "description": {
+      "type": "string",
+      "description": "Brief overview of the lesson"
+    },
+    "type": {
+      "type": "string",
+      "enum": ["lecture", "tutorial", "lab", "project", "reflection", "discussion"],
+      "description": "Type of lesson"
+    },
+    "estimatedMinutes": {
+      "type": "number",
+      "minimum": 1,
+      "description": "Estimated time to complete in minutes"
+    },
+    "content": {
+      "type": "object",
+      "required": ["format", "body"],
+      "properties": {
+        "format": {
+          "type": "string",
+          "enum": ["markdown", "html", "interactive", "video", "mixed"],
+          "description": "Content format"
+        },
+        "body": {
+          "type": "string",
+          "description": "Main lesson content"
+        },
+        "resources": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["title", "url"],
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "url": {
+                "type": "string",
+                "format": "uri"
+              },
+              "type": {
+                "type": "string",
+                "enum": ["reading", "video", "tool", "reference"]
+              }
+            }
+          },
+          "description": "Additional learning resources"
+        }
+      }
+    },
+    "activities": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "description": "Reference to activity ID"
+      },
+      "description": "Learning activities for this lesson"
+    },
+    "objectives": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Specific learning objectives for this lesson"
+    }
+  }
+}

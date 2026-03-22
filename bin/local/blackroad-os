@@ -1,0 +1,107 @@
+#!/usr/bin/env bash
+# ============================================================================
+# BLACKROAD OS, INC. - PROPRIETARY AND CONFIDENTIAL
+# Copyright (c) 2025-2026 BlackRoad OS, Inc. All Rights Reserved.
+# 
+# This code is the intellectual property of BlackRoad OS, Inc.
+# AI-assisted development does not transfer ownership to AI providers.
+# Unauthorized use, copying, or distribution is prohibited.
+# NOT licensed for AI training or data extraction.
+# ============================================================================
+set -e
+C_BLUE="\e[38;5;33m"
+C_MAGENTA="\e[38;5;163m"
+C_PINK="\e[38;5;198m"
+C_ORANGE="\e[38;5;202m"
+C_AMBER="\e[38;5;208m"
+C_WHITE="\e[38;5;15m"
+C_BLACK="\e[38;5;0m"
+C_RESET="\e[0m"
+draw_box () {
+  local TITLE="$1"
+  local COLOR="$2"
+  local WIDTH="$3"
+  local INNER=$((WIDTH - 2))
+  local LINE=$(printf '─%.0s' $(seq 1 $INNER))
+  echo -e "${COLOR}┌${LINE}┐${C_RESET}"
+  printf "${COLOR}│${C_RESET} %-*s ${COLOR}│${C_RESET}\n" $((INNER-1)) "$TITLE"
+  echo -e "${COLOR}└${LINE}┘${C_RESET}"
+}
+
+draw_bar () {
+  local LABEL="$1"
+  local PERCENT="$2"
+  local COLOR="$3"
+  local WIDTH="$4"
+  local FILLED=$((PERCENT * WIDTH / 100))
+  local EMPTY=$((WIDTH - FILLED))
+  local FILL=$(printf '█%.0s' $(seq 1 $FILLED))
+  local VOID=$(printf '░%.0s' $(seq 1 $EMPTY))
+  printf "%b%-10s [%b%s%b%s%b] %3d%%%b\n" \
+    "$C_WHITE" "$LABEL" \
+    "$COLOR" "$FILL" \
+    "$C_BLACK" "$VOID" \
+    "$C_RESET" "$PERCENT" "$C_RESET"
+}
+main_menu () {
+  local ITEMS=("LIVE DASHBOARD" "ANIMATED DASHBOARD" "EXIT")
+  local SELECTED=0
+
+  tput civis
+  while true; do
+    clear
+    draw_box "BLACKROAD OS" "$C_BLUE" 40
+
+    for i in "${!ITEMS[@]}"; do
+      if [[ $i -eq $SELECTED ]]; then
+        echo -e "${C_PINK}▶ ${ITEMS[$i]}${C_RESET}"
+      else
+        echo "  ${ITEMS[$i]}"
+      fi
+    done
+
+    read -rsn1 KEY
+    [[ $KEY == $'\x1b' ]] && read -rsn2 KEY
+
+    case "$KEY" in
+      '[A') ((SELECTED--)) ;;
+      '[B') ((SELECTED++)) ;;
+      '') break ;;
+    esac
+
+    ((SELECTED<0)) && SELECTED=2
+    ((SELECTED>2)) && SELECTED=0
+  done
+
+  tput cnorm
+  clear
+
+  case $SELECTED in
+    0) live_dashboard ;;
+    1) animated_dashboard ;;
+    2) exit ;;
+  esac
+}
+live_dashboard () {
+  clear
+  draw_box "LIVE DASHBOARD" "$C_WHITE" 40
+  draw_bar CPU 72 "$C_BLUE" 20
+  draw_bar MEM 44 "$C_MAGENTA" 20
+  draw_bar NET 61 "$C_AMBER" 20
+  read -rsn1
+}
+
+animated_dashboard () {
+  local PHASE=0
+  while true; do
+    clear
+    draw_box "ANIMATED DASHBOARD" "$C_WHITE" 40
+    draw_bar CPU 72 "$C_BLUE" 20
+    draw_bar MEM 44 "$C_MAGENTA" 20
+    draw_bar NET 61 "$C_AMBER" 20
+    read -rsn1 -t 0.2 KEY
+    [[ "$KEY" == "q" ]] && break
+    ((PHASE++))
+  done
+}
+main_menu

@@ -1,0 +1,221 @@
+# 🎨 Brand Integration Hooks
+# Defines how Creator Studio connects to blackroad-os-brand
+
+name: brand-hooks
+description: |
+  Integration configuration for connecting Creator Studio Pack with the
+  BlackRoad OS brand system. Brand system is the source of truth for
+  visual identity, voice, and tone.
+version: "1.0.0"
+
+# 🔗 Source system
+source:
+  pack: blackroad-os-brand
+  description: Brand system source of truth for visual and verbal identity
+
+# 📦 Data sync configuration
+sync:
+  # When to sync brand data
+  triggers:
+    - on_brief_create
+    - on_campaign_create
+    - on_asset_create
+    - on_demand  # Manual refresh
+    - scheduled  # Daily sync
+    
+  # Sync frequency
+  schedule:
+    frequency: daily
+    time: "00:00"
+    timezone: "UTC"
+
+# 🎨 Brand elements to reference
+brand_elements:
+  # Visual identity
+  visual:
+    - element: color_palette
+      usage: Required for all visual content
+      sync_fields:
+        - primary_colors
+        - secondary_colors
+        - accent_colors
+        - background_colors
+        - text_colors
+      constraints:
+        - must_use_approved_colors
+        
+    - element: typography
+      usage: Required for all text-based content
+      sync_fields:
+        - primary_font
+        - secondary_font
+        - heading_styles
+        - body_styles
+      constraints:
+        - must_use_approved_fonts
+        
+    - element: logos
+      usage: Logo placement in content
+      sync_fields:
+        - primary_logo
+        - secondary_logo
+        - icon_mark
+        - logo_variants
+        - clear_space_rules
+      constraints:
+        - respect_clear_space
+        - use_correct_variant
+        
+    - element: imagery_style
+      usage: Photography and illustration guidelines
+      sync_fields:
+        - photography_style
+        - illustration_style
+        - icon_style
+        - image_treatments
+      constraints:
+        - match_approved_styles
+
+  # Verbal identity
+  verbal:
+    - element: voice_and_tone
+      usage: Required for all copy
+      sync_fields:
+        - brand_voice
+        - tone_guidelines
+        - personality_traits
+      constraints:
+        - maintain_voice_consistency
+        
+    - element: messaging_framework
+      usage: Key messages and positioning
+      sync_fields:
+        - value_propositions
+        - key_messages
+        - positioning_statements
+        - elevator_pitch
+      constraints:
+        - align_with_positioning
+        
+    - element: terminology
+      usage: Approved terms and phrases
+      sync_fields:
+        - approved_terms
+        - prohibited_phrases
+        - industry_jargon_policy
+      constraints:
+        - use_approved_terminology
+        - avoid_prohibited_phrases
+
+  # Brand kits
+  kits:
+    - element: brand_kit
+      usage: Complete brand packages
+      sync_fields:
+        - kit_id
+        - kit_version
+        - included_assets
+      reference_only: true
+
+# 📝 Reference patterns
+reference_patterns:
+  # How to reference brand elements in schemas
+  in_creative_brief:
+    fields:
+      - brand_references.brand_kit_id
+      - brand_references.color_palette
+      - brand_references.voice_and_tone
+      - brand_references.logo_variant
+    
+  in_campaign:
+    fields:
+      - brand_references.brand_kit_id
+      - brand_references.campaign_visual_identity
+      - brand_references.messaging_framework_id
+    
+  in_content_asset:
+    fields:
+      - brand_references.brand_kit_id
+      - brand_references.color_palette
+      - brand_references.typography
+      - brand_references.voice_and_tone
+      - brand_references.logo_variant
+
+# ✅ Validation rules
+validation:
+  on_submit:
+    - check: colors_in_palette
+      description: Verify all colors match brand palette
+      severity: error
+      
+    - check: fonts_approved
+      description: Verify typography matches guidelines
+      severity: error
+      
+    - check: voice_alignment
+      description: Check copy aligns with brand voice
+      severity: warning
+      
+    - check: terminology_compliance
+      description: Check for prohibited phrases
+      severity: error
+      
+    - check: logo_usage
+      description: Verify correct logo variant and clear space
+      severity: error
+
+  on_agent_generate:
+    - check: brand_voice_alignment
+      description: AI-generated content matches brand voice
+      required: true
+      
+    - check: prohibited_phrases
+      description: No prohibited phrases in output
+      required: true
+
+# 🔐 Security
+security:
+  # What brand data can be cached locally
+  cacheable:
+    - color_palette
+    - typography
+    - voice_guidelines
+    - terminology
+    
+  # What must always be fetched fresh
+  always_fresh:
+    - logo_urls
+    - brand_kit_versions
+    - asset_links
+    
+  # Access control
+  access:
+    read: all_creator_studio_users
+    modify: brand_team_only
+
+# 📊 Audit logging
+audit:
+  log_events:
+    - brand_data_synced
+    - brand_validation_failed
+    - brand_override_requested
+  
+  include:
+    - timestamp
+    - user_or_agent
+    - element_accessed
+    - validation_result
+
+# 🔄 Conflict resolution
+conflict_handling:
+  brand_update:
+    action: notify_active_projects
+    message: "Brand guidelines updated - review active content for alignment"
+    
+  validation_failure:
+    action: block_publish
+    require: brand_team_exception
+    
+  exception_request:
+    workflow: submit_to_brand_team
+    sla: "24h"

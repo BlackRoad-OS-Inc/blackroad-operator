@@ -1,0 +1,5 @@
+"""
+BlackRoad OS — memory/2048/tiers/core.py
+Part of the sovereign edge AI operating system.
+"""
+# TODO: Implement core

@@ -1,0 +1,354 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://blackroad-os.dev/schemas/creative-brief.schema.json",
+  "title": "Creative Brief",
+  "description": "📝 Schema for creative briefs that initiate content creation projects",
+  "type": "object",
+  "required": [
+    "id",
+    "title",
+    "project_type",
+    "target_audience",
+    "key_messages",
+    "deliverables",
+    "timeline",
+    "created_at",
+    "created_by"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for the brief",
+      "pattern": "^brief-[a-z0-9-]+$"
+    },
+    "title": {
+      "type": "string",
+      "description": "Brief title",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "project_type": {
+      "type": "string",
+      "description": "Type of creative project",
+      "enum": [
+        "post",
+        "thread",
+        "video",
+        "email",
+        "landing_page",
+        "deck",
+        "article",
+        "newsletter",
+        "campaign",
+        "brand_refresh",
+        "other"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "description": "Current status of the brief",
+      "enum": [
+        "draft",
+        "in_review",
+        "approved",
+        "in_progress",
+        "completed",
+        "archived"
+      ],
+      "default": "draft"
+    },
+    "overview": {
+      "type": "string",
+      "description": "Executive summary of the project"
+    },
+    "background": {
+      "type": "string",
+      "description": "Context and background information"
+    },
+    "objectives": {
+      "type": "array",
+      "description": "Project objectives and goals",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1
+    },
+    "target_audience": {
+      "type": "object",
+      "description": "Target audience definition",
+      "required": ["primary"],
+      "properties": {
+        "primary": {
+          "type": "string",
+          "description": "Primary target audience"
+        },
+        "secondary": {
+          "type": "string",
+          "description": "Secondary target audience"
+        },
+        "personas": {
+          "type": "array",
+          "description": "Specific persona references",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "key_messages": {
+      "type": "array",
+      "description": "Core messages to communicate",
+      "items": {
+        "type": "object",
+        "required": ["message"],
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "priority": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10
+          },
+          "supporting_points": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "minItems": 1
+    },
+    "deliverables": {
+      "type": "array",
+      "description": "Expected outputs from this project",
+      "items": {
+        "type": "object",
+        "required": ["type", "description"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "copy",
+              "visual",
+              "video",
+              "audio",
+              "document",
+              "presentation",
+              "other"
+            ]
+          },
+          "description": {
+            "type": "string"
+          },
+          "format": {
+            "type": "string"
+          },
+          "dimensions": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      },
+      "minItems": 1
+    },
+    "channels": {
+      "type": "array",
+      "description": "Distribution channels for the content",
+      "items": {
+        "type": "string",
+        "enum": [
+          "social_media",
+          "email",
+          "blog",
+          "website",
+          "paid_ads",
+          "video_platform",
+          "podcast",
+          "webinar",
+          "press",
+          "internal",
+          "other"
+        ]
+      }
+    },
+    "timeline": {
+      "type": "object",
+      "description": "Project timeline",
+      "required": ["due_date"],
+      "properties": {
+        "kickoff_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "draft_due": {
+          "type": "string",
+          "format": "date"
+        },
+        "review_due": {
+          "type": "string",
+          "format": "date"
+        },
+        "due_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "publish_date": {
+          "type": "string",
+          "format": "date"
+        }
+      }
+    },
+    "stakeholders": {
+      "type": "object",
+      "description": "Project stakeholders and their roles",
+      "properties": {
+        "requestor": {
+          "type": "string",
+          "description": "Person or team requesting the work"
+        },
+        "creator": {
+          "type": "string",
+          "description": "Primary creator/writer"
+        },
+        "designer": {
+          "type": "string",
+          "description": "Visual designer"
+        },
+        "editor": {
+          "type": "string",
+          "description": "Editor/reviewer"
+        },
+        "approver": {
+          "type": "string",
+          "description": "Final approver"
+        },
+        "legal_reviewer": {
+          "type": "string",
+          "description": "Legal reviewer (if required)"
+        },
+        "brand_reviewer": {
+          "type": "string",
+          "description": "Brand reviewer (if required)"
+        }
+      }
+    },
+    "brand_references": {
+      "type": "object",
+      "description": "🎨 References to brand assets from blackroad-os-brand",
+      "properties": {
+        "brand_kit_id": {
+          "type": "string",
+          "description": "Reference to brand kit"
+        },
+        "color_palette": {
+          "type": "string",
+          "description": "Specific color palette to use"
+        },
+        "voice_and_tone": {
+          "type": "string",
+          "description": "Voice and tone guidelines reference"
+        },
+        "logo_variant": {
+          "type": "string",
+          "description": "Which logo variant to use"
+        }
+      }
+    },
+    "external_assets": {
+      "type": "array",
+      "description": "🧾 Links to external assets (Canva, Figma, etc.)",
+      "items": {
+        "type": "object",
+        "required": ["url", "type"],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["canva", "figma", "google_drive", "dropbox", "notion", "other"]
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "risk_level": {
+      "type": "string",
+      "description": "⚠️ Content risk classification",
+      "enum": ["low", "medium", "high"],
+      "default": "low"
+    },
+    "requires_legal_review": {
+      "type": "boolean",
+      "description": "Whether legal review is required",
+      "default": false
+    },
+    "requires_brand_review": {
+      "type": "boolean",
+      "description": "Whether brand review is required",
+      "default": false
+    },
+    "budget": {
+      "type": "object",
+      "description": "Budget information",
+      "properties": {
+        "amount": {
+          "type": "number",
+          "minimum": 0
+        },
+        "currency": {
+          "type": "string",
+          "default": "USD"
+        }
+      }
+    },
+    "success_metrics": {
+      "type": "array",
+      "description": "📊 How success will be measured",
+      "items": {
+        "type": "object",
+        "required": ["metric"],
+        "properties": {
+          "metric": {
+            "type": "string"
+          },
+          "target": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "notes": {
+      "type": "string",
+      "description": "Additional notes or context"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the brief was created"
+    },
+    "created_by": {
+      "type": "string",
+      "description": "Who created the brief"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the brief was last updated"
+    },
+    "version": {
+      "type": "integer",
+      "description": "Brief version number",
+      "minimum": 1,
+      "default": 1
+    }
+  }
+}

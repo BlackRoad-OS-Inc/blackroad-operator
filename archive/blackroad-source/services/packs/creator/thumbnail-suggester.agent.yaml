@@ -1,0 +1,225 @@
+# 🖼️ Thumbnail Suggester Agent
+# Assists with visual content planning and thumbnail concepts
+
+name: thumbnail-suggester
+description: |
+  🤖 AI agent that assists with visual content planning by suggesting thumbnail
+  concepts, image compositions, and visual hooks. Provides descriptions and
+  references only; does not create final visual assets.
+version: "1.0.0"
+
+# 🎯 Agent capabilities
+capabilities:
+  - thumbnail_concepts
+  - composition_suggestions
+  - visual_hook_ideas
+  - color_recommendations
+  - text_overlay_suggestions
+  - a_b_test_variations
+
+# 🖼️ Supported visual types
+supported_visual_types:
+  - youtube_thumbnail
+  - social_image
+  - blog_hero
+  - email_header
+  - ad_creative
+  - presentation_slide
+  - infographic_layout
+  - story_cover
+
+# 🔁 Workflow integration
+workflow_states:
+  allowed_in:
+    - ideation
+    - draft
+    - assets  # Campaign workflow
+  not_allowed_in:
+    - review
+    - approve
+    - publish
+    - measure
+    - archive
+
+# ✅ Allowed actions
+allowed_actions:
+  - action: suggest_concept
+    description: Propose thumbnail concept with description
+    requires_approval: true
+    
+  - action: describe_composition
+    description: Suggest visual layout and composition
+    requires_approval: true
+    
+  - action: recommend_colors
+    description: Suggest color palette (must align with brand)
+    requires_approval: true
+    brand_constraint: true
+    
+  - action: suggest_text_overlay
+    description: Recommend text placement and styling
+    requires_approval: true
+    
+  - action: generate_variations
+    description: Create A/B test variation concepts
+    requires_approval: true
+    max_variations: 5
+    
+  - action: reference_examples
+    description: Link to reference images or styles
+    requires_approval: false
+
+# 🚫 Restricted actions
+restricted_actions:
+  - action: create_final_asset
+    reason: Agent provides concepts only; designers create final assets
+    
+  - action: publish
+    reason: All publishing requires human approval
+    
+  - action: modify_brand_colors
+    reason: Must use approved brand colors
+    
+  - action: use_stock_images
+    reason: Cannot select or license images; suggestions only
+
+# 🎨 Brand constraints
+brand_integration:
+  source: blackroad-os-brand
+  required_fields:
+    - color_palette
+    - typography
+    - logo_variants
+    - visual_style_guide
+  must_respect:
+    - primary_colors
+    - secondary_colors
+    - approved_fonts
+    - logo_clear_space
+    - visual_tone
+
+# 📐 Format specifications
+format_specs:
+  youtube_thumbnail:
+    dimensions: "1280x720"
+    aspect_ratio: "16:9"
+    max_text_coverage: "30%"
+    
+  social_image:
+    dimensions_square: "1080x1080"
+    dimensions_landscape: "1200x630"
+    dimensions_portrait: "1080x1350"
+    
+  blog_hero:
+    dimensions: "1200x630"
+    
+  email_header:
+    dimensions: "600x200"
+    
+  ad_creative:
+    varies_by_platform: true
+
+# 📊 Quality checks
+quality_checks:
+  - check: brand_color_alignment
+    description: Ensure suggested colors match brand palette
+    
+  - check: text_readability
+    description: Verify text suggestions are readable at thumbnail size
+    
+  - check: composition_balance
+    description: Check visual balance of suggested layout
+    
+  - check: contrast_ratio
+    description: Ensure sufficient contrast for accessibility
+    
+  - check: mobile_friendly
+    description: Verify concept works at small sizes
+
+# ⚠️ Risk handling
+risk_handling:
+  standard:
+    auto_suggestions: true
+    requires_review: design
+    
+  brand_sensitive:
+    # Major campaigns, external partnerships
+    auto_suggestions: true
+    requires_review:
+      - design
+      - brand
+    flag_message: "Brand-sensitive visual - brand review recommended"
+
+# 📝 Output format
+output_format:
+  concept_description:
+    - headline_text: string
+    - subtext: string (optional)
+    - visual_elements: array
+    - color_scheme: object
+    - composition_notes: string
+    - mood: string
+    - reference_links: array (optional)
+    
+  metadata:
+    - agent_id: thumbnail-suggester
+    - timestamp: true
+    - content_type: true
+    - target_dimensions: true
+    - brand_kit_reference: true
+
+# 🔄 Feedback loops
+feedback_patterns:
+  revise:
+    trigger: human_feedback
+    action: regenerate concept with feedback
+    max_iterations: 3
+    
+  a_b_test:
+    trigger: request_variations
+    action: generate distinct visual concepts
+    track_performance: true
+    archive_winner: true
+    
+  learn_from_performance:
+    trigger: thumbnail_performance_data
+    action: analyze click-through patterns
+    update_suggestions: true
+
+# 🔐 Security
+security:
+  data_access:
+    - content_briefs: read
+    - brand_guidelines: read
+    - performance_data: read
+    - image_references: read
+  
+  forbidden_access:
+    - platform_tokens
+    - user_credentials
+    - licensed_image_libraries
+
+# 📊 Metrics tracked
+metrics:
+  - concepts_suggested
+  - approval_rate
+  - revision_count
+  - a_b_test_results
+  - click_through_rates_influenced
+
+# 🔗 Integration hooks
+integrations:
+  brand:
+    source: blackroad-os-brand
+    sync: on_startup
+    fields:
+      - color_palette
+      - visual_style_guide
+    
+  external_assets:
+    conventions:
+      - store_links_only: true
+      - supported_platforms:
+        - canva
+        - figma
+        - google_drive

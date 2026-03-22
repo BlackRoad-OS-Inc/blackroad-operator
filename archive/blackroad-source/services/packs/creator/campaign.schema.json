@@ -1,0 +1,456 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://blackroad-os.dev/schemas/campaign.schema.json",
+  "title": "Campaign",
+  "description": "📆 Schema for marketing campaigns that coordinate multiple content assets across channels",
+  "type": "object",
+  "required": [
+    "id",
+    "name",
+    "campaign_type",
+    "status",
+    "theme",
+    "channels",
+    "timeline",
+    "created_at",
+    "created_by"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for the campaign",
+      "pattern": "^campaign-[a-z0-9-]+$"
+    },
+    "name": {
+      "type": "string",
+      "description": "Campaign name",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "campaign_type": {
+      "type": "string",
+      "description": "Type of campaign",
+      "enum": [
+        "product_launch",
+        "brand_awareness",
+        "demand_generation",
+        "event_promotion",
+        "seasonal",
+        "partnership",
+        "thought_leadership",
+        "customer_retention",
+        "other"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "description": "Current workflow state",
+      "enum": [
+        "theme",
+        "assets",
+        "channels",
+        "schedule",
+        "launch",
+        "analyze",
+        "archive"
+      ]
+    },
+    "theme": {
+      "type": "object",
+      "description": "🎯 Campaign theme and concept",
+      "required": ["concept", "goals"],
+      "properties": {
+        "concept": {
+          "type": "string",
+          "description": "Core campaign concept"
+        },
+        "tagline": {
+          "type": "string",
+          "description": "Campaign tagline or headline"
+        },
+        "goals": {
+          "type": "array",
+          "description": "Campaign goals",
+          "items": {
+            "type": "object",
+            "required": ["goal"],
+            "properties": {
+              "goal": {
+                "type": "string"
+              },
+              "metric": {
+                "type": "string"
+              },
+              "target": {
+                "type": "string"
+              }
+            }
+          },
+          "minItems": 1
+        },
+        "target_audience": {
+          "type": "object",
+          "properties": {
+            "primary": {
+              "type": "string"
+            },
+            "secondary": {
+              "type": "string"
+            },
+            "personas": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "key_messages": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "assets": {
+      "type": "array",
+      "description": "🎬 Content assets in this campaign",
+      "items": {
+        "type": "object",
+        "required": ["asset_id", "type", "status"],
+        "properties": {
+          "asset_id": {
+            "type": "string",
+            "description": "Reference to content-asset"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "post",
+              "thread",
+              "video",
+              "email",
+              "landing_page",
+              "deck",
+              "article",
+              "newsletter",
+              "ad",
+              "banner",
+              "other"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "planned",
+              "in_progress",
+              "ready",
+              "published",
+              "archived"
+            ]
+          },
+          "assigned_channels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "due_date": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      }
+    },
+    "channels": {
+      "type": "array",
+      "description": "📡 Distribution channels",
+      "items": {
+        "type": "object",
+        "required": ["channel", "status"],
+        "properties": {
+          "channel": {
+            "type": "string",
+            "enum": [
+              "social_media",
+              "twitter",
+              "linkedin",
+              "instagram",
+              "facebook",
+              "tiktok",
+              "youtube",
+              "email",
+              "blog",
+              "website",
+              "paid_ads",
+              "google_ads",
+              "meta_ads",
+              "linkedin_ads",
+              "podcast",
+              "webinar",
+              "press",
+              "other"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": ["planned", "configured", "active", "paused", "completed"]
+          },
+          "budget": {
+            "type": "number",
+            "minimum": 0
+          },
+          "targeting": {
+            "type": "object",
+            "properties": {
+              "audience": {
+                "type": "string"
+              },
+              "geo": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "timeline": {
+      "type": "object",
+      "description": "📆 Campaign timeline",
+      "required": ["start_date", "end_date"],
+      "properties": {
+        "planning_start": {
+          "type": "string",
+          "format": "date"
+        },
+        "asset_deadline": {
+          "type": "string",
+          "format": "date"
+        },
+        "start_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "end_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "review_date": {
+          "type": "string",
+          "format": "date"
+        }
+      }
+    },
+    "schedule": {
+      "type": "array",
+      "description": "Content calendar entries",
+      "items": {
+        "type": "object",
+        "required": ["asset_id", "channel", "publish_date"],
+        "properties": {
+          "asset_id": {
+            "type": "string"
+          },
+          "channel": {
+            "type": "string"
+          },
+          "publish_date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["scheduled", "published", "failed", "cancelled"]
+          }
+        }
+      }
+    },
+    "budget": {
+      "type": "object",
+      "description": "💰 Campaign budget",
+      "properties": {
+        "total": {
+          "type": "number",
+          "minimum": 0
+        },
+        "spent": {
+          "type": "number",
+          "minimum": 0
+        },
+        "currency": {
+          "type": "string",
+          "default": "USD"
+        },
+        "breakdown": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "stakeholders": {
+      "type": "object",
+      "description": "👥 Campaign stakeholders",
+      "properties": {
+        "campaign_owner": {
+          "type": "string"
+        },
+        "creative_lead": {
+          "type": "string"
+        },
+        "marketing_ops": {
+          "type": "string"
+        },
+        "legal_reviewer": {
+          "type": "string"
+        },
+        "brand_reviewer": {
+          "type": "string"
+        },
+        "executive_sponsor": {
+          "type": "string"
+        }
+      }
+    },
+    "brand_references": {
+      "type": "object",
+      "description": "🎨 References to brand assets from blackroad-os-brand",
+      "properties": {
+        "brand_kit_id": {
+          "type": "string"
+        },
+        "campaign_visual_identity": {
+          "type": "string"
+        },
+        "messaging_framework_id": {
+          "type": "string"
+        }
+      }
+    },
+    "external_assets": {
+      "type": "array",
+      "description": "🧾 Links to external assets (Canva, Figma, etc.)",
+      "items": {
+        "type": "object",
+        "required": ["url", "type"],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["canva", "figma", "google_drive", "dropbox", "notion", "other"]
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "risk_level": {
+      "type": "string",
+      "description": "⚠️ Campaign risk classification",
+      "enum": ["low", "medium", "high"],
+      "default": "low"
+    },
+    "requires_legal_review": {
+      "type": "boolean",
+      "description": "Whether legal review is required",
+      "default": false
+    },
+    "requires_brand_review": {
+      "type": "boolean",
+      "description": "Whether brand review is required",
+      "default": true
+    },
+    "performance": {
+      "type": "object",
+      "description": "📊 Campaign performance metrics",
+      "properties": {
+        "reach": {
+          "type": "object",
+          "properties": {
+            "impressions": { "type": "integer" },
+            "unique_visitors": { "type": "integer" },
+            "audience_growth": { "type": "number" }
+          }
+        },
+        "engagement": {
+          "type": "object",
+          "properties": {
+            "engagement_rate": { "type": "number" },
+            "click_through_rate": { "type": "number" },
+            "shares": { "type": "integer" },
+            "comments": { "type": "integer" }
+          }
+        },
+        "conversion": {
+          "type": "object",
+          "properties": {
+            "conversion_rate": { "type": "number" },
+            "leads_generated": { "type": "integer" },
+            "pipeline_influenced": { "type": "number" },
+            "revenue_attributed": { "type": "number" }
+          }
+        }
+      }
+    },
+    "integrations": {
+      "type": "object",
+      "description": "🔗 Cross-pack integrations",
+      "properties": {
+        "archive_id": {
+          "type": "string",
+          "description": "Reference in blackroad-os-archive"
+        },
+        "dashboard_id": {
+          "type": "string",
+          "description": "Dashboard in blackroad-os-prism-console"
+        },
+        "related_packs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "pack": {
+                "type": "string"
+              },
+              "reference_id": {
+                "type": "string"
+              },
+              "relationship": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "notes": {
+      "type": "string",
+      "description": "Additional notes"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "created_by": {
+      "type": "string"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 1
+    }
+  }
+}

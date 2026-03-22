@@ -1,0 +1,83 @@
+{
+  "BlackRoad Client Init": {
+    "prefix": "br-init",
+    "body": [
+      "import blackroad \"github.com/BlackRoad-OS/blackroad-sdk-go\"",
+      "",
+      "client, err := blackroad.NewClient(&blackroad.ClientConfig{",
+      "    APIKey: \"${1:your-api-key}\",",
+      "})",
+      "if err != nil {",
+      "    log.Fatal(err)",
+      "}"
+    ],
+    "description": "Initialize BlackRoad client"
+  },
+  "BlackRoad List Agents": {
+    "prefix": "br-agents-list",
+    "body": [
+      "agents, err := client.Agents.List(ctx, &blackroad.AgentListOptions{",
+      "    Division: \"${1:AI}\",",
+      "    Level:    ${2:4},",
+      "})",
+      "if err != nil {",
+      "    log.Fatal(err)",
+      "}",
+      "fmt.Printf(\"Found %d agents\\n\", len(agents))"
+    ],
+    "description": "List BlackRoad agents"
+  },
+  "BlackRoad Register Agent": {
+    "prefix": "br-agent-register",
+    "body": [
+      "agent, err := client.Agents.Register(ctx, &blackroad.RegisterAgentOptions{",
+      "    Name:     \"${1:my-agent}\",",
+      "    Type:     \"${2:ai}\",",
+      "    Division: \"${3:Labs}\",",
+      "    Level:    ${4:4},",
+      "})"
+    ],
+    "description": "Register a new BlackRoad agent"
+  },
+  "BlackRoad Dispatch Task": {
+    "prefix": "br-task-dispatch",
+    "body": [
+      "task, err := client.Tasks.Dispatch(ctx, &blackroad.DispatchTaskOptions{",
+      "    Title:       \"${1:Task title}\",",
+      "    Description: \"${2:Task description}\",",
+      "    Priority:    \"${3:high}\",",
+      "    Division:    \"${4:Security}\",",
+      "})"
+    ],
+    "description": "Dispatch a new BlackRoad task"
+  },
+  "BlackRoad Log Memory": {
+    "prefix": "br-memory-log",
+    "body": [
+      "entry, err := client.Memory.Log(ctx, &blackroad.LogMemoryOptions{",
+      "    Action:  \"${1:deployed}\",",
+      "    Entity:  \"${2:service-name}\",",
+      "    Details: \"${3:Details about the action}\",",
+      "    Tags:    []string{\"${4:tag1}\", \"${5:tag2}\"},",
+      "})"
+    ],
+    "description": "Log entry to BlackRoad memory"
+  },
+  "BlackRoad Error Handling": {
+    "prefix": "br-errors",
+    "body": [
+      "var notFoundErr *blackroad.NotFoundError",
+      "var rateLimitErr *blackroad.RateLimitError",
+      "",
+      "switch {",
+      "case errors.As(err, &notFoundErr):",
+      "    fmt.Println(\"Not found\")",
+      "case errors.As(err, &rateLimitErr):",
+      "    fmt.Printf(\"Rate limited. Retry after %d seconds\\n\", rateLimitErr.RetryAfter)",
+      "default:",
+      "    log.Fatal(err)",
+      "}"
+    ],
+    "description": "BlackRoad error handling pattern"
+  }
+}

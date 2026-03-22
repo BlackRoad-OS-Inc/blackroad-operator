@@ -1,0 +1,41 @@
+# Warp Workflow: SSH Connect to BlackRoad Infrastructure
+# https://docs.warp.dev/features/workflows
+
+name: SSH Connect
+description: Connect to BlackRoad infrastructure via SSH
+tags:
+  - blackroad
+  - ssh
+  - infrastructure
+author: BlackRoad OS
+version: 1.0.0
+
+arguments:
+  - name: target
+    description: Target server (droplet, pi-lucidia, pi-edge-1, pi-edge-2)
+    default_value: droplet
+
+command: |
+  case "{{target}}" in
+    droplet)
+      echo "Connecting to DigitalOcean Droplet..."
+      ssh root@$DROPLET_IP
+      ;;
+    pi-lucidia)
+      echo "Connecting to Lucidia Pi..."
+      ssh pi@192.168.4.38
+      ;;
+    pi-edge-1)
+      echo "Connecting to Edge Pi 1..."
+      ssh pi@192.168.4.39
+      ;;
+    pi-edge-2)
+      echo "Connecting to Edge Pi 2..."
+      ssh pi@192.168.4.40
+      ;;
+    *)
+      echo "Unknown target: {{target}}"
+      echo "Available: droplet, pi-lucidia, pi-edge-1, pi-edge-2"
+      exit 1
+      ;;
+  esac

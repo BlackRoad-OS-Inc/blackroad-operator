@@ -1,0 +1,119 @@
+#!/usr/bin/env bash
+# BlackRoad AI - Unlimited local AI assistant
+# Routes through your unlimited copilot system with local models first
+set -eo pipefail
+
+source "$HOME/.blackroad/config/nodes.sh" 2>/dev/null || {
+  AMBER='\033[38;5;214m'; BLUE='\033[38;5;33m'
+  GREEN='\033[38;5;82m'; RED='\033[38;5;196m'; RESET='\033[0m'
+}
+
+UNLIMITED_COPILOT="$HOME/blackroad-unlimited-copilot.py"
+
+# Check if Python script exists
+if [ ! -f "$UNLIMITED_COPILOT" ]; then
+    echo -e "${RED}Error: blackroad-unlimited-copilot.py not found${RESET}"
+    echo "Expected location: $UNLIMITED_COPILOT"
+    exit 1
+fi
+
+# Handle different subcommands
+case "${1:-}" in
+    suggest|explain|s|e)
+        # Code generation/explanation - use unlimited system
+        shift
+        
+        if [ -z "$*" ]; then
+            echo -e "${BLUE}Usage:${RESET} blackroad-ai suggest \"your question\""
+            exit 1
+        fi
+        
+        # Enhanced header
+        echo -e "${AMBER}╔═══════════════════════════════════════════════════════════════╗${RESET}"
+        echo -e "${AMBER}║${RESET}          BlackRoad AI - Unlimited Intelligence            ${AMBER}║${RESET}"
+        echo -e "${AMBER}╠═══════════════════════════════════════════════════════════════╣${RESET}"
+        
+        # Check what's available
+        local fleet_ip="${NODE_IP[cecilia]:-192.168.4.96}"
+        if curl -sf -m 2 "http://${fleet_ip}:11434/api/tags" > /dev/null 2>&1; then
+            models=$(curl -sf "http://${fleet_ip}:11434/api/tags" | jq '.models | length' 2>/dev/null || echo "?")
+            echo -e "${AMBER}║${RESET}  ${GREEN}✅ Fleet Online${RESET} - $models local models ready              ${AMBER}║${RESET}"
+        else
+            echo -e "${AMBER}║${RESET}  ${AMBER}⚠️  Local AI loading...${RESET} falling back to cloud        ${AMBER}║${RESET}"
+        fi
+        
+        echo -e "${AMBER}║${RESET}  ${GREEN}Cost:${RESET} \$0/month (local) + fallback to cloud          ${AMBER}║${RESET}"
+        echo -e "${AMBER}║${RESET}  ${GREEN}Rate Limits:${RESET} None on local models                    ${AMBER}║${RESET}"
+        echo -e "${AMBER}║${RESET}  ${GREEN}Privacy:${RESET} Code stays local on your network             ${AMBER}║${RESET}"
+        echo -e "${AMBER}╚═══════════════════════════════════════════════════════════════╝${RESET}"
+        echo ""
+        
+        python3 "$UNLIMITED_COPILOT" "$@"
+        ;;
+    
+    status)
+        # Show system status with enhanced header
+        echo -e "${AMBER}╔═══════════════════════════════════════════════════════════════╗${RESET}"
+        echo -e "${AMBER}║${RESET}          BlackRoad AI - System Status                      ${AMBER}║${RESET}"
+        echo -e "${AMBER}╠═══════════════════════════════════════════════════════════════╣${RESET}"
+        
+        # Check Ollama (Octavia)
+        echo -e "${BLUE}Ollama Fleet:${RESET}"
+        local fleet_ip="${NODE_IP[cecilia]:-192.168.4.96}"
+        if curl -sf -m 2 "http://${fleet_ip}:11434/api/tags" > /dev/null 2>&1; then
+            models=$(curl -sf "http://${fleet_ip}:11434/api/tags" | jq '.models | length' 2>/dev/null || echo "?")
+            echo -e "  ${GREEN}✅ Online${RESET} - $models models available"
+            curl -sf "http://${fleet_ip}:11434/api/tags" | jq -r '.models[].name' 2>/dev/null | head -5 | sed 's/^/  /'
+        else
+            echo -e "  ${AMBER}⚠️  Offline (will use fallbacks)${RESET}"
+        fi
+        
+        # Check gh copilot (fallback)
+        echo -e "\n${BLUE}GitHub Copilot (fallback):${RESET}"
+        if command -v gh > /dev/null && gh auth status > /dev/null 2>&1; then
+            echo -e "  ${GREEN}✅ Authenticated${RESET}"
+        else
+            echo -e "  ${AMBER}⚠️  Not authenticated${RESET}"
+        fi
+        
+        # Show available methods
+        echo -e "\n${BLUE}Available Methods:${RESET}"
+        python3 "$UNLIMITED_COPILOT" 2>&1 | grep -E "^\s+•" || echo "  Run 'python3 $UNLIMITED_COPILOT' for details"
+        ;;
+    
+    methods|list)
+        # List available methods
+        python3 "$UNLIMITED_COPILOT"
+        ;;
+    
+    help|--help|-h|"")
+        # Show help
+        echo -e "${AMBER}╔═══════════════════════════════════════════════╗${RESET}"
+        echo -e "${AMBER}║${RESET}              BlackRoad AI                     ${AMBER}║${RESET}"
+        echo -e "${AMBER}╚═══════════════════════════════════════════════╝${RESET}"
+        echo ""
+        echo -e "${BLUE}Usage:${RESET}"
+        echo "  blackroad-ai suggest \"write a hello world in rust\""
+        echo "  blackroad-ai explain \"what does this function do?\""
+        echo "  blackroad-ai status          # Check system health"
+        echo "  blackroad-ai methods         # List all AI methods"
+        echo ""
+        echo -e "${GREEN}Features:${RESET}"
+        echo "  • Uses local AI first (unlimited, free)"
+        echo "  • Automatic fallback to cloud APIs"
+        echo "  • 10+ access methods"
+        echo "  • Zero rate limits on local models"
+        echo ""
+        echo -e "${AMBER}Aliases:${RESET}"
+        echo "  suggest -> s"
+        echo "  explain -> e"
+        ;;
+    
+    *)
+        # Unknown command - show help
+        echo -e "${AMBER}Unknown command: $1${RESET}"
+        echo ""
+        "$0" help
+        exit 1
+        ;;
+esac

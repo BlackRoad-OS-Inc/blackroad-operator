@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+MODEL="blackroad-funnel"
+
+if [ "$#" -eq 0 ]; then
+  INPUT=$(cat)
+else
+  INPUT="$*"
+fi
+
+echo "$INPUT" | ollama run "$MODEL" \
+| awk '
+  BEGIN { keep=1 }
+  /^NOTES:/ { print; getline; print; exit }
+  { print }
+'

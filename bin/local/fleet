@@ -1,0 +1,163 @@
+#!/usr/bin/env bash
+# ============================================================================
+# BLACKROAD OS, INC. - PROPRIETARY AND CONFIDENTIAL
+# Copyright (c) 2025-2026 BlackRoad OS, Inc. All Rights Reserved.
+# ============================================================================
+# BlackRoad Fleet Command - Control all agents from one place
+set -eo pipefail
+
+source "$HOME/.blackroad/config/nodes.sh" 2>/dev/null || true
+
+show_help() {
+    printf '%b╔══════════════════════════════════════════════════════════════╗%b\n' "$PINK" "$RESET"
+    printf '%b║%b  %bBlackRoad Fleet Command%b - Control all AI agents            %b║%b\n' "$PINK" "$RESET" "$AMBER" "$RESET" "$PINK" "$RESET"
+    printf '%b╚══════════════════════════════════════════════════════════════╝%b\n\n' "$PINK" "$RESET"
+    echo "Usage:"
+    echo "  fleet status              - Status of all nodes"
+    echo "  fleet ask \"question\"      - Ask ALL agents a question"
+    echo "  fleet run \"command\"       - Run command on all nodes"
+    echo "  fleet ssh <node>          - SSH to specific node"
+    echo "  fleet models              - List models on all nodes"
+    echo "  fleet health              - Detailed health check"
+}
+
+fleet_status() {
+    printf '%b╔══════════════════════════════════════════════════════════════╗%b\n' "$PINK" "$RESET"
+    printf '%b║%b  %bBlackRoad Fleet Status%b                                      %b║%b\n' "$PINK" "$RESET" "$AMBER" "$RESET" "$PINK" "$RESET"
+    printf '%b╚══════════════════════════════════════════════════════════════╝%b\n\n' "$PINK" "$RESET"
+
+    for node in "${ALL_NODES[@]}"; do
+        local ip="${NODE_IP[$node]:-}"
+        local user="${NODE_USER[$node]:-}"
+        [[ -z "$ip" ]] && continue
+
+        printf '  %b%-10s%b ' "$AMBER" "$node" "$RESET"
+
+        local result
+        result=$(ssh -o ConnectTimeout=3 -o BatchMode=yes "${user}@${ip}" \
+          'echo "$(uptime -p 2>/dev/null || echo up) | $(df -h / | tail -1 | awk "{print \$5}")"' 2>/dev/null)
+
+        if [[ -n "$result" ]]; then
+            printf '%b●%b %s\n' "$GREEN" "$RESET" "$result"
+        else
+            printf '%b○ offline%b\n' "$RED" "$RESET"
+        fi
+    done
+    echo ""
+}
+
+fleet_ask_all() {
+    local question="$1"
+    [[ -z "$question" ]] && { echo "Usage: fleet ask \"question\""; return 1; }
+
+    printf '%bFleet Query:%b %s\n\n' "$AMBER" "$RESET" "${question:0:60}"
+
+    for node in "${PI_NODES[@]}"; do
+        local ip="${NODE_IP[$node]:-}"
+        [[ -z "$ip" ]] && continue
+
+        printf '%b━━━ %s ━━━%b\n' "$BLUE" "$node" "$RESET"
+
+        local response
+        response=$(curl -sf --max-time 30 "http://${ip}:11434/api/generate" \
+          -d "$(jq -n --arg p "$question" '{model: "llama3.2", prompt: $p, stream: false}')" 2>/dev/null | \
+          jq -r '.response // empty' 2>/dev/null)
+
+        if [[ -n "$response" ]]; then
+            echo "$response" | head -20
+        else
+            printf '%b(no response or offline)%b\n' "$RED" "$RESET"
+        fi
+        echo ""
+    done
+}
+
+fleet_run() {
+    local cmd="$1"
+    [[ -z "$cmd" ]] && { echo "Usage: fleet run \"command\""; return 1; }
+
+    printf '%bRunning on all nodes:%b %s\n\n' "$PINK" "$RESET" "$cmd"
+
+    for node in "${ALL_NODES[@]}"; do
+        local ip="${NODE_IP[$node]:-}"
+        local user="${NODE_USER[$node]:-}"
+        [[ -z "$ip" ]] && continue
+
+        printf '%b%s%b:\n' "$AMBER" "$node" "$RESET"
+        ssh -o ConnectTimeout=5 -o BatchMode=yes "${user}@${ip}" "$cmd" 2>/dev/null || printf '%bfailed%b\n' "$RED" "$RESET"
+        echo ""
+    done
+}
+
+fleet_ssh() {
+    local node="$1"
+    [[ -z "$node" ]] && { echo "Usage: fleet ssh <node>"; return 1; }
+
+    local target
+    target=$(br_ssh_target "$node" 2>/dev/null) || { echo "Unknown node: $node"; return 1; }
+    printf '%bConnecting to %s...%b\n' "$BLUE" "$node" "$RESET"
+    ssh $BR_SSH_OPTS "$target"
+}
+
+fleet_models() {
+    printf '%bModels across fleet:%b\n\n' "$PINK" "$RESET"
+
+    for node in "${PI_NODES[@]}"; do
+        local ip="${NODE_IP[$node]:-}"
+        [[ -z "$ip" ]] && continue
+
+        printf '%b%s%b:\n' "$AMBER" "$node" "$RESET"
+        local tags
+        tags=$(curl -sf --connect-timeout 3 "http://${ip}:11434/api/tags" 2>/dev/null)
+        if [[ -n "$tags" ]]; then
+            echo "$tags" | jq -r '.models[].name' 2>/dev/null | sed 's/^/  /'
+        else
+            echo "  (offline)"
+        fi
+        echo ""
+    done
+}
+
+fleet_health() {
+    printf '%b╔══════════════════════════════════════════════════════════════╗%b\n' "$PINK" "$RESET"
+    printf '%b║%b  %bBlackRoad Fleet Health Check%b                                %b║%b\n' "$PINK" "$RESET" "$AMBER" "$RESET" "$PINK" "$RESET"
+    printf '%b╚══════════════════════════════════════════════════════════════╝%b\n\n' "$PINK" "$RESET"
+
+    printf '%-12s %-8s %-10s %-10s %-15s\n' "NODE" "STATUS" "DISK" "LOAD" "UPTIME"
+    printf '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
+
+    for node in "${ALL_NODES[@]}"; do
+        local ip="${NODE_IP[$node]:-}"
+        local user="${NODE_USER[$node]:-}"
+        [[ -z "$ip" ]] && continue
+
+        local result
+        result=$(ssh -o ConnectTimeout=3 -o BatchMode=yes "${user}@${ip}" '
+            disk=$(df -h / | tail -1 | awk "{print \$5}")
+            load=$(cat /proc/loadavg 2>/dev/null | awk "{print \$1}" || echo "N/A")
+            up=$(uptime -p 2>/dev/null | sed "s/up //" | cut -c1-12 || echo "N/A")
+            echo "$disk|$load|$up"
+        ' 2>/dev/null)
+
+        if [[ -n "$result" ]]; then
+            IFS='|' read -r disk load up <<< "$result"
+            printf '%-12s %b%-8s%b %-10s %-10s %-15s\n' "$node" "$GREEN" "online" "$RESET" "$disk" "$load" "$up"
+        else
+            printf '%-12s %b%-8s%b %-10s %-10s %-15s\n' "$node" "$RED" "offline" "$RESET" "-" "-" "-"
+        fi
+    done
+    echo ""
+}
+
+case "${1:-help}" in
+    status|st)    fleet_status ;;
+    ask)
+        shift
+        fleet_ask_all "$*"
+        ;;
+    run|exec)     fleet_run "$2" ;;
+    ssh|connect)  fleet_ssh "$2" ;;
+    models)       fleet_models ;;
+    health|check) fleet_health ;;
+    help|--help|-h|*) show_help ;;
+esac

@@ -1,0 +1,456 @@
+#!/usr/bin/env bash
+# ============================================================================
+# BLACKROAD OS, INC. - PROPRIETARY AND CONFIDENTIAL
+# Copyright (c) 2025-2026 BlackRoad OS, Inc. All Rights Reserved.
+# ============================================================================
+# br-ai - BlackRoad AI Hub
+# Unified AI gateway: local fleet, cloud APIs, model routing, multi-provider
+# Usage: br-ai <command> [args]
+set -eo pipefail
+
+source "$HOME/.blackroad/config/nodes.sh" 2>/dev/null || true
+
+AI_DIR="$HOME/.blackroad/ai"
+AI_DB="$AI_DIR/hub.db"
+HISTORY_DIR="$AI_DIR/history"
+MODELS_REGISTRY="$AI_DIR/models.json"
+mkdir -p "$AI_DIR" "$HISTORY_DIR"
+
+# Provider backends
+declare -A PROVIDERS=(
+  [ollama]="local"
+  [anthropic]="cloud"
+  [openai]="cloud"
+  [gemini]="cloud"
+  [grok]="cloud"
+)
+
+# Fleet Ollama nodes (priority order)
+OLLAMA_NODES=(cecilia lucidia alice)
+
+# Cloud API keys (from env)
+ANTHROPIC_KEY="${ANTHROPIC_API_KEY:-}"
+OPENAI_KEY="${OPENAI_API_KEY:-}"
+GEMINI_KEY="${GOOGLE_AI_API_KEY:-${GEMINI_API_KEY:-}}"
+GROK_KEY="${XAI_API_KEY:-}"
+
+# SQL helper
+_sql() { sqlite3 "$AI_DB" "$@" 2>/dev/null; }
+_sql_escape() { echo "$1" | sed "s/'/''/g"; }
+
+# Initialize hub database
+init_db() {
+  _sql <<'SQL'
+CREATE TABLE IF NOT EXISTS queries (
+    id TEXT PRIMARY KEY,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+    provider TEXT,
+    model TEXT,
+    node TEXT,
+    prompt_len INTEGER,
+    response_len INTEGER,
+    latency_ms INTEGER,
+    status TEXT,
+    cost_estimate REAL DEFAULT 0
+);
+CREATE TABLE IF NOT EXISTS models (
+    name TEXT PRIMARY KEY,
+    provider TEXT,
+    node TEXT,
+    size TEXT,
+    capabilities TEXT,
+    last_seen DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_q_provider ON queries(provider);
+CREATE INDEX IF NOT EXISTS idx_q_ts ON queries(timestamp);
+PRAGMA journal_mode=WAL;
+PRAGMA busy_timeout=5000;
+SQL
+}
+
+# ============================================================================
+# PROVIDER FUNCTIONS
+# ============================================================================
+
+# Find best Ollama node
+find_ollama() {
+  for node in "${OLLAMA_NODES[@]}"; do
+    local ip="${NODE_IP[$node]:-}"
+    [[ -z "$ip" ]] && continue
+    if curl -sf --connect-timeout 2 "http://${ip}:11434/api/tags" &>/dev/null; then
+      echo "$node"
+      return 0
+    fi
+  done
+  return 1
+}
+
+# Query Ollama (local fleet)
+query_ollama() {
+  local model="$1" prompt="$2" node="${3:-}"
+  [[ -z "$node" ]] && node=$(find_ollama) || { echo "No Ollama nodes available" >&2; return 1; }
+
+  local ip="${NODE_IP[$node]}"
+  local start_ms=$(($(date +%s) * 1000))
+
+  local response
+  response=$(curl -sf --max-time 120 "http://${ip}:11434/api/generate" \
+    -d "{\"model\":\"$model\",\"prompt\":$(printf '%s' "$prompt" | jq -Rs .),\"stream\":false}" 2>/dev/null)
+
+  local end_ms=$(($(date +%s) * 1000))
+  local latency=$((end_ms - start_ms))
+
+  local text
+  text=$(echo "$response" | jq -r '.response // empty' 2>/dev/null)
+
+  if [[ -n "$text" ]]; then
+    # Log query
+    local id="q_$(date +%s)_$(openssl rand -hex 4)"
+    _sql "INSERT INTO queries (id, provider, model, node, prompt_len, response_len, latency_ms, status)
+          VALUES ('$id', 'ollama', '$(_sql_escape "$model")', '$node', ${#prompt}, ${#text}, $latency, 'success')" 2>/dev/null || true
+    echo "$text"
+  else
+    return 1
+  fi
+}
+
+# Query Anthropic (Claude)
+query_anthropic() {
+  local model="${1:-claude-sonnet-4-6}" prompt="$2"
+  [[ -z "$ANTHROPIC_KEY" ]] && { echo "ANTHROPIC_API_KEY not set" >&2; return 1; }
+
+  local response
+  response=$(curl -sf --max-time 120 "https://api.anthropic.com/v1/messages" \
+    -H "x-api-key: $ANTHROPIC_KEY" \
+    -H "anthropic-version: 2023-06-01" \
+    -H "content-type: application/json" \
+    -d "$(jq -n --arg model "$model" --arg prompt "$prompt" \
+      '{model: $model, max_tokens: 4096, messages: [{role: "user", content: $prompt}]}')" 2>/dev/null)
+
+  echo "$response" | jq -r '.content[0].text // empty' 2>/dev/null
+}
+
+# Query OpenAI
+query_openai() {
+  local model="${1:-gpt-4o}" prompt="$2"
+  [[ -z "$OPENAI_KEY" ]] && { echo "OPENAI_API_KEY not set" >&2; return 1; }
+
+  local response
+  response=$(curl -sf --max-time 120 "https://api.openai.com/v1/chat/completions" \
+    -H "Authorization: Bearer $OPENAI_KEY" \
+    -H "Content-Type: application/json" \
+    -d "$(jq -n --arg model "$model" --arg prompt "$prompt" \
+      '{model: $model, messages: [{role: "user", content: $prompt}]}')" 2>/dev/null)
+
+  echo "$response" | jq -r '.choices[0].message.content // empty' 2>/dev/null
+}
+
+# Query Gemini
+query_gemini() {
+  local model="${1:-gemini-1.5-pro}" prompt="$2"
+  [[ -z "$GEMINI_KEY" ]] && { echo "GOOGLE_AI_API_KEY not set" >&2; return 1; }
+
+  local response
+  response=$(curl -sf --max-time 120 \
+    "https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_KEY}" \
+    -H "Content-Type: application/json" \
+    -d "$(jq -n --arg prompt "$prompt" \
+      '{contents: [{parts: [{text: $prompt}]}]}')" 2>/dev/null)
+
+  echo "$response" | jq -r '.candidates[0].content.parts[0].text // empty' 2>/dev/null
+}
+
+# Query Grok (xAI)
+query_grok() {
+  local model="${1:-grok-beta}" prompt="$2"
+  [[ -z "$GROK_KEY" ]] && { echo "XAI_API_KEY not set" >&2; return 1; }
+
+  local response
+  response=$(curl -sf --max-time 120 "https://api.x.ai/v1/chat/completions" \
+    -H "Authorization: Bearer $GROK_KEY" \
+    -H "Content-Type: application/json" \
+    -d "$(jq -n --arg model "$model" --arg prompt "$prompt" \
+      '{model: $model, messages: [{role: "user", content: $prompt}]}')" 2>/dev/null)
+
+  echo "$response" | jq -r '.choices[0].message.content // empty' 2>/dev/null
+}
+
+# ============================================================================
+# SMART ROUTING
+# ============================================================================
+
+# Auto-route: try local first, fallback to cloud
+smart_query() {
+  local prompt="$1"
+  local model="${2:-auto}"
+  local provider="${3:-auto}"
+
+  if [[ "$provider" == "auto" ]]; then
+    # Try local Ollama first (free, fast, private)
+    local node
+    node=$(find_ollama 2>/dev/null) && {
+      local ollama_model="${model}"
+      [[ "$model" == "auto" ]] && ollama_model="llama3.2"
+      local result
+      result=$(query_ollama "$ollama_model" "$prompt" "$node" 2>/dev/null)
+      if [[ -n "$result" ]]; then
+        printf '%b[ollama@%s → %s]%b\n' "$BLUE" "$node" "$ollama_model" "$RESET" >&2
+        echo "$result"
+        return 0
+      fi
+    }
+
+    # Fallback chain: Anthropic → OpenAI → Gemini → Grok
+    for cloud_provider in anthropic openai gemini grok; do
+      local cloud_model
+      case "$cloud_provider" in
+        anthropic) [[ -z "$ANTHROPIC_KEY" ]] && continue; cloud_model="claude-sonnet-4-6" ;;
+        openai)    [[ -z "$OPENAI_KEY" ]] && continue; cloud_model="gpt-4o" ;;
+        gemini)    [[ -z "$GEMINI_KEY" ]] && continue; cloud_model="gemini-1.5-pro" ;;
+        grok)      [[ -z "$GROK_KEY" ]] && continue; cloud_model="grok-beta" ;;
+      esac
+
+      local result
+      result=$(query_${cloud_provider} "$cloud_model" "$prompt" 2>/dev/null)
+      if [[ -n "$result" ]]; then
+        printf '%b[%s → %s]%b\n' "$VIOLET" "$cloud_provider" "$cloud_model" "$RESET" >&2
+        echo "$result"
+        return 0
+      fi
+    done
+
+    printf '%bNo AI providers available%b\n' "$RED" "$RESET" >&2
+    return 1
+  else
+    # Direct provider routing
+    case "$provider" in
+      ollama)    query_ollama "${model:-llama3.2}" "$prompt" ;;
+      anthropic) query_anthropic "${model:-claude-sonnet-4-6}" "$prompt" ;;
+      openai)    query_openai "${model:-gpt-4o}" "$prompt" ;;
+      gemini)    query_gemini "${model:-gemini-1.5-pro}" "$prompt" ;;
+      grok)      query_grok "${model:-grok-beta}" "$prompt" ;;
+      *)         echo "Unknown provider: $provider" >&2; return 1 ;;
+    esac
+  fi
+}
+
+# ============================================================================
+# COMMANDS
+# ============================================================================
+
+cmd_query() {
+  local provider="auto" model="auto"
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      -p|--provider) provider="$2"; shift 2 ;;
+      -m|--model)    model="$2"; shift 2 ;;
+      *)             break ;;
+    esac
+  done
+  local prompt="$*"
+  [[ -z "$prompt" ]] && { echo "Usage: br-ai query [-p provider] [-m model] \"prompt\"" >&2; return 1; }
+  smart_query "$prompt" "$model" "$provider"
+}
+
+cmd_chat() {
+  local provider="auto" model="auto"
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      -p|--provider) provider="$2"; shift 2 ;;
+      -m|--model)    model="$2"; shift 2 ;;
+      *)             break ;;
+    esac
+  done
+
+  printf '%bBlackRoad AI Chat%b [provider: %s, model: %s]\n' "$PINK" "$RESET" "$provider" "$model"
+  printf 'Type your message (Ctrl+D to exit)\n\n'
+
+  while printf '%b> %b' "$AMBER" "$RESET" && IFS= read -r line; do
+    [[ -z "$line" ]] && continue
+    local response
+    response=$(smart_query "$line" "$model" "$provider" 2>/dev/null)
+    if [[ -n "$response" ]]; then
+      echo "$response"
+    else
+      printf '%bNo response%b\n' "$RED" "$RESET"
+    fi
+    echo
+  done
+}
+
+cmd_models() {
+  printf '%b%-20s %-12s %-12s %-8s%b\n' "$BLUE" "MODEL" "PROVIDER" "NODE" "STATUS" "$RESET"
+  printf '%-20s %-12s %-12s %-8s\n' "─────" "────────" "────" "──────"
+
+  # Local Ollama models
+  for node in "${OLLAMA_NODES[@]}"; do
+    local ip="${NODE_IP[$node]:-}"
+    [[ -z "$ip" ]] && continue
+    local tags
+    tags=$(curl -sf --connect-timeout 2 "http://${ip}:11434/api/tags" 2>/dev/null)
+    if [[ -n "$tags" ]]; then
+      echo "$tags" | jq -r '.models[]?.name // empty' 2>/dev/null | while read -r m; do
+        printf '%-20s %-12s %-12s %b%-8s%b\n' "$m" "ollama" "$node" "$GREEN" "ready" "$RESET"
+      done
+    fi
+  done
+
+  # Cloud providers
+  [[ -n "$ANTHROPIC_KEY" ]] && printf '%-20s %-12s %-12s %b%-8s%b\n' "claude-*" "anthropic" "cloud" "$GREEN" "ready" "$RESET"
+  [[ -n "$OPENAI_KEY" ]]    && printf '%-20s %-12s %-12s %b%-8s%b\n' "gpt-4o" "openai" "cloud" "$GREEN" "ready" "$RESET"
+  [[ -n "$GEMINI_KEY" ]]    && printf '%-20s %-12s %-12s %b%-8s%b\n' "gemini-1.5-pro" "gemini" "cloud" "$GREEN" "ready" "$RESET"
+  [[ -n "$GROK_KEY" ]]      && printf '%-20s %-12s %-12s %b%-8s%b\n' "grok-beta" "grok" "cloud" "$GREEN" "ready" "$RESET"
+}
+
+cmd_providers() {
+  printf '%b%-12s %-8s %-30s%b\n' "$BLUE" "PROVIDER" "STATUS" "DETAILS" "$RESET"
+  printf '%-12s %-8s %-30s\n' "────────" "──────" "───────"
+
+  # Ollama fleet
+  for node in "${OLLAMA_NODES[@]}"; do
+    local ip="${NODE_IP[$node]:-}"
+    [[ -z "$ip" ]] && continue
+    local count
+    count=$(curl -sf --connect-timeout 2 "http://${ip}:11434/api/tags" 2>/dev/null | jq '.models | length' 2>/dev/null)
+    if [[ -n "$count" ]]; then
+      printf '%-12s %b%-8s%b %s (%s, %s models)\n' "ollama" "$GREEN" "UP" "$RESET" "$node" "$ip" "$count"
+    else
+      printf '%-12s %b%-8s%b %s (%s)\n' "ollama" "$RED" "DOWN" "$RESET" "$node" "$ip"
+    fi
+  done
+
+  # Cloud
+  local -A cloud_keys=([anthropic]="$ANTHROPIC_KEY" [openai]="$OPENAI_KEY" [gemini]="$GEMINI_KEY" [grok]="$GROK_KEY")
+  for p in anthropic openai gemini grok; do
+    if [[ -n "${cloud_keys[$p]}" ]]; then
+      printf '%-12s %b%-8s%b API key configured\n' "$p" "$GREEN" "READY" "$RESET"
+    else
+      printf '%-12s %b%-8s%b No API key\n' "$p" "$AMBER" "NO KEY" "$RESET"
+    fi
+  done
+}
+
+cmd_stats() {
+  init_db 2>/dev/null
+  printf '%bAI Hub Statistics%b\n\n' "$PINK" "$RESET"
+
+  local total; total=$(_sql "SELECT COUNT(*) FROM queries" 2>/dev/null || echo "0")
+  local today; today=$(_sql "SELECT COUNT(*) FROM queries WHERE date(timestamp)=date('now')" 2>/dev/null || echo "0")
+  local avg_lat; avg_lat=$(_sql "SELECT COALESCE(AVG(latency_ms),0) FROM queries WHERE status='success'" 2>/dev/null || echo "0")
+
+  printf '  Total queries:   %s\n' "$total"
+  printf '  Today:           %s\n' "$today"
+  printf '  Avg latency:     %sms\n\n' "$avg_lat"
+
+  printf '  %bBy provider:%b\n' "$BLUE" "$RESET"
+  _sql "SELECT provider, COUNT(*), AVG(latency_ms) FROM queries GROUP BY provider ORDER BY COUNT(*) DESC" 2>/dev/null | \
+    while IFS='|' read -r prov cnt lat; do
+      printf '    %-12s %d queries (avg %dms)\n' "$prov" "$cnt" "${lat%.*}"
+    done
+}
+
+cmd_benchmark() {
+  local prompt="${1:-Explain what a Raspberry Pi is in one sentence.}"
+  printf '%bBenchmarking all providers...%b\n\n' "$AMBER" "$RESET"
+
+  # Ollama nodes
+  for node in "${OLLAMA_NODES[@]}"; do
+    local ip="${NODE_IP[$node]:-}"
+    [[ -z "$ip" ]] && continue
+    printf '  ollama@%-10s ' "$node"
+    local start=$SECONDS
+    local result
+    result=$(query_ollama "llama3.2" "$prompt" "$node" 2>/dev/null)
+    local elapsed=$(( SECONDS - start ))
+    if [[ -n "$result" ]]; then
+      printf '%b%ds%b (%d chars)\n' "$GREEN" "$elapsed" "$RESET" "${#result}"
+    else
+      printf '%bfailed%b\n' "$RED" "$RESET"
+    fi
+  done
+
+  # Cloud providers
+  for p in anthropic openai gemini grok; do
+    local key_var="${p^^}_KEY"
+    # Map to the right variable
+    case "$p" in
+      anthropic) [[ -z "$ANTHROPIC_KEY" ]] && continue ;;
+      openai) [[ -z "$OPENAI_KEY" ]] && continue ;;
+      gemini) [[ -z "$GEMINI_KEY" ]] && continue ;;
+      grok) [[ -z "$GROK_KEY" ]] && continue ;;
+    esac
+    printf '  %-18s ' "$p"
+    local start=$SECONDS
+    local result
+    result=$(query_${p} "" "$prompt" 2>/dev/null)
+    local elapsed=$(( SECONDS - start ))
+    if [[ -n "$result" ]]; then
+      printf '%b%ds%b (%d chars)\n' "$GREEN" "$elapsed" "$RESET" "${#result}"
+    else
+      printf '%bfailed%b\n' "$RED" "$RESET"
+    fi
+  done
+}
+
+cmd_hub() {
+  printf '%b╔══════════════════════════════════════════════════════════╗%b\n' "$PINK" "$RESET"
+  printf '%b║              BLACKROAD AI HUB                           ║%b\n' "$PINK" "$RESET"
+  printf '%b║         Local-First Sovereign Intelligence               ║%b\n' "$PINK" "$RESET"
+  printf '%b╚══════════════════════════════════════════════════════════╝%b\n\n' "$PINK" "$RESET"
+
+  cmd_providers
+  echo ""
+  cmd_stats
+}
+
+usage() {
+  cat <<EOF
+${PINK}br-ai${RESET} - BlackRoad AI Hub
+
+${BLUE}COMMANDS:${RESET}
+  query [-p provider] [-m model] "prompt"   Smart query (auto-routes)
+  chat [-p provider] [-m model]             Interactive chat
+  models                                    List all available models
+  providers                                 Show provider status
+  stats                                     Query statistics
+  benchmark ["prompt"]                      Benchmark all providers
+  hub                                       Full hub dashboard
+
+${AMBER}PROVIDERS:${RESET}
+  ollama      Local fleet (cecilia, lucidia, alice) — FREE, private
+  anthropic   Claude API (ANTHROPIC_API_KEY)
+  openai      GPT-4o API (OPENAI_API_KEY)
+  gemini      Google AI (GOOGLE_AI_API_KEY)
+  grok        xAI (XAI_API_KEY)
+
+${GREEN}EXAMPLES:${RESET}
+  br-ai query "explain kubernetes"                 Auto-route (local first)
+  br-ai query -p anthropic "write a poem"          Force Claude
+  br-ai query -p ollama -m mistral "hello"         Specific model
+  br-ai chat                                       Interactive (auto)
+  br-ai chat -p gemini                             Chat with Gemini
+  br-ai models                                     See what's available
+  br-ai benchmark                                  Speed test all providers
+
+${VIOLET}ROUTING:${RESET}
+  Auto mode tries: ollama (free) → anthropic → openai → gemini → grok
+  Set API keys to enable cloud providers. Local fleet always preferred.
+EOF
+}
+
+# Init DB on first use
+[[ -f "$AI_DB" ]] || init_db 2>/dev/null
+
+case "${1:-}" in
+  query|q)     shift; cmd_query "$@" ;;
+  chat|c)      shift; cmd_chat "$@" ;;
+  models|m)    cmd_models ;;
+  providers|p) cmd_providers ;;
+  stats|s)     cmd_stats ;;
+  benchmark|b) shift; cmd_benchmark "$@" ;;
+  hub|h)       cmd_hub ;;
+  init)        init_db ;;
+  -h|--help|help|"") usage ;;
+  *)           # Treat everything else as a query
+               cmd_query "$@" ;;
+esac

@@ -1,0 +1,130 @@
+#!/usr/bin/env bash
+# ============================================================================
+# BLACKROAD OS, INC. - PROPRIETARY AND CONFIDENTIAL
+# Copyright (c) 2025-2026 BlackRoad OS, Inc. All Rights Reserved.
+#
+# This code is the intellectual property of BlackRoad OS, Inc.
+# AI-assisted development does not transfer ownership to AI providers.
+# Unauthorized use, copying, or distribution is prohibited.
+# NOT licensed for AI training or data extraction.
+# ============================================================================
+# BlackRoad OS - Unified Command Interface
+
+set -eo pipefail
+
+case "$1" in
+    code|c)
+        # Launch BlackRoad Code (local Ollama-powered, unlimited)
+        shift
+        exec ~/.local/bin/blackroad-code "$@"
+        ;;
+    claude)
+        # Launch Claude Code (Anthropic-powered, usage-limited)
+        shift
+        exec cecilia-code "$@"
+        ;;
+    ai|k)
+        # BlackRoad AI Hub (unified: ollama/openai/anthropic/gateway)
+        shift
+        exec /Users/alexa/blackroad/br ai "$@"
+        ;;
+    local|l)
+        # Force local backend
+        shift
+        exec ~/.local/bin/blackroad-ai -l "$@"
+        ;;
+    anthropic|a)
+        # Force Anthropic backend
+        shift
+        exec ~/.local/bin/blackroad-ai -a "$@"
+        ;;
+    openai|o)
+        # Force OpenAI backend
+        shift
+        exec ~/.local/bin/blackroad-ai -o "$@"
+        ;;
+    models)
+        # RoadChain SHA-2048 Model Registry
+        shift
+        exec python3 -m roadchain models "${@:-stats}"
+        ;;
+    ai-models)
+        # List available AI backend models
+        exec ~/.local/bin/blackroad-ai --models
+        ;;
+    windows|win|w)
+        # Windows integration layer
+        shift
+        exec ~/.local/bin/blackroad-windows "$@"
+        ;;
+    identity|id)
+        # RoadChain SHA-2048 Agent Identity
+        shift
+        exec python3 -m roadchain identity "$@"
+        ;;
+    wallet)
+        # RoadChain Wallet
+        shift
+        exec python3 -m roadchain wallet "$@"
+        ;;
+    chain)
+        shift
+        # br chain tip/tail/show/verify/stats/search/append → PS-SHA∞ chain explorer
+        case "${1:-}" in
+          tip|tail|show|verify|stats|stat|search|find|append|add|export|dump|log|last|head|latest|integrity|ledger|help|--help)
+            exec /Users/alexa/blackroad/br chain "$@" ;;
+          *)
+            # Default: roadchain blockchain
+            exec python3 -m roadchain "${1:-stats}" "$@" ;;
+        esac
+        ;;
+    hash)
+        # SHA-2048 hash
+        shift
+        exec python3 -m roadchain hash "$@"
+        ;;
+    security|sec)
+        # RoadChain Security Scanner
+        shift
+        case "${1:-fleet}" in
+            local)    exec python3 ~/roadchain-security-scan.py --local ;;
+            scan)     shift; exec python3 ~/roadchain-security-scan.py --scan "$@" ;;
+            discover) exec python3 ~/roadchain-security-scan.py --discover ;;
+            fleet)    exec python3 ~/roadchain-security-scan.py --fleet ;;
+            harden)   shift; exec python3 ~/roadchain-security-scan.py --harden "$@" ;;
+            scores)   exec python3 ~/roadchain-security-scan.py --scores ;;
+            alerts)   exec python3 ~/roadchain-security-scan.py --alerts ;;
+            report)   exec python3 ~/roadchain-security-scan.py --report ;;
+            *)        echo "Usage: br security [local|scan|discover|fleet|harden|scores|alerts|report]" ;;
+        esac
+        ;;
+    stack)
+        # Show sovereignty stack
+        echo "
+BLACKROAD SOVEREIGNTY STACK
+═══════════════════════════
+LAYER 8: IDENTITY → SHA-2048 (RoadChain, identity > provider)
+LAYER 7: API      → blackroad-ai (local/anthropic/openai)
+LAYER 6: CDN      → Cloudflare (205 projects, owned)
+LAYER 5: DNS      → Pi-hole + Cloudflare DNS
+LAYER 4: ISP      → Tailscale mesh (8 devices)
+LAYER 3: BACKBONE → Encrypted tunnels
+LAYER 2: OS       → macOS, Linux (Pis), Windows (WSL2)
+LAYER 1: HARDWARE → M1, Pi cluster, Hailo-8
+LAYER 0: YOU      → BlackRoad root
+"
+        ;;
+    brand|tpl)
+        # BlackRoad Brand Kit — HTML template engine
+        shift
+        exec /Users/alexa/blackroad/tools/brand/br-brand.sh "$@"
+        ;;
+    nodes|hardware|fleet|git|deploy|docker|ci|api|snippet|search|quality|perf|env|note|logs|session|test|backup|deps|notify|agent|metrics|world|db|pi|ocean|vercel|cloudflare|security|cece|pair|radar|gateway|stream|events|template|tmpl|log-tail|logt|ssh|whoami|who|bcast|docs|git-ai|gai|review|status-all|sa|env-check|envc|port|task|tasks|org|cron|roundup|standup|pulse|timeline|tl|sync|snapshot|snap|context|ctx|collab|mesh|journal|mem|memory|ai|ask|wifi|lan|net-scan|health|check|diag|vault|secret|secrets|harden|hardening|comply|compliance|runtime|template|tmpl|auth|chain|ledger|relay|inbox|flow|workflow|hook|webhook|llm|prompt|prompts|schedule|sched|gen|generate|scaffold|cost|usage|budget|watch|watcher|mock|diff|alias|aliases|feat|feature|flags|trace|span|profile|profiles|envp|job|jobs|queue-job|lint|linter|format|fmt|tree|ftree|bench|benchmark|perf-bench|health-check|hc|uptime|signal|event|event-bus|schema|validate|replay|playbook|rate|ratelimit|cache|kv|audit|audit-log|webhook|wh|deps-graph|graph|pi-domains|pi-dns|pi-route|mock|mock-server|trace|trace-http|http-trace|db-migrate|migrate|migrations|pr-check|pr|review|secret-rotation|secret-rot|rotate|env-diff|envdiff|git-graph|git-log|glog|load-test|loadtest|load|db-browser|dbb|sqlite)
+        # Route to full BlackRoad CLI
+        exec /Users/alexa/blackroad/br "$@"
+        ;;
+    *)
+        # Default: BlackRoad OS login/menu system
+        exec bash ~/blackroad-login.sh "$@"
+        ;;
+esac

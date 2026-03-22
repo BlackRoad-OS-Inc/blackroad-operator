@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Create your BlackRoad OS account. Deploy AI agents on your own hardware.">
+<title>Sign Up | BlackRoad OS</title>
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<meta property="og:title" content="Sign Up | BlackRoad OS">
+<meta property="og:description" content="Create your BlackRoad OS account. Deploy AI agents on your own hardware.">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="/nav.js" defer></script>
+<script src="/footer.js" defer></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #000; color: #fff; font-family: 'Inter', sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
+  .signup-container { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 20px; }
+  .signup-box { width: 100%; max-width: 420px; }
+  .signup-box h1 { font-family: 'Space Grotesk', sans-serif; font-size: 2rem; font-weight: 700; margin-bottom: 8px; }
+  .signup-box p.sub { color: #888; margin-bottom: 32px; }
+  .form-group { margin-bottom: 20px; }
+  .form-group label { display: block; font-size: 0.875rem; color: #aaa; margin-bottom: 6px; }
+  .form-group input { width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; color: #fff; font-size: 1rem; font-family: 'Inter', sans-serif; outline: none; transition: border-color 0.2s; }
+  .form-group input:focus { border-color: #FF1D6C; }
+  .form-group input::placeholder { color: #555; }
+  .btn-submit { width: 100%; padding: 14px; background: linear-gradient(135deg, #FF1D6C, #9C27B0); border: none; border-radius: 12px; color: #fff; font-size: 1rem; font-weight: 600; font-family: 'Space Grotesk', sans-serif; cursor: pointer; transition: opacity 0.2s; }
+  .btn-submit:hover { opacity: 0.9; }
+  .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+  .error { background: rgba(255,0,0,0.1); border: 1px solid rgba(255,0,0,0.2); border-radius: 12px; padding: 12px 16px; color: #ff6b6b; font-size: 0.875rem; margin-bottom: 20px; display: none; }
+  .success { background: rgba(0,255,0,0.1); border: 1px solid rgba(0,255,0,0.2); border-radius: 12px; padding: 12px 16px; color: #4CAF50; font-size: 0.875rem; margin-bottom: 20px; display: none; }
+  .divider { text-align: center; color: #555; font-size: 0.875rem; margin: 24px 0; position: relative; }
+  .divider::before, .divider::after { content: ''; position: absolute; top: 50%; width: 40%; height: 1px; background: rgba(255,255,255,0.1); }
+  .divider::before { left: 0; }
+  .divider::after { right: 0; }
+  .login-link { text-align: center; margin-top: 24px; color: #888; font-size: 0.875rem; }
+  .login-link a { color: #FF1D6C; text-decoration: none; }
+  .login-link a:hover { text-decoration: underline; }
+  .features { margin-top: 32px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.05); }
+  .features li { list-style: none; color: #888; font-size: 0.875rem; padding: 6px 0; padding-left: 20px; position: relative; }
+  .features li::before { content: ''; position: absolute; left: 0; top: 50%; width: 8px; height: 8px; border-radius: 50%; background: linear-gradient(135deg, #FF1D6C, #9C27B0); transform: translateY(-50%); }
+</style>
+</head>
+<body>
+
+<div class="signup-container">
+  <div class="signup-box">
+    <h1>Create your account</h1>
+    <p class="sub">Get started with BlackRoad OS. No credit card required.</p>
+
+    <div class="error" id="error"></div>
+    <div class="success" id="success"></div>
+
+    <form id="signup-form">
+      <div class="form-group">
+        <label for="name">Full name</label>
+        <input type="text" id="name" name="name" placeholder="Your name" required>
+      </div>
+      <div class="form-group">
+        <label for="email">Email address</label>
+        <input type="email" id="email" name="email" placeholder="you@example.com" required>
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" placeholder="At least 8 characters" minlength="8" required>
+      </div>
+      <button type="submit" class="btn-submit" id="submit-btn">Create account</button>
+    </form>
+
+    <p class="login-link">Already have an account? <a href="/login">Sign in</a></p>
+
+    <ul class="features">
+      <li>Deploy AI agents on your own hardware</li>
+      <li>Real-time fleet monitoring dashboard</li>
+      <li>OpenAI-compatible API included</li>
+      <li>Free tier with no time limit</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+const form = document.getElementById('signup-form');
+const errorEl = document.getElementById('error');
+const successEl = document.getElementById('success');
+const submitBtn = document.getElementById('submit-btn');
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  errorEl.style.display = 'none';
+  successEl.style.display = 'none';
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Creating account...';
+
+  const name = document.getElementById('name').value;
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+
+  try {
+    const res = await fetch('https://auth.blackroad.io/api/signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, password })
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error || 'Signup failed');
+    }
+
+    if (data.token) {
+      localStorage.setItem('auth-storage', JSON.stringify({
+        state: { user: data.user, token: data.token, isAuthenticated: true }
+      }));
+    }
+
+    successEl.textContent = 'Account created. Redirecting...';
+    successEl.style.display = 'block';
+    setTimeout(() => { window.location.href = '/'; }, 1500);
+  } catch (err) {
+    errorEl.textContent = err.message || 'Something went wrong. Please try again.';
+    errorEl.style.display = 'block';
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Create account';
+  }
+});
+</script>
+</body>
+</html>

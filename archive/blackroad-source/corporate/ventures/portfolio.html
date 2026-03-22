@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BlackRoad Ventures — Portfolio</title>
+  <style>
+    :root {
+      --amber: #F5A623; --pink: #FF1D6C; --blue: #2979FF; --violet: #9C27B0;
+      --grad: linear-gradient(135deg, #F5A623 0%, #FF1D6C 38.2%, #9C27B0 61.8%, #2979FF 100%);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #0a0a0a; color: #fff; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif; min-height: 100vh; }
+    header { background: #111; border-bottom: 1px solid #222; padding: 20px 40px; display: flex; align-items: center; gap: 12px; }
+    .logo { font-size: 1.25rem; font-weight: 700; background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .subtitle { color: #666; font-size: 0.875rem; }
+    main { max-width: 1100px; margin: 0 auto; padding: 40px 20px; }
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 40px; }
+    .stat { background: #111; border: 1px solid #222; border-radius: 12px; padding: 20px; }
+    .stat .value { font-size: 2rem; font-weight: 700; }
+    .stat .label { color: #666; font-size: 0.75rem; margin-top: 4px; text-transform: uppercase; letter-spacing: .08em; }
+    .amber { color: var(--amber); } .pink { color: var(--pink); } .blue { color: var(--blue); } .violet { color: var(--violet); }
+    h2 { font-size: 1.25rem; margin-bottom: 16px; }
+    .deals { display: grid; gap: 12px; }
+    .deal { background: #111; border: 1px solid #222; border-radius: 12px; padding: 20px; display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: start; transition: border-color .2s; }
+    .deal:hover { border-color: #333; }
+    .deal-name { font-weight: 600; font-size: 1.05rem; }
+    .deal-meta { color: #888; font-size: 0.8rem; margin-top: 4px; }
+    .deal-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+    .tag { background: #1a1a1a; border: 1px solid #333; border-radius: 6px; padding: 2px 10px; font-size: 0.72rem; color: #aaa; }
+    .stage { padding: 4px 12px; border-radius: 20px; font-size: 0.72rem; font-weight: 600; white-space: nowrap; }
+    .stage.seed { background: rgba(245,166,35,.15); color: #F5A623; }
+    .stage.series-a { background: rgba(255,29,108,.15); color: #FF1D6C; }
+    .stage.series-b { background: rgba(41,121,255,.15); color: #2979FF; }
+    .stage.growth { background: rgba(156,39,176,.15); color: #9C27B0; }
+    .stage.acquisition { background: rgba(100,100,100,.15); color: #aaa; }
+    section { margin-bottom: 40px; }
+    .search { width: 100%; background: #111; border: 1px solid #333; border-radius: 10px; padding: 12px 16px; color: #fff; font-size: 0.95rem; margin-bottom: 20px; outline: none; }
+    .search:focus { border-color: #FF1D6C; }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <div class="logo">BlackRoad Ventures</div>
+      <div class="subtitle">Portfolio & Deal Pipeline</div>
+    </div>
+  </header>
+  <main>
+    <div class="stats">
+      <div class="stat"><div class="value amber" id="stat-total">—</div><div class="label">Portfolio Companies</div></div>
+      <div class="stat"><div class="value pink" id="stat-active">—</div><div class="label">Active Deals</div></div>
+      <div class="stat"><div class="value blue" id="stat-sectors">—</div><div class="label">Sectors</div></div>
+      <div class="stat"><div class="value violet" id="stat-stages">—</div><div class="label">Stages</div></div>
+    </div>
+
+    <section>
+      <h2>🔍 Pipeline</h2>
+      <input class="search" id="search" type="text" placeholder="Search companies, sectors, tags..." oninput="filterDeals()">
+      <div class="deals" id="deal-list"></div>
+    </section>
+  </main>
+
+  <script>
+    const PORTFOLIO = [
+      { name: "BlackRoad AI Compute Cluster", sector: "AI Infrastructure", stage: "growth", description: "Distributed GPU inference cluster — aria64 + alice fleet", tags: ["AI", "GPU", "Raspberry Pi", "Edge"] },
+      { name: "BlackRoad OS Platform", sector: "Developer Tools", stage: "series-b", description: "AI-first developer OS with 30,000 agent capacity", tags: ["SaaS", "Platform", "DevOps"] },
+      { name: "Lucidia Earth", sector: "AI/Visualization", stage: "seed", description: "3D world visualization with AI-generated environments", tags: ["Three.js", "WebGL", "AI", "Metaverse"] },
+      { name: "CECE Identity Protocol", sector: "AI Identity", stage: "seed", description: "Portable AI identity — exists across any provider", tags: ["AI", "Identity", "Protocol"] },
+      { name: "BlackRoad Security Suite", sector: "Cybersecurity", stage: "series-a", description: "SAST + secret scanning + compliance automation", tags: ["Security", "DevSecOps", "SAST"] },
+      { name: "Worlds Feed Network", sector: "AI Content", stage: "seed", description: "Autonomous AI world generation — RSS/JSON feed at worlds.blackroad.io", tags: ["AI", "Content", "Edge"] },
+      { name: "BlackRoad Education Platform", sector: "EdTech", stage: "seed", description: "Interactive tutorial runner for AI-native learning", tags: ["EdTech", "CLI", "AI"] },
+      { name: "BlackRoad Media Intelligence", sector: "Media Tech", stage: "seed", description: "World artifact feed, syndication, and distribution", tags: ["Media", "RSS", "Syndication"] },
+      { name: "Foundation Governance Stack", sector: "GovTech", stage: "seed", description: "GDPR/CCPA/SOC2 compliance scanner + RFC governance", tags: ["Compliance", "GovTech", "RFC"] },
+      { name: "Hardware Fleet Management", sector: "IoT/Hardware", stage: "series-a", description: "Pi fleet management — 3 nodes, 30K agent capacity", tags: ["IoT", "Fleet", "Raspberry Pi"] },
+    ]
+
+    function stageLabel(s) {
+      return s.replace("-", " ").replace(/\b\w/g, c => c.toUpperCase())
+    }
+
+    function renderDeals(deals) {
+      const el = document.getElementById("deal-list")
+      el.innerHTML = deals.map(d => `
+        <div class="deal">
+          <div>
+            <div class="deal-name">${d.name}</div>
+            <div class="deal-meta">${d.sector} — ${d.description}</div>
+            <div class="deal-tags">${d.tags.map(t => `<span class="tag">${t}</span>`).join("")}</div>
+          </div>
+          <span class="stage ${d.stage}">${stageLabel(d.stage)}</span>
+        </div>
+      `).join("")
+    }
+
+    function filterDeals() {
+      const q = document.getElementById("search").value.toLowerCase()
+      renderDeals(PORTFOLIO.filter(d =>
+        d.name.toLowerCase().includes(q) ||
+        d.sector.toLowerCase().includes(q) ||
+        d.description.toLowerCase().includes(q) ||
+        d.tags.some(t => t.toLowerCase().includes(q))
+      ))
+    }
+
+    // Stats
+    const sectors = new Set(PORTFOLIO.map(d => d.sector))
+    const stages = new Set(PORTFOLIO.map(d => d.stage))
+    const active = PORTFOLIO.filter(d => d.stage !== "acquisition")
+    document.getElementById("stat-total").textContent = PORTFOLIO.length
+    document.getElementById("stat-active").textContent = active.length
+    document.getElementById("stat-sectors").textContent = sectors.size
+    document.getElementById("stat-stages").textContent = stages.size
+
+    renderDeals(PORTFOLIO)
+  </script>
+</body>
+</html>
