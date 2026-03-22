@@ -1,7 +1,7 @@
 /**
  * BlackRoad KPI Agents Worker
  *
- * Monitors the 30,000-agent fleet in real-time. Tracks agent
+ * Monitors the 35-agent fleet in real-time. Tracks agent
  * status, task distribution, performance, and heartbeats.
  *
  * Endpoints:
@@ -34,7 +34,7 @@ function json(data, status = 200) {
 // ─── Fleet configuration ────────────────────────────────────────────────────
 
 const FLEET_CONFIG = {
-  total_agents: 30000,
+  total_agents: 67,
   nodes: [
     { id: 'octavia_pi', ip: '192.168.4.64', capacity: 22500, role: 'PRIMARY' },
     { id: 'lucidia_pi', ip: '192.168.4.38', capacity: 7500, role: 'SECONDARY' },

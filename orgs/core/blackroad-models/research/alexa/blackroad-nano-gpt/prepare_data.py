@@ -12,6 +12,9 @@ import sys
 import numpy as np
 import yaml
 
+# Unbuffer stdout for real-time progress
+sys.stdout.reconfigure(line_buffering=True)
+
 from tokenizer import BPETokenizer
 
 # Directories to skip entirely (forks, deps, generated)
@@ -19,17 +22,30 @@ SKIP_DIRS = {
     '.git', '__pycache__', 'node_modules', '.next', '.vercel',
     'dist', 'build', '.cache', '.tox', 'venv', '.venv', 'env',
     '.eggs', '*.egg-info', '.mypy_cache', '.pytest_cache',
-    # Fork repos to exclude
+    # Fork repos (we want BlackRoad original content, not upstream)
     'blackroad-vllm', 'blackbox-n8n', 'blackbox-airbyte',
     'blackbox-activepieces', 'blackbox-prefect', 'blackbox-temporal',
     'blackbox-huginn', 'blackbox-dolphinscheduler', 'blackbox-kestra',
+    # Binary/generated/large dirs to skip
+    '.ollama', '.npm', '.cargo', '.rustup', '.docker', '.kube',
+    '.local', '.config', '.ssh', '.gnupg', '.warp', '.claude',
+    '.lucidia-claude', '.lucidia-copilot', '.lucidia-cache',
+    'checkpoints', 'samples', 'logs', '.models', '.android',
+    'FreeSO', 'NotBlox', 'OpenSandbox', 'OpenViking', 'SanAndreasUnity',
+    'CityDreamer', 'Cosmosium', 'GameBoyWorlds', 'MapGenerator',
+    'Minetest-WorldEdit', 'BitNet', 'moltcraft', 'pokevue',
+    'system-prompts-and-models-of-ai-tools', 'rowboat',
+    '.zsh_sessions', '.ServiceHub', '.plastic4',
 }
 
 # File extensions to include
-EXTENSIONS = {'.md', '.py', '.sh', '.js', '.ts', '.yaml', '.yml', '.json', '.css', '.html'}
+EXTENSIONS = {'.md', '.py', '.sh', '.js', '.ts', '.yaml', '.yml', '.json', '.css', '.html', '.txt', '.toml', '.cfg', '.road'}
 
 # Max file size (500 KB)
 MAX_FILE_SIZE = 500 * 1024
+
+# Max corpus size for BPE training (5 MB) -- pure Python BPE is O(n*merges)
+MAX_CORPUS_SIZE = 50 * 1024 * 1024
 
 
 def should_skip_dir(dirname):
@@ -96,6 +112,20 @@ def collect_corpus(source_dir):
 
     corpus = '\n\n'.join(corpus_parts)
 
+    # Cap corpus size to keep BPE training feasible in pure Python
+    corpus_bytes = len(corpus.encode('utf-8'))
+    if corpus_bytes > MAX_CORPUS_SIZE:
+        print(f"\n  Corpus ({corpus_bytes / 1024 / 1024:.1f} MB) exceeds {MAX_CORPUS_SIZE / 1024 / 1024:.0f} MB cap, truncating...")
+        # Truncate at a clean boundary (newline)
+        truncated = corpus[:MAX_CORPUS_SIZE]
+        last_newline = truncated.rfind('\n')
+        if last_newline > 0:
+            corpus = truncated[:last_newline]
+        else:
+            corpus = truncated
+        total_bytes = len(corpus.encode('utf-8'))
+        print(f"  Truncated to {total_bytes / 1024 / 1024:.1f} MB")
+
     print(f"\nCorpus statistics:")
     print(f"  Files included: {len(corpus_parts)}")
     print(f"  Total size: {total_bytes / 1024 / 1024:.1f} MB")
@@ -140,17 +170,18 @@ def main():
     print("Step 2: Training BPE tokenizer...")
     print("=" * 60)
     tokenizer = BPETokenizer()
-    tokenizer.train(corpus, vocab_size=vocab_size)
+    # train() returns the already-merged token list -- reuse it instead of
+    # calling encode() which would redo all 3840 merge passes on 5MB of text.
+    tokens = tokenizer.train(corpus, vocab_size=vocab_size)
 
     tokenizer_path = os.path.join(data_dir, 'tokenizer.json')
     tokenizer.save(tokenizer_path)
 
-    # Step 3: Encode corpus
+    # Step 3: Report token stats (encoding already done during training)
     print()
     print("=" * 60)
-    print("Step 3: Encoding corpus...")
+    print("Step 3: Token stats...")
     print("=" * 60)
-    tokens = tokenizer.encode(corpus)
     print(f"Total tokens: {len(tokens):,}")
 
     tokens_array = np.array(tokens, dtype=np.uint16)

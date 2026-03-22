@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Signal — Know Before It Breaks</title>
+<link rel="icon" type="image/png" sizes="32x32" href="https://images.blackroad.io/brand/br-square-32.png" />
+<link rel="apple-touch-icon" sizes="180x180" href="https://images.blackroad.io/brand/apple-touch-icon.png" />
+<meta property="og:image" content="https://images.blackroad.io/brand/br-square-512.png" />
+<meta name="description" content="Signal — Notifications, monitoring alerts, and fleet health for BlackRoad OS. Know before it breaks.">
+<link rel="stylesheet" href="../_shared/design.css">
+<style>
+  .hero { padding: var(--sp-xl) var(--sp-md); min-height: 100vh; display: flex; flex-direction: column; justify-content: center; }
+  @media (min-width: 768px) { .hero { padding: 0 var(--sp-xl); } }
+  .hero-sub { font-size: 1.1rem; color: var(--subtle); max-width: 520px; line-height: 1.7; margin: var(--sp-md) 0 var(--sp-xl); }
+  .btn-primary { display: inline-flex; align-items: center; gap: 8px; background: var(--grad); color: var(--white); padding: 14px 28px; border-radius: 6px; font-weight: 700; font-size: 0.95rem; transition: opacity 0.2s; }
+  .btn-primary:hover { opacity: 0.9; }
+  .feature-card { background: var(--surface); border: 1px solid var(--border); padding: var(--sp-lg); }
+  .feature-card h3 { margin-bottom: var(--sp-xs); }
+  .feature-card p { font-size: 0.85rem; color: var(--subtle); line-height: 1.6; }
+  .feature-icon { font-size: 1.6rem; margin-bottom: var(--sp-sm); }
+  .alert-feed { background: var(--surface); border: 1px solid var(--border); margin-top: var(--sp-xl); overflow: hidden; }
+  .alert-header { display: flex; align-items: center; justify-content: space-between; padding: var(--sp-sm) var(--sp-md); border-bottom: 1px solid var(--border); }
+  .alert-header h4 { font-size: 0.85rem; font-weight: 600; }
+  .alert-header span { font-family: var(--jb); font-size: 0.65rem; color: var(--muted); }
+  .alert-item { display: flex; align-items: flex-start; gap: var(--sp-md); padding: var(--sp-md); border-bottom: 1px solid var(--border); }
+  .alert-item:last-child { border-bottom: none; }
+  .alert-sev { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 6px; }
+  .sev-crit { background: #FF2255; box-shadow: 0 0 8px rgba(255,34,85,0.4); }
+  .sev-warn { background: #FF6B2B; }
+  .sev-info { background: #4488FF; }
+  .sev-ok { background: #00D4FF; }
+  .alert-body h5 { font-size: 0.85rem; font-weight: 600; margin-bottom: 2px; }
+  .alert-body p { font-size: 0.78rem; color: var(--muted); line-height: 1.5; }
+  .alert-body .alert-time { font-family: var(--jb); font-size: 0.65rem; color: var(--muted); margin-top: 4px; }
+  .rule-list { margin-top: var(--sp-xl); }
+  .rule-item { display: flex; align-items: center; gap: var(--sp-md); padding: var(--sp-md); background: var(--surface); border: 1px solid var(--border); margin-bottom: var(--sp-sm); }
+  .rule-item code { font-family: var(--jb); font-size: 0.75rem; color: var(--subtle); background: var(--elevated); padding: 4px 10px; border: 1px solid var(--border); flex-shrink: 0; }
+  .rule-item span { font-size: 0.82rem; color: var(--subtle); }
+  .channel-tags { display: flex; flex-wrap: wrap; gap: var(--sp-sm); margin-top: var(--sp-lg); }
+  .channel-tag { background: var(--elevated); border: 1px solid var(--border); padding: var(--sp-xs) var(--sp-md); font-family: var(--jb); font-size: 0.72rem; color: var(--subtle); }
+</style>
+</head>
+<body class="dot-bg">
+  <nav>
+    <div class="nav-logo">Signal</div>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#feed">Alert Feed</a>
+      <a href="#rules">Rules</a>
+      <a href="https://blackroad.io">BlackRoad OS</a>
+    </div>
+    <button class="nav-toggle" onclick="this.classList.toggle('open');document.getElementById('nav-mobile').classList.toggle('open')" aria-label="Menu"><span></span><span></span><span></span></button>
+  </nav>
+  <div id="nav-mobile" class="nav-mobile">
+    <a href="#features" onclick="document.getElementById('nav-mobile').classList.remove('open')">Features</a>
+    <a href="#feed" onclick="document.getElementById('nav-mobile').classList.remove('open')">Alert Feed</a>
+    <a href="#rules" onclick="document.getElementById('nav-mobile').classList.remove('open')">Rules</a>
+    <a href="https://blackroad.io">BlackRoad OS</a>
+  </div>
+
+  <div class="hero">
+    <div class="section-label">Fleet Monitoring</div>
+    <h1>Know before<br>it breaks.</h1>
+    <p class="hero-sub">Signal watches your entire fleet and tells you the second something goes wrong. Disk filling up, service down, SSL expiring, agent stuck — get alerted through the channel you choose, not the one a vendor forces on you.</p>
+    <a href="#features" class="btn-primary">Configure Alerts &rarr;</a>
+  </div>
+
+  <section id="features">
+    <div class="section-label">Capabilities</div>
+    <h2 style="margin-bottom:var(--sp-xl);">Alerting that actually works</h2>
+    <div class="grid-3">
+      <div class="feature-card">
+        <div class="feature-icon">&#128680;</div>
+        <h3>Severity tiers</h3>
+        <p>Critical, warning, info, resolved. Each tier routes differently. Critical pages you at 3am. Info waits for your morning dashboard.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#129302;</div>
+        <h3>AI triage</h3>
+        <p>Lucidia reads every alert before you do. Correlates events across nodes. "Cecilia disk full" + "MinIO write errors" = one root cause, one alert.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#128268;</div>
+        <h3>Multi-channel delivery</h3>
+        <p>Push to RoundTrip, email, webhook, NATS, or SMS. Stack multiple channels per severity. Never miss a critical alert.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#9201;</div>
+        <h3>Escalation rules</h3>
+        <p>If nobody acknowledges a critical alert in 5 minutes, escalate. Retry on a different channel. Keep escalating until someone responds.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#128203;</div>
+        <h3>Alert history</h3>
+        <p>Every alert logged with timestamp, severity, source, and resolution. Full audit trail. See patterns before they become outages.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#128263;</div>
+        <h3>Smart silencing</h3>
+        <p>Maintenance windows, one-click snooze, auto-silence for known issues. No alert fatigue. Only real problems reach you.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="feed">
+    <div class="section-label">Live Feed</div>
+    <h2 style="margin-bottom:var(--sp-md);">Recent alerts</h2>
+    <div class="alert-feed">
+      <div class="alert-header">
+        <h4>Signal Feed — All Nodes</h4>
+        <span>5 alerts today</span>
+      </div>
+      <div class="alert-item">
+        <div class="alert-sev sev-crit"></div>
+        <div class="alert-body">
+          <h5>Cecilia unreachable</h5>
+          <p>SSH connection timeout after 30s. Last seen 2h ago. Ollama, MinIO, PostgreSQL affected.</p>
+          <div class="alert-time">14:23 UTC &middot; CRITICAL &middot; Unacknowledged</div>
+        </div>
+      </div>
+      <div class="alert-item">
+        <div class="alert-sev sev-warn"></div>
+        <div class="alert-body">
+          <h5>Lucidia SD card degrading</h5>
+          <p>Read errors increasing. 847 bad sectors detected. Backup completed, replacement recommended.</p>
+          <div class="alert-time">12:05 UTC &middot; WARNING &middot; Acknowledged</div>
+        </div>
+      </div>
+      <div class="alert-item">
+        <div class="alert-sev sev-info"></div>
+        <div class="alert-body">
+          <h5>SSL certificate renewing</h5>
+          <p>Let's Encrypt auto-renewal triggered for 12 domains on Gematria. Caddy handling rotation.</p>
+          <div class="alert-time">09:41 UTC &middot; INFO &middot; Auto-resolved</div>
+        </div>
+      </div>
+      <div class="alert-item">
+        <div class="alert-sev sev-ok"></div>
+        <div class="alert-body">
+          <h5>Alice disk usage normal</h5>
+          <p>Disk usage dropped from 89% to 64% after log rotation. Threshold cleared.</p>
+          <div class="alert-time">08:15 UTC &middot; RESOLVED</div>
+        </div>
+      </div>
+      <div class="alert-item">
+        <div class="alert-sev sev-warn"></div>
+        <div class="alert-body">
+          <h5>Aria power cycle needed</h5>
+          <p>Node unresponsive to WireGuard ping. Physical access required for recovery.</p>
+          <div class="alert-time">07:30 UTC &middot; WARNING &middot; Pending</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="rules">
+    <div class="section-label">Alert Rules</div>
+    <h2 style="margin-bottom:var(--sp-md);">Define what matters</h2>
+    <p style="max-width:480px;margin-bottom:var(--sp-md);">Write rules in plain English or code. Signal compiles them into efficient watchers.</p>
+    <div class="rule-list">
+      <div class="rule-item"><code>disk &gt; 85%</code><span>Alert when any node disk usage exceeds 85%</span></div>
+      <div class="rule-item"><code>ping timeout 30s</code><span>Critical alert if any fleet node stops responding</span></div>
+      <div class="rule-item"><code>ssl &lt; 7d</code><span>Warning when SSL certificates expire within 7 days</span></div>
+      <div class="rule-item"><code>agent idle &gt; 1h</code><span>Notify when any agent has been idle for over an hour</span></div>
+      <div class="rule-item"><code>http 5xx &gt; 10/min</code><span>Escalate if error rate spikes above 10 per minute</span></div>
+    </div>
+    <div style="margin-top:var(--sp-xl);">
+      <div class="section-label">Delivery Channels</div>
+      <h3 style="margin-bottom:var(--sp-md);">Route alerts where you need them</h3>
+      <div class="channel-tags">
+        <div class="channel-tag">RoundTrip</div>
+        <div class="channel-tag">Email</div>
+        <div class="channel-tag">Webhook</div>
+        <div class="channel-tag">NATS pub/sub</div>
+        <div class="channel-tag">SMS (Twilio)</div>
+        <div class="channel-tag">ntfy.sh</div>
+        <div class="channel-tag">Gotify</div>
+        <div class="channel-tag">Matrix</div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>&copy; 2026 BlackRoad OS, Inc. &mdash; Pave Tomorrow.</span>
+    <span style="display:flex;gap:var(--sp-lg);flex-wrap:wrap;">
+      <a href="https://blackroad.io" style="color:var(--muted)">Home</a>
+      <a href="https://blackroadai.com" style="color:var(--muted)">AI</a>
+      <a href="https://blackroad.network" style="color:var(--muted)">Network</a>
+    </span>
+  </footer>
+</body>
+</html>

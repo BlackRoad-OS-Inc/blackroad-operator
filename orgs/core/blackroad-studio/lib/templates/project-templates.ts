@@ -1,0 +1,325 @@
+import type { Scene } from '@/lib/types'
+import { DEFAULT_SCENE_DURATION_FRAMES, FPS } from '@/lib/constants'
+
+export interface ProjectTemplate {
+  id: string
+  name: string
+  description: string
+  category: 'story' | 'education' | 'entertainment' | 'marketing'
+  thumbnail: { sky: string; ground: string }
+  scenes: Omit<Scene, 'id'>[]
+  characterIds: string[]
+}
+
+export const PROJECT_TEMPLATES: ProjectTemplate[] = [
+  {
+    id: 'sunny-adventure',
+    name: 'Sunny\'s Big Adventure',
+    description: 'A cheerful character goes on a journey through different locations',
+    category: 'story',
+    thumbnail: { sky: '#87CEEB', ground: '#90EE90' },
+    characterIds: ['miss-sunshine', 'mr-brave', 'miss-curious'],
+    scenes: [
+      {
+        order: 0,
+        type: 'title',
+        backgroundId: 'sunny-park',
+        characters: [],
+        props: [],
+        dialogue: [],
+        narration: 'Sunny\'s Big Adventure',
+        durationFrames: 4 * FPS,
+        transition: 'fade',
+      },
+      {
+        order: 1,
+        type: 'narration',
+        backgroundId: 'neighborhood',
+        characters: [
+          { characterId: 'miss-sunshine', position: { x: 0.5, y: 0.78 }, scale: 1, animation: 'idle', enterAnimation: 'bounce-in' },
+        ],
+        props: [],
+        dialogue: [
+          { id: 'd1', characterId: null, text: 'One bright morning, Miss Sunshine woke up with a wonderful feeling.', voiceId: 'narrator-warm', audioUrl: null, audioDurationMs: 0 },
+        ],
+        narration: 'One bright morning, Miss Sunshine woke up with a wonderful feeling. Today was the day for an adventure!',
+        durationFrames: 6 * FPS,
+        transition: 'fade',
+      },
+      {
+        order: 2,
+        type: 'dialogue',
+        backgroundId: 'sunny-park',
+        characters: [
+          { characterId: 'miss-sunshine', position: { x: 0.3, y: 0.78 }, scale: 1, animation: 'talking', enterAnimation: 'slide-left' },
+          { characterId: 'mr-brave', position: { x: 0.7, y: 0.78 }, scale: 1.15, animation: 'idle', enterAnimation: 'slide-right' },
+        ],
+        props: [],
+        dialogue: [
+          { id: 'd2', characterId: 'miss-sunshine', text: 'Mr. Brave! Want to come on an adventure with me?', voiceId: 'kid-bright', audioUrl: null, audioDurationMs: 0 },
+          { id: 'd3', characterId: 'mr-brave', text: 'An adventure? Count me in! Where are we going?', voiceId: 'character-hero', audioUrl: null, audioDurationMs: 0 },
+          { id: 'd4', characterId: 'miss-sunshine', text: 'Wherever the road takes us!', voiceId: 'kid-bright', audioUrl: null, audioDurationMs: 0 },
+        ],
+        narration: null,
+        durationFrames: 8 * FPS,
+        transition: 'slide-left',
+      },
+      {
+        order: 3,
+        type: 'dialogue',
+        backgroundId: 'beach',
+        characters: [
+          { characterId: 'miss-sunshine', position: { x: 0.25, y: 0.78 }, scale: 1, animation: 'dancing', enterAnimation: 'slide-left' },
+          { characterId: 'mr-brave', position: { x: 0.55, y: 0.78 }, scale: 1.15, animation: 'waving', enterAnimation: 'slide-right' },
+          { characterId: 'miss-curious', position: { x: 0.8, y: 0.78 }, scale: 0.85, animation: 'bouncing', enterAnimation: 'bounce-in' },
+        ],
+        props: [],
+        dialogue: [
+          { id: 'd5', characterId: 'miss-curious', text: 'Oh wow! You made it to the beach! Can I join too?', voiceId: 'kid-sweet', audioUrl: null, audioDurationMs: 0 },
+          { id: 'd6', characterId: 'miss-sunshine', text: 'The more the merrier!', voiceId: 'kid-bright', audioUrl: null, audioDurationMs: 0 },
+        ],
+        narration: null,
+        durationFrames: 7 * FPS,
+        transition: 'fade',
+      },
+      {
+        order: 4,
+        type: 'end',
+        backgroundId: 'starry-night',
+        characters: [],
+        props: [],
+        dialogue: [],
+        narration: 'The End',
+        durationFrames: 4 * FPS,
+        transition: 'fade',
+      },
+    ],
+  },
+  {
+    id: 'how-things-work',
+    name: 'How Things Work',
+    description: 'An explainer template — characters break down a topic in simple terms',
+    category: 'education',
+    thumbnail: { sky: '#2C3E50', ground: '#34495E' },
+    characterIds: ['narrator', 'miss-curious', 'mr-cool'],
+    scenes: [
+      {
+        order: 0,
+        type: 'title',
+        backgroundId: 'school',
+        characters: [],
+        props: [],
+        dialogue: [],
+        narration: 'How Things Work',
+        durationFrames: 4 * FPS,
+        transition: 'fade',
+      },
+      {
+        order: 1,
+        type: 'narration',
+        backgroundId: 'school',
+        characters: [
+          { characterId: 'narrator', position: { x: 0.5, y: 0.78 }, scale: 1.15, animation: 'talking', enterAnimation: 'fade-in' },
+        ],
+        props: [],
+        dialogue: [
+          { id: 'd1', characterId: null, text: 'Have you ever wondered how things work? Today we\'re going to find out!', voiceId: 'narrator-warm', audioUrl: null, audioDurationMs: 0 },
+        ],
+        narration: 'Have you ever wondered how things work? Today we\'re going to find out!',
+        durationFrames: 6 * FPS,
+        transition: 'fade',
+      },
+      {
+        order: 2,
+        type: 'dialogue',
+        backgroundId: 'school',
+        characters: [
+          { characterId: 'miss-curious', position: { x: 0.3, y: 0.78 }, scale: 0.85, animation: 'bouncing', enterAnimation: 'bounce-in' },
+          { characterId: 'mr-cool', position: { x: 0.7, y: 0.78 }, scale: 1, animation: 'idle', enterAnimation: 'slide-right' },
+        ],
+        props: [],
+        dialogue: [
+          { id: 'd2', characterId: 'miss-curious', text: 'I have SO many questions! Where do we start?', voiceId: 'kid-sweet', audioUrl: null, audioDurationMs: 0 },
+          { id: 'd3', characterId: 'mr-cool', text: 'Let\'s start with the basics and work our way up.', voiceId: 'character-hero', audioUrl: null, audioDurationMs: 0 },
+        ],
+        narration: null,
+        durationFrames: 7 * FPS,
+        transition: 'slide-left',
+      },
+      {
+        order: 3,
+        type: 'narration',
+        backgroundId: 'school',
+        characters: [
+          { characterId: 'narrator', position: { x: 0.5, y: 0.78 }, scale: 1.15, animation: 'talking', enterAnimation: 'fade-in' },
+        ],
+        props: [],
+        dialogue: [
+          { id: 'd4', characterId: null, text: '[Explain your topic here — replace this with your content]', voiceId: 'narrator-warm', audioUrl: null, audioDurationMs: 0 },
+        ],
+        narration: '[Explain your topic here — replace this with your content]',
+        durationFrames: 8 * FPS,
+        transition: 'fade',
+      },
+      {
+        order: 4,
+        type: 'dialogue',
+        backgroundId: 'school',
+        characters: [
+          { characterId: 'miss-curious', position: { x: 0.3, y: 0.78 }, scale: 0.85, animation: 'waving', enterAnimation: 'slide-left' },
+          { characterId: 'mr-cool', position: { x: 0.7, y: 0.78 }, scale: 1, animation: 'waving', enterAnimation: 'slide-right' },
+        ],
+        props: [],
+        dialogue: [
+          { id: 'd5', characterId: 'miss-curious', text: 'Now I understand! That was amazing!', voiceId: 'kid-sweet', audioUrl: null, audioDurationMs: 0 },
+          { id: 'd6', characterId: 'mr-cool', text: 'See you next time for more discoveries!', voiceId: 'character-hero', audioUrl: null, audioDurationMs: 0 },
+        ],
+        narration: null,
+        durationFrames: 6 * FPS,
+        transition: 'fade',
+      },
+      {
+        order: 5,
+        type: 'end',
+        backgroundId: 'school',
+        characters: [],
+        props: [],
+        dialogue: [],
+        narration: 'The End',
+        durationFrames: 4 * FPS,
+        transition: 'fade',
+      },
+    ],
+  },
+  {
+    id: 'podcast-debate',
+    name: 'The Great Debate',
+    description: 'Two characters debate a fun topic — perfect for animated podcasts',
+    category: 'entertainment',
+    thumbnail: { sky: '#1a1a2e', ground: '#16213e' },
+    characterIds: ['mr-jolly', 'mr-grumpy'],
+    scenes: [
+      {
+        order: 0,
+        type: 'title',
+        backgroundId: 'living-room',
+        characters: [],
+        props: [],
+        dialogue: [],
+        narration: 'The Great Debate',
+        durationFrames: 4 * FPS,
+        transition: 'zoom',
+      },
+      {
+        order: 1,
+        type: 'narration',
+        backgroundId: 'living-room',
+        characters: [
+          { characterId: 'mr-jolly', position: { x: 0.35, y: 0.78 }, scale: 1.15, animation: 'waving', enterAnimation: 'slide-left' },
+          { characterId: 'mr-grumpy', position: { x: 0.65, y: 0.78 }, scale: 1, animation: 'idle', enterAnimation: 'slide-right' },
+        ],
+        props: [],
+        dialogue: [
+          { id: 'd1', characterId: null, text: 'Welcome to The Great Debate! Today\'s topic is...', voiceId: 'narrator-deep', audioUrl: null, audioDurationMs: 0 },
+        ],
+        narration: 'Welcome to The Great Debate!',
+        durationFrames: 5 * FPS,
+        transition: 'fade',
+      },
+      {
+        order: 2,
+        type: 'dialogue',
+        backgroundId: 'living-room',
+        characters: [
+          { characterId: 'mr-jolly', position: { x: 0.35, y: 0.78 }, scale: 1.15, animation: 'talking', enterAnimation: 'none' },
+          { characterId: 'mr-grumpy', position: { x: 0.65, y: 0.78 }, scale: 1, animation: 'idle', enterAnimation: 'none' },
+        ],
+        props: [],
+        dialogue: [
+          { id: 'd2', characterId: 'mr-jolly', text: 'I think [topic] is absolutely wonderful! Here\'s why...', voiceId: 'character-hero', audioUrl: null, audioDurationMs: 0 },
+          { id: 'd3', characterId: 'mr-grumpy', text: 'Oh please. [Topic] is overrated and here\'s proof.', voiceId: 'narrator-deep', audioUrl: null, audioDurationMs: 0 },
+          { id: 'd4', characterId: 'mr-jolly', text: 'But you can\'t deny that...', voiceId: 'character-hero', audioUrl: null, audioDurationMs: 0 },
+          { id: 'd5', characterId: 'mr-grumpy', text: 'Actually, I can and I will.', voiceId: 'narrator-deep', audioUrl: null, audioDurationMs: 0 },
+        ],
+        narration: null,
+        durationFrames: 12 * FPS,
+        transition: 'cut',
+      },
+      {
+        order: 3,
+        type: 'end',
+        backgroundId: 'living-room',
+        characters: [],
+        props: [],
+        dialogue: [],
+        narration: 'Thanks for watching!',
+        durationFrames: 4 * FPS,
+        transition: 'fade',
+      },
+    ],
+  },
+  {
+    id: 'product-promo',
+    name: 'Product Spotlight',
+    description: 'Short animated promo — introduce a product or service with personality',
+    category: 'marketing',
+    thumbnail: { sky: '#0a0a0a', ground: '#1a1a2e' },
+    characterIds: ['miss-sparkle', 'mr-cool'],
+    scenes: [
+      {
+        order: 0,
+        type: 'title',
+        backgroundId: 'outer-space',
+        characters: [],
+        props: [],
+        dialogue: [],
+        narration: 'Introducing [Your Product]',
+        durationFrames: 3 * FPS,
+        transition: 'zoom',
+      },
+      {
+        order: 1,
+        type: 'dialogue',
+        backgroundId: 'neighborhood',
+        characters: [
+          { characterId: 'miss-sparkle', position: { x: 0.5, y: 0.78 }, scale: 0.85, animation: 'bouncing', enterAnimation: 'drop-in' },
+        ],
+        props: [],
+        dialogue: [
+          { id: 'd1', characterId: 'miss-sparkle', text: 'Ever wished you could [solve problem]? Now you can!', voiceId: 'kid-bright', audioUrl: null, audioDurationMs: 0 },
+        ],
+        narration: null,
+        durationFrames: 5 * FPS,
+        transition: 'slide-left',
+      },
+      {
+        order: 2,
+        type: 'dialogue',
+        backgroundId: 'neighborhood',
+        characters: [
+          { characterId: 'miss-sparkle', position: { x: 0.3, y: 0.78 }, scale: 0.85, animation: 'dancing', enterAnimation: 'none' },
+          { characterId: 'mr-cool', position: { x: 0.7, y: 0.78 }, scale: 1, animation: 'talking', enterAnimation: 'slide-right' },
+        ],
+        props: [],
+        dialogue: [
+          { id: 'd2', characterId: 'mr-cool', text: 'Here\'s how it works — it\'s incredibly simple.', voiceId: 'character-hero', audioUrl: null, audioDurationMs: 0 },
+          { id: 'd3', characterId: 'miss-sparkle', text: 'Try it free today!', voiceId: 'kid-bright', audioUrl: null, audioDurationMs: 0 },
+        ],
+        narration: null,
+        durationFrames: 6 * FPS,
+        transition: 'fade',
+      },
+      {
+        order: 3,
+        type: 'end',
+        backgroundId: 'outer-space',
+        characters: [],
+        props: [],
+        dialogue: [],
+        narration: 'Get started at yoursite.com',
+        durationFrames: 4 * FPS,
+        transition: 'zoom',
+      },
+    ],
+  },
+]

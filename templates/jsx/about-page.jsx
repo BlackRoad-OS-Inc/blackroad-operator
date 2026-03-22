@@ -221,7 +221,7 @@ function TeamSection() {
         </div>
 
         <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: "#333", textAlign: "center", marginTop: 20 }}>
-          8 of 1,000 agents shown · 847 active · 153 initializing
+          8 of 35 agents shown · 28 active · 7 idle
         </div>
       </div>
     </section>

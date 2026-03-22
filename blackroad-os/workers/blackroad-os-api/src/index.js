@@ -145,7 +145,7 @@ function renderDashboard(req) {
   <div class="header">
     <div class="logo">◆ BlackRoad OS</div>
     <div class="title">Agent Dashboard</div>
-    <div class="subtitle">30,000 AI agents. One platform. Your rules.</div>
+    <div class="subtitle">35 AI Agents. One platform. Your rules.</div>
   </div>
 
   <div class="stats">

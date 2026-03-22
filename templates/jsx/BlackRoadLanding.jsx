@@ -393,7 +393,7 @@ function Pricing() {
     {
       name: "Operator",
       price: "$0",
-      cadence: "open source core",
+      cadence: "public code",
       color: "#4488FF",
       items: ["Self-hosted K3s cluster", "Lucidia base agent", "Z-framework SDK", "Community support"],
       cta: "Deploy Free",

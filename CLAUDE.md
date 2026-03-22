@@ -286,17 +286,16 @@ esac
 
 ### Tokenless Gateway (`blackroad-core/`)
 
-Agents never embed API keys. All LLM provider communication flows through the gateway:
+All inference runs on local Ollama fleet. No external AI APIs. Sovereign.
 
 ```
-[Agent CLIs] → [Gateway :8787] → [Ollama / Claude / OpenAI / Gemini]
+[Agent CLIs] → [Gateway :8787] → [Ollama Fleet (Octavia/Lucidia/Aria)]
 ```
 
 **Gateway Providers:** `blackroad-core/gateway/providers/`
-- `ollama.js` — Local Ollama models
-- `anthropic.js` — Claude
-- `openai.js` — OpenAI
-- `gemini.js` — Google Gemini
+- `ollama.js` — Local Ollama (single node)
+- `ollama-fleet.js` — Distributed Ollama (round-robin with failover)
+- External providers (anthropic/openai/xai/gemini/groq/deepseek/together) — DEPRECATED, redirect to Ollama
 
 **Agent Permissions:** `blackroad-core/policies/agent-permissions.json`
 

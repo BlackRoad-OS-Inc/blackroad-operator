@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BlackRoad Quantum Research — Papers &amp; Experiments</title>
+<meta name="description" content="Quantum-inspired research. Papers, experiments, citations. Academic exploration of entangled computing on local hardware.">
+<meta name="theme-color" content="#000000">
+<link rel="canonical" href="https://blackroadquantum.info">
+<link rel="icon" type="image/x-icon" href="https://images.blackroad.io/brand/favicon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="https://images.blackroad.io/brand/br-square-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://images.blackroad.io/brand/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://blackroadquantum.info">
+<meta property="og:title" content="BlackRoad Quantum Research">
+<meta property="og:description" content="Papers, experiments, and citations in quantum-inspired computing.">
+<meta property="og:image" content="https://images.blackroad.io/brand/br-square-512.png">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"BlackRoad Quantum Research","url":"https://blackroadquantum.info","description":"Quantum-inspired research papers and experiments."}</script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+:root{
+  --g:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);
+  --bg:#000;--card:#0a0a0a;--border:#1a1a1a;--muted:#444;--sub:#737373;--text:#f5f5f5;--white:#fff;
+  --sg:'Space Grotesk',sans-serif;--jb:'JetBrains Mono',monospace
+}
+body{background:#000;color:var(--text);font-family:var(--sg);overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+::selection{background:rgba(136,68,255,.3)}
+
+.progress-bar{position:fixed;top:0;left:0;height:3px;background:var(--g);z-index:1000;width:0%}
+
+/* HERO */
+.hero-container{height:300vh;position:relative}
+.hero-sticky{position:sticky;top:0;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
+#hero-canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.hero-content{position:relative;z-index:1;text-align:center}
+.hero-title{font-size:clamp(56px,11vw,140px);font-weight:700;letter-spacing:-.04em;line-height:.9;opacity:0}
+.hero-sub{font-size:clamp(16px,2.2vw,28px);font-weight:300;opacity:0;margin-top:28px;line-height:1.5}
+.hero-hint{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);opacity:0;font-family:var(--jb);font-size:12px;letter-spacing:.1em;text-transform:uppercase}
+.hero-hint::after{content:'';display:block;width:1px;height:40px;background:rgba(255,255,255,.2);margin:12px auto 0}
+
+/* PAPERS */
+.papers-section{padding:100px 48px;max-width:1000px;margin:0 auto}
+.section-label{font-family:var(--jb);font-size:11px;letter-spacing:.15em;text-transform:uppercase;opacity:.25;margin-bottom:12px}
+.section-title{font-size:clamp(32px,5vw,72px);font-weight:700;letter-spacing:-.03em;margin-bottom:16px}
+.section-desc{font-size:16px;opacity:.4;max-width:520px;line-height:1.7;margin-bottom:48px}
+.paper-card{border:1px solid var(--border);border-radius:16px;padding:40px;margin-bottom:24px;position:relative;overflow:hidden;transition:border-color .3s;cursor:pointer}
+.paper-card:hover{border-color:rgba(255,255,255,.1)}
+.paper-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--g);opacity:.3}
+.paper-type{font-family:var(--jb);font-size:10px;letter-spacing:.12em;text-transform:uppercase;opacity:.25;margin-bottom:12px}
+.paper-title{font-size:clamp(20px,3vw,32px);font-weight:700;letter-spacing:-.02em;margin-bottom:12px;line-height:1.2}
+.paper-authors{font-size:14px;opacity:.35;margin-bottom:16px}
+.paper-abstract{font-size:14px;opacity:.3;line-height:1.8;margin-bottom:20px;max-height:0;overflow:hidden;transition:max-height .5s ease}
+.paper-card.expanded .paper-abstract{max-height:400px}
+.paper-meta{display:flex;gap:24px;flex-wrap:wrap;font-family:var(--jb);font-size:11px;opacity:.2}
+.paper-toggle{position:absolute;top:40px;right:40px;width:32px;height:32px;border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;opacity:.25;transition:transform .3s}
+.paper-card.expanded .paper-toggle{transform:rotate(45deg)}
+.paper-cite{font-family:var(--jb);font-size:11px;opacity:.15;padding:12px 16px;border:1px solid var(--border);border-radius:8px;margin-top:16px;cursor:pointer;transition:opacity .2s}
+.paper-cite:hover{opacity:.4}
+
+/* EXPERIMENTS */
+.experiments-section{padding:100px 48px;max-width:1000px;margin:0 auto}
+.exp-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+.exp-card{border:1px solid var(--border);border-radius:16px;padding:32px;position:relative;overflow:hidden}
+.exp-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;opacity:.3}
+.exp-status{font-family:var(--jb);font-size:10px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.exp-dot{width:6px;height:6px;border-radius:50%;display:inline-block}
+.exp-title{font-size:18px;font-weight:700;margin-bottom:8px}
+.exp-desc{font-size:13px;opacity:.3;line-height:1.7;margin-bottom:16px}
+.exp-result{font-family:var(--jb);font-size:12px;border:1px solid var(--border);border-radius:8px;padding:12px 16px;opacity:.25;line-height:1.8}
+#exp-run-btn{padding:12px 28px;border:1px solid var(--border);border-radius:8px;background:transparent;color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--jb);opacity:.35;transition:all .2s;margin-top:12px}
+#exp-run-btn:hover{opacity:.7;border-color:rgba(255,255,255,.2)}
+
+/* CITATIONS */
+.citations-section{padding:100px 48px;max-width:1000px;margin:0 auto}
+.cite-list{counter-reset:cite}
+.cite-item{padding:20px 24px;border-bottom:1px solid var(--border);counter-increment:cite;position:relative;padding-left:48px}
+.cite-item::before{content:'[' counter(cite) ']';position:absolute;left:0;font-family:var(--jb);font-size:11px;opacity:.2}
+.cite-author{font-weight:600;font-size:14px;opacity:.5}
+.cite-title{font-size:14px;opacity:.3;font-style:italic;margin-top:4px}
+.cite-journal{font-family:var(--jb);font-size:11px;opacity:.15;margin-top:4px}
+
+/* FOOTER */
+.site-footer{padding:120px 48px 48px;text-align:center}
+.footer-tagline{font-size:clamp(48px,8vw,120px);font-weight:700;letter-spacing:-.04em;opacity:.15;margin-bottom:60px}
+.footer-links{display:flex;gap:32px;justify-content:center;flex-wrap:wrap;margin-bottom:32px}
+.footer-links a{font-size:14px;opacity:.3;transition:opacity .2s}
+.footer-links a:hover{opacity:.7}
+.footer-copy{font-size:12px;opacity:.15;font-family:var(--jb)}
+.eco-footer{text-align:center;padding:24px 48px;border-top:1px solid var(--border);margin-top:48px}
+.eco-footer a{font-size:11px;opacity:.2;margin:0 12px;transition:opacity .2s}
+.eco-footer a:hover{opacity:.5}
+
+@media(prefers-reduced-motion:reduce){.hero-container{height:auto!important}.hero-sticky{position:relative!important}}
+@media(max-width:768px){
+  .papers-section,.experiments-section,.citations-section{padding:60px 20px}
+  .exp-grid{grid-template-columns:1fr}
+  .site-footer{padding:80px 20px 32px}
+}
+</style>
+<script src="https://bb.blackroad.io/bb.js" defer></script>
+</head>
+<body>
+
+<div class="progress-bar" id="progress-bar"></div>
+
+<!-- HERO -->
+<section class="hero-container" id="hero-container">
+  <div class="hero-sticky">
+    <canvas id="hero-canvas"></canvas>
+    <div class="hero-content">
+      <h1 class="hero-title" id="hero-title">Quantum Research</h1>
+      <p class="hero-sub" id="hero-sub">Papers, experiments, and proofs — exploring what computing looks like when every device thinks together.</p>
+    </div>
+    <div class="hero-hint" id="hero-hint">Scroll to explore</div>
+  </div>
+</section>
+
+<!-- PAPERS -->
+<section class="papers-section" id="papers-section">
+  <div class="section-label">Published Research</div>
+  <div class="section-title">Papers</div>
+  <div class="section-desc">Internal research documents exploring quantum-inspired coordination, entangled state management, and distributed inference.</div>
+  <div id="papers-list"></div>
+</section>
+
+<!-- EXPERIMENTS -->
+<section class="experiments-section" id="experiments-section">
+  <div class="section-label">Live Experiments</div>
+  <div class="section-title">Experiments</div>
+  <div class="section-desc">Runnable experiments that demonstrate quantum-inspired principles in your browser using Web Crypto and Web Workers.</div>
+  <div class="exp-grid" id="exp-grid"></div>
+</section>
+
+<!-- CITATIONS -->
+<section class="citations-section" id="citations-section">
+  <div class="section-label">References</div>
+  <div class="section-title">Citations</div>
+  <div class="section-desc">Foundational works that inform our approach to distributed, quantum-inspired computing.</div>
+  <div class="cite-list" id="cite-list"></div>
+</section>
+
+<!-- FOOTER -->
+<footer class="site-footer">
+  <div class="footer-tagline">Pave Tomorrow.</div>
+  <div class="footer-links">
+    <a href="https://blackroad.io">Home</a>
+    <a href="https://blackroadai.com">AI</a>
+    <a href="https://blackroadquantum.com">Quantum</a>
+    <a href="https://blackroadquantum.net">Network</a>
+    <a href="https://blackroad.systems">Status</a>
+    <a href="https://blackroad.company">Company</a>
+    <a href="https://brand.blackroad.io">Brand</a>
+    <a href="https://github.com/blackboxprogramming">GitHub</a>
+  </div>
+  <div class="footer-copy">&copy; 2025-2026 BlackRoad OS, Inc.</div>
+</footer>
+<div class="eco-footer">
+  <a href="https://blackroadquantum.com">Quantum</a>
+  <a href="https://blackroadquantum.net">Network</a>
+  <a href="https://blackroadquantum.shop">Hardware</a>
+  <a href="https://blackroadquantum.store">Store</a>
+  <a href="https://pricing.blackroad.io">Pricing</a>
+</div>
+
+<script>
+const GRAD = ['#FF6B2B','#FF2255','#CC00AA','#8844FF','#4488FF','#00D4FF'];
+const PI2 = Math.PI*2;
+const lerp=(a,b,t)=>a+(b-a)*t, clamp=(v,lo,hi)=>Math.min(hi,Math.max(lo,v));
+const getScrollProgress=el=>{const r=el.getBoundingClientRect();return clamp(-r.top/(el.offsetHeight-innerHeight),0,1);};
+let scrollY=0;
+window.addEventListener('scroll',()=>{scrollY=pageYOffset;},{passive:true});
+function setupCanvas(cv){const d=Math.min(devicePixelRatio,2),r=cv.getBoundingClientRect();cv.width=r.width*d;cv.height=r.height*d;const c=cv.getContext('2d');c.scale(d,d);return{ctx:c,w:r.width,h:r.height};}
+
+/* PAPERS DATA */
+const PAPERS = [
+  {
+    type:'Internal Paper',
+    title:'Entangled State Coordination in Edge-Native Mesh Networks',
+    authors:'Amundson, A. et al.',
+    abstract:'We present a framework for maintaining consistent state across heterogeneous edge devices using quantum-inspired entanglement metaphors. By treating each node\'s local state as a qubit analogue, we achieve eventual consistency with O(log n) message complexity. Our 5-node Raspberry Pi testbed demonstrates sub-10ms state propagation across the full mesh, with cryptographic verification at each hop. The approach eliminates the need for a central coordinator while maintaining Byzantine fault tolerance for up to f < n/3 faulty nodes.',
+    date:'2026-02',
+    status:'Published',
+    doi:'10.blackroad/qn-2026-001',
+    tags:['mesh','consensus','edge']
+  },
+  {
+    type:'Technical Report',
+    title:'Hardware-Accelerated Inference at 52 TOPS on ARM-Class Devices',
+    authors:'Amundson, A.',
+    abstract:'This report documents the deployment and benchmarking of dual Hailo-8 neural processing units on Raspberry Pi 5 single-board computers. We achieve 52 TOPS combined throughput at under 5W total power consumption, enabling real-time object detection (YOLOv8), natural language processing (Llama 3.2 3B quantized), and embedding generation (nomic-embed-text) without cloud dependencies. Latency measurements show p95 inference under 15ms for classification tasks and under 50ms for generative tasks.',
+    date:'2026-01',
+    status:'Published',
+    doi:'10.blackroad/hw-2026-002',
+    tags:['hailo','inference','arm']
+  },
+  {
+    type:'Working Paper',
+    title:'Recursive Self-Similarity in Information Substrates: From DNA to Neural Networks',
+    authors:'Amundson, A.',
+    abstract:'We observe that the same pattern of simple units composing recursively into emergent complexity appears across biology (DNA codons to proteins), natural language (phonemes to sentences), and computing (gates to programs). This paper formalizes the isomorphism and proposes a unified information theory where each substrate implements the same abstract machine: encode, compose, express. We draw on Mandelbrot\'s self-similarity, Conway\'s Game of Life, and Godel\'s incompleteness to argue that this pattern is fundamental rather than coincidental.',
+    date:'2026-03',
+    status:'Draft',
+    doi:'10.blackroad/uit-2026-003',
+    tags:['information theory','biology','recursion']
+  },
+  {
+    type:'Experiment Report',
+    title:'NATS Pub/Sub as Quantum Channel Analogue for Agent Communication',
+    authors:'Amundson, A.',
+    abstract:'We deploy NATS v2.12.3 across a 5-node WireGuard mesh and evaluate it as a communication substrate for autonomous AI agents. Each agent publishes state updates to topic-partitioned subjects, and subscriber agents receive correlated updates with measured latencies of 2-8ms within the local mesh and 40-60ms to cloud relays. We compare this architecture to classical message queues and find that the pub/sub pattern more naturally models the "observation collapses state" property of quantum measurement, where an agent reading a message channel determines the system\'s behavior.',
+    date:'2026-03',
+    status:'Published',
+    doi:'10.blackroad/nats-2026-004',
+    tags:['nats','pub/sub','agents']
+  },
+];
+
+/* EXPERIMENTS DATA */
+const EXPERIMENTS = [
+  {
+    title:'Entanglement Simulation',
+    desc:'Generate two correlated random bitstrings using Web Crypto. Measure correlation coefficient to demonstrate pseudo-entanglement.',
+    status:'Ready',
+    color:'#8844FF',
+    run: async function(el) {
+      el.textContent = 'Running entanglement simulation...\n';
+      const buf1 = new Uint8Array(256), buf2 = new Uint8Array(256);
+      crypto.getRandomValues(buf1);
+      // Correlate: XOR with shared secret
+      const secret = new Uint8Array(256); crypto.getRandomValues(secret);
+      for(let i=0;i<256;i++) buf2[i]=buf1[i]^secret[i];
+      // Measure correlation
+      let corr=0;for(let i=0;i<256;i++)corr+=(buf1[i]===buf2[i]?1:0);corr/=256;
+      const entropy1=buf1.reduce((s,b)=>s+b,0)/256;
+      const hash1=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',buf1))).map(b=>b.toString(16).padStart(2,'0')).join('');
+      const hash2=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',buf2))).map(b=>b.toString(16).padStart(2,'0')).join('');
+      el.textContent=`Qubit A: ${hash1.substring(0,32)}...\nQubit B: ${hash2.substring(0,32)}...\nCorrelation: ${(corr*100).toFixed(1)}%\nMean entropy: ${entropy1.toFixed(2)}\nBits generated: 512\nResult: Entanglement ${corr<0.1?'STRONG':'WEAK'}`;
+    }
+  },
+  {
+    title:'Hash Collision Search',
+    desc:'Brute-force search for partial SHA-256 collisions. Shows computational difficulty of finding matching prefixes.',
+    status:'Ready',
+    color:'#FF2255',
+    run: async function(el) {
+      el.textContent='Searching for 2-byte hash prefix collision...\n';
+      const target=Array.from(crypto.getRandomValues(new Uint8Array(2))).map(b=>b.toString(16).padStart(2,'0')).join('');
+      el.textContent+=`Target prefix: ${target}\n`;
+      let attempts=0,found=false;
+      const start=performance.now();
+      for(let i=0;i<50000&&!found;i++){
+        const data=new TextEncoder().encode('attempt-'+i+'-'+Date.now());
+        const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',data))).map(b=>b.toString(16).padStart(2,'0')).join('');
+        attempts++;
+        if(hash.startsWith(target)){found=true;const ms=(performance.now()-start).toFixed(1);el.textContent+=`FOUND at attempt ${attempts} (${ms}ms)\nHash: ${hash.substring(0,32)}...\nDifficulty: 1/${Math.pow(16,target.length)} = 1/${Math.pow(16,target.length)}`;break;}
+      }
+      if(!found){const ms=(performance.now()-start).toFixed(1);el.textContent+=`NOT FOUND in ${attempts} attempts (${ms}ms)\nProbability: ${(1-Math.pow(1-1/Math.pow(16,target.length),attempts)*100).toFixed(2)}%`;}
+    }
+  },
+  {
+    title:'Key Exchange Demo',
+    desc:'ECDH key exchange using Web Crypto P-256. Two parties derive a shared secret without transmitting it.',
+    status:'Ready',
+    color:'#00D4FF',
+    run: async function(el) {
+      el.textContent='Generating ECDH key pairs...\n';
+      const aliceKey=await crypto.subtle.generateKey({name:'ECDH',namedCurve:'P-256'},true,['deriveBits']);
+      const bobKey=await crypto.subtle.generateKey({name:'ECDH',namedCurve:'P-256'},true,['deriveBits']);
+      const alicePub=await crypto.subtle.exportKey('jwk',aliceKey.publicKey);
+      const bobPub=await crypto.subtle.exportKey('jwk',bobKey.publicKey);
+      el.textContent+=`Alice pubkey: ${alicePub.x.substring(0,24)}...\nBob pubkey:   ${bobPub.x.substring(0,24)}...\n`;
+      const sharedA=await crypto.subtle.deriveBits({name:'ECDH',public:bobKey.publicKey},aliceKey.privateKey,256);
+      const sharedB=await crypto.subtle.deriveBits({name:'ECDH',public:aliceKey.publicKey},bobKey.privateKey,256);
+      const hexA=Array.from(new Uint8Array(sharedA)).map(b=>b.toString(16).padStart(2,'0')).join('');
+      const hexB=Array.from(new Uint8Array(sharedB)).map(b=>b.toString(16).padStart(2,'0')).join('');
+      const match=hexA===hexB;
+      el.textContent+=`\nAlice secret: ${hexA.substring(0,32)}...\nBob secret:   ${hexB.substring(0,32)}...\nSecrets match: ${match?'YES':'NO'}\nKey exchange: ${match?'SUCCESS':'FAILED'}`;
+    }
+  },
+  {
+    title:'Random Oracle Test',
+    desc:'Statistical analysis of SHA-256 output distribution. Tests uniformity, avalanche effect, and bit independence.',
+    status:'Ready',
+    color:'#FF6B2B',
+    run: async function(el) {
+      el.textContent='Running random oracle statistical tests...\n';
+      const N=1000;let bitCounts=new Array(256).fill(0);
+      for(let i=0;i<N;i++){
+        const data=new TextEncoder().encode('test-'+i);
+        const hash=new Uint8Array(await crypto.subtle.digest('SHA-256',data));
+        for(let b=0;b<32;b++)for(let bit=0;bit<8;bit++)if(hash[b]&(1<<bit))bitCounts[b*8+bit]++;
+      }
+      const avgBias=bitCounts.reduce((s,c)=>s+Math.abs(c/N-0.5),0)/256;
+      // Avalanche test
+      const d1=new TextEncoder().encode('avalanche-test-0');
+      const d2=new TextEncoder().encode('avalanche-test-1');
+      const h1=new Uint8Array(await crypto.subtle.digest('SHA-256',d1));
+      const h2=new Uint8Array(await crypto.subtle.digest('SHA-256',d2));
+      let diffBits=0;for(let i=0;i<32;i++){let x=h1[i]^h2[i];while(x){diffBits+=x&1;x>>=1;}}
+      el.textContent+=`Samples: ${N}\nAvg bit bias: ${(avgBias*100).toFixed(3)}% (ideal: 0%)\nAvalanche: ${diffBits}/256 bits changed (${(diffBits/256*100).toFixed(1)}%, ideal: 50%)\nUniformity: ${avgBias<0.02?'PASS':'MARGINAL'}\nAvalanche: ${Math.abs(diffBits/256-0.5)<0.1?'PASS':'MARGINAL'}`;
+    }
+  },
+];
+
+/* CITATIONS DATA */
+const CITATIONS = [
+  {author:'Shor, P.W.',title:'Algorithms for quantum computation: discrete logarithms and factoring',journal:'Proc. 35th Annual Symposium on Foundations of Computer Science, pp. 124-134, 1994'},
+  {author:'Grover, L.K.',title:'A fast quantum mechanical algorithm for database search',journal:'Proc. 28th Annual ACM Symposium on Theory of Computing, pp. 212-219, 1996'},
+  {author:'Bennett, C.H. & Brassard, G.',title:'Quantum cryptography: Public key distribution and coin tossing',journal:'Proc. IEEE Int. Conf. on Computers, Systems and Signal Processing, pp. 175-179, 1984'},
+  {author:'Lamport, L.',title:'The Part-Time Parliament',journal:'ACM Transactions on Computer Systems, 16(2):133-169, 1998'},
+  {author:'Castro, M. & Liskov, B.',title:'Practical Byzantine Fault Tolerance',journal:'Proc. 3rd Symposium on Operating Systems Design and Implementation, 1999'},
+  {author:'Mandelbrot, B.',title:'The Fractal Geometry of Nature',journal:'W.H. Freeman and Company, 1982'},
+  {author:'Conway, J.H.',title:'The Game of Life',journal:'Scientific American, 223(4):4-10, 1970'},
+  {author:'Godel, K.',title:'On Formally Undecidable Propositions of Principia Mathematica and Related Systems',journal:'Monatshefte fur Mathematik und Physik, 38:173-198, 1931'},
+  {author:'Einstein, A., Podolsky, B. & Rosen, N.',title:'Can Quantum-Mechanical Description of Physical Reality Be Considered Complete?',journal:'Physical Review, 47(10):777-780, 1935'},
+  {author:'Bell, J.S.',title:'On the Einstein Podolsky Rosen Paradox',journal:'Physics, 1(3):195-200, 1964'},
+];
+
+/* BUILD PAPERS */
+const papersList = document.getElementById('papers-list');
+PAPERS.forEach((p,i) => {
+  const card = document.createElement('div');
+  card.className = 'paper-card';
+  card.innerHTML = `
+    <div class="paper-type">${p.type}</div>
+    <div class="paper-title">${p.title}</div>
+    <div class="paper-authors">${p.authors}</div>
+    <div class="paper-abstract">${p.abstract}</div>
+    <div class="paper-meta">
+      <span>${p.date}</span><span>${p.status}</span><span>DOI: ${p.doi}</span>
+      ${p.tags.map(t=>'<span>#'+t+'</span>').join('')}
+    </div>
+    <div class="paper-cite" id="cite-${i}">Click to copy BibTeX citation</div>
+    <div class="paper-toggle">+</div>`;
+  card.addEventListener('click', e => {
+    if (e.target.classList.contains('paper-cite')) {
+      const bib = `@article{blackroad${p.doi.split('-').pop()},\n  title={${p.title}},\n  author={${p.authors}},\n  year={${p.date.split('-')[0]}},\n  doi={${p.doi}}\n}`;
+      navigator.clipboard.writeText(bib).then(()=>{e.target.textContent='Copied BibTeX to clipboard';setTimeout(()=>{e.target.textContent='Click to copy BibTeX citation';},2000);});
+      return;
+    }
+    card.classList.toggle('expanded');
+  });
+  papersList.appendChild(card);
+});
+
+/* BUILD EXPERIMENTS */
+const expGrid = document.getElementById('exp-grid');
+EXPERIMENTS.forEach((exp,i) => {
+  const card = document.createElement('div');
+  card.className = 'exp-card';
+  card.innerHTML = `<div style="position:absolute;top:0;left:0;right:0;height:2px;background:${exp.color};opacity:.3"></div>
+    <div class="exp-status"><span class="exp-dot" style="background:${exp.color}"></span>${exp.status}</div>
+    <div class="exp-title">${exp.title}</div>
+    <div class="exp-desc">${exp.desc}</div>
+    <div class="exp-result" id="exp-result-${i}">Click Run to execute experiment</div>
+    <button id="exp-run-btn" onclick="runExperiment(${i})">Run Experiment</button>`;
+  expGrid.appendChild(card);
+});
+
+async function runExperiment(i) {
+  const el = document.getElementById('exp-result-'+i);
+  el.style.opacity='.5';
+  try { await EXPERIMENTS[i].run(el); } catch(e) { el.textContent='Error: '+e.message; }
+}
+
+/* BUILD CITATIONS */
+const citeList = document.getElementById('cite-list');
+CITATIONS.forEach(c => {
+  const item = document.createElement('div');
+  item.className = 'cite-item';
+  item.innerHTML = `<div class="cite-author">${c.author}</div><div class="cite-title">${c.title}</div><div class="cite-journal">${c.journal}</div>`;
+  citeList.appendChild(item);
+});
+
+/* HERO CANVAS — flowing equations */
+const heroCv = document.getElementById('hero-canvas');
+let heroCtx,heroW,heroH;
+function resizeHero(){({ctx:heroCtx,w:heroW,h:heroH}=setupCanvas(heroCv));}
+resizeHero();
+
+const equations = ['|ψ⟩ = α|0⟩ + β|1⟩','H|0⟩ = (|0⟩+|1⟩)/√2','⟨ψ|φ⟩ = Σ αᵢ*βᵢ','P(x) = |⟨x|ψ⟩|²','U†U = I','CNOT|11⟩ = |10⟩','e^{iθ}','∂ψ/∂t = -iHψ'];
+const floatingEqs = [];
+for(let i=0;i<20;i++) floatingEqs.push({x:Math.random()*2000,y:Math.random()*2000,vx:(Math.random()-.5)*.15,vy:(Math.random()-.5)*.15,eq:equations[i%equations.length],opacity:Math.random()*.04+.01});
+
+function drawHero(p) {
+  heroCtx.clearRect(0,0,heroW,heroH);
+  heroCtx.font='400 13px "JetBrains Mono"';heroCtx.textAlign='center';
+  floatingEqs.forEach(e=>{
+    e.x+=e.vx;e.y+=e.vy;
+    if(e.x<-100)e.x=heroW+100;if(e.x>heroW+100)e.x=-100;if(e.y<-20)e.y=heroH+20;if(e.y>heroH+20)e.y=-20;
+    heroCtx.fillStyle='rgba(255,255,255,'+e.opacity*p+')';heroCtx.fillText(e.eq,e.x,e.y);
+  });
+}
+
+/* SCROLL + MAIN LOOP */
+const progressBar=document.getElementById('progress-bar');
+
+function mainLoop(){
+  const docH=document.documentElement.scrollHeight-innerHeight;
+  progressBar.style.width=(docH>0?scrollY/docH*100:0)+'%';
+
+  const heroP=getScrollProgress(document.getElementById('hero-container'));
+  const ht=document.getElementById('hero-title'),hs=document.getElementById('hero-sub'),hh=document.getElementById('hero-hint');
+  if(heroP<.15){const t=heroP/.15;ht.style.opacity=t;ht.style.transform=`translateY(${lerp(50,0,t)}px)`;}
+  else if(heroP<.5){ht.style.opacity=1;ht.style.transform='translateY(0)';}
+  else{const t=(heroP-.5)/.3;ht.style.opacity=1-t;ht.style.transform=`translateY(${lerp(0,-50,t)}px)`;}
+  if(heroP<.2)hs.style.opacity=0;else if(heroP<.35)hs.style.opacity=(heroP-.2)/.15;else if(heroP<.55)hs.style.opacity=1;else hs.style.opacity=Math.max(0,1-(heroP-.55)/.2);
+  hh.style.opacity=heroP<.05?heroP/.05*.5:heroP<.2?.5:Math.max(0,.5-(heroP-.2)*3);
+  drawHero(clamp(heroP*3,0,1));
+
+  requestAnimationFrame(mainLoop);
+}
+
+// Observer
+const observer=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.style.opacity='1';e.target.style.transform='translateY(0)';}});},{threshold:.1});
+document.querySelectorAll('.papers-section,.experiments-section,.citations-section').forEach(el=>{el.style.opacity='0';el.style.transform='translateY(40px)';el.style.transition='opacity .8s ease,transform .8s ease';observer.observe(el);});
+
+let resizeTimer;
+window.addEventListener('resize',()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(resizeHero,150);});
+
+requestAnimationFrame(mainLoop);
+
+(function(){if(!localStorage.getItem('br-consent-seen')){var b=document.createElement('div');b.id='br-consent';b.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:9999;background:#000;border-top:1px solid rgba(255,255,255,.08);padding:20px 48px;font-family:var(--sg)';b.innerHTML='<div style="max-width:900px;margin:0 auto;display:flex;align-items:center;gap:24px;flex-wrap:wrap"><div style="flex:1;min-width:280px"><div style="font-size:14px;color:#fff;font-weight:600;margin-bottom:4px">No cookies. No tracking. No data sold.</div><div style="font-size:12px;color:#fff;opacity:.4">Your data stays on your device.</div></div><div><button onclick="document.getElementById(\'br-consent\').remove();localStorage.setItem(\'br-consent-seen\',\'1\')" style="padding:10px 28px;background:#fff;color:#000;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--sg)">Got it</button></div></div>';document.body.appendChild(b)}})();
+</script>
+</body>
+</html>

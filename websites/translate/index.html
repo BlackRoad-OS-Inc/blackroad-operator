@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RoadLang — 80 Languages. Zero Cloud.</title>
+<link rel="icon" type="image/png" sizes="32x32" href="https://images.blackroad.io/brand/br-square-32.png" />
+<link rel="apple-touch-icon" sizes="180x180" href="https://images.blackroad.io/brand/apple-touch-icon.png" />
+<meta property="og:image" content="https://images.blackroad.io/brand/br-square-512.png" />
+<meta name="description" content="RoadLang — Local-first translation engine. 80 languages. Runs on your device. No data leaves your network.">
+<link rel="stylesheet" href="../_shared/design.css">
+<style>
+  .hero { padding: var(--sp-xl) var(--sp-md); min-height: 100vh; display: flex; flex-direction: column; justify-content: center; }
+  @media (min-width: 768px) { .hero { padding: 0 var(--sp-xl); } }
+  .hero-sub { font-size: 1.1rem; color: var(--subtle); max-width: 520px; line-height: 1.7; margin: var(--sp-md) 0 var(--sp-xl); }
+  .btn-primary { display: inline-flex; align-items: center; gap: 8px; background: var(--grad); color: var(--white); padding: 14px 28px; font-weight: 700; font-size: 0.95rem; transition: opacity 0.2s; border: none; cursor: pointer; }
+  .btn-primary:hover { opacity: 0.9; }
+  .btn-secondary { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--border); color: var(--white); padding: 14px 28px; font-weight: 600; font-size: 0.95rem; transition: border-color 0.2s; background: transparent; cursor: pointer; }
+  .btn-secondary:hover { border-color: var(--muted); }
+  .btn-row { display: flex; flex-wrap: wrap; gap: var(--sp-sm); }
+  .feature-card { background: var(--surface); border: 1px solid var(--border); padding: var(--sp-lg); transition: border-color 0.25s; }
+  .feature-card:hover { border-color: var(--muted); }
+  .feature-card h3 { margin-bottom: var(--sp-xs); }
+  .feature-card p { font-size: 0.85rem; color: var(--subtle); line-height: 1.6; }
+  .feature-icon { font-family: var(--jb); font-size: 0.8rem; color: var(--muted); margin-bottom: var(--sp-sm); display: block; }
+  .demo-box { background: var(--surface); border: 1px solid var(--border); padding: var(--sp-lg); margin: var(--sp-xl) 0; }
+  .demo-row { display: grid; grid-template-columns: 1fr; gap: var(--sp-md); margin-bottom: var(--sp-md); }
+  @media (min-width: 600px) { .demo-row { grid-template-columns: 1fr 1fr; } }
+  .demo-panel { border: 1px solid var(--border); padding: var(--sp-md); }
+  .demo-label { font-family: var(--jb); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); margin-bottom: var(--sp-xs); }
+  .demo-text { font-size: 0.95rem; color: var(--white); line-height: 1.7; font-family: var(--in); }
+  .demo-text.translated { color: var(--subtle); font-style: italic; }
+  .lang-grid { display: flex; flex-wrap: wrap; gap: 6px; margin: var(--sp-lg) 0; }
+  .lang-tag { display: inline-block; padding: 4px 12px; font-family: var(--jb); font-size: 0.7rem; border: 1px solid var(--border); color: var(--muted); transition: border-color 0.2s, color 0.2s; }
+  .lang-tag:hover { border-color: var(--muted); color: var(--white); }
+  .lang-tag.popular { border-color: var(--muted); color: var(--subtle); }
+  .privacy-block { background: var(--surface); border: 1px solid var(--border); padding: var(--sp-xl) var(--sp-md); }
+  @media (min-width: 768px) { .privacy-block { padding: var(--sp-xl); } }
+  .privacy-item { display: flex; gap: var(--sp-md); margin-bottom: var(--sp-lg); align-items: flex-start; }
+  .privacy-item:last-child { margin-bottom: 0; }
+  .privacy-marker { font-family: var(--jb); font-size: 0.75rem; color: var(--muted); flex-shrink: 0; min-width: 24px; }
+  .privacy-item h4 { font-family: var(--sg); font-size: 1rem; font-weight: 600; margin-bottom: 4px; }
+  .privacy-item p { font-size: 0.85rem; color: var(--subtle); line-height: 1.6; }
+  .stat-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--sp-md); margin-bottom: var(--sp-xl); }
+  @media (min-width: 768px) { .stat-row { grid-template-columns: repeat(4, 1fr); } }
+  .stat { text-align: center; padding: var(--sp-lg); border: 1px solid var(--border); }
+  .stat-num { font-family: var(--sg); font-size: 2.2rem; font-weight: 700; background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .stat-label { font-size: 0.75rem; color: var(--muted); font-family: var(--jb); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 4px; }
+</style>
+</head>
+<body class="dot-bg">
+  <nav>
+    <a href="https://translate.blackroad.io" class="nav-logo">RoadLang</a>
+    <div class="nav-links">
+      <a href="#demo">Demo</a>
+      <a href="#languages">Languages</a>
+      <a href="#privacy">Privacy</a>
+      <a href="https://blackroad.io">BlackRoad OS</a>
+    </div>
+    <a href="#install" class="nav-cta">Install</a>
+    <button class="nav-toggle" onclick="this.classList.toggle('open');document.getElementById('nav-mobile').classList.toggle('open')" aria-label="Menu"><span></span><span></span><span></span></button>
+  </nav>
+  <div id="nav-mobile" class="nav-mobile">
+    <a href="#demo" onclick="document.getElementById('nav-mobile').classList.remove('open')">Demo</a>
+    <a href="#languages" onclick="document.getElementById('nav-mobile').classList.remove('open')">Languages</a>
+    <a href="#privacy" onclick="document.getElementById('nav-mobile').classList.remove('open')">Privacy</a>
+    <a href="https://blackroad.io">BlackRoad OS</a>
+  </div>
+
+  <div class="hero">
+    <div class="section-label">Local Translation Engine</div>
+    <h1>80 languages.<br>Zero cloud.</h1>
+    <p class="hero-sub">RoadLang is a local-first translation engine that runs entirely on your device. Your text never leaves your network. Fast, accurate, and completely private. Replaces Google Translate.</p>
+    <div class="btn-row">
+      <a href="#install" class="btn-primary">Install RoadLang</a>
+      <a href="#demo" class="btn-secondary">Try the Demo</a>
+    </div>
+  </div>
+
+  <section>
+    <div class="stat-row fade-up">
+      <div class="stat"><div class="stat-num">80</div><div class="stat-label">Languages</div></div>
+      <div class="stat"><div class="stat-num">0</div><div class="stat-label">Data sent</div></div>
+      <div class="stat"><div class="stat-num">&lt;200ms</div><div class="stat-label">Latency</div></div>
+      <div class="stat"><div class="stat-num">2GB</div><div class="stat-label">Model size</div></div>
+    </div>
+  </section>
+
+  <section id="demo">
+    <div class="section-label">Live Demo</div>
+    <h2 style="margin-bottom:var(--sp-xl);">Translate anything, locally</h2>
+    <div class="demo-box">
+      <div class="demo-row">
+        <div class="demo-panel">
+          <div class="demo-label">English</div>
+          <div class="demo-text">Every device on the BlackRoad mesh speaks the same language. Sovereign infrastructure means your data never crosses a border you didn't choose.</div>
+        </div>
+        <div class="demo-panel">
+          <div class="demo-label">Spanish</div>
+          <div class="demo-text translated">Cada dispositivo en la red BlackRoad habla el mismo idioma. Infraestructura soberana significa que tus datos nunca cruzan una frontera que no elegiste.</div>
+        </div>
+      </div>
+      <div class="demo-row">
+        <div class="demo-panel">
+          <div class="demo-label">Japanese</div>
+          <div class="demo-text translated" style="font-style:normal;">BlackRoadメッシュ上のすべてのデバイスが同じ言語を話します。ソブリンインフラストラクチャとは、選択しなかった国境をデータが越えないことを意味します。</div>
+        </div>
+        <div class="demo-panel">
+          <div class="demo-label">Arabic</div>
+          <div class="demo-text translated" dir="rtl" style="font-style:normal;">كل جهاز على شبكة BlackRoad يتحدث نفس اللغة. البنية التحتية السيادية تعني أن بياناتك لا تعبر حدودًا لم تخترها.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="languages">
+    <div class="section-label">Languages</div>
+    <h2 style="margin-bottom:var(--sp-md);">80 language pairs and growing</h2>
+    <p style="max-width:520px;margin-bottom:var(--sp-lg);">All translation models run locally via Ollama. Download a language pack once, use it forever. No API keys. No rate limits. No per-character billing.</p>
+    <div class="lang-grid">
+      <span class="lang-tag popular">English</span>
+      <span class="lang-tag popular">Spanish</span>
+      <span class="lang-tag popular">French</span>
+      <span class="lang-tag popular">German</span>
+      <span class="lang-tag popular">Japanese</span>
+      <span class="lang-tag popular">Chinese</span>
+      <span class="lang-tag popular">Korean</span>
+      <span class="lang-tag popular">Arabic</span>
+      <span class="lang-tag popular">Portuguese</span>
+      <span class="lang-tag popular">Russian</span>
+      <span class="lang-tag">Hindi</span>
+      <span class="lang-tag">Italian</span>
+      <span class="lang-tag">Dutch</span>
+      <span class="lang-tag">Polish</span>
+      <span class="lang-tag">Turkish</span>
+      <span class="lang-tag">Vietnamese</span>
+      <span class="lang-tag">Thai</span>
+      <span class="lang-tag">Swedish</span>
+      <span class="lang-tag">Norwegian</span>
+      <span class="lang-tag">Danish</span>
+      <span class="lang-tag">Finnish</span>
+      <span class="lang-tag">Czech</span>
+      <span class="lang-tag">Romanian</span>
+      <span class="lang-tag">Hungarian</span>
+      <span class="lang-tag">Greek</span>
+      <span class="lang-tag">Hebrew</span>
+      <span class="lang-tag">Indonesian</span>
+      <span class="lang-tag">Malay</span>
+      <span class="lang-tag">Tagalog</span>
+      <span class="lang-tag">Swahili</span>
+      <span class="lang-tag">Ukrainian</span>
+      <span class="lang-tag">Bengali</span>
+      <span class="lang-tag">Tamil</span>
+      <span class="lang-tag">Urdu</span>
+      <span class="lang-tag">Persian</span>
+      <span class="lang-tag">+ 45 more</span>
+    </div>
+  </section>
+
+  <section id="features">
+    <div class="section-label">Features</div>
+    <h2 style="margin-bottom:var(--sp-xl);">More than word replacement</h2>
+    <div class="grid-3">
+      <div class="feature-card">
+        <span class="feature-icon">// context</span>
+        <h3>Context-aware</h3>
+        <p>RoadLang uses transformer models that understand context, idioms, and tone. Technical docs get technical translations. Casual text stays casual.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">// batch</span>
+        <h3>Batch translate</h3>
+        <p>Translate entire directories of files, markdown docs, or codebases. Preserve formatting, code blocks, and frontmatter. Built for developer workflows.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">// api</span>
+        <h3>REST API</h3>
+        <p>Drop-in replacement for the Google Translate API. Same endpoint format, same response schema. Switch your app to local translation in one line.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">// cli</span>
+        <h3>CLI-first</h3>
+        <p>Pipe text through RoadLang from your terminal. Translate git commit messages, README files, or error logs. Integrates with any shell workflow.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">// speed</span>
+        <h3>Sub-200ms latency</h3>
+        <p>Optimized for ARM64 hardware. Translations complete in under 200ms on a Raspberry Pi 5. Near-instant on desktop hardware with GPU.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">// offline</span>
+        <h3>Works offline</h3>
+        <p>No internet connection needed after initial model download. Translate on airplanes, in basements, or on air-gapped networks.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="privacy">
+    <div class="section-label">Privacy</div>
+    <h2 style="margin-bottom:var(--sp-xl);">Your words stay yours</h2>
+    <div class="privacy-block">
+      <div class="privacy-item">
+        <div class="privacy-marker">--</div>
+        <div>
+          <h4>No telemetry</h4>
+          <p>RoadLang sends zero data to any external server. No usage tracking, no analytics, no "anonymous" metrics. The binary runs and that is it.</p>
+        </div>
+      </div>
+      <div class="privacy-item">
+        <div class="privacy-marker">--</div>
+        <div>
+          <h4>No training on your data</h4>
+          <p>Google Translate uses your translations to improve their models. RoadLang does not. Your medical records, legal documents, and private messages are never training data.</p>
+        </div>
+      </div>
+      <div class="privacy-item">
+        <div class="privacy-marker">--</div>
+        <div>
+          <h4>Auditable source</h4>
+          <p>The full source is available on your Gitea instance. Inspect every line. Verify it does what we say. No trust required.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="install">
+    <div class="section-label">Install</div>
+    <h2 style="margin-bottom:var(--sp-md);">Translate in 30 seconds</h2>
+    <p style="max-width:520px;margin-bottom:var(--sp-xl);">RoadLang runs on Linux, macOS, and ARM64 devices. Install it, download a language pair, and start translating.</p>
+    <div style="background:var(--surface);border:1px solid var(--border);padding:var(--sp-md);font-family:var(--jb);font-size:0.8rem;color:var(--subtle);line-height:1.8;">
+      <span style="color:var(--muted);"># Install RoadLang</span><br>
+      <span style="color:var(--white);">br install roadlang</span><br><br>
+      <span style="color:var(--muted);"># Download language packs</span><br>
+      <span style="color:var(--white);">br roadlang pull</span> <span style="color:var(--cyan);">en-es en-fr en-ja en-zh</span><br><br>
+      <span style="color:var(--muted);"># Translate text</span><br>
+      <span style="color:var(--white);">echo "Pave Tomorrow" | br roadlang</span> <span style="color:var(--cyan);">--to es</span><br>
+      <span style="color:var(--muted);"># => "Pavimenta el manana"</span>
+    </div>
+  </section>
+
+  <footer>
+    <span>&copy; 2026 BlackRoad OS, Inc. &mdash; Pave Tomorrow.</span>
+    <span style="display:flex;gap:var(--sp-lg);flex-wrap:wrap;">
+      <a href="https://blackroad.io" style="color:var(--muted)">Home</a>
+      <a href="https://blackroadai.com" style="color:var(--muted)">AI</a>
+      <a href="https://blackroad.network" style="color:var(--muted)">Network</a>
+    </span>
+  </footer>
+</body>
+</html>

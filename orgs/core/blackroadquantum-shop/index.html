@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BlackRoad Quantum Hardware — Build Your Fleet</title>
+<meta name="description" content="Quantum-inspired hardware kits. Raspberry Pi 5 fleet, Hailo-8 accelerators, mesh networking. Build your own AI infrastructure.">
+<meta name="theme-color" content="#000000">
+<link rel="canonical" href="https://blackroadquantum.shop">
+<link rel="icon" type="image/x-icon" href="https://images.blackroad.io/brand/favicon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="https://images.blackroad.io/brand/br-square-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://images.blackroad.io/brand/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://blackroadquantum.shop">
+<meta property="og:title" content="BlackRoad Quantum Hardware">
+<meta property="og:description" content="Build your own AI fleet with Raspberry Pi and Hailo-8.">
+<meta property="og:image" content="https://images.blackroad.io/brand/br-square-512.png">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"BlackRoad Quantum Hardware","url":"https://blackroadquantum.shop","description":"Hardware kits for quantum-inspired computing."}</script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+:root{
+  --g:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);
+  --bg:#000;--card:#0a0a0a;--border:#1a1a1a;--muted:#444;--sub:#737373;--text:#f5f5f5;--white:#fff;
+  --sg:'Space Grotesk',sans-serif;--jb:'JetBrains Mono',monospace
+}
+body{background:#000;color:var(--text);font-family:var(--sg);overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+::selection{background:rgba(136,68,255,.3)}
+
+.progress-bar{position:fixed;top:0;left:0;height:3px;background:var(--g);z-index:1000;width:0%}
+
+/* HERO */
+.hero-container{height:300vh;position:relative}
+.hero-sticky{position:sticky;top:0;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
+#hero-canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.hero-content{position:relative;z-index:1;text-align:center}
+.hero-title{font-size:clamp(56px,11vw,140px);font-weight:700;letter-spacing:-.04em;line-height:.9;opacity:0}
+.hero-sub{font-size:clamp(16px,2.2vw,28px);font-weight:300;opacity:0;margin-top:28px;line-height:1.5}
+.hero-hint{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);opacity:0;font-family:var(--jb);font-size:12px;letter-spacing:.1em;text-transform:uppercase}
+.hero-hint::after{content:'';display:block;width:1px;height:40px;background:rgba(255,255,255,.2);margin:12px auto 0}
+
+/* FLEET */
+.fleet-section{padding:100px 48px}
+.fleet-wrap{max-width:1200px;margin:0 auto}
+.section-label{font-family:var(--jb);font-size:11px;letter-spacing:.15em;text-transform:uppercase;opacity:.25;margin-bottom:12px}
+.section-title{font-size:clamp(32px,5vw,72px);font-weight:700;letter-spacing:-.03em;margin-bottom:16px}
+.section-desc{font-size:16px;opacity:.4;max-width:520px;line-height:1.7;margin-bottom:48px}
+.fleet-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px}
+.hw-card{border:1px solid var(--border);border-radius:16px;padding:40px;position:relative;overflow:hidden;transition:border-color .3s}
+.hw-card:hover{border-color:rgba(255,255,255,.1)}
+.hw-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;opacity:.4}
+.hw-name{font-size:24px;font-weight:700;margin-bottom:4px}
+.hw-role{font-family:var(--jb);font-size:11px;opacity:.25;margin-bottom:16px}
+.hw-specs{list-style:none;margin-bottom:20px}
+.hw-specs li{font-size:13px;opacity:.35;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.03);display:flex;justify-content:space-between}
+.hw-specs li span:last-child{font-family:var(--jb);opacity:.7}
+.hw-power{display:flex;gap:16px;margin-top:16px}
+.hw-power-item{text-align:center}
+.hw-power-val{font-size:20px;font-weight:700}
+.hw-power-lbl{font-family:var(--jb);font-size:9px;opacity:.2;text-transform:uppercase;margin-top:2px}
+
+/* CONFIGURATOR */
+.config-section{padding:100px 48px}
+.config-wrap{max-width:900px;margin:0 auto}
+.config-builder{border:1px solid var(--border);border-radius:16px;padding:48px;position:relative;overflow:hidden}
+.config-builder::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--g);opacity:.3}
+.config-row{display:flex;align-items:center;justify-content:space-between;padding:20px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.config-label{font-size:15px;font-weight:600}
+.config-sublabel{font-size:12px;opacity:.25;margin-top:2px}
+.config-control{display:flex;align-items:center;gap:12px}
+.config-btn{width:36px;height:36px;border:1px solid var(--border);border-radius:8px;background:transparent;color:#fff;font-size:16px;cursor:pointer;opacity:.35;transition:opacity .2s;display:flex;align-items:center;justify-content:center}
+.config-btn:hover{opacity:.7}
+.config-val{font-family:var(--jb);font-size:16px;font-weight:600;min-width:32px;text-align:center}
+.config-toggle{width:48px;height:26px;border-radius:13px;border:1px solid var(--border);background:transparent;cursor:pointer;position:relative;transition:background .3s}
+.config-toggle.on{background:rgba(136,68,255,.3);border-color:rgba(136,68,255,.4)}
+.config-toggle::after{content:'';width:20px;height:20px;border-radius:50%;background:#fff;position:absolute;top:2px;left:2px;transition:transform .3s;opacity:.5}
+.config-toggle.on::after{transform:translateX(22px);opacity:.8}
+.config-summary{margin-top:32px;padding:32px;border:1px solid var(--border);border-radius:12px}
+.config-total{font-size:clamp(32px,5vw,56px);font-weight:700;letter-spacing:-.03em;margin-bottom:8px}
+.config-total span{background:var(--g);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.config-breakdown{font-family:var(--jb);font-size:11px;opacity:.25;line-height:2}
+.config-cta{display:inline-block;padding:14px 36px;border:1px solid rgba(255,255,255,.15);border-radius:8px;font-size:14px;font-weight:600;margin-top:24px;transition:all .2s;cursor:pointer;background:transparent;color:#fff;font-family:var(--sg)}
+.config-cta:hover{border-color:rgba(255,255,255,.3);background:rgba(255,255,255,.03)}
+
+/* PRICING */
+.pricing-section{padding:100px 48px}
+.pricing-wrap{max-width:1100px;margin:0 auto}
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.price-card{border:1px solid var(--border);border-radius:16px;padding:40px;position:relative;overflow:hidden;text-align:center}
+.price-card.featured{border-color:rgba(136,68,255,.2)}
+.price-card.featured::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--g)}
+.price-badge{font-family:var(--jb);font-size:10px;letter-spacing:.12em;text-transform:uppercase;opacity:.25;margin-bottom:16px}
+.price-name{font-size:24px;font-weight:700;margin-bottom:8px}
+.price-amount{font-size:clamp(36px,5vw,56px);font-weight:700;letter-spacing:-.03em;margin-bottom:8px}
+.price-period{font-family:var(--jb);font-size:11px;opacity:.2;margin-bottom:24px}
+.price-features{list-style:none;text-align:left;margin-bottom:32px}
+.price-features li{font-size:13px;opacity:.35;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.03);padding-left:20px;position:relative}
+.price-features li::before{content:'';position:absolute;left:0;top:14px;width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.15)}
+.price-btn{display:block;width:100%;padding:14px;border:1px solid var(--border);border-radius:8px;background:transparent;color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--sg);transition:all .2s;opacity:.5}
+.price-btn:hover{opacity:.8;border-color:rgba(255,255,255,.2)}
+.price-card.featured .price-btn{border-color:rgba(136,68,255,.3);opacity:.7}
+
+/* FOOTER */
+.site-footer{padding:120px 48px 48px;text-align:center}
+.footer-tagline{font-size:clamp(48px,8vw,120px);font-weight:700;letter-spacing:-.04em;opacity:.15;margin-bottom:60px}
+.footer-links{display:flex;gap:32px;justify-content:center;flex-wrap:wrap;margin-bottom:32px}
+.footer-links a{font-size:14px;opacity:.3;transition:opacity .2s}
+.footer-links a:hover{opacity:.7}
+.footer-copy{font-size:12px;opacity:.15;font-family:var(--jb)}
+.eco-footer{text-align:center;padding:24px 48px;border-top:1px solid var(--border);margin-top:48px}
+.eco-footer a{font-size:11px;opacity:.2;margin:0 12px;transition:opacity .2s}
+.eco-footer a:hover{opacity:.5}
+
+@media(prefers-reduced-motion:reduce){.hero-container{height:auto!important}.hero-sticky{position:relative!important}}
+@media(max-width:768px){
+  .fleet-section,.config-section,.pricing-section{padding:60px 20px}
+  .fleet-grid{grid-template-columns:1fr}
+  .pricing-grid{grid-template-columns:1fr}
+  .config-builder{padding:24px}
+  .site-footer{padding:80px 20px 32px}
+}
+</style>
+<script src="https://bb.blackroad.io/bb.js" defer></script>
+</head>
+<body>
+
+<div class="progress-bar" id="progress-bar"></div>
+
+<!-- HERO -->
+<section class="hero-container" id="hero-container">
+  <div class="hero-sticky">
+    <canvas id="hero-canvas"></canvas>
+    <div class="hero-content">
+      <h1 class="hero-title" id="hero-title">Quantum Hardware</h1>
+      <p class="hero-sub" id="hero-sub">Your AI runs on your hardware. Build your fleet from Raspberry Pi 5 and Hailo-8 accelerators.</p>
+    </div>
+    <div class="hero-hint" id="hero-hint">Scroll to explore</div>
+  </div>
+</section>
+
+<!-- FLEET -->
+<section class="fleet-section" id="fleet-section">
+  <div class="fleet-wrap">
+    <div class="section-label">The Fleet</div>
+    <div class="section-title">5 Nodes. 52 TOPS.</div>
+    <div class="section-desc">Every node in the BlackRoad fleet is a Raspberry Pi running on your network. No cloud. No subscriptions. Your hardware, your data.</div>
+    <div class="fleet-grid" id="fleet-grid"></div>
+  </div>
+</section>
+
+<!-- CONFIGURATOR -->
+<section class="config-section" id="config-section">
+  <div class="config-wrap">
+    <div class="section-label">Build Your Own</div>
+    <div class="section-title">Fleet Configurator</div>
+    <div class="section-desc">Design your fleet. Pick components, see the total cost, and understand exactly what you're building.</div>
+    <div class="config-builder" id="configurator"></div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing-section" id="pricing-section">
+  <div class="pricing-wrap">
+    <div class="section-label">Kits</div>
+    <div class="section-title">Pre-Built Kits</div>
+    <div class="section-desc">Curated hardware bundles based on our production fleet. Everything you need to get started.</div>
+    <div class="pricing-grid" id="pricing-grid"></div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="site-footer">
+  <div class="footer-tagline">Pave Tomorrow.</div>
+  <div class="footer-links">
+    <a href="https://blackroad.io">Home</a>
+    <a href="https://blackroadai.com">AI</a>
+    <a href="https://blackroadquantum.com">Quantum</a>
+    <a href="https://blackroadquantum.net">Network</a>
+    <a href="https://blackroad.systems">Status</a>
+    <a href="https://blackroad.company">Company</a>
+    <a href="https://brand.blackroad.io">Brand</a>
+    <a href="https://github.com/blackboxprogramming">GitHub</a>
+  </div>
+  <div class="footer-copy">&copy; 2025-2026 BlackRoad OS, Inc.</div>
+</footer>
+<div class="eco-footer">
+  <a href="https://blackroadquantum.com">Quantum</a>
+  <a href="https://blackroadquantum.net">Network</a>
+  <a href="https://blackroadquantum.info">Research</a>
+  <a href="https://blackroadquantum.store">Store</a>
+  <a href="https://pricing.blackroad.io">Pricing</a>
+</div>
+
+<script>
+const GRAD=['#FF6B2B','#FF2255','#CC00AA','#8844FF','#4488FF','#00D4FF'];
+const PI2=Math.PI*2;
+const lerp=(a,b,t)=>a+(b-a)*t, clamp=(v,lo,hi)=>Math.min(hi,Math.max(lo,v));
+const getScrollProgress=el=>{const r=el.getBoundingClientRect();return clamp(-r.top/(el.offsetHeight-innerHeight),0,1);};
+let scrollY=0;
+window.addEventListener('scroll',()=>{scrollY=pageYOffset;},{passive:true});
+function setupCanvas(cv){const d=Math.min(devicePixelRatio,2),r=cv.getBoundingClientRect();cv.width=r.width*d;cv.height=r.height*d;const c=cv.getContext('2d');c.scale(d,d);return{ctx:c,w:r.width,h:r.height};}
+
+/* FLEET DATA */
+const FLEET = [
+  { name:'Alice', role:'Gateway', ip:'.49', color:'#00D4FF', specs:[['Board','Raspberry Pi 5 8GB'],['Storage','256GB NVMe'],['Role','DNS, PostgreSQL, Qdrant'],['Accelerator','None'],['Power','5W idle']], tops:0, power:'5W', models:0 },
+  { name:'Cecilia', role:'Brain', ip:'.96', color:'#CC00AA', specs:[['Board','Raspberry Pi 5 8GB'],['Storage','512GB NVMe'],['Role','Ollama, Embedding, Inference'],['Accelerator','Hailo-8 (26 TOPS)'],['Power','7.5W peak']], tops:26, power:'7.5W', models:16 },
+  { name:'Octavia', role:'Architect', ip:'.101', color:'#8844FF', specs:[['Board','Raspberry Pi 5 8GB'],['Storage','512GB NVMe'],['Role','Gitea, Docker Swarm, Inference'],['Accelerator','Hailo-8 (26 TOPS)'],['Power','7.5W peak']], tops:26, power:'7.5W', models:207 },
+  { name:'Aria', role:'Interface', ip:'.98', color:'#FF2255', specs:[['Board','Raspberry Pi 5 4GB'],['Storage','128GB SD'],['Role','Frontend, Webhook Relay'],['Accelerator','None'],['Power','4W idle']], tops:0, power:'4W', models:0 },
+  { name:'Lucidia', role:'Dreamer', ip:'.38', color:'#4488FF', specs:[['Board','Raspberry Pi 5 4GB'],['Storage','128GB SD'],['Role','Web Apps, CI Runner'],['Accelerator','None'],['Power','4W idle']], tops:0, power:'4W', models:334 },
+];
+
+const fleetGrid = document.getElementById('fleet-grid');
+FLEET.forEach(node => {
+  const card = document.createElement('div');
+  card.className = 'hw-card';
+  card.innerHTML = `<div style="position:absolute;top:0;left:0;right:0;height:2px;background:${node.color};opacity:.4"></div>
+    <div class="hw-name">${node.name}</div>
+    <div class="hw-role">${node.role} &mdash; 192.168.4${node.ip}</div>
+    <ul class="hw-specs">${node.specs.map(([k,v])=>`<li><span>${k}</span><span>${v}</span></li>`).join('')}</ul>
+    <div class="hw-power">
+      <div class="hw-power-item"><div class="hw-power-val">${node.tops||'--'}</div><div class="hw-power-lbl">TOPS</div></div>
+      <div class="hw-power-item"><div class="hw-power-val">${node.power}</div><div class="hw-power-lbl">Power</div></div>
+      <div class="hw-power-item"><div class="hw-power-val">${node.models||'--'}</div><div class="hw-power-lbl">${node.tops?'Models':'Apps'}</div></div>
+    </div>`;
+  fleetGrid.appendChild(card);
+});
+
+/* CONFIGURATOR */
+const CONFIG = {
+  pis: { val:3, min:1, max:10, price:80, label:'Raspberry Pi 5', sub:'8GB RAM, quad-core ARM' },
+  nvme: { val:2, min:0, max:10, price:45, label:'NVMe Drives', sub:'256GB PCIe Gen3' },
+  hailo: { val:1, min:0, max:5, price:99, label:'Hailo-8 Accelerators', sub:'26 TOPS each, PCIe M.2' },
+  psu: { val:1, min:0, max:5, price:25, label:'USB-C Power Supplies', sub:'27W PD, official Pi' },
+  switch: { val:false, price:30, label:'Gigabit Switch', sub:'5-port unmanaged' },
+  case: { val:false, price:35, label:'Cluster Case', sub:'Stacked Pi enclosure with fans' },
+};
+
+function buildConfigurator() {
+  const el = document.getElementById('configurator');
+  let html = '';
+  for (const [key, cfg] of Object.entries(CONFIG)) {
+    if (typeof cfg.val === 'boolean') {
+      html += `<div class="config-row"><div><div class="config-label">${cfg.label}</div><div class="config-sublabel">${cfg.sub} &mdash; $${cfg.price}</div></div>
+        <div class="config-control"><button class="config-toggle ${cfg.val?'on':''}" data-key="${key}"></button></div></div>`;
+    } else {
+      html += `<div class="config-row"><div><div class="config-label">${cfg.label}</div><div class="config-sublabel">${cfg.sub} &mdash; $${cfg.price} each</div></div>
+        <div class="config-control"><button class="config-btn" data-key="${key}" data-dir="-1">&minus;</button><div class="config-val" id="cfg-${key}">${cfg.val}</div><button class="config-btn" data-key="${key}" data-dir="1">+</button></div></div>`;
+    }
+  }
+  html += '<div class="config-summary"><div class="config-total" id="cfg-total">$0</div><div class="config-breakdown" id="cfg-breakdown"></div><button class="config-cta" onclick="exportConfig()">Export Build List</button></div>';
+  el.innerHTML = html;
+  updateTotal();
+
+  el.querySelectorAll('.config-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const key=btn.dataset.key, dir=parseInt(btn.dataset.dir), cfg=CONFIG[key];
+      cfg.val=clamp(cfg.val+dir,cfg.min,cfg.max);
+      document.getElementById('cfg-'+key).textContent=cfg.val;
+      updateTotal();
+    });
+  });
+  el.querySelectorAll('.config-toggle').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const key=btn.dataset.key; CONFIG[key].val=!CONFIG[key].val;
+      btn.classList.toggle('on',CONFIG[key].val); updateTotal();
+    });
+  });
+}
+
+function updateTotal() {
+  let total=0, lines=[], tops=0;
+  for (const [key, cfg] of Object.entries(CONFIG)) {
+    if (typeof cfg.val === 'boolean') {
+      if (cfg.val) { total+=cfg.price; lines.push(`${cfg.label}: $${cfg.price}`); }
+    } else {
+      if (cfg.val>0) { const sub=cfg.val*cfg.price; total+=sub; lines.push(`${cfg.val}x ${cfg.label}: $${sub}`);
+        if (key==='hailo') tops+=cfg.val*26;
+      }
+    }
+  }
+  document.getElementById('cfg-total').innerHTML=`<span>$${total}</span>`;
+  document.getElementById('cfg-breakdown').innerHTML=lines.join('\n')+(tops?`\nTotal: ${tops} TOPS`:'');
+}
+
+function exportConfig() {
+  let text='BlackRoad Quantum Hardware Build\n================================\n';
+  for (const [key,cfg] of Object.entries(CONFIG)) {
+    if (typeof cfg.val==='boolean') { if(cfg.val) text+=`${cfg.label}: $${cfg.price}\n`; }
+    else if (cfg.val>0) text+=`${cfg.val}x ${cfg.label}: $${cfg.val*cfg.price}\n`;
+  }
+  let total=0;for(const c of Object.values(CONFIG))total+=(typeof c.val==='boolean'?(c.val?c.price:0):c.val*c.price);
+  text+=`\nTotal: $${total}\n`;
+  navigator.clipboard.writeText(text).then(()=>alert('Build list copied to clipboard'));
+}
+
+buildConfigurator();
+
+/* PRICING */
+const KITS = [
+  { name:'Starter', badge:'1 Node', price:'$80', period:'one-time', features:['1x Raspberry Pi 5 8GB','128GB microSD','USB-C power supply','BlackRoad OS pre-installed','Single-node AI inference','Community support'], featured:false },
+  { name:'Fleet', badge:'Most Popular', price:'$499', period:'one-time', features:['3x Raspberry Pi 5 8GB','1x Hailo-8 (26 TOPS)','2x 256GB NVMe drives','Gigabit switch','Cluster case with fans','WireGuard mesh pre-configured','16 Ollama models included'], featured:true },
+  { name:'Quantum', badge:'Full Stack', price:'$899', period:'one-time', features:['5x Raspberry Pi 5 8GB','2x Hailo-8 (52 TOPS)','4x 512GB NVMe drives','Gigabit switch + case','Full mesh networking','All 50 AI skills pre-loaded','Production-grade monitoring','Priority support'], featured:false },
+];
+
+const pricingGrid = document.getElementById('pricing-grid');
+KITS.forEach(kit => {
+  const card = document.createElement('div');
+  card.className = 'price-card'+(kit.featured?' featured':'');
+  card.innerHTML = `<div class="price-badge">${kit.badge}</div>
+    <div class="price-name">${kit.name}</div>
+    <div class="price-amount">${kit.price}</div>
+    <div class="price-period">${kit.period}</div>
+    <ul class="price-features">${kit.features.map(f=>`<li>${f}</li>`).join('')}</ul>
+    <button class="price-btn" onclick="alert('Coming soon. Join the waitlist at blackroad.io')">Get Started</button>`;
+  pricingGrid.appendChild(card);
+});
+
+/* HERO CANVAS — floating circuit boards */
+const heroCv=document.getElementById('hero-canvas');
+let heroCtx,heroW,heroH;
+function resizeHero(){({ctx:heroCtx,w:heroW,h:heroH}=setupCanvas(heroCv));}
+resizeHero();
+
+const chips=[];
+for(let i=0;i<15;i++){chips.push({x:Math.random()*2000,y:Math.random()*2000,vx:(Math.random()-.5)*.2,vy:(Math.random()-.5)*.2,size:Math.random()*30+20,rotation:Math.random()*PI2,rotSpeed:(Math.random()-.5)*.005,c:GRAD[i%6]});}
+function drawHero(p){
+  heroCtx.clearRect(0,0,heroW,heroH);
+  chips.forEach(ch=>{
+    ch.x+=ch.vx;ch.y+=ch.vy;ch.rotation+=ch.rotSpeed;
+    if(ch.x<-50)ch.x=heroW+50;if(ch.x>heroW+50)ch.x=-50;if(ch.y<-50)ch.y=heroH+50;if(ch.y>heroH+50)ch.y=-50;
+    heroCtx.save();heroCtx.translate(ch.x,ch.y);heroCtx.rotate(ch.rotation);
+    heroCtx.strokeStyle=ch.c;heroCtx.globalAlpha=0.06*p;heroCtx.lineWidth=1;
+    heroCtx.strokeRect(-ch.size/2,-ch.size/2,ch.size,ch.size);
+    // Pin marks
+    for(let j=0;j<4;j++){const px=-ch.size/2+j*(ch.size/3);heroCtx.fillStyle=ch.c;heroCtx.fillRect(px,-ch.size/2-3,2,3);heroCtx.fillRect(px,ch.size/2,2,3);}
+    heroCtx.restore();
+  });
+  heroCtx.globalAlpha=1;
+}
+
+/* SCROLL + MAIN LOOP */
+const progressBar=document.getElementById('progress-bar');
+function mainLoop(){
+  const docH=document.documentElement.scrollHeight-innerHeight;
+  progressBar.style.width=(docH>0?scrollY/docH*100:0)+'%';
+  const heroP=getScrollProgress(document.getElementById('hero-container'));
+  const ht=document.getElementById('hero-title'),hs=document.getElementById('hero-sub'),hh=document.getElementById('hero-hint');
+  if(heroP<.15){const t=heroP/.15;ht.style.opacity=t;ht.style.transform=`translateY(${lerp(50,0,t)}px)`;}
+  else if(heroP<.5){ht.style.opacity=1;ht.style.transform='translateY(0)';}
+  else{const t=(heroP-.5)/.3;ht.style.opacity=1-t;ht.style.transform=`translateY(${lerp(0,-50,t)}px)`;}
+  if(heroP<.2)hs.style.opacity=0;else if(heroP<.35)hs.style.opacity=(heroP-.2)/.15;else if(heroP<.55)hs.style.opacity=1;else hs.style.opacity=Math.max(0,1-(heroP-.55)/.2);
+  hh.style.opacity=heroP<.05?heroP/.05*.5:heroP<.2?.5:Math.max(0,.5-(heroP-.2)*3);
+  drawHero(clamp(heroP*3,0,1));
+  requestAnimationFrame(mainLoop);
+}
+
+const observer=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.style.opacity='1';e.target.style.transform='translateY(0)';}});},{threshold:.1});
+document.querySelectorAll('.fleet-section,.config-section,.pricing-section').forEach(el=>{el.style.opacity='0';el.style.transform='translateY(40px)';el.style.transition='opacity .8s ease,transform .8s ease';observer.observe(el);});
+
+let resizeTimer;
+window.addEventListener('resize',()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(resizeHero,150);});
+requestAnimationFrame(mainLoop);
+
+(function(){if(!localStorage.getItem('br-consent-seen')){var b=document.createElement('div');b.id='br-consent';b.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:9999;background:#000;border-top:1px solid rgba(255,255,255,.08);padding:20px 48px;font-family:var(--sg)';b.innerHTML='<div style="max-width:900px;margin:0 auto;display:flex;align-items:center;gap:24px;flex-wrap:wrap"><div style="flex:1;min-width:280px"><div style="font-size:14px;color:#fff;font-weight:600;margin-bottom:4px">No cookies. No tracking. No data sold.</div><div style="font-size:12px;color:#fff;opacity:.4">Your data stays on your device.</div></div><div><button onclick="document.getElementById(\'br-consent\').remove();localStorage.setItem(\'br-consent-seen\',\'1\')" style="padding:10px 28px;background:#fff;color:#000;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--sg)">Got it</button></div></div>';document.body.appendChild(b)}})();
+</script>
+</body>
+</html>

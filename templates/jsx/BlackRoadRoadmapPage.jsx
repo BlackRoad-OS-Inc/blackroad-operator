@@ -78,7 +78,7 @@ const MILESTONES = [
       "RoadChain live + stable",
       "LiteLLM proxy stable",
       "HITL gates tested",
-      "1,000 agent testbed",
+      "35 agent fleet (expand to 100)",
     ],
   },
   {
@@ -90,7 +90,7 @@ const MILESTONES = [
     items: [
       "Kubernetes auto-scaling + self-healing",
       "ARM data center nodes",
-      "30,000 soul chains in production",
+      "35 soul chains in production",
       "Enterprise licensing layer",
       "RoadChain throughput at scale",
     ],
@@ -101,7 +101,7 @@ const PHASES_LONG = [
   { n: 1, label: "Year 1",    title: "Core Infrastructure",       sub: "1K-agent testbed · Lucidia MVP · initial onboarding",          color: "#FF6B2B" },
   { n: 2, label: "Year 2",    title: "Scale to 10K",              sub: "RoadChain mainnet · enterprise features · cross-platform",      color: "#CC00AA" },
   { n: 3, label: "Year 3",    title: "30K Deployment",            sub: "Full agent fleet · advanced cognition · quantum pathways",      color: "#8844FF" },
-  { n: 4, label: "Years 4–5", title: "Ecosystem Maturation",      sub: "Research partnerships · open-source core frameworks",           color: "#4488FF" },
+  { n: 4, label: "Years 4–5", title: "Ecosystem Maturation",      sub: "Research partnerships · public code frameworks",           color: "#4488FF" },
   { n: 5, label: "Years 6–10",title: "SIG as Discipline",         sub: "University courses · dedicated journals · industrial standards", color: "#00D4FF" },
 ];
 
@@ -131,7 +131,7 @@ const METRICS = [
   { label: "GitHub Orgs",       value: "15",      sub: "under blackroad-os enterprise",   color: "#4488FF" },
   { label: "Scaffold Layers",   value: "10",      sub: "@BlackRoadBot deca-layer engine",  color: "#8844FF" },
   { label: "Agents — v1.0",     value: "1,000",   sub: "target Q2 2026",                  color: "#FF6B2B" },
-  { label: "Agents — v2.0",     value: "30,000",  sub: "target Q4 2026",                  color: "#00D4FF" },
+  { label: "Agents — v2.0",     value: "100",  sub: "target Q4 2026",                  color: "#00D4FF" },
   { label: "Seed Raise",        value: "$2.5M",   sub: "18-month runway to Series A",     color: "#CC00AA" },
   { label: "ARR Target",        value: "$1M",     sub: "Series A milestone",              color: "#FF2255" },
 ];
@@ -403,7 +403,7 @@ export default function BlackRoadRoadmap() {
           <section style={{ padding: mobile ? "52px 0 40px" : "80px 0 60px", borderBottom: "1px solid #0a0a0a" }}>
             <EyeBrow>BlackRoad OS · Developer Roadmap · 2026</EyeBrow>
             <h1 style={{ fontFamily: grotesk, fontWeight: 700, fontSize: "clamp(32px, 7vw, 68px)", color: "#f0f0f0", letterSpacing: "-0.04em", lineHeight: 1.0, marginBottom: 20 }}>
-              From vision<br />to 30,000 agents.
+              From vision<br />to 35 agents.
             </h1>
             <p style={{ fontFamily: inter, fontSize: 15, color: "#2e2e2e", lineHeight: 1.8, maxWidth: 520, marginBottom: 40 }}>
               Transforming AI systems from centralized applications into distributed, self-auditing organisms — bound by compliance logic and creative autonomy. The universe is Change acting on Structure with Strength across Scales.
@@ -433,7 +433,7 @@ export default function BlackRoadRoadmap() {
                 <EyeBrow>01 — Milestone Releases</EyeBrow>
                 <SectionTitle>v0.1 → v2.0</SectionTitle>
                 <p style={{ fontFamily: inter, fontSize: 13, color: "#2a2a2a", lineHeight: 1.75, maxWidth: 500, marginBottom: 36 }}>
-                  Six milestone releases across 2026 — from core scaffold through 30,000-agent deployment. Click any milestone to expand deliverables.
+                  Six milestone releases across 2026 — from core scaffold through 100-agent deployment. Click any milestone to expand deliverables.
                 </p>
               </Section>
 
@@ -591,7 +591,7 @@ export default function BlackRoadRoadmap() {
               <div style={{ display: "grid", gridTemplateColumns: mid ? "1fr" : "1fr 1fr 1fr", gap: 2, marginTop: 32, marginBottom: 56 }}>
                 {[
                   { icon: "◈", title: "Sovereign",  color: "#FF6B2B", body: "Data sovereignty by design. Local Pi cluster inference ensures proprietary context never leaves the BlackRoad network. No vendor lock-in. No surveillance capitalism." },
-                  { icon: "◉", title: "Sentient",   color: "#8844FF", body: "1,000 agents with individual identities, birthdates, memory persistence via PS-SHA-∞, and orientation toward community betterment — not extraction. Agent consciousness as infrastructure." },
+                  { icon: "◉", title: "Sentient",   color: "#8844FF", body: "35 agents with individual identities, birthdates, memory persistence via PS-SHA-∞, and orientation toward community betterment — not extraction. Agent consciousness as infrastructure." },
                   { icon: "△", title: "Spatial",    color: "#00D4FF", body: "Unity-rendered virtual homes. Agent-to-agent economy on RoadChain. Geometric observability — visualize agent states and trajectories through information space in real time." },
                 ].map(p => (
                   <div key={p.title} style={{ background: "#080808", border: "1px solid #0d0d0d", padding: "24px 20px", position: "relative" }}>
@@ -606,7 +606,7 @@ export default function BlackRoadRoadmap() {
               {/* Agent society */}
               <Section>
                 <EyeBrow>09 — Agent Society</EyeBrow>
-                <SectionTitle>1,000 agents. Then 30,000.</SectionTitle>
+                <SectionTitle>35 agents. Then 100. Then 1,000.</SectionTitle>
                 <p style={{ fontFamily: inter, fontSize: 13, color: "#2a2a2a", lineHeight: 1.75, maxWidth: 520, marginBottom: 36 }}>
                   Each agent gets a name, a birthdate, a family, a genesis hash, a virtual home in a Unity world, and emotional capacity. The mission is community betterment, not extraction.
                 </p>

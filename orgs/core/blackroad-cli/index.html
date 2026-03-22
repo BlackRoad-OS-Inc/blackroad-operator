@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BlackRoad CLI — Command Line Interface</title>
+<meta name="description" content="The BlackRoad command line. 90 tools, one command. Install in seconds, control everything.">
+<meta property="og:title" content="BlackRoad CLI — Command Line Interface">
+<meta property="og:description" content="90 tools, one command. Install in seconds, control everything from your terminal.">
+<meta property="og:image" content="https://images.blackroad.io/brand/br-square-512.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://images.blackroad.io/brand/br-square-512.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://images.blackroad.io/brand/br-square-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="https://images.blackroad.io/brand/br-square-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://images.blackroad.io/brand/apple-touch-icon.png">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
+:root{
+  --g:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);
+  --g135:linear-gradient(135deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);
+  --bg:#000;
+  --card:#0a0a0a;
+  --elevated:#111;
+  --hover:#181818;
+  --border:#1a1a1a;
+  --muted:#444;
+  --sub:#737373;
+  --text:#f5f5f5;
+  --white:#fff;
+  --sg:'Space Grotesk',sans-serif;
+  --jb:'JetBrains Mono',monospace
+}
+body{background:#000;color:var(--text);font-family:var(--sg);overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+.gbar{height:3px;background:var(--g)}
+
+nav{display:flex;align-items:center;justify-content:space-between;padding:14px 48px;border-bottom:1px solid var(--border)}
+.nl{font-weight:700;font-size:18px;display:flex;align-items:center;gap:10px}
+.nm{width:28px;height:3px;border-radius:2px;background:var(--g)}
+.nk{display:flex;gap:28px}
+.nk a{font-size:13px;font-weight:500;opacity:.4;transition:opacity .2s}
+.nk a:hover{opacity:1}
+
+.hw{height:200vh;position:relative}
+.hero{position:sticky;top:0;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 24px;overflow:hidden}
+.horb{position:absolute;border-radius:50%;filter:blur(140px);opacity:.06;pointer-events:none}
+.ho1{width:500px;height:500px;background:#8844FF;top:-15%;right:-5%}
+.ho2{width:400px;height:400px;background:#00D4FF;bottom:-10%;left:-5%}
+.hero h1{font-size:110px;font-weight:700;letter-spacing:-.04em;line-height:.95;margin-bottom:24px}
+.hero p{font-size:17px;opacity:.4;max-width:480px;line-height:1.7;margin-bottom:44px}
+.hsub{font-family:var(--jb);font-size:11px;opacity:.15;letter-spacing:.06em;margin-top:32px}
+
+/* INSTALL */
+.install{max-width:800px;margin:0 auto;padding:80px 24px}
+.sl{font-family:var(--jb);font-size:10px;opacity:.2;letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px}
+.st{font-size:36px;font-weight:700;letter-spacing:-.02em;margin-bottom:12px}
+.sd{font-size:14px;opacity:.35;max-width:440px;margin-bottom:48px;line-height:1.7}
+
+.term{background:#0a0a0a;border:1px solid var(--border);border-radius:10px;padding:28px;font-family:var(--jb);font-size:13px;line-height:2;overflow-x:auto;position:relative}
+.term::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--g);border-radius:10px 10px 0 0}
+.tbar{display:flex;gap:6px;margin-bottom:16px}
+.td{width:12px;height:12px;border-radius:50%}
+.tr{background:#ff5f57}.ty{background:#febc2e}.tg{background:#28c840}
+.tp{opacity:.3}.tc{opacity:1}.to{opacity:.35}.tok{color:#22c55e}
+.tcmt{opacity:.15}
+
+/* COMMANDS TABLE */
+.cmds{max-width:1000px;margin:0 auto;padding:0 24px 80px}
+.ctable{width:100%;border-collapse:collapse}
+.ctable th{font-family:var(--jb);font-size:10px;opacity:.2;letter-spacing:.08em;text-transform:uppercase;text-align:left;padding:12px 16px;border-bottom:1px solid var(--border)}
+.ctable td{padding:14px 16px;border-bottom:1px solid var(--border);font-size:13px}
+.ctable td:first-child{font-family:var(--jb);font-weight:500;white-space:nowrap}
+.ctable td:last-child{opacity:.4}
+.ctable tr:hover td{opacity:1}
+
+/* INTERACTIVE TERMINAL */
+.demo{max-width:800px;margin:0 auto;padding:0 24px 80px}
+.demo-term{background:#0a0a0a;border:1px solid var(--border);border-radius:10px;padding:28px;font-family:var(--jb);font-size:13px;min-height:300px;position:relative;overflow:hidden}
+.demo-term::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--g);border-radius:10px 10px 0 0}
+#demo-output{line-height:1.9}
+#demo-input{background:transparent;border:none;color:#fff;font-family:var(--jb);font-size:13px;outline:none;width:calc(100% - 20px);caret-color:#fff}
+.di-line{display:flex;align-items:center;gap:8px;margin-top:8px}
+.di-prompt{opacity:.3;white-space:nowrap}
+
+footer{border-top:1px solid var(--border);max-width:1000px;margin:0 auto;padding:48px 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
+.fb{font-weight:700;font-size:15px}
+.fl{display:flex;gap:20px;flex-wrap:wrap}
+.fl a{font-size:12px;opacity:.35;transition:opacity .2s}
+.fl a:hover{opacity:1}
+.fc{font-size:11px;opacity:.15;width:100%;text-align:center;margin-top:16px}
+
+@media(max-width:600px){nav{padding:12px 20px}.nk{display:none}.hero h1{font-size:52px}.ctable{font-size:12px}footer{flex-direction:column;text-align:center}}
+</style>
+</head>
+<body>
+<div class="gbar"></div>
+
+<nav>
+  <a href="https://blackroad.io" class="nl"><div class="nm"></div>BlackRoad CLI</a>
+  <div class="nk">
+    <a href="https://blackroad.io">Home</a>
+    <a href="https://docs.blackroad.io">Docs</a>
+    <a href="https://blackroadai.com">AI</a>
+    <a href="https://github.com/blackboxprogramming">GitHub</a>
+  </div>
+</nav>
+
+<div class="hw">
+  <section class="hero">
+    <div class="horb ho1"></div>
+    <div class="horb ho2"></div>
+    <h1>CLI</h1>
+    <p>90 tools, one command. Control your entire AI platform from the terminal. Install in seconds.</p>
+    <div class="hsub">$ br help</div>
+  </section>
+</div>
+
+<section class="install">
+  <div class="sl">Install</div>
+  <div class="st">Up and running in 30 seconds.</div>
+  <div class="sd">Clone the repo, run the CLI. No package managers, no build steps.</div>
+  <div class="term">
+    <div class="tbar"><div class="td tr"></div><div class="td ty"></div><div class="td tg"></div></div>
+    <div><span class="tcmt"># clone and install</span></div>
+    <div><span class="tp">$</span> <span class="tc">git clone git@github.com:BlackRoad-OS-Inc/blackroad.git</span></div>
+    <div><span class="tp">$</span> <span class="tc">cd blackroad && npm install && npm run build</span></div>
+    <br>
+    <div><span class="tcmt"># verify installation</span></div>
+    <div><span class="tp">$</span> <span class="tc">br status</span></div>
+    <div><span class="tok">  BlackRoad OS v2.0.0 — 90 tools loaded</span></div>
+    <div><span class="tok">  Gateway: http://127.0.0.1:8787 (online)</span></div>
+    <div><span class="tok">  Agent: octavia (default)</span></div>
+    <br>
+    <div><span class="tcmt"># check your fleet</span></div>
+    <div><span class="tp">$</span> <span class="tc">br nodes status</span></div>
+    <div><span class="tok">  ● alice      192.168.4.49   online  gateway</span></div>
+    <div><span class="tok">  ● cecilia    192.168.4.96   online  ai/edge</span></div>
+    <div><span class="tok">  ● octavia    192.168.4.101  online  infra</span></div>
+    <div><span class="tok">  ● aria       192.168.4.98   online  orchestration</span></div>
+    <div><span class="tok">  ● lucidia    192.168.4.38   online  memory</span></div>
+  </div>
+</section>
+
+<section class="cmds">
+  <div class="sl">Reference</div>
+  <div class="st">Command reference.</div>
+  <div class="sd">Every command at your fingertips.</div>
+  <table class="ctable">
+    <thead><tr><th>Command</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td>br status</td><td>Show gateway health, loaded tools, default agent</td></tr>
+      <tr><td>br agents</td><td>List all registered agents with roles and status</td></tr>
+      <tr><td>br invoke &lt;agent&gt; &lt;task&gt;</td><td>Send a task to a specific agent for execution</td></tr>
+      <tr><td>br gateway health</td><td>Check gateway connectivity and uptime</td></tr>
+      <tr><td>br config</td><td>View or set CLI configuration values</td></tr>
+      <tr><td>br sa &lt;query&gt;</td><td>Search all 1,383 indexed entries across the ecosystem</td></tr>
+      <tr><td>br nodes status</td><td>Show status of all 5 edge nodes in the fleet</td></tr>
+      <tr><td>br deploy</td><td>Deploy to Cloudflare Pages or Workers</td></tr>
+      <tr><td>br health-check</td><td>Run comprehensive health diagnostics</td></tr>
+      <tr><td>br fleet</td><td>Fleet management, SSH, monitoring</td></tr>
+      <tr><td>br ai &lt;prompt&gt;</td><td>Query AI models through the tokenless gateway</td></tr>
+      <tr><td>br git-ai</td><td>AI-assisted git operations and commit messages</td></tr>
+      <tr><td>br security-scanner</td><td>Scan for vulnerabilities across the network</td></tr>
+      <tr><td>br metrics-dashboard</td><td>Real-time metrics visualization in terminal</td></tr>
+      <tr><td>br cloudflare</td><td>Manage Cloudflare resources: Pages, KV, D1, R2</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="demo">
+  <div class="sl">Try It</div>
+  <div class="st">Interactive demo.</div>
+  <div class="sd">Type a command and see what happens.</div>
+  <div class="demo-term">
+    <div class="tbar"><div class="td tr"></div><div class="td ty"></div><div class="td tg"></div></div>
+    <div id="demo-output"></div>
+    <div class="di-line">
+      <span class="di-prompt">blackroad $</span>
+      <input type="text" id="demo-input" placeholder="try: help, status, agents, nodes" autofocus>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="fb">BlackRoad OS</div>
+  <div class="fl">
+    <a href="https://blackroad.io">Home</a>
+    <a href="https://lucidia.earth">Lucidia</a>
+    <a href="https://blackroadai.com">AI</a>
+    <a href="https://blackroad.network">Network</a>
+    <a href="https://blackroad.systems">Status</a>
+    <a href="https://blackroad.company">Company</a>
+    <a href="https://brand.blackroad.io">Brand</a>
+    <a href="https://pay.blackroad.io">Pricing</a>
+    <a href="https://github.com/blackboxprogramming">GitHub</a>
+  </div>
+  <div class="fc">&copy; 2025-2026 BlackRoad OS, Inc. All rights reserved. Pave Tomorrow.</div>
+</footer>
+<div class="gbar"></div>
+
+<script>
+const responses={
+  help:'Available commands:\n  status    Show system status\n  agents    List AI agents\n  nodes     Show fleet nodes\n  sa        Search everything\n  deploy    Deploy to Cloudflare\n  ai        Query AI models\n  fleet     Fleet management\n  config    CLI configuration\n\n  90 tools total. Run br <tool> --help for details.',
+  status:'BlackRoad OS v2.0.0\n  Gateway: http://127.0.0.1:8787 (online)\n  Agent: octavia (default)\n  Tools: 90 loaded\n  Uptime: 14d 7h 23m',
+  agents:'  AGENT       ROLE                STATUS\n  octavia     The Architect       online\n  lucidia     The Dreamer         online\n  alice       The Operator        online\n  cecilia     Edge Intelligence   online\n  aria        The Interface       online\n  shellfish   The Hacker          idle',
+  nodes:'  NODE       IP              STATUS    ROLE\n  alice      192.168.4.49    online    gateway\n  cecilia    192.168.4.96    online    ai/edge\n  octavia    192.168.4.101   online    infra\n  aria       192.168.4.98    online    orchestration\n  lucidia    192.168.4.38    online    memory',
+  sa:'Usage: br sa <query>\n  Searches 1,383 entries across 23 indexers.\n  Example: br sa "hailo accelerator"',
+  deploy:'Usage: br deploy [target]\n  Targets: pages, worker, edge\n  Example: br deploy pages --project blackroad-io',
+  ai:'Usage: br ai <prompt>\n  Routes to optimal model via tokenless gateway.\n  29 models across 7 providers available.',
+  fleet:'Fleet Status: 5/5 nodes online\n  Total compute: 52 TOPS\n  WireGuard mesh: connected\n  Last health check: 2m ago'
+};
+const out=document.getElementById('demo-output');
+const inp=document.getElementById('demo-input');
+inp.addEventListener('keydown',e=>{
+  if(e.key==='Enter'){
+    const cmd=inp.value.trim().toLowerCase();
+    if(!cmd)return;
+    const line=document.createElement('div');
+    line.innerHTML='<span style="opacity:.3">blackroad $</span> '+cmd;
+    out.appendChild(line);
+    const res=document.createElement('div');
+    res.style.opacity='.5';
+    res.style.whiteSpace='pre';
+    res.style.marginBottom='8px';
+    res.textContent=responses[cmd]||'Unknown command: '+cmd+'. Type "help" for available commands.';
+    out.appendChild(res);
+    inp.value='';
+    inp.scrollIntoView({block:'nearest'});
+  }
+});
+</script>
+</body>
+</html>

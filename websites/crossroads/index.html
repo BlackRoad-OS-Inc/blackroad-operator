@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crossroads — Decisions Made Clear</title>
+<link rel="icon" type="image/png" sizes="32x32" href="https://images.blackroad.io/brand/br-square-32.png" />
+<link rel="apple-touch-icon" sizes="180x180" href="https://images.blackroad.io/brand/apple-touch-icon.png" />
+<meta property="og:image" content="https://images.blackroad.io/brand/br-square-512.png" />
+<meta name="description" content="Crossroads — Decision engine. Weighted criteria. Team voting. Audit trail. Never second-guess.">
+<link rel="stylesheet" href="../_shared/design.css">
+<style>
+  .hero { padding: var(--sp-xl) var(--sp-md); min-height: 100vh; display: flex; flex-direction: column; justify-content: center; }
+  @media (min-width: 768px) { .hero { padding: 0 var(--sp-xl); } }
+  .hero-sub { font-size: 1.1rem; color: var(--subtle); max-width: 480px; line-height: 1.7; margin: var(--sp-md) 0 var(--sp-xl); }
+  .btn-primary { display: inline-flex; align-items: center; gap: 8px; background: var(--grad); color: var(--white); padding: 14px 28px; font-weight: 700; font-size: 0.95rem; transition: opacity 0.2s; border: none; cursor: pointer; }
+  .btn-primary:hover { opacity: 0.9; }
+  .feature-card { background: var(--surface); border: 1px solid var(--border); padding: var(--sp-lg); transition: border-color 0.25s; }
+  .feature-card:hover { border-color: var(--muted); }
+  .feature-card h3 { margin-bottom: var(--sp-xs); }
+  .feature-card p { font-size: 0.85rem; color: var(--subtle); line-height: 1.6; }
+  .feature-icon { font-family: var(--jb); font-size: 1.2rem; color: var(--muted); margin-bottom: var(--sp-sm); }
+  .decision-matrix { background: var(--surface); border: 1px solid var(--border); margin: var(--sp-xl) 0; overflow-x: auto; }
+  .matrix-title { padding: var(--sp-md); border-bottom: 1px solid var(--border); font-family: var(--sg); font-weight: 600; }
+  .matrix-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+  .matrix-table th { padding: 10px var(--sp-md); text-align: left; font-family: var(--jb); font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; border-bottom: 1px solid var(--border); }
+  .matrix-table td { padding: 10px var(--sp-md); border-bottom: 1px solid var(--border); font-family: var(--in); color: var(--subtle); }
+  .matrix-table tr:last-child td { border-bottom: none; }
+  .score-bar { display: inline-block; height: 8px; background: var(--grad); background-size: 200% 100%; vertical-align: middle; margin-right: 8px; }
+  .winner { color: var(--white); font-weight: 600; }
+  .vote-row { display: flex; gap: var(--sp-sm); margin-top: var(--sp-sm); flex-wrap: wrap; }
+  .vote-chip { font-family: var(--jb); font-size: 0.65rem; padding: 3px 10px; background: var(--elevated); color: var(--subtle); border: 1px solid var(--border); }
+  .vote-chip.yes { border-color: #00D4FF; color: #00D4FF; }
+  .cta-section { text-align: center; padding: var(--sp-2xl) var(--sp-md); }
+  .cta-section h2 { margin-bottom: var(--sp-md); }
+  .cta-section p { max-width: 480px; margin: 0 auto var(--sp-xl); }
+</style>
+</head>
+<body class="dot-bg">
+  <nav>
+    <div class="nav-logo">Crossroads</div>
+    <div class="nav-links">
+      <a href="#matrix">Decisions</a>
+      <a href="#features">Features</a>
+      <a href="https://blackroad.io">BlackRoad OS</a>
+    </div>
+    <button class="nav-cta" onclick="location.href='#start'">Make a Decision</button>
+    <button class="nav-toggle" onclick="this.classList.toggle('open');document.getElementById('nav-mobile').classList.toggle('open')" aria-label="Menu"><span></span><span></span><span></span></button>
+  </nav>
+  <div id="nav-mobile" class="nav-mobile">
+    <a href="#matrix" onclick="document.getElementById('nav-mobile').classList.remove('open')">Decisions</a>
+    <a href="#features" onclick="document.getElementById('nav-mobile').classList.remove('open')">Features</a>
+    <a href="https://blackroad.io">BlackRoad OS</a>
+  </div>
+
+  <div class="hero">
+    <div class="section-label">Decision Engine</div>
+    <h1>Decisions<br>made clear.</h1>
+    <p class="hero-sub">Weighted criteria. Team voting. Full audit trail. Stop debating in Slack threads. Structure your decisions and never second-guess again.</p>
+    <a href="#start" class="btn-primary">Start a Decision</a>
+  </div>
+
+  <section id="matrix">
+    <div class="section-label">Live Decision</div>
+    <h2 style="margin-bottom:var(--sp-md);">Which database for the new service?</h2>
+    <div class="decision-matrix">
+      <div class="matrix-title">Weighted Scoring Matrix</div>
+      <table class="matrix-table">
+        <thead>
+          <tr><th>Criteria (weight)</th><th>PostgreSQL</th><th>SQLite</th><th>D1</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Performance (30%)</td>
+            <td><span class="score-bar" style="width:78px"></span>8.5</td>
+            <td><span class="score-bar" style="width:64px"></span>7.0</td>
+            <td><span class="score-bar" style="width:55px"></span>6.0</td>
+          </tr>
+          <tr>
+            <td>Self-hosted (25%)</td>
+            <td><span class="score-bar" style="width:82px"></span>9.0</td>
+            <td><span class="score-bar" style="width:91px"></span>10</td>
+            <td><span class="score-bar" style="width:18px"></span>2.0</td>
+          </tr>
+          <tr>
+            <td>Simplicity (20%)</td>
+            <td><span class="score-bar" style="width:46px"></span>5.0</td>
+            <td><span class="score-bar" style="width:82px"></span>9.0</td>
+            <td><span class="score-bar" style="width:73px"></span>8.0</td>
+          </tr>
+          <tr>
+            <td>Ecosystem (15%)</td>
+            <td class="winner"><span class="score-bar" style="width:91px"></span>10</td>
+            <td><span class="score-bar" style="width:55px"></span>6.0</td>
+            <td><span class="score-bar" style="width:37px"></span>4.0</td>
+          </tr>
+          <tr>
+            <td>Fleet-ready (10%)</td>
+            <td><span class="score-bar" style="width:73px"></span>8.0</td>
+            <td><span class="score-bar" style="width:82px"></span>9.0</td>
+            <td><span class="score-bar" style="width:27px"></span>3.0</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:var(--sp-md);">
+      <div>
+        <div style="font-family:var(--sg);font-size:1.4rem;font-weight:700;">Winner: SQLite</div>
+        <div style="font-family:var(--jb);font-size:0.75rem;color:var(--muted);">Weighted score: 8.35 / 10</div>
+      </div>
+      <div class="vote-row">
+        <span class="vote-chip yes">Octavia: SQLite</span>
+        <span class="vote-chip yes">Alice: SQLite</span>
+        <span class="vote-chip">Aria: PostgreSQL</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="features">
+    <div class="section-label">Capabilities</div>
+    <h2 style="margin-bottom:var(--sp-xl);">Structure beats intuition</h2>
+    <div class="grid-3">
+      <div class="feature-card">
+        <div class="feature-icon">W:[]</div>
+        <h3>Weighted Criteria</h3>
+        <p>Define what matters and how much. Assign weights to criteria. Math replaces arguments. Best option surfaces naturally.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">V:3</div>
+        <h3>Team Voting</h3>
+        <p>Async voting with optional anonymity. See where the team stands. Resolve ties with tiebreaker rules you define.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">T:&gt;</div>
+        <h3>Decision Timeline</h3>
+        <p>Every decision logged: who proposed, who voted, what was decided, and why. Full audit trail forever.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">AI:</div>
+        <h3>AI Analysis</h3>
+        <p>Crossroads analyzes your criteria and options, surfaces blind spots, and suggests criteria you may have missed.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">T:[]</div>
+        <h3>Templates</h3>
+        <p>Tech stack decisions, hiring, vendor selection, architecture reviews. Pre-built templates for common decisions.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">R:&lt;</div>
+        <h3>Reversibility Score</h3>
+        <p>Every decision rated on reversibility. One-way doors get extra scrutiny. Two-way doors ship fast.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="start" class="cta-section">
+    <div class="section-label">Get Started</div>
+    <h2>Decide with confidence.</h2>
+    <p>Your first structured decision in 2 minutes. Works for teams of 1 or 100.</p>
+    <a href="https://blackroad.io" class="btn-primary">Deploy Crossroads</a>
+  </section>
+
+  <footer>
+    <span>&copy; 2026 BlackRoad OS, Inc. &mdash; Pave Tomorrow.</span>
+    <span style="display:flex;gap:var(--sp-lg);flex-wrap:wrap;">
+      <a href="https://blackroad.io" style="color:var(--muted)">Home</a>
+      <a href="https://blackroadai.com" style="color:var(--muted)">AI</a>
+      <a href="https://blackroad.network" style="color:var(--muted)">Network</a>
+    </span>
+  </footer>
+</body>
+</html>

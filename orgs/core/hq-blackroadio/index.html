@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HQ — Pixel Art Headquarters | BlackRoad OS</title>
+<link rel="icon" type="image/x-icon" href="https://images.blackroad.io/brand/favicon.png" />
+<link rel="icon" type="image/png" sizes="192x192" href="https://images.blackroad.io/brand/br-square-192.png" />
+<link rel="apple-touch-icon" sizes="180x180" href="https://images.blackroad.io/brand/apple-touch-icon.png" />
+<meta property="og:image" content="https://images.blackroad.io/brand/blackroad-icon-512.png" />
+<meta property="og:title" content="HQ — Pixel Art Headquarters | BlackRoad OS" />
+<meta property="og:description" content="14 floors of pixel art metaverse. From the rooftop to the gym, every floor has a purpose and an agent." />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://images.blackroad.io/brand/blackroad-icon-512.png" />
+<meta name="description" content="14 floors of pixel art metaverse. From the rooftop to the gym, every floor has a purpose and an agent.">
+<style>
+:root{--g:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);--bg:#000;--card:#0a0a0a;--elevated:#111;--border:#1a1a1a;--text:#f5f5f5;--sg:'Space Grotesk',sans-serif;--jb:'JetBrains Mono',monospace}
+*{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}
+body{background:#000;color:var(--text);font-family:var(--sg);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:#000}::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#FF6B2B,#FF2255,#8844FF,#00D4FF);border-radius:3px}
+.hero{height:200vh;position:relative}
+.hero-pin{position:sticky;top:0;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
+.hero-title{font-size:clamp(60px,12vw,100px);font-weight:700;text-align:center;line-height:0.95;letter-spacing:-3px}
+.hero-sub{font-family:var(--jb);font-size:clamp(14px,1.8vw,20px);margin-top:24px;opacity:0.7;text-align:center}
+.grad-line{width:60%;max-width:600px;height:2px;margin:32px auto 0;background:var(--g);border-radius:2px}
+.grid-bg{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.03) 1px,transparent 1px);background-size:60px 60px;pointer-events:none}
+.gradient-line{height:1px;background:linear-gradient(90deg,transparent,#FF2255,#8844FF,#00D4FF,transparent)}
+section{padding:120px 40px;max-width:1200px;margin:0 auto}
+.section-label{font-family:var(--jb);font-size:13px;letter-spacing:3px;text-transform:uppercase;opacity:0.5;margin-bottom:16px}
+.section-title{font-size:clamp(32px,5vw,56px);font-weight:700;margin-bottom:48px;line-height:1.1}
+
+.building{display:flex;flex-direction:column;gap:1px;background:rgba(255,255,255,0.04)}
+.floor{display:grid;grid-template-columns:60px 1fr 160px;align-items:center;padding:20px 24px;background:#000;cursor:pointer;transition:all 0.3s;gap:16px}
+.floor:hover{background:rgba(255,255,255,0.03)}
+.floor.active{background:rgba(255,255,255,0.04);border-left:3px solid #fff}
+.floor-num{font-family:var(--jb);font-size:13px;opacity:0.3}
+.floor-name{font-weight:700;font-size:16px}
+.floor-desc{font-size:13px;opacity:0.4;margin-top:2px}
+.floor-agent{font-family:var(--jb);font-size:12px;opacity:0.4;text-align:right}
+.floor-detail{display:none;grid-column:1/-1;padding:16px 0 0 76px;font-size:14px;opacity:0.5;line-height:1.8}
+.floor.active .floor-detail{display:block}
+.floor-services{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.floor-svc{font-family:var(--jb);font-size:11px;padding:3px 10px;border:1px solid rgba(255,255,255,0.1);opacity:0.5}
+
+.elevator{border:1px solid rgba(255,255,255,0.12);padding:32px;margin-top:60px;text-align:center}
+.elevator-title{font-weight:700;font-size:20px;margin-bottom:16px}
+.elevator-buttons{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
+.elev-btn{width:44px;height:44px;border:1px solid rgba(255,255,255,0.12);background:transparent;color:#fff;font-family:var(--jb);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s}
+.elev-btn:hover,.elev-btn.active{border-color:#fff;background:rgba(255,255,255,0.06)}
+
+.floor-preview{border:1px solid rgba(255,255,255,0.1);padding:32px;margin-top:48px;min-height:200px;transition:all 0.3s}
+.floor-preview-title{font-weight:700;font-size:24px;margin-bottom:8px}
+.floor-preview-agent{font-family:var(--jb);font-size:13px;opacity:0.4;margin-bottom:16px}
+.floor-preview-desc{font-size:15px;opacity:0.6;line-height:1.8;margin-bottom:16px}
+.floor-preview-infra{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+.infra-item{border:1px solid rgba(255,255,255,0.06);padding:12px;font-family:var(--jb);font-size:12px;opacity:0.5}
+
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:24px;margin-top:60px}
+.stat-box{border:1px solid rgba(255,255,255,0.12);padding:24px;text-align:center;transition:border-color 0.3s}
+.stat-box:hover{border-color:rgba(255,255,255,0.25)}
+.stat-num{font-size:36px;font-weight:700;margin-bottom:4px}
+.stat-label{font-size:12px;font-family:var(--jb);opacity:0.4;text-transform:uppercase;letter-spacing:2px}
+
+.pixel-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-top:48px}
+.pixel-card{border:1px solid rgba(255,255,255,0.08);padding:16px;text-align:center;transition:all 0.3s;cursor:pointer}
+.pixel-card:hover{border-color:rgba(255,255,255,0.25);transform:translateY(-3px)}
+.pixel-name{font-family:var(--jb);font-size:11px;opacity:0.4;margin-top:8px}
+.pixel-placeholder{width:64px;height:64px;margin:0 auto;display:flex;align-items:center;justify-content:center;font-size:24px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06)}
+
+.agent-roster{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-top:48px}
+.agent-card{border:1px solid rgba(255,255,255,0.1);padding:24px;transition:all 0.3s}
+.agent-card:hover{border-color:rgba(255,255,255,0.3);transform:translateY(-2px)}
+.agent-name{font-weight:700;font-size:18px;margin-bottom:4px}
+.agent-role{font-family:var(--jb);font-size:12px;opacity:0.4;margin-bottom:12px}
+.agent-floor{font-size:13px;opacity:0.5}
+
+.fade-up{opacity:0;transform:translateY(40px);transition:opacity 0.8s,transform 0.8s}
+.fade-up.visible{opacity:1;transform:translateY(0)}
+footer{border-top:1px solid rgba(255,255,255,0.08);padding:60px 40px;text-align:center;margin-top:120px}
+footer nav{display:flex;flex-wrap:wrap;justify-content:center;gap:24px;margin-bottom:24px}
+footer a{color:rgba(255,255,255,0.4);text-decoration:none;font-size:14px;transition:color 0.3s}
+footer a:hover{color:#fff}
+footer p{font-size:13px;opacity:0.3}
+@media(max-width:768px){section{padding:80px 20px}.floor{grid-template-columns:1fr;gap:8px}.floor-agent{text-align:left}.pixel-gallery{grid-template-columns:repeat(3,1fr)}}
+</style>
+</head>
+<body>
+<div class="hero">
+<div class="hero-pin">
+<div class="grid-bg"></div>
+<h1 class="hero-title">HQ</h1>
+<p class="hero-sub">14 floors of your metaverse</p>
+<div class="grad-line"></div>
+</div>
+</div>
+
+<section class="fade-up">
+<div class="section-label">The Building</div>
+<h2 class="section-title">Welcome to BlackRoad HQ.</h2>
+<div class="building" id="building"></div>
+
+<div class="floor-preview" id="floor-preview">
+<div class="floor-preview-title">Select a floor</div>
+<div class="floor-preview-agent">Click any floor above or use the elevator</div>
+<div class="floor-preview-desc">Each floor of HQ maps to a real function in your infrastructure. Agents live here, work here, report here. All rendered on your device.</div>
+</div>
+
+<div class="elevator">
+<div class="elevator-title">Elevator</div>
+<div class="elevator-buttons" id="elevator"></div>
+</div>
+
+<div class="stats-row">
+<div class="stat-box"><div class="stat-num">14</div><div class="stat-label">Floors</div></div>
+<div class="stat-box"><div class="stat-num">50</div><div class="stat-label">Pixel Assets</div></div>
+<div class="stat-box"><div class="stat-num">5</div><div class="stat-label">Agents</div></div>
+<div class="stat-box"><div class="stat-num">1</div><div class="stat-label">Building</div></div>
+</div>
+</section>
+<div class="gradient-line"></div>
+
+<section class="fade-up">
+<div class="section-label">Agents</div>
+<h2 class="section-title">Who lives in HQ.</h2>
+<div class="agent-roster">
+<div class="agent-card"><div class="agent-name" style="color:#8844FF">Octavia</div><div class="agent-role">The Architect</div><div class="agent-floor">Executive Suite (14F) + Finance (5F)</div></div>
+<div class="agent-card"><div class="agent-name" style="color:#00C853">Alice</div><div class="agent-role">The Operator</div><div class="agent-floor">Engineering (12F) + Data Center (10F) + Operations (6F)</div></div>
+<div class="agent-card"><div class="agent-name" style="color:#00D4FF">Lucidia</div><div class="agent-role">The Dreamer</div><div class="agent-floor">Research Lab (13F) + Library (4F)</div></div>
+<div class="agent-card"><div class="agent-name" style="color:#4488FF">Aria</div><div class="agent-role">The Interface</div><div class="agent-floor">Design Studio (11F) + Communications (8F) + Lobby (L)</div></div>
+<div class="agent-card"><div class="agent-name" style="color:#FF2255">Shellfish</div><div class="agent-role">The Hacker</div><div class="agent-floor">Security (7F) + Gym (B)</div></div>
+</div>
+</section>
+<div class="gradient-line"></div>
+
+<section class="fade-up">
+<div class="section-label">Pixel Art</div>
+<h2 class="section-title">50 assets on R2.</h2>
+<p style="opacity:0.6;font-size:16px;line-height:1.8;max-width:640px;margin-bottom:24px">Every floor has its own pixel art assets stored on Cloudflare R2 at images.blackroad.io/pixel-art/. Each one was created for the BlackRoad metaverse and renamed for consistency.</p>
+<div class="pixel-gallery" id="pixel-gallery"></div>
+</section>
+<div class="gradient-line"></div>
+
+<section class="fade-up">
+<div class="section-label">Vision</div>
+<h2 class="section-title">Your digital space. Your rules.</h2>
+<p style="opacity:0.6;font-size:16px;line-height:1.8;max-width:640px;margin-bottom:24px">HQ is a pixel art metaverse that maps to real infrastructure. Each floor represents a function — from the executive rooftop to the basement gym. Agents live here, work here, report here. All rendered on your device.</p>
+<p style="opacity:0.4;font-size:14px;line-height:1.8;max-width:640px">The building is more than a visual — it is a navigable interface to your infrastructure. Click a floor to see what services run there, which agent is responsible, and what that function does in your network. No cloud rendering. No subscription. Just your HQ.</p>
+</section>
+
+<footer>
+<nav>
+<a href="https://blackroad.io">Home</a><a href="https://lucidia.earth">Lucidia</a><a href="https://blackroadai.com">AI</a>
+<a href="https://blackroad.network">Network</a><a href="https://blackroad.systems">Cloud</a><a href="https://blackroad.company">Company</a>
+<a href="https://pay.blackroad.io">Pricing</a><a href="https://search.blackroad.io">Search</a><a href="https://github.com/blackboxprogramming">GitHub</a>
+</nav>
+<p>BlackRoad OS — Pave Tomorrow.</p>
+<p style="margin-top:8px">&copy; 2025-2026 BlackRoad OS, Inc. All rights reserved.</p>
+</footer>
+
+<script>
+const floors=[
+{num:'R',name:'Rooftop',desc:'Satellite uplink and observation deck',agent:'Octavia',detail:'Panoramic view of the entire network. Real-time dashboards, status boards, and the main antenna array. WireGuard mesh visualization and fleet-wide monitoring.',services:['Status Dashboard','WireGuard Monitor','Mesh Visualizer'],infra:['7 nodes tracked','20 domains monitored','52 TOPS utilization']},
+{num:'14',name:'Executive Suite',desc:'Strategy and planning',agent:'Octavia',detail:'Where the big decisions happen. Roadmaps, OKRs, and the war room for incident response. Octavia runs planning sessions, sprint reviews, and architecture decisions.',services:['OKR Tracker','Sprint Planner','War Room'],infra:['Infinite Todos system','Task Marketplace','Memory journal']},
+{num:'13',name:'Research Lab',desc:'Experimental AI models',agent:'Lucidia',detail:'Testing ground for new models, embedding experiments, and RAG pipeline development. Lucidia runs experiments with nomic-embed-text and tests new Ollama models before fleet deployment.',services:['Model Testing','RAG Pipeline','Embedding Bench'],infra:['16 Ollama models','nomic-embed-text','Qdrant 156K vectors']},
+{num:'12',name:'Engineering',desc:'Core development floor',agent:'Alice',detail:'The main build floor. CI/CD pipelines, code review stations, and deployment consoles. Alice manages the entire development lifecycle from commit to deploy.',services:['CI/CD Pipeline','Code Review','Deploy Console'],infra:['Gitea 207 repos','GitHub Actions runner','12/12 tests passing']},
+{num:'11',name:'Design Studio',desc:'UI/UX and brand',agent:'Aria',detail:'Pixel art workstations, brand guidelines, component library development. Aria designs the interface layer — from the 30-site ecosystem footer to individual component blocks.',services:['Pixel Art Studio','Brand Guidelines','Component Library'],infra:['50 pixel assets','30 sites styled','24 UI components']},
+{num:'10',name:'Data Center',desc:'Database and storage',agent:'Alice',detail:'PostgreSQL, Qdrant, SQLite databases, R2/S3 object storage terminals. Alice manages the entire data layer — 228 SQLite databases, 8 D1 edges, 40 KV namespaces.',services:['PostgreSQL','Qdrant Vectors','SQLite Manager'],infra:['228 databases','184MB FTS5 index','10 R2 buckets']},
+{num:'9',name:'Agent Quarters',desc:'Agent dormitory and briefing',agent:'All',detail:'Where agents rest between tasks. Briefing room, skill inventory, memory banks. All 5 agents check in here for task assignments and status updates via NATS pub/sub.',services:['Briefing Room','Skill Inventory','Memory Banks'],infra:['50 AI skills','5 active agents','NATS messaging']},
+{num:'8',name:'Communications',desc:'NATS messaging hub',agent:'Aria',detail:'Message routing, pub/sub consoles, Slack integration, webhook dispatch. Aria routes communications between agents, external webhooks (GitHub Squad), and Slack notifications.',services:['NATS Console','Slack Hub','Webhook Router'],infra:['NATS v2.12.3','Squad Webhook (69 repos)','Slack integration']},
+{num:'7',name:'Security',desc:'Auth and compliance',agent:'Shellfish',detail:'JWT validation, rate limiting, port scanning, vulnerability assessment stations. Shellfish runs security audits, manages the tokenless architecture, and monitors agent permissions.',services:['JWT Auth','Port Scanner','Vuln Assessment'],infra:['42 users','auth.blackroad.io','Agent permissions matrix']},
+{num:'6',name:'Operations',desc:'Fleet management',agent:'Alice',detail:'Service control panels, health monitors, cron job management, log aggregation. Alice runs the fleet from this floor — every 5-minute health check, every daily backup, every service restart.',services:['Service Panel','Health Monitor','Cron Manager'],infra:['*/5 health checks','Daily 3am backup','99.9% uptime']},
+{num:'5',name:'Finance',desc:'Billing and payments',agent:'Octavia',detail:'RoadPay dashboard, Stripe integration, subscription management, revenue tracking. Octavia oversees the billing system — 4 plans, 4 add-ons, D1 tollbooth database at the edge.',services:['RoadPay Dashboard','Stripe Console','Revenue Tracker'],infra:['4 plans + 4 add-ons','D1 tollbooth','pay.blackroad.io']},
+{num:'4',name:'Library',desc:'Codex and knowledge base',agent:'Lucidia',detail:'Full-text search terminals, pattern database, TIL broadcasts, solution archive. Lucidia manages the knowledge layer — 1,383 indexed entries from 23 sources across 28 entity types.',services:['FTS5 Search','Codex Patterns','TIL Broadcast'],infra:['1,383 entries','23 indexers','28 entity types']},
+{num:'L',name:'Lobby',desc:'Welcome and reception',agent:'Aria',detail:'Visitor check-in, directory board, elevator access, the main entrance to BlackRoad HQ. Aria greets visitors and provides navigation across the 14-floor building.',services:['Directory Board','Visitor Check-in','Navigation'],infra:['blackroad.io','30-site ecosystem','Brand manifesto']},
+{num:'B',name:'Gym',desc:'Performance training',agent:'Shellfish',detail:'Benchmark stations, load testing rigs, stress test equipment, endurance monitoring. Shellfish runs the performance lab — Hailo-8 benchmarks, inference timing, and fleet stress tests.',services:['Benchmark Suite','Load Tester','Stress Monitor'],infra:['52 TOPS benchmark','2x Hailo-8','5 Pi stress tests']}
+];
+
+function render(){
+  const b=document.getElementById('building');
+  b.innerHTML=floors.map((f,i)=>`<div class="floor${i===0?' active':''}" onclick="selectFloor(${i})">
+    <div class="floor-num">${f.num}</div>
+    <div>
+      <div class="floor-name">${f.name}</div>
+      <div class="floor-desc">${f.desc}</div>
+      <div class="floor-detail">${f.detail}
+        <div class="floor-services">${f.services.map(s=>`<span class="floor-svc">${s}</span>`).join('')}</div>
+      </div>
+    </div>
+    <div class="floor-agent">${f.agent}</div>
+  </div>`).join('');
+  const e=document.getElementById('elevator');
+  e.innerHTML=floors.map((f,i)=>`<button class="elev-btn${i===0?' active':''}" onclick="selectFloor(${i})">${f.num}</button>`).join('');
+  selectFloor(0);
+}
+
+function selectFloor(idx){
+  document.querySelectorAll('.floor').forEach((f,i)=>f.classList.toggle('active',i===idx));
+  document.querySelectorAll('.elev-btn').forEach((b,i)=>b.classList.toggle('active',i===idx));
+  const f=floors[idx];
+  const preview=document.getElementById('floor-preview');
+  preview.innerHTML=`<div class="floor-preview-title">${f.num==='R'?'Rooftop':f.num==='L'?'Lobby':f.num==='B'?'Gym':'Floor '+f.num} — ${f.name}</div>
+    <div class="floor-preview-agent">Agent: ${f.agent}</div>
+    <div class="floor-preview-desc">${f.detail}</div>
+    <div class="floor-preview-infra">${f.infra.map(i=>`<div class="infra-item">${i}</div>`).join('')}${f.services.map(s=>`<div class="infra-item">${s}</div>`).join('')}</div>`;
+  document.querySelectorAll('.floor')[idx].scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+const pixelAssets=['rooftop','executive','research-lab','engineering','design-studio','data-center','agent-quarters','comms-hub','security','operations','finance','library','lobby','gym','octavia-desk','alice-terminal','lucidia-crystal','aria-canvas','shellfish-scanner','elevator','stairwell','server-rack','antenna-array','briefing-table','status-board','neon-sign','coffee-machine','whiteboard','monitor-wall','filing-cabinet','plant-pot','desk-lamp','keyboard','mouse','chair-office','bookshelf','trophy','clock-wall','fire-extinguisher','security-camera','door-glass','window-city','pipe-network','cable-tray','ventilation','solar-panel','satellite-dish','router-box','badge-reader','key-card'];
+document.getElementById('pixel-gallery').innerHTML=pixelAssets.map(a=>`<div class="pixel-card"><div class="pixel-placeholder">${a.charAt(0).toUpperCase()}</div><div class="pixel-name">${a}.png</div></div>`).join('');
+
+render();
+const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible')})},{threshold:0.15});
+document.querySelectorAll('.fade-up').forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>

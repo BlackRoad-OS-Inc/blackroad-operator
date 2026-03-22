@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BlackRoad Live Stats</title>
+<link rel="icon" type="image/png" sizes="32x32" href="https://images.blackroad.io/brand/br-square-32.png" />
+<meta name="description" content="Real-time stats for the entire BlackRoad fleet.">
+<link rel="stylesheet" href="../_shared/design.css">
+<style>
+.hero{padding:var(--sp-xl) var(--sp-md);min-height:40vh;display:flex;flex-direction:column;justify-content:center}
+@media(min-width:768px){.hero{padding:var(--sp-2xl) var(--sp-xl)}}
+.stats-mega{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--sp-md)}
+@media(min-width:600px){.stats-mega{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:900px){.stats-mega{grid-template-columns:repeat(5,1fr)}}
+.stat-box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:var(--sp-lg);text-align:center;transition:border-color .2s}
+.stat-box:hover{border-color:var(--muted)}
+.stat-num{font-size:2rem;font-weight:800;font-family:var(--jb);letter-spacing:-.04em;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+@media(min-width:768px){.stat-num{font-size:2.5rem}}
+.stat-label{font-family:var(--jb);font-size:.65rem;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;margin-top:4px}
+.pulse{animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.live-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#22c55e;margin-right:6px;animation:pulse 2s ease-in-out infinite}
+.updated{font-family:var(--jb);font-size:.7rem;color:var(--muted);margin-top:var(--sp-lg);text-align:center}
+</style>
+</head>
+<body class="dot-bg">
+<nav>
+<div class="nav-logo"><span class="live-dot"></span>Live Stats</div>
+<div class="nav-links"><a href="https://blackroad.io">BlackRoad OS</a></div>
+<button class="nav-toggle" onclick="this.classList.toggle('open');document.getElementById('nav-mobile').classList.toggle('open')" aria-label="Menu"><span></span><span></span><span></span></button>
+</nav>
+<div id="nav-mobile" class="nav-mobile"><a href="https://blackroad.io">BlackRoad OS</a></div>
+
+<div class="hero">
+<div class="section-label"><span class="live-dot"></span>Real-Time Fleet Data</div>
+<h1>BlackRoad by<br>the numbers.</h1>
+</div>
+
+<section>
+<div class="stats-mega" id="stats">
+<div class="stat-box"><div class="stat-num" id="s-repos">—</div><div class="stat-label">Repos</div></div>
+<div class="stat-box"><div class="stat-num" id="s-agents">—</div><div class="stat-label">Agents</div></div>
+<div class="stat-box"><div class="stat-num" id="s-sites">—</div><div class="stat-label">Sites</div></div>
+<div class="stat-box"><div class="stat-num" id="s-devices">—</div><div class="stat-label">Devices</div></div>
+<div class="stat-box"><div class="stat-num" id="s-services">—</div><div class="stat-label">Services</div></div>
+<div class="stat-box"><div class="stat-num" id="s-domains">—</div><div class="stat-label">Domains</div></div>
+<div class="stat-box"><div class="stat-num" id="s-dns">—</div><div class="stat-label">DNS Records</div></div>
+<div class="stat-box"><div class="stat-num" id="s-codex">—</div><div class="stat-label">Codex Solutions</div></div>
+<div class="stat-box"><div class="stat-num" id="s-journal">—</div><div class="stat-label">Journal Entries</div></div>
+<div class="stat-box"><div class="stat-num" id="s-webhooks">—</div><div class="stat-label">Webhooks</div></div>
+<div class="stat-box"><div class="stat-num" id="s-tops">—</div><div class="stat-label">TOPS</div></div>
+<div class="stat-box"><div class="stat-num" id="s-caddy">—</div><div class="stat-label">Caddy Vhosts</div></div>
+<div class="stat-box"><div class="stat-num" id="s-todos">—</div><div class="stat-label">Todos</div></div>
+<div class="stat-box"><div class="stat-num" id="s-tils">—</div><div class="stat-label">TIL Broadcasts</div></div>
+<div class="stat-box"><div class="stat-num" id="s-collab">—</div><div class="stat-label">Collab Messages</div></div>
+</div>
+<div class="updated" id="updated">Loading...</div>
+</section>
+
+<footer>
+<span>© 2026 BlackRoad OS, Inc. — Pave Tomorrow.</span>
+</footer>
+
+<script>
+const map = {
+  repos:'s-repos', agents:'s-agents', sites:'s-sites', devices:'s-devices',
+  services:'s-services', domains:'s-domains', dns_records:'s-dns',
+  codex_solutions:'s-codex', journal_entries:'s-journal', webhooks:'s-webhooks',
+  tops:'s-tops', caddy_vhosts:'s-caddy', todos:'s-todos',
+  til_broadcasts:'s-tils', collab_messages:'s-collab'
+};
+
+function animateCount(el, target) {
+  const current = parseInt(el.textContent) || 0;
+  if (current === target) return;
+  const step = Math.max(1, Math.ceil(Math.abs(target - current) / 30));
+  let val = current;
+  const timer = setInterval(() => {
+    val += (target > current) ? step : -step;
+    if ((target > current && val >= target) || (target < current && val <= target)) {
+      val = target;
+      clearInterval(timer);
+    }
+    el.textContent = val.toLocaleString();
+  }, 20);
+}
+
+async function load() {
+  try {
+    const r = await fetch('/stats/data.json');
+    const d = await r.json();
+    for (const [key, elId] of Object.entries(map)) {
+      const el = document.getElementById(elId);
+      if (el && d[key] !== undefined) animateCount(el, parseInt(d[key]));
+    }
+    if (d.generated_at) {
+      document.getElementById('updated').textContent = 'Updated: ' + new Date(d.generated_at).toLocaleString();
+    }
+  } catch(e) {
+    // Fallback hardcoded
+    const fallback = {repos:615,agents:60,sites:238,devices:8,services:20,domains:20,dns_records:82,codex_solutions:185,journal_entries:1128,webhooks:396,tops:52,caddy_vhosts:91,todos:170,til_broadcasts:400,collab_messages:141};
+    for (const [key, elId] of Object.entries(map)) {
+      const el = document.getElementById(elId);
+      if (el && fallback[key]) animateCount(el, fallback[key]);
+    }
+    document.getElementById('updated').textContent = 'Showing cached data';
+  }
+}
+load();
+setInterval(load, 30000);
+</script>
+</body>
+</html>

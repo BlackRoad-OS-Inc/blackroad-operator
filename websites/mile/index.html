@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mile — Track Every Milestone</title>
+<link rel="icon" type="image/png" sizes="32x32" href="https://images.blackroad.io/brand/br-square-32.png" />
+<link rel="apple-touch-icon" sizes="180x180" href="https://images.blackroad.io/brand/apple-touch-icon.png" />
+<meta property="og:image" content="https://images.blackroad.io/brand/br-square-512.png" />
+<meta name="description" content="Mile — Project progress tracking. OKRs, sprints, milestones, visual roadmaps.">
+<link rel="stylesheet" href="../_shared/design.css">
+<style>
+  .hero { padding: var(--sp-xl) var(--sp-md); min-height: 100vh; display: flex; flex-direction: column; justify-content: center; }
+  @media (min-width: 768px) { .hero { padding: 0 var(--sp-xl); } }
+  .hero-sub { font-size: 1.1rem; color: var(--subtle); max-width: 480px; line-height: 1.7; margin: var(--sp-md) 0 var(--sp-xl); }
+  .btn-primary { display: inline-flex; align-items: center; gap: 8px; background: var(--grad); color: var(--white); padding: 14px 28px; font-weight: 700; font-size: 0.95rem; transition: opacity 0.2s; border: none; cursor: pointer; }
+  .btn-primary:hover { opacity: 0.9; }
+  .feature-card { background: var(--surface); border: 1px solid var(--border); padding: var(--sp-lg); transition: border-color 0.25s; }
+  .feature-card:hover { border-color: var(--muted); }
+  .feature-card h3 { margin-bottom: var(--sp-xs); }
+  .feature-card p { font-size: 0.85rem; color: var(--subtle); line-height: 1.6; }
+  .feature-icon { font-family: var(--jb); font-size: 1.2rem; color: var(--muted); margin-bottom: var(--sp-sm); }
+  .roadmap { margin: var(--sp-xl) 0; }
+  .milestone { display: flex; gap: var(--sp-md); margin-bottom: var(--sp-lg); align-items: flex-start; }
+  .milestone-marker { width: 40px; flex-shrink: 0; display: flex; flex-direction: column; align-items: center; }
+  .milestone-dot { width: 16px; height: 16px; border-radius: 50%; background: var(--border); }
+  .milestone-dot.done { background: linear-gradient(135deg, #FF6B2B, #FF2255); }
+  .milestone-dot.active { background: linear-gradient(135deg, #4488FF, #00D4FF); box-shadow: 0 0 12px rgba(68,136,255,0.4); }
+  .milestone-line { width: 2px; flex: 1; background: var(--border); min-height: 30px; }
+  .milestone-content { flex: 1; background: var(--surface); border: 1px solid var(--border); padding: var(--sp-md); }
+  .milestone-content h4 { font-family: var(--sg); font-size: 0.95rem; margin-bottom: 4px; }
+  .milestone-content p { font-size: 0.8rem; color: var(--subtle); line-height: 1.5; }
+  .milestone-meta { font-family: var(--jb); font-size: 0.7rem; color: var(--muted); margin-top: 6px; }
+  .progress-bar { height: 6px; background: var(--elevated); margin-top: 8px; }
+  .progress-fill { height: 100%; background: var(--grad); background-size: 200% 100%; animation: gradShift 4s linear infinite; }
+  .stat-row { display: flex; gap: var(--sp-md); margin-top: var(--sp-xl); flex-wrap: wrap; }
+  .stat { flex: 1; min-width: 120px; text-align: center; padding: var(--sp-lg); background: var(--surface); border: 1px solid var(--border); }
+  .stat .num { font-family: var(--sg); font-size: 1.8rem; font-weight: 700; background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .stat .label { font-family: var(--jb); font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 4px; }
+  .cta-section { text-align: center; padding: var(--sp-2xl) var(--sp-md); }
+  .cta-section h2 { margin-bottom: var(--sp-md); }
+  .cta-section p { max-width: 480px; margin: 0 auto var(--sp-xl); }
+</style>
+</head>
+<body class="dot-bg">
+  <nav>
+    <div class="nav-logo">Mile</div>
+    <div class="nav-links">
+      <a href="#roadmap">Roadmap</a>
+      <a href="#features">Features</a>
+      <a href="https://blackroad.io">BlackRoad OS</a>
+    </div>
+    <button class="nav-cta" onclick="location.href='#start'">Start Tracking</button>
+    <button class="nav-toggle" onclick="this.classList.toggle('open');document.getElementById('nav-mobile').classList.toggle('open')" aria-label="Menu"><span></span><span></span><span></span></button>
+  </nav>
+  <div id="nav-mobile" class="nav-mobile">
+    <a href="#roadmap" onclick="document.getElementById('nav-mobile').classList.remove('open')">Roadmap</a>
+    <a href="#features" onclick="document.getElementById('nav-mobile').classList.remove('open')">Features</a>
+    <a href="https://blackroad.io">BlackRoad OS</a>
+  </div>
+
+  <div class="hero">
+    <div class="section-label">Progress Tracker</div>
+    <h1>Track every<br>milestone.</h1>
+    <p class="hero-sub">OKRs, sprints, milestones, and visual roadmaps. Know exactly where every project stands. No status meetings. No spreadsheets. Just clarity.</p>
+    <a href="#start" class="btn-primary">Create a Roadmap</a>
+  </div>
+
+  <section id="roadmap">
+    <div class="section-label">Live Roadmap</div>
+    <h2 style="margin-bottom:var(--sp-xl);">BlackRoad OS Q1 2026</h2>
+    <div class="roadmap">
+      <div class="milestone">
+        <div class="milestone-marker"><div class="milestone-dot done"></div><div class="milestone-line"></div></div>
+        <div class="milestone-content">
+          <h4>Sovereignty Stack</h4>
+          <p>Self-hosted DNS, TLS, Git, AI, Workers, Object Storage. Zero external dependencies.</p>
+          <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+          <div class="milestone-meta">Completed &mdash; 14 Mar 2026</div>
+        </div>
+      </div>
+      <div class="milestone">
+        <div class="milestone-marker"><div class="milestone-dot done"></div><div class="milestone-line"></div></div>
+        <div class="milestone-content">
+          <h4>Agent Fleet v2</h4>
+          <p>35 agents deployed. RoundTrip sovereign chat. NATS mesh live on 4 nodes.</p>
+          <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+          <div class="milestone-meta">Completed &mdash; 17 Mar 2026</div>
+        </div>
+      </div>
+      <div class="milestone">
+        <div class="milestone-marker"><div class="milestone-dot active"></div><div class="milestone-line"></div></div>
+        <div class="milestone-content">
+          <h4>BlackBox Protocol</h4>
+          <p>Multi-network mesh: Tor, IPFS, BitTorrent, WebRTC. Ternary routing. Browser SDK.</p>
+          <div class="progress-bar"><div class="progress-fill" style="width:62%"></div></div>
+          <div class="milestone-meta">In Progress &mdash; 62% complete</div>
+        </div>
+      </div>
+      <div class="milestone">
+        <div class="milestone-marker"><div class="milestone-dot"></div></div>
+        <div class="milestone-content">
+          <h4>RoadPay Launch</h4>
+          <p>Billing, subscriptions, usage metering. Stripe as card processor only.</p>
+          <div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div>
+          <div class="milestone-meta">Upcoming &mdash; Q2 2026</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="features">
+    <div class="section-label">Capabilities</div>
+    <h2 style="margin-bottom:var(--sp-xl);">Built for builders</h2>
+    <div class="grid-3">
+      <div class="feature-card">
+        <div class="feature-icon">OKR</div>
+        <h3>OKR Tracking</h3>
+        <p>Set objectives and key results. Auto-calculated progress. Roll up from tasks to milestones to company goals.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">SPR</div>
+        <h3>Sprint Planning</h3>
+        <p>Two-week sprints with velocity tracking. Burndown charts. Carry-over detection. Scope creep alerts.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">VIS</div>
+        <h3>Visual Roadmaps</h3>
+        <p>Timeline view, board view, list view. Drag milestones. Set dependencies. Share with stakeholders.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">DEP</div>
+        <h3>Dependencies</h3>
+        <p>Link milestones across projects. Blocked items surfaced automatically. Critical path highlighted.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">RPT</div>
+        <h3>Auto-Reports</h3>
+        <p>Weekly progress digests generated from actual work. No manual updates. AI summarizes what shipped.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">API</div>
+        <h3>API-First</h3>
+        <p>Every feature accessible via REST API. Build custom dashboards. Integrate with CI/CD. Automate everything.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="start" class="cta-section">
+    <div class="section-label">Get Started</div>
+    <h2>Know where you stand.</h2>
+    <p>Import from GitHub Issues, Jira, or start fresh. Your first roadmap in under 3 minutes.</p>
+    <a href="https://blackroad.io" class="btn-primary">Deploy Mile</a>
+  </section>
+
+  <footer>
+    <span>&copy; 2026 BlackRoad OS, Inc. &mdash; Pave Tomorrow.</span>
+    <span style="display:flex;gap:var(--sp-lg);flex-wrap:wrap;">
+      <a href="https://blackroad.io" style="color:var(--muted)">Home</a>
+      <a href="https://blackroadai.com" style="color:var(--muted)">AI</a>
+      <a href="https://blackroad.network" style="color:var(--muted)">Network</a>
+    </span>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920,height=1080">
+<title>BlackBoard — Product Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Inter:wght@300;400&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1920px;height:1080px;overflow:hidden;background:#000;color:#fff;font-family:'Space Grotesk',sans-serif}
+.scene{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;opacity:0;transition:opacity .8s}
+.scene.active{opacity:1}
+.mono{font-family:'JetBrains Mono',monospace}
+.grad{background:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.grad-line{height:3px;border-radius:2px;background:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF)}
+
+/* Feature comparison */
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:48px;width:1100px}
+.compare-col{text-align:left}
+.compare-title{font-size:14px;text-transform:uppercase;letter-spacing:.2em;margin-bottom:24px;color:rgba(255,255,255,.3)}
+.compare-item{padding:12px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:16px;display:flex;align-items:center;gap:12px;opacity:0;transform:translateX(-10px);transition:all .4s}
+.compare-item.visible{opacity:1;transform:translateX(0)}
+.compare-item .x{color:#ef4444;font-size:14px}
+.compare-item .check{color:#22c55e;font-size:14px}
+.strikethrough{text-decoration:line-through;color:rgba(255,255,255,.2)}
+
+/* Data flow animation */
+.flow{position:relative;width:1400px;height:500px}
+.flow-stage{position:absolute;border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:20px 28px;text-align:center;opacity:0;transition:all .6s;transform:scale(.9)}
+.flow-stage.visible{opacity:1;transform:scale(1)}
+.flow-stage .stage-icon{font-size:32px;margin-bottom:8px}
+.flow-stage .stage-name{font-size:14px;font-weight:600;margin-bottom:4px}
+.flow-stage .stage-detail{font-size:11px;color:rgba(255,255,255,.3);font-family:'JetBrains Mono',monospace}
+
+/* Arrow */
+.flow-arrow{position:absolute;color:rgba(255,255,255,.15);font-size:24px;opacity:0;transition:opacity .5s}
+.flow-arrow.visible{opacity:1}
+
+/* Metric tiles */
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;width:1100px}
+.metric-tile{border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:24px;text-align:left;opacity:0;transform:translateY(20px);transition:all .5s}
+.metric-tile.visible{opacity:1;transform:translateY(0)}
+.metric-tile .mv{font-family:'JetBrains Mono',monospace;font-size:32px;font-weight:700}
+.metric-tile .ml{font-size:11px;text-transform:uppercase;letter-spacing:.15em;color:rgba(255,255,255,.3);margin-top:6px;font-family:'JetBrains Mono',monospace}
+.metric-tile .md{font-size:12px;color:rgba(255,255,255,.15);margin-top:4px;font-family:'JetBrains Mono',monospace}
+
+/* Code embed */
+.embed-box{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:40px 56px;text-align:center;max-width:800px}
+.embed-code{font-family:'JetBrains Mono',monospace;font-size:22px;color:#fff;margin:24px 0;padding:20px;background:rgba(255,255,255,.03);border-radius:8px;border:1px solid rgba(255,255,255,.06)}
+</style>
+</head>
+<body>
+
+<!-- SCENE 1: Title -->
+<div class="scene" id="s1">
+  <div class="mono" style="font-size:13px;letter-spacing:.3em;color:rgba(255,255,255,.3);margin-bottom:16px">PRODUCT</div>
+  <div style="font-size:64px;font-weight:700">Black<span class="grad">Board</span></div>
+  <div class="grad-line" style="width:200px;margin-top:24px"></div>
+  <div style="font-size:20px;color:rgba(255,255,255,.4);margin-top:20px;font-weight:300">Sovereign Analytics. Zero dependencies.</div>
+</div>
+
+<!-- SCENE 2: What it replaces -->
+<div class="scene" id="s2">
+  <div class="compare">
+    <div class="compare-col">
+      <div class="compare-title">They charge you for</div>
+      <div class="compare-item"><span class="x">✗</span> <span class="strikethrough">Google Analytics</span></div>
+      <div class="compare-item"><span class="x">✗</span> <span class="strikethrough">HubSpot CRM</span></div>
+      <div class="compare-item"><span class="x">✗</span> <span class="strikethrough">Hotjar Heatmaps</span></div>
+      <div class="compare-item"><span class="x">✗</span> <span class="strikethrough">Sentry Error Tracking</span></div>
+      <div class="compare-item"><span class="x">✗</span> <span class="strikethrough">FullStory Session Replay</span></div>
+      <div class="compare-item"><span class="x">✗</span> <span class="strikethrough">Facebook Pixel</span></div>
+      <div class="compare-item"><span class="x">✗</span> <span class="strikethrough">Cloudflare Bot Management</span></div>
+    </div>
+    <div class="compare-col">
+      <div class="compare-title">We built it sovereign</div>
+      <div class="compare-item"><span class="check">✓</span> 200+ data points per visitor</div>
+      <div class="compare-item"><span class="check">✓</span> CRM with lead scoring</div>
+      <div class="compare-item"><span class="check">✓</span> Click heatmaps + rage detection</div>
+      <div class="compare-item"><span class="check">✓</span> JS errors + stack traces</div>
+      <div class="compare-item"><span class="check">✓</span> Full navigation path replay</div>
+      <div class="compare-item"><span class="check">✓</span> Multi-touch attribution</div>
+      <div class="compare-item"><span class="check">✓</span> Bot detection + threat scoring</div>
+    </div>
+  </div>
+</div>
+
+<!-- SCENE 3: Data flow -->
+<div class="scene" id="s3">
+  <div style="font-size:14px;letter-spacing:.2em;color:rgba(255,255,255,.3);margin-bottom:32px" class="mono">DATA FLOW</div>
+  <div class="flow">
+    <div class="flow-stage" style="left:0;top:180px"><div class="stage-icon">&#x1F310;</div><div class="stage-name">Visitor</div><div class="stage-detail">any of 48+ domains</div></div>
+    <div class="flow-arrow" style="left:150px;top:210px">→</div>
+    <div class="flow-stage" style="left:200px;top:180px"><div class="stage-icon">&#x1F4DC;</div><div class="stage-name">bb.js</div><div class="stage-detail">8KB beacon • 0 cookies</div></div>
+    <div class="flow-arrow" style="left:380px;top:210px">→</div>
+    <div class="flow-stage" style="left:430px;top:100px"><div class="stage-icon">&#x1F6E1;</div><div class="stage-name">Bot Detection</div><div class="stage-detail">multi-signal scoring</div></div>
+    <div class="flow-stage" style="left:430px;top:260px"><div class="stage-icon">&#x1F9EC;</div><div class="stage-name">Fingerprint</div><div class="stage-detail">canvas + webgl + audio</div></div>
+    <div class="flow-arrow" style="left:630px;top:210px">→</div>
+    <div class="flow-stage" style="left:680px;top:100px"><div class="stage-icon">&#x1F4CA;</div><div class="stage-name">D1 Database</div><div class="stage-detail">10 tables • 40+ indexes</div></div>
+    <div class="flow-stage" style="left:680px;top:260px"><div class="stage-icon">&#x26A1;</div><div class="stage-name">Analytics Engine</div><div class="stage-detail">100K events/day free</div></div>
+    <div class="flow-arrow" style="left:880px;top:210px">→</div>
+    <div class="flow-stage" style="left:930px;top:180px"><div class="stage-icon">&#x1F3AF;</div><div class="stage-name">Dashboard</div><div class="stage-detail">real-time • 30+ API endpoints</div></div>
+    <div class="flow-arrow" style="left:1120px;top:210px">→</div>
+    <div class="flow-stage" style="left:1170px;top:180px"><div class="stage-icon">&#x1F4B0;</div><div class="stage-name">Revenue</div><div class="stage-detail">attribution • conversions</div></div>
+  </div>
+</div>
+
+<!-- SCENE 4: What it captures -->
+<div class="scene" id="s4">
+  <div style="font-size:14px;letter-spacing:.2em;color:rgba(255,255,255,.3);margin-bottom:32px" class="mono">PER VISITOR</div>
+  <div class="metrics">
+    <div class="metric-tile" style="transition-delay:.1s"><div class="mv grad">200+</div><div class="ml">Data Points</div><div class="md">per pageview</div></div>
+    <div class="metric-tile" style="transition-delay:.2s"><div class="mv">5</div><div class="ml">Core Web Vitals</div><div class="md">LCP FCP CLS FID INP</div></div>
+    <div class="metric-tile" style="transition-delay:.3s"><div class="mv">40+</div><div class="ml">Browser Features</div><div class="md">WebGPU WASM WebRTC...</div></div>
+    <div class="metric-tile" style="transition-delay:.4s"><div class="mv grad">∞</div><div class="ml">Cross-Session</div><div class="md">fingerprint tracking</div></div>
+    <div class="metric-tile" style="transition-delay:.5s"><div class="mv">Every</div><div class="ml">Click Tracked</div><div class="md">rage + dead detection</div></div>
+    <div class="metric-tile" style="transition-delay:.6s"><div class="mv">Every</div><div class="ml">Scroll Depth</div><div class="md">25 50 75 90 100%</div></div>
+    <div class="metric-tile" style="transition-delay:.7s"><div class="mv">Every</div><div class="ml">Form Field</div><div class="md">time + abandon tracking</div></div>
+    <div class="metric-tile" style="transition-delay:.8s"><div class="mv">Every</div><div class="ml">JS Error</div><div class="md">stack traces + source</div></div>
+  </div>
+</div>
+
+<!-- SCENE 5: One line embed -->
+<div class="scene" id="s5">
+  <div class="embed-box">
+    <div style="font-size:28px;font-weight:700">One line. Every page.</div>
+    <div class="embed-code">&lt;script src="https://bb.blackroad.io/bb.js"&gt;&lt;/script&gt;</div>
+    <div style="font-size:16px;color:rgba(255,255,255,.3)">No cookies. No GDPR banner. No dependencies. 8KB.</div>
+  </div>
+</div>
+
+<!-- SCENE 6: CTA -->
+<div class="scene" id="s6">
+  <div style="font-size:48px;font-weight:700">If it hits us,</div>
+  <div style="font-size:48px;font-weight:700" class="grad">it's known.</div>
+  <div class="grad-line" style="width:150px;margin-top:32px"></div>
+  <div class="mono" style="font-size:14px;color:rgba(255,255,255,.3);margin-top:20px;letter-spacing:.2em">bb.blackroad.io</div>
+</div>
+
+<script>
+const scenes = document.querySelectorAll('.scene');
+const durations = [4000, 7000, 7000, 6000, 5000, 5000];
+let current = 0;
+
+function showScene(i) {
+  if (i >= scenes.length) return;
+  scenes.forEach(s => s.classList.remove('active'));
+  scenes[i].classList.add('active');
+
+  if (i === 1) {
+    document.querySelectorAll('.compare-item').forEach((el, j) =>
+      setTimeout(() => el.classList.add('visible'), j * 250));
+  }
+  if (i === 2) {
+    document.querySelectorAll('.flow-stage, .flow-arrow').forEach((el, j) =>
+      setTimeout(() => el.classList.add('visible'), j * 300));
+  }
+  if (i === 3) {
+    document.querySelectorAll('.metric-tile').forEach((el, j) =>
+      setTimeout(() => el.classList.add('visible'), j * 200));
+  }
+
+  setTimeout(() => showScene(i + 1), durations[i]);
+}
+showScene(0);
+</script>
+</body>
+</html>

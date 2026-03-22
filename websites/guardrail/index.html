@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GuardRail — Always Watching. Always Up.</title>
+<link rel="icon" type="image/png" sizes="32x32" href="https://images.blackroad.io/brand/br-square-32.png" />
+<link rel="apple-touch-icon" sizes="180x180" href="https://images.blackroad.io/brand/apple-touch-icon.png" />
+<meta property="og:image" content="https://images.blackroad.io/brand/br-square-512.png" />
+<meta name="description" content="GuardRail — Uptime monitoring for all BlackRoad services. Always watching. Always up. Self-hosted, fork of Uptime Kuma.">
+<link rel="stylesheet" href="../_shared/design.css">
+<style>
+  .hero { padding: var(--sp-xl) var(--sp-md); min-height: 100vh; display: flex; flex-direction: column; justify-content: center; }
+  @media (min-width: 768px) { .hero { padding: 0 var(--sp-xl); } }
+  .hero-sub { font-size: 1.1rem; color: var(--subtle); max-width: 520px; line-height: 1.7; margin: var(--sp-md) 0 var(--sp-xl); }
+  .btn-primary { display: inline-flex; align-items: center; gap: 8px; background: var(--grad); color: var(--white); padding: 14px 28px; border-radius: 6px; font-weight: 700; font-size: 0.95rem; transition: opacity 0.2s; }
+  .btn-primary:hover { opacity: 0.9; }
+  .feature-card { background: var(--surface); border: 1px solid var(--border); padding: var(--sp-lg); }
+  .feature-card h3 { margin-bottom: var(--sp-xs); }
+  .feature-card p { font-size: 0.85rem; color: var(--subtle); line-height: 1.6; }
+  .feature-icon { font-size: 1.6rem; margin-bottom: var(--sp-sm); }
+  .uptime-board { background: var(--surface); border: 1px solid var(--border); margin-top: var(--sp-xl); overflow: hidden; }
+  .uptime-header { display: flex; align-items: center; justify-content: space-between; padding: var(--sp-sm) var(--sp-md); border-bottom: 1px solid var(--border); }
+  .uptime-header h4 { font-size: 0.85rem; font-weight: 600; }
+  .uptime-header span { font-family: var(--jb); font-size: 0.65rem; color: var(--muted); }
+  .uptime-row { display: flex; align-items: center; gap: var(--sp-md); padding: var(--sp-sm) var(--sp-md); border-bottom: 1px solid var(--border); }
+  .uptime-row:last-child { border-bottom: none; }
+  .uptime-name { font-size: 0.85rem; font-weight: 600; min-width: 120px; }
+  .uptime-bars { display: flex; gap: 2px; flex: 1; }
+  .uptime-bar { height: 20px; flex: 1; min-width: 3px; }
+  .bar-up { background: #00D4FF; }
+  .bar-down { background: #FF2255; }
+  .bar-degraded { background: #FF6B2B; }
+  .bar-unknown { background: var(--border); }
+  .uptime-pct { font-family: var(--jb); font-size: 0.75rem; min-width: 52px; text-align: right; }
+  .pct-good { color: #00D4FF; }
+  .pct-warn { color: #FF6B2B; }
+  .pct-bad { color: #FF2255; }
+  .legend { display: flex; gap: var(--sp-lg); padding: var(--sp-sm) var(--sp-md); border-top: 1px solid var(--border); }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-family: var(--jb); font-size: 0.65rem; color: var(--muted); }
+  .legend-dot { width: 8px; height: 8px; }
+  .incident-log { margin-top: var(--sp-xl); }
+  .incident { background: var(--surface); border: 1px solid var(--border); padding: var(--sp-md); margin-bottom: var(--sp-sm); }
+  .incident-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--sp-xs); }
+  .incident-header h4 { font-size: 0.85rem; font-weight: 600; }
+  .incident-tag { font-family: var(--jb); font-size: 0.6rem; padding: 3px 8px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .tag-resolved { background: rgba(0,212,255,0.1); color: #00D4FF; border: 1px solid rgba(0,212,255,0.2); }
+  .tag-ongoing { background: rgba(255,34,85,0.1); color: #FF2255; border: 1px solid rgba(255,34,85,0.2); }
+  .tag-investigating { background: rgba(255,107,43,0.1); color: #FF6B2B; border: 1px solid rgba(255,107,43,0.2); }
+  .incident p { font-size: 0.78rem; color: var(--muted); line-height: 1.5; }
+  .incident .incident-time { font-family: var(--jb); font-size: 0.65rem; color: var(--muted); margin-top: var(--sp-xs); }
+  .stat-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--sp-md); margin-top: var(--sp-xl); }
+  @media (min-width: 600px) { .stat-row { grid-template-columns: repeat(4, 1fr); } }
+  .stat-box { background: var(--surface); border: 1px solid var(--border); padding: var(--sp-lg); text-align: center; }
+  .stat-box .stat-num { font-family: var(--sg); font-size: 2rem; font-weight: 700; }
+  .stat-box .stat-label { font-family: var(--jb); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-top: 4px; }
+</style>
+</head>
+<body class="dot-bg">
+  <nav>
+    <div class="nav-logo">GuardRail</div>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#status">Status Board</a>
+      <a href="#incidents">Incidents</a>
+      <a href="https://blackroad.io">BlackRoad OS</a>
+    </div>
+    <button class="nav-toggle" onclick="this.classList.toggle('open');document.getElementById('nav-mobile').classList.toggle('open')" aria-label="Menu"><span></span><span></span><span></span></button>
+  </nav>
+  <div id="nav-mobile" class="nav-mobile">
+    <a href="#features" onclick="document.getElementById('nav-mobile').classList.remove('open')">Features</a>
+    <a href="#status" onclick="document.getElementById('nav-mobile').classList.remove('open')">Status Board</a>
+    <a href="#incidents" onclick="document.getElementById('nav-mobile').classList.remove('open')">Incidents</a>
+    <a href="https://blackroad.io">BlackRoad OS</a>
+  </div>
+
+  <div class="hero">
+    <div class="section-label">Uptime Monitoring</div>
+    <h1>Always watching.<br>Always up.</h1>
+    <p class="hero-sub">GuardRail monitors every BlackRoad service around the clock. HTTP, TCP, DNS, ping, SSL — checked every 60 seconds from multiple locations. Self-hosted on your fleet, forked from Uptime Kuma, customized for BlackRoad OS.</p>
+    <a href="#status" class="btn-primary">View Status &rarr;</a>
+  </div>
+
+  <section id="features">
+    <div class="section-label">Capabilities</div>
+    <h2 style="margin-bottom:var(--sp-xl);">Monitoring that never sleeps</h2>
+    <div class="grid-3">
+      <div class="feature-card">
+        <div class="feature-icon">&#128994;</div>
+        <h3>60-second checks</h3>
+        <p>Every monitored endpoint pinged once per minute. HTTP status, response time, SSL validity, and content verification. No blind spots.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#127760;</div>
+        <h3>Multi-location probes</h3>
+        <p>Monitor from Gematria (NYC), your local Pi fleet, and Tor hidden services. See availability from every perspective that matters.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#128202;</div>
+        <h3>Uptime SLA tracking</h3>
+        <p>30-day, 90-day, and yearly uptime percentages. Visual bars show exactly when downtime happened and for how long.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#128276;</div>
+        <h3>Instant notifications</h3>
+        <p>Hooks into Signal for alerting. Down event triggers immediate notification. Configurable escalation per monitor.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#128203;</div>
+        <h3>Public status pages</h3>
+        <p>Generate a clean, branded status page for your users. Share the truth about your infrastructure. Transparency builds trust.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#128736;</div>
+        <h3>Maintenance windows</h3>
+        <p>Schedule downtime without false alerts. Planned maintenance shows as gray, not red. Your uptime percentage stays honest.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="status">
+    <div class="section-label">Status Board</div>
+    <h2 style="margin-bottom:var(--sp-md);">Last 30 days</h2>
+
+    <div class="stat-row">
+      <div class="stat-box"><div class="stat-num" style="color:#00D4FF">43</div><div class="stat-label">Monitors</div></div>
+      <div class="stat-box"><div class="stat-num" style="color:#00D4FF">38</div><div class="stat-label">Up</div></div>
+      <div class="stat-box"><div class="stat-num" style="color:#FF2255">3</div><div class="stat-label">Down</div></div>
+      <div class="stat-box"><div class="stat-num" style="color:#FF6B2B">2</div><div class="stat-label">Degraded</div></div>
+    </div>
+
+    <div class="uptime-board">
+      <div class="uptime-header">
+        <h4>Service Uptime — 30 Day History</h4>
+        <span>Each bar = 1 day</span>
+      </div>
+      <div class="uptime-row">
+        <span class="uptime-name">blackroad.io</span>
+        <div class="uptime-bars">
+          <div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div>
+          <div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div>
+          <div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div>
+          <div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div>
+          <div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div>
+          <div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div>
+        </div>
+        <span class="uptime-pct pct-good">100%</span>
+      </div>
+      <div class="uptime-row">
+        <span class="uptime-name">Gitea</span>
+        <div class="uptime-bars">
+          <div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div>
+          <div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-degraded"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div>
+          <div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div>
+          <div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div>
+          <div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div>
+          <div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div>
+        </div>
+        <span class="uptime-pct pct-good">99.8%</span>
+      </div>
+      <div class="uptime-row">
+        <span class="uptime-name">Ollama (Cecilia)</span>
+        <div class="uptime-bars">
+          <div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div>
+          <div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div>
+          <div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div>
+          <div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div>
+          <div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div>
+          <div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-down"></div><div class="uptime-bar bar-down"></div>
+        </div>
+        <span class="uptime-pct pct-warn">93.3%</span>
+      </div>
+      <div class="uptime-row">
+        <span class="uptime-name">MinIO</span>
+        <div class="uptime-bars">
+          <div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div>
+          <div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div>
+          <div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div>
+          <div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div>
+          <div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div>
+          <div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-down"></div><div class="uptime-bar bar-down"></div>
+        </div>
+        <span class="uptime-pct pct-warn">93.3%</span>
+      </div>
+      <div class="uptime-row">
+        <span class="uptime-name">Caddy TLS</span>
+        <div class="uptime-bars">
+          <div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div>
+          <div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div>
+          <div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div>
+          <div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div>
+          <div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div>
+          <div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div>
+        </div>
+        <span class="uptime-pct pct-good">100%</span>
+      </div>
+      <div class="uptime-row">
+        <span class="uptime-name">NATS</span>
+        <div class="uptime-bars">
+          <div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div>
+          <div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div>
+          <div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div>
+          <div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div>
+          <div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div>
+          <div class="uptime-bar bar-degraded"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div><div class="uptime-bar bar-up"></div>
+        </div>
+        <span class="uptime-pct pct-good">99.6%</span>
+      </div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot bar-up"></div>Operational</div>
+        <div class="legend-item"><div class="legend-dot bar-degraded"></div>Degraded</div>
+        <div class="legend-item"><div class="legend-dot bar-down"></div>Down</div>
+        <div class="legend-item"><div class="legend-dot bar-unknown"></div>No Data</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="incidents">
+    <div class="section-label">Incident Log</div>
+    <h2 style="margin-bottom:var(--sp-xl);">Recent incidents</h2>
+    <div class="incident-log">
+      <div class="incident">
+        <div class="incident-header">
+          <h4>Cecilia completely offline</h4>
+          <span class="incident-tag tag-ongoing">Ongoing</span>
+        </div>
+        <p>All services on Cecilia (Ollama, MinIO, PostgreSQL, InfluxDB) unreachable. SSH connection timeout. Likely hardware or power issue. Requires physical access.</p>
+        <div class="incident-time">Started: 2026-03-17 12:23 UTC &middot; Duration: ongoing</div>
+      </div>
+      <div class="incident">
+        <div class="incident-header">
+          <h4>Aria unresponsive</h4>
+          <span class="incident-tag tag-investigating">Investigating</span>
+        </div>
+        <p>WireGuard peer not responding. Node needs physical power cycle. Low priority — Aria handles non-critical workloads.</p>
+        <div class="incident-time">Started: 2026-03-17 07:30 UTC &middot; Duration: ongoing</div>
+      </div>
+      <div class="incident">
+        <div class="incident-header">
+          <h4>Alice disk usage spike</h4>
+          <span class="incident-tag tag-resolved">Resolved</span>
+        </div>
+        <p>Disk hit 89% due to accumulated nginx logs. Automatic log rotation triggered. Usage dropped to 64%. No data loss.</p>
+        <div class="incident-time">Started: 2026-03-17 06:45 UTC &middot; Resolved: 08:15 UTC &middot; Duration: 1h 30m</div>
+      </div>
+      <div class="incident">
+        <div class="incident-header">
+          <h4>NATS cluster degraded performance</h4>
+          <span class="incident-tag tag-resolved">Resolved</span>
+        </div>
+        <p>Message latency increased 3x during peak agent activity. Resolved by adjusting buffer sizes. No messages lost.</p>
+        <div class="incident-time">Started: 2026-03-12 14:10 UTC &middot; Resolved: 14:45 UTC &middot; Duration: 35m</div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>&copy; 2026 BlackRoad OS, Inc. &mdash; Pave Tomorrow.</span>
+    <span style="display:flex;gap:var(--sp-lg);flex-wrap:wrap;">
+      <a href="https://blackroad.io" style="color:var(--muted)">Home</a>
+      <a href="https://blackroadai.com" style="color:var(--muted)">AI</a>
+      <a href="https://blackroad.network" style="color:var(--muted)">Network</a>
+    </span>
+  </footer>
+</body>
+</html>

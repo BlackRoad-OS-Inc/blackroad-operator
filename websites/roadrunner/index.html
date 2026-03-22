@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RoadRunner — Build. Test. Ship. Repeat.</title>
+<link rel="icon" type="image/png" sizes="32x32" href="https://images.blackroad.io/brand/br-square-32.png" />
+<link rel="apple-touch-icon" sizes="180x180" href="https://images.blackroad.io/brand/apple-touch-icon.png" />
+<meta property="og:image" content="https://images.blackroad.io/brand/br-square-512.png" />
+<meta name="description" content="RoadRunner — Self-hosted CI/CD. Gitea Actions on Pi fleet. Zero billable minutes. Build. Test. Ship. Repeat.">
+<link rel="stylesheet" href="../_shared/design.css">
+<style>
+  .hero { padding: var(--sp-xl) var(--sp-md); min-height: 100vh; display: flex; flex-direction: column; justify-content: center; }
+  @media (min-width: 768px) { .hero { padding: 0 var(--sp-xl); } }
+  .hero-sub { font-size: 1.1rem; color: var(--subtle); max-width: 520px; line-height: 1.7; margin: var(--sp-md) 0 var(--sp-xl); }
+  .btn-primary { display: inline-flex; align-items: center; gap: 8px; background: var(--grad); color: var(--white); padding: 14px 28px; font-weight: 700; font-size: 0.95rem; transition: opacity 0.2s; border: none; cursor: pointer; }
+  .btn-primary:hover { opacity: 0.9; }
+  .feature-card { background: var(--surface); border: 1px solid var(--border); padding: var(--sp-lg); }
+  .feature-card h3 { margin-bottom: var(--sp-xs); }
+  .feature-card p { font-size: 0.85rem; color: var(--subtle); line-height: 1.6; }
+  .feature-icon { font-size: 1.5rem; margin-bottom: var(--sp-sm); }
+  .pipeline-demo { background: var(--surface); border: 1px solid var(--border); padding: var(--sp-lg); margin-top: var(--sp-xl); font-family: var(--jb); font-size: 0.8rem; }
+  .pipeline-header { color: var(--muted); font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: var(--sp-md); }
+  .pipeline-stage { display: flex; align-items: center; gap: var(--sp-md); padding: var(--sp-xs) 0; border-bottom: 1px solid var(--border); }
+  .pipeline-stage:last-child { border-bottom: none; }
+  .stage-status { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .stage-status.pass { background: #00D4FF; }
+  .stage-status.running { background: #FF6B2B; animation: barPulse 1.5s ease-in-out infinite; }
+  .stage-name { color: var(--white); flex: 1; }
+  .stage-time { color: var(--muted); font-size: 0.75rem; }
+  .stat-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--sp-md); margin-top: var(--sp-xl); }
+  @media (min-width: 600px) { .stat-row { grid-template-columns: repeat(4, 1fr); } }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); padding: var(--sp-lg); text-align: center; }
+  .stat-number { font-family: var(--sg); font-size: 2rem; font-weight: 700; color: var(--white); }
+  .stat-label { font-family: var(--jb); font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-top: var(--sp-xs); }
+</style>
+</head>
+<body class="dot-bg">
+  <nav>
+    <div class="nav-logo">RoadRunner</div>
+    <div class="nav-links">
+      <a href="#pipeline">Pipeline</a>
+      <a href="#features">Features</a>
+      <a href="#stats">Stats</a>
+      <a href="https://blackroad.io">BlackRoad OS</a>
+    </div>
+    <button class="nav-toggle" onclick="this.classList.toggle('open');document.getElementById('nav-mobile').classList.toggle('open')" aria-label="Menu"><span></span><span></span><span></span></button>
+  </nav>
+  <div id="nav-mobile" class="nav-mobile">
+    <a href="#pipeline" onclick="document.getElementById('nav-mobile').classList.remove('open')">Pipeline</a>
+    <a href="#features" onclick="document.getElementById('nav-mobile').classList.remove('open')">Features</a>
+    <a href="#stats" onclick="document.getElementById('nav-mobile').classList.remove('open')">Stats</a>
+    <a href="https://blackroad.io">BlackRoad OS</a>
+  </div>
+
+  <div class="hero">
+    <div class="section-label">Self-Hosted CI/CD</div>
+    <h1>Build. Test.<br>Ship. Repeat.</h1>
+    <p class="hero-sub">RoadRunner is CI/CD on your own hardware. Gitea Actions running on the Pi fleet. Zero billable minutes. Zero cloud dependency. Push code, it builds. Merge, it deploys.</p>
+    <a href="#pipeline" class="btn-primary">See the Pipeline</a>
+  </div>
+
+  <section id="pipeline">
+    <div class="section-label">Live Pipeline</div>
+    <h2 style="margin-bottom:var(--sp-md);">Every push triggers a build</h2>
+    <p style="max-width:520px;margin-bottom:var(--sp-lg);">Real pipeline from the BlackRoad fleet. Gitea Actions + act_runner on ARM64 Raspberry Pis.</p>
+    <div class="pipeline-demo">
+      <div class="pipeline-header">blackroad-operator / main / #247</div>
+      <div class="pipeline-stage">
+        <div class="stage-status pass"></div>
+        <span class="stage-name">checkout</span>
+        <span class="stage-time">2s</span>
+      </div>
+      <div class="pipeline-stage">
+        <div class="stage-status pass"></div>
+        <span class="stage-name">install dependencies</span>
+        <span class="stage-time">14s</span>
+      </div>
+      <div class="pipeline-stage">
+        <div class="stage-status pass"></div>
+        <span class="stage-name">typecheck</span>
+        <span class="stage-time">8s</span>
+      </div>
+      <div class="pipeline-stage">
+        <div class="stage-status pass"></div>
+        <span class="stage-name">shellcheck (90 scripts)</span>
+        <span class="stage-time">22s</span>
+      </div>
+      <div class="pipeline-stage">
+        <div class="stage-status pass"></div>
+        <span class="stage-name">vitest (unit tests)</span>
+        <span class="stage-time">6s</span>
+      </div>
+      <div class="pipeline-stage">
+        <div class="stage-status running"></div>
+        <span class="stage-name">deploy to fleet</span>
+        <span class="stage-time">...</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="features">
+    <div class="section-label">Features</div>
+    <h2 style="margin-bottom:var(--sp-xl);">CI/CD without the bill</h2>
+    <div class="grid-3">
+      <div class="feature-card">
+        <div class="feature-icon">&#128187;</div>
+        <h3>ARM64 native</h3>
+        <p>Runs natively on Raspberry Pi. No emulation layer. No x86 overhead. Real ARM64 builds on real hardware.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#128268;</div>
+        <h3>Gitea Actions</h3>
+        <p>GitHub Actions compatible syntax. Same YAML workflows. Drop-in replacement. Your repos, your runners.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#128640;</div>
+        <h3>Auto-deploy</h3>
+        <p>Push to main and it deploys. Push to a branch and it builds. Tag a release and it ships. No manual steps.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#128274;</div>
+        <h3>Secrets management</h3>
+        <p>Encrypted secrets in Gitea. Injected at runtime. Never stored in repos. Never visible in logs.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#128451;</div>
+        <h3>Matrix builds</h3>
+        <p>Test across Node versions, OS targets, configuration variants. Parallel execution across multiple runners.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#128176;</div>
+        <h3>$0 forever</h3>
+        <p>GitHub Actions: $0.008/min. CircleCI: $0.006/min. RoadRunner: $0. Your hardware. Zero billing.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="stats">
+    <div class="section-label">Fleet Stats</div>
+    <h2 style="margin-bottom:var(--sp-md);">Running on the Pi fleet</h2>
+    <div class="stat-row">
+      <div class="stat-card">
+        <div class="stat-number">239</div>
+        <div class="stat-label">Repos</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">$0</div>
+        <div class="stat-label">Monthly Cost</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">5</div>
+        <div class="stat-label">Runners</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">24/7</div>
+        <div class="stat-label">Availability</div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>&copy; 2026 BlackRoad OS, Inc. — Pave Tomorrow.</span>
+    <span style="display:flex;gap:var(--sp-lg);flex-wrap:wrap;">
+      <a href="https://blackroad.io" style="color:var(--muted)">Home</a>
+      <a href="https://blackroadai.com" style="color:var(--muted)">AI</a>
+      <a href="https://blackroad.network" style="color:var(--muted)">Network</a>
+    </span>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Roadblock — Block the Bad. Pass the Good.</title>
+<link rel="icon" type="image/png" sizes="32x32" href="https://images.blackroad.io/brand/br-square-32.png" />
+<link rel="apple-touch-icon" sizes="180x180" href="https://images.blackroad.io/brand/apple-touch-icon.png" />
+<meta property="og:image" content="https://images.blackroad.io/brand/br-square-512.png" />
+<meta name="description" content="Roadblock — WAF, rate limiting, access control. Sovereign security. Block the bad. Pass the good.">
+<link rel="stylesheet" href="../_shared/design.css">
+<style>
+  .hero { padding: var(--sp-xl) var(--sp-md); min-height: 100vh; display: flex; flex-direction: column; justify-content: center; }
+  @media (min-width: 768px) { .hero { padding: 0 var(--sp-xl); } }
+  .hero-sub { font-size: 1.1rem; color: var(--subtle); max-width: 520px; line-height: 1.7; margin: var(--sp-md) 0 var(--sp-xl); }
+  .btn-primary { display: inline-flex; align-items: center; gap: 8px; background: var(--grad); color: var(--white); padding: 14px 28px; font-weight: 700; font-size: 0.95rem; transition: opacity 0.2s; border: none; cursor: pointer; }
+  .btn-primary:hover { opacity: 0.9; }
+  .feature-card { background: var(--surface); border: 1px solid var(--border); padding: var(--sp-lg); }
+  .feature-card h3 { margin-bottom: var(--sp-xs); }
+  .feature-card p { font-size: 0.85rem; color: var(--subtle); line-height: 1.6; }
+  .feature-icon { font-size: 1.5rem; margin-bottom: var(--sp-sm); }
+  .threat-feed { background: var(--surface); border: 1px solid var(--border); padding: var(--sp-lg); margin-top: var(--sp-xl); font-family: var(--jb); font-size: 0.8rem; }
+  .threat-header { color: var(--muted); font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: var(--sp-md); display: flex; justify-content: space-between; }
+  .threat-line { display: flex; align-items: center; gap: var(--sp-md); padding: var(--sp-xs) 0; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  .threat-line:last-child { border-bottom: none; }
+  .threat-action { font-size: 0.7rem; padding: 2px 8px; }
+  .threat-action.blocked { color: #FF2255; border: 1px solid #FF225533; }
+  .threat-action.passed { color: #00D4FF; border: 1px solid #00D4FF33; }
+  .threat-action.limited { color: #FF6B2B; border: 1px solid #FF6B2B33; }
+  .threat-ip { color: var(--muted); }
+  .threat-rule { color: var(--subtle); flex: 1; }
+  .shield-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--sp-md); margin-top: var(--sp-xl); }
+  @media (min-width: 600px) { .shield-stats { grid-template-columns: repeat(4, 1fr); } }
+  .shield-stat { background: var(--surface); border: 1px solid var(--border); padding: var(--sp-lg); text-align: center; }
+  .shield-number { font-family: var(--sg); font-size: 1.8rem; font-weight: 700; color: var(--white); }
+  .shield-label { font-family: var(--jb); font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-top: var(--sp-xs); }
+  .layer-stack { margin-top: var(--sp-xl); }
+  .layer { background: var(--surface); border: 1px solid var(--border); padding: var(--sp-md) var(--sp-lg); margin-bottom: 2px; display: flex; align-items: center; gap: var(--sp-md); }
+  .layer-num { font-family: var(--jb); font-size: 0.75rem; color: var(--muted); width: 24px; flex-shrink: 0; }
+  .layer-name { font-family: var(--sg); font-size: 0.95rem; font-weight: 600; flex: 1; }
+  .layer-desc { font-size: 0.8rem; color: var(--subtle); display: none; }
+  @media (min-width: 600px) { .layer-desc { display: block; } }
+</style>
+</head>
+<body class="dot-bg">
+  <nav>
+    <div class="nav-logo">Roadblock</div>
+    <div class="nav-links">
+      <a href="#threats">Threat Feed</a>
+      <a href="#layers">Layers</a>
+      <a href="#features">Features</a>
+      <a href="https://blackroad.io">BlackRoad OS</a>
+    </div>
+    <button class="nav-toggle" onclick="this.classList.toggle('open');document.getElementById('nav-mobile').classList.toggle('open')" aria-label="Menu"><span></span><span></span><span></span></button>
+  </nav>
+  <div id="nav-mobile" class="nav-mobile">
+    <a href="#threats" onclick="document.getElementById('nav-mobile').classList.remove('open')">Threat Feed</a>
+    <a href="#layers" onclick="document.getElementById('nav-mobile').classList.remove('open')">Layers</a>
+    <a href="#features" onclick="document.getElementById('nav-mobile').classList.remove('open')">Features</a>
+    <a href="https://blackroad.io">BlackRoad OS</a>
+  </div>
+
+  <div class="hero">
+    <div class="section-label">Sovereign Security</div>
+    <h1>Block the bad.<br>Pass the good.</h1>
+    <p class="hero-sub">Roadblock is your self-hosted WAF, rate limiter, and access control layer. Sits in front of every service. Inspects every request. Blocks threats before they reach your infrastructure.</p>
+    <a href="#threats" class="btn-primary">View Threat Feed</a>
+  </div>
+
+  <section id="threats">
+    <div class="section-label">Live Feed</div>
+    <h2 style="margin-bottom:var(--sp-md);">Real-time threat visibility</h2>
+    <p style="max-width:520px;margin-bottom:var(--sp-lg);">Every request inspected. Every decision logged. See what Roadblock catches in real time.</p>
+    <div class="threat-feed">
+      <div class="threat-header">
+        <span>Roadblock / last 60 seconds</span>
+        <span>151 domains protected</span>
+      </div>
+      <div class="threat-line">
+        <span class="threat-action blocked">BLOCKED</span>
+        <span class="threat-ip">185.220.101.x</span>
+        <span class="threat-rule">SQL injection attempt on /api/search</span>
+      </div>
+      <div class="threat-line">
+        <span class="threat-action limited">RATE LIMITED</span>
+        <span class="threat-ip">45.33.32.x</span>
+        <span class="threat-rule">100+ req/min to /login — throttled to 10/min</span>
+      </div>
+      <div class="threat-line">
+        <span class="threat-action blocked">BLOCKED</span>
+        <span class="threat-ip">192.241.xx.x</span>
+        <span class="threat-rule">Known scanner (Shodan) — blocked by reputation</span>
+      </div>
+      <div class="threat-line">
+        <span class="threat-action passed">PASSED</span>
+        <span class="threat-ip">WireGuard</span>
+        <span class="threat-rule">Internal fleet request — trusted network</span>
+      </div>
+      <div class="threat-line">
+        <span class="threat-action blocked">BLOCKED</span>
+        <span class="threat-ip">103.xx.xx.x</span>
+        <span class="threat-rule">Path traversal attempt: /../../../etc/passwd</span>
+      </div>
+    </div>
+    <div class="shield-stats">
+      <div class="shield-stat">
+        <div class="shield-number">151</div>
+        <div class="shield-label">Domains</div>
+      </div>
+      <div class="shield-stat">
+        <div class="shield-number">99.7%</div>
+        <div class="shield-label">Uptime</div>
+      </div>
+      <div class="shield-stat">
+        <div class="shield-number">&lt;5ms</div>
+        <div class="shield-label">Inspect Time</div>
+      </div>
+      <div class="shield-stat">
+        <div class="shield-number">24/7</div>
+        <div class="shield-label">Active</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="layers">
+    <div class="section-label">Defense Layers</div>
+    <h2 style="margin-bottom:var(--sp-md);">Seven layers of protection</h2>
+    <p style="max-width:520px;margin-bottom:var(--sp-lg);">Every request passes through each layer. If any layer rejects, the request is blocked.</p>
+    <div class="layer-stack">
+      <div class="layer"><span class="layer-num">L1</span><span class="layer-name">IP reputation</span><span class="layer-desc">Known bad actors, scanners, botnets</span></div>
+      <div class="layer"><span class="layer-num">L2</span><span class="layer-name">Rate limiting</span><span class="layer-desc">Per-IP, per-route, sliding window</span></div>
+      <div class="layer"><span class="layer-num">L3</span><span class="layer-name">Geo-blocking</span><span class="layer-desc">Country-level allow/deny lists</span></div>
+      <div class="layer"><span class="layer-num">L4</span><span class="layer-name">WAF rules</span><span class="layer-desc">SQL injection, XSS, path traversal, RCE</span></div>
+      <div class="layer"><span class="layer-num">L5</span><span class="layer-name">Bot detection</span><span class="layer-desc">Challenge suspicious user agents</span></div>
+      <div class="layer"><span class="layer-num">L6</span><span class="layer-name">Auth verification</span><span class="layer-desc">JWT validation, API key checks</span></div>
+      <div class="layer"><span class="layer-num">L7</span><span class="layer-name">Content inspection</span><span class="layer-desc">Payload scanning, size limits, type validation</span></div>
+    </div>
+  </section>
+
+  <section id="features">
+    <div class="section-label">Features</div>
+    <h2 style="margin-bottom:var(--sp-xl);">Security you control</h2>
+    <div class="grid-3">
+      <div class="feature-card">
+        <div class="feature-icon">&#128737;</div>
+        <h3>WAF engine</h3>
+        <p>OWASP Top 10 protection out of the box. Custom rules in simple config. No vendor lock-in.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#9201;</div>
+        <h3>Rate limiting</h3>
+        <p>Sliding window rate limits. Per-IP, per-route, per-API-key. Configurable burst allowance.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#128274;</div>
+        <h3>Access control</h3>
+        <p>IP allowlists, WireGuard trust, JWT verification. Layer access controls per domain and route.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#128202;</div>
+        <h3>Real-time dashboard</h3>
+        <p>Live threat feed, request volume, block rate, top attackers. All in one view.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#129302;</div>
+        <h3>AI threat analysis</h3>
+        <p>Local Ollama models classify novel attack patterns. Learn from traffic. Adapt rules automatically.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#127760;</div>
+        <h3>Self-hosted</h3>
+        <p>Runs on your edge. Caddy + nginx integration. No Cloudflare dependency. Your rules, your network.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>&copy; 2026 BlackRoad OS, Inc. — Pave Tomorrow.</span>
+    <span style="display:flex;gap:var(--sp-lg);flex-wrap:wrap;">
+      <a href="https://blackroad.io" style="color:var(--muted)">Home</a>
+      <a href="https://blackroadai.com" style="color:var(--muted)">AI</a>
+      <a href="https://blackroad.network" style="color:var(--muted)">Network</a>
+    </span>
+  </footer>
+</body>
+</html>

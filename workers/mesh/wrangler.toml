@@ -1,0 +1,28 @@
+name               = "blackroad-mesh"
+main               = "src/index.js"
+compatibility_date = "2024-12-01"
+account_id         = "848cf0b18d51e0170e0d1537aec3505a"
+assets             = { directory = "./public" }
+
+[vars]
+INSTANCE = "blackroad-mesh"
+
+# Durable Objects for WebSocket signaling (peer discovery)
+[[durable_objects.bindings]]
+name       = "SIGNAL"
+class_name = "SignalRoom"
+
+[[migrations]]
+tag         = "v1"
+new_classes = ["SignalRoom"]
+
+# KV for mesh state (node registry, capacity)
+[[kv_namespaces]]
+binding = "MESH_STATE"
+id      = "2f25b30fcea84464a8efbb09d4427e5a"
+
+# D1 for mesh analytics
+[[d1_databases]]
+binding       = "DB"
+database_name = "blackboard"
+database_id   = "bcc78f33-b052-4cb2-bcfb-db5cd3c08472"

@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="icon" type="image/png" sizes="32x32" href="https://images.blackroad.io/brand/br-square-32.png" />
+<link rel="icon" type="image/png" sizes="192x192" href="https://images.blackroad.io/brand/br-square-192.png" />
+<link rel="apple-touch-icon" sizes="180x180" href="https://images.blackroad.io/brand/apple-touch-icon.png" />
+<meta property="og:image" content="https://images.blackroad.io/brand/br-square-512.png" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:image" content="https://images.blackroad.io/brand/br-square-512.png" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Radius — See the invisible. Simulate the impossible. Interactive physics, chemistry, and quantum simulations with lab notebooks.">
+<meta name="theme-color" content="#4488FF">
+<link rel="canonical" href="https://sim.blackroad.io">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://sim.blackroad.io">
+<meta property="og:title" content="Radius — Physics & Quantum Simulations">
+<meta property="og:description" content="See the invisible. Simulate the impossible. Interactive simulations for physics, chemistry, and quantum mechanics.">
+<meta property="og:site_name" content="BlackRoad OS">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Radius","url":"https://sim.blackroad.io","description":"Interactive physics, chemistry, and quantum simulations. See the invisible. Simulate the impossible."}</script>
+<title>Radius — See the Invisible. Simulate the Impossible.</title>
+<link rel="stylesheet" href="../_shared/design.css">
+<style>
+  .hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: var(--sp-xl) var(--sp-md);
+    position: relative; overflow: hidden;
+  }
+  @media (min-width: 768px) {
+    .hero { padding: 0 var(--sp-xl); }
+  }
+  .hero-eyebrow {
+    font-family: var(--jb); font-size: 0.75rem;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--subtle); margin-bottom: var(--sp-md);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .hero-eyebrow::before {
+    content: ''; width: 6px; height: 6px;
+    background: #4488FF; border-radius: 50%;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+  }
+  .hero h1 { max-width: 800px; margin-bottom: var(--sp-lg); }
+  .hero-sub {
+    font-size: 1.1rem; color: var(--subtle);
+    max-width: 560px; margin-bottom: var(--sp-xl); line-height: 1.7;
+  }
+  @media (min-width: 768px) {
+    .hero-sub { font-size: 1.2rem; }
+  }
+  .hero-actions { display: flex; gap: var(--sp-md); align-items: center; flex-wrap: wrap; }
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--grad); color: var(--white);
+    padding: 14px 28px; border-radius: 6px;
+    font-weight: 700; font-size: 0.95rem;
+    transition: opacity 0.2s, transform 0.2s var(--ease-spring);
+  }
+  .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+  .btn-ghost {
+    display: inline-flex; align-items: center; gap: 8px;
+    border: 1px solid var(--border); color: var(--subtle);
+    padding: 14px 28px; border-radius: 6px; font-size: 0.95rem;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .btn-ghost:hover { border-color: var(--muted); color: var(--white); }
+
+  /* Particle animation */
+  .particle-field {
+    position: relative;
+    height: 280px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    margin-bottom: var(--sp-xl);
+  }
+  @media (min-width: 768px) {
+    .particle-field { height: 360px; }
+  }
+  .particle {
+    position: absolute;
+    border-radius: 50%;
+    animation: drift linear infinite;
+  }
+  .wave-line {
+    position: absolute;
+    left: 0; right: 0;
+    height: 2px;
+    background: var(--grad);
+    background-size: 200% 100%;
+    animation: waveMotion 4s ease-in-out infinite;
+    opacity: 0.3;
+  }
+  @keyframes drift {
+    0% { transform: translate(0, 0) scale(1); opacity: 0.8; }
+    25% { opacity: 1; }
+    50% { transform: translate(var(--dx), var(--dy)) scale(0.6); opacity: 0.6; }
+    75% { opacity: 0.9; }
+    100% { transform: translate(calc(var(--dx) * 2), 0) scale(1); opacity: 0.8; }
+  }
+  @keyframes waveMotion {
+    0%, 100% { transform: translateY(0) scaleY(1); }
+    25% { transform: translateY(-30px) scaleY(2); }
+    50% { transform: translateY(10px) scaleY(0.5); }
+    75% { transform: translateY(-15px) scaleY(1.5); }
+  }
+  .particle-label {
+    position: absolute; bottom: var(--sp-md); left: var(--sp-md);
+    font-family: var(--jb); font-size: 0.65rem;
+    color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase;
+  }
+
+  .stats-row {
+    display: grid; grid-template-columns: repeat(2, 1fr);
+    gap: var(--sp-lg); text-align: center;
+  }
+  @media (min-width: 600px) {
+    .stats-row { grid-template-columns: repeat(4, 1fr); }
+  }
+  .stat-num {
+    font-size: 2.5rem; font-weight: 800;
+    font-family: var(--jb); letter-spacing: -0.04em;
+    background: var(--grad); -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  @media (min-width: 768px) {
+    .stat-num { font-size: 3rem; }
+  }
+  .stat-label { font-size: 0.8rem; color: var(--subtle); margin-top: 4px; }
+
+  .sim-grid {
+    display: grid; grid-template-columns: 1fr; gap: var(--sp-md);
+  }
+  @media (min-width: 600px) { .sim-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 900px) { .sim-grid { grid-template-columns: repeat(3, 1fr); } }
+  .sim-card {
+    background: var(--surface); border: 1px solid var(--border);
+    padding: var(--sp-lg); transition: border-color 0.25s;
+  }
+  .sim-card:hover { border-color: var(--muted); }
+  .sim-category {
+    font-family: var(--jb); font-size: 0.65rem;
+    letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: var(--sp-sm);
+  }
+  .sim-title {
+    font-family: var(--sg); font-size: 1.1rem; font-weight: 700;
+    color: var(--white); margin-bottom: var(--sp-xs);
+  }
+  .sim-desc { font-size: 0.8rem; color: var(--subtle); line-height: 1.65; }
+  .sim-params {
+    display: flex; gap: var(--sp-xs); flex-wrap: wrap;
+    margin-top: var(--sp-sm);
+  }
+  .sim-param {
+    font-family: var(--jb); font-size: 0.65rem;
+    color: var(--muted); background: var(--elevated);
+    border: 1px solid var(--border);
+    padding: 2px 8px;
+  }
+
+  .features-grid { display: grid; grid-template-columns: 1fr; gap: var(--sp-md); }
+  @media (min-width: 600px) { .features-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 900px) { .features-grid { grid-template-columns: repeat(3, 1fr); } }
+  .feature-title { font-size: 1rem; font-weight: 600; margin-bottom: var(--sp-xs); }
+  .feature-desc { font-size: 0.875rem; color: var(--subtle); line-height: 1.65; }
+  .feature-icon { font-size: 1.3rem; margin-bottom: var(--sp-sm); }
+
+  .cta-band {
+    background: linear-gradient(135deg, rgba(68,136,255,0.08) 0%, rgba(0,212,255,0.08) 50%, rgba(136,68,255,0.08) 100%);
+    border: 1px solid var(--border); border-radius: 10px;
+    padding: var(--sp-xl) var(--sp-md); text-align: center;
+  }
+  @media (min-width: 768px) {
+    .cta-band { padding: var(--sp-2xl) var(--sp-xl); }
+  }
+  .cta-band h2 { margin-bottom: var(--sp-md); }
+  .cta-band p { max-width: 500px; margin: 0 auto var(--sp-xl); }
+</style>
+<script src="https://blackroad-mesh.amundsonalexa.workers.dev/mesh.js" defer></script>
+</head>
+<body class="dot-bg">
+
+  <!-- Nav -->
+  <nav>
+    <div class="nav-logo">Radius</div>
+    <div class="nav-links">
+      <a href="#simulations">Simulations</a>
+      <a href="#features">Features</a>
+      <a href="#labs">Labs</a>
+      <a href="https://blackroad.io">BlackRoad OS</a>
+    </div>
+    <a href="#launch" class="nav-cta">Launch Sim →</a>
+    <button class="nav-toggle" onclick="this.classList.toggle('open');document.getElementById('nav-mobile').classList.toggle('open')" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+  <div id="nav-mobile" class="nav-mobile">
+    <a href="#simulations" onclick="document.getElementById('nav-mobile').classList.remove('open')">Simulations</a>
+    <a href="#features" onclick="document.getElementById('nav-mobile').classList.remove('open')">Features</a>
+    <a href="#labs" onclick="document.getElementById('nav-mobile').classList.remove('open')">Labs</a>
+    <a href="https://blackroad.io">BlackRoad OS</a>
+    <a href="#launch" style="color:var(--white);font-weight:700;" onclick="document.getElementById('nav-mobile').classList.remove('open')">Launch Sim →</a>
+  </div>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-eyebrow">Wave 3 · Education</div>
+    <h1>See the invisible.<br>Simulate the impossible.</h1>
+    <p class="hero-sub">Radius is an interactive simulation engine for physics, chemistry, and quantum mechanics. Manipulate particles, watch reactions unfold, explore quantum states — all in the browser.</p>
+    <div class="hero-actions">
+      <a href="#launch" class="btn-primary">Launch Sim →</a>
+      <a href="#simulations" class="btn-ghost">Browse Simulations</a>
+    </div>
+  </div>
+
+  <!-- Particle Animation -->
+  <section>
+    <div class="particle-field">
+      <div class="particle" style="width:8px;height:8px;background:#FF6B2B;top:20%;left:10%;--dx:120px;--dy:-40px;animation-duration:6s;"></div>
+      <div class="particle" style="width:12px;height:12px;background:#FF2255;top:40%;left:25%;--dx:-80px;--dy:60px;animation-duration:8s;"></div>
+      <div class="particle" style="width:6px;height:6px;background:#CC00AA;top:60%;left:45%;--dx:100px;--dy:-80px;animation-duration:5s;"></div>
+      <div class="particle" style="width:10px;height:10px;background:#8844FF;top:30%;left:60%;--dx:-60px;--dy:40px;animation-duration:7s;"></div>
+      <div class="particle" style="width:7px;height:7px;background:#4488FF;top:70%;left:75%;--dx:80px;--dy:-60px;animation-duration:9s;"></div>
+      <div class="particle" style="width:9px;height:9px;background:#00D4FF;top:50%;left:90%;--dx:-100px;--dy:20px;animation-duration:6.5s;"></div>
+      <div class="particle" style="width:5px;height:5px;background:#FF6B2B;top:80%;left:15%;--dx:60px;--dy:-100px;animation-duration:7.5s;"></div>
+      <div class="particle" style="width:11px;height:11px;background:#4488FF;top:15%;left:50%;--dx:-40px;--dy:80px;animation-duration:8.5s;"></div>
+      <div class="particle" style="width:4px;height:4px;background:#CC00AA;top:85%;left:65%;--dx:90px;--dy:-50px;animation-duration:5.5s;"></div>
+      <div class="particle" style="width:8px;height:8px;background:#00D4FF;top:45%;left:35%;--dx:-70px;--dy:-30px;animation-duration:10s;"></div>
+      <div class="wave-line" style="top:35%;"></div>
+      <div class="wave-line" style="top:50%;animation-delay:1s;"></div>
+      <div class="wave-line" style="top:65%;animation-delay:2s;"></div>
+      <div class="particle-label">Wave-Particle Duality · Interactive</div>
+    </div>
+  </section>
+
+  <!-- Stats -->
+  <section>
+    <div class="section-label">Engine specs</div>
+    <div class="stats-row" style="margin-top: var(--sp-lg);">
+      <div>
+        <div class="stat-num">60</div>
+        <div class="stat-label">FPS Rendering</div>
+      </div>
+      <div>
+        <div class="stat-num">120+</div>
+        <div class="stat-label">Simulations</div>
+      </div>
+      <div>
+        <div class="stat-num">118</div>
+        <div class="stat-label">Elements</div>
+      </div>
+      <div>
+        <div class="stat-num">0</div>
+        <div class="stat-label">Plugins Required</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Simulations -->
+  <section id="simulations">
+    <div class="section-label">Simulation library</div>
+    <h2 style="margin-bottom: var(--sp-xl);">120+ interactive simulations.</h2>
+    <div class="sim-grid">
+      <div class="sim-card">
+        <div class="sim-category">Classical Mechanics</div>
+        <div class="sim-title">Projectile Motion</div>
+        <p class="sim-desc">Launch objects at any angle and velocity. Visualize parabolic trajectories with and without air resistance. Measure range, height, and flight time.</p>
+        <div class="sim-params">
+          <span class="sim-param">velocity</span>
+          <span class="sim-param">angle</span>
+          <span class="sim-param">gravity</span>
+          <span class="sim-param">drag</span>
+        </div>
+      </div>
+      <div class="sim-card">
+        <div class="sim-category">Electromagnetism</div>
+        <div class="sim-title">Field Visualizer</div>
+        <p class="sim-desc">Place charges and magnets. Watch electric and magnetic field lines form in real time. See how fields superpose and interact.</p>
+        <div class="sim-params">
+          <span class="sim-param">charge</span>
+          <span class="sim-param">position</span>
+          <span class="sim-param">field-type</span>
+        </div>
+      </div>
+      <div class="sim-card">
+        <div class="sim-category">Quantum Mechanics</div>
+        <div class="sim-title">Double Slit Experiment</div>
+        <p class="sim-desc">Fire individual photons through two slits. Watch the interference pattern build up one particle at a time. Toggle observation to collapse the wave function.</p>
+        <div class="sim-params">
+          <span class="sim-param">wavelength</span>
+          <span class="sim-param">slit-width</span>
+          <span class="sim-param">observe</span>
+        </div>
+      </div>
+      <div class="sim-card">
+        <div class="sim-category">Chemistry</div>
+        <div class="sim-title">Molecular Builder</div>
+        <p class="sim-desc">Drag atoms to build molecules. Watch bonds form and break. See electron orbitals, bond angles, and molecular geometry in 3D.</p>
+        <div class="sim-params">
+          <span class="sim-param">element</span>
+          <span class="sim-param">bond-type</span>
+          <span class="sim-param">orbital</span>
+        </div>
+      </div>
+      <div class="sim-card">
+        <div class="sim-category">Thermodynamics</div>
+        <div class="sim-title">Gas Law Explorer</div>
+        <p class="sim-desc">A virtual container of gas molecules. Adjust temperature, pressure, and volume. Watch individual molecules and see the math emerge from chaos.</p>
+        <div class="sim-params">
+          <span class="sim-param">temp</span>
+          <span class="sim-param">pressure</span>
+          <span class="sim-param">volume</span>
+          <span class="sim-param">n-moles</span>
+        </div>
+      </div>
+      <div class="sim-card">
+        <div class="sim-category">Quantum Mechanics</div>
+        <div class="sim-title">Quantum State Explorer</div>
+        <p class="sim-desc">Visualize qubit states on the Bloch sphere. Apply quantum gates (Hadamard, CNOT, Pauli). Watch superposition and entanglement form.</p>
+        <div class="sim-params">
+          <span class="sim-param">qubits</span>
+          <span class="sim-param">gate</span>
+          <span class="sim-param">measure</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section id="features">
+    <div class="section-label">Features</div>
+    <h2 style="margin-bottom: var(--sp-xl);">A lab in your browser.</h2>
+    <div class="features-grid">
+      <div class="card">
+        <div class="feature-icon">🔬</div>
+        <div class="feature-title">Interactive Physics Sims</div>
+        <p class="feature-desc">Drag, drop, adjust parameters, and watch physics happen. Every simulation runs in real time with accurate numerical solvers.</p>
+      </div>
+      <div class="card">
+        <div class="feature-icon">⚗</div>
+        <div class="feature-title">Molecular Visualization</div>
+        <p class="feature-desc">3D molecular rendering with electron density maps, orbital shapes, and bond visualization. All 118 elements in the periodic table.</p>
+      </div>
+      <div class="card">
+        <div class="feature-icon">🌀</div>
+        <div class="feature-title">Quantum State Explorer</div>
+        <p class="feature-desc">Bloch sphere visualization, gate operations, entanglement diagrams. See quantum computing concepts that textbooks can only describe.</p>
+      </div>
+      <div class="card" id="labs">
+        <div class="feature-icon">📓</div>
+        <div class="feature-title">Lab Notebooks</div>
+        <p class="feature-desc">Every simulation session auto-generates a lab notebook entry. Hypothesis, parameters, observations, and conclusions — ready to submit.</p>
+      </div>
+      <div class="card">
+        <div class="feature-icon">📐</div>
+        <div class="feature-title">Math Overlay</div>
+        <p class="feature-desc">Toggle the equations governing each simulation. See the math update in real time as you change parameters. Theory meets reality.</p>
+      </div>
+      <div class="card">
+        <div class="feature-icon">🖥</div>
+        <div class="feature-title">Zero Install</div>
+        <p class="feature-desc">Runs entirely in the browser using WebGL and WebAssembly. No plugins, no downloads, no Java applets. Works on phones and tablets.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section id="launch">
+    <div class="cta-band">
+      <div class="section-label">Start exploring</div>
+      <h2>The universe fits in a browser tab.</h2>
+      <p>From Newton's laws to quantum entanglement. Every simulation interactive, every equation visible, every experiment repeatable.</p>
+      <div style="display:flex;gap:var(--sp-md);justify-content:center;flex-wrap:wrap;">
+        <a href="#" class="btn-primary">Launch Sim →</a>
+        <a href="https://blackroad.io" class="btn-ghost">BlackRoad OS</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <span>© 2026 BlackRoad OS, Inc. All rights reserved.</span>
+    <span style="display:flex;gap:var(--sp-lg);flex-wrap:wrap;">
+      <a href="https://blackroad.io" style="color:var(--muted);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">Home</a>
+      <a href="https://blackroadai.com" style="color:var(--muted);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">AI</a>
+      <a href="https://blackroad.network" style="color:var(--muted);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">Network</a>
+      <a href="https://blackroad.systems" style="color:var(--muted);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">Status</a>
+      <a href="https://pricing.blackroad.io" style="color:var(--muted);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">Pricing</a>
+      <a href="https://github.com/blackboxprogramming" style="color:var(--muted);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">GitHub</a>
+    </span>
+  </footer>
+
+</body>
+</html>

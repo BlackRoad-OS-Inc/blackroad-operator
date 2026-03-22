@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bypass — Skip the Frustration</title>
+<link rel="icon" type="image/png" sizes="32x32" href="https://images.blackroad.io/brand/br-square-32.png" />
+<link rel="apple-touch-icon" sizes="180x180" href="https://images.blackroad.io/brand/apple-touch-icon.png" />
+<meta property="og:image" content="https://images.blackroad.io/brand/br-square-512.png" />
+<meta name="description" content="Bypass — AI debugging assistant. Stack traces explained. Fix suggestions. Time-travel debugging.">
+<link rel="stylesheet" href="../_shared/design.css">
+<style>
+  .hero { padding: var(--sp-xl) var(--sp-md); min-height: 100vh; display: flex; flex-direction: column; justify-content: center; }
+  @media (min-width: 768px) { .hero { padding: 0 var(--sp-xl); } }
+  .hero-sub { font-size: 1.1rem; color: var(--subtle); max-width: 480px; line-height: 1.7; margin: var(--sp-md) 0 var(--sp-xl); }
+  .btn-primary { display: inline-flex; align-items: center; gap: 8px; background: var(--grad); color: var(--white); padding: 14px 28px; font-weight: 700; font-size: 0.95rem; transition: opacity 0.2s; border: none; cursor: pointer; }
+  .btn-primary:hover { opacity: 0.9; }
+  .feature-card { background: var(--surface); border: 1px solid var(--border); padding: var(--sp-lg); transition: border-color 0.25s; }
+  .feature-card:hover { border-color: var(--muted); }
+  .feature-card h3 { margin-bottom: var(--sp-xs); }
+  .feature-card p { font-size: 0.85rem; color: var(--subtle); line-height: 1.6; }
+  .feature-icon { font-family: var(--jb); font-size: 1.2rem; color: var(--muted); margin-bottom: var(--sp-sm); }
+  .debug-panel { background: var(--surface); border: 1px solid var(--border); margin: var(--sp-xl) 0; overflow: hidden; }
+  .debug-header { padding: var(--sp-sm) var(--sp-md); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+  .debug-title { font-family: var(--jb); font-size: 0.8rem; color: #FF2255; }
+  .ai-badge { font-family: var(--jb); font-size: 0.65rem; padding: 2px 8px; background: linear-gradient(90deg, #8844FF, #4488FF); color: var(--white); }
+  .stack-trace { padding: var(--sp-md); font-family: var(--jb); font-size: 0.75rem; line-height: 1.8; border-bottom: 1px solid var(--border); }
+  .stack-line { color: var(--muted); }
+  .stack-line.error { color: #FF2255; }
+  .stack-line.highlight { color: var(--white); background: rgba(255,34,85,0.08); padding: 2px 4px; margin: 0 -4px; }
+  .debug-explanation { padding: var(--sp-md); }
+  .debug-explanation h4 { font-family: var(--sg); font-size: 0.95rem; margin-bottom: var(--sp-sm); }
+  .debug-explanation p { font-size: 0.85rem; color: var(--subtle); line-height: 1.7; }
+  .fix-block { margin-top: var(--sp-md); padding: var(--sp-md); background: var(--elevated); border-left: 3px solid #00D4FF; }
+  .fix-block .fix-label { font-family: var(--jb); font-size: 0.7rem; color: #00D4FF; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: var(--sp-xs); }
+  .fix-block code { font-family: var(--jb); font-size: 0.8rem; color: var(--white); line-height: 1.6; display: block; white-space: pre-wrap; }
+  .timeline { margin: var(--sp-xl) 0; }
+  .timeline-step { display: flex; gap: var(--sp-md); margin-bottom: var(--sp-lg); align-items: flex-start; }
+  .timeline-marker { width: 32px; height: 32px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-family: var(--jb); font-size: 0.7rem; border: 1px solid var(--border); color: var(--muted); }
+  .timeline-marker.active { border-color: #FF2255; color: #FF2255; background: rgba(255,34,85,0.1); }
+  .timeline-content h4 { font-family: var(--sg); font-size: 0.9rem; margin-bottom: 2px; }
+  .timeline-content p { font-size: 0.8rem; color: var(--subtle); line-height: 1.5; }
+  .timeline-content .time { font-family: var(--jb); font-size: 0.7rem; color: var(--muted); }
+  .cta-section { text-align: center; padding: var(--sp-2xl) var(--sp-md); }
+  .cta-section h2 { margin-bottom: var(--sp-md); }
+  .cta-section p { max-width: 480px; margin: 0 auto var(--sp-xl); }
+</style>
+</head>
+<body class="dot-bg">
+  <nav>
+    <div class="nav-logo">Bypass</div>
+    <div class="nav-links">
+      <a href="#debug">Debug</a>
+      <a href="#features">Features</a>
+      <a href="https://blackroad.io">BlackRoad OS</a>
+    </div>
+    <button class="nav-cta" onclick="location.href='#start'">Debug Now</button>
+    <button class="nav-toggle" onclick="this.classList.toggle('open');document.getElementById('nav-mobile').classList.toggle('open')" aria-label="Menu"><span></span><span></span><span></span></button>
+  </nav>
+  <div id="nav-mobile" class="nav-mobile">
+    <a href="#debug" onclick="document.getElementById('nav-mobile').classList.remove('open')">Debug</a>
+    <a href="#features" onclick="document.getElementById('nav-mobile').classList.remove('open')">Features</a>
+    <a href="https://blackroad.io">BlackRoad OS</a>
+  </div>
+
+  <div class="hero">
+    <div class="section-label">AI Debugging</div>
+    <h1>Skip the<br>frustration.</h1>
+    <p class="hero-sub">Paste a stack trace. Get an explanation. Get a fix. Bypass turns cryptic errors into clear solutions with time-travel debugging that shows you exactly what went wrong.</p>
+    <a href="#start" class="btn-primary">Debug Something</a>
+  </div>
+
+  <section id="debug">
+    <div class="section-label">Live Debug</div>
+    <h2 style="margin-bottom:var(--sp-md);">Error &rarr; Explanation &rarr; Fix</h2>
+    <div class="debug-panel">
+      <div class="debug-header">
+        <div class="debug-title">TypeError: Cannot read properties of undefined</div>
+        <div class="ai-badge">BYPASS AI</div>
+      </div>
+      <div class="stack-trace">
+        <div class="stack-line error">TypeError: Cannot read properties of undefined (reading 'map')</div>
+        <div class="stack-line highlight">&nbsp;&nbsp;at renderUsers (src/components/UserList.tsx:24:18)</div>
+        <div class="stack-line">&nbsp;&nbsp;at processChild (node_modules/react-dom/...)</div>
+        <div class="stack-line">&nbsp;&nbsp;at finishClassComponent (node_modules/react-dom/...)</div>
+        <div class="stack-line">&nbsp;&nbsp;at beginWork (node_modules/react-dom/...)</div>
+      </div>
+      <div class="debug-explanation">
+        <h4>What happened</h4>
+        <p>The <code>users</code> prop in <code>UserList.tsx</code> line 24 is <code>undefined</code> when the component first renders. The API call in the parent hasn't resolved yet, so <code>users.map()</code> fails because you can't call <code>.map()</code> on <code>undefined</code>.</p>
+        <div class="fix-block">
+          <div class="fix-label">Suggested Fix</div>
+          <code>// Line 24 — add optional chaining + fallback
+const list = (users ?? []).map(u =&gt; (
+  &lt;UserCard key={u.id} user={u} /&gt;
+));</code>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label" style="margin-top:var(--sp-xl)">Time Travel</div>
+    <h3 style="margin-bottom:var(--sp-md);">Execution timeline</h3>
+    <div class="timeline">
+      <div class="timeline-step">
+        <div class="timeline-marker">1</div>
+        <div class="timeline-content">
+          <h4>Component mounts</h4>
+          <p>UserList renders. <code>users</code> prop is <code>undefined</code> (parent state initializes as null).</p>
+          <div class="time">T+0ms</div>
+        </div>
+      </div>
+      <div class="timeline-step">
+        <div class="timeline-marker active">2</div>
+        <div class="timeline-content">
+          <h4>Crash: users.map()</h4>
+          <p>Cannot call <code>.map()</code> on <code>undefined</code>. React error boundary catches, but damage is done.</p>
+          <div class="time">T+2ms</div>
+        </div>
+      </div>
+      <div class="timeline-step">
+        <div class="timeline-marker">3</div>
+        <div class="timeline-content">
+          <h4>API resolves (too late)</h4>
+          <p>The fetch in the parent component returns 47 users. But the component already crashed.</p>
+          <div class="time">T+340ms</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="features">
+    <div class="section-label">Capabilities</div>
+    <h2 style="margin-bottom:var(--sp-xl);">Debug smarter, not harder</h2>
+    <div class="grid-3">
+      <div class="feature-card">
+        <div class="feature-icon">err</div>
+        <h3>Stack Trace Decoder</h3>
+        <p>Paste any stack trace. Bypass explains it in plain English. No more deciphering minified production errors.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">fix</div>
+        <h3>Fix Suggestions</h3>
+        <p>Not just explanations. Exact code fixes you can copy-paste. Bypass knows your codebase and suggests idiomatic solutions.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">t:&lt;</div>
+        <h3>Time-Travel Debug</h3>
+        <p>Step through execution history. See the exact sequence of events that led to the bug. Cause and effect, laid bare.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">log</div>
+        <h3>Smart Logging</h3>
+        <p>Bypass suggests where to add logs. When you hit an error, the right context is already captured. No more "add a console.log and try again."</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">pat</div>
+        <h3>Pattern Detection</h3>
+        <p>Same bug twice? Bypass remembers. It detects recurring error patterns and warns you before they ship.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">ctx</div>
+        <h3>Full Context</h3>
+        <p>Bypass reads your repo, understands types, follows imports, and knows your conventions. Debugging with full awareness.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="start" class="cta-section">
+    <div class="section-label">Get Started</div>
+    <h2>Stop staring at stack traces.</h2>
+    <p>Paste an error. Get an answer. Fix the bug. Move on with your life.</p>
+    <a href="https://blackroad.io" class="btn-primary">Deploy Bypass</a>
+  </section>
+
+  <footer>
+    <span>&copy; 2026 BlackRoad OS, Inc. &mdash; Pave Tomorrow.</span>
+    <span style="display:flex;gap:var(--sp-lg);flex-wrap:wrap;">
+      <a href="https://blackroad.io" style="color:var(--muted)">Home</a>
+      <a href="https://blackroadai.com" style="color:var(--muted)">AI</a>
+      <a href="https://blackroad.network" style="color:var(--muted)">Network</a>
+    </span>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BlackBoard — Sovereign Analytics</title>
+    <link rel="icon" type="image/x-icon" href="https://images.blackroad.io/brand/favicon.ico" />
+    <link rel="icon" type="image/png" sizes="192x192" href="https://images.blackroad.io/brand/blackroad-icon-192.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="https://images.blackroad.io/brand/apple-touch-icon.png" />
+    <meta property="og:image" content="https://images.blackroad.io/brand/blackroad-icon-512.png" />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#000;--surface:#0a0a0a;--border:#1a1a1a;--muted:#444;--sub:#737373;--white:#fff;
+  --g:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);
+  --green:#22c55e;--red:#ef4444;--blue:#4488FF;--purple:#8844FF;--amber:#f59e0b;
+  --sg:'Space Grotesk',sans-serif;--jb:'JetBrains Mono',monospace;
+}
+body{background:var(--bg);color:var(--white);font-family:var(--sg);overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+
+/* Layout */
+.app{display:grid;grid-template-columns:220px 1fr;min-height:100vh}
+
+/* Sidebar */
+.sidebar{background:var(--surface);border-right:1px solid var(--border);padding:24px 0;display:flex;flex-direction:column}
+.sidebar-logo{padding:0 20px 24px;font-weight:700;font-size:18px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);margin-bottom:16px}
+.logo-mark{width:24px;height:3px;border-radius:2px;background:var(--g)}
+.sidebar-section{padding:0 12px;margin-bottom:16px}
+.sidebar-label{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);padding:8px;font-family:var(--jb)}
+.sidebar-link{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:6px;font-size:13px;font-weight:500;color:var(--sub);cursor:pointer;transition:all .15s}
+.sidebar-link:hover{background:rgba(255,255,255,.05);color:var(--white)}
+.sidebar-link.active{background:rgba(255,255,255,.08);color:var(--white)}
+.sidebar-link .icon{width:16px;text-align:center;font-size:14px}
+.sidebar-footer{margin-top:auto;padding:16px 20px;border-top:1px solid var(--border);font-size:11px;color:var(--muted);font-family:var(--jb)}
+
+/* Main */
+.main{padding:32px;overflow-y:auto}
+.main-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:32px}
+.main-header h1{font-size:24px;font-weight:700}
+.controls{display:flex;gap:12px;align-items:center}
+.select{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:8px 12px;color:var(--white);font-size:13px;font-family:var(--sg)}
+.select option{background:#111}
+.btn-refresh{background:none;border:1px solid var(--border);border-radius:6px;padding:8px 14px;color:var(--sub);font-size:13px;cursor:pointer;font-family:var(--sg);transition:border-color .2s}
+.btn-refresh:hover{border-color:var(--muted);color:var(--white)}
+
+/* Stat Cards */
+.stats-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-bottom:32px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px}
+.stat-label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-family:var(--jb);margin-bottom:8px}
+.stat-value{font-size:28px;font-weight:700;font-family:var(--jb)}
+.stat-change{font-size:11px;margin-top:4px;font-family:var(--jb)}
+.stat-up{color:var(--green)}.stat-down{color:var(--red)}
+
+/* Chart area */
+.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:24px;margin-bottom:24px}
+.chart-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.chart-title{font-size:14px;font-weight:600}
+.chart{height:200px;display:flex;align-items:flex-end;gap:2px;padding-top:20px}
+.chart-bar{flex:1;background:var(--g);border-radius:2px 2px 0 0;min-height:2px;transition:height .3s;position:relative}
+.chart-bar:hover{opacity:.8}
+.chart-bar:hover::after{content:attr(data-label);position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:4px 8px;border-radius:4px;font-size:11px;font-family:var(--jb);white-space:nowrap;margin-bottom:4px}
+
+/* Tables */
+.tables-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px}
+.table-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px;overflow:hidden}
+.table-card h3{font-size:14px;font-weight:600;margin-bottom:16px}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-family:var(--jb);padding:8px 0;border-bottom:1px solid var(--border)}
+td{padding:8px 0;font-size:13px;border-bottom:1px solid var(--border)}
+td:last-child{text-align:right;font-family:var(--jb);color:var(--sub)}
+tr:last-child td{border-bottom:none}
+.bar-cell{display:flex;align-items:center;gap:8px}
+.bar-fill{height:4px;border-radius:2px;background:var(--g)}
+
+/* Live feed */
+.feed-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px}
+.feed-card h3{font-size:14px;font-weight:600;margin-bottom:16px}
+.feed-item{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}
+.feed-item:last-child{border-bottom:none}
+.feed-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.feed-type{font-family:var(--jb);font-size:11px;color:var(--muted);min-width:70px}
+.feed-path{flex:1;color:var(--sub)}
+.feed-meta{font-family:var(--jb);font-size:11px;color:var(--muted)}
+
+/* CRM view */
+.contacts-table{width:100%;margin-top:16px}
+.contacts-table th{font-size:11px;padding:10px 8px}
+.contacts-table td{padding:10px 8px;font-size:13px}
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-family:var(--jb)}
+.tag-lead{background:transparent;border:1px solid var(--blue);color:#f5f5f5}
+.tag-customer{background:transparent;border:1px solid var(--green);color:#f5f5f5}
+
+/* Embed section */
+.embed-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:24px;margin-top:24px}
+.embed-card h3{font-size:16px;font-weight:600;margin-bottom:8px}
+.embed-card p{font-size:13px;color:var(--sub);margin-bottom:16px}
+.code-block{background:#0d0d0d;border:1px solid var(--border);border-radius:6px;padding:16px;font-family:var(--jb);font-size:13px;color:#f5f5f5;overflow-x:auto;position:relative}
+.code-block .copy-btn{position:absolute;top:8px;right:8px;background:var(--border);border:none;color:var(--sub);padding:4px 10px;border-radius:4px;font-size:11px;cursor:pointer;font-family:var(--jb)}
+.code-block .copy-btn:hover{color:var(--white)}
+
+/* Responsive */
+@media(max-width:900px){
+  .app{grid-template-columns:1fr}
+  .sidebar{display:none}
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .tables-grid{grid-template-columns:1fr}
+  .main{padding:20px}
+}
+</style>
+  <script src="https://blackroad-mesh.amundsonalexa.workers.dev/mesh.js" defer></script>
+</head>
+<body>
+<div class="app">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-logo"><div class="logo-mark"></div> BlackBoard</div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Analytics</div>
+      <div class="sidebar-link active" onclick="showView('overview')"><span class="icon">&#x25CF;</span> Overview</div>
+      <div class="sidebar-link" onclick="showView('pages')"><span class="icon">&#x1F4C4;</span> Pages</div>
+      <div class="sidebar-link" onclick="showView('referrers')"><span class="icon">&#x1F517;</span> Referrers</div>
+      <div class="sidebar-link" onclick="showView('countries')"><span class="icon">&#x1F30D;</span> Countries</div>
+      <div class="sidebar-link" onclick="showView('devices')"><span class="icon">&#x1F4F1;</span> Devices</div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Marketing</div>
+      <div class="sidebar-link" onclick="showView('campaigns')"><span class="icon">&#x1F4E3;</span> Campaigns</div>
+      <div class="sidebar-link" onclick="showView('conversions')"><span class="icon">&#x1F3AF;</span> Conversions</div>
+      <div class="sidebar-link" onclick="showView('attribution')"><span class="icon">&#x1F504;</span> Attribution</div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">CRM</div>
+      <div class="sidebar-link" onclick="showView('contacts')"><span class="icon">&#x1F464;</span> Contacts</div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Setup</div>
+      <div class="sidebar-link" onclick="showView('embed')"><span class="icon">&#x2699;&#xFE0F;</span> Install</div>
+    </div>
+
+    <div class="sidebar-footer">BlackBoard v1.0<br>by BlackRoad OS</div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main" id="main">
+    <!-- Header -->
+    <div class="main-header">
+      <h1 id="viewTitle">Overview</h1>
+      <div class="controls">
+        <select class="select" id="siteFilter" onchange="refresh()">
+          <option value="">All sites</option>
+        </select>
+        <select class="select" id="daysFilter" onchange="refresh()">
+          <option value="1">Today</option>
+          <option value="7" selected>7 days</option>
+          <option value="30">30 days</option>
+          <option value="90">90 days</option>
+        </select>
+        <button class="btn-refresh" onclick="refresh()">Refresh</button>
+      </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-grid" id="statsGrid">
+      <div class="stat-card"><div class="stat-label">Pageviews</div><div class="stat-value" id="statViews">—</div></div>
+      <div class="stat-card"><div class="stat-label">Visitors</div><div class="stat-value" id="statVisitors">—</div></div>
+      <div class="stat-card"><div class="stat-label">Sessions</div><div class="stat-value" id="statSessions">—</div></div>
+      <div class="stat-card"><div class="stat-label">Conversions</div><div class="stat-value" id="statConversions">—</div></div>
+      <div class="stat-card"><div class="stat-label">Revenue</div><div class="stat-value" id="statRevenue">—</div></div>
+    </div>
+
+    <!-- Chart -->
+    <div class="chart-card" id="chartCard">
+      <div class="chart-header">
+        <div class="chart-title">Pageviews over time</div>
+      </div>
+      <div class="chart" id="chart"></div>
+    </div>
+
+    <!-- Tables -->
+    <div class="tables-grid" id="tablesGrid">
+      <div class="table-card">
+        <h3>Top Pages</h3>
+        <table><thead><tr><th>Page</th><th>Views</th></tr></thead><tbody id="pagesTable"></tbody></table>
+      </div>
+      <div class="table-card">
+        <h3>Top Referrers</h3>
+        <table><thead><tr><th>Referrer</th><th>Views</th></tr></thead><tbody id="referrersTable"></tbody></table>
+      </div>
+    </div>
+
+    <div class="tables-grid">
+      <div class="table-card">
+        <h3>Countries</h3>
+        <table><thead><tr><th>Country</th><th>Visitors</th></tr></thead><tbody id="countriesTable"></tbody></table>
+      </div>
+      <div class="table-card">
+        <h3>Browsers</h3>
+        <table><thead><tr><th>Browser</th><th>Views</th></tr></thead><tbody id="browsersTable"></tbody></table>
+      </div>
+    </div>
+
+    <!-- Live Feed -->
+    <div class="feed-card">
+      <h3>Live Events</h3>
+      <div id="feedList"><p style="color:var(--muted);text-align:center;padding:20px;font-size:13px">Events stream when connected to the mesh</p></div>
+    </div>
+
+    <!-- Embed Instructions (hidden by default) -->
+    <div id="embedView" style="display:none">
+      <div class="embed-card">
+        <h3>Add BlackBoard to any site</h3>
+        <p>One script tag. No cookies. No GDPR banner needed. Under 2KB. Tracks pageviews, clicks, conversions, UTM attribution, and CRM contacts.</p>
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyEmbed()">Copy</button>
+          &lt;script src="https://bb.blackroad.io/bb.js"&gt;&lt;/script&gt;
+        </div>
+      </div>
+
+      <div class="embed-card" style="margin-top:16px">
+        <h3>Track custom events</h3>
+        <p>Use the JavaScript API to track conversions, signups, and any custom event.</p>
+        <div class="code-block">
+// Track a custom event<br>
+bb.track('button_click', { button: 'hero-cta' });<br><br>
+// Track a conversion with revenue<br>
+bb.convert('purchase', 299, 'USD');<br><br>
+// Identify a contact (CRM)<br>
+bb.identify({ email: 'user@example.com', name: 'Jane' });<br><br>
+// Track signup with attribution<br>
+bb.track('signup', { plan: 'sovereign', free_month: true });
+        </div>
+      </div>
+
+      <div class="embed-card" style="margin-top:16px">
+        <h3>Email tracking pixel</h3>
+        <p>Add to any email template for open tracking.</p>
+        <div class="code-block">
+&lt;img src="https://bb.blackroad.io/px?cid=CONTACT_ID&amp;campaign=CAMPAIGN_NAME" width="1" height="1"&gt;
+        </div>
+      </div>
+
+      <div class="embed-card" style="margin-top:16px">
+        <h3>Click tracking for links</h3>
+        <p>Wrap any URL to track clicks with attribution.</p>
+        <div class="code-block">
+https://bb.blackroad.io/r?url=https://auth.blackroad.io/signup&amp;src=email&amp;campaign=launch
+        </div>
+      </div>
+    </div>
+
+    <!-- Contacts View (hidden by default) -->
+    <div id="contactsView" style="display:none">
+      <div class="table-card" style="margin-top:0">
+        <h3>All Contacts</h3>
+        <table class="contacts-table">
+          <thead><tr><th>Email</th><th>Name</th><th>Source</th><th>Campaign</th><th>Country</th><th>Views</th><th>Last Seen</th></tr></thead>
+          <tbody id="contactsTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Campaigns View (hidden by default) -->
+    <div id="campaignsView" style="display:none">
+      <div class="table-card" style="margin-top:0">
+        <h3>Campaign Attribution</h3>
+        <table>
+          <thead><tr><th>Source</th><th>Medium</th><th>Campaign</th><th>Visitors</th><th>Views</th></tr></thead>
+          <tbody id="campaignsTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Conversions View (hidden by default) -->
+    <div id="conversionsView" style="display:none">
+      <div class="table-card" style="margin-top:0">
+        <h3>Conversion Attribution</h3>
+        <table>
+          <thead><tr><th>Event</th><th>Source</th><th>Campaign</th><th>Count</th><th>Revenue</th></tr></thead>
+          <tbody id="conversionsTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = '';  // relative to same origin
+let currentView = 'overview';
+
+function q(sel) { return document.querySelector(sel) }
+function qa(sel) { return document.querySelectorAll(sel) }
+function fmt(n) { return n >= 1000 ? (n/1000).toFixed(1) + 'k' : (n || 0).toString() }
+function fmtMoney(n) { return '$' + (n || 0).toLocaleString() }
+
+async function api(path) {
+  const site = q('#siteFilter').value;
+  const days = q('#daysFilter').value;
+  const sep = path.includes('?') ? '&' : '?';
+  const res = await fetch(`${API}/api/${path}${sep}site=${encodeURIComponent(site)}&days=${days}`);
+  return res.json();
+}
+
+async function refresh() {
+  if (currentView === 'overview') await loadOverview();
+  else if (currentView === 'contacts') await loadContacts();
+  else if (currentView === 'campaigns') await loadCampaigns();
+  else if (currentView === 'conversions') await loadConversions();
+}
+
+async function loadOverview() {
+  const [stats, ts, pages, refs, countries, browsers, feed] = await Promise.all([
+    api('stats'), api('timeseries'), api('pages'), api('referrers'),
+    api('countries'), api('browsers'), api('feed')
+  ]);
+
+  q('#statViews').textContent = fmt(stats.pageviews);
+  q('#statVisitors').textContent = fmt(stats.visitors);
+  q('#statSessions').textContent = fmt(stats.sessions);
+  q('#statConversions').textContent = fmt(stats.conversions);
+  q('#statRevenue').textContent = fmtMoney(stats.revenue);
+
+  // Chart
+  const chart = q('#chart');
+  chart.innerHTML = '';
+  if (ts.length) {
+    const max = Math.max(...ts.map(d => d.views), 1);
+    ts.forEach(d => {
+      const bar = document.createElement('div');
+      bar.className = 'chart-bar';
+      bar.style.height = Math.max((d.views / max) * 180, 2) + 'px';
+      bar.setAttribute('data-label', d.day + ': ' + d.views + ' views');
+      chart.appendChild(bar);
+    });
+  }
+
+  // Tables
+  renderTable('pagesTable', pages.slice(0, 10), r => `<td>${r.path || '/'}</td><td>${fmt(r.views)}</td>`);
+  renderTable('referrersTable', refs.slice(0, 10), r => `<td>${shortUrl(r.referrer)}</td><td>${fmt(r.views)}</td>`);
+  renderTable('countriesTable', countries.slice(0, 10), r => `<td>${r.country}</td><td>${fmt(r.visitors)}</td>`);
+  renderTable('browsersTable', browsers.slice(0, 10), r => `<td>${r.browser}</td><td>${fmt(r.views)}</td>`);
+
+  // Feed
+  const feedEl = q('#feedList');
+  feedEl.innerHTML = '';
+  (feed || []).slice(0, 20).forEach(e => {
+    const colors = { pageview: 'var(--green)', click: 'var(--blue)', signup: 'var(--purple)', email_open: 'var(--amber)' };
+    feedEl.innerHTML += `<div class="feed-item">
+      <div class="feed-dot" style="background:${colors[e.type] || 'var(--muted)'}"></div>
+      <div class="feed-type">${e.type}</div>
+      <div class="feed-path">${e.path || '—'}</div>
+      <div class="feed-meta">${e.country || ''} ${e.browser || ''}</div>
+      <div class="feed-meta">${timeAgo(e.ts)}</div>
+    </div>`;
+  });
+
+  // Load sites filter
+  const sites = await api('sites');
+  const sel = q('#siteFilter');
+  const current = sel.value;
+  sel.innerHTML = '<option value="">All sites</option>';
+  (sites || []).forEach(s => {
+    sel.innerHTML += `<option value="${s.site}" ${s.site === current ? 'selected' : ''}>${s.site} (${fmt(s.views)})</option>`;
+  });
+}
+
+async function loadContacts() {
+  const contacts = await api('contacts');
+  renderTable('contactsTable', contacts || [], r =>
+    `<td>${r.email}</td><td>${r.name || '—'}</td><td><span class="tag tag-lead">${r.source}</span></td>
+     <td>${r.utm_campaign || '—'}</td><td>${r.country || '—'}</td>
+     <td>${r.page_views}</td><td>${timeAgo(r.last_seen)}</td>`
+  );
+}
+
+async function loadCampaigns() {
+  const campaigns = await api('campaigns');
+  renderTable('campaignsTable', campaigns || [], r =>
+    `<td>${r.utm_source}</td><td>${r.utm_medium || '—'}</td>
+     <td>${r.utm_campaign || '—'}</td><td>${fmt(r.visitors)}</td><td>${fmt(r.views)}</td>`
+  );
+}
+
+async function loadConversions() {
+  const conv = await api('conversions');
+  renderTable('conversionsTable', conv || [], r =>
+    `<td>${r.event}</td><td>${r.utm_source || 'direct'}</td>
+     <td>${r.utm_campaign || '—'}</td><td>${r.count}</td><td>${fmtMoney(r.revenue)}</td>`
+  );
+}
+
+function renderTable(id, rows, renderRow) {
+  const el = q('#' + id);
+  el.innerHTML = rows.length ? rows.map(r => '<tr>' + renderRow(r) + '</tr>').join('') : '<tr><td colspan="10" style="color:var(--muted);text-align:center;padding:20px">No data yet</td></tr>';
+}
+
+function showView(view) {
+  currentView = view;
+  // Update active nav
+  qa('.sidebar-link').forEach(l => l.classList.remove('active'));
+  event.target.closest('.sidebar-link').classList.add('active');
+
+  // Show/hide sections
+  const overviewEls = [q('#statsGrid'), q('#chartCard'), ...qa('.tables-grid'), q('.feed-card')];
+  const allViews = { embed: q('#embedView'), contacts: q('#contactsView'), campaigns: q('#campaignsView'), conversions: q('#conversionsView') };
+
+  // Hide everything first
+  overviewEls.forEach(el => el.style.display = 'none');
+  Object.values(allViews).forEach(el => el.style.display = 'none');
+
+  q('#viewTitle').textContent = {
+    overview: 'Overview', pages: 'Pages', referrers: 'Referrers', countries: 'Countries',
+    devices: 'Devices', campaigns: 'Campaigns', conversions: 'Conversions',
+    attribution: 'Attribution', contacts: 'Contacts', embed: 'Install BlackBoard'
+  }[view] || view;
+
+  if (view === 'overview' || view === 'pages' || view === 'referrers' || view === 'countries' || view === 'devices') {
+    overviewEls.forEach(el => el.style.display = '');
+    loadOverview();
+  } else if (allViews[view]) {
+    allViews[view].style.display = 'block';
+    if (view === 'contacts') loadContacts();
+    if (view === 'campaigns' || view === 'attribution') loadCampaigns();
+    if (view === 'conversions') loadConversions();
+  }
+}
+
+function shortUrl(url) {
+  try { return new URL(url).hostname } catch { return url || 'Direct' }
+}
+
+function timeAgo(ts) {
+  const d = Date.now() - ts;
+  if (d < 60000) return 'now';
+  if (d < 3600000) return Math.floor(d/60000) + 'm';
+  if (d < 86400000) return Math.floor(d/3600000) + 'h';
+  return Math.floor(d/86400000) + 'd';
+}
+
+function copyEmbed() {
+  navigator.clipboard.writeText('<script src="https://bb.blackroad.io/bb.js"><\/script>');
+  event.target.textContent = 'Copied!';
+  setTimeout(() => event.target.textContent = 'Copy', 1500);
+}
+
+// Auto-refresh every 30s
+loadOverview();
+setInterval(() => { if (currentView === 'overview') loadOverview() }, 67);
+</script>
+</body>
+</html>

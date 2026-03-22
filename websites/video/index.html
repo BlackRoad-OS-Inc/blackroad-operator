@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="icon" type="image/png" sizes="32x32" href="https://images.blackroad.io/brand/br-square-32.png" />
+<link rel="icon" type="image/png" sizes="192x192" href="https://images.blackroad.io/brand/br-square-192.png" />
+<link rel="apple-touch-icon" sizes="180x180" href="https://images.blackroad.io/brand/apple-touch-icon.png" />
+<meta property="og:image" content="https://images.blackroad.io/brand/br-square-512.png" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:image" content="https://images.blackroad.io/brand/br-square-512.png" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="RoadView — AI video editing. Describe the cut. Get the video. Natural language editing, auto b-roll, AI voiceover, color grading.">
+<meta name="theme-color" content="#8844FF">
+<link rel="canonical" href="https://video.blackroad.io">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://video.blackroad.io">
+<meta property="og:title" content="RoadView — Describe the cut. Get the video.">
+<meta property="og:description" content="AI video editing with natural language commands, auto b-roll, voiceover, and color grading.">
+<meta property="og:site_name" content="BlackRoad OS">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"RoadView","url":"https://video.blackroad.io","description":"AI video editing. Describe the cut. Get the video.","applicationCategory":"MultimediaApplication","operatingSystem":"Web"}</script>
+<title>RoadView — Describe the cut. Get the video.</title>
+<link rel="stylesheet" href="../_shared/design.css">
+<style>
+  .hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: var(--sp-xl) var(--sp-md);
+    position: relative; overflow: hidden;
+  }
+  @media (min-width: 768px) {
+    .hero { padding: 0 var(--sp-xl); }
+  }
+  .hero-eyebrow {
+    font-family: var(--jb); font-size: 0.75rem;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--subtle); margin-bottom: var(--sp-md);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .hero-eyebrow::before {
+    content: ''; width: 6px; height: 6px;
+    background: var(--orchid); border-radius: 50%;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+  }
+  .hero h1 { max-width: 800px; margin-bottom: var(--sp-lg); }
+  .hero-sub {
+    font-size: 1.1rem; color: var(--subtle);
+    max-width: 520px; margin-bottom: var(--sp-xl); line-height: 1.7;
+  }
+  @media (min-width: 768px) {
+    .hero-sub { font-size: 1.2rem; }
+  }
+  .hero-actions { display: flex; gap: var(--sp-md); align-items: center; flex-wrap: wrap; }
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--grad); color: var(--white);
+    padding: 14px 28px; border-radius: 6px;
+    font-weight: 700; font-size: 0.95rem;
+    transition: opacity 0.2s, transform 0.2s var(--ease-spring);
+  }
+  .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+  .btn-ghost {
+    display: inline-flex; align-items: center; gap: 8px;
+    border: 1px solid var(--border); color: var(--subtle);
+    padding: 14px 28px; border-radius: 6px; font-size: 0.95rem;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .btn-ghost:hover { border-color: var(--muted); color: var(--white); }
+
+  .replaces {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--jb); font-size: 0.7rem;
+    color: var(--muted); margin-top: var(--sp-md);
+  }
+  .replaces-name { text-decoration: line-through; opacity: 0.5; }
+
+  /* Timeline Mockup */
+  .timeline-mockup {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    max-width: 900px;
+    margin-top: var(--sp-xl);
+  }
+  .timeline-preview {
+    aspect-ratio: 16/9;
+    max-height: 300px;
+    background: linear-gradient(135deg, #0a0a0a 0%, #111 50%, #0a0a0a 100%);
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .preview-play {
+    width: 56px; height: 56px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: border-color 0.2s, transform 0.2s;
+    z-index: 2;
+  }
+  .preview-play:hover { border-color: rgba(255,255,255,0.6); transform: scale(1.05); }
+  .preview-play::after {
+    content: '';
+    width: 0; height: 0;
+    border-left: 18px solid rgba(255,255,255,0.7);
+    border-top: 11px solid transparent;
+    border-bottom: 11px solid transparent;
+    margin-left: 4px;
+  }
+  .preview-timecode {
+    position: absolute; bottom: 12px; right: 16px;
+    font-family: var(--jb); font-size: 0.7rem;
+    color: var(--subtle);
+  }
+  .preview-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg, transparent 60%, rgba(0,0,0,0.6) 100%);
+  }
+  .ai-command {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--elevated);
+  }
+  .ai-prompt-icon {
+    font-family: var(--jb); font-size: 0.7rem;
+    color: var(--orchid); font-weight: 700;
+    flex-shrink: 0;
+  }
+  .ai-prompt-text {
+    font-family: var(--in); font-size: 0.85rem;
+    color: var(--subtle); flex: 1;
+  }
+  .ai-prompt-text em { color: var(--white); font-style: normal; }
+
+  .timeline-tracks { padding: 0; }
+  .timeline-ruler {
+    display: flex; align-items: center;
+    padding: 4px 0;
+    border-bottom: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .ruler-label {
+    width: 60px; flex-shrink: 0;
+    border-right: 1px solid var(--border);
+    padding: 0 4px;
+  }
+  @media (min-width: 600px) {
+    .ruler-label { width: 80px; }
+  }
+  .ruler-marks {
+    display: flex; flex: 1; padding: 0 8px;
+  }
+  .ruler-mark {
+    font-family: var(--jb); font-size: 0.55rem;
+    color: var(--muted); min-width: 50px;
+    flex-shrink: 0;
+  }
+  .track {
+    display: flex; align-items: center;
+    border-bottom: 1px solid var(--border);
+    min-height: 36px;
+  }
+  .track-label {
+    width: 60px; flex-shrink: 0;
+    font-family: var(--jb); font-size: 0.6rem;
+    color: var(--muted); text-align: center;
+    padding: 0 4px;
+    border-right: 1px solid var(--border);
+  }
+  @media (min-width: 600px) {
+    .track-label { width: 80px; font-size: 0.65rem; }
+  }
+  .track-content {
+    flex: 1; display: flex; align-items: center;
+    padding: 4px 8px; gap: 4px;
+    overflow: hidden;
+  }
+  .clip {
+    height: 24px; border-radius: 3px;
+    display: flex; align-items: center;
+    padding: 0 8px;
+    font-family: var(--jb); font-size: 0.6rem;
+    color: rgba(255,255,255,0.8);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .clip-video { background: linear-gradient(90deg, var(--orchid), var(--arc)); }
+  .clip-broll { background: linear-gradient(90deg, rgba(136,68,255,0.4), rgba(68,136,255,0.4)); border: 1px solid rgba(136,68,255,0.5); }
+  .clip-audio { background: linear-gradient(90deg, var(--ember), var(--flare)); }
+  .clip-voice { background: linear-gradient(90deg, rgba(255,107,43,0.4), rgba(255,34,85,0.4)); border: 1px solid rgba(255,107,43,0.5); }
+  .clip-text { background: linear-gradient(90deg, var(--cyan), var(--arc)); }
+
+  .timeline-playhead {
+    position: relative; height: 2px;
+    background: var(--border);
+    margin-left: 60px;
+  }
+  @media (min-width: 600px) {
+    .timeline-playhead { margin-left: 80px; }
+  }
+  .playhead-marker {
+    position: absolute; left: 38%;
+    top: -4px; width: 2px; height: 10px;
+    background: var(--flare);
+  }
+  .playhead-marker::before {
+    content: ''; position: absolute;
+    top: -4px; left: -4px;
+    width: 10px; height: 4px;
+    background: var(--flare);
+  }
+
+  .features-grid { display: grid; grid-template-columns: 1fr; gap: var(--sp-md); }
+  @media (min-width: 600px) { .features-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 900px) { .features-grid { grid-template-columns: repeat(3, 1fr); } }
+  .feature-title { font-size: 1rem; font-weight: 600; margin-bottom: var(--sp-xs); }
+  .feature-desc { font-size: 0.875rem; color: var(--subtle); line-height: 1.65; }
+  .feature-icon {
+    font-family: var(--jb); font-size: 0.75rem; font-weight: 700;
+    margin-bottom: var(--sp-sm);
+    background: var(--grad); -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent; background-clip: text;
+  }
+
+  .nl-commands {
+    display: flex; flex-direction: column;
+    gap: var(--sp-sm); margin-top: var(--sp-lg);
+    max-width: 700px;
+  }
+  .nl-cmd {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: var(--sp-md);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    transition: border-color 0.2s;
+  }
+  .nl-cmd:hover { border-color: var(--muted); }
+  .nl-arrow {
+    font-family: var(--jb); font-size: 0.8rem;
+    color: var(--orchid); flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .nl-input {
+    font-family: var(--in); font-size: 0.9rem;
+    color: var(--white); line-height: 1.5;
+  }
+  .nl-result {
+    font-family: var(--jb); font-size: 0.7rem;
+    color: var(--muted); margin-top: 4px;
+  }
+
+  .cta-band {
+    background: linear-gradient(135deg, rgba(136,68,255,0.08) 0%, rgba(68,136,255,0.08) 50%, rgba(0,212,255,0.08) 100%);
+    border: 1px solid var(--border); border-radius: 10px;
+    padding: var(--sp-xl) var(--sp-md); text-align: center;
+  }
+  @media (min-width: 768px) {
+    .cta-band { padding: var(--sp-2xl) var(--sp-xl); }
+  }
+  .cta-band h2 { margin-bottom: var(--sp-md); }
+  .cta-band p { max-width: 500px; margin: 0 auto var(--sp-xl); }
+</style>
+<script src="https://blackroad-mesh.amundsonalexa.workers.dev/mesh.js" defer></script>
+</head>
+<body class="dot-bg">
+
+  <!-- Nav -->
+  <nav>
+    <div class="nav-logo">RoadView</div>
+    <div class="nav-links">
+      <a href="#timeline">Timeline</a>
+      <a href="#features">Features</a>
+      <a href="#commands">AI Commands</a>
+      <a href="https://blackroad.io">BlackRoad OS</a>
+    </div>
+    <a href="https://video.blackroad.io/edit" class="nav-cta">Edit Video</a>
+    <button class="nav-toggle" onclick="this.classList.toggle('open');document.getElementById('nav-mobile').classList.toggle('open')" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+  <div id="nav-mobile" class="nav-mobile">
+    <a href="#timeline" onclick="document.getElementById('nav-mobile').classList.remove('open')">Timeline</a>
+    <a href="#features" onclick="document.getElementById('nav-mobile').classList.remove('open')">Features</a>
+    <a href="#commands" onclick="document.getElementById('nav-mobile').classList.remove('open')">AI Commands</a>
+    <a href="https://blackroad.io">BlackRoad OS</a>
+    <a href="https://video.blackroad.io/edit" style="color:var(--white);font-weight:700;">Edit Video</a>
+  </div>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-eyebrow">Wave 2 &middot; Creator Tools</div>
+    <h1>Describe the cut.<br>Get the video.</h1>
+    <p class="hero-sub">RoadView is AI video editing that listens. Tell it what you want in plain English. It cuts, grades, adds b-roll, and renders. You direct. It edits.</p>
+    <div class="hero-actions">
+      <a href="https://video.blackroad.io/edit" class="btn-primary">Edit Video</a>
+      <a href="#features" class="btn-ghost">See Features</a>
+    </div>
+    <div class="replaces">
+      Replaces <span class="replaces-name">Premiere</span> <span class="replaces-name">CapCut</span> <span class="replaces-name">DaVinci</span>
+    </div>
+  </div>
+
+  <!-- Timeline Mockup -->
+  <section id="timeline">
+    <div class="section-label">Editor</div>
+    <h2 style="margin-bottom: var(--sp-md);">The timeline, reimagined</h2>
+    <p style="max-width: 520px; margin-bottom: var(--sp-lg);">A familiar multi-track timeline with an AI command bar. Type what you want. The timeline updates in real time.</p>
+    <div class="timeline-mockup">
+      <div class="timeline-preview">
+        <div class="preview-overlay"></div>
+        <div class="preview-play"></div>
+        <div class="preview-timecode">00:01:24:15 / 00:04:12:00</div>
+      </div>
+      <div class="ai-command">
+        <span class="ai-prompt-icon">AI</span>
+        <span class="ai-prompt-text"><em>Cut the intro to 8 seconds</em> and add a fade transition to the next clip</span>
+      </div>
+      <div class="timeline-tracks">
+        <div class="timeline-ruler">
+          <div class="ruler-label"></div>
+          <div class="ruler-marks">
+            <div class="ruler-mark">0:00</div>
+            <div class="ruler-mark">0:30</div>
+            <div class="ruler-mark">1:00</div>
+            <div class="ruler-mark">1:30</div>
+            <div class="ruler-mark">2:00</div>
+            <div class="ruler-mark">2:30</div>
+            <div class="ruler-mark">3:00</div>
+            <div class="ruler-mark">3:30</div>
+            <div class="ruler-mark">4:00</div>
+          </div>
+        </div>
+        <div class="timeline-playhead">
+          <div class="playhead-marker"></div>
+        </div>
+        <div class="track">
+          <div class="track-label">V1</div>
+          <div class="track-content">
+            <div class="clip clip-video" style="width:22%;">intro.mp4</div>
+            <div class="clip clip-video" style="width:35%;">main-talk.mp4</div>
+            <div class="clip clip-video" style="width:28%;">demo.mp4</div>
+          </div>
+        </div>
+        <div class="track">
+          <div class="track-label">V2</div>
+          <div class="track-content">
+            <div style="width:24%; flex-shrink:0;"></div>
+            <div class="clip clip-broll" style="width:12%;">b-roll</div>
+            <div style="width:8%; flex-shrink:0;"></div>
+            <div class="clip clip-broll" style="width:18%;">b-roll</div>
+          </div>
+        </div>
+        <div class="track">
+          <div class="track-label">A1</div>
+          <div class="track-content">
+            <div class="clip clip-audio" style="width:85%;">main-audio.wav</div>
+          </div>
+        </div>
+        <div class="track">
+          <div class="track-label">VO</div>
+          <div class="track-content">
+            <div class="clip clip-voice" style="width:20%;">ai-voice</div>
+            <div style="width:40%; flex-shrink:0;"></div>
+            <div class="clip clip-voice" style="width:15%;">ai-voice</div>
+          </div>
+        </div>
+        <div class="track">
+          <div class="track-label">TXT</div>
+          <div class="track-content">
+            <div class="clip clip-text" style="width:10%;">title</div>
+            <div style="width:50%; flex-shrink:0;"></div>
+            <div class="clip clip-text" style="width:18%;">lower third</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section id="features">
+    <div class="section-label">Features</div>
+    <h2 style="margin-bottom: var(--sp-xl);">Professional editing.<br>Natural language.</h2>
+    <div class="features-grid">
+      <div class="card">
+        <div class="feature-icon">NL</div>
+        <div class="feature-title">Natural Language Editing</div>
+        <p class="feature-desc">Type "trim the silence" or "add a zoom on the speaker at 1:24." RoadView translates your intent into precise timeline edits.</p>
+      </div>
+      <div class="card">
+        <div class="feature-icon">BR</div>
+        <div class="feature-title">Auto B-Roll</div>
+        <p class="feature-desc">AI identifies talking head segments and suggests relevant b-roll. Accept, swap, or regenerate. Never stare at a static shot again.</p>
+      </div>
+      <div class="card">
+        <div class="feature-icon">VO</div>
+        <div class="feature-title">AI Voiceover</div>
+        <p class="feature-desc">Generate narration from your script. Multiple voices, adjustable pacing, emotion control. Sounds human because the model was trained on real speech.</p>
+      </div>
+      <div class="card">
+        <div class="feature-icon">CLR</div>
+        <div class="feature-title">AI Color Grading</div>
+        <p class="feature-desc">Describe the mood: "warm documentary," "cold thriller," "vintage film." The AI applies a grade that matches across all clips.</p>
+      </div>
+      <div class="card">
+        <div class="feature-icon">CAP</div>
+        <div class="feature-title">Auto Captions</div>
+        <p class="feature-desc">Speech-to-text captions with word-level timing. Styled to match your brand. Animated, positioned, and formatted automatically.</p>
+      </div>
+      <div class="card">
+        <div class="feature-icon">EXP</div>
+        <div class="feature-title">Multi-Format Export</div>
+        <p class="feature-desc">YouTube, Instagram Reels, TikTok, 4K master. One project, every aspect ratio and format. Batch render overnight.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- AI Commands -->
+  <section id="commands">
+    <div class="section-label">Natural Language</div>
+    <h2 style="margin-bottom: var(--sp-md);">Just say what you want</h2>
+    <p style="max-width: 520px;">No keyboard shortcuts to memorize. No menu diving. Type your edit in plain English.</p>
+    <div class="nl-commands">
+      <div class="nl-cmd">
+        <span class="nl-arrow">&gt;</span>
+        <div>
+          <div class="nl-input">"Remove all silence longer than 2 seconds"</div>
+          <div class="nl-result">14 cuts applied. 47s removed. Timeline: 4:12 &rarr; 3:25</div>
+        </div>
+      </div>
+      <div class="nl-cmd">
+        <span class="nl-arrow">&gt;</span>
+        <div>
+          <div class="nl-input">"Add cinematic black bars and a warm grade"</div>
+          <div class="nl-result">2.35:1 letterbox applied. Color LUT: Warm Cinema. All clips graded.</div>
+        </div>
+      </div>
+      <div class="nl-cmd">
+        <span class="nl-arrow">&gt;</span>
+        <div>
+          <div class="nl-input">"Generate b-roll of city streets for the transition at 1:45"</div>
+          <div class="nl-result">3 options generated. Inserted best match on V2 at 01:45:00.</div>
+        </div>
+      </div>
+      <div class="nl-cmd">
+        <span class="nl-arrow">&gt;</span>
+        <div>
+          <div class="nl-input">"Export vertical for Reels and square for LinkedIn"</div>
+          <div class="nl-result">Queued: 1080x1920 (Reels) + 1080x1080 (LinkedIn). ETA: 8 min.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section>
+    <div class="cta-band">
+      <div class="section-label">RoadView</div>
+      <h2>Direct. Don't click.</h2>
+      <p>Video editing shouldn't require a certification. Tell RoadView what you want. Watch it happen.</p>
+      <div style="display:flex;gap:var(--sp-md);justify-content:center;flex-wrap:wrap;">
+        <a href="https://video.blackroad.io/edit" class="btn-primary">Edit Video</a>
+        <a href="https://blackroad.io" class="btn-ghost">BlackRoad OS</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <span>&copy; 2026 BlackRoad OS, Inc. All rights reserved.</span>
+    <span style="display:flex;gap:var(--sp-lg);flex-wrap:wrap;">
+      <a href="https://blackroad.io" style="color:var(--muted);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">Home</a>
+      <a href="https://blackroadai.com" style="color:var(--muted);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">AI</a>
+      <a href="https://blackroad.network" style="color:var(--muted);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">Network</a>
+      <a href="https://pricing.blackroad.io" style="color:var(--muted);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">Pricing</a>
+    </span>
+  </footer>
+
+</body>
+</html>

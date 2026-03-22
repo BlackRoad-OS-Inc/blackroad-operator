@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BlackRoad Models — 29 AI Models, 7 Providers</title>
+<meta name="description" content="29 AI models across 7 providers. Groq, Together, DeepSeek, xAI, OpenAI, Gemini, Anthropic.">
+<meta property="og:title" content="BlackRoad Models">
+<meta property="og:description" content="29 AI models across 7 providers. One unified API.">
+<meta property="og:image" content="https://images.blackroad.io/brand/br-square-512.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://images.blackroad.io/brand/br-square-512.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://images.blackroad.io/brand/br-square-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="https://images.blackroad.io/brand/br-square-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://images.blackroad.io/brand/apple-touch-icon.png">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
+:root{
+  --g:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);
+  --g135:linear-gradient(135deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);
+  --bg:#000;
+  --card:#0a0a0a;
+  --elevated:#111;
+  --hover:#181818;
+  --border:#1a1a1a;
+  --muted:#444;
+  --sub:#737373;
+  --text:#f5f5f5;
+  --white:#fff;
+  --sg:'Space Grotesk',sans-serif;
+  --jb:'JetBrains Mono',monospace
+}
+body{background:#000;color:var(--text);font-family:var(--sg);overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+.gbar{height:3px;background:var(--g)}
+
+nav{display:flex;align-items:center;justify-content:space-between;padding:14px 48px;border-bottom:1px solid var(--border)}
+.nl{font-weight:700;font-size:18px;display:flex;align-items:center;gap:10px}
+.nm{width:28px;height:3px;border-radius:2px;background:var(--g)}
+.nk{display:flex;gap:28px}
+.nk a{font-size:13px;font-weight:500;opacity:.4;transition:opacity .2s}
+.nk a:hover{opacity:1}
+
+.hw{height:200vh;position:relative}
+.hero{position:sticky;top:0;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 24px;overflow:hidden}
+.horb{position:absolute;border-radius:50%;filter:blur(140px);opacity:.06;pointer-events:none}
+.ho1{width:500px;height:500px;background:#CC00AA;top:-15%;left:5%}
+.ho2{width:400px;height:400px;background:#4488FF;bottom:-10%;right:5%}
+.hero h1{font-size:110px;font-weight:700;letter-spacing:-.04em;line-height:.95;margin-bottom:24px}
+.hero p{font-size:17px;opacity:.4;max-width:480px;line-height:1.7}
+
+/* PROVIDERS */
+.providers{max-width:1100px;margin:0 auto;padding:80px 24px}
+.sl{font-family:var(--jb);font-size:10px;opacity:.2;letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px}
+.st{font-size:36px;font-weight:700;letter-spacing:-.02em;margin-bottom:12px}
+.sd{font-size:14px;opacity:.35;max-width:440px;margin-bottom:48px;line-height:1.7}
+
+.provider-tabs{display:flex;gap:0;border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:32px;flex-wrap:wrap}
+.ptab{padding:10px 20px;font-size:12px;font-weight:600;cursor:pointer;border-right:1px solid var(--border);transition:background .2s;opacity:.4}
+.ptab:last-child{border-right:none}
+.ptab.active{background:rgba(255,255,255,.05);opacity:1}
+.ptab:hover{opacity:.7}
+
+.model-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.model-card{border:1px solid var(--border);border-radius:8px;padding:20px;transition:border-color .2s;position:relative;overflow:hidden;display:none}
+.model-card.visible{display:block}
+.model-card:hover{border-color:#333}
+.model-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--g);opacity:0;transition:opacity .2s}
+.model-card:hover::before{opacity:1}
+.model-name{font-family:var(--jb);font-size:13px;font-weight:500;margin-bottom:4px}
+.model-provider{font-size:11px;opacity:.25;margin-bottom:10px}
+.model-specs{font-size:11px;opacity:.35;line-height:1.6}
+.model-try{display:inline-block;margin-top:12px;padding:6px 16px;border:1px solid var(--border);border-radius:4px;font-size:11px;font-weight:600;font-family:var(--sg);cursor:pointer;transition:border-color .2s}
+.model-try:hover{border-color:#444}
+
+/* COUNTER */
+.counter{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:48px}
+.cbox{border:1px solid var(--border);border-radius:8px;padding:24px;text-align:center}
+.cval{font-size:36px;font-weight:700;letter-spacing:-.02em;margin-bottom:4px}
+.clbl{font-family:var(--jb);font-size:9px;opacity:.2;letter-spacing:.08em;text-transform:uppercase}
+
+/* TRY IT */
+.tryit{max-width:1100px;margin:0 auto;padding:0 24px 80px}
+.try-box{border:1px solid var(--border);border-radius:10px;padding:32px;position:relative;overflow:hidden}
+.try-box::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--g)}
+.try-input{width:100%;background:#0a0a0a;border:1px solid var(--border);border-radius:6px;padding:14px 16px;color:#fff;font-family:var(--sg);font-size:14px;outline:none;margin-bottom:16px;transition:border-color .2s}
+.try-input:focus{border-color:#333}
+.try-select{background:#0a0a0a;border:1px solid var(--border);border-radius:6px;padding:10px 14px;color:#fff;font-family:var(--jb);font-size:12px;outline:none;margin-right:12px;cursor:pointer}
+.try-btn{padding:10px 24px;background:#fff;color:#000;border:none;border-radius:6px;font-size:13px;font-weight:600;font-family:var(--sg);cursor:pointer}
+.try-output{margin-top:20px;padding:16px;background:#0a0a0a;border:1px solid var(--border);border-radius:6px;font-family:var(--jb);font-size:12px;line-height:1.7;opacity:.5;min-height:60px;display:none}
+
+footer{border-top:1px solid var(--border);max-width:1100px;margin:0 auto;padding:48px 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
+.fb{font-weight:700;font-size:15px}
+.fl{display:flex;gap:20px;flex-wrap:wrap}
+.fl a{font-size:12px;opacity:.35;transition:opacity .2s}
+.fl a:hover{opacity:1}
+.fc{font-size:11px;opacity:.15;width:100%;text-align:center;margin-top:16px}
+
+@media(max-width:900px){.model-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){nav{padding:12px 20px}.nk{display:none}.hero h1{font-size:52px}.model-grid{grid-template-columns:1fr}.counter{grid-template-columns:1fr}footer{flex-direction:column;text-align:center}}
+</style>
+</head>
+<body>
+<div class="gbar"></div>
+
+<nav>
+  <a href="https://blackroad.io" class="nl"><div class="nm"></div>Models</a>
+  <div class="nk">
+    <a href="https://blackroad.io">Home</a>
+    <a href="https://blackroadai.com">AI</a>
+    <a href="https://docs.blackroad.io">Docs</a>
+    <a href="https://github.com/blackboxprogramming">GitHub</a>
+  </div>
+</nav>
+
+<div class="hw">
+  <section class="hero">
+    <div class="horb ho1"></div>
+    <div class="horb ho2"></div>
+    <h1>Models</h1>
+    <p>29 AI models across 7 providers. One unified API. Your gateway routes to the best model for every task.</p>
+  </section>
+</div>
+
+<section class="providers">
+  <div class="counter">
+    <div class="cbox"><div class="cval">29</div><div class="clbl">Models</div></div>
+    <div class="cbox"><div class="cval">7</div><div class="clbl">Providers</div></div>
+    <div class="cbox"><div class="cval">1</div><div class="clbl">API</div></div>
+  </div>
+
+  <div class="sl">Directory</div>
+  <div class="st">Model directory.</div>
+  <div class="sd">Every model available through the BlackRoad gateway.</div>
+
+  <div class="provider-tabs" id="ptabs">
+    <div class="ptab active" data-p="all">All</div>
+    <div class="ptab" data-p="groq">Groq</div>
+    <div class="ptab" data-p="together">Together</div>
+    <div class="ptab" data-p="deepseek">DeepSeek</div>
+    <div class="ptab" data-p="xai">xAI</div>
+    <div class="ptab" data-p="openai">OpenAI</div>
+    <div class="ptab" data-p="gemini">Gemini</div>
+    <div class="ptab" data-p="anthropic">Anthropic</div>
+  </div>
+
+  <div class="model-grid" id="mgrid">
+    <div class="model-card visible" data-p="groq"><div class="model-name">Llama 3.3 70B</div><div class="model-provider">Groq</div><div class="model-specs">70B params, 128K context, ultra-fast inference</div><a href="https://blackroadai.com" class="model-try">Try it</a></div>
+    <div class="model-card visible" data-p="groq"><div class="model-name">Llama 3.1 8B</div><div class="model-provider">Groq</div><div class="model-specs">8B params, 128K context, instant responses</div><a href="https://blackroadai.com" class="model-try">Try it</a></div>
+    <div class="model-card visible" data-p="groq"><div class="model-name">Mixtral 8x7B</div><div class="model-provider">Groq</div><div class="model-specs">MoE architecture, 32K context</div><a href="https://blackroadai.com" class="model-try">Try it</a></div>
+    <div class="model-card visible" data-p="groq"><div class="model-name">Gemma 2 9B</div><div class="model-provider">Groq</div><div class="model-specs">9B params, efficient instruction following</div><a href="https://blackroadai.com" class="model-try">Try it</a></div>
+    <div class="model-card visible" data-p="together"><div class="model-name">Llama 3.1 405B</div><div class="model-provider">Together</div><div class="model-specs">405B params, largest open model, 128K context</div><a href="https://blackroadai.com" class="model-try">Try it</a></div>
+    <div class="model-card visible" data-p="together"><div class="model-name">Qwen 2.5 72B</div><div class="model-provider">Together</div><div class="model-specs">72B params, multilingual, code-optimized</div><a href="https://blackroadai.com" class="model-try">Try it</a></div>
+    <div class="model-card visible" data-p="together"><div class="model-name">Mistral Large</div><div class="model-provider">Together</div><div class="model-specs">123B params, strong reasoning</div><a href="https://blackroadai.com" class="model-try">Try it</a></div>
+    <div class="model-card visible" data-p="together"><div class="model-name">DBRX Instruct</div><div class="model-provider">Together</div><div class="model-specs">132B MoE, Databricks, enterprise</div><a href="https://blackroadai.com" class="model-try">Try it</a></div>
+    <div class="model-card visible" data-p="deepseek"><div class="model-name">DeepSeek V3</div><div class="model-provider">DeepSeek</div><div class="model-specs">685B MoE, 128K context, SOTA coding</div><a href="https://blackroadai.com" class="model-try">Try it</a></div>
+    <div class="model-card visible" data-p="deepseek"><div class="model-name">DeepSeek R1</div><div class="model-provider">DeepSeek</div><div class="model-specs">671B MoE, chain-of-thought reasoning</div><a href="https://blackroadai.com" class="model-try">Try it</a></div>
+    <div class="model-card visible" data-p="deepseek"><div class="model-name">DeepSeek Coder V2</div><div class="model-provider">DeepSeek</div><div class="model-specs">236B MoE, optimized for code generation</div><a href="https://blackroadai.com" class="model-try">Try it</a></div>
+    <div class="model-card visible" data-p="xai"><div class="model-name">Grok 2</div><div class="model-provider">xAI</div><div class="model-specs">Next-gen reasoning, real-time knowledge</div><a href="https://blackroadai.com" class="model-try">Try it</a></div>
+    <div class="model-card visible" data-p="xai"><div class="model-name">Grok 2 Mini</div><div class="model-provider">xAI</div><div class="model-specs">Compact, fast, cost-efficient</div><a href="https://blackroadai.com" class="model-try">Try it</a></div>
+    <div class="model-card visible" data-p="xai"><div class="model-name">Grok Vision</div><div class="model-provider">xAI</div><div class="model-specs">Multimodal, image understanding</div><a href="https://blackroadai.com" class="model-try">Try it</a></div>
+    <div class="model-card visible" data-p="openai"><div class="model-name">GPT-4o</div><div class="model-provider">OpenAI</div><div class="model-specs">Multimodal, 128K context, fast</div><a href="https://blackroadai.com" class="model-try">Try it</a></div>
+    <div class="model-card visible" data-p="openai"><div class="model-name">GPT-4o Mini</div><div class="model-provider">OpenAI</div><div class="model-specs">Cost-efficient, 128K context</div><a href="https://blackroadai.com" class="model-try">Try it</a></div>
+    <div class="model-card visible" data-p="openai"><div class="model-name">o1</div><div class="model-provider">OpenAI</div><div class="model-specs">Advanced reasoning, chain-of-thought</div><a href="https://blackroadai.com" class="model-try">Try it</a></div>
+    <div class="model-card visible" data-p="openai"><div class="model-name">o3-mini</div><div class="model-provider">OpenAI</div><div class="model-specs">Efficient reasoning, fast turnaround</div><a href="https://blackroadai.com" class="model-try">Try it</a></div>
+    <div class="model-card visible" data-p="gemini"><div class="model-name">Gemini 2.0 Flash</div><div class="model-provider">Gemini</div><div class="model-specs">2M context, multimodal, ultra-fast</div><a href="https://blackroadai.com" class="model-try">Try it</a></div>
+    <div class="model-card visible" data-p="gemini"><div class="model-name">Gemini 1.5 Pro</div><div class="model-provider">Gemini</div><div class="model-specs">1M context, strong reasoning</div><a href="https://blackroadai.com" class="model-try">Try it</a></div>
+    <div class="model-card visible" data-p="gemini"><div class="model-name">Gemini 2.5 Pro</div><div class="model-provider">Gemini</div><div class="model-specs">Latest, best performance tier</div><a href="https://blackroadai.com" class="model-try">Try it</a></div>
+    <div class="model-card visible" data-p="gemini"><div class="model-name">Gemini 2.0 Flash Lite</div><div class="model-provider">Gemini</div><div class="model-specs">Lightweight, cost-efficient</div><a href="https://blackroadai.com" class="model-try">Try it</a></div>
+    <div class="model-card visible" data-p="anthropic"><div class="model-name">Claude Opus 4</div><div class="model-provider">Anthropic</div><div class="model-specs">Most capable, 200K context, agentic</div><a href="https://blackroadai.com" class="model-try">Try it</a></div>
+    <div class="model-card visible" data-p="anthropic"><div class="model-name">Claude Sonnet 4</div><div class="model-provider">Anthropic</div><div class="model-specs">Balanced performance, 200K context</div><a href="https://blackroadai.com" class="model-try">Try it</a></div>
+    <div class="model-card visible" data-p="anthropic"><div class="model-name">Claude 3.5 Haiku</div><div class="model-provider">Anthropic</div><div class="model-specs">Fast, 200K context, cost-efficient</div><a href="https://blackroadai.com" class="model-try">Try it</a></div>
+    <div class="model-card visible" data-p="anthropic"><div class="model-name">Claude Sonnet 3.5 V2</div><div class="model-provider">Anthropic</div><div class="model-specs">Enhanced coding, 200K context</div><a href="https://blackroadai.com" class="model-try">Try it</a></div>
+    <div class="model-card visible" data-p="groq"><div class="model-name">Llama Guard 3 8B</div><div class="model-provider">Groq</div><div class="model-specs">Safety classifier, content filtering</div><a href="https://blackroadai.com" class="model-try">Try it</a></div>
+    <div class="model-card visible" data-p="together"><div class="model-name">CodeLlama 34B</div><div class="model-provider">Together</div><div class="model-specs">34B params, specialized for code</div><a href="https://blackroadai.com" class="model-try">Try it</a></div>
+    <div class="model-card visible" data-p="deepseek"><div class="model-name">DeepSeek Chat</div><div class="model-provider">DeepSeek</div><div class="model-specs">General chat, balanced performance</div><a href="https://blackroadai.com" class="model-try">Try it</a></div>
+  </div>
+</section>
+
+<section class="tryit">
+  <div class="sl">Playground</div>
+  <div class="st">Try a model.</div>
+  <div class="sd">Send a prompt and see the response.</div>
+  <div class="try-box">
+    <input type="text" class="try-input" id="try-prompt" placeholder="Enter a prompt...">
+    <div>
+      <select class="try-select" id="try-model">
+        <option>Claude Opus 4</option>
+        <option>GPT-4o</option>
+        <option>Gemini 2.5 Pro</option>
+        <option>DeepSeek V3</option>
+        <option>Llama 3.3 70B</option>
+        <option>Grok 2</option>
+      </select>
+      <button class="try-btn" id="try-send">Send</button>
+    </div>
+    <div class="try-output" id="try-output"></div>
+  </div>
+</section>
+
+<footer>
+  <div class="fb">BlackRoad OS</div>
+  <div class="fl">
+    <a href="https://blackroad.io">Home</a>
+    <a href="https://lucidia.earth">Lucidia</a>
+    <a href="https://blackroadai.com">AI</a>
+    <a href="https://blackroad.network">Network</a>
+    <a href="https://blackroad.systems">Status</a>
+    <a href="https://blackroad.company">Company</a>
+    <a href="https://brand.blackroad.io">Brand</a>
+    <a href="https://pay.blackroad.io">Pricing</a>
+    <a href="https://github.com/blackboxprogramming">GitHub</a>
+  </div>
+  <div class="fc">&copy; 2025-2026 BlackRoad OS, Inc. All rights reserved. Pave Tomorrow.</div>
+</footer>
+<div class="gbar"></div>
+
+<script>
+document.querySelectorAll('.ptab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    document.querySelectorAll('.ptab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    const p=tab.dataset.p;
+    document.querySelectorAll('.model-card').forEach(c=>{
+      c.classList.toggle('visible',p==='all'||c.dataset.p===p);
+    });
+  });
+});
+document.getElementById('try-send').addEventListener('click',()=>{
+  const prompt=document.getElementById('try-prompt').value;
+  const model=document.getElementById('try-model').value;
+  const out=document.getElementById('try-output');
+  if(!prompt)return;
+  out.style.display='block';
+  out.textContent='Routing to '+model+' via gateway...\n\nThis is a demo. In production, your prompt would be routed through the BlackRoad tokenless gateway to '+model+'. No API keys leave your device.';
+});
+</script>
+</body>
+</html>

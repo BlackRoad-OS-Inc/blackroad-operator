@@ -171,13 +171,13 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
   <!-- Headline KPIs -->
   <div class="card" id="card-repos">
     <div class="card-header"><span class="card-title">Total Repositories</span><span class="card-badge">GitHub</span></div>
-    <div class="metric-value" id="v-repos">1,825</div>
+    <div class="metric-value" id="v-repos">275</div>
     <div class="metric-unit">across 17 organizations</div>
     <div class="sparkline" id="spark-repos"></div>
   </div>
   <div class="card" id="card-agents">
     <div class="card-header"><span class="card-title">Active Agents</span><span class="card-badge">Fleet</span></div>
-    <div class="metric-value" id="v-agents">30,000</div>
+    <div class="metric-value" id="v-agents">67</div>
     <div class="metric-unit">distributed across 3 nodes</div>
     <div class="sparkline" id="spark-agents"></div>
   </div>
@@ -252,7 +252,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
   </div>
 
   <!-- Agent Fleet Section -->
-  <div class="section-title">Agent Fleet (30,000)</div>
+  <div class="section-title">Agent Fleet (67)</div>
   <div class="card" id="card-task-dist">
     <div class="card-header"><span class="card-title">Task Distribution</span><span class="card-badge">Fleet</span></div>
     <div id="task-dist"></div>
@@ -413,11 +413,11 @@ function updateKpis(data) {
 
   if (data.headline) {
     const h = data.headline;
-    $('v-repos').textContent = fmt(h.total_repos || 1825);
-    $('v-agents').textContent = fmt(h.total_agents || 30000);
+    $('v-repos').textContent = fmt(h.total_repos || 275);
+    $('v-agents').textContent = fmt(h.total_agents || 67);
     $('v-workers').textContent = fmt(h.cf_workers || 75) + '+';
-    addSpark('spark-repos', h.total_repos || 1825);
-    addSpark('spark-agents', h.total_agents || 30000);
+    addSpark('spark-repos', h.total_repos || 275);
+    addSpark('spark-agents', h.total_agents || 67);
     addSpark('spark-workers', h.cf_workers || 75);
     renderSpark('spark-repos');
     renderSpark('spark-agents');
@@ -497,8 +497,8 @@ async function pollKpis() {
 function microUpdate() {
   trackUpdate();
   const jitter = () => (Math.random() - 0.5) * 2;
-  addSpark('spark-repos', 1825 + Math.floor(jitter() * 3));
-  addSpark('spark-agents', 30000 + Math.floor(jitter() * 50));
+  addSpark('spark-repos', 275 + Math.floor(jitter() * 3));
+  addSpark('spark-agents', 67 + Math.floor(jitter() * 50));
   addSpark('spark-workers', 75 + Math.floor(jitter() * 2));
   renderSpark('spark-repos');
   renderSpark('spark-agents');
@@ -521,7 +521,7 @@ pollKpis();
 setInterval(pollKpis, 5000);
 
 addEvent('BlackRoad KPI Dashboard initialized');
-addEvent('Monitoring 17 orgs, 1,825+ repos, 30K agents');
+addEvent('Monitoring 17 orgs, 275+ repos, 35 agents');
 addEvent('Sub-second refresh active');
 </script>
 </body>

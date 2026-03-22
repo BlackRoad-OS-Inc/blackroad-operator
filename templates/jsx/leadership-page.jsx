@@ -140,7 +140,7 @@ function FounderSection() {
                 { title: "Mathematics", items: "317+ equations, 7 volumes, 5 frameworks" },
                 { title: "Architecture", items: "20 domains, 150+ subdomains, 4 layers" },
                 { title: "Engineering", items: "K3s, NATS, Cloudflare, Pi mesh" },
-                { title: "Product", items: "12 products, 6 portals, 1,000 agents" },
+                { title: "Product", items: "20 products, 6 rooms, 35 agents" },
               ].map((r) => (
                 <div key={r.title} style={{ background: "#0a0a0a", border: "1px solid #151515", borderRadius: 8, padding: 14 }}>
                   <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: "#525252", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6 }}>{r.title}</div>

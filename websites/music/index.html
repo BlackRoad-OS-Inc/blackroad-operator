@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BlackRoad Music — Sound for the Road</title>
+<meta name="description" content="Music tools powered by local AI. Composition, mixing, mastering — all on your device.">
+<link rel="icon" type="image/png" sizes="32x32" href="https://images.blackroad.io/brand/br-square-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="https://images.blackroad.io/brand/br-square-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://images.blackroad.io/brand/apple-touch-icon.png">
+<meta property="og:image" content="https://images.blackroad.io/brand/br-square-512.png">
+<meta property="og:title" content="BlackRoad Music — Sound for the Road">
+<meta property="og:description" content="Music tools powered by local AI. Composition, mixing, mastering — all on your device.">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://images.blackroad.io/brand/br-square-512.png">
+<link rel="stylesheet" href="../_shared/design.css">
+<style>
+  /* Hero */
+  .hero {
+    min-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 120px var(--sp-xl) var(--sp-2xl);
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .hero-sub {
+    font-size: 1.1rem;
+    color: var(--subtle);
+    max-width: 560px;
+    margin-top: var(--sp-lg);
+    line-height: 1.7;
+  }
+
+  /* Status badge */
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--jb);
+    font-size: 0.7rem;
+    color: var(--muted);
+    padding: 6px 14px;
+    border: 1px solid var(--border);
+    margin-top: var(--sp-lg);
+    width: fit-content;
+  }
+  .status-dot {
+    width: 6px;
+    height: 6px;
+    background: var(--ember);
+    animation: barPulse 2s ease infinite;
+  }
+
+  /* Visualizer */
+  .visualizer {
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    height: 40px;
+    margin-top: var(--sp-xl);
+  }
+  .bar {
+    width: 4px;
+    background: var(--grad);
+    background-size: 100% 400%;
+    animation: barPulse 1.2s ease infinite;
+  }
+  .bar:nth-child(1) { height: 60%; animation-delay: 0s; }
+  .bar:nth-child(2) { height: 85%; animation-delay: 0.15s; }
+  .bar:nth-child(3) { height: 45%; animation-delay: 0.3s; }
+  .bar:nth-child(4) { height: 95%; animation-delay: 0.1s; }
+  .bar:nth-child(5) { height: 55%; animation-delay: 0.25s; }
+  .bar:nth-child(6) { height: 75%; animation-delay: 0.05s; }
+  .bar:nth-child(7) { height: 40%; animation-delay: 0.35s; }
+  .bar:nth-child(8) { height: 90%; animation-delay: 0.2s; }
+  .bar:nth-child(9) { height: 50%; animation-delay: 0.4s; }
+  .bar:nth-child(10) { height: 70%; animation-delay: 0.12s; }
+  .bar:nth-child(11) { height: 80%; animation-delay: 0.28s; }
+  .bar:nth-child(12) { height: 35%; animation-delay: 0.18s; }
+
+  /* Feature cards */
+  .features {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--sp-xl) var(--sp-2xl);
+  }
+  .feature-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--sp-md);
+  }
+  .feature-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: var(--sp-lg);
+    transition: border-color 0.25s;
+  }
+  .feature-card:hover {
+    border-color: var(--muted);
+  }
+  .feature-icon {
+    width: 32px;
+    height: 3px;
+    background: var(--grad);
+    margin-bottom: var(--sp-md);
+  }
+  .feature-card h3 {
+    font-size: 1.1rem;
+    margin-bottom: var(--sp-xs);
+  }
+  .feature-card p {
+    font-size: 0.85rem;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+  .feature-label {
+    font-family: var(--jb);
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    margin-top: var(--sp-md);
+  }
+
+  /* Stats */
+  .stats-section {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--sp-xl) var(--sp-2xl);
+  }
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--sp-md);
+  }
+  .stat-card {
+    border: 1px solid var(--border);
+    padding: var(--sp-lg);
+    text-align: center;
+  }
+  .stat-value {
+    font-family: var(--sg);
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--white);
+  }
+  .stat-label {
+    font-family: var(--jb);
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    margin-top: var(--sp-xs);
+  }
+
+  /* CTA */
+  .cta-section {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: var(--sp-2xl) var(--sp-xl);
+    text-align: center;
+  }
+  .cta-section h2 {
+    margin-bottom: var(--sp-md);
+  }
+  .cta-section p {
+    max-width: 480px;
+    margin: 0 auto var(--sp-lg);
+    font-size: 0.95rem;
+  }
+  .cta-button {
+    display: inline-block;
+    font-family: var(--in);
+    font-weight: 600;
+    font-size: 0.85rem;
+    padding: 12px 32px;
+    border: 1px solid var(--border);
+    color: var(--white);
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .cta-button:hover {
+    border-color: var(--muted);
+    background: var(--surface);
+  }
+
+  /* Divider */
+  .section-divider {
+    height: 1px;
+    background: var(--border);
+    max-width: 1200px;
+    margin: 0 auto var(--sp-2xl);
+  }
+
+  /* Ecosystem footer links */
+  .eco-links {
+    text-align: center;
+    padding: 8px 0;
+    font-size: 0.7rem;
+    font-family: var(--jb);
+  }
+  .eco-links a {
+    color: var(--muted);
+    margin: 0 8px;
+    transition: color 0.2s;
+  }
+  .eco-links a:hover { color: var(--white); }
+  .tagline {
+    text-align: center;
+    padding: 13px 0 0;
+    font-size: 0.75rem;
+    opacity: 0.5;
+    font-family: var(--jb);
+  }
+
+  @media (min-width: 600px) {
+    .feature-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (min-width: 768px) {
+    .stats-grid { grid-template-columns: repeat(4, 1fr); }
+    .hero { padding: 120px var(--sp-xl) var(--sp-2xl); }
+    .features, .stats-section, .cta-section { padding-left: var(--sp-xl); padding-right: var(--sp-xl); }
+  }
+</style>
+<script src="https://blackroad-mesh.amundsonalexa.workers.dev/mesh.js" defer></script>
+</head>
+<body class="dot-bg">
+
+  <nav>
+    <div class="nav-logo">BlackRoad Music</div>
+    <div class="nav-links">
+      <a href="https://blackroad.io">Platform</a>
+      <a href="https://blackroadai.com">AI</a>
+      <a href="https://docs.blackroad.io">Docs</a>
+    </div>
+    <a href="mailto:alexa@blackroad.io" class="nav-cta">Get Early Access</a>
+    <button class="nav-toggle" onclick="this.classList.toggle('open');document.getElementById('nav-mobile').classList.toggle('open')" aria-label="Menu"><span></span><span></span><span></span></button>
+  </nav>
+  <div id="nav-mobile" class="nav-mobile">
+    <a href="https://blackroad.io">Platform</a>
+    <a href="https://blackroadai.com">AI</a>
+    <a href="https://docs.blackroad.io">Docs</a>
+    <a href="mailto:alexa@blackroad.io">Get Early Access</a>
+  </div>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="section-label">Coming Soon</div>
+    <h1>Sound for<br>the Road.</h1>
+    <p class="hero-sub">
+      Music tools powered by local AI. Composition, mixing, mastering &mdash;
+      all on your device. No cloud dependency. No subscription. Your sound, your hardware.
+    </p>
+    <div class="visualizer">
+      <div class="bar"></div>
+      <div class="bar"></div>
+      <div class="bar"></div>
+      <div class="bar"></div>
+      <div class="bar"></div>
+      <div class="bar"></div>
+      <div class="bar"></div>
+      <div class="bar"></div>
+      <div class="bar"></div>
+      <div class="bar"></div>
+      <div class="bar"></div>
+      <div class="bar"></div>
+    </div>
+    <div class="status-badge">
+      <span class="status-dot"></span>
+      In Development
+    </div>
+  </div>
+
+  <!-- Features -->
+  <div class="features">
+    <div class="section-label">Capabilities</div>
+    <h2 style="margin-bottom: var(--sp-lg);">Everything runs locally.</h2>
+    <div class="feature-grid">
+
+      <div class="feature-card fade-up">
+        <div class="feature-icon"></div>
+        <h3>AI Composition</h3>
+        <p>
+          Generate melodies, harmonies, and arrangements using local AI models.
+          Train on your own library. No data leaves your machine.
+        </p>
+        <div class="feature-label">Ollama + Custom Models</div>
+      </div>
+
+      <div class="feature-card fade-up">
+        <div class="feature-icon"></div>
+        <h3>Local Mixing</h3>
+        <p>
+          Multi-track mixing with AI-assisted EQ, compression, and spatial audio.
+          Real-time processing on edge hardware.
+        </p>
+        <div class="feature-label">Edge Compute</div>
+      </div>
+
+      <div class="feature-card fade-up">
+        <div class="feature-icon"></div>
+        <h3>Sound Design</h3>
+        <p>
+          Synthesize textures, pads, and effects from text prompts.
+          Generate sample packs tuned to your genre and taste.
+        </p>
+        <div class="feature-label">Text-to-Audio</div>
+      </div>
+
+      <div class="feature-card fade-up">
+        <div class="feature-icon"></div>
+        <h3>Collaboration</h3>
+        <p>
+          Share stems and projects across the BlackRoad mesh network.
+          Version-controlled sessions. Real-time sync between nodes.
+        </p>
+        <div class="feature-label">NATS Mesh</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="section-divider"></div>
+  <div class="stats-section">
+    <div class="section-label">Infrastructure</div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value">5</div>
+        <div class="stat-label">Compute Nodes</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">16</div>
+        <div class="stat-label">AI Models</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">52</div>
+        <div class="stat-label">TOPS</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">0</div>
+        <div class="stat-label">Cloud Dependencies</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="section-divider"></div>
+  <div class="cta-section">
+    <h2>Built for creators<br>who own their tools.</h2>
+    <p>
+      BlackRoad Music is part of the BlackRoad OS ecosystem.
+      Local-first. Sovereign. No middlemen between you and your sound.
+    </p>
+    <a href="https://blackroad.io" class="cta-button">Explore BlackRoad OS</a>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <span>&copy; 2026 BlackRoad OS, Inc.</span>
+    <span style="display:flex;gap:34px;">
+      <a href="https://blackroad.io" style="color:var(--muted);transition:color 0.2s" onmouseover="this.style.color='#f5f5f5'" onmouseout="this.style.color=''">blackroad.io</a>
+      <a href="https://docs.blackroad.io" style="color:var(--muted);transition:color 0.2s" onmouseover="this.style.color='#f5f5f5'" onmouseout="this.style.color=''">Docs</a>
+    </span>
+  </footer>
+  <div class="eco-links">
+    <a href="https://blackroad.io">Home</a>
+    <a href="https://lucidia.earth">Lucidia</a>
+    <a href="https://blackroadai.com">AI</a>
+    <a href="https://blackroad.network">Network</a>
+    <a href="https://blackroad.systems">Status</a>
+    <a href="https://blackroad.company">Company</a>
+    <a href="https://brand.blackroad.io">Brand</a>
+    <a href="https://pricing.blackroad.io">Pricing</a>
+    <a href="https://github.com/blackboxprogramming">GitHub</a>
+  </div>
+  <div class="tagline">BlackRoad OS &mdash; Pave Tomorrow.</div>
+
+<script src="../_shared/search.js" defer></script>
+<script src="https://bb.blackroad.io/bb.js" defer></script>
+</body>
+</html>

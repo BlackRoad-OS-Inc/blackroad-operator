@@ -1,0 +1,36 @@
+name               = "blackboard"
+main               = "src/index.js"
+compatibility_date = "2024-12-01"
+account_id         = "848cf0b18d51e0170e0d1537aec3505a"
+assets             = { directory = "./public" }
+workers_dev        = true
+
+# Custom domain (auto-creates DNS record)
+routes = [
+  { pattern = "bb.blackroad.io", custom_domain = true }
+]
+
+[vars]
+INSTANCE = "blackboard"
+CORS_ORIGIN = "*"
+VERSION = "3.0.0"
+# API_KEY set via `wrangler secret put API_KEY` for sensitive endpoints
+
+# D1 database for all analytics data
+[[d1_databases]]
+binding       = "DB"
+database_name = "blackboard"
+database_id   = "bcc78f33-b052-4cb2-bcfb-db5cd3c08472"
+
+# KV for real-time counters, sessions, rate limits
+[[kv_namespaces]]
+binding = "REALTIME"
+id      = "43a338856e364cd396ced2be2d30ffe9"
+
+# Analytics Engine for high-volume time-series (free tier: 100K events/day)
+[[analytics_engine_datasets]]
+binding = "EVENTS"
+
+# Daily aggregation at 3 AM UTC
+[triggers]
+crons = ["0 3 * * *"]
