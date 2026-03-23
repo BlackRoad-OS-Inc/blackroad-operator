@@ -1,3 +1,11 @@
+# blackroad-operator
+
+> CLI tooling, node bootstrap scripts, and operational control utilities for BlackRoad OS.
+
+Part of the [BlackRoad OS](https://blackroad.io) ecosystem — [BlackRoad-OS-Inc](https://github.com/BlackRoad-OS-Inc)
+
+---
+
 # BlackRoad Operator
 
 The operational brain of BlackRoad OS. Scripts, tools, configs, and automation for managing the entire fleet.
