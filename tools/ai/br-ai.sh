@@ -13,6 +13,24 @@ CHAT_DB="${HOME}/.blackroad/chat-history.db"
 CODEX_DB="${HOME}/.blackroad/memory/codex/codex.db"
 OPS_DB="${HOME}/.blackroad/ai-ops-history.db"
 BR_AI_TRUST_MODE="${BR_AI_TRUST_MODE:-observe}"
+BR_ALL_ORGS=(
+  "BlackRoad-OS-Inc"
+  "BlackRoad-OS"
+  "BlackRoad-AI"
+  "BlackRoad-Studio"
+  "BlackRoad-Education"
+  "BlackRoad-Security"
+  "BlackRoad-Labs"
+  "BlackRoad-Hardware"
+  "BlackRoad-Media"
+  "BlackRoad-Foundation"
+  "BlackRoad-Ventures"
+  "BlackRoad-Cloud"
+  "BlackRoad-Gov"
+  "BlackRoad-Archive"
+  "BlackRoad-Interactive"
+  "Blackbox-Enterprises"
+)
 
 # Find a live Ollama node
 find_ollama() {
@@ -519,7 +537,7 @@ Return JSON only with this exact schema:
   "summary": "short sentence",
   "actions": [
     {
-      "command": "health.status|pi.status|pi.models|pi.worlds|pi.read|pi.logs|pi.task|pi.generate|deploy.detect|deploy.status|deploy.watch.github|deploy.rollback.github|cloudflare.zones|cloudflare.dns.list|cloudflare.analytics|cloudflare.cache.purge|workflows.list|workflows.runs|workflows.view|workflows.dispatch|sites.generate",
+      "command": "health.status|orgs.overview|pi.status|pi.models|pi.worlds|pi.read|pi.logs|pi.task|pi.generate|deploy.detect|deploy.status|deploy.watch.github|deploy.rollback.github|cloudflare.zones|cloudflare.dns.list|cloudflare.analytics|cloudflare.cache.purge|workflows.list|workflows.runs|workflows.view|workflows.dispatch|sites.generate",
       "args": ["arg1", "arg2"],
       "why": "short reason"
     }
@@ -528,6 +546,7 @@ Return JSON only with this exact schema:
 Rules:
 - Use at most 3 actions.
 - Prefer read-only actions first.
+- Use orgs.overview when the objective asks about all orgs, the full BlackRoad org layer, or ecosystem-wide status.
 - Use pi.task only when the request explicitly asks to queue work on a Pi.
 - Use pi.generate only for bounded text/content generation on a Pi. Args are [node, prompt].
 - For pi.worlds args are [node, count?].
@@ -552,6 +571,9 @@ resolve_ops_command() {
   case "$action" in
     health.status)
       printf '%s\n' "\"${BR_ROOT}/tools/health-check/br-health.sh\""
+      ;;
+    orgs.overview)
+      printf '%s\n' "BR_ALL_ORGS_STR=\"${(j:,:)BR_ALL_ORGS}\" python3 \"${BR_ROOT}/scripts/ops/orgs_overview.py\""
       ;;
     pi.status)
       printf '%s\n' "\"${BR_ROOT}/tools/pi-manager/br-pi.sh\" status"
@@ -672,6 +694,7 @@ if not actions:
     sys.exit(0)
 read_only = {
     "health.status",
+    "orgs.overview",
     "pi.status",
     "pi.models",
     "pi.worlds",
@@ -713,6 +736,7 @@ for idx, action in enumerate(actions, start=1):
     br_root = os.environ["BR_ROOT"]
     table = {
         "health.status": [f"{br_root}/tools/health-check/br-health.sh"],
+        "orgs.overview": ["python3", f"{br_root}/scripts/ops/orgs_overview.py"],
         "pi.status": [f"{br_root}/tools/pi-manager/br-pi.sh", "status"],
         "pi.models": [f"{br_root}/tools/pi-manager/br-pi.sh", "models", args[0] if args else "aria64"],
         "pi.worlds": [f"{br_root}/tools/pi-manager/br-pi.sh", "worlds", args[0] if args else "aria64", args[1] if len(args) > 1 else "10"],
@@ -1060,6 +1084,7 @@ ${objective}
 
 Available commands:
 - health.status
+- orgs.overview
 - pi.status
 - pi.models
 - pi.worlds
