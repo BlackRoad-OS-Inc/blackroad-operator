@@ -48,6 +48,7 @@ Use these commands when you want Lucidia to operate the system instead of just c
 ./tools/ai/br-ai.sh autonomous "run local health and list GitHub workflows"
 ./tools/ai/br-ai.sh autonomous "show the latest failed workflow run details"
 ./tools/ai/br-ai.sh ops "show the latest failed workflow run details"
+./tools/ai/br-ai.sh ops "show an overview of all BlackRoad orgs"
 ./tools/ai/br-ai.sh remediate "run the Autonomous Websites workflow on main"
 ./tools/ai/br-ai.sh remediate "purge Cloudflare cache for blackroad.io"
 ./tools/ai/br-ai.sh remediate "rerun the previous successful GitHub deploy workflow"
@@ -64,6 +65,7 @@ Every Lucidia plan and execution is now recorded in a local SQLite history at `~
 The control plane is intentionally bounded. It currently routes through safe actions for:
 
 - health checks
+- all-orgs overview across the canonical BlackRoad org set
 - Pi fleet status, models, worlds, logs, and task queueing
 - bounded Pi-side generation for operator tasks
 - deployment detection, history, GitHub deploy watching, and GitHub rollback/rerun
