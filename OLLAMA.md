@@ -46,6 +46,9 @@ cd /Users/alexa/blackroad-operator
 # Inspect the full BlackRoad org layer
 ./tools/ai/br-ai.sh ops "show an overview of all BlackRoad orgs"
 
+# Inspect the front-door vs internal org split
+./tools/ai/br-ai.sh ops "show the BlackRoad org category map"
+
 # Inspect the strongest repo surface inside one org
 ./tools/ai/br-ai.sh ops "show the top 8 repos in BlackRoad-OS"
 
@@ -81,7 +84,7 @@ Each Lucidia plan and execution is logged locally in `~/.blackroad/ai-ops-histor
 The current safe autonomous surface in this repo includes:
 
 - local health checks
-- all-orgs overview across the canonical BlackRoad org set
+- all-orgs overview and category mapping across the canonical BlackRoad org set
 - per-org drilldown, top-repo views, weakest-org summaries, and stale/shell-org detection
 - Raspberry Pi fleet status, models, worlds, logs, and task queueing
 - bounded Pi-side generation for operator tasks
