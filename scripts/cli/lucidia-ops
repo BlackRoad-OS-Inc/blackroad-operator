@@ -13,6 +13,7 @@ Usage:
   lucidia-ops run <objective>
   lucidia-ops remediate <objective>
   lucidia-ops fleet
+  lucidia-ops orgs [detail <org>|weakest [count]]
   lucidia-ops health
   lucidia-ops sites
   lucidia-ops history
@@ -27,6 +28,7 @@ Examples:
   lucidia-ops export json 10
   lucidia-ops replay last remediate
   lucidia-ops plan "show an overview of all BlackRoad orgs"
+  lucidia-ops orgs detail BlackRoad-AI
   lucidia-ops health
 EOF
 }
@@ -49,7 +51,23 @@ case "$cmd" in
     exec "$BR_AI" autonomous "check Pi fleet health and list available models"
     ;;
   orgs)
-    exec "$BR_AI" ops "show an overview of all BlackRoad orgs"
+    shift
+    case "${1:-overview}" in
+      detail)
+        shift
+        exec "$BR_AI" ops "show org detail for ${1:-BlackRoad-OS}"
+        ;;
+      weakest)
+        shift
+        exec "$BR_AI" ops "show the weakest ${1:-5} BlackRoad orgs"
+        ;;
+      overview|all|"")
+        exec "$BR_AI" ops "show an overview of all BlackRoad orgs"
+        ;;
+      *)
+        exec "$BR_AI" ops "show org detail for $1"
+        ;;
+    esac
     ;;
   health)
     exec "$BR_AI" autonomous "run local system health and summarize the result"
