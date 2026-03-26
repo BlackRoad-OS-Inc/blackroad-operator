@@ -537,7 +537,7 @@ Return JSON only with this exact schema:
   "summary": "short sentence",
   "actions": [
     {
-      "command": "health.status|orgs.overview|orgs.detail|orgs.weakest|pi.status|pi.models|pi.worlds|pi.read|pi.logs|pi.task|pi.generate|deploy.detect|deploy.status|deploy.watch.github|deploy.rollback.github|cloudflare.zones|cloudflare.dns.list|cloudflare.analytics|cloudflare.cache.purge|workflows.list|workflows.runs|workflows.view|workflows.dispatch|sites.generate",
+      "command": "health.status|orgs.overview|orgs.detail|orgs.weakest|orgs.stale|orgs.repos|pi.status|pi.models|pi.worlds|pi.read|pi.logs|pi.task|pi.generate|deploy.detect|deploy.status|deploy.watch.github|deploy.rollback.github|cloudflare.zones|cloudflare.dns.list|cloudflare.analytics|cloudflare.cache.purge|workflows.list|workflows.runs|workflows.view|workflows.dispatch|sites.generate",
       "args": ["arg1", "arg2"],
       "why": "short reason"
     }
@@ -549,6 +549,8 @@ Rules:
 - Use orgs.overview when the objective asks about all orgs, the full BlackRoad org layer, or ecosystem-wide status.
 - Use orgs.detail for one named org. Args are [org].
 - Use orgs.weakest to surface the smallest or emptiest orgs. Args are [count?].
+- Use orgs.stale to surface shell-like, thin, or low-signal orgs. Args are [count?].
+- Use orgs.repos to list top repos in one named org. Args are [org, count?].
 - Use pi.task only when the request explicitly asks to queue work on a Pi.
 - Use pi.generate only for bounded text/content generation on a Pi. Args are [node, prompt].
 - For pi.worlds args are [node, count?].
@@ -582,6 +584,12 @@ resolve_ops_command() {
       ;;
     orgs.weakest)
       printf '%s\n' "BR_ALL_ORGS_STR=\"${(j:,:)BR_ALL_ORGS}\" python3 \"${BR_ROOT}/scripts/ops/orgs_overview.py\" weakest \"${1:-5}\""
+      ;;
+    orgs.stale)
+      printf '%s\n' "BR_ALL_ORGS_STR=\"${(j:,:)BR_ALL_ORGS}\" python3 \"${BR_ROOT}/scripts/ops/orgs_overview.py\" stale \"${1:-5}\""
+      ;;
+    orgs.repos)
+      printf '%s\n' "python3 \"${BR_ROOT}/scripts/ops/orgs_overview.py\" repos \"${1:-BlackRoad-OS}\" \"${2:-5}\""
       ;;
     pi.status)
       printf '%s\n' "\"${BR_ROOT}/tools/pi-manager/br-pi.sh\" status"
@@ -705,6 +713,8 @@ read_only = {
     "orgs.overview",
     "orgs.detail",
     "orgs.weakest",
+    "orgs.stale",
+    "orgs.repos",
     "pi.status",
     "pi.models",
     "pi.worlds",
@@ -749,6 +759,8 @@ for idx, action in enumerate(actions, start=1):
         "orgs.overview": ["python3", f"{br_root}/scripts/ops/orgs_overview.py"],
         "orgs.detail": ["python3", f"{br_root}/scripts/ops/orgs_overview.py", "detail", args[0] if args else "BlackRoad-OS"],
         "orgs.weakest": ["python3", f"{br_root}/scripts/ops/orgs_overview.py", "weakest", args[0] if args else "5"],
+        "orgs.stale": ["python3", f"{br_root}/scripts/ops/orgs_overview.py", "stale", args[0] if args else "5"],
+        "orgs.repos": ["python3", f"{br_root}/scripts/ops/orgs_overview.py", "repos", args[0] if args else "BlackRoad-OS", args[1] if len(args) > 1 else "5"],
         "pi.status": [f"{br_root}/tools/pi-manager/br-pi.sh", "status"],
         "pi.models": [f"{br_root}/tools/pi-manager/br-pi.sh", "models", args[0] if args else "aria64"],
         "pi.worlds": [f"{br_root}/tools/pi-manager/br-pi.sh", "worlds", args[0] if args else "aria64", args[1] if len(args) > 1 else "10"],
@@ -1099,6 +1111,8 @@ Available commands:
 - orgs.overview
 - orgs.detail
 - orgs.weakest
+- orgs.stale
+- orgs.repos
 - pi.status
 - pi.models
 - pi.worlds
