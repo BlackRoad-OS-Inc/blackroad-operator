@@ -13,7 +13,7 @@ Usage:
   lucidia-ops run <objective>
   lucidia-ops remediate <objective>
   lucidia-ops fleet
-  lucidia-ops orgs [detail <org>|weakest [count]]
+  lucidia-ops orgs [detail <org>|repos <org> [count]|weakest [count]|stale [count]]
   lucidia-ops health
   lucidia-ops sites
   lucidia-ops history
@@ -29,6 +29,8 @@ Examples:
   lucidia-ops replay last remediate
   lucidia-ops plan "show an overview of all BlackRoad orgs"
   lucidia-ops orgs detail BlackRoad-AI
+  lucidia-ops orgs repos BlackRoad-OS 8
+  lucidia-ops orgs stale 5
   lucidia-ops health
 EOF
 }
@@ -60,6 +62,14 @@ case "$cmd" in
       weakest)
         shift
         exec "$BR_AI" ops "show the weakest ${1:-5} BlackRoad orgs"
+        ;;
+      stale)
+        shift
+        exec "$BR_AI" ops "show the most stale ${1:-5} BlackRoad orgs"
+        ;;
+      repos)
+        shift
+        exec "$BR_AI" ops "show the top ${2:-5} repos in ${1:-BlackRoad-OS}"
         ;;
       overview|all|"")
         exec "$BR_AI" ops "show an overview of all BlackRoad orgs"
