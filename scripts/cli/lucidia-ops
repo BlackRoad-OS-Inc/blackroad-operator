@@ -13,7 +13,7 @@ Usage:
   lucidia-ops run <objective>
   lucidia-ops remediate <objective>
   lucidia-ops fleet
-  lucidia-ops orgs [detail <org>|repos <org> [count]|weakest [count]|stale [count]]
+  lucidia-ops orgs [map|detail <org>|repos <org> [count]|weakest [count]|stale [count]]
   lucidia-ops health
   lucidia-ops sites
   lucidia-ops history
@@ -28,6 +28,7 @@ Examples:
   lucidia-ops export json 10
   lucidia-ops replay last remediate
   lucidia-ops plan "show an overview of all BlackRoad orgs"
+  lucidia-ops orgs map
   lucidia-ops orgs detail BlackRoad-AI
   lucidia-ops orgs repos BlackRoad-OS 8
   lucidia-ops orgs stale 5
@@ -58,6 +59,9 @@ case "$cmd" in
       detail)
         shift
         exec "$BR_AI" ops "show org detail for ${1:-BlackRoad-OS}"
+        ;;
+      map)
+        exec "$BR_AI" ops "show the BlackRoad org category map"
         ;;
       weakest)
         shift
