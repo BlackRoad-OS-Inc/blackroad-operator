@@ -24,6 +24,58 @@
 
 ## Overview
 
+### Fast Start For This Repo
+
+If you want Lucidia to operate BlackRoad from local Ollama instead of plain chat, use the repo control plane first:
+
+```bash
+cd /Users/alexa/blackroad-operator
+
+# Conversational use
+./tools/ai/br-ai.sh chat
+
+# Let Ollama plan safe operations
+./tools/ai/br-ai.sh ops "check the Pi fleet and list available models"
+
+# Let Ollama execute the safe plan
+./tools/ai/br-ai.sh autonomous "run local health and summarize issues"
+
+# Inspect a workflow run in detail
+./tools/ai/br-ai.sh ops "show the latest failed workflow run details"
+
+# Dispatch a safe workflow
+./tools/ai/br-ai.sh autonomous "run the Autonomous Websites workflow on main"
+
+# Shortcuts
+./scripts/cli/lucidia-ops fleet
+./scripts/cli/lucidia-ops run "regenerate public sites and report the result"
+./scripts/cli/ollama-os plan "check workflow status"
+```
+
+### What Ollama Can Operate Here
+
+The current safe autonomous surface in this repo includes:
+
+- local health checks
+- Raspberry Pi fleet status, models, worlds, logs, and task queueing
+- deploy detection, deploy history inspection, and GitHub deploy watching
+- Cloudflare zone, DNS, and analytics inspection
+- GitHub workflow listing, recent workflow run inspection, single-run detail inspection, and dispatch for a small allowlisted workflow set
+- public site regeneration
+
+Current workflow dispatches in the allowlist:
+
+- `Connector: Email Digest`
+- `Connector: Stripe`
+- `Agent: Workflow Sync`
+- `Agent: Repo Improver`
+- `Check Dependencies`
+- `Scrape & Index All Orgs`
+- `Autonomous Websites`
+- `Agent GitHub Assets`
+
+This is not arbitrary shell execution. The model plans against an allowlist and then the repo executes only those mapped actions.
+
 ### Why Local Inference?
 
 BlackRoad OS embraces local-first AI for:
