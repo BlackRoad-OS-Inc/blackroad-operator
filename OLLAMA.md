@@ -55,6 +55,7 @@ cd /Users/alexa/blackroad-operator
 # Shortcuts
 ./scripts/cli/lucidia-ops fleet
 ./scripts/cli/lucidia-ops run "regenerate public sites and report the result"
+./scripts/cli/lucidia-ops history
 ./scripts/cli/ollama-os plan "check workflow status"
 ```
 
@@ -65,6 +66,8 @@ Trust levels in this repo:
 - `ops`: plan only
 - `autonomous`: execute read-only allowlisted actions
 - `remediate`: execute read-only and mutating allowlisted actions
+
+Each Lucidia plan and execution is logged locally in `~/.blackroad/ai-ops-history.db`.
 
 The current safe autonomous surface in this repo includes:
 
@@ -77,6 +80,13 @@ The current safe autonomous surface in this repo includes:
 - public site regeneration
 
 Mutating actions require remediation trust. That includes Pi tasking, Pi-side generation, workflow dispatch, GitHub rollback/rerun, Cloudflare cache purge, and site regeneration.
+
+To inspect the local audit trail:
+
+```bash
+./tools/ai/br-ai.sh history
+./scripts/cli/lucidia-ops history
+```
 
 Current workflow dispatches in the allowlist:
 
