@@ -88,10 +88,19 @@ jobs:
             ].join('\\n');
 
             // Post as issue (triggers email notification if watching)
-            await github.rest.issues.create({
-              owner: org, repo: 'blackroad-operator',
-              title: `📊 Weekly Digest — ${new Date().toISOString().split('T')[0]}`,
-              body: digest,
-              labels: ['digest', 'automated']
-            });
-            console.log('Weekly digest posted');
+            try {
+              await github.rest.issues.create({
+                owner: org, repo: 'blackroad-operator',
+                title: `📊 Weekly Digest — ${new Date().toISOString().split('T')[0]}`,
+                body: digest,
+                labels: ['digest', 'automated']
+              });
+              console.log('Weekly digest posted');
+            } catch (error) {
+              if (String(error?.message || error).includes('IP allow list enabled')) {
+                core.warning('Skipping digest issue creation because the org IP allow list blocks GitHub-hosted runners.');
+                console.log(digest);
+                return;
+              }
+              throw error;
+            }
