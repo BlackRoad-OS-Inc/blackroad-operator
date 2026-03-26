@@ -15,6 +15,7 @@ cd /Users/alexa/blackroad-operator
 # Ollama-first control plane
 ./tools/ai/br-ai.sh ops "check the Pi fleet and list available models"
 ./tools/ai/br-ai.sh autonomous "regenerate public sites and report what changed"
+./tools/ai/br-ai.sh remediate "purge Cloudflare cache for blackroad.io"
 
 # Shortcuts
 ./scripts/cli/lucidia-ops fleet
@@ -44,14 +45,20 @@ Use these commands when you want Lucidia to operate the system instead of just c
 ```bash
 ./tools/ai/br-ai.sh ops "check the fleet and summarize issues"
 ./tools/ai/br-ai.sh autonomous "run local health and list GitHub workflows"
-./tools/ai/br-ai.sh autonomous "regenerate public sites and summarize the changes"
+./tools/ai/br-ai.sh autonomous "show the latest failed workflow run details"
 ./tools/ai/br-ai.sh ops "show the latest failed workflow run details"
-./tools/ai/br-ai.sh autonomous "run the Autonomous Websites workflow on main"
-./tools/ai/br-ai.sh autonomous "purge Cloudflare cache for blackroad.io"
-./tools/ai/br-ai.sh autonomous "rerun the previous successful GitHub deploy workflow"
+./tools/ai/br-ai.sh remediate "run the Autonomous Websites workflow on main"
+./tools/ai/br-ai.sh remediate "purge Cloudflare cache for blackroad.io"
+./tools/ai/br-ai.sh remediate "rerun the previous successful GitHub deploy workflow"
 ```
 
-The autonomous path is intentionally bounded. It currently routes through safe actions for:
+Trust levels:
+
+- `ops`: plan only, never executes
+- `autonomous`: executes read-only allowlisted actions
+- `remediate`: executes read-only and mutating allowlisted actions
+
+The control plane is intentionally bounded. It currently routes through safe actions for:
 
 - health checks
 - Pi fleet status, models, worlds, logs, and task queueing
@@ -60,6 +67,15 @@ The autonomous path is intentionally bounded. It currently routes through safe a
 - Cloudflare zone, DNS, analytics inspection, and cache purge
 - workflow listing, recent run inspection, single-run detail inspection, and dispatch for a small allowlisted workflow set
 - website regeneration
+
+Mutating actions that require remediation trust:
+
+- Pi task queueing
+- Pi-side generation
+- GitHub workflow dispatch
+- GitHub deploy rollback/rerun
+- Cloudflare cache purge
+- public site regeneration
 
 Allowed workflow dispatches through Lucidia:
 
