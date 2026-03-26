@@ -43,6 +43,9 @@ cd /Users/alexa/blackroad-operator
 # Inspect a workflow run in detail
 ./tools/ai/br-ai.sh ops "show the latest failed workflow run details"
 
+# Inspect the full BlackRoad org layer
+./tools/ai/br-ai.sh ops "show an overview of all BlackRoad orgs"
+
 # Dispatch a safe workflow
 ./tools/ai/br-ai.sh remediate "run the Autonomous Websites workflow on main"
 
@@ -72,6 +75,7 @@ Each Lucidia plan and execution is logged locally in `~/.blackroad/ai-ops-histor
 The current safe autonomous surface in this repo includes:
 
 - local health checks
+- all-orgs overview across the canonical BlackRoad org set
 - Raspberry Pi fleet status, models, worlds, logs, and task queueing
 - bounded Pi-side generation for operator tasks
 - deploy detection, deploy history inspection, GitHub deploy watching, and GitHub rollback/rerun
