@@ -183,18 +183,20 @@ jobs:
 
             // Fix missing LICENSE (add proprietary license)
             if (fixes.includes('license_missing')) {
-              const license = `BlackRoad OS, Inc. — Proprietary License
-
-Copyright (c) 2024-2026 BlackRoad OS, Inc. All Rights Reserved.
-
-This software is proprietary to BlackRoad OS, Inc.
-Source code is publicly visible for transparency.
-Commercial use, forking, and redistribution are prohibited
-without written authorization from BlackRoad OS, Inc.
-
-Contact: alexa@blackroad.io
-Website: https://blackroad.io
-`;
+              const license = [
+                'BlackRoad OS, Inc. - Proprietary License',
+                '',
+                'Copyright (c) 2024-2026 BlackRoad OS, Inc. All Rights Reserved.',
+                '',
+                'This software is proprietary to BlackRoad OS, Inc.',
+                'Source code is publicly visible for transparency.',
+                'Commercial use, forking, and redistribution are prohibited',
+                'without written authorization from BlackRoad OS, Inc.',
+                '',
+                'Contact: alexa@blackroad.io',
+                'Website: https://blackroad.io',
+                ''
+              ].join('\n');
               try {
                 await github.rest.repos.createOrUpdateFileContents({
                   owner: org, repo, path: 'LICENSE',
@@ -210,26 +212,28 @@ Website: https://blackroad.io
 
             // Fix stub README (< 100 chars)
             if (fixes.includes('readme_stub') || fixes.includes('readme_missing')) {
-              const readme = `# ${repo}
-
-**Proprietary Software — [BlackRoad OS, Inc.](https://github.com/BlackRoad-OS-Inc)**
-
-${language !== 'unknown' ? `Built with ${language}.` : ''}
-
-## About
-
-Part of the BlackRoad OS ecosystem — sovereign infrastructure on self-hosted hardware.
-
-## License
-
-This software is proprietary to BlackRoad OS, Inc. Source code is publicly visible for transparency. Commercial use, forking, and redistribution are prohibited without written authorization.
-
----
-
-**BlackRoad OS — Pave Tomorrow.**
-
-*Copyright 2024-2026 BlackRoad OS, Inc. All Rights Reserved.*
-`;
+              const readme = [
+                `# ${repo}`,
+                '',
+                '**Proprietary Software - [BlackRoad OS, Inc.](https://github.com/BlackRoad-OS-Inc)**',
+                '',
+                language !== 'unknown' ? `Built with ${language}.` : '',
+                '',
+                '## About',
+                '',
+                'Part of the BlackRoad OS ecosystem - sovereign infrastructure on self-hosted hardware.',
+                '',
+                '## License',
+                '',
+                'This software is proprietary to BlackRoad OS, Inc. Source code is publicly visible for transparency. Commercial use, forking, and redistribution are prohibited without written authorization.',
+                '',
+                '---',
+                '',
+                '**BlackRoad OS - Pave Tomorrow.**',
+                '',
+                '*Copyright 2024-2026 BlackRoad OS, Inc. All Rights Reserved.*',
+                ''
+              ].join('\n');
               try {
                 let sha;
                 try {
