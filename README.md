@@ -47,14 +47,17 @@ Use these commands when you want Lucidia to operate the system instead of just c
 ./tools/ai/br-ai.sh autonomous "regenerate public sites and summarize the changes"
 ./tools/ai/br-ai.sh ops "show the latest failed workflow run details"
 ./tools/ai/br-ai.sh autonomous "run the Autonomous Websites workflow on main"
+./tools/ai/br-ai.sh autonomous "purge Cloudflare cache for blackroad.io"
+./tools/ai/br-ai.sh autonomous "rerun the previous successful GitHub deploy workflow"
 ```
 
 The autonomous path is intentionally bounded. It currently routes through safe actions for:
 
 - health checks
 - Pi fleet status, models, worlds, logs, and task queueing
-- deployment detection, history, and GitHub deploy watching
-- Cloudflare zone, DNS, and analytics inspection
+- bounded Pi-side generation for operator tasks
+- deployment detection, history, GitHub deploy watching, and GitHub rollback/rerun
+- Cloudflare zone, DNS, analytics inspection, and cache purge
 - workflow listing, recent run inspection, single-run detail inspection, and dispatch for a small allowlisted workflow set
 - website regeneration
 
