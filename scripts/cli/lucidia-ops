@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+BR_ROOT="${BR_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
+BR_AI="${BR_ROOT}/tools/ai/br-ai.sh"
+
+show_help() {
+  cat <<'EOF'
+Lucidia Ops
+
+Usage:
+  lucidia-ops plan <objective>
+  lucidia-ops run <objective>
+  lucidia-ops remediate <objective>
+  lucidia-ops fleet
+  lucidia-ops health
+  lucidia-ops sites
+  lucidia-ops history
+
+Examples:
+  lucidia-ops plan "check the Pi fleet and list available models"
+  lucidia-ops run "regenerate public sites and inspect workflow status"
+  lucidia-ops remediate "purge Cloudflare cache for blackroad.io"
+  lucidia-ops health
+EOF
+}
+
+cmd="${1:-help}"
+case "$cmd" in
+  plan)
+    shift
+    exec "$BR_AI" ops "$@"
+    ;;
+  run|auto|autonomous)
+    shift
+    exec "$BR_AI" autonomous "$@"
+    ;;
+  remediate)
+    shift
+    exec "$BR_AI" remediate "$@"
+    ;;
+  fleet)
+    exec "$BR_AI" autonomous "check Pi fleet health and list available models"
+    ;;
+  health)
+    exec "$BR_AI" autonomous "run local system health and summarize the result"
+    ;;
+  sites)
+    exec "$BR_AI" remediate "regenerate public sites and report what changed"
+    ;;
+  history)
+    shift
+    exec "$BR_AI" history "$@"
+    ;;
+  help|--help|-h|"")
+    show_help
+    ;;
+  *)
+    exec "$BR_AI" autonomous "$cmd" "${@:2}"
+    ;;
+esac
