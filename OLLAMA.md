@@ -46,6 +46,12 @@ cd /Users/alexa/blackroad-operator
 # Inspect the full BlackRoad org layer
 ./tools/ai/br-ai.sh ops "show an overview of all BlackRoad orgs"
 
+# Inspect the strongest repo surface inside one org
+./tools/ai/br-ai.sh ops "show the top 8 repos in BlackRoad-OS"
+
+# Surface shell-like or stale orgs
+./tools/ai/br-ai.sh ops "show the most stale 5 BlackRoad orgs"
+
 # Dispatch a safe workflow
 ./tools/ai/br-ai.sh remediate "run the Autonomous Websites workflow on main"
 
@@ -76,7 +82,7 @@ The current safe autonomous surface in this repo includes:
 
 - local health checks
 - all-orgs overview across the canonical BlackRoad org set
-- per-org drilldown and weakest-org summaries
+- per-org drilldown, top-repo views, weakest-org summaries, and stale/shell-org detection
 - Raspberry Pi fleet status, models, worlds, logs, and task queueing
 - bounded Pi-side generation for operator tasks
 - deploy detection, deploy history inspection, GitHub deploy watching, and GitHub rollback/rerun
