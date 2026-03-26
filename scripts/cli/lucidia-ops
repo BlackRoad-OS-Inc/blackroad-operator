@@ -16,11 +16,14 @@ Usage:
   lucidia-ops health
   lucidia-ops sites
   lucidia-ops history
+  lucidia-ops last
+  lucidia-ops export [markdown|json] [limit]
 
 Examples:
   lucidia-ops plan "check the Pi fleet and list available models"
   lucidia-ops run "regenerate public sites and inspect workflow status"
   lucidia-ops remediate "purge Cloudflare cache for blackroad.io"
+  lucidia-ops export json 10
   lucidia-ops health
 EOF
 }
@@ -51,6 +54,13 @@ case "$cmd" in
   history)
     shift
     exec "$BR_AI" history "$@"
+    ;;
+  last)
+    exec "$BR_AI" last
+    ;;
+  export)
+    shift
+    exec "$BR_AI" export "$@"
     ;;
   help|--help|-h|"")
     show_help
