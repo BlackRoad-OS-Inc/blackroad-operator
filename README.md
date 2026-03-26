@@ -66,6 +66,7 @@ The control plane is intentionally bounded. It currently routes through safe act
 
 - health checks
 - all-orgs overview across the canonical BlackRoad org set
+- per-org drilldown and weakest-org summaries
 - Pi fleet status, models, worlds, logs, and task queueing
 - bounded Pi-side generation for operator tasks
 - deployment detection, history, GitHub deploy watching, and GitHub rollback/rerun
