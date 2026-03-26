@@ -44,13 +44,13 @@ cd /Users/alexa/blackroad-operator
 ./tools/ai/br-ai.sh ops "show the latest failed workflow run details"
 
 # Dispatch a safe workflow
-./tools/ai/br-ai.sh autonomous "run the Autonomous Websites workflow on main"
+./tools/ai/br-ai.sh remediate "run the Autonomous Websites workflow on main"
 
 # Purge Cloudflare cache through the allowlist
-./tools/ai/br-ai.sh autonomous "purge Cloudflare cache for blackroad.io"
+./tools/ai/br-ai.sh remediate "purge Cloudflare cache for blackroad.io"
 
 # Trigger a bounded GitHub rollback/rerun path
-./tools/ai/br-ai.sh autonomous "rerun the previous successful GitHub deploy workflow"
+./tools/ai/br-ai.sh remediate "rerun the previous successful GitHub deploy workflow"
 
 # Shortcuts
 ./scripts/cli/lucidia-ops fleet
@@ -59,6 +59,12 @@ cd /Users/alexa/blackroad-operator
 ```
 
 ### What Ollama Can Operate Here
+
+Trust levels in this repo:
+
+- `ops`: plan only
+- `autonomous`: execute read-only allowlisted actions
+- `remediate`: execute read-only and mutating allowlisted actions
 
 The current safe autonomous surface in this repo includes:
 
@@ -69,6 +75,8 @@ The current safe autonomous surface in this repo includes:
 - Cloudflare zone, DNS, analytics inspection, and cache purge
 - GitHub workflow listing, recent workflow run inspection, single-run detail inspection, and dispatch for a small allowlisted workflow set
 - public site regeneration
+
+Mutating actions require remediation trust. That includes Pi tasking, Pi-side generation, workflow dispatch, GitHub rollback/rerun, Cloudflare cache purge, and site regeneration.
 
 Current workflow dispatches in the allowlist:
 
