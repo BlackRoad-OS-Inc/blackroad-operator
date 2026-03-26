@@ -157,26 +157,35 @@ jobs:
             ];
             let fixed = 0;
 
-            for (const org of ORGS) {
-              const { data: repos } = await github.rest.repos.listForOrg({ org, per_page: 100 });
-              for (const repo of repos) {
-                if (repo.archived || (repo.description && repo.description.length >= 10)) continue;
-                if (fixed >= 30) break;
+            try {
+              for (const org of ORGS) {
+                const { data: repos } = await github.rest.repos.listForOrg({ org, per_page: 100 });
+                for (const repo of repos) {
+                  if (repo.archived || (repo.description && repo.description.length >= 10)) continue;
+                  if (fixed >= 30) break;
 
-                const name = repo.name.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-                const lang = repo.language ? `. Built with ${repo.language}` : '';
-                const desc = `${name} — BlackRoad OS${lang}. Proprietary to BlackRoad OS, Inc.`;
+                  const name = repo.name.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                  const lang = repo.language ? `. Built with ${repo.language}` : '';
+                  const desc = `${name} — BlackRoad OS${lang}. Proprietary to BlackRoad OS, Inc.`;
 
-                try {
-                  await github.rest.repos.update({
-                    owner: org, repo: repo.name,
-                    description: desc.substring(0, 350)
-                  });
-                  fixed++;
-                  console.log(`Fixed: ${org}/${repo.name}`);
-                } catch (e) {
-                  console.log(`Skip: ${org}/${repo.name} — ${e.message}`);
+                  try {
+                    await github.rest.repos.update({
+                      owner: org, repo: repo.name,
+                      description: desc.substring(0, 350)
+                    });
+                    fixed++;
+                    console.log(`Fixed: ${org}/${repo.name}`);
+                  } catch (e) {
+                    console.log(`Skip: ${org}/${repo.name} — ${e.message}`);
+                  }
                 }
               }
+            } catch (error) {
+              const message = error?.message || String(error);
+              if (message.includes('IP allow list enabled')) {
+                core.warning(`Skipping hosted-runner autofix because org APIs are blocked by IP allow list: ${message}`);
+                return;
+              }
+              throw error;
             }
             console.log(`Fixed ${fixed} descriptions`);

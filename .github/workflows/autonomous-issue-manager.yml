@@ -209,66 +209,69 @@ jobs:
             const staleDays = parseInt('${{ env.STALE_DAYS }}');
             const closeDays = parseInt('${{ env.CLOSE_DAYS }}');
             const now = new Date();
+            try {
+              const issues = await github.rest.issues.listForRepo({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                state: 'open',
+                per_page: 100
+              });
 
-            // Get open issues
-            const issues = await github.rest.issues.listForRepo({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              state: 'open',
-              per_page: 100
-            });
+              for (const issue of issues.data) {
+                if (issue.pull_request) continue;
 
-            for (const issue of issues.data) {
-              // Skip PRs
-              if (issue.pull_request) continue;
+                const updatedAt = new Date(issue.updated_at);
+                const daysSinceUpdate = Math.floor((now - updatedAt) / (1000 * 60 * 60 * 24));
 
-              const updatedAt = new Date(issue.updated_at);
-              const daysSinceUpdate = Math.floor((now - updatedAt) / (1000 * 60 * 60 * 24));
+                const hasStaleLabel = issue.labels.some(l => l.name === 'stale');
+                const isProtected = issue.labels.some(l =>
+                  ['pinned', 'security', 'priority:high', 'in-progress'].includes(l.name)
+                );
 
-              const hasStaleLabel = issue.labels.some(l => l.name === 'stale');
-              const isProtected = issue.labels.some(l =>
-                ['pinned', 'security', 'priority:high', 'in-progress'].includes(l.name)
-              );
+                if (isProtected) continue;
 
-              if (isProtected) continue;
+                if (hasStaleLabel && daysSinceUpdate >= closeDays) {
+                  await github.rest.issues.update({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: issue.number,
+                    state: 'closed',
+                    state_reason: 'not_planned'
+                  });
 
-              // Already marked stale - check if should close
-              if (hasStaleLabel && daysSinceUpdate >= closeDays) {
-                await github.rest.issues.update({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: issue.number,
-                  state: 'closed',
-                  state_reason: 'not_planned'
-                });
+                  await github.rest.issues.createComment({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: issue.number,
+                    body: `This issue has been automatically closed due to inactivity.\n\nIf this is still relevant, please reopen it with additional context.\n\n---\n*Closed by BlackRoad Autonomous Agent*`
+                  });
 
-                await github.rest.issues.createComment({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: issue.number,
-                  body: `This issue has been automatically closed due to inactivity.\n\nIf this is still relevant, please reopen it with additional context.\n\n---\n*Closed by BlackRoad Autonomous Agent*`
-                });
+                  console.log(`Closed stale issue #${issue.number}`);
+                } else if (!hasStaleLabel && daysSinceUpdate >= staleDays) {
+                  await github.rest.issues.addLabels({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: issue.number,
+                    labels: ['stale']
+                  });
 
-                console.log(`Closed stale issue #${issue.number}`);
+                  await github.rest.issues.createComment({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: issue.number,
+                    body: `This issue has been automatically marked as **stale** because it has not had recent activity.\n\nIt will be closed in ${closeDays} days if no further activity occurs.\n\n---\n*Marked by BlackRoad Autonomous Agent*`
+                  });
+
+                  console.log(`Marked issue #${issue.number} as stale`);
+                }
               }
-              // Mark as stale
-              else if (!hasStaleLabel && daysSinceUpdate >= staleDays) {
-                await github.rest.issues.addLabels({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: issue.number,
-                  labels: ['stale']
-                });
-
-                await github.rest.issues.createComment({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: issue.number,
-                  body: `This issue has been automatically marked as **stale** because it has not had recent activity.\n\nIt will be closed in ${closeDays} days if no further activity occurs.\n\n---\n*Marked by BlackRoad Autonomous Agent*`
-                });
-
-                console.log(`Marked issue #${issue.number} as stale`);
+            } catch (error) {
+              const message = error?.message || String(error);
+              if (message.includes('IP allow list enabled')) {
+                core.warning(`Skipping stale cleanup on hosted runner: ${message}`);
+                return;
               }
+              throw error;
             }
 
   # ============================================
