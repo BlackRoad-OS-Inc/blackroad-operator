@@ -46,6 +46,12 @@ cd /Users/alexa/blackroad-operator
 # Dispatch a safe workflow
 ./tools/ai/br-ai.sh autonomous "run the Autonomous Websites workflow on main"
 
+# Purge Cloudflare cache through the allowlist
+./tools/ai/br-ai.sh autonomous "purge Cloudflare cache for blackroad.io"
+
+# Trigger a bounded GitHub rollback/rerun path
+./tools/ai/br-ai.sh autonomous "rerun the previous successful GitHub deploy workflow"
+
 # Shortcuts
 ./scripts/cli/lucidia-ops fleet
 ./scripts/cli/lucidia-ops run "regenerate public sites and report the result"
@@ -58,8 +64,9 @@ The current safe autonomous surface in this repo includes:
 
 - local health checks
 - Raspberry Pi fleet status, models, worlds, logs, and task queueing
-- deploy detection, deploy history inspection, and GitHub deploy watching
-- Cloudflare zone, DNS, and analytics inspection
+- bounded Pi-side generation for operator tasks
+- deploy detection, deploy history inspection, GitHub deploy watching, and GitHub rollback/rerun
+- Cloudflare zone, DNS, analytics inspection, and cache purge
 - GitHub workflow listing, recent workflow run inspection, single-run detail inspection, and dispatch for a small allowlisted workflow set
 - public site regeneration
 
