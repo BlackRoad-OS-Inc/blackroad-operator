@@ -83,6 +83,9 @@ Mutating actions that require remediation trust:
 Audit trail:
 
 - `./tools/ai/br-ai.sh history`
+- `./tools/ai/br-ai.sh last`
+- `./tools/ai/br-ai.sh export markdown 20`
+- `./tools/ai/br-ai.sh export json 20`
 - `./scripts/cli/lucidia-ops history`
 
 Allowed workflow dispatches through Lucidia:
