@@ -20,6 +20,7 @@ cd /Users/alexa/blackroad-operator
 # Shortcuts
 ./scripts/cli/lucidia-ops fleet
 ./scripts/cli/lucidia-ops run "check local health and workflow status"
+./scripts/cli/lucidia-ops history
 ./scripts/cli/ollama-os run "check Pi fleet health and list models"
 ```
 
@@ -58,6 +59,8 @@ Trust levels:
 - `autonomous`: executes read-only allowlisted actions
 - `remediate`: executes read-only and mutating allowlisted actions
 
+Every Lucidia plan and execution is now recorded in a local SQLite history at `~/.blackroad/ai-ops-history.db`.
+
 The control plane is intentionally bounded. It currently routes through safe actions for:
 
 - health checks
@@ -76,6 +79,11 @@ Mutating actions that require remediation trust:
 - GitHub deploy rollback/rerun
 - Cloudflare cache purge
 - public site regeneration
+
+Audit trail:
+
+- `./tools/ai/br-ai.sh history`
+- `./scripts/cli/lucidia-ops history`
 
 Allowed workflow dispatches through Lucidia:
 
