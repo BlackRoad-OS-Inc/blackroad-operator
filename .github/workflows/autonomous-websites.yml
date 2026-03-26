@@ -1,0 +1,67 @@
+name: Autonomous Websites
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/generate_public_sites.py'
+      - 'websites/**'
+      - '.github/workflows/autonomous-websites.yml'
+  schedule:
+    - cron: '17 */6 * * *'
+  workflow_dispatch:
+    inputs:
+      deploy:
+        description: 'Deploy pages after regeneration'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+concurrency:
+  group: autonomous-websites
+  cancel-in-progress: false
+
+jobs:
+  regenerate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12'
+
+      - name: Regenerate consumer-facing sites
+        run: python3 scripts/generate_public_sites.py
+
+      - name: Commit regenerated sites
+        if: github.event_name != 'pull_request'
+        run: |
+          if [ -n "$(git status --porcelain websites scripts/generate_public_sites.py)" ]; then
+            git config user.name "blackroad-web[bot]"
+            git config user.email "bot@blackroad.io"
+            git add websites scripts/generate_public_sites.py
+            git commit -m "docs(web): regenerate public site surfaces"
+            git push
+          else
+            echo "No website changes detected"
+          fi
+
+      - name: Deploy selected production sites
+        if: ${{ inputs.deploy == true && github.event_name == 'workflow_dispatch' }}
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          if [ -z "${CLOUDFLARE_API_TOKEN}" ]; then
+            echo "CLOUDFLARE_API_TOKEN is not set, skipping deploy"
+            exit 0
+          fi
+          npm install --no-save wrangler
+          bash websites/deploy.sh blackroad.io
+          bash websites/deploy.sh lucidia.earth
+          bash websites/deploy.sh roadcoin.io
