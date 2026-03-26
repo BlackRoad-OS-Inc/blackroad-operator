@@ -14,7 +14,7 @@ def main():
     mode = sys.argv[1] if len(sys.argv) > 1 else "overview"
     orgs_env = os.environ.get("BR_ALL_ORGS_STR", "")
     orgs = [o for o in orgs_env.split(",") if o]
-    if mode in {"overview", "weakest"} and not orgs:
+    if mode in {"overview", "weakest", "stale"} and not orgs:
         print("No org list configured.")
         return 1
 
@@ -65,6 +65,35 @@ def main():
             print(f"- {row['org']}: repos={row['public_repos']}, followers={row['followers']} :: {row['description'][:90]}")
         return 0
 
+    if mode == "stale":
+        count = int(sys.argv[2]) if len(sys.argv) > 2 else 5
+        ranked = []
+        for row in rows:
+            if row["public_repos"] < 0:
+                continue
+            desc = row["description"].strip()
+            shell_flags = []
+            if row["public_repos"] <= 25:
+                shell_flags.append("thin")
+            if row["followers"] <= 1:
+                shell_flags.append("low-follow")
+            if not desc:
+                shell_flags.append("no-desc")
+            score = (
+                1 if row["public_repos"] <= 25 else 0,
+                1 if row["followers"] <= 1 else 0,
+                1 if not desc else 0,
+                max(0, 100 - row["public_repos"]),
+            )
+            ranked.append((score, row, shell_flags))
+        ranked.sort(key=lambda item: (-item[0][0], -item[0][1], -item[0][2], -item[0][3], item[1]["org"]))
+        print(f"Stale or shell-like BlackRoad orgs (top {count})")
+        print("")
+        for _, row, shell_flags in ranked[:count]:
+            flags = ",".join(shell_flags) if shell_flags else "active"
+            print(f"- {row['org']}: repos={row['public_repos']}, followers={row['followers']}, flags={flags} :: {row['description'][:90]}")
+        return 0
+
     if mode == "detail":
         if len(sys.argv) < 3:
             print("Usage: orgs_overview.py detail <org>")
@@ -79,6 +108,24 @@ def main():
         print(f"- description: {(data.get('description') or '').strip()}")
         print(f"- blog: {data.get('blog') or ''}")
         print(f"- location: {data.get('location') or ''}")
+        return 0
+
+    if mode == "repos":
+        if len(sys.argv) < 3:
+            print("Usage: orgs_overview.py repos <org> [count]")
+            return 1
+        org = sys.argv[2]
+        count = int(sys.argv[3]) if len(sys.argv) > 3 else 5
+        repos = gh_json(f"orgs/{org}/repos?type=public&sort=updated&direction=desc&per_page={max(count, 1)}")
+        print(f"{org} top repos")
+        print("")
+        for repo in repos[:count]:
+            name = repo.get("name", "")
+            stars = repo.get("stargazers_count", 0)
+            pushed_at = (repo.get("pushed_at") or "")[:10]
+            archived = " archived" if repo.get("archived") else ""
+            desc = (repo.get("description") or "").strip()[:90]
+            print(f"- {name}: stars={stars}, pushed={pushed_at}{archived} :: {desc}")
         return 0
 
     print(f"Unknown mode: {mode}")
