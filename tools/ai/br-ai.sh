@@ -11,6 +11,7 @@ DEFAULT_MODEL="${BR_AI_MODEL:-}"
 SEARCH_DB="${HOME}/.blackroad/search.db"
 CHAT_DB="${HOME}/.blackroad/chat-history.db"
 CODEX_DB="${HOME}/.blackroad/memory/codex/codex.db"
+OPS_DB="${HOME}/.blackroad/ai-ops-history.db"
 BR_AI_TRUST_MODE="${BR_AI_TRUST_MODE:-observe}"
 
 # Find a live Ollama node
@@ -110,6 +111,72 @@ db.execute('INSERT INTO messages VALUES (?,?,?,?,?)', (str(uuid.uuid4()), '$role
 db.commit()
 db.close()
 " 2>/dev/null
+}
+
+init_ops_db() {
+  python3 - <<'PY'
+import os, sqlite3
+db_path = os.path.expanduser('~/.blackroad/ai-ops-history.db')
+os.makedirs(os.path.dirname(db_path), exist_ok=True)
+db = sqlite3.connect(db_path)
+db.execute('''
+CREATE TABLE IF NOT EXISTS ops_runs (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  ts TEXT NOT NULL,
+  mode TEXT NOT NULL,
+  trust_mode TEXT NOT NULL,
+  model TEXT,
+  objective TEXT NOT NULL,
+  summary TEXT,
+  actions_json TEXT,
+  status TEXT NOT NULL,
+  note TEXT
+)
+''')
+db.commit()
+db.close()
+PY
+}
+
+log_ops_run() {
+  local mode="$1" trust_mode="$2" model="$3" objective="$4" summary="$5" actions_json="$6" status="$7" note="${8:-}"
+  OPS_MODE="$mode" OPS_TRUST="$trust_mode" OPS_MODEL="$model" OPS_OBJECTIVE="$objective" OPS_SUMMARY="$summary" OPS_ACTIONS="$actions_json" OPS_STATUS="$status" OPS_NOTE="$note" \
+  python3 - <<'PY'
+import datetime, os, sqlite3
+db_path = os.path.expanduser('~/.blackroad/ai-ops-history.db')
+os.makedirs(os.path.dirname(db_path), exist_ok=True)
+db = sqlite3.connect(db_path)
+db.execute('''
+CREATE TABLE IF NOT EXISTS ops_runs (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  ts TEXT NOT NULL,
+  mode TEXT NOT NULL,
+  trust_mode TEXT NOT NULL,
+  model TEXT,
+  objective TEXT NOT NULL,
+  summary TEXT,
+  actions_json TEXT,
+  status TEXT NOT NULL,
+  note TEXT
+)
+''')
+db.execute(
+  'INSERT INTO ops_runs (ts, mode, trust_mode, model, objective, summary, actions_json, status, note) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+  (
+    datetime.datetime.now().isoformat(),
+    os.environ.get('OPS_MODE', ''),
+    os.environ.get('OPS_TRUST', ''),
+    os.environ.get('OPS_MODEL', ''),
+    os.environ.get('OPS_OBJECTIVE', ''),
+    os.environ.get('OPS_SUMMARY', ''),
+    os.environ.get('OPS_ACTIONS', ''),
+    os.environ.get('OPS_STATUS', ''),
+    os.environ.get('OPS_NOTE', ''),
+  )
+)
+db.commit()
+db.close()
+PY
 }
 
 header() {
@@ -596,10 +663,12 @@ if start == -1 or end == -1 or end < start:
     print("  Could not parse Ollama plan.")
     sys.exit(1)
 data = json.loads(raw[start:end+1])
+summary = data.get('summary', 'No summary provided')
 print(f"  Summary: {data.get('summary', 'No summary provided')}")
 actions = data.get('actions', [])
 if not actions:
     print("  No executable actions proposed.")
+    print("OPS_RESULT_JSON=" + json.dumps({"summary": summary, "actions": actions, "status": "no_actions", "note": "No executable actions proposed."}))
     sys.exit(0)
 read_only = {
     "health.status",
@@ -697,8 +766,32 @@ for idx, action in enumerate(actions, start=1):
         print("...output truncated...")
     if proc.returncode != 0:
         print(f"     exit: {proc.returncode}")
+        print("OPS_RESULT_JSON=" + json.dumps({"summary": summary, "actions": actions, "status": "error", "note": f"{cmd} exited with {proc.returncode}"}))
         sys.exit(proc.returncode)
+print("OPS_RESULT_JSON=" + json.dumps({"summary": summary, "actions": actions, "status": "success" if mode == "execute" else "planned", "note": ""}))
 PY
+}
+
+cmd_history() {
+  init_ops_db
+  local limit="${1:-15}"
+  header "history"
+  echo "  ${CYAN}Lucidia ops history:${NC}"
+  echo ""
+  python3 - "$limit" <<'PY'
+import os, sqlite3, sys
+db_path = os.path.expanduser('~/.blackroad/ai-ops-history.db')
+db = sqlite3.connect(db_path)
+rows = db.execute(
+  "SELECT id, ts, mode, trust_mode, status, objective FROM ops_runs ORDER BY id DESC LIMIT ?",
+  (int(sys.argv[1]),)
+).fetchall()
+for row in rows:
+  id_, ts, mode, trust, status, objective = row
+  print(f"  #{id_:<4} {ts[:19]}  {mode:<10} {trust:<10} {status:<10} {objective[:90]}")
+db.close()
+PY
+  echo ""
 }
 
 cmd_ops() {
@@ -712,6 +805,7 @@ cmd_ops() {
   }
   local model=$(pick_model)
   [[ -z "$model" ]] && { echo "  ${RED}Ollama offline on all nodes${NC}"; exit 1; }
+  init_ops_db
   header "$model"
   echo "  ${CYAN}Ops objective:${NC} $objective"
   echo "  ${DIM}trust:${NC} ${BR_AI_TRUST_MODE}"
@@ -749,6 +843,7 @@ $(ops_schema)"
   plan=$(ollama_ask "$model" "$prompt" "You are a precise BlackRoad operations planner. Return valid JSON only." "700")
   if [[ -z "$plan" ]]; then
     echo "  ${RED}No plan returned from Ollama.${NC}"
+    log_ops_run "$execute_mode" "$BR_AI_TRUST_MODE" "$model" "$objective" "" "" "error" "No plan returned from Ollama"
     exit 1
   fi
   if [[ "$execute_mode" == "execute" ]]; then
@@ -756,7 +851,45 @@ $(ops_schema)"
   else
     echo "  ${BOLD}Plan:${NC}"
   fi
-  run_ops_plan "$plan" "$execute_mode"
+  local ops_output
+  local ops_status=0
+  ops_output=$(run_ops_plan "$plan" "$execute_mode") || ops_status=$?
+  printf '%s\n' "$ops_output"
+  local result_json
+  result_json=$(printf '%s\n' "$ops_output" | sed -n 's/^OPS_RESULT_JSON=//p' | tail -1)
+  local summary=""
+  local actions_json="[]"
+  local status_text="planned"
+  local note=""
+  if [[ -n "$result_json" ]]; then
+    summary=$(RESULT_JSON="$result_json" python3 - <<'PY'
+import json, os
+data=json.loads(os.environ['RESULT_JSON'])
+print(data.get('summary',''))
+PY
+)
+    actions_json=$(RESULT_JSON="$result_json" python3 - <<'PY'
+import json, os
+data=json.loads(os.environ['RESULT_JSON'])
+print(json.dumps(data.get('actions', [])))
+PY
+)
+    status_text=$(RESULT_JSON="$result_json" python3 - <<'PY'
+import json, os
+data=json.loads(os.environ['RESULT_JSON'])
+print(data.get('status','planned'))
+PY
+)
+    note=$(RESULT_JSON="$result_json" python3 - <<'PY'
+import json, os
+data=json.loads(os.environ['RESULT_JSON'])
+print(data.get('note',''))
+PY
+)
+  fi
+  [[ $ops_status -ne 0 ]] && status_text="error"
+  log_ops_run "$execute_mode" "$BR_AI_TRUST_MODE" "$model" "$objective" "$summary" "$actions_json" "$status_text" "$note"
+  [[ $ops_status -ne 0 ]] && exit $ops_status
   echo ""
 }
 
@@ -795,6 +928,7 @@ show_help() {
   echo "    ${CYAN}fleet${NC}                 Fleet Ollama status + analysis"
   echo "    ${CYAN}models${NC}                List all models across fleet"
   echo "    ${CYAN}summarize <path>${NC}      Summarize file or directory"
+  echo "    ${CYAN}history [limit]${NC}       Show Lucidia ops history"
   echo "    ${CYAN}ops <objective>${NC}       Plan actions only"
   echo "    ${CYAN}autonomous <objective>${NC} Execute read-only actions; mutating actions require remediation trust"
   echo "    ${CYAN}remediate <objective>${NC} Execute read-only and mutating allowlisted actions"
@@ -823,6 +957,7 @@ case "${1:-help}" in
   chat)          cmd_chat "$2" ;;
   fleet|status)  cmd_fleet ;;
   models|ls)     cmd_models ;;
+  history|hist)  shift; cmd_history "$@" ;;
   ops)           shift; cmd_ops plan "$@" ;;
   autonomous|auto) shift; cmd_autonomous "$@" ;;
   remediate)     shift; cmd_remediate "$@" ;;
