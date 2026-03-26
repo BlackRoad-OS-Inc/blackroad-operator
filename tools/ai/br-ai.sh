@@ -794,6 +794,127 @@ PY
   echo ""
 }
 
+cmd_last() {
+  init_ops_db
+  header "last"
+  echo "  ${CYAN}Most recent Lucidia ops run:${NC}"
+  echo ""
+  python3 - <<'PY'
+import json, os, sqlite3
+db_path = os.path.expanduser('~/.blackroad/ai-ops-history.db')
+db = sqlite3.connect(db_path)
+row = db.execute(
+  "SELECT id, ts, mode, trust_mode, model, objective, summary, actions_json, status, note FROM ops_runs ORDER BY id DESC LIMIT 1"
+).fetchone()
+db.close()
+if not row:
+    print("  No ops history yet.")
+    raise SystemExit(0)
+id_, ts, mode, trust, model, objective, summary, actions_json, status, note = row
+print(f"  id:       {id_}")
+print(f"  ts:       {ts}")
+print(f"  mode:     {mode}")
+print(f"  trust:    {trust}")
+print(f"  model:    {model or 'unknown'}")
+print(f"  status:   {status}")
+print(f"  objective:{' ' if objective else ''}{objective}")
+print(f"  summary:  {summary or ''}")
+if note:
+    print(f"  note:     {note}")
+actions = []
+if actions_json:
+    try:
+        actions = json.loads(actions_json)
+    except Exception:
+        actions = []
+if actions:
+    print("  actions:")
+    for idx, action in enumerate(actions, start=1):
+        args = " ".join(str(a) for a in (action.get("args") or []))
+        why = action.get("why", "")
+        line = f"    {idx}. {action.get('command','unknown')}"
+        if args:
+            line += f" {args}"
+        if why:
+            line += f"  [{why}]"
+        print(line)
+PY
+  echo ""
+}
+
+cmd_export() {
+  init_ops_db
+  local format="${1:-markdown}"
+  local limit="${2:-20}"
+  header "export"
+  echo "  ${CYAN}Exporting Lucidia ops history:${NC} ${format} (${limit})"
+  echo ""
+  python3 - "$format" "$limit" <<'PY'
+import json, os, sqlite3, sys
+fmt = sys.argv[1]
+limit = int(sys.argv[2])
+db_path = os.path.expanduser('~/.blackroad/ai-ops-history.db')
+db = sqlite3.connect(db_path)
+rows = db.execute(
+  "SELECT id, ts, mode, trust_mode, model, objective, summary, actions_json, status, note FROM ops_runs ORDER BY id DESC LIMIT ?",
+  (limit,)
+).fetchall()
+db.close()
+items = []
+for row in rows:
+    id_, ts, mode, trust, model, objective, summary, actions_json, status, note = row
+    try:
+        actions = json.loads(actions_json) if actions_json else []
+    except Exception:
+        actions = []
+    items.append({
+        "id": id_,
+        "ts": ts,
+        "mode": mode,
+        "trust_mode": trust,
+        "model": model,
+        "objective": objective,
+        "summary": summary,
+        "actions": actions,
+        "status": status,
+        "note": note,
+    })
+if fmt == "json":
+    print(json.dumps(items, indent=2))
+else:
+    print("# Lucidia Ops Export")
+    print("")
+    for item in items:
+      print(f"## Run #{item['id']}")
+      print("")
+      print(f"- Time: `{item['ts']}`")
+      print(f"- Mode: `{item['mode']}`")
+      print(f"- Trust: `{item['trust_mode']}`")
+      print(f"- Model: `{item['model'] or 'unknown'}`")
+      print(f"- Status: `{item['status']}`")
+      print(f"- Objective: {item['objective']}")
+      if item['summary']:
+          print(f"- Summary: {item['summary']}")
+      if item['note']:
+          print(f"- Note: {item['note']}")
+      print("- Actions:")
+      if item["actions"]:
+          for action in item["actions"]:
+              args = " ".join(str(a) for a in (action.get("args") or []))
+              why = action.get("why", "")
+              text = f"  - `{action.get('command','unknown')}`"
+              if args:
+                  text += f" `{args}`"
+              if why:
+                  text += f" — {why}"
+              print(text)
+      else:
+          print("  - none")
+      print("")
+PY
+  echo ""
+}
+
 cmd_ops() {
   local execute_mode="${1:-plan}"
   shift
@@ -929,6 +1050,8 @@ show_help() {
   echo "    ${CYAN}models${NC}                List all models across fleet"
   echo "    ${CYAN}summarize <path>${NC}      Summarize file or directory"
   echo "    ${CYAN}history [limit]${NC}       Show Lucidia ops history"
+  echo "    ${CYAN}last${NC}                  Show the most recent Lucidia ops run"
+  echo "    ${CYAN}export [fmt] [limit]${NC} Export Lucidia ops history as markdown or json"
   echo "    ${CYAN}ops <objective>${NC}       Plan actions only"
   echo "    ${CYAN}autonomous <objective>${NC} Execute read-only actions; mutating actions require remediation trust"
   echo "    ${CYAN}remediate <objective>${NC} Execute read-only and mutating allowlisted actions"
@@ -958,6 +1081,8 @@ case "${1:-help}" in
   fleet|status)  cmd_fleet ;;
   models|ls)     cmd_models ;;
   history|hist)  shift; cmd_history "$@" ;;
+  last)          cmd_last ;;
+  export)        shift; cmd_export "$@" ;;
   ops)           shift; cmd_ops plan "$@" ;;
   autonomous|auto) shift; cmd_autonomous "$@" ;;
   remediate)     shift; cmd_remediate "$@" ;;
