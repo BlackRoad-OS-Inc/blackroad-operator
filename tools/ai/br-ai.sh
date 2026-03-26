@@ -18,6 +18,7 @@ BR_ALL_ORGS=(
   "BlackRoad-OS"
   "BlackRoad-AI"
   "BlackRoad-Studio"
+  "BlackRoad-Forge"
   "BlackRoad-Education"
   "BlackRoad-Security"
   "BlackRoad-Labs"
@@ -537,7 +538,7 @@ Return JSON only with this exact schema:
   "summary": "short sentence",
   "actions": [
     {
-      "command": "health.status|orgs.overview|orgs.detail|orgs.weakest|orgs.stale|orgs.repos|pi.status|pi.models|pi.worlds|pi.read|pi.logs|pi.task|pi.generate|deploy.detect|deploy.status|deploy.watch.github|deploy.rollback.github|cloudflare.zones|cloudflare.dns.list|cloudflare.analytics|cloudflare.cache.purge|workflows.list|workflows.runs|workflows.view|workflows.dispatch|sites.generate",
+      "command": "health.status|orgs.overview|orgs.map|orgs.detail|orgs.weakest|orgs.stale|orgs.repos|pi.status|pi.models|pi.worlds|pi.read|pi.logs|pi.task|pi.generate|deploy.detect|deploy.status|deploy.watch.github|deploy.rollback.github|cloudflare.zones|cloudflare.dns.list|cloudflare.analytics|cloudflare.cache.purge|workflows.list|workflows.runs|workflows.view|workflows.dispatch|sites.generate",
       "args": ["arg1", "arg2"],
       "why": "short reason"
     }
@@ -547,6 +548,7 @@ Rules:
 - Use at most 3 actions.
 - Prefer read-only actions first.
 - Use orgs.overview when the objective asks about all orgs, the full BlackRoad org layer, or ecosystem-wide status.
+- Use orgs.map when the objective asks which orgs are public-facing, internal, specialized, or archive.
 - Use orgs.detail for one named org. Args are [org].
 - Use orgs.weakest to surface the smallest or emptiest orgs. Args are [count?].
 - Use orgs.stale to surface shell-like, thin, or low-signal orgs. Args are [count?].
@@ -578,6 +580,9 @@ resolve_ops_command() {
       ;;
     orgs.overview)
       printf '%s\n' "BR_ALL_ORGS_STR=\"${(j:,:)BR_ALL_ORGS}\" python3 \"${BR_ROOT}/scripts/ops/orgs_overview.py\""
+      ;;
+    orgs.map)
+      printf '%s\n' "BR_ALL_ORGS_STR=\"${(j:,:)BR_ALL_ORGS}\" python3 \"${BR_ROOT}/scripts/ops/orgs_overview.py\" map"
       ;;
     orgs.detail)
       printf '%s\n' "python3 \"${BR_ROOT}/scripts/ops/orgs_overview.py\" detail \"${1}\""
@@ -711,6 +716,7 @@ if not actions:
 read_only = {
     "health.status",
     "orgs.overview",
+    "orgs.map",
     "orgs.detail",
     "orgs.weakest",
     "orgs.stale",
@@ -757,6 +763,7 @@ for idx, action in enumerate(actions, start=1):
     table = {
         "health.status": [f"{br_root}/tools/health-check/br-health.sh"],
         "orgs.overview": ["python3", f"{br_root}/scripts/ops/orgs_overview.py"],
+        "orgs.map": ["python3", f"{br_root}/scripts/ops/orgs_overview.py", "map"],
         "orgs.detail": ["python3", f"{br_root}/scripts/ops/orgs_overview.py", "detail", args[0] if args else "BlackRoad-OS"],
         "orgs.weakest": ["python3", f"{br_root}/scripts/ops/orgs_overview.py", "weakest", args[0] if args else "5"],
         "orgs.stale": ["python3", f"{br_root}/scripts/ops/orgs_overview.py", "stale", args[0] if args else "5"],
@@ -1109,6 +1116,7 @@ ${objective}
 Available commands:
 - health.status
 - orgs.overview
+- orgs.map
 - orgs.detail
 - orgs.weakest
 - orgs.stale
