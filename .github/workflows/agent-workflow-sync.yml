@@ -58,54 +58,63 @@ jobs:
 
             let synced = 0, errors = 0;
 
-            for (const wf of WORKFLOWS) {
-              // Read source workflow from this repo
-              let sourceContent;
-              try {
-                const { data } = await github.rest.repos.getContent({
-                  owner: 'BlackRoad-OS-Inc', repo: 'blackroad-operator',
-                  path: `.github/workflows/${wf}`
-                });
-                sourceContent = data.content;
-              } catch (e) {
-                console.log(`Source not found: ${wf}`);
-                continue;
-              }
-
-              for (const org of ORGS) {
+            try {
+              for (const wf of WORKFLOWS) {
+                // Read source workflow from this repo
+                let sourceContent;
                 try {
-                  // Check if target exists
-                  let sha;
-                  try {
-                    const { data } = await github.rest.repos.getContent({
-                      owner: org, repo: 'RoadCode',
-                      path: `.github/workflows/${wf}`
-                    });
-                    sha = data.sha;
-
-                    // Skip if content is identical
-                    if (data.content.replace(/\s/g, '') === sourceContent.replace(/\s/g, '')) {
-                      continue;
-                    }
-                  } catch {}
-
-                  const params = {
-                    owner: org, repo: 'RoadCode',
-                    path: `.github/workflows/${wf}`,
-                    message: `agent: sync ${wf} from operator`,
-                    content: sourceContent,
-                    committer: { name: 'BlackRoad Agent', email: 'agent@blackroad.io' }
-                  };
-                  if (sha) params.sha = sha;
-
-                  await github.rest.repos.createOrUpdateFileContents(params);
-                  synced++;
-                  console.log(`Synced: ${org}/RoadCode/${wf}`);
+                  const { data } = await github.rest.repos.getContent({
+                    owner: 'BlackRoad-OS-Inc', repo: 'blackroad-operator',
+                    path: `.github/workflows/${wf}`
+                  });
+                  sourceContent = data.content;
                 } catch (e) {
-                  errors++;
-                  console.log(`Error: ${org}/RoadCode/${wf} — ${e.message}`);
+                  console.log(`Source not found: ${wf}`);
+                  continue;
+                }
+
+                for (const org of ORGS) {
+                  try {
+                    // Check if target exists
+                    let sha;
+                    try {
+                      const { data } = await github.rest.repos.getContent({
+                        owner: org, repo: 'RoadCode',
+                        path: `.github/workflows/${wf}`
+                      });
+                      sha = data.sha;
+
+                      // Skip if content is identical
+                      if (data.content.replace(/\s/g, '') === sourceContent.replace(/\s/g, '')) {
+                        continue;
+                      }
+                    } catch {}
+
+                    const params = {
+                      owner: org, repo: 'RoadCode',
+                      path: `.github/workflows/${wf}`,
+                      message: `agent: sync ${wf} from operator`,
+                      content: sourceContent,
+                      committer: { name: 'BlackRoad Agent', email: 'agent@blackroad.io' }
+                    };
+                    if (sha) params.sha = sha;
+
+                    await github.rest.repos.createOrUpdateFileContents(params);
+                    synced++;
+                    console.log(`Synced: ${org}/RoadCode/${wf}`);
+                  } catch (e) {
+                    errors++;
+                    console.log(`Error: ${org}/RoadCode/${wf} — ${e.message}`);
+                  }
                 }
               }
+            } catch (error) {
+              if (String(error?.message || error).includes('IP allow list enabled')) {
+                core.warning('Skipping workflow sync because the org IP allow list blocks GitHub-hosted runners.');
+                await core.summary.addRaw('## Workflow Sync\n\nSkipped because the org IP allow list blocks hosted-runner GitHub API access.').write();
+                return;
+              }
+              throw error;
             }
 
             console.log(`\nSynced: ${synced} | Errors: ${errors}`);
@@ -137,47 +146,56 @@ jobs:
 
             let disabled = 0, checked = 0;
 
-            for (const org of ORGS) {
-              const { data: repos } = await github.rest.repos.listForOrg({ org, per_page: 100 });
+            try {
+              for (const org of ORGS) {
+                const { data: repos } = await github.rest.repos.listForOrg({ org, per_page: 100 });
 
-              for (const repo of repos.filter(r => !r.archived)) {
-                try {
-                  const { data: workflows } = await github.rest.actions.listRepoWorkflows({
-                    owner: org, repo: repo.name
-                  });
+                for (const repo of repos.filter(r => !r.archived)) {
+                  try {
+                    const { data: workflows } = await github.rest.actions.listRepoWorkflows({
+                      owner: org, repo: repo.name
+                    });
 
-                  for (const wf of workflows.workflows) {
-                    if (wf.state !== 'active') continue;
-                    checked++;
+                    for (const wf of workflows.workflows) {
+                      if (wf.state !== 'active') continue;
+                      checked++;
 
-                    // Check if it matches a broken pattern
-                    const shouldDisable = DISABLE_PATTERNS.some(p =>
-                      wf.name.includes(p) || wf.path.includes(p.toLowerCase().replace(/ /g, '-'))
-                    );
+                      // Check if it matches a broken pattern
+                      const shouldDisable = DISABLE_PATTERNS.some(p =>
+                        wf.name.includes(p) || wf.path.includes(p.toLowerCase().replace(/ /g, '-'))
+                      );
 
-                    if (!shouldDisable) continue;
+                      if (!shouldDisable) continue;
 
-                    // Verify it's actually failing (last 3 runs all failed)
-                    try {
-                      const { data: runs } = await github.rest.actions.listWorkflowRuns({
-                        owner: org, repo: repo.name, workflow_id: wf.id,
-                        per_page: 3, status: 'completed'
-                      });
-
-                      const allFailed = runs.workflow_runs.length >= 3 &&
-                        runs.workflow_runs.every(r => r.conclusion === 'failure');
-
-                      if (allFailed) {
-                        await github.rest.actions.disableWorkflow({
-                          owner: org, repo: repo.name, workflow_id: wf.id
+                      // Verify it's actually failing (last 3 runs all failed)
+                      try {
+                        const { data: runs } = await github.rest.actions.listWorkflowRuns({
+                          owner: org, repo: repo.name, workflow_id: wf.id,
+                          per_page: 3, status: 'completed'
                         });
-                        disabled++;
-                        console.log(`Disabled: ${org}/${repo.name}/${wf.name} (3+ consecutive failures)`);
-                      }
-                    } catch {}
-                  }
-                } catch {}
+
+                        const allFailed = runs.workflow_runs.length >= 3 &&
+                          runs.workflow_runs.every(r => r.conclusion === 'failure');
+
+                        if (allFailed) {
+                          await github.rest.actions.disableWorkflow({
+                            owner: org, repo: repo.name, workflow_id: wf.id
+                          });
+                          disabled++;
+                          console.log(`Disabled: ${org}/${repo.name}/${wf.name} (3+ consecutive failures)`);
+                        }
+                      } catch {}
+                    }
+                  } catch {}
+                }
               }
+            } catch (error) {
+              if (String(error?.message || error).includes('IP allow list enabled')) {
+                core.warning('Skipping broken-workflow cleanup because the org IP allow list blocks GitHub-hosted runners.');
+                await core.summary.addRaw('## Broken Workflow Cleanup\n\nSkipped because the org IP allow list blocks hosted-runner GitHub API access.').write();
+                return;
+              }
+              throw error;
             }
 
             console.log(`\nChecked: ${checked} workflows | Disabled: ${disabled}`);
