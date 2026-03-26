@@ -76,6 +76,7 @@ The current safe autonomous surface in this repo includes:
 
 - local health checks
 - all-orgs overview across the canonical BlackRoad org set
+- per-org drilldown and weakest-org summaries
 - Raspberry Pi fleet status, models, worlds, logs, and task queueing
 - bounded Pi-side generation for operator tasks
 - deploy detection, deploy history inspection, GitHub deploy watching, and GitHub rollback/rerun
