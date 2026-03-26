@@ -4,6 +4,47 @@ import os
 import subprocess
 import sys
 
+PUBLIC_FACING = {
+    "BlackRoad-OS",
+    "BlackRoad-AI",
+    "BlackRoad-Studio",
+    "BlackRoad-Forge",
+}
+
+SPECIALIZED = {
+    "BlackRoad-Cloud",
+    "BlackRoad-Education",
+    "BlackRoad-Interactive",
+    "BlackRoad-Security",
+    "BlackRoad-Hardware",
+    "BlackRoad-Media",
+    "BlackRoad-Labs",
+    "BlackRoad-Gov",
+    "BlackRoad-Foundation",
+    "BlackRoad-Ventures",
+    "Blackbox-Enterprises",
+}
+
+INTERNAL = {
+    "BlackRoad-OS-Inc",
+}
+
+ARCHIVAL = {
+    "BlackRoad-Archive",
+}
+
+
+def classify_org(org: str):
+    if org in PUBLIC_FACING:
+        return "public"
+    if org in INTERNAL:
+        return "internal"
+    if org in ARCHIVAL:
+        return "archive"
+    if org in SPECIALIZED:
+        return "specialized"
+    return "review"
+
 
 def gh_json(path: str):
     out = subprocess.check_output(["gh", "api", path], text=True)
@@ -14,7 +55,7 @@ def main():
     mode = sys.argv[1] if len(sys.argv) > 1 else "overview"
     orgs_env = os.environ.get("BR_ALL_ORGS_STR", "")
     orgs = [o for o in orgs_env.split(",") if o]
-    if mode in {"overview", "weakest", "stale"} and not orgs:
+    if mode in {"overview", "weakest", "stale", "map"} and not orgs:
         print("No org list configured.")
         return 1
 
@@ -30,6 +71,7 @@ def main():
             total_repos += public_repos
             rows.append({
                 "org": org,
+                "category": classify_org(org),
                 "public_repos": public_repos,
                 "followers": int(data.get("followers", 0) or 0),
                 "description": data.get("description") or "",
@@ -37,6 +79,7 @@ def main():
         except subprocess.CalledProcessError as exc:
             rows.append({
                 "org": org,
+                "category": classify_org(org),
                 "public_repos": -1,
                 "followers": 0,
                 "description": f"error: gh api failed ({exc.returncode})",
@@ -48,9 +91,32 @@ def main():
         for row in rows:
             repos = "?" if row["public_repos"] < 0 else str(row["public_repos"])
             desc = row["description"][:90]
-            print(f"- {row['org']}: repos={repos}, followers={row['followers']} :: {desc}")
+            print(f"- {row['org']}: category={row['category']}, repos={repos}, followers={row['followers']} :: {desc}")
         print("")
         print(f"Totals: orgs={len(rows)} public_repos={total_public}")
+        return 0
+
+    if mode == "map":
+        grouped = {
+            "public": [],
+            "specialized": [],
+            "internal": [],
+            "archive": [],
+            "review": [],
+        }
+        for row in rows:
+            grouped.setdefault(row["category"], []).append(row)
+        print("BlackRoad org map")
+        print("")
+        for category in ["public", "specialized", "internal", "archive", "review"]:
+            items = sorted(grouped.get(category, []), key=lambda r: r["org"])
+            if not items:
+                continue
+            print(f"{category}:")
+            for row in items:
+                repos = "?" if row["public_repos"] < 0 else str(row["public_repos"])
+                print(f"- {row['org']}: repos={repos}, followers={row['followers']}")
+            print("")
         return 0
 
     if mode == "weakest":
