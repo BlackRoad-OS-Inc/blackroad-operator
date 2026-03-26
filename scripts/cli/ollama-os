@@ -34,12 +34,14 @@ Usage:
   ollama-os history
   ollama-os last
   ollama-os export [markdown|json] [limit]
+  ollama-os replay [last|id] [auto|remediate]
 
 Examples:
   ollama-os plan "check the Pi fleet and list models"
   ollama-os run "regenerate sites and report the result"
   ollama-os remediate "purge Cloudflare cache for blackroad.io"
   ollama-os export json 10
+  ollama-os replay last remediate
 EOF
     ;;
   remediate)
@@ -56,6 +58,10 @@ EOF
   export)
     shift
     exec "$AI_TOOL" export "$@"
+    ;;
+  replay)
+    shift
+    exec "$AI_TOOL" replay "$@"
     ;;
   *)
     exec "$AI_TOOL" ask "$@"
