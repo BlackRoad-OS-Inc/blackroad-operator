@@ -11,6 +11,7 @@ DEFAULT_MODEL="${BR_AI_MODEL:-}"
 SEARCH_DB="${HOME}/.blackroad/search.db"
 CHAT_DB="${HOME}/.blackroad/chat-history.db"
 CODEX_DB="${HOME}/.blackroad/memory/codex/codex.db"
+BR_AI_TRUST_MODE="${BR_AI_TRUST_MODE:-observe}"
 
 # Find a live Ollama node
 find_ollama() {
@@ -584,10 +585,11 @@ PY
 run_ops_plan() {
   local raw_plan="$1"
   local execute_mode="$2"
-  RAW_PLAN="$raw_plan" EXECUTE_MODE="$execute_mode" BR_ROOT="$BR_ROOT" python3 - <<'PY'
+  RAW_PLAN="$raw_plan" EXECUTE_MODE="$execute_mode" BR_ROOT="$BR_ROOT" BR_AI_TRUST_MODE="$BR_AI_TRUST_MODE" python3 - <<'PY'
 import json, os, subprocess, sys
 raw = os.environ["RAW_PLAN"].strip()
 mode = os.environ["EXECUTE_MODE"]
+trust_mode = os.environ.get("BR_AI_TRUST_MODE", "observe")
 start = raw.find('{')
 end = raw.rfind('}')
 if start == -1 or end == -1 or end < start:
@@ -599,14 +601,45 @@ actions = data.get('actions', [])
 if not actions:
     print("  No executable actions proposed.")
     sys.exit(0)
+read_only = {
+    "health.status",
+    "pi.status",
+    "pi.models",
+    "pi.worlds",
+    "pi.read",
+    "pi.logs",
+    "deploy.detect",
+    "deploy.status",
+    "deploy.watch.github",
+    "cloudflare.zones",
+    "cloudflare.dns.list",
+    "cloudflare.analytics",
+    "workflows.list",
+    "workflows.runs",
+    "workflows.view",
+}
+mutating = {
+    "pi.task",
+    "pi.generate",
+    "deploy.rollback.github",
+    "cloudflare.cache.purge",
+    "workflows.dispatch",
+    "sites.generate",
+}
+print(f"  Trust mode: {trust_mode}")
 for idx, action in enumerate(actions, start=1):
     cmd = action.get('command', '')
     args = [str(a) for a in (action.get('args') or [])]
     why = action.get('why', '')
+    action_class = "mutating" if cmd in mutating else "read-only"
     print(f"  {idx}. {cmd} {' '.join(args)}".rstrip())
     if why:
         print(f"     reason: {why}")
+    print(f"     class: {action_class}")
     if mode != "execute":
+        continue
+    if cmd in mutating and trust_mode != "remediate":
+        print(f"     skipped: {cmd} requires BR_AI_TRUST_MODE=remediate")
         continue
     br_root = os.environ["BR_ROOT"]
     table = {
@@ -681,6 +714,7 @@ cmd_ops() {
   [[ -z "$model" ]] && { echo "  ${RED}Ollama offline on all nodes${NC}"; exit 1; }
   header "$model"
   echo "  ${CYAN}Ops objective:${NC} $objective"
+  echo "  ${DIM}trust:${NC} ${BR_AI_TRUST_MODE}"
   echo ""
   local prompt
   prompt="You are Lucidia operating the BlackRoad local control plane.
@@ -730,6 +764,16 @@ cmd_autonomous() {
   cmd_ops execute "$@"
 }
 
+cmd_remediate() {
+  local objective="$*"
+  [[ -z "$objective" ]] && {
+    echo "  Usage: br ai remediate <objective>"
+    echo "  Example: br ai remediate rerun the previous successful GitHub deploy workflow"
+    exit 1
+  }
+  BR_AI_TRUST_MODE=remediate cmd_ops execute "$objective"
+}
+
 show_help() {
   echo ""
   echo "  ${VIOLET}${BOLD}br ai${NC}  — Sovereign AI (Ollama fleet)"
@@ -751,8 +795,9 @@ show_help() {
   echo "    ${CYAN}fleet${NC}                 Fleet Ollama status + analysis"
   echo "    ${CYAN}models${NC}                List all models across fleet"
   echo "    ${CYAN}summarize <path>${NC}      Summarize file or directory"
-  echo "    ${CYAN}ops <objective>${NC}       Let Ollama plan safe Pi/deploy/health/workflow actions"
-  echo "    ${CYAN}autonomous <objective>${NC} Plan and execute the safe action set immediately"
+  echo "    ${CYAN}ops <objective>${NC}       Plan actions only"
+  echo "    ${CYAN}autonomous <objective>${NC} Execute read-only actions; mutating actions require remediation trust"
+  echo "    ${CYAN}remediate <objective>${NC} Execute read-only and mutating allowlisted actions"
   echo ""
   echo "  ${BOLD}Pipe:${NC}"
   echo "    ${DIM}cat file.py | br ai pipe 'find bugs'${NC}"
@@ -761,6 +806,7 @@ show_help() {
   echo "  ${BOLD}Config:${NC}"
   echo "    ${DIM}export BR_AI_MODEL=llama3.2:3b${NC}"
   echo "    ${DIM}export OLLAMA_URL=http://192.168.4.96:11434${NC}"
+  echo "    ${DIM}export BR_AI_TRUST_MODE=observe|remediate${NC}"
   echo ""
 }
 
@@ -779,6 +825,7 @@ case "${1:-help}" in
   models|ls)     cmd_models ;;
   ops)           shift; cmd_ops plan "$@" ;;
   autonomous|auto) shift; cmd_autonomous "$@" ;;
+  remediate)     shift; cmd_remediate "$@" ;;
   pipe)          shift; cmd_pipe "$@" ;;
   help|*)        show_help ;;
 esac
