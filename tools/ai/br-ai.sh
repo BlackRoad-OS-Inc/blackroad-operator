@@ -915,6 +915,128 @@ PY
   echo ""
 }
 
+cmd_replay() {
+  init_ops_db
+  local target="${1:-last}"
+  local replay_mode="${2:-auto}"
+  local trust="${BR_AI_TRUST_MODE}"
+  if [[ "$replay_mode" == "remediate" ]]; then
+    trust="remediate"
+  fi
+  header "replay"
+  echo "  ${CYAN}Replaying Lucidia ops run:${NC} ${target}"
+  echo "  ${DIM}trust:${NC} ${trust}"
+  echo ""
+  local replay_payload
+  replay_payload=$(REPLAY_TARGET="$target" python3 - <<'PY'
+import json, os, sqlite3, sys
+db_path = os.path.expanduser('~/.blackroad/ai-ops-history.db')
+db = sqlite3.connect(db_path)
+target = os.environ.get("REPLAY_TARGET", "last")
+if target == "last":
+    row = db.execute(
+      "SELECT id, objective, summary, actions_json, trust_mode, status FROM ops_runs ORDER BY id DESC LIMIT 1"
+    ).fetchone()
+else:
+    row = db.execute(
+      "SELECT id, objective, summary, actions_json, trust_mode, status FROM ops_runs WHERE id = ?",
+      (int(target),)
+    ).fetchone()
+db.close()
+if not row:
+    print("")
+    raise SystemExit(0)
+id_, objective, summary, actions_json, trust_mode, status = row
+try:
+    actions = json.loads(actions_json) if actions_json else []
+except Exception:
+    actions = []
+print(json.dumps({
+  "id": id_,
+  "objective": objective,
+  "summary": summary or "",
+  "actions": actions,
+  "trust_mode": trust_mode,
+  "status": status,
+}))
+PY
+)
+  if [[ -z "$replay_payload" ]]; then
+    echo "  ${DIM}No matching ops run found.${NC}"
+    echo ""
+    return 0
+  fi
+  local replay_id objective summary actions_json saved_trust
+  replay_id=$(REPLAY_PAYLOAD="$replay_payload" python3 - <<'PY'
+import json, os
+print(json.loads(os.environ["REPLAY_PAYLOAD"])["id"])
+PY
+)
+  objective=$(REPLAY_PAYLOAD="$replay_payload" python3 - <<'PY'
+import json, os
+print(json.loads(os.environ["REPLAY_PAYLOAD"])["objective"])
+PY
+)
+  summary=$(REPLAY_PAYLOAD="$replay_payload" python3 - <<'PY'
+import json, os
+print(json.loads(os.environ["REPLAY_PAYLOAD"]).get("summary",""))
+PY
+)
+  actions_json=$(REPLAY_PAYLOAD="$replay_payload" python3 - <<'PY'
+import json, os
+data=json.loads(os.environ["REPLAY_PAYLOAD"])
+print(json.dumps(data.get("actions", [])))
+PY
+)
+  saved_trust=$(REPLAY_PAYLOAD="$replay_payload" python3 - <<'PY'
+import json, os
+print(json.loads(os.environ["REPLAY_PAYLOAD"]).get("trust_mode","observe"))
+PY
+)
+  echo "  Replaying run #${replay_id}"
+  echo "  Objective: ${objective}"
+  [[ -n "$summary" ]] && echo "  Summary: ${summary}"
+  echo "  Recorded trust: ${saved_trust}"
+  echo ""
+  local raw_plan
+  raw_plan=$(REPLAY_SUMMARY="$summary" REPLAY_ACTIONS="$actions_json" python3 - <<'PY'
+import json, os
+print(json.dumps({
+  "summary": os.environ.get("REPLAY_SUMMARY","Replayed Lucidia ops run"),
+  "actions": json.loads(os.environ.get("REPLAY_ACTIONS","[]")),
+}))
+PY
+)
+  local replay_output
+  local replay_status=0
+  replay_output=$(BR_AI_TRUST_MODE="$trust" run_ops_plan "$raw_plan" execute) || replay_status=$?
+  printf '%s\n' "$replay_output"
+  local result_json
+  result_json=$(printf '%s\n' "$replay_output" | sed -n 's/^OPS_RESULT_JSON=//p' | tail -1)
+  local status_text="replayed"
+  local note="replay of run #${replay_id}"
+  if [[ -n "$result_json" ]]; then
+    status_text=$(RESULT_JSON="$result_json" python3 - <<'PY'
+import json, os
+data=json.loads(os.environ['RESULT_JSON'])
+print(data.get('status','replayed'))
+PY
+)
+    local replay_note
+    replay_note=$(RESULT_JSON="$result_json" python3 - <<'PY'
+import json, os
+data=json.loads(os.environ['RESULT_JSON'])
+print(data.get('note',''))
+PY
+)
+    [[ -n "$replay_note" ]] && note="${note}; ${replay_note}"
+  fi
+  [[ $replay_status -ne 0 ]] && status_text="error"
+  log_ops_run "replay" "$trust" "replay:${saved_trust}" "$objective" "$summary" "$actions_json" "$status_text" "$note"
+  echo ""
+  [[ $replay_status -ne 0 ]] && return $replay_status
+}
+
 cmd_ops() {
   local execute_mode="${1:-plan}"
   shift
@@ -1052,6 +1174,7 @@ show_help() {
   echo "    ${CYAN}history [limit]${NC}       Show Lucidia ops history"
   echo "    ${CYAN}last${NC}                  Show the most recent Lucidia ops run"
   echo "    ${CYAN}export [fmt] [limit]${NC} Export Lucidia ops history as markdown or json"
+  echo "    ${CYAN}replay [last|id] [mode]${NC} Replay a recorded ops run; mode can be auto or remediate"
   echo "    ${CYAN}ops <objective>${NC}       Plan actions only"
   echo "    ${CYAN}autonomous <objective>${NC} Execute read-only actions; mutating actions require remediation trust"
   echo "    ${CYAN}remediate <objective>${NC} Execute read-only and mutating allowlisted actions"
@@ -1083,6 +1206,7 @@ case "${1:-help}" in
   history|hist)  shift; cmd_history "$@" ;;
   last)          cmd_last ;;
   export)        shift; cmd_export "$@" ;;
+  replay)        shift; cmd_replay "$@" ;;
   ops)           shift; cmd_ops plan "$@" ;;
   autonomous|auto) shift; cmd_autonomous "$@" ;;
   remediate)     shift; cmd_remediate "$@" ;;
