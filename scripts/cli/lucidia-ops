@@ -18,12 +18,14 @@ Usage:
   lucidia-ops history
   lucidia-ops last
   lucidia-ops export [markdown|json] [limit]
+  lucidia-ops replay [last|id] [auto|remediate]
 
 Examples:
   lucidia-ops plan "check the Pi fleet and list available models"
   lucidia-ops run "regenerate public sites and inspect workflow status"
   lucidia-ops remediate "purge Cloudflare cache for blackroad.io"
   lucidia-ops export json 10
+  lucidia-ops replay last remediate
   lucidia-ops health
 EOF
 }
@@ -61,6 +63,10 @@ case "$cmd" in
   export)
     shift
     exec "$BR_AI" export "$@"
+    ;;
+  replay)
+    shift
+    exec "$BR_AI" replay "$@"
     ;;
   help|--help|-h|"")
     show_help
