@@ -451,7 +451,7 @@ Return JSON only with this exact schema:
   "summary": "short sentence",
   "actions": [
     {
-      "command": "health.status|pi.status|pi.models|pi.worlds|pi.read|pi.logs|pi.task|deploy.detect|deploy.status|deploy.watch.github|cloudflare.zones|cloudflare.dns.list|cloudflare.analytics|workflows.list|workflows.runs|workflows.view|workflows.dispatch|sites.generate",
+      "command": "health.status|pi.status|pi.models|pi.worlds|pi.read|pi.logs|pi.task|pi.generate|deploy.detect|deploy.status|deploy.watch.github|deploy.rollback.github|cloudflare.zones|cloudflare.dns.list|cloudflare.analytics|cloudflare.cache.purge|workflows.list|workflows.runs|workflows.view|workflows.dispatch|sites.generate",
       "args": ["arg1", "arg2"],
       "why": "short reason"
     }
@@ -461,12 +461,15 @@ Rules:
 - Use at most 3 actions.
 - Prefer read-only actions first.
 - Use pi.task only when the request explicitly asks to queue work on a Pi.
+- Use pi.generate only for bounded text/content generation on a Pi. Args are [node, prompt].
 - For pi.worlds args are [node, count?].
 - For pi.read args are [node, name?].
 - For pi.logs args are [node, service?].
 - For pi.task args are [node, title, description?, agent?].
+- For deploy.rollback.github args are [repo?]. Default repo is the current repo.
 - For cloudflare.dns.list args are [zone].
 - For cloudflare.analytics args are [zone].
+- For cloudflare.cache.purge args are [zone].
 - For workflows.runs args are [repo?]. Default repo is the current repo.
 - For workflows.view args are [run_id, repo?]. Default repo is the current repo.
 - For workflows.dispatch args are [workflow, repo?, ref?]. Only use these workflows: Connector: Email Digest, Connector: Stripe, Agent: Workflow Sync, Agent: Repo Improver, Check Dependencies, Scrape & Index All Orgs, Autonomous Websites, Agent GitHub Assets.
@@ -510,8 +513,14 @@ resolve_ops_command() {
     pi.task)
       printf '%s\n' "\"${BR_ROOT}/tools/pi-manager/br-pi.sh\" task ${1:-aria64} \"$2\" \"$3\" ${4:-LUCIDIA}"
       ;;
+    pi.generate)
+      printf '%s\n' "\"${BR_ROOT}/tools/pi-manager/br-pi.sh\" generate ${1:-aria64} \"$2\""
+      ;;
     deploy.watch.github)
       printf '%s\n' "\"${BR_ROOT}/tools/deploy-manager/br-deploy.sh\" watch github"
+      ;;
+    deploy.rollback.github)
+      printf '%s\n' "cd \"${BR_ROOT}\" && gh run rerun \"\$(gh run list --repo \"${1:-BlackRoad-OS-Inc/blackroad-operator}\" --limit 5 --json databaseId,conclusion -q '[.[] | select(.conclusion==\"success\")][1].databaseId')\" --repo \"${1:-BlackRoad-OS-Inc/blackroad-operator}\""
       ;;
     cloudflare.dns.list)
       printf '%s\n' "\"${BR_ROOT}/tools/cloudflare/br-cloudflare.sh\" dns list \"$1\""
@@ -521,6 +530,9 @@ resolve_ops_command() {
       ;;
     cloudflare.analytics)
       printf '%s\n' "\"${BR_ROOT}/tools/cloudflare/br-cloudflare.sh\" analytics \"$1\""
+      ;;
+    cloudflare.cache.purge)
+      printf '%s\n' "\"${BR_ROOT}/tools/cloudflare/br-cloudflare.sh\" cache \"$1\""
       ;;
     workflows.list)
       printf '%s\n' "gh workflow list"
@@ -605,12 +617,15 @@ for idx, action in enumerate(actions, start=1):
         "pi.read": [f"{br_root}/tools/pi-manager/br-pi.sh", "read", args[0] if args else "aria64", args[1] if len(args) > 1 else ""],
         "pi.logs": [f"{br_root}/tools/pi-manager/br-pi.sh", "logs", args[0] if args else "aria64", args[1] if len(args) > 1 else "world"],
         "pi.task": [f"{br_root}/tools/pi-manager/br-pi.sh", "task", args[0] if args else "aria64", args[1] if len(args) > 1 else "Untitled task", args[2] if len(args) > 2 else (args[1] if len(args) > 1 else "Untitled task"), args[3] if len(args) > 3 else "LUCIDIA"],
+        "pi.generate": [f"{br_root}/tools/pi-manager/br-pi.sh", "generate", args[0] if args else "aria64", args[1] if len(args) > 1 else "Create something useful for BlackRoad."],
         "deploy.detect": [f"{br_root}/tools/deploy-manager/br-deploy.sh", "detect"],
         "deploy.status": [f"{br_root}/tools/deploy-manager/br-deploy.sh", "status"],
         "deploy.watch.github": [f"{br_root}/tools/deploy-manager/br-deploy.sh", "watch", "github"],
+        "deploy.rollback.github": [f"{br_root}/tools/deploy-manager/br-deploy.sh", "rollback", "github"],
         "cloudflare.zones": [f"{br_root}/tools/cloudflare/br-cloudflare.sh", "zones"],
         "cloudflare.dns.list": [f"{br_root}/tools/cloudflare/br-cloudflare.sh", "dns", "list", args[0] if args else ""],
         "cloudflare.analytics": [f"{br_root}/tools/cloudflare/br-cloudflare.sh", "analytics", args[0] if args else ""],
+        "cloudflare.cache.purge": [f"{br_root}/tools/cloudflare/br-cloudflare.sh", "cache", args[0] if args else ""],
         "workflows.list": ["gh", "workflow", "list"],
         "workflows.runs": ["gh", "run", "list", "--repo", args[0] if args else "BlackRoad-OS-Inc/blackroad-operator", "--limit", "10"],
         "workflows.view": ["gh", "run", "view", args[0] if args else "", "--repo", args[1] if len(args) > 1 else "BlackRoad-OS-Inc/blackroad-operator"],
@@ -680,12 +695,15 @@ Available commands:
 - pi.read
 - pi.logs
 - pi.task
+- pi.generate
 - deploy.detect
 - deploy.status
 - deploy.watch.github
+- deploy.rollback.github
 - cloudflare.zones
 - cloudflare.dns.list
 - cloudflare.analytics
+- cloudflare.cache.purge
 - workflows.list
 - workflows.runs
 - workflows.view
