@@ -86,6 +86,8 @@ Audit trail:
 - `./tools/ai/br-ai.sh last`
 - `./tools/ai/br-ai.sh export markdown 20`
 - `./tools/ai/br-ai.sh export json 20`
+- `./tools/ai/br-ai.sh replay last`
+- `./tools/ai/br-ai.sh replay 42 remediate`
 - `./scripts/cli/lucidia-ops history`
 
 Allowed workflow dispatches through Lucidia:
