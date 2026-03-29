@@ -446,7 +446,19 @@ class Parser:
 
     def parse_expression(self) -> Expression:
         """Parse expression (top level - lowest precedence)"""
-        return self.parse_or_expression()
+        return self.parse_pipe_expression()
+
+    def parse_pipe_expression(self) -> Expression:
+        """Parse pipe expression: expr |> func (left-to-right chaining)"""
+        left = self.parse_or_expression()
+
+        while self.match(TokenType.PIPE_ARROW):
+            op_token = self.advance()
+            right = self.parse_or_expression()
+            # Transform: x |> f into f(x)
+            left = FunctionCall(right, [left], line=op_token.line, column=op_token.column)
+
+        return left
 
     def parse_or_expression(self) -> Expression:
         """Parse logical OR expression"""
@@ -570,14 +582,26 @@ class Parser:
         return expr
 
     def parse_arguments(self) -> List[Expression]:
-        """Parse function call arguments"""
+        """Parse function call arguments (positional and keyword)"""
         arguments = []
 
         if self.match(TokenType.RPAREN):
             return arguments
 
         while True:
-            arguments.append(self.parse_expression())
+            # Check for keyword argument: name=value
+            if (self.match(TokenType.IDENTIFIER) and
+                self.peek_token().type == TokenType.ASSIGN):
+                key_token = self.advance()  # identifier
+                self.advance()  # =
+                value = self.parse_expression()
+                # Wrap as a dict entry to distinguish from positional
+                arguments.append(DictLiteral(
+                    [(StringLiteral(key_token.value, line=key_token.line, column=key_token.column), value)],
+                    line=key_token.line, column=key_token.column
+                ))
+            else:
+                arguments.append(self.parse_expression())
 
             if not self.match(TokenType.COMMA):
                 break
@@ -782,21 +806,148 @@ class Parser:
         elif obj_type == TokenType.CAMERA:
             return CameraObject(name, properties, line=token.line, column=token.column)
 
-    # Stubs for other complex features
+    # ========================================================================
+    # Type, Match, Spawn
+    # ========================================================================
+
     def parse_type_definition(self) -> TypeDefinition:
-        """Parse type definition (stub)"""
-        # TODO: Implement full type definition parsing
-        pass
+        """Parse type definition: type User: name: string, age: int"""
+        token = self.expect(TokenType.TYPE)
+        name = self.expect(TokenType.IDENTIFIER).value
+        self.expect(TokenType.COLON)
+        self.skip_newlines()
+        self.expect(TokenType.INDENT)
+
+        fields = []
+        while not self.match(TokenType.DEDENT, TokenType.EOF):
+            self.skip_newlines()
+            if self.match(TokenType.IDENTIFIER):
+                field_token = self.current_token()
+                field_name = self.expect(TokenType.IDENTIFIER).value
+                self.expect(TokenType.COLON)
+                field_type = self.parse_type()
+
+                default_value = None
+                if self.match(TokenType.ASSIGN):
+                    self.advance()
+                    default_value = self.parse_expression()
+
+                fields.append(TypeField(
+                    field_name, field_type, default_value,
+                    line=field_token.line, column=field_token.column
+                ))
+                self.skip_newlines()
+            elif self.match(TokenType.FUN, TokenType.ASYNC):
+                # Methods inside type definitions
+                method = self.parse_function_definition()
+                fields.append(TypeField(
+                    method.name,
+                    FunctionType(
+                        [p.type_annotation for p in method.parameters if p.type_annotation],
+                        method.return_type,
+                        line=method.line, column=method.column
+                    ),
+                    method,
+                    line=method.line, column=method.column
+                ))
+                self.skip_newlines()
+            else:
+                break
+
+        self.expect(TokenType.DEDENT)
+        return TypeDefinition(name, fields, False, line=token.line, column=token.column)
 
     def parse_match_statement(self) -> MatchStatement:
-        """Parse match statement (stub)"""
-        # TODO: Implement match statement parsing
-        pass
+        """Parse match statement: match x: case 1: ... case _: ..."""
+        token = self.expect(TokenType.MATCH)
+        value = self.parse_expression()
+        self.expect(TokenType.COLON)
+        self.skip_newlines()
+        self.expect(TokenType.INDENT)
+
+        cases = []
+        while not self.match(TokenType.DEDENT, TokenType.EOF):
+            self.skip_newlines()
+            if self.match(TokenType.CASE):
+                self.advance()
+                pattern = self.parse_pattern()
+                self.expect(TokenType.COLON)
+                self.skip_newlines()
+                self.expect(TokenType.INDENT)
+                body = self.parse_block()
+                self.expect(TokenType.DEDENT)
+                cases.append(MatchCase(pattern, body, line=token.line, column=token.column))
+                self.skip_newlines()
+            else:
+                break
+
+        self.expect(TokenType.DEDENT)
+        return MatchStatement(value, cases, line=token.line, column=token.column)
+
+    def parse_pattern(self) -> Pattern:
+        """Parse a match pattern"""
+        token = self.current_token()
+
+        # Wildcard: _
+        if self.match(TokenType.IDENTIFIER) and token.value == '_':
+            self.advance()
+            return WildcardPattern(line=token.line, column=token.column)
+
+        # Integer literal pattern
+        if self.match(TokenType.INTEGER):
+            self.advance()
+            return LiteralPattern(
+                IntegerLiteral(token.value, line=token.line, column=token.column),
+                line=token.line, column=token.column
+            )
+
+        # String literal pattern
+        if self.match(TokenType.STRING):
+            self.advance()
+            return LiteralPattern(
+                StringLiteral(token.value, line=token.line, column=token.column),
+                line=token.line, column=token.column
+            )
+
+        # Boolean literal pattern
+        if self.match(TokenType.BOOLEAN):
+            self.advance()
+            return LiteralPattern(
+                BooleanLiteral(token.value, line=token.line, column=token.column),
+                line=token.line, column=token.column
+            )
+
+        # Identifier pattern (binds value) or Constructor pattern (Type.Variant)
+        if self.match(TokenType.IDENTIFIER):
+            name = self.advance().value
+
+            # Constructor pattern: Status.Active
+            if self.match(TokenType.DOT):
+                self.advance()
+                variant = self.expect(TokenType.IDENTIFIER).value
+                fields = []
+                if self.match(TokenType.LPAREN):
+                    self.advance()
+                    while not self.match(TokenType.RPAREN):
+                        fields.append(self.parse_pattern())
+                        if self.match(TokenType.COMMA):
+                            self.advance()
+                    self.expect(TokenType.RPAREN)
+                return ConstructorPattern(name, variant, fields, line=token.line, column=token.column)
+
+            return IdentifierPattern(name, line=token.line, column=token.column)
+
+        raise SyntaxError(f"Expected pattern at {token.line}:{token.column}")
 
     def parse_spawn_statement(self) -> SpawnStatement:
-        """Parse spawn statement (stub)"""
-        # TODO: Implement spawn statement parsing
-        pass
+        """Parse spawn statement: spawn: ... (concurrent task)"""
+        token = self.expect(TokenType.SPAWN)
+        self.expect(TokenType.COLON)
+        self.skip_newlines()
+        self.expect(TokenType.INDENT)
+        body = self.parse_block()
+        self.expect(TokenType.DEDENT)
+        return SpawnStatement(body, line=token.line, column=token.column)
 
 
 def parse(source: str, filename: str = "<stdin>") -> Program:

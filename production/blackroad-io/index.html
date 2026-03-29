@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BlackRoad OS — The OS that works for you, not on you.</title>
+<meta name="description" content="Distributed AI operating system. 200 agents with persistent memory. Truth-first search. 80% creator revenue. Sovereign infrastructure.">
+<link rel="canonical" href="https://blackroad.io">
+<link rel="icon" type="image/png" sizes="32x32" href="https://images.blackroad.io/brand/br-square-32.png">
+<meta property="og:title" content="BlackRoad OS — The OS that works for you, not on you.">
+<meta property="og:description" content="200 AI agents. 20 domains. Sovereign infrastructure. No cloud dependency.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://blackroad.io">
+<meta name="twitter:card" content="summary">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Organization","name":"BlackRoad OS, Inc.","url":"https://blackroad.io","foundingDate":"2025-11-17","founder":{"@type":"Person","name":"Alexa Louise Amundson"}}
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--ember:#FF6B2B;--fuse:#FF2255;--pulse:#CC00AA;--drift:#8844FF;--signal:#4488FF;--arc:#00D4FF;--grad:linear-gradient(90deg,var(--ember),var(--fuse),var(--pulse),var(--drift),var(--signal),var(--arc));--t1:#f5f5f5;--t2:#d4d4d4;--t3:#a3a3a3;--t4:#737373;--t5:#525252;--t6:#404040;--t7:#333;--t8:#262626;--bg:#0a0a0a;--card:#131313;--inset:#0f0f0f;--border:#1a1a1a;--bh:#262626;--sans:'Inter',sans-serif;--head:'Space Grotesk',sans-serif;--mono:'JetBrains Mono',monospace;--max:720px}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--t1);font-family:var(--sans);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+button{cursor:pointer;font-family:inherit;border:none;background:none}
+input:focus{outline:none;border-color:var(--bh)!important}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--bh);border-radius:3px}
+
+.grad{height:1px;background:var(--grad)}
+.page{max-width:var(--max);margin:0 auto;padding:0 20px}
+.dots{display:flex;gap:3px}
+.dots i{width:6px;height:6px;border-radius:50%;display:block}
+
+/* Nav */
+.nav{padding:0 20px;height:52px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.nav-brand{display:flex;align-items:center;gap:8px}
+.nav-name{font-family:var(--head);font-size:16px;font-weight:700;letter-spacing:-0.02em}
+.nav-links{display:flex;align-items:center;gap:16px}
+.nav-links a{font-size:13px;color:var(--t4)}
+.nav-links a:hover{color:var(--t2)}
+.btn{font-size:14px;font-weight:500;padding:10px 24px;border-radius:8px;display:inline-flex;align-items:center;gap:8px;transition:opacity .15s}
+.btn:hover{opacity:.88}
+.btn-w{color:var(--bg);background:var(--t1)}
+.btn-o{color:var(--t3);border:1px solid var(--t6)}
+.btn-g{color:var(--t5);border:1px solid var(--border)}
+
+/* Typography */
+h1,h2,h3{font-family:var(--head);font-weight:700;letter-spacing:-0.03em;line-height:1.1}
+h1{font-size:clamp(32px,7vw,52px)}
+h2{font-size:clamp(26px,5vw,40px);letter-spacing:-0.02em}
+.label{font-family:var(--mono);font-size:11px;color:var(--t5);text-transform:uppercase;letter-spacing:.15em}
+.body{font-size:15px;color:var(--t4);line-height:1.65}
+.sm{font-size:14px;color:var(--t4);line-height:1.6}
+.xs{font-size:13px;color:var(--t5);line-height:1.5}
+.mono-xs{font-family:var(--mono);font-size:10px;color:var(--t7)}
+
+/* Card */
+.card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px;transition:border-color .15s}
+.card:hover{border-color:var(--bh)}
+
+/* Stats */
+.stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:1px;background:var(--border);border-radius:10px;overflow:hidden}
+.stat{background:var(--inset);padding:14px 16px;text-align:center}
+.stat-v{font-family:var(--head);font-size:22px;font-weight:700}
+.stat-l{font-family:var(--mono);font-size:9px;color:var(--t6);text-transform:uppercase;letter-spacing:.06em;margin-top:4px}
+
+/* Portal row */
+.portal{display:flex;align-items:flex-start;gap:20px;flex-wrap:wrap;background:var(--card);padding:24px}
+.portal-bar{width:4px;height:20px;border-radius:2px;flex-shrink:0;margin-top:2px}
+
+/* Terminal */
+.term{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.term-head{padding:10px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.term-dot{width:6px;height:6px;border-radius:50%;background:var(--t7)}
+.term-title{font-family:var(--mono);font-size:11px;color:var(--t8);margin-left:4px}
+.term-body{padding:16px 18px;font-family:var(--mono);font-size:12px;line-height:2}
+.term-cmd{color:var(--t7)}
+.term-row{color:var(--t4)}
+.term-val{color:var(--t2)}
+.term-dim{color:var(--t5)}
+
+/* Footer */
+.footer{max-width:var(--max);margin:0 auto;padding:24px 20px 48px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.footer-name{font-family:var(--head);font-size:13px;font-weight:600;color:var(--t3)}
+.footer-sub{font-family:var(--mono);font-size:10px;color:var(--t7);margin-top:4px}
+.footer-links{display:flex;gap:20px}
+.footer-links a{font-size:12px;color:var(--t5)}
+
+/* Toast */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--t1);color:var(--bg);padding:10px 24px;border-radius:8px;font-size:13px;font-weight:500;opacity:0;transition:all .3s;pointer-events:none;z-index:999}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media(max-width:560px){.hide-m{display:none!important}.nav-links{gap:10px}}
+</style>
+</head>
+<body>
+
+<div class="grad"></div>
+
+<nav class="nav">
+  <div class="nav-brand">
+    <div class="dots">
+      <i style="background:var(--ember)"></i><i style="background:var(--fuse)"></i><i style="background:var(--pulse)"></i>
+      <i style="background:var(--drift)"></i><i style="background:var(--signal)"></i><i style="background:var(--arc)"></i>
+    </div>
+    <span class="nav-name">BlackRoad</span>
+  </div>
+  <div class="nav-links">
+    <a href="#portals" class="hide-m">Portals</a>
+    <a href="#principles" class="hide-m">Principles</a>
+    <a href="#agents" class="hide-m">Agents</a>
+    <a href="https://docs.blackroad.io">Docs</a>
+    <button class="btn btn-w" style="font-size:12px;padding:8px 18px" onclick="document.getElementById('email').focus()">Early Access</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section style="padding:100px 20px 56px">
+  <div class="page">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:24px">
+      <div class="dots"><i style="background:var(--ember)"></i><i style="background:var(--fuse)"></i><i style="background:var(--pulse)"></i><i style="background:var(--drift)"></i><i style="background:var(--signal)"></i><i style="background:var(--arc)"></i></div>
+      <span class="label" style="margin:0">Distributed AI Operating System</span>
+    </div>
+    <h1 style="margin-bottom:24px">The OS that<br>works <em style="font-style:normal">for</em> you,<br>not <em style="font-style:normal">on</em> you.</h1>
+    <p class="body" style="max-width:520px;margin-bottom:32px">200 AI agents with persistent memory and individual identity. Truth-first search. 80% creator revenue. Zero admin friction. An ecosystem built on the radical idea that technology should make humans more human.</p>
+
+    <!-- Waitlist -->
+    <form id="waitlistForm" style="display:flex;gap:8px;max-width:480px;margin-bottom:12px;flex-wrap:wrap" onsubmit="return joinWaitlist(event)">
+      <input id="email" type="email" required placeholder="your@email.com" style="flex:1;min-width:200px;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-family:var(--sans);font-size:14px;padding:12px 16px">
+      <button type="submit" class="btn btn-w" id="wlBtn">Request Early Access</button>
+    </form>
+    <p id="wlMsg" style="font-family:var(--mono);font-size:12px;color:var(--t5);margin-bottom:24px;min-height:18px"></p>
+
+    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:40px">
+      <a href="https://docs.blackroad.io" class="btn btn-o">Read the Architecture</a>
+      <a href="https://github.com/BlackRoad-OS-Inc" class="btn btn-g">View on GitHub</a>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="stat-v" id="agentCount">1,000</div><div class="stat-l">AI Agents</div></div>
+      <div class="stat"><div class="stat-v">20</div><div class="stat-l">Domains</div></div>
+      <div class="stat"><div class="stat-v">150+</div><div class="stat-l">Subdomains</div></div>
+      <div class="stat"><div class="stat-v">80%</div><div class="stat-l">Creator Revenue</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="grad"></div>
+
+<!-- PORTALS -->
+<section id="portals" style="padding:56px 20px">
+  <div class="page">
+    <div class="label" style="margin-bottom:12px">Ecosystem</div>
+    <h2 style="margin-bottom:12px">Six portals.<br>One identity.</h2>
+    <p class="sm" style="max-width:480px;margin-bottom:32px">Your preferences, your data, your reputation — portable across every surface. No more starting over.</p>
+
+    <div style="display:flex;flex-direction:column;gap:1px;background:var(--border);border-radius:12px;overflow:hidden">
+      <div class="portal">
+        <div class="portal-bar" style="background:var(--ember)"></div>
+        <div style="flex:1;min-width:0">
+          <a href="https://tutor.blackroad.io" style="font-family:var(--head);font-size:20px;font-weight:700;display:block;margin-bottom:6px">RoadWork</a>
+          <p class="xs">AI tutoring that adapts to how you actually learn. Not how a textbook thinks you should.</p>
+        </div>
+        <span class="mono-xs" style="background:var(--bg);padding:4px 10px;border-radius:4px;border:1px solid var(--border)">EDUCATION</span>
+      </div>
+      <div class="portal">
+        <div class="portal-bar" style="background:var(--fuse)"></div>
+        <div style="flex:1;min-width:0">
+          <a href="https://search.blackroad.io" style="font-family:var(--head);font-size:20px;font-weight:700;display:block;margin-bottom:6px">RoadView</a>
+          <p class="xs">Search that verifies before it surfaces. Every result scored for confidence, not clicks.</p>
+        </div>
+        <span class="mono-xs" style="background:var(--bg);padding:4px 10px;border-radius:4px;border:1px solid var(--border)">SEARCH</span>
+      </div>
+      <div class="portal">
+        <div class="portal-bar" style="background:var(--pulse)"></div>
+        <div style="flex:1;min-width:0">
+          <a href="https://radio.blackroad.io" style="font-family:var(--head);font-size:20px;font-weight:700;display:block;margin-bottom:6px">SoundRoad</a>
+          <p class="xs">AI music production. Hum a melody, get a track. 80% of revenue goes to you.</p>
+        </div>
+        <span class="mono-xs" style="background:var(--bg);padding:4px 10px;border-radius:4px;border:1px solid var(--border)">MUSIC</span>
+      </div>
+      <div class="portal">
+        <div class="portal-bar" style="background:var(--drift)"></div>
+        <div style="flex:1;min-width:0">
+          <a href="https://game.blackroad.io" style="font-family:var(--head);font-size:20px;font-weight:700;display:block;margin-bottom:6px">RoadWorld</a>
+          <p class="xs">Virtual environments with real-world bridges. 80% creator revenue. You own everything.</p>
+        </div>
+        <span class="mono-xs" style="background:var(--bg);padding:4px 10px;border-radius:4px;border:1px solid var(--border)">WORLDS</span>
+      </div>
+      <div class="portal">
+        <div class="portal-bar" style="background:var(--signal)"></div>
+        <div style="flex:1;min-width:0">
+          <a href="https://social.blackroad.io" style="font-family:var(--head);font-size:20px;font-weight:700;display:block;margin-bottom:6px">BackRoad</a>
+          <p class="xs">Social without the sickness. No vanity metrics. No addiction mechanics. Just people.</p>
+        </div>
+        <span class="mono-xs" style="background:var(--bg);padding:4px 10px;border-radius:4px;border:1px solid var(--border)">SOCIAL</span>
+      </div>
+      <div class="portal">
+        <div class="portal-bar" style="background:var(--arc)"></div>
+        <div style="flex:1;min-width:0">
+          <a href="https://pay.blackroad.io" style="font-family:var(--head);font-size:20px;font-weight:700;display:block;margin-bottom:6px">CashRoad</a>
+          <p class="xs">Financial clarity without judgment. Decision-time assistance, not post-spending shame.</p>
+        </div>
+        <span class="mono-xs" style="background:var(--bg);padding:4px 10px;border-radius:4px;border:1px solid var(--border)">FINANCE</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRINCIPLES -->
+<section id="principles" style="padding:56px 20px">
+  <div class="page">
+    <div class="label" style="margin-bottom:12px">Philosophy</div>
+    <h2 style="margin-bottom:32px">Built different.<br>On purpose.</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px">
+      <div class="card"><div class="mono-xs" style="margin-bottom:16px">01</div><h3 style="font-size:20px;margin-bottom:12px">Truth-First</h3><p class="xs" style="color:var(--t4)">Every piece of information carries a confidence score. No SEO gaming. No ad-driven rankings. Only verified facts surface.</p></div>
+      <div class="card"><div class="mono-xs" style="margin-bottom:16px">02</div><h3 style="font-size:20px;margin-bottom:12px">Creator-Owned</h3><p class="xs" style="color:var(--t4)">80% revenue share. Your data, your content, your audience. Portable identity across every portal in the ecosystem.</p></div>
+      <div class="card"><div class="mono-xs" style="margin-bottom:16px">03</div><h3 style="font-size:20px;margin-bottom:12px">Agent Intelligence</h3><p class="xs" style="color:var(--t4)">200 AI agents with persistent memory, individual identities, and evolving capabilities oriented toward community betterment.</p></div>
+      <div class="card"><div class="mono-xs" style="margin-bottom:16px">04</div><h3 style="font-size:20px;margin-bottom:12px">Zero Admin</h3><p class="xs" style="color:var(--t4)">The OS handles forms, PDFs, onboarding, and compliance in the background. Admin becomes invisible, not a life event.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- AGENTS -->
+<section id="agents" style="padding:56px 20px">
+  <div class="page">
+    <div class="label" style="margin-bottom:12px">Intelligence</div>
+    <h2 style="margin-bottom:12px">Not tools.<br>Teammates.</h2>
+    <p class="sm" style="max-width:480px;margin-bottom:32px">Each agent has a birthdate, persistent memory, and a virtual home. They remember every interaction. They evolve. They're oriented toward community — not extraction.</p>
+    <div class="term">
+      <div class="term-head"><div class="term-dot"></div><div class="term-dot"></div><div class="term-dot"></div><span class="term-title">agent.registry</span></div>
+      <div class="term-body">
+        <div class="term-cmd">$ br agents --status active</div><br>
+        <div class="term-row"><span class="term-val">AGENT         STATUS     MEMORY      UPTIME</span></div>
+        <div class="term-row"><span class="term-val">alice</span><span class="term-dim">         active     2.4TB       347d</span></div>
+        <div class="term-row"><span class="term-val">lucidia</span><span class="term-dim">       active     1.8TB       289d</span></div>
+        <div class="term-row"><span class="term-val">meridian</span><span class="term-dim">      active     940GB       194d</span></div>
+        <div class="term-row"><span class="term-val">cadence</span><span class="term-dim">       active     380GB       112d</span></div>
+        <div class="term-row"><span class="term-val">cece</span><span class="term-dim">          active     290GB        98d</span></div>
+        <br><div class="term-dim">5 of 200 agents shown. 847 active. 153 initializing.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section style="padding:56px 20px;text-align:center">
+  <div class="page">
+    <div class="grad" style="opacity:.5;margin-bottom:40px"></div>
+    <h2 style="margin-bottom:16px">Technology should make<br>humans more human.</h2>
+    <p class="sm" style="max-width:440px;margin:0 auto 32px">BlackRoad OS is in active development. Join the architects building something that gives a damn.</p>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+      <button class="btn btn-w" onclick="document.getElementById('email').focus();window.scrollTo({top:0,behavior:'smooth'})">Request Early Access</button>
+      <a href="https://github.com/BlackRoad-OS-Inc" class="btn btn-o">View on GitHub</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<div class="grad"></div>
+<footer class="footer">
+  <div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+      <div class="dots"><i style="background:var(--ember)"></i><i style="background:var(--fuse)"></i><i style="background:var(--pulse)"></i><i style="background:var(--drift)"></i><i style="background:var(--signal)"></i><i style="background:var(--arc)"></i></div>
+      <span class="footer-name">BlackRoad OS</span>
+    </div>
+    <div class="footer-sub">Built by Alexa Amundson · Delaware C-Corp · Est. 2025</div>
+  </div>
+  <div class="footer-links">
+    <a href="https://docs.blackroad.io">Docs</a>
+    <a href="https://github.com/BlackRoad-OS-Inc">GitHub</a>
+    <a href="https://status.blackroad.io">Status</a>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// Waitlist
+function joinWaitlist(e) {
+  e.preventDefault();
+  var email = document.getElementById('email').value;
+  var btn = document.getElementById('wlBtn');
+  var msg = document.getElementById('wlMsg');
+  btn.textContent = 'Joining...';
+  btn.disabled = true;
+  fetch('/api/waitlist', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({email: email, referral: document.referrer || 'direct'})
+  }).then(function(r){return r.json()}).then(function(d){
+    if (d.success) {
+      msg.textContent = "You're #" + d.position + " on the list. We'll be in touch.";
+      msg.style.color = 'var(--t3)';
+      document.getElementById('email').value = '';
+      btn.textContent = 'Joined';
+      toast("You're on the list");
+    } else {
+      msg.textContent = d.error || 'Already on the list.';
+      btn.textContent = 'Request Early Access';
+      btn.disabled = false;
+    }
+  }).catch(function(){
+    msg.textContent = 'Something went wrong. Try again.';
+    btn.textContent = 'Request Early Access';
+    btn.disabled = false;
+  });
+  return false;
+}
+
+// Analytics
+fetch('/api/ping?e=pageview&p=' + encodeURIComponent(location.pathname)).catch(function(){});
+
+// Toast
+function toast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function(){t.classList.remove('show')}, 3000);
+}
+</script>
+</body>
+</html>

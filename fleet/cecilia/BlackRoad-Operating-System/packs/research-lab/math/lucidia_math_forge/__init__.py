@@ -1,1 +1,0 @@
-"""Lucidia Math Forge package."""

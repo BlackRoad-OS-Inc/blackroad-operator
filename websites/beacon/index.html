@@ -1,227 +1,203 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Beacon — Every Device. One Mesh.</title>
-<link rel="icon" type="image/png" sizes="32x32" href="https://images.blackroad.io/brand/br-square-32.png" />
-<link rel="apple-touch-icon" sizes="180x180" href="https://images.blackroad.io/brand/apple-touch-icon.png" />
-<meta property="og:image" content="https://images.blackroad.io/brand/br-square-512.png" />
-<meta name="description" content="Beacon — IoT mesh dashboard for Pi fleets, sensors, and smart home devices. Self-hosted. No cloud required.">
-<link rel="stylesheet" href="../_shared/design.css">
-<style>
-  .hero { padding: var(--sp-xl) var(--sp-md); min-height: 100vh; display: flex; flex-direction: column; justify-content: center; }
-  @media (min-width: 768px) { .hero { padding: 0 var(--sp-xl); } }
-  .hero-sub { font-size: 1.1rem; color: var(--subtle); max-width: 520px; line-height: 1.7; margin: var(--sp-md) 0 var(--sp-xl); }
-  .btn-primary { display: inline-flex; align-items: center; gap: 8px; background: var(--grad); color: var(--white); padding: 14px 28px; font-weight: 700; font-size: 0.95rem; transition: opacity 0.2s; border: none; cursor: pointer; }
-  .btn-primary:hover { opacity: 0.9; }
-  .btn-secondary { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--border); color: var(--white); padding: 14px 28px; font-weight: 600; font-size: 0.95rem; transition: border-color 0.2s; background: transparent; cursor: pointer; }
-  .btn-secondary:hover { border-color: var(--muted); }
-  .btn-row { display: flex; flex-wrap: wrap; gap: var(--sp-sm); }
-  .feature-card { background: var(--surface); border: 1px solid var(--border); padding: var(--sp-lg); transition: border-color 0.25s; }
-  .feature-card:hover { border-color: var(--muted); }
-  .feature-card h3 { margin-bottom: var(--sp-xs); }
-  .feature-card p { font-size: 0.85rem; color: var(--subtle); line-height: 1.6; }
-  .feature-icon { font-family: var(--jb); font-size: 0.8rem; color: var(--muted); margin-bottom: var(--sp-sm); display: block; }
-  .device-list { border: 1px solid var(--border); }
-  .device-row { display: grid; grid-template-columns: auto 1fr auto auto; gap: var(--sp-md); padding: var(--sp-sm) var(--sp-md); border-bottom: 1px solid var(--border); align-items: center; font-size: 0.82rem; }
-  .device-row:last-child { border-bottom: none; }
-  .device-header { background: var(--surface); font-family: var(--jb); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
-  .status-dot { width: 8px; height: 8px; border-radius: 50%; }
-  .status-dot.online { background: #22c55e; box-shadow: 0 0 6px #22c55e44; }
-  .status-dot.offline { background: #ef4444; }
-  .status-dot.warning { background: #f59e0b; }
-  .device-name { color: var(--white); font-family: var(--sg); font-weight: 600; }
-  .device-ip { color: var(--muted); font-family: var(--jb); font-size: 0.75rem; }
-  .device-metric { color: var(--subtle); font-family: var(--jb); font-size: 0.75rem; }
-  .mesh-visual { background: var(--surface); border: 1px solid var(--border); padding: var(--sp-xl) var(--sp-md); margin: var(--sp-xl) 0; position: relative; overflow: hidden; min-height: 200px; }
-  .mesh-node { display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; border: 1px solid var(--border); font-family: var(--jb); font-size: 0.75rem; color: var(--subtle); margin: 4px; }
-  .mesh-node.active { border-color: var(--muted); color: var(--white); }
-  .protocol-tag { display: inline-block; padding: 2px 8px; font-family: var(--jb); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em; border: 1px solid var(--border); color: var(--muted); margin: 2px; }
-  .use-case { display: flex; gap: var(--sp-md); margin-bottom: var(--sp-lg); align-items: flex-start; }
-  .use-case-num { font-family: var(--sg); font-size: 1.5rem; font-weight: 700; color: var(--muted); flex-shrink: 0; }
-  .use-case h4 { font-family: var(--sg); font-size: 1rem; font-weight: 600; margin-bottom: 4px; }
-  .use-case p { font-size: 0.85rem; color: var(--subtle); line-height: 1.6; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Beacon | BlackRoad</title>
+  <meta name="description" content="Beacon is part of BlackRoad Studio, the experience layer for public websites, design systems, and polished surfaces.">
+  <meta name="theme-color" content="#0b0b0b">
+  <link rel="canonical" href="https://blackroad.io/beacon">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Beacon | BlackRoad">
+  <meta property="og:description" content="Beacon is part of BlackRoad Studio, the experience layer for public websites, design systems, and polished surfaces.">
+  <meta property="og:url" content="https://blackroad.io/beacon">
+  <meta property="og:site_name" content="BlackRoad">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Beacon | BlackRoad">
+  <meta name="twitter:description" content="Beacon is part of BlackRoad Studio, the experience layer for public websites, design systems, and polished surfaces.">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://images.blackroad.io/brand/br-square-32.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="https://images.blackroad.io/brand/br-square-192.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://images.blackroad.io/brand/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #090909;
+      --bg-soft: #111111;
+      --card: #131313;
+      --border: #232323;
+      --text: #f5f5f5;
+      --muted: #b2b2b2;
+      --dim: #6d6d6d;
+      --ember: #ff6b2b;
+      --flare: #ff2255;
+      --magenta: #cc00aa;
+      --orchid: #8844ff;
+      --arc: #4488ff;
+      --cyan: #00d4ff;
+      --grad: linear-gradient(100deg, var(--ember), var(--flare), var(--magenta), var(--orchid), var(--arc), var(--cyan));
+      --display: 'Space Grotesk', sans-serif;
+      --body: 'Inter', sans-serif;
+      --mono: 'JetBrains Mono', monospace;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: radial-gradient(circle at top, #151515 0, var(--bg) 45%); color: var(--text); }
+    body { font-family: var(--body); min-height: 100vh; }
+    a { color: inherit; text-decoration: none; }
+    .topbar { height: 4px; background: var(--grad); background-size: 180% 100%; animation: shift 7s linear infinite; }
+    @keyframes shift { from { background-position: 0 0; } to { background-position: 180% 0; } }
+    .shell { max-width: 1160px; margin: 0 auto; padding: 0 24px 80px; }
+    .nav { display: flex; justify-content: space-between; align-items: center; padding: 18px 0; border-bottom: 1px solid var(--border); }
+    .brand { display: flex; align-items: center; gap: 12px; font-family: var(--display); font-weight: 700; letter-spacing: -0.03em; }
+    .brand-mark { display: grid; grid-template-columns: repeat(3, 8px); gap: 4px; }
+    .brand-mark span { width: 8px; height: 8px; border-radius: 999px; }
+    .brand-mark span:nth-child(1) { background: var(--ember); }
+    .brand-mark span:nth-child(2) { background: var(--flare); }
+    .brand-mark span:nth-child(3) { background: var(--cyan); }
+    .nav-links { display: flex; gap: 18px; font-size: 13px; color: var(--muted); }
+    .hero { padding: 72px 0 48px; display: grid; gap: 28px; }
+    .eyebrow { font-family: var(--mono); color: var(--dim); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; }
+    h1 { font-family: var(--display); font-size: clamp(38px, 6vw, 74px); line-height: 0.95; letter-spacing: -0.05em; margin: 0; max-width: 900px; }
+    .hero-copy { max-width: 740px; font-size: 18px; line-height: 1.7; color: var(--muted); }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 14px; }
+    .btn-primary, .btn-secondary { padding: 14px 20px; border-radius: 999px; font-weight: 600; font-size: 14px; }
+    .btn-primary { background: var(--text); color: #050505; }
+    .btn-secondary { border: 1px solid var(--border); color: var(--muted); }
+    .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+    .stat-card, .pillar-card { background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 20px; padding: 20px; }
+    .stat-value { font-family: var(--display); font-size: clamp(24px, 4vw, 34px); letter-spacing: -0.04em; }
+    .stat-label { font-family: var(--mono); font-size: 11px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.12em; margin-top: 6px; }
+    .section { padding: 40px 0; }
+    .section-head { display: grid; gap: 10px; margin-bottom: 20px; }
+    .section-head h2 { font-family: var(--display); font-size: clamp(26px, 4vw, 40px); letter-spacing: -0.04em; margin: 0; }
+    .section-head p { margin: 0; color: var(--muted); max-width: 760px; line-height: 1.7; }
+    .pillars { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .pillar-card h3 { font-family: var(--display); margin: 8px 0 10px; font-size: 24px; letter-spacing: -0.03em; }
+    .pillar-card p { color: var(--muted); margin: 0; line-height: 1.7; }
+    .links { display: flex; flex-wrap: wrap; gap: 10px; }
+    .link-pill { border: 1px solid var(--border); border-radius: 999px; padding: 10px 14px; color: var(--muted); font-size: 13px; }
+    footer { margin-top: 36px; padding-top: 20px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; gap: 12px; color: var(--dim); font-family: var(--mono); font-size: 11px; }
+    @media (max-width: 860px) {
+      .stats, .pillars { grid-template-columns: 1fr 1fr; }
+      .nav { gap: 16px; flex-direction: column; align-items: flex-start; }
+      footer { flex-direction: column; }
+    }
+    @media (max-width: 560px) {
+      .shell { padding: 0 16px 56px; }
+      .stats, .pillars { grid-template-columns: 1fr; }
+      .hero { padding-top: 44px; }
+      .hero-copy { font-size: 16px; }
+    }
+  </style>
 </head>
-<body class="dot-bg">
-  <nav>
-    <a href="https://iot.blackroad.io" class="nav-logo">Beacon</a>
-    <div class="nav-links">
-      <a href="#dashboard">Dashboard</a>
-      <a href="#features">Features</a>
-      <a href="#use-cases">Use Cases</a>
-      <a href="https://blackroad.io">BlackRoad OS</a>
-    </div>
-    <a href="#deploy" class="nav-cta">Deploy Beacon</a>
-    <button class="nav-toggle" onclick="this.classList.toggle('open');document.getElementById('nav-mobile').classList.toggle('open')" aria-label="Menu"><span></span><span></span><span></span></button>
-  </nav>
-  <div id="nav-mobile" class="nav-mobile">
-    <a href="#dashboard" onclick="document.getElementById('nav-mobile').classList.remove('open')">Dashboard</a>
-    <a href="#features" onclick="document.getElementById('nav-mobile').classList.remove('open')">Features</a>
-    <a href="#use-cases" onclick="document.getElementById('nav-mobile').classList.remove('open')">Use Cases</a>
-    <a href="https://blackroad.io">BlackRoad OS</a>
+<body>
+  <div class="topbar"></div>
+  <div class="shell">
+    <nav class="nav">
+      <a class="brand" href="https://blackroad.io">
+        <span class="brand-mark"><span></span><span></span><span></span></span>
+        <span>BlackRoad</span>
+      </a>
+      <div class="nav-links">
+        <a href="https://github.com/BlackRoad-OS">OS</a>
+        <a href="https://github.com/BlackRoad-AI">AI</a>
+        <a href="https://github.com/BlackRoad-Studio">Studio</a>
+        <a href="https://github.com/BlackRoad-Forge">Forge</a>
+      </div>
+    </nav>
+
+    <main>
+      <section class="hero">
+        <div class="eyebrow">Studio</div>
+        <h1>Beacon</h1>
+        <p class="hero-copy">Beacon is part of BlackRoad Studio, the experience layer for public websites, design systems, and polished surfaces.</p>
+        <div class="hero-actions">
+          <a class="btn-primary" href="https://blackroad.io">Explore BlackRoad OS</a>
+          <a class="btn-secondary" href="https://github.com/BlackRoad-Studio">View GitHub</a>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="stats">
+          
+      <div class="stat-card">
+        <div class="stat-value">Public</div>
+        <div class="stat-label">Surface</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-value">Design</div>
+        <div class="stat-label">System</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-value">Docs</div>
+        <div class="stat-label">Layer</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-value">Brand</div>
+        <div class="stat-label">Signals</div>
+      </div>
+        </div>
+      </section>
+
+      <section class="section" id="pillars">
+        <div class="section-head">
+          <div class="eyebrow">Public Map</div>
+          <h2>The BlackRoad ecosystem is organized around 4 public surfaces.</h2>
+          <p>Instead of asking visitors to decode dozens of internal orgs, BlackRoad now leads with 4 clear pillars: the platform, the intelligence, the experience, and the experiments.</p>
+        </div>
+        <div class="pillars">
+          
+        <article class="pillar-card">
+          <div class="section-label">the platform</div>
+          <h3>BlackRoad-OS</h3>
+          <p>Core apps, APIs, operator systems, and runtime tooling.</p>
+        </article>
+
+        <article class="pillar-card">
+          <div class="section-label">the intelligence</div>
+          <h3>BlackRoad-AI</h3>
+          <p>Local-first AI, agents, memory systems, and model integrations.</p>
+        </article>
+
+        <article class="pillar-card">
+          <div class="section-label">the experience</div>
+          <h3>BlackRoad-Studio</h3>
+          <p>Websites, design systems, docs, and polished product surfaces.</p>
+        </article>
+
+        <article class="pillar-card">
+          <div class="section-label">the experiments</div>
+          <h3>BlackRoad-Forge</h3>
+          <p>Prototypes, interactive builds, tutorials, and maker projects.</p>
+        </article>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <div class="eyebrow">Related</div>
+          <h2>Keep moving.</h2>
+          <p>Use these links to move across the public BlackRoad surface without getting lost in internal structure.</p>
+        </div>
+        <div class="links">
+          <a class="link-pill" href="https://github.com/BlackRoad-Studio">BlackRoad Studio</a>
+<a class="link-pill" href="https://blackroad.io">BlackRoad.io</a>
+<a class="link-pill" href="https://blackroad.io">Home</a>
+<a class="link-pill" href="https://docs.blackroad.io">Docs</a>
+<a class="link-pill" href="https://search.blackroad.io">Search</a>
+<a class="link-pill" href="https://github.com/BlackRoad-OS">GitHub</a>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <span>Beacon · part of BlackRoad</span>
+      <span>Pave Tomorrow.</span>
+    </footer>
   </div>
-
-  <div class="hero">
-    <div class="section-label">IoT Mesh Dashboard</div>
-    <h1>Every device.<br>One mesh.</h1>
-    <p class="hero-sub">Beacon is a self-hosted IoT dashboard for your Pi fleet, sensors, cameras, and smart home. WireGuard-encrypted mesh. Real-time metrics. No cloud dependency. No monthly fee.</p>
-    <div class="btn-row">
-      <a href="#deploy" class="btn-primary">Deploy Beacon</a>
-      <a href="#dashboard" class="btn-secondary">Live Dashboard</a>
-    </div>
-  </div>
-
-  <section id="dashboard">
-    <div class="section-label">Live Fleet Status</div>
-    <h2 style="margin-bottom:var(--sp-xl);">Your devices at a glance</h2>
-    <div class="device-list">
-      <div class="device-row device-header">
-        <div>Status</div><div>Device</div><div>Load</div><div>Uptime</div>
-      </div>
-      <div class="device-row">
-        <div class="status-dot online"></div>
-        <div><span class="device-name">Alice</span><br><span class="device-ip">192.168.4.49 &middot; Gateway</span></div>
-        <div class="device-metric">12% CPU</div>
-        <div class="device-metric">47d 8h</div>
-      </div>
-      <div class="device-row">
-        <div class="status-dot offline"></div>
-        <div><span class="device-name">Cecilia</span><br><span class="device-ip">192.168.4.96 &middot; AI Node</span></div>
-        <div class="device-metric">--</div>
-        <div class="device-metric">Offline</div>
-      </div>
-      <div class="device-row">
-        <div class="status-dot online"></div>
-        <div><span class="device-name">Octavia</span><br><span class="device-ip">192.168.4.101 &middot; Gitea + Workers</span></div>
-        <div class="device-metric">34% CPU</div>
-        <div class="device-metric">22d 3h</div>
-      </div>
-      <div class="device-row">
-        <div class="status-dot warning"></div>
-        <div><span class="device-name">Aria</span><br><span class="device-ip">192.168.4.98 &middot; Interface</span></div>
-        <div class="device-metric">--</div>
-        <div class="device-metric">Needs reboot</div>
-      </div>
-      <div class="device-row">
-        <div class="status-dot online"></div>
-        <div><span class="device-name">Lucidia</span><br><span class="device-ip">192.168.4.38 &middot; Web Apps</span></div>
-        <div class="device-metric">28% CPU</div>
-        <div class="device-metric">14d 11h</div>
-      </div>
-    </div>
-
-    <div class="mesh-visual">
-      <div class="section-label" style="margin-bottom:var(--sp-md);">Mesh Topology</div>
-      <div>
-        <span class="mesh-node active">Alice (GW)</span>
-        <span class="mesh-node active">Octavia</span>
-        <span class="mesh-node active">Lucidia</span>
-        <span class="mesh-node">Cecilia</span>
-        <span class="mesh-node">Aria</span>
-        <span class="mesh-node active">Gematria (DO)</span>
-        <span class="mesh-node active">Anastasia (DO)</span>
-      </div>
-      <div style="margin-top:var(--sp-md);">
-        <span class="protocol-tag">WireGuard</span>
-        <span class="protocol-tag">NATS</span>
-        <span class="protocol-tag">mDNS</span>
-        <span class="protocol-tag">SSH</span>
-        <span class="protocol-tag">Tor</span>
-      </div>
-    </div>
-  </section>
-
-  <section id="features">
-    <div class="section-label">Features</div>
-    <h2 style="margin-bottom:var(--sp-xl);">Everything Home Assistant should be</h2>
-    <div class="grid-3">
-      <div class="feature-card">
-        <span class="feature-icon">// mesh</span>
-        <h3>WireGuard mesh</h3>
-        <p>Every device connects through encrypted WireGuard tunnels. Full mesh, not hub-and-spoke. Any node can reach any other node directly.</p>
-      </div>
-      <div class="feature-card">
-        <span class="feature-icon">// metrics</span>
-        <h3>Real-time telemetry</h3>
-        <p>CPU, memory, disk, temperature, network throughput. Historical data in InfluxDB. Alerts when thresholds are crossed. No external services.</p>
-      </div>
-      <div class="feature-card">
-        <span class="feature-icon">// auto</span>
-        <h3>Automation engine</h3>
-        <p>NATS-based pub/sub for event-driven automation. Temperature too high? Spin down workloads. Disk full? Archive and alert. All programmable.</p>
-      </div>
-      <div class="feature-card">
-        <span class="feature-icon">// discover</span>
-        <h3>Auto-discovery</h3>
-        <p>Plug in a new Pi, sensor, or camera. Beacon finds it via mDNS, provisions WireGuard keys, and adds it to the mesh. Zero config.</p>
-      </div>
-      <div class="feature-card">
-        <span class="feature-icon">// ai</span>
-        <h3>AI anomaly detection</h3>
-        <p>Local Ollama models watch your metrics and flag anomalies before they become outages. Predictive disk failure. Unusual network patterns.</p>
-      </div>
-      <div class="feature-card">
-        <span class="feature-icon">// map</span>
-        <h3>Physical topology</h3>
-        <p>Map your devices by room, rack, or location. See which devices share a switch, which are on battery backup, and which have redundancy.</p>
-      </div>
-    </div>
-  </section>
-
-  <section id="use-cases">
-    <div class="section-label">Use Cases</div>
-    <h2 style="margin-bottom:var(--sp-xl);">Built for real infrastructure</h2>
-    <div class="use-case">
-      <div class="use-case-num">01</div>
-      <div>
-        <h4>Pi fleet management</h4>
-        <p>Run 5 Pis or 500. Beacon gives you SSH access, remote reboot, package updates, and log aggregation from a single dashboard. No agent installation needed.</p>
-      </div>
-    </div>
-    <div class="use-case">
-      <div class="use-case-num">02</div>
-      <div>
-        <h4>Smart home without the cloud</h4>
-        <p>Connect Zigbee sensors, cameras, thermostats, and smart plugs. All data stays on your LAN. Automations run locally. Works during internet outages.</p>
-      </div>
-    </div>
-    <div class="use-case">
-      <div class="use-case-num">03</div>
-      <div>
-        <h4>Edge AI inference</h4>
-        <p>Distribute AI workloads across Hailo-8 accelerators (52 TOPS). Beacon schedules inference jobs, balances load, and aggregates results. Computer vision at the edge.</p>
-      </div>
-    </div>
-    <div class="use-case">
-      <div class="use-case-num">04</div>
-      <div>
-        <h4>Network monitoring</h4>
-        <p>Track every TCP/UDP port across every device. Beacon maps your actual network topology, detects rogue services, and alerts on unauthorized listeners.</p>
-      </div>
-    </div>
-  </section>
-
-  <section id="deploy">
-    <div class="section-label">Deploy</div>
-    <h2 style="margin-bottom:var(--sp-md);">One command. Full visibility.</h2>
-    <p style="max-width:520px;margin-bottom:var(--sp-xl);">Beacon runs on any Linux device with SSH access. It discovers your network, inventories your devices, and stands up a dashboard in under a minute.</p>
-    <div style="background:var(--surface);border:1px solid var(--border);padding:var(--sp-md);font-family:var(--jb);font-size:0.8rem;color:var(--subtle);line-height:1.8;">
-      <span style="color:var(--muted);"># Install Beacon</span><br>
-      <span style="color:var(--white);">br install beacon</span><br>
-      <span style="color:var(--white);">br beacon scan</span> <span style="color:var(--cyan);">--subnet 192.168.4.0/24</span><br>
-      <span style="color:var(--white);">br beacon serve</span> <span style="color:var(--cyan);">--port 3300</span>
-    </div>
-  </section>
-
-  <footer>
-    <span>&copy; 2026 BlackRoad OS, Inc. &mdash; Pave Tomorrow.</span>
-    <span style="display:flex;gap:var(--sp-lg);flex-wrap:wrap;">
-      <a href="https://blackroad.io" style="color:var(--muted)">Home</a>
-      <a href="https://blackroadai.com" style="color:var(--muted)">AI</a>
-      <a href="https://blackroad.network" style="color:var(--muted)">Network</a>
-    </span>
-  </footer>
 </body>
 </html>

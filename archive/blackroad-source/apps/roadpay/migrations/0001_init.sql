@@ -1,2 +1,0 @@
--- BlackRoad OS — apps/roadpay/migrations/0001_init.sql
--- TODO: 0001_init

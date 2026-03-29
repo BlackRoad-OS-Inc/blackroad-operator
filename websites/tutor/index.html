@@ -1,144 +1,203 @@
 <!DOCTYPE html>
-<html lang="en"><head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Roadie Tutor — AI That Remembers How You Learn</title>
-<meta name="description" content="AI homework help that actually teaches. Math, science, reading, writing. Your tutor remembers what you studied last week. $20/mo replaces $100/hr private tutoring.">
-<link rel="canonical" href="https://tutor.blackroad.io">
-<meta property="og:title" content="Roadie Tutor — AI That Remembers How You Learn">
-<meta property="og:description" content="60% of parents can't help with homework. Roadie can. Persistent memory, adaptive difficulty, every subject. $20/mo.">
-<meta property="og:url" content="https://tutor.blackroad.io">
-<script type="application/ld+json">
-{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Roadie Tutor","applicationCategory":"EducationalApplication","description":"AI tutoring with persistent memory. Math, science, reading, writing. Adapts to how you learn.","url":"https://tutor.blackroad.io","author":{"@type":"Organization","name":"BlackRoad OS, Inc."},"offers":{"@type":"Offer","price":"20","priceCurrency":"USD","description":"Student plan — unlimited tutoring"}}
-</script>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#0a0a0a;--card:#131313;--border:#1a1a1a;--text:#f5f5f5;--muted:#737373;--dim:#525252;--gold:#FFC107;--ember:#FF6B2B}
-body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;line-height:1.7}
-.bar{height:2px;background:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF)}
-nav{height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;border-bottom:1px solid var(--border)}
-nav .logo{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px}
-nav a{color:var(--dim);font-size:13px;text-decoration:none;margin-left:16px}
-.hero{max-width:720px;margin:0 auto;padding:100px 20px 60px;text-align:center}
-.hero h1{font-family:'Space Grotesk',sans-serif;font-size:clamp(36px,7vw,64px);font-weight:700;line-height:1.08;margin-bottom:20px}
-.hero h1 em{font-style:normal;color:var(--gold)}
-.hero .sub{font-size:18px;color:var(--muted);max-width:520px;margin:0 auto 40px}
-.btn{display:inline-block;padding:14px 32px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:14px;text-decoration:none;transition:all .3s}
-.btn-gold{background:var(--gold);color:#000}.btn-gold:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(255,193,7,.3)}
-.btn-outline{border:1px solid var(--border);color:var(--text)}.btn-outline:hover{border-color:var(--gold)}
-.stats{display:flex;justify-content:center;gap:40px;padding:40px 20px;flex-wrap:wrap}
-.stat{text-align:center}.stat .num{font-family:'Space Grotesk',sans-serif;font-size:32px;font-weight:700;color:var(--gold)}.stat .lbl{font-size:12px;color:var(--dim);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.1em}
-section{max-width:720px;margin:0 auto;padding:64px 20px}
-section h2{font-family:'Space Grotesk',sans-serif;font-size:28px;font-weight:700;margin-bottom:16px}
-section p{color:var(--muted);font-size:15px;margin-bottom:16px}
-.problem{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:32px;margin:32px 0}
-.problem h3{font-family:'Space Grotesk',sans-serif;font-size:18px;margin-bottom:8px}
-.problem p{color:var(--dim);font-size:14px}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin:32px 0}
-.card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:24px;transition:all .3s}
-.card:hover{border-color:var(--gold);transform:translateY(-4px)}
-.card h3{font-family:'Space Grotesk',sans-serif;font-size:16px;margin-bottom:8px}
-.card p{color:var(--dim);font-size:13px}
-.term{background:#0d0d0d;border:1px solid var(--border);border-radius:10px;padding:24px;font-family:'JetBrains Mono',monospace;font-size:13px;line-height:2;margin:32px 0}
-.p{color:var(--gold)}.g{color:#4caf50}.o{color:var(--dim)}
-.pricing{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin:32px 0}
-.plan{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:28px}
-.plan.pop{border-color:var(--gold)}
-.plan h3{font-family:'Space Grotesk',sans-serif;font-size:18px;margin-bottom:4px}
-.plan .price{font-family:'Space Grotesk',sans-serif;font-size:36px;font-weight:700;margin:8px 0}
-.plan .price span{font-size:14px;color:var(--muted);font-weight:400}
-.plan ul{list-style:none;margin:16px 0}.plan ul li{padding:4px 0;font-size:13px;color:var(--dim)}.plan ul li::before{content:'✓ ';color:var(--gold)}
-.faq{margin:32px 0}.faq details{background:var(--card);border:1px solid var(--border);border-radius:8px;margin-bottom:8px;padding:16px 20px}
-.faq summary{font-family:'Space Grotesk',sans-serif;font-size:15px;cursor:pointer;color:var(--text)}
-.faq details p{margin-top:12px;font-size:14px;color:var(--dim)}
-footer{max-width:720px;margin:0 auto;padding:48px 20px;text-align:center;border-top:1px solid var(--border)}
-footer a{color:var(--dim);font-size:12px;text-decoration:none;margin:0 12px}
-footer .copy{color:#262626;font-size:10px;font-family:'JetBrains Mono',monospace;margin-top:16px}
-@media(max-width:640px){nav a{display:none}.stats{gap:20px}}
-</style></head><body>
-<div class="bar"></div>
-<nav><div class="logo">Roadie Tutor</div><div><a href="https://blackroad.io">BlackRoad</a><a href="https://lucidia.earth">Lucidia</a><a href="#pricing">Pricing</a></div></nav>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tutor | BlackRoad</title>
+  <meta name="description" content="Tutor is part of BlackRoad Forge, where experiments, tutorials, prototypes, and interactive builds take shape.">
+  <meta name="theme-color" content="#0b0b0b">
+  <link rel="canonical" href="https://blackroad.io/tutor">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Tutor | BlackRoad">
+  <meta property="og:description" content="Tutor is part of BlackRoad Forge, where experiments, tutorials, prototypes, and interactive builds take shape.">
+  <meta property="og:url" content="https://blackroad.io/tutor">
+  <meta property="og:site_name" content="BlackRoad">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Tutor | BlackRoad">
+  <meta name="twitter:description" content="Tutor is part of BlackRoad Forge, where experiments, tutorials, prototypes, and interactive builds take shape.">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://images.blackroad.io/brand/br-square-32.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="https://images.blackroad.io/brand/br-square-192.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://images.blackroad.io/brand/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #090909;
+      --bg-soft: #111111;
+      --card: #131313;
+      --border: #232323;
+      --text: #f5f5f5;
+      --muted: #b2b2b2;
+      --dim: #6d6d6d;
+      --ember: #ff6b2b;
+      --flare: #ff2255;
+      --magenta: #cc00aa;
+      --orchid: #8844ff;
+      --arc: #4488ff;
+      --cyan: #00d4ff;
+      --grad: linear-gradient(100deg, var(--ember), var(--flare), var(--magenta), var(--orchid), var(--arc), var(--cyan));
+      --display: 'Space Grotesk', sans-serif;
+      --body: 'Inter', sans-serif;
+      --mono: 'JetBrains Mono', monospace;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: radial-gradient(circle at top, #151515 0, var(--bg) 45%); color: var(--text); }
+    body { font-family: var(--body); min-height: 100vh; }
+    a { color: inherit; text-decoration: none; }
+    .topbar { height: 4px; background: var(--grad); background-size: 180% 100%; animation: shift 7s linear infinite; }
+    @keyframes shift { from { background-position: 0 0; } to { background-position: 180% 0; } }
+    .shell { max-width: 1160px; margin: 0 auto; padding: 0 24px 80px; }
+    .nav { display: flex; justify-content: space-between; align-items: center; padding: 18px 0; border-bottom: 1px solid var(--border); }
+    .brand { display: flex; align-items: center; gap: 12px; font-family: var(--display); font-weight: 700; letter-spacing: -0.03em; }
+    .brand-mark { display: grid; grid-template-columns: repeat(3, 8px); gap: 4px; }
+    .brand-mark span { width: 8px; height: 8px; border-radius: 999px; }
+    .brand-mark span:nth-child(1) { background: var(--ember); }
+    .brand-mark span:nth-child(2) { background: var(--flare); }
+    .brand-mark span:nth-child(3) { background: var(--cyan); }
+    .nav-links { display: flex; gap: 18px; font-size: 13px; color: var(--muted); }
+    .hero { padding: 72px 0 48px; display: grid; gap: 28px; }
+    .eyebrow { font-family: var(--mono); color: var(--dim); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; }
+    h1 { font-family: var(--display); font-size: clamp(38px, 6vw, 74px); line-height: 0.95; letter-spacing: -0.05em; margin: 0; max-width: 900px; }
+    .hero-copy { max-width: 740px; font-size: 18px; line-height: 1.7; color: var(--muted); }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 14px; }
+    .btn-primary, .btn-secondary { padding: 14px 20px; border-radius: 999px; font-weight: 600; font-size: 14px; }
+    .btn-primary { background: var(--text); color: #050505; }
+    .btn-secondary { border: 1px solid var(--border); color: var(--muted); }
+    .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+    .stat-card, .pillar-card { background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 20px; padding: 20px; }
+    .stat-value { font-family: var(--display); font-size: clamp(24px, 4vw, 34px); letter-spacing: -0.04em; }
+    .stat-label { font-family: var(--mono); font-size: 11px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.12em; margin-top: 6px; }
+    .section { padding: 40px 0; }
+    .section-head { display: grid; gap: 10px; margin-bottom: 20px; }
+    .section-head h2 { font-family: var(--display); font-size: clamp(26px, 4vw, 40px); letter-spacing: -0.04em; margin: 0; }
+    .section-head p { margin: 0; color: var(--muted); max-width: 760px; line-height: 1.7; }
+    .pillars { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .pillar-card h3 { font-family: var(--display); margin: 8px 0 10px; font-size: 24px; letter-spacing: -0.03em; }
+    .pillar-card p { color: var(--muted); margin: 0; line-height: 1.7; }
+    .links { display: flex; flex-wrap: wrap; gap: 10px; }
+    .link-pill { border: 1px solid var(--border); border-radius: 999px; padding: 10px 14px; color: var(--muted); font-size: 13px; }
+    footer { margin-top: 36px; padding-top: 20px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; gap: 12px; color: var(--dim); font-family: var(--mono); font-size: 11px; }
+    @media (max-width: 860px) {
+      .stats, .pillars { grid-template-columns: 1fr 1fr; }
+      .nav { gap: 16px; flex-direction: column; align-items: flex-start; }
+      footer { flex-direction: column; }
+    }
+    @media (max-width: 560px) {
+      .shell { padding: 0 16px 56px; }
+      .stats, .pillars { grid-template-columns: 1fr; }
+      .hero { padding-top: 44px; }
+      .hero-copy { font-size: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar"></div>
+  <div class="shell">
+    <nav class="nav">
+      <a class="brand" href="https://blackroad.io">
+        <span class="brand-mark"><span></span><span></span><span></span></span>
+        <span>BlackRoad</span>
+      </a>
+      <div class="nav-links">
+        <a href="https://github.com/BlackRoad-OS">OS</a>
+        <a href="https://github.com/BlackRoad-AI">AI</a>
+        <a href="https://github.com/BlackRoad-Studio">Studio</a>
+        <a href="https://github.com/BlackRoad-Forge">Forge</a>
+      </div>
+    </nav>
 
-<div class="hero">
-<h1>AI that <em>remembers</em> how you learn.</h1>
-<p class="sub">60% of parents can't help with homework. Roadie can. Math, science, reading, writing — with persistent memory that adapts to your child.</p>
-<a href="#pricing" class="btn btn-gold">Start Learning — $20/mo</a>
-</div>
+    <main>
+      <section class="hero">
+        <div class="eyebrow">Forge</div>
+        <h1>Tutor</h1>
+        <p class="hero-copy">Tutor is part of BlackRoad Forge, where experiments, tutorials, prototypes, and interactive builds take shape.</p>
+        <div class="hero-actions">
+          <a class="btn-primary" href="https://blackroad.io">Explore BlackRoad OS</a>
+          <a class="btn-secondary" href="https://github.com/BlackRoad-Forge">View GitHub</a>
+        </div>
+      </section>
 
-<div class="stats">
-<div class="stat"><div class="num">60%</div><div class="lbl">Parents can't help</div></div>
-<div class="stat"><div class="num">$124B</div><div class="lbl">Tutoring market</div></div>
-<div class="stat"><div class="num">$20</div><div class="lbl">Per month</div></div>
-<div class="stat"><div class="num">∞</div><div class="lbl">Memory</div></div>
-</div>
+      <section class="section">
+        <div class="stats">
+          
+      <div class="stat-card">
+        <div class="stat-value">Prototype</div>
+        <div class="stat-label">Velocity</div>
+      </div>
 
-<section>
-<h2>The problem with every other tutor.</h2>
-<div class="problem"><h3>ChatGPT forgets.</h3><p>Every conversation starts from scratch. Your child explains their math level again. And again. And again. No continuity. No progress tracking.</p></div>
-<div class="problem"><h3>Khan Academy doesn't work.</h3><p>St. John's University study: no significant difference in achievement. Where effects existed, they were negative. Traditional instruction produced better results.</p></div>
-<div class="problem"><h3>Private tutors cost $40-100/hour.</h3><p>That's $160-400/month for one subject, one session per week. Most families can't afford it. The $124.5 billion tutoring market exists because the need is real and unmet.</p></div>
-<div class="problem"><h3>Photomath gives answers, not understanding.</h3><p>Shows steps but doesn't explain them. Students copy without learning. The greatest concern from educators: academic cheating.</p></div>
-</section>
+      <div class="stat-card">
+        <div class="stat-value">Interactive</div>
+        <div class="stat-label">Builds</div>
+      </div>
 
-<section>
-<h2>How Roadie is different.</h2>
-<div class="grid">
-<div class="card"><h3>Persistent Memory</h3><p>Roadie remembers what your child studied last Tuesday. Their strengths, weaknesses, learning style, and progress — all stored locally. Never resets.</p></div>
-<div class="card"><h3>Actually Teaches</h3><p>Uses the Concrete-Representational-Abstract framework. Doesn't just show the answer — builds understanding step by step, adapting to how your child thinks.</p></div>
-<div class="card"><h3>Every Subject</h3><p>Math (algebra through calculus), science (biology, chemistry, physics), reading comprehension, writing and grammar, history, geography. One tutor, all subjects.</p></div>
-<div class="card"><h3>Privacy First</h3><p>Runs on local AI. Your child's learning data never leaves your network. No cloud training, no data harvesting, no surveillance of your family.</p></div>
-<div class="card"><h3>Parent Dashboard</h3><p>See what your child studied, where they struggled, what they mastered. Weekly progress reports. No more guessing if they actually did their homework.</p></div>
-<div class="card"><h3>Adapts Difficulty</h3><p>Too easy? It challenges. Too hard? It scaffolds. Roadie uses spaced repetition (FSRS algorithm) to optimize when and what to review.</p></div>
-</div>
-</section>
+      <div class="stat-card">
+        <div class="stat-value">Tutorial</div>
+        <div class="stat-label">Flow</div>
+      </div>
 
-<section>
-<h2>See it work.</h2>
-<div class="term">
-<span class="p">roadie $</span> <span class="o">help me with quadratic equations</span><br>
-<span class="g">I remember last week you were working on factoring. You got</span><br>
-<span class="g">9/10 on the practice set but struggled with the difference</span><br>
-<span class="g">of squares. Let's start from there and build up to the</span><br>
-<span class="g">quadratic formula. Want to try a visual approach first?</span><br><br>
-<span class="p">roadie $</span> <span class="o">yes please</span><br>
-<span class="g">Think of x² + 5x + 6 as a rectangle. The area is the</span><br>
-<span class="g">expression. We need to find the sides. What two numbers</span><br>
-<span class="g">multiply to 6 AND add to 5?</span><br><br>
-<span class="p">roadie $</span> <span class="o">2 and 3</span><br>
-<span class="g">Exactly! So (x+2)(x+3) = x² + 5x + 6. The rectangle has</span><br>
-<span class="g">sides (x+2) and (x+3). You just factored a quadratic.</span><br>
-<span class="g">Ready for one where the leading coefficient isn't 1?</span>
-</div>
-</section>
+      <div class="stat-card">
+        <div class="stat-value">Maker</div>
+        <div class="stat-label">Mindset</div>
+      </div>
+        </div>
+      </section>
 
-<section id="pricing">
-<h2>Pricing.</h2>
-<p>One subscription. Every subject. Unlimited conversations. No per-question charges.</p>
-<div class="pricing">
-<div class="plan"><h3>Student</h3><div class="price">$20<span>/mo</span></div><ul><li>Unlimited tutoring</li><li>Persistent memory</li><li>All subjects</li><li>STEM visualization</li><li>1 device</li></ul><a href="https://blackroad.io" class="btn btn-outline" style="width:100%;text-align:center;margin-top:12px">Coming Soon</a></div>
-<div class="plan pop"><h3>Family</h3><div class="price">$35<span>/mo</span></div><ul><li>Everything in Student</li><li>Up to 5 children</li><li>Parent dashboard</li><li>Progress tracking</li><li>Multi-device</li><li>Weekly reports</li></ul><a href="https://blackroad.io" class="btn btn-gold" style="width:100%;text-align:center;margin-top:12px">Coming Soon</a></div>
-<div class="plan"><h3>Pro</h3><div class="price">$50<span>/mo</span></div><ul><li>Everything in Family</li><li>Unlimited devices</li><li>API access</li><li>Custom subjects</li><li>Priority support</li></ul><a href="https://blackroad.io" class="btn btn-outline" style="width:100%;text-align:center;margin-top:12px">Coming Soon</a></div>
-</div>
-</section>
+      <section class="section" id="pillars">
+        <div class="section-head">
+          <div class="eyebrow">Public Map</div>
+          <h2>The BlackRoad ecosystem is organized around 4 public surfaces.</h2>
+          <p>Instead of asking visitors to decode dozens of internal orgs, BlackRoad now leads with 4 clear pillars: the platform, the intelligence, the experience, and the experiments.</p>
+        </div>
+        <div class="pillars">
+          
+        <article class="pillar-card">
+          <div class="section-label">the platform</div>
+          <h3>BlackRoad-OS</h3>
+          <p>Core apps, APIs, operator systems, and runtime tooling.</p>
+        </article>
 
-<section>
-<h2>Questions.</h2>
-<div class="faq">
-<details><summary>How is this different from ChatGPT?</summary><p>ChatGPT forgets everything between conversations. Roadie remembers your child's learning history, strengths, weaknesses, and preferred learning style across every session. It also runs locally — your data never goes to OpenAI's servers.</p></details>
-<details><summary>What subjects does it cover?</summary><p>Math (arithmetic through calculus), science (biology, chemistry, physics), reading comprehension, writing and grammar, history, and geography. We're adding more subjects continuously.</p></details>
-<details><summary>Does it work offline?</summary><p>Yes. Roadie runs on local AI (Ollama). Once the model is downloaded, it works without internet. Your child can study anywhere.</p></details>
-<details><summary>How does the parent dashboard work?</summary><p>You see what subjects your child studied, how long they spent, where they struggled, and what they mastered. Weekly email reports summarize progress. No surveillance — just visibility.</p></details>
-<details><summary>Is my child's data safe?</summary><p>Completely. Roadie runs on your own hardware. No cloud storage, no training on your data, no third-party access. Your family's learning data stays in your home.</p></details>
-<details><summary>What ages is it for?</summary><p>Elementary through high school. The adaptive difficulty system adjusts to any level — from basic addition to AP Calculus.</p></details>
-</div>
-</section>
+        <article class="pillar-card">
+          <div class="section-label">the intelligence</div>
+          <h3>BlackRoad-AI</h3>
+          <p>Local-first AI, agents, memory systems, and model integrations.</p>
+        </article>
 
-<footer>
-<a href="https://blackroad.io">BlackRoad OS</a>
-<a href="https://lucidia.earth">Lucidia</a>
-<a href="https://roadwork.blackroad.io">RoadWork</a>
-<a href="https://blackroadai.com">AI</a>
-<a href="https://github.com/BlackRoad-OS-Inc">GitHub</a>
-<div class="copy">&copy; 2025-2026 BlackRoad OS, Inc. Pave Tomorrow.</div>
-</footer>
-</body></html>
+        <article class="pillar-card">
+          <div class="section-label">the experience</div>
+          <h3>BlackRoad-Studio</h3>
+          <p>Websites, design systems, docs, and polished product surfaces.</p>
+        </article>
+
+        <article class="pillar-card">
+          <div class="section-label">the experiments</div>
+          <h3>BlackRoad-Forge</h3>
+          <p>Prototypes, interactive builds, tutorials, and maker projects.</p>
+        </article>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <div class="eyebrow">Related</div>
+          <h2>Keep moving.</h2>
+          <p>Use these links to move across the public BlackRoad surface without getting lost in internal structure.</p>
+        </div>
+        <div class="links">
+          <a class="link-pill" href="https://github.com/BlackRoad-Forge">BlackRoad Forge</a>
+<a class="link-pill" href="https://search.blackroad.io">RoadSearch</a>
+<a class="link-pill" href="https://blackroad.io">Home</a>
+<a class="link-pill" href="https://docs.blackroad.io">Docs</a>
+<a class="link-pill" href="https://search.blackroad.io">Search</a>
+<a class="link-pill" href="https://github.com/BlackRoad-OS">GitHub</a>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <span>Tutor · part of BlackRoad</span>
+      <span>Pave Tomorrow.</span>
+    </footer>
+  </div>
+</body>
+</html>

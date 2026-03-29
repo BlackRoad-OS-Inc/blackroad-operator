@@ -1,451 +1,203 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<link rel="icon" type="image/png" sizes="32x32" href="https://images.blackroad.io/brand/br-square-32.png" />
-<link rel="icon" type="image/png" sizes="192x192" href="https://images.blackroad.io/brand/br-square-192.png" />
-<link rel="apple-touch-icon" sizes="180x180" href="https://images.blackroad.io/brand/apple-touch-icon.png" />
-<meta property="og:image" content="https://images.blackroad.io/brand/br-square-512.png" />
-<meta name="twitter:card" content="summary" />
-<meta name="twitter:image" content="https://images.blackroad.io/brand/br-square-512.png" />
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="RoadSearch — Search 1,383 entries across 23 indexes. Repos, docs, agents, tools, domains, wiki. AI-powered answers from your own infrastructure.">
-<meta name="theme-color" content="#4488FF">
-<link rel="canonical" href="https://search.blackroad.io">
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://search.blackroad.io">
-<meta property="og:title" content="RoadSearch — Search Everything">
-<meta property="og:description" content="1,383 entries. 23 indexes. 28 entity types. AI-powered answers from your own infrastructure.">
-<meta property="og:site_name" content="BlackRoad OS">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"RoadSearch","url":"https://search.blackroad.io","description":"Unified search engine for all BlackRoad content.","potentialAction":{"@type":"SearchAction","target":"https://search.blackroad.io/search?q={search_term_string}","query-input":"required name=search_term_string"}}</script>
-<title>RoadSearch — Search Everything</title>
-<link rel="stylesheet" href="../_shared/design.css">
-<style>
-  /* Hero — search-focused, centered */
-  .hero {
-    min-height: 100vh;
-    display: flex; flex-direction: column; justify-content: center; align-items: center;
-    padding: var(--sp-xl) var(--sp-md);
-    text-align: center;
-    position: relative; overflow: hidden;
-  }
-  @media (min-width: 768px) {
-    .hero { padding: 0 var(--sp-xl); }
-  }
-  .hero-eyebrow {
-    font-family: var(--jb); font-size: 0.75rem;
-    letter-spacing: 0.2em; text-transform: uppercase;
-    color: var(--subtle); margin-bottom: var(--sp-md);
-    display: flex; align-items: center; gap: 10px;
-  }
-  .hero-eyebrow::before {
-    content: ''; width: 6px; height: 6px;
-    background: #4488FF; border-radius: 50%;
-    animation: pulse 2s ease-in-out infinite;
-  }
-  @keyframes pulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.4; transform: scale(0.8); }
-  }
-  .hero h1 { max-width: 700px; margin-bottom: var(--sp-md); }
-  .hero-sub {
-    font-size: 1.1rem; color: var(--subtle);
-    max-width: 520px; margin-bottom: var(--sp-xl); line-height: 1.7;
-  }
-  @media (min-width: 768px) {
-    .hero-sub { font-size: 1.2rem; }
-  }
-
-  /* Search box */
-  .search-box {
-    width: 100%; max-width: 640px;
-    position: relative; margin-bottom: var(--sp-xl);
-  }
-  .search-input {
-    width: 100%; padding: 18px 56px 18px 22px;
-    background: var(--surface); border: 1px solid var(--border);
-    color: var(--white); font-family: var(--in); font-size: 1.05rem;
-    outline: none; transition: border-color 0.25s;
-  }
-  .search-input::placeholder { color: var(--muted); }
-  .search-input:focus { border-color: var(--arc); }
-  .search-kbd {
-    position: absolute; right: 16px; top: 50%; transform: translateY(-50%);
-    font-family: var(--jb); font-size: 0.65rem;
-    padding: 3px 8px; border: 1px solid var(--border); color: var(--muted);
-    pointer-events: none;
-  }
-
-  /* Category pills */
-  .categories {
-    display: flex; flex-wrap: wrap; gap: var(--sp-xs);
-    justify-content: center; margin-bottom: var(--sp-xl);
-  }
-  .cat-pill {
-    font-family: var(--jb); font-size: 0.72rem;
-    letter-spacing: 0.05em; text-transform: uppercase;
-    padding: 8px 16px; border: 1px solid var(--border);
-    color: var(--subtle); cursor: pointer;
-    transition: border-color 0.2s, color 0.2s, background 0.2s;
-  }
-  .cat-pill:hover, .cat-pill.active {
-    border-color: var(--arc); color: var(--white);
-    background: rgba(68, 136, 255, 0.08);
-  }
-  .cat-count {
-    color: var(--muted); margin-left: 4px; font-size: 0.65rem;
-  }
-
-  .btn-primary {
-    display: inline-flex; align-items: center; gap: 8px;
-    background: var(--grad); color: var(--white);
-    padding: 14px 28px; border-radius: 6px;
-    font-weight: 700; font-size: 0.95rem;
-    transition: opacity 0.2s, transform 0.2s var(--ease-spring);
-  }
-  .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
-  .btn-ghost {
-    display: inline-flex; align-items: center; gap: 8px;
-    border: 1px solid var(--border); color: var(--subtle);
-    padding: 14px 28px; border-radius: 6px; font-size: 0.95rem;
-    transition: border-color 0.2s, color 0.2s;
-  }
-  .btn-ghost:hover { border-color: var(--muted); color: var(--white); }
-
-  /* Stats */
-  .stats-row {
-    display: grid; grid-template-columns: repeat(2, 1fr);
-    gap: var(--sp-lg); text-align: center;
-  }
-  @media (min-width: 600px) {
-    .stats-row { grid-template-columns: repeat(4, 1fr); }
-  }
-  .stat-num {
-    font-size: 2.5rem; font-weight: 800;
-    font-family: var(--jb); letter-spacing: -0.04em;
-    background: var(--grad); -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent; background-clip: text;
-  }
-  @media (min-width: 768px) {
-    .stat-num { font-size: 3rem; }
-  }
-  .stat-label { font-size: 0.8rem; color: var(--subtle); margin-top: 4px; }
-
-  /* AI Answers */
-  .ai-answer {
-    background: var(--surface); border: 1px solid var(--border);
-    padding: var(--sp-lg); max-width: 700px; margin: 0 auto;
-  }
-  .ai-answer-header {
-    display: flex; align-items: center; gap: 10px;
-    margin-bottom: var(--sp-md);
-  }
-  .ai-badge {
-    font-family: var(--jb); font-size: 0.65rem;
-    letter-spacing: 0.1em; text-transform: uppercase;
-    padding: 4px 10px; background: rgba(68, 136, 255, 0.12);
-    color: var(--arc);
-  }
-  .ai-answer p { font-size: 0.9rem; line-height: 1.75; }
-  .ai-sources {
-    margin-top: var(--sp-md); padding-top: var(--sp-sm);
-    border-top: 1px solid var(--border);
-    display: flex; flex-wrap: wrap; gap: var(--sp-xs);
-  }
-  .ai-source {
-    font-family: var(--jb); font-size: 0.68rem;
-    color: var(--muted); padding: 3px 8px;
-    border: 1px solid var(--border);
-    transition: color 0.2s;
-  }
-  .ai-source:hover { color: var(--white); }
-
-  /* Recent searches */
-  .recent-list {
-    display: flex; flex-direction: column; gap: var(--sp-xs);
-    max-width: 640px; margin: 0 auto;
-  }
-  .recent-item {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: var(--sp-sm) var(--sp-md);
-    border: 1px solid var(--border); background: var(--surface);
-    transition: border-color 0.2s;
-    cursor: pointer;
-  }
-  .recent-item:hover { border-color: var(--muted); }
-  .recent-query {
-    font-family: var(--in); font-size: 0.9rem; color: var(--white);
-  }
-  .recent-meta {
-    font-family: var(--jb); font-size: 0.7rem; color: var(--muted);
-  }
-
-  /* Features */
-  .features-grid { display: grid; grid-template-columns: 1fr; gap: var(--sp-md); }
-  @media (min-width: 600px) { .features-grid { grid-template-columns: repeat(2, 1fr); } }
-  @media (min-width: 900px) { .features-grid { grid-template-columns: repeat(3, 1fr); } }
-  .feature-title { font-size: 1rem; font-weight: 600; margin-bottom: var(--sp-xs); }
-  .feature-desc { font-size: 0.875rem; color: var(--subtle); line-height: 1.65; }
-  .feature-icon { font-size: 1.3rem; margin-bottom: var(--sp-sm); }
-
-  /* Terminal */
-  .terminal {
-    background: #0a0a0a; border: 1px solid var(--border);
-    border-radius: 10px; padding: var(--sp-md);
-    font-family: var(--jb); font-size: 0.75rem;
-    line-height: 1.8; overflow-x: auto;
-  }
-  @media (min-width: 768px) {
-    .terminal { padding: var(--sp-lg); font-size: 0.82rem; }
-  }
-  .terminal-bar { display: flex; gap: 6px; margin-bottom: var(--sp-md); }
-  .terminal-dot { width: 12px; height: 12px; border-radius: 50%; }
-  .t-red { background: #ff5f57; }
-  .t-yellow { background: #febc2e; }
-  .t-green { background: #28c840; }
-  .t-prompt { color: #4488FF; }
-  .t-cmd { color: var(--white); }
-  .t-out { color: var(--muted); }
-  .t-success { color: #22c55e; }
-  .t-comment { color: rgba(255,255,255,0.3); }
-  .t-highlight { color: #FF6B2B; }
-
-  /* CTA */
-  .cta-band {
-    background: linear-gradient(135deg, rgba(68,136,255,0.08) 0%, rgba(0,212,255,0.08) 50%, rgba(136,68,255,0.08) 100%);
-    border: 1px solid var(--border); border-radius: 10px;
-    padding: var(--sp-xl) var(--sp-md); text-align: center;
-  }
-  @media (min-width: 768px) {
-    .cta-band { padding: var(--sp-2xl) var(--sp-xl); }
-  }
-  .cta-band h2 { margin-bottom: var(--sp-md); }
-  .cta-band p { max-width: 500px; margin: 0 auto var(--sp-xl); }
-</style>
-<script src="https://blackroad-mesh.amundsonalexa.workers.dev/mesh.js" defer></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RoadSearch | BlackRoad</title>
+  <meta name="description" content="Search the BlackRoad ecosystem across products, docs, systems, and experiments.">
+  <meta name="theme-color" content="#0b0b0b">
+  <link rel="canonical" href="https://blackroad.io/roadsearch">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="RoadSearch | BlackRoad">
+  <meta property="og:description" content="Search the BlackRoad ecosystem across products, docs, systems, and experiments.">
+  <meta property="og:url" content="https://blackroad.io/roadsearch">
+  <meta property="og:site_name" content="BlackRoad">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="RoadSearch | BlackRoad">
+  <meta name="twitter:description" content="Search the BlackRoad ecosystem across products, docs, systems, and experiments.">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://images.blackroad.io/brand/br-square-32.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="https://images.blackroad.io/brand/br-square-192.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://images.blackroad.io/brand/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #090909;
+      --bg-soft: #111111;
+      --card: #131313;
+      --border: #232323;
+      --text: #f5f5f5;
+      --muted: #b2b2b2;
+      --dim: #6d6d6d;
+      --ember: #ff6b2b;
+      --flare: #ff2255;
+      --magenta: #cc00aa;
+      --orchid: #8844ff;
+      --arc: #4488ff;
+      --cyan: #00d4ff;
+      --grad: linear-gradient(100deg, var(--ember), var(--flare), var(--magenta), var(--orchid), var(--arc), var(--cyan));
+      --display: 'Space Grotesk', sans-serif;
+      --body: 'Inter', sans-serif;
+      --mono: 'JetBrains Mono', monospace;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: radial-gradient(circle at top, #151515 0, var(--bg) 45%); color: var(--text); }
+    body { font-family: var(--body); min-height: 100vh; }
+    a { color: inherit; text-decoration: none; }
+    .topbar { height: 4px; background: var(--grad); background-size: 180% 100%; animation: shift 7s linear infinite; }
+    @keyframes shift { from { background-position: 0 0; } to { background-position: 180% 0; } }
+    .shell { max-width: 1160px; margin: 0 auto; padding: 0 24px 80px; }
+    .nav { display: flex; justify-content: space-between; align-items: center; padding: 18px 0; border-bottom: 1px solid var(--border); }
+    .brand { display: flex; align-items: center; gap: 12px; font-family: var(--display); font-weight: 700; letter-spacing: -0.03em; }
+    .brand-mark { display: grid; grid-template-columns: repeat(3, 8px); gap: 4px; }
+    .brand-mark span { width: 8px; height: 8px; border-radius: 999px; }
+    .brand-mark span:nth-child(1) { background: var(--ember); }
+    .brand-mark span:nth-child(2) { background: var(--flare); }
+    .brand-mark span:nth-child(3) { background: var(--cyan); }
+    .nav-links { display: flex; gap: 18px; font-size: 13px; color: var(--muted); }
+    .hero { padding: 72px 0 48px; display: grid; gap: 28px; }
+    .eyebrow { font-family: var(--mono); color: var(--dim); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; }
+    h1 { font-family: var(--display); font-size: clamp(38px, 6vw, 74px); line-height: 0.95; letter-spacing: -0.05em; margin: 0; max-width: 900px; }
+    .hero-copy { max-width: 740px; font-size: 18px; line-height: 1.7; color: var(--muted); }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 14px; }
+    .btn-primary, .btn-secondary { padding: 14px 20px; border-radius: 999px; font-weight: 600; font-size: 14px; }
+    .btn-primary { background: var(--text); color: #050505; }
+    .btn-secondary { border: 1px solid var(--border); color: var(--muted); }
+    .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+    .stat-card, .pillar-card { background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 20px; padding: 20px; }
+    .stat-value { font-family: var(--display); font-size: clamp(24px, 4vw, 34px); letter-spacing: -0.04em; }
+    .stat-label { font-family: var(--mono); font-size: 11px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.12em; margin-top: 6px; }
+    .section { padding: 40px 0; }
+    .section-head { display: grid; gap: 10px; margin-bottom: 20px; }
+    .section-head h2 { font-family: var(--display); font-size: clamp(26px, 4vw, 40px); letter-spacing: -0.04em; margin: 0; }
+    .section-head p { margin: 0; color: var(--muted); max-width: 760px; line-height: 1.7; }
+    .pillars { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .pillar-card h3 { font-family: var(--display); margin: 8px 0 10px; font-size: 24px; letter-spacing: -0.03em; }
+    .pillar-card p { color: var(--muted); margin: 0; line-height: 1.7; }
+    .links { display: flex; flex-wrap: wrap; gap: 10px; }
+    .link-pill { border: 1px solid var(--border); border-radius: 999px; padding: 10px 14px; color: var(--muted); font-size: 13px; }
+    footer { margin-top: 36px; padding-top: 20px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; gap: 12px; color: var(--dim); font-family: var(--mono); font-size: 11px; }
+    @media (max-width: 860px) {
+      .stats, .pillars { grid-template-columns: 1fr 1fr; }
+      .nav { gap: 16px; flex-direction: column; align-items: flex-start; }
+      footer { flex-direction: column; }
+    }
+    @media (max-width: 560px) {
+      .shell { padding: 0 16px 56px; }
+      .stats, .pillars { grid-template-columns: 1fr; }
+      .hero { padding-top: 44px; }
+      .hero-copy { font-size: 16px; }
+    }
+  </style>
 </head>
-<body class="dot-bg">
+<body>
+  <div class="topbar"></div>
+  <div class="shell">
+    <nav class="nav">
+      <a class="brand" href="https://blackroad.io">
+        <span class="brand-mark"><span></span><span></span><span></span></span>
+        <span>BlackRoad</span>
+      </a>
+      <div class="nav-links">
+        <a href="https://github.com/BlackRoad-OS">OS</a>
+        <a href="https://github.com/BlackRoad-AI">AI</a>
+        <a href="https://github.com/BlackRoad-Studio">Studio</a>
+        <a href="https://github.com/BlackRoad-Forge">Forge</a>
+      </div>
+    </nav>
 
-  <!-- Nav -->
-  <nav>
-    <div class="nav-logo">RoadSearch</div>
-    <div class="nav-links">
-      <a href="#categories">Categories</a>
-      <a href="#ai-answers">AI Answers</a>
-      <a href="#cli">CLI</a>
-      <a href="https://blackroad.io">BlackRoad OS</a>
-    </div>
-    <a href="#search" class="nav-cta">Search Now</a>
-    <button class="nav-toggle" onclick="this.classList.toggle('open');document.getElementById('nav-mobile').classList.toggle('open')" aria-label="Menu">
-      <span></span><span></span><span></span>
-    </button>
-  </nav>
-  <div id="nav-mobile" class="nav-mobile">
-    <a href="#categories" onclick="document.getElementById('nav-mobile').classList.remove('open')">Categories</a>
-    <a href="#ai-answers" onclick="document.getElementById('nav-mobile').classList.remove('open')">AI Answers</a>
-    <a href="#cli" onclick="document.getElementById('nav-mobile').classList.remove('open')">CLI</a>
-    <a href="https://blackroad.io">BlackRoad OS</a>
-    <a href="#search" style="color:var(--white);font-weight:700;">Search Now</a>
+    <main>
+      <section class="hero">
+        <div class="eyebrow">Discovery</div>
+        <h1>RoadSearch</h1>
+        <p class="hero-copy">Search the BlackRoad ecosystem across products, docs, systems, and experiments.</p>
+        <div class="hero-actions">
+          <a class="btn-primary" href="https://blackroad.io">Explore BlackRoad OS</a>
+          <a class="btn-secondary" href="https://github.com/BlackRoad-Forge">View GitHub</a>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="stats">
+          
+      <div class="stat-card">
+        <div class="stat-value">Prototype</div>
+        <div class="stat-label">Velocity</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-value">Interactive</div>
+        <div class="stat-label">Builds</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-value">Tutorial</div>
+        <div class="stat-label">Flow</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-value">Maker</div>
+        <div class="stat-label">Mindset</div>
+      </div>
+        </div>
+      </section>
+
+      <section class="section" id="pillars">
+        <div class="section-head">
+          <div class="eyebrow">Public Map</div>
+          <h2>The BlackRoad ecosystem is organized around 4 public surfaces.</h2>
+          <p>Instead of asking visitors to decode dozens of internal orgs, BlackRoad now leads with 4 clear pillars: the platform, the intelligence, the experience, and the experiments.</p>
+        </div>
+        <div class="pillars">
+          
+        <article class="pillar-card">
+          <div class="section-label">the platform</div>
+          <h3>BlackRoad-OS</h3>
+          <p>Core apps, APIs, operator systems, and runtime tooling.</p>
+        </article>
+
+        <article class="pillar-card">
+          <div class="section-label">the intelligence</div>
+          <h3>BlackRoad-AI</h3>
+          <p>Local-first AI, agents, memory systems, and model integrations.</p>
+        </article>
+
+        <article class="pillar-card">
+          <div class="section-label">the experience</div>
+          <h3>BlackRoad-Studio</h3>
+          <p>Websites, design systems, docs, and polished product surfaces.</p>
+        </article>
+
+        <article class="pillar-card">
+          <div class="section-label">the experiments</div>
+          <h3>BlackRoad-Forge</h3>
+          <p>Prototypes, interactive builds, tutorials, and maker projects.</p>
+        </article>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <div class="eyebrow">Related</div>
+          <h2>Keep moving.</h2>
+          <p>Use these links to move across the public BlackRoad surface without getting lost in internal structure.</p>
+        </div>
+        <div class="links">
+          <a class="link-pill" href="https://github.com/BlackRoad-Forge">BlackRoad Forge</a>
+<a class="link-pill" href="https://search.blackroad.io">RoadSearch</a>
+<a class="link-pill" href="https://blackroad.io">Home</a>
+<a class="link-pill" href="https://docs.blackroad.io">Docs</a>
+<a class="link-pill" href="https://search.blackroad.io">Search</a>
+<a class="link-pill" href="https://github.com/BlackRoad-OS">GitHub</a>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <span>RoadSearch · part of BlackRoad</span>
+      <span>Pave Tomorrow.</span>
+    </footer>
   </div>
-
-  <!-- Hero with Search -->
-  <div class="hero" id="search">
-    <div class="hero-eyebrow">Wave 1 Revenue &middot; Search</div>
-    <h1>Find anything.<br>Instantly.</h1>
-    <p class="hero-sub">Search 1,383 entries across 23 indexes. Repos, docs, agents, tools, domains, wiki -- all indexed, all searchable, all yours.</p>
-    <div class="search-box">
-      <input type="text" class="search-input" placeholder="Search BlackRoad OS..." autofocus>
-      <span class="search-kbd">/</span>
-    </div>
-    <div class="categories" id="categories">
-      <span class="cat-pill active">All <span class="cat-count">1,383</span></span>
-      <span class="cat-pill">Repos <span class="cat-count">275</span></span>
-      <span class="cat-pill">Docs <span class="cat-count">340</span></span>
-      <span class="cat-pill">Agents <span class="cat-count">35</span></span>
-      <span class="cat-pill">Tools <span class="cat-count">90</span></span>
-      <span class="cat-pill">Domains <span class="cat-count">151</span></span>
-      <span class="cat-pill">Wiki <span class="cat-count">492</span></span>
-    </div>
-  </div>
-
-  <!-- Stats -->
-  <section id="stats">
-    <div class="section-label">Index coverage</div>
-    <div class="stats-row" style="margin-top: var(--sp-lg);">
-      <div>
-        <div class="stat-num">1,383</div>
-        <div class="stat-label">Indexed Entries</div>
-      </div>
-      <div>
-        <div class="stat-num">23</div>
-        <div class="stat-label">Data Sources</div>
-      </div>
-      <div>
-        <div class="stat-num">28</div>
-        <div class="stat-label">Entity Types</div>
-      </div>
-      <div>
-        <div class="stat-num">&lt;50ms</div>
-        <div class="stat-label">Query Latency</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- AI Answers -->
-  <section id="ai-answers">
-    <div class="section-label">AI-Powered Answers</div>
-    <h2 style="margin-bottom: var(--sp-md); text-align: center;">Ask a question.<br>Get a real answer.</h2>
-    <p style="max-width: 560px; margin: 0 auto var(--sp-xl); text-align: center;">RoadSearch uses local Ollama models to synthesize answers from your indexed data. No API calls to external services. Your data never leaves your network.</p>
-    <div class="ai-answer">
-      <div class="ai-answer-header">
-        <span class="ai-badge">AI Answer</span>
-        <span style="font-family:var(--jb);font-size:0.7rem;color:var(--muted);">via Ollama / llama3.2</span>
-      </div>
-      <p style="color:var(--white);margin-bottom:var(--sp-sm);font-weight:600;font-family:var(--sg);">How does the WireGuard mesh work?</p>
-      <p>The BlackRoad WireGuard mesh connects 5 Raspberry Pis and 2 DigitalOcean droplets in a full-mesh topology. Each node has a TollBooth (WireGuard fork) interface on the 10.0.0.0/24 subnet. Traffic from the internet hits Gematria (Caddy TLS edge), then routes through WireGuard to the Pi fleet. All 12/12 SSH connections verified active. Configuration managed via <code style="color:#4488FF;font-size:0.85em">br wire</code> CLI.</p>
-      <div class="ai-sources">
-        <a href="#" class="ai-source">WIRE-MAP.md</a>
-        <a href="#" class="ai-source">PORT-MAP.md</a>
-        <a href="#" class="ai-source">infrastructure.md</a>
-        <a href="#" class="ai-source">blackbox-protocol.md</a>
-      </div>
-    </div>
-  </section>
-
-  <!-- Recent Searches -->
-  <section>
-    <div class="section-label">Recent searches</div>
-    <h2 style="margin-bottom: var(--sp-xl);">What people are finding</h2>
-    <div class="recent-list">
-      <div class="recent-item">
-        <span class="recent-query">mesh network topology</span>
-        <span class="recent-meta">14 results</span>
-      </div>
-      <div class="recent-item">
-        <span class="recent-query">ollama model list</span>
-        <span class="recent-meta">8 results</span>
-      </div>
-      <div class="recent-item">
-        <span class="recent-query">deploy worker to octavia</span>
-        <span class="recent-meta">11 results</span>
-      </div>
-      <div class="recent-item">
-        <span class="recent-query">roadpay stripe integration</span>
-        <span class="recent-meta">6 results</span>
-      </div>
-      <div class="recent-item">
-        <span class="recent-query">agent manifest format</span>
-        <span class="recent-meta">9 results</span>
-      </div>
-      <div class="recent-item">
-        <span class="recent-query">pi fleet ssh config</span>
-        <span class="recent-meta">12 results</span>
-      </div>
-    </div>
-  </section>
-
-  <!-- Features -->
-  <section id="features">
-    <div class="section-label">How it works</div>
-    <h2 style="margin-bottom: var(--sp-xl);">Sovereign search.<br>Zero external calls.</h2>
-    <div class="features-grid">
-      <div class="card">
-        <div class="feature-icon">&#128269;</div>
-        <div class="feature-title">FTS5 Full-Text Search</div>
-        <p class="feature-desc">SQLite FTS5 engine with BM25 ranking. Sub-50ms queries across 1,383 entries. Rebuilt every 6 hours via cron.</p>
-      </div>
-      <div class="card">
-        <div class="feature-icon">&#129302;</div>
-        <div class="feature-title">AI Synthesis</div>
-        <p class="feature-desc">Local Ollama models read search results and compose natural-language answers. Your data stays on your Pis.</p>
-      </div>
-      <div class="card">
-        <div class="feature-icon">&#128200;</div>
-        <div class="feature-title">23 Data Sources</div>
-        <p class="feature-desc">Codex, TILs, journal, repos, websites, tools, agents, wiki, scripts, memories, domains, docs, articles, and more.</p>
-      </div>
-      <div class="card">
-        <div class="feature-icon">&#128736;</div>
-        <div class="feature-title">CLI + Web</div>
-        <p class="feature-desc">Use <code style="color:#4488FF;font-size:0.8em">br search-all</code> from the terminal or search.blackroad.io from the browser. Same index, same results.</p>
-      </div>
-      <div class="card">
-        <div class="feature-icon">&#128301;</div>
-        <div class="feature-title">Knowledge Graph</div>
-        <p class="feature-desc">Entity relationships mapped between repos, agents, tools, and domains. See how everything connects.</p>
-      </div>
-      <div class="card">
-        <div class="feature-icon">&#9889;</div>
-        <div class="feature-title">Auto-Rebuild</div>
-        <p class="feature-desc">Index rebuilds every 6 hours via cron. New entries from codex, TILs, journal, and repos are picked up automatically.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- Terminal -->
-  <section id="cli">
-    <div class="section-label">CLI</div>
-    <div class="terminal">
-      <div class="terminal-bar">
-        <div class="terminal-dot t-red"></div>
-        <div class="terminal-dot t-yellow"></div>
-        <div class="terminal-dot t-green"></div>
-      </div>
-      <div><span class="t-comment"># search everything</span></div>
-      <div><span class="t-prompt">$</span> <span class="t-cmd">br search-all "mesh network"</span></div>
-      <div><span class="t-out">&nbsp;&nbsp;Searching 1,383 entries across 23 indexes...</span></div>
-      <br>
-      <div><span class="t-success">&nbsp;&nbsp;14 results</span> <span class="t-out">(0.032s)</span></div>
-      <br>
-      <div><span class="t-out">&nbsp;&nbsp;<span class="t-highlight">[repo]</span>&nbsp;&nbsp;&nbsp;&nbsp;blackroad-mesh&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Full mesh networking SDK</span></div>
-      <div><span class="t-out">&nbsp;&nbsp;<span class="t-highlight">[doc]</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mesh-network-strategy&nbsp;&nbsp;&nbsp;"Every link is a node"</span></div>
-      <div><span class="t-out">&nbsp;&nbsp;<span class="t-highlight">[doc]</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;WIRE-MAP.md&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Physical+logical topology</span></div>
-      <div><span class="t-out">&nbsp;&nbsp;<span class="t-highlight">[agent]</span>&nbsp;&nbsp;&nbsp;alice&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Gateway + mesh routing</span></div>
-      <div><span class="t-out">&nbsp;&nbsp;<span class="t-highlight">[tool]</span>&nbsp;&nbsp;&nbsp;&nbsp;blackroad-mesh.sh&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Mesh status + diagnostics</span></div>
-      <div><span class="t-out">&nbsp;&nbsp;<span class="t-highlight">[wiki]</span>&nbsp;&nbsp;&nbsp;&nbsp;BlackBox Protocol&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Tor/IPFS/BT/WebRTC mesh</span></div>
-      <div><span class="t-out">&nbsp;&nbsp;... 8 more results</span></div>
-      <br>
-      <div><span class="t-comment"># get AI answer</span></div>
-      <div><span class="t-prompt">$</span> <span class="t-cmd">br search-all "mesh network" --ai</span></div>
-      <div><span class="t-out">&nbsp;&nbsp;<span style="color:#4488FF;">AI:</span> The BlackRoad mesh connects 7 nodes across 5 protocols...</span></div>
-    </div>
-  </section>
-
-  <!-- CTA -->
-  <section>
-    <div class="cta-band">
-      <div class="section-label">Start Searching</div>
-      <h2>Your knowledge. One search.</h2>
-      <p>Every repo, doc, agent, tool, and domain -- indexed and searchable in under 50ms. No external APIs. No data leaving your network.</p>
-      <div style="display:flex;gap:var(--sp-md);justify-content:center;flex-wrap:wrap;">
-        <a href="#search" class="btn-primary">Search Now</a>
-        <a href="https://blackroad.io" class="btn-ghost">BlackRoad OS</a>
-      </div>
-    </div>
-  </section>
-
-  <!-- Footer -->
-  <footer>
-    <span>&copy; 2026 BlackRoad OS, Inc. All rights reserved. Pave Tomorrow.</span>
-    <span style="display:flex;gap:var(--sp-lg);flex-wrap:wrap;">
-      <a href="https://blackroad.io" style="color:var(--muted);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">Home</a>
-      <a href="https://pay.blackroad.io" style="color:var(--muted);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">Pay</a>
-      <a href="https://garage.blackroad.io" style="color:var(--muted);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">Garage</a>
-      <a href="https://blackroadai.com" style="color:var(--muted);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">AI</a>
-      <a href="https://blackroad.network" style="color:var(--muted);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">Network</a>
-      <a href="https://github.com/blackboxprogramming" style="color:var(--muted);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">GitHub</a>
-    </span>
-  </footer>
-
-  <!-- Search keyboard shortcut -->
-  <script>
-    document.addEventListener('keydown', function(e) {
-      if (e.key === '/' && document.activeElement.tagName !== 'INPUT') {
-        e.preventDefault();
-        document.querySelector('.search-input').focus();
-      }
-    });
-  </script>
-
 </body>
 </html>

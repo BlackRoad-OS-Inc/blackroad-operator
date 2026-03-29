@@ -1,2 +1,0 @@
--- BlackRoad OS — apps/roadpay/migrations/0004_keys.sql
--- TODO: 0004_keys

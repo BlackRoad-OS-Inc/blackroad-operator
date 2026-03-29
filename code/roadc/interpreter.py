@@ -53,8 +53,10 @@ class Interpreter:
         self._setup_builtins()
 
     def _setup_builtins(self):
-        """Register built-in functions including ternary operations"""
+        """Register built-in functions including ternary operations and stdlib"""
         env = self.global_env
+        import math, time, os, json, hashlib, random
+
         # Standard
         env.set('print', lambda *args: print(*args))
         env.set('len', len)
@@ -63,16 +65,74 @@ class Interpreter:
         env.set('int', int)
         env.set('float', float)
         env.set('type', lambda x: type(x).__name__)
+        env.set('repr', repr)
+        env.set('assert', lambda cond, msg="Assertion failed": None if cond else (_ for _ in ()).throw(AssertionError(msg)))
+
         # Ternary
         env.set('trit', lambda v=0: Trit(v))
         env.set('ARRIVED', ARRIVED)
         env.set('WAITING', WAITING)
         env.set('CANCELLED', CANCELLED)
         env.set('tword', lambda v=0, w=8: TernaryWord(v, w))
+
         # Routing
         env.set('route', lambda rid, paths: self.router.route(rid, paths))
         env.set('resolve', lambda rid, pid, result=None: self.router.resolve(rid, pid, result))
         env.set('route_status', lambda: self.router.status())
+
+        # Math module
+        env.set('math', {
+            'pi': math.pi, 'e': math.e, 'tau': math.tau, 'inf': math.inf,
+            'sqrt': math.sqrt, 'abs': abs, 'pow': pow, 'log': math.log,
+            'log2': math.log2, 'log10': math.log10,
+            'sin': math.sin, 'cos': math.cos, 'tan': math.tan,
+            'asin': math.asin, 'acos': math.acos, 'atan': math.atan, 'atan2': math.atan2,
+            'floor': math.floor, 'ceil': math.ceil, 'round': round,
+            'min': min, 'max': max, 'sum': sum,
+            'factorial': math.factorial, 'gcd': math.gcd,
+            'amundson': 1 / (2 * math.e),  # The irreducible gap
+        })
+
+        # Time module
+        env.set('time', {
+            'now': time.time, 'sleep': time.sleep,
+            'ms': lambda: int(time.time() * 1000),
+            'iso': lambda: time.strftime('%Y-%m-%dT%H:%M:%S'),
+        })
+
+        # IO module
+        env.set('io', {
+            'read': lambda path: open(os.path.expanduser(path)).read(),
+            'write': lambda path, data: open(os.path.expanduser(path), 'w').write(data),
+            'append': lambda path, data: open(os.path.expanduser(path), 'a').write(data),
+            'exists': lambda path: os.path.exists(os.path.expanduser(path)),
+            'input': input,
+        })
+
+        # JSON module
+        env.set('json', {
+            'parse': json.loads,
+            'stringify': lambda obj, indent=None: json.dumps(obj, indent=indent, default=str),
+        })
+
+        # Crypto module
+        env.set('crypto', {
+            'sha256': lambda s: hashlib.sha256(s.encode()).hexdigest(),
+            'md5': lambda s: hashlib.md5(s.encode()).hexdigest(),
+            'random': random.random,
+            'randint': random.randint,
+            'choice': random.choice,
+            'shuffle': lambda lst: (random.shuffle(lst), lst)[1],
+        })
+
+        # Functional helpers
+        env.set('map', lambda fn, lst: [fn(x) for x in lst])
+        env.set('filter', lambda fn, lst: [x for x in lst if fn(x)])
+        env.set('reduce', lambda fn, lst, init=None: __import__('functools').reduce(fn, lst) if init is None else __import__('functools').reduce(fn, lst, init))
+        env.set('zip', lambda *args: [list(t) for t in zip(*args)])
+        env.set('enumerate', lambda lst: [[i, v] for i, v in enumerate(lst)])
+        env.set('sorted', lambda lst, key=None, reverse=False: sorted(lst, key=key, reverse=reverse))
+        env.set('reversed', lambda lst: list(reversed(lst)))
 
     def run(self, program):
         for stmt in program.statements:
@@ -133,6 +193,94 @@ class Interpreter:
 
         elif isinstance(stmt, ForLoop):
             self.exec_for(stmt, env)
+
+        elif isinstance(stmt, MatchStatement):
+            self.exec_match(stmt, env)
+
+        elif isinstance(stmt, TypeDefinition):
+            self.exec_type_def(stmt, env)
+
+        elif isinstance(stmt, SpawnStatement):
+            self.exec_spawn(stmt, env)
+
+        elif isinstance(stmt, ModuleDeclaration):
+            pass  # Module declarations are metadata only
+
+        elif isinstance(stmt, ImportStatement):
+            pass  # Imports handled at module resolution layer
+
+        elif isinstance(stmt, ExportStatement):
+            self.exec_statement(stmt.statement, env)
+
+    def exec_match(self, stmt, env):
+        """Execute match statement with pattern matching"""
+        value = self.eval_expr(stmt.value, env)
+        for case in stmt.cases:
+            match_env = Environment(parent=env)
+            if self.match_pattern(case.pattern, value, match_env):
+                self.exec_block(case.body, match_env)
+                return
+
+    def match_pattern(self, pattern, value, env):
+        """Check if a value matches a pattern, binding variables in env"""
+        if isinstance(pattern, WildcardPattern):
+            return True
+        if isinstance(pattern, LiteralPattern):
+            lit_val = self.eval_expr(pattern.value, env)
+            return value == lit_val
+        if isinstance(pattern, IdentifierPattern):
+            env.set(pattern.name, value)
+            return True
+        if isinstance(pattern, RangePattern):
+            start = self.eval_expr(pattern.start, env)
+            end = self.eval_expr(pattern.end, env)
+            return start <= value < end
+        if isinstance(pattern, ConstructorPattern):
+            if isinstance(value, dict):
+                if value.get('_type') == f"{pattern.type_name}.{pattern.variant}":
+                    for i, field_pat in enumerate(pattern.fields):
+                        field_vals = value.get('_fields', [])
+                        if i < len(field_vals):
+                            if not self.match_pattern(field_pat, field_vals[i], env):
+                                return False
+                    return True
+            return False
+        return False
+
+    def exec_type_def(self, stmt, env):
+        """Execute type definition — creates a constructor function"""
+        field_names = [f.name for f in stmt.fields if not isinstance(f.default_value, FunctionDefinition)]
+        field_defaults = {f.name: f.default_value for f in stmt.fields if f.default_value and not isinstance(f.default_value, FunctionDefinition)}
+        methods = {f.name: f.default_value for f in stmt.fields if isinstance(f.default_value, FunctionDefinition)}
+
+        def constructor(**kwargs):
+            instance = {}
+            for fname in field_names:
+                if fname in kwargs:
+                    instance[fname] = kwargs[fname]
+                elif fname in field_defaults:
+                    instance[fname] = self.eval_expr(field_defaults[fname], env)
+                else:
+                    instance[fname] = None
+            instance['_type'] = stmt.name
+            for mname, mdef in methods.items():
+                mdef._closure_env = env
+                instance[mname] = mdef
+            return instance
+
+        env.set(stmt.name, constructor)
+
+    def exec_spawn(self, stmt, env):
+        """Execute spawn statement — runs body (sync for now, async later)"""
+        import threading
+        spawn_env = Environment(parent=env)
+        def run_spawn():
+            try:
+                self.exec_block(stmt.body, spawn_env)
+            except ReturnSignal:
+                pass
+        t = threading.Thread(target=run_spawn, daemon=True)
+        t.start()
 
     def exec_if(self, stmt, env):
         if self.eval_expr(stmt.condition, env):
@@ -253,7 +401,38 @@ class Interpreter:
             return obj[index]
         if isinstance(expr, VectorLiteral):
             return tuple(self.eval_expr(c, env) for c in expr.components)
+        if isinstance(expr, LambdaExpression):
+            return self.eval_lambda(expr, env)
+        if isinstance(expr, MatchExpression):
+            return self.eval_match_expr(expr, env)
         raise RuntimeError(f"Unknown expression: {type(expr).__name__}")
+
+    def eval_lambda(self, expr, env):
+        """Evaluate lambda expression — returns a callable"""
+        def closure(*args):
+            call_env = Environment(parent=env)
+            for param, arg in zip(expr.parameters, args):
+                call_env.set(param.name, arg)
+            return self.eval_expr(expr.body, call_env)
+        return closure
+
+    def eval_match_expr(self, expr, env):
+        """Evaluate match as an expression (returns a value)"""
+        value = self.eval_expr(expr.value, env)
+        for case in expr.cases:
+            match_env = Environment(parent=env)
+            if self.match_pattern(case.pattern, value, match_env):
+                if case.body:
+                    for stmt in case.body[:-1]:
+                        self.exec_statement(stmt, match_env)
+                    last = case.body[-1]
+                    if isinstance(last, ExpressionStatement):
+                        return self.eval_expr(last.expression, match_env)
+                    elif isinstance(last, ReturnStatement) and last.value:
+                        return self.eval_expr(last.value, match_env)
+                    self.exec_statement(last, match_env)
+                return None
+        return None
 
     def eval_binary(self, expr, env):
         left = self.eval_expr(expr.left, env)
@@ -325,9 +504,21 @@ class Interpreter:
         func = self.eval_expr(expr.function, env)
 
         # Handle lambda-like callables from member access
-        if callable(func):
-            args = [self.eval_expr(a, env) for a in expr.arguments]
-            return func(*args)
+        if callable(func) and not isinstance(func, FunctionDefinition):
+            # Separate positional and keyword args
+            pos_args = []
+            kw_args = {}
+            for a in expr.arguments:
+                val = self.eval_expr(a, env)
+                if isinstance(val, dict) and len(val) == 1 and isinstance(a, DictLiteral):
+                    # Keyword argument encoded as single-entry dict
+                    for k, v in val.items():
+                        kw_args[k] = v
+                else:
+                    pos_args.append(val)
+            if kw_args:
+                return func(*pos_args, **kw_args)
+            return func(*pos_args)
 
         if not isinstance(func, FunctionDefinition):
             raise RuntimeError(f"'{func}' is not callable")

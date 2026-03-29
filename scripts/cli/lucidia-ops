@@ -1,0 +1,113 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+BR_ROOT="${BR_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
+BR_AI="${BR_ROOT}/tools/ai/br-ai.sh"
+
+show_help() {
+  cat <<'EOF'
+Lucidia Ops
+
+Usage:
+  lucidia-ops plan <objective>
+  lucidia-ops run <objective>
+  lucidia-ops remediate <objective>
+  lucidia-ops fleet
+  lucidia-ops orgs [map|detail <org>|repos <org> [count]|weakest [count]|stale [count]]
+  lucidia-ops health
+  lucidia-ops sites
+  lucidia-ops history
+  lucidia-ops last
+  lucidia-ops export [markdown|json] [limit]
+  lucidia-ops replay [last|id] [auto|remediate]
+
+Examples:
+  lucidia-ops plan "check the Pi fleet and list available models"
+  lucidia-ops run "regenerate public sites and inspect workflow status"
+  lucidia-ops remediate "purge Cloudflare cache for blackroad.io"
+  lucidia-ops export json 10
+  lucidia-ops replay last remediate
+  lucidia-ops plan "show an overview of all BlackRoad orgs"
+  lucidia-ops orgs map
+  lucidia-ops orgs detail BlackRoad-AI
+  lucidia-ops orgs repos BlackRoad-OS 8
+  lucidia-ops orgs stale 5
+  lucidia-ops health
+EOF
+}
+
+cmd="${1:-help}"
+case "$cmd" in
+  plan)
+    shift
+    exec "$BR_AI" ops "$@"
+    ;;
+  run|auto|autonomous)
+    shift
+    exec "$BR_AI" autonomous "$@"
+    ;;
+  remediate)
+    shift
+    exec "$BR_AI" remediate "$@"
+    ;;
+  fleet)
+    exec "$BR_AI" autonomous "check Pi fleet health and list available models"
+    ;;
+  orgs)
+    shift
+    case "${1:-overview}" in
+      detail)
+        shift
+        exec "$BR_AI" ops "show org detail for ${1:-BlackRoad-OS}"
+        ;;
+      map)
+        exec "$BR_AI" ops "show the BlackRoad org category map"
+        ;;
+      weakest)
+        shift
+        exec "$BR_AI" ops "show the weakest ${1:-5} BlackRoad orgs"
+        ;;
+      stale)
+        shift
+        exec "$BR_AI" ops "show the most stale ${1:-5} BlackRoad orgs"
+        ;;
+      repos)
+        shift
+        exec "$BR_AI" ops "show the top ${2:-5} repos in ${1:-BlackRoad-OS}"
+        ;;
+      overview|all|"")
+        exec "$BR_AI" ops "show an overview of all BlackRoad orgs"
+        ;;
+      *)
+        exec "$BR_AI" ops "show org detail for $1"
+        ;;
+    esac
+    ;;
+  health)
+    exec "$BR_AI" autonomous "run local system health and summarize the result"
+    ;;
+  sites)
+    exec "$BR_AI" remediate "regenerate public sites and report what changed"
+    ;;
+  history)
+    shift
+    exec "$BR_AI" history "$@"
+    ;;
+  last)
+    exec "$BR_AI" last
+    ;;
+  export)
+    shift
+    exec "$BR_AI" export "$@"
+    ;;
+  replay)
+    shift
+    exec "$BR_AI" replay "$@"
+    ;;
+  help|--help|-h|"")
+    show_help
+    ;;
+  *)
+    exec "$BR_AI" autonomous "$cmd" "${@:2}"
+    ;;
+esac

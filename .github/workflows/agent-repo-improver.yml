@@ -61,51 +61,61 @@ jobs:
 
             const issues = [];
 
-            for (const org of orgs) {
-              let page = 1;
-              let repos = [];
-              while (true) {
-                const { data } = await github.rest.repos.listForOrg({ org, per_page: 100, page, type: 'all' });
-                if (data.length === 0) break;
-                repos = repos.concat(data.filter(r => !r.archived && !r.fork));
-                page++;
+            try {
+              for (const org of orgs) {
+                let page = 1;
+                let repos = [];
+                while (true) {
+                  const { data } = await github.rest.repos.listForOrg({ org, per_page: 100, page, type: 'all' });
+                  if (data.length === 0) break;
+                  repos = repos.concat(data.filter(r => !r.archived && !r.fork));
+                  page++;
+                }
+
+                for (const repo of repos) {
+                  if (issues.length >= maxRepos) break;
+                  const fixes = [];
+
+                  // Check README
+                  try {
+                    const { data: readme } = await github.rest.repos.getReadme({ owner: org, repo: repo.name });
+                    const content = Buffer.from(readme.content, 'base64').toString();
+                    if (content.length < 100) fixes.push('readme_stub');
+                  } catch {
+                    fixes.push('readme_missing');
+                  }
+
+                  // Check LICENSE
+                  try {
+                    await github.rest.repos.getContent({ owner: org, repo: repo.name, path: 'LICENSE' });
+                  } catch {
+                    fixes.push('license_missing');
+                  }
+
+                  // Check description
+                  if (!repo.description || repo.description.length < 10) {
+                    fixes.push('description_missing');
+                  }
+
+                  // Check topics
+                  const { data: topicData } = await github.rest.repos.getAllTopics({ owner: org, repo: repo.name });
+                  if (!topicData.names || topicData.names.length === 0) {
+                    fixes.push('topics_missing');
+                  }
+
+                  if (fixes.length > 0) {
+                    issues.push({ org, repo: repo.name, fixes, language: repo.language || 'unknown' });
+                  }
+                }
               }
-
-              for (const repo of repos) {
-                if (issues.length >= maxRepos) break;
-                const fixes = [];
-
-                // Check README
-                try {
-                  const { data: readme } = await github.rest.repos.getReadme({ owner: org, repo: repo.name });
-                  const content = Buffer.from(readme.content, 'base64').toString();
-                  if (content.length < 100) fixes.push('readme_stub');
-                } catch {
-                  fixes.push('readme_missing');
-                }
-
-                // Check LICENSE
-                try {
-                  await github.rest.repos.getContent({ owner: org, repo: repo.name, path: 'LICENSE' });
-                } catch {
-                  fixes.push('license_missing');
-                }
-
-                // Check description
-                if (!repo.description || repo.description.length < 10) {
-                  fixes.push('description_missing');
-                }
-
-                // Check topics
-                const { data: topicData } = await github.rest.repos.getAllTopics({ owner: org, repo: repo.name });
-                if (!topicData.names || topicData.names.length === 0) {
-                  fixes.push('topics_missing');
-                }
-
-                if (fixes.length > 0) {
-                  issues.push({ org, repo: repo.name, fixes, language: repo.language || 'unknown' });
-                }
+            } catch (error) {
+              if (String(error?.message || error).includes('IP allow list enabled')) {
+                core.warning('Skipping repo audit because the org IP allow list blocks GitHub-hosted runners.');
+                core.setOutput('repos', '[]');
+                core.setOutput('total', '0');
+                return;
               }
+              throw error;
             }
 
             core.setOutput('repos', JSON.stringify(issues.slice(0, maxRepos)));
@@ -138,118 +148,138 @@ jobs:
             const language = '${{ matrix.language }}';
 
             console.log(`Fixing ${org}/${repo}: ${fixes.join(', ')}`);
-
-            // Fix missing description
-            if (fixes.includes('description_missing')) {
-              const langDesc = {
-                'JavaScript': 'JS/TS application',
-                'TypeScript': 'TypeScript application',
-                'Python': 'Python application',
-                'Shell': 'Shell scripts and automation',
-                'HTML': 'Web application',
-                'Rust': 'Rust application',
-                'Go': 'Go application',
-                'unknown': 'BlackRoad OS component'
-              };
-              const desc = `${repo.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())} — ${langDesc[language] || 'BlackRoad OS component'}. Proprietary to BlackRoad OS, Inc.`;
-
-              await github.rest.repos.update({ owner: org, repo, description: desc.substring(0, 350) });
-              console.log(`  Set description: ${desc.substring(0, 80)}...`);
-            }
-
-            // Fix missing topics
-            if (fixes.includes('topics_missing')) {
-              const baseTags = ['blackroad', 'blackroad-os'];
-              const langTags = {
-                'JavaScript': ['javascript', 'nodejs'],
-                'TypeScript': ['typescript', 'nodejs'],
-                'Python': ['python'],
-                'Shell': ['bash', 'shell', 'automation'],
-                'HTML': ['html', 'web'],
-                'Rust': ['rust'],
-                'Go': ['golang']
-              };
-              const tags = [...baseTags, ...(langTags[language] || [])];
-
-              // Infer from repo name
-              if (repo.includes('ai') || repo.includes('lucidia')) tags.push('ai');
-              if (repo.includes('security') || repo.includes('audit')) tags.push('security');
-              if (repo.includes('fleet') || repo.includes('pi')) tags.push('raspberry-pi');
-              if (repo.includes('road')) tags.push('sovereign-infrastructure');
-
-              await github.rest.repos.replaceAllTopics({ owner: org, repo, names: [...new Set(tags)].slice(0, 20) });
-              console.log(`  Set topics: ${tags.join(', ')}`);
-            }
-
-            // Fix missing LICENSE (add proprietary license)
-            if (fixes.includes('license_missing')) {
-              const license = `BlackRoad OS, Inc. — Proprietary License
-
-Copyright (c) 2024-2026 BlackRoad OS, Inc. All Rights Reserved.
-
-This software is proprietary to BlackRoad OS, Inc.
-Source code is publicly visible for transparency.
-Commercial use, forking, and redistribution are prohibited
-without written authorization from BlackRoad OS, Inc.
-
-Contact: alexa@blackroad.io
-Website: https://blackroad.io
-`;
-              try {
-                await github.rest.repos.createOrUpdateFileContents({
-                  owner: org, repo, path: 'LICENSE',
-                  message: 'add proprietary LICENSE',
-                  content: Buffer.from(license).toString('base64'),
-                  committer: { name: 'BlackRoad Agent', email: 'agent@blackroad.io' }
-                });
-                console.log('  Added LICENSE');
-              } catch (e) {
-                console.log(`  LICENSE skip: ${e.message}`);
-              }
-            }
-
-            // Fix stub README (< 100 chars)
-            if (fixes.includes('readme_stub') || fixes.includes('readme_missing')) {
-              const readme = `# ${repo}
-
-**Proprietary Software — [BlackRoad OS, Inc.](https://github.com/BlackRoad-OS-Inc)**
-
-${language !== 'unknown' ? `Built with ${language}.` : ''}
-
-## About
-
-Part of the BlackRoad OS ecosystem — sovereign infrastructure on self-hosted hardware.
-
-## License
-
-This software is proprietary to BlackRoad OS, Inc. Source code is publicly visible for transparency. Commercial use, forking, and redistribution are prohibited without written authorization.
-
----
-
-**BlackRoad OS — Pave Tomorrow.**
-
-*Copyright 2024-2026 BlackRoad OS, Inc. All Rights Reserved.*
-`;
-              try {
-                let sha;
-                try {
-                  const { data } = await github.rest.repos.getContent({ owner: org, repo, path: 'README.md' });
-                  sha = data.sha;
-                } catch {}
-
-                const params = {
-                  owner: org, repo, path: 'README.md',
-                  message: fixes.includes('readme_missing') ? 'add README' : 'improve stub README',
-                  content: Buffer.from(readme).toString('base64'),
-                  committer: { name: 'BlackRoad Agent', email: 'agent@blackroad.io' }
+            try {
+              // Fix missing description
+              if (fixes.includes('description_missing')) {
+                const langDesc = {
+                  'JavaScript': 'JS/TS application',
+                  'TypeScript': 'TypeScript application',
+                  'Python': 'Python application',
+                  'Shell': 'Shell scripts and automation',
+                  'HTML': 'Web application',
+                  'Rust': 'Rust application',
+                  'Go': 'Go application',
+                  'unknown': 'BlackRoad OS component'
                 };
-                if (sha) params.sha = sha;
+                const desc = `${repo.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())} - ${langDesc[language] || 'BlackRoad OS component'}. Proprietary to BlackRoad OS, Inc.`;
 
-                await github.rest.repos.createOrUpdateFileContents(params);
-                console.log('  Fixed README');
-              } catch (e) {
-                console.log(`  README skip: ${e.message}`);
+                await github.rest.repos.update({ owner: org, repo, description: desc.substring(0, 350) });
+                console.log(`  Set description: ${desc.substring(0, 80)}...`);
               }
+
+              // Fix missing topics
+              if (fixes.includes('topics_missing')) {
+                const baseTags = ['blackroad', 'blackroad-os'];
+                const langTags = {
+                  'JavaScript': ['javascript', 'nodejs'],
+                  'TypeScript': ['typescript', 'nodejs'],
+                  'Python': ['python'],
+                  'Shell': ['bash', 'shell', 'automation'],
+                  'HTML': ['html', 'web'],
+                  'Rust': ['rust'],
+                  'Go': ['golang']
+                };
+                const tags = [...baseTags, ...(langTags[language] || [])];
+
+                // Infer from repo name
+                if (repo.includes('ai') || repo.includes('lucidia')) tags.push('ai');
+                if (repo.includes('security') || repo.includes('audit')) tags.push('security');
+                if (repo.includes('fleet') || repo.includes('pi')) tags.push('raspberry-pi');
+                if (repo.includes('road')) tags.push('sovereign-infrastructure');
+
+                await github.rest.repos.replaceAllTopics({ owner: org, repo, names: [...new Set(tags)].slice(0, 20) });
+                console.log(`  Set topics: ${tags.join(', ')}`);
+              }
+
+              // Fix missing LICENSE (add proprietary license)
+              if (fixes.includes('license_missing')) {
+                const license = [
+                  'BlackRoad OS, Inc. - Proprietary License',
+                  '',
+                  'Copyright (c) 2024-2026 BlackRoad OS, Inc. All Rights Reserved.',
+                  '',
+                  'This software is proprietary to BlackRoad OS, Inc.',
+                  'Source code is publicly visible for transparency.',
+                  'Commercial use, forking, and redistribution are prohibited',
+                  'without written authorization from BlackRoad OS, Inc.',
+                  '',
+                  'Contact: alexa@blackroad.io',
+                  'Website: https://blackroad.io',
+                  ''
+                ].join('\n');
+                try {
+                  await github.rest.repos.createOrUpdateFileContents({
+                    owner: org, repo, path: 'LICENSE',
+                    message: 'add proprietary LICENSE',
+                    content: Buffer.from(license).toString('base64'),
+                    committer: { name: 'BlackRoad Agent', email: 'agent@blackroad.io' }
+                  });
+                  console.log('  Added LICENSE');
+                } catch (e) {
+                  console.log(`  LICENSE skip: ${e.message}`);
+                }
+              }
+
+                try {
+                  // Fix stub README (< 100 chars)
+                  if (fixes.includes('readme_stub') || fixes.includes('readme_missing')) {
+                    const readme = [
+                      `# ${repo}`,
+                      '',
+                      '**Proprietary Software - [BlackRoad OS, Inc.](https://github.com/BlackRoad-OS-Inc)**',
+                      '',
+                      language !== 'unknown' ? `Built with ${language}.` : '',
+                      '',
+                      '## About',
+                      '',
+                      'Part of the BlackRoad OS ecosystem - sovereign infrastructure on self-hosted hardware.',
+                      '',
+                      '## License',
+                      '',
+                      'This software is proprietary to BlackRoad OS, Inc. Source code is publicly visible for transparency. Commercial use, forking, and redistribution are prohibited without written authorization.',
+                      '',
+                      '---',
+                      '',
+                      '**BlackRoad OS - Pave Tomorrow.**',
+                      '',
+                      '*Copyright 2024-2026 BlackRoad OS, Inc. All Rights Reserved.*',
+                      ''
+                    ].join('\n');
+                    try {
+                      let sha;
+                      try {
+                        const { data } = await github.rest.repos.getContent({ owner: org, repo, path: 'README.md' });
+                        sha = data.sha;
+                      } catch {}
+
+                      const params = {
+                        owner: org, repo, path: 'README.md',
+                        message: fixes.includes('readme_missing') ? 'add README' : 'improve stub README',
+                        content: Buffer.from(readme).toString('base64'),
+                        committer: { name: 'BlackRoad Agent', email: 'agent@blackroad.io' }
+                      };
+                      if (sha) params.sha = sha;
+
+                      await github.rest.repos.createOrUpdateFileContents(params);
+                      console.log('  Fixed README');
+                    } catch (e) {
+                      console.log(`  README skip: ${e.message}`);
+                    }
+                  }
+                } catch (error) {
+                  if (String(error?.message || error).includes('IP allow list enabled')) {
+                    core.warning(`Skipping fixes for ${org}/${repo} because the org IP allow list blocks GitHub-hosted runners.`);
+                    return;
+                  }
+                  throw error;
+                }
+              }
+            } catch (error) {
+              if (String(error?.message || error).includes('IP allow list enabled')) {
+                core.warning(`Skipping fix job for ${org}/${repo} because the org IP allow list blocks GitHub-hosted runners.`);
+                return;
+              }
+              throw error;
             }
 
   report:

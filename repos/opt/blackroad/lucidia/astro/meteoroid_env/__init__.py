@@ -1,1 +1,0 @@
-"""Meteoroid environment utilities."""

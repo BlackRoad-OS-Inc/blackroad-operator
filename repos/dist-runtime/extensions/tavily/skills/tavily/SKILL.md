@@ -1,1 +1,0 @@
-../../../../../dist/extensions/tavily/skills/tavily/SKILL.md

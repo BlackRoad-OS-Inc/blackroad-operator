@@ -1,1 +1,0 @@
-# blackboxprogramming/rowboat/CLAUDE.md

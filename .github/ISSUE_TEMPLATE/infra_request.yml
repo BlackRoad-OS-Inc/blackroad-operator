@@ -1,12 +1,12 @@
-name: Infrastructure Request
-description: Request infrastructure changes (deploy, DNS, workers, Pi, etc.)
+name: Operations Request
+description: Request deploy, DNS, workflow, Pi fleet, monitoring, or local AI operations work
 title: '[Infra]: '
 labels: ['type:infra', 'status:backlog']
 body:
   - type: markdown
     attributes:
       value: |
-        Request changes to BlackRoad infrastructure - deployments, DNS, workers, Pi fleet, etc.
+        Request changes to BlackRoad operations: deployments, DNS, workers, Pi fleet, workflows, or Ollama routing.
 
   - type: dropdown
     id: platform
@@ -23,6 +23,7 @@ body:
         - GitHub Actions
         - Tailscale mesh
         - Cloudflare Tunnel
+        - Local Ollama operator
     validations:
       required: true
 
@@ -38,6 +39,8 @@ body:
         - Security patch
         - Monitoring / alerting
         - Decommission
+        - Workflow / automation change
+        - Ollama / agent routing change
     validations:
       required: true
 
@@ -71,3 +74,14 @@ body:
     attributes:
       label: Rollback plan
       description: How do we revert if something goes wrong?
+
+  - type: textarea
+    id: executable_path
+    attributes:
+      label: Executable path
+      description: If this should be runnable by agents, describe the exact command or automation target.
+      placeholder: |
+        Example:
+        - br ai autonomous "deploy blackroad.io and verify health"
+        - br cloudflare dns list blackroad.io
+        - br pi status

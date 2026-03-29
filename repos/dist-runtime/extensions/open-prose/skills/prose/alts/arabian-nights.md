@@ -1,1 +1,0 @@
-../../../../../../dist/extensions/open-prose/skills/prose/alts/arabian-nights.md

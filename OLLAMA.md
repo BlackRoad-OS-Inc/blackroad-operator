@@ -24,6 +24,102 @@
 
 ## Overview
 
+### Fast Start For This Repo
+
+If you want Lucidia to operate BlackRoad from local Ollama instead of plain chat, use the repo control plane first:
+
+```bash
+cd /Users/alexa/blackroad-operator
+
+# Conversational use
+./tools/ai/br-ai.sh chat
+
+# Let Ollama plan safe operations
+./tools/ai/br-ai.sh ops "check the Pi fleet and list available models"
+
+# Let Ollama execute the safe plan
+./tools/ai/br-ai.sh autonomous "run local health and summarize issues"
+
+# Inspect a workflow run in detail
+./tools/ai/br-ai.sh ops "show the latest failed workflow run details"
+
+# Inspect the full BlackRoad org layer
+./tools/ai/br-ai.sh ops "show an overview of all BlackRoad orgs"
+
+# Inspect the front-door vs internal org split
+./tools/ai/br-ai.sh ops "show the BlackRoad org category map"
+
+# Inspect the strongest repo surface inside one org
+./tools/ai/br-ai.sh ops "show the top 8 repos in BlackRoad-OS"
+
+# Surface shell-like or stale orgs
+./tools/ai/br-ai.sh ops "show the most stale 5 BlackRoad orgs"
+
+# Dispatch a safe workflow
+./tools/ai/br-ai.sh remediate "run the Autonomous Websites workflow on main"
+
+# Purge Cloudflare cache through the allowlist
+./tools/ai/br-ai.sh remediate "purge Cloudflare cache for blackroad.io"
+
+# Trigger a bounded GitHub rollback/rerun path
+./tools/ai/br-ai.sh remediate "rerun the previous successful GitHub deploy workflow"
+
+# Shortcuts
+./scripts/cli/lucidia-ops fleet
+./scripts/cli/lucidia-ops run "regenerate public sites and report the result"
+./scripts/cli/lucidia-ops history
+./scripts/cli/ollama-os plan "check workflow status"
+```
+
+### What Ollama Can Operate Here
+
+Trust levels in this repo:
+
+- `ops`: plan only
+- `autonomous`: execute read-only allowlisted actions
+- `remediate`: execute read-only and mutating allowlisted actions
+
+Each Lucidia plan and execution is logged locally in `~/.blackroad/ai-ops-history.db`.
+
+The current safe autonomous surface in this repo includes:
+
+- local health checks
+- all-orgs overview and category mapping across the canonical BlackRoad org set
+- per-org drilldown, top-repo views, weakest-org summaries, and stale/shell-org detection
+- Raspberry Pi fleet status, models, worlds, logs, and task queueing
+- bounded Pi-side generation for operator tasks
+- deploy detection, deploy history inspection, GitHub deploy watching, and GitHub rollback/rerun
+- Cloudflare zone, DNS, analytics inspection, and cache purge
+- GitHub workflow listing, recent workflow run inspection, single-run detail inspection, and dispatch for a small allowlisted workflow set
+- public site regeneration
+
+Mutating actions require remediation trust. That includes Pi tasking, Pi-side generation, workflow dispatch, GitHub rollback/rerun, Cloudflare cache purge, and site regeneration.
+
+To inspect the local audit trail:
+
+```bash
+./tools/ai/br-ai.sh history
+./tools/ai/br-ai.sh last
+./tools/ai/br-ai.sh export markdown 20
+./tools/ai/br-ai.sh export json 20
+./tools/ai/br-ai.sh replay last
+./tools/ai/br-ai.sh replay 42 remediate
+./scripts/cli/lucidia-ops history
+```
+
+Current workflow dispatches in the allowlist:
+
+- `Connector: Email Digest`
+- `Connector: Stripe`
+- `Agent: Workflow Sync`
+- `Agent: Repo Improver`
+- `Check Dependencies`
+- `Scrape & Index All Orgs`
+- `Autonomous Websites`
+- `Agent GitHub Assets`
+
+This is not arbitrary shell execution. The model plans against an allowlist and then the repo executes only those mapped actions.
+
 ### Why Local Inference?
 
 BlackRoad OS embraces local-first AI for:

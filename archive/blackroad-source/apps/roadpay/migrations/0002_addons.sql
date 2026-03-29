@@ -1,2 +1,0 @@
--- BlackRoad OS — apps/roadpay/migrations/0002_addons.sql
--- TODO: 0002_addons

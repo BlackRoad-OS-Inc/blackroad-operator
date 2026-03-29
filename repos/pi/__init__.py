@@ -1,2 +1,0 @@
-"""BlackRoad Pi API package."""
-

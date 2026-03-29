@@ -1,2 +1,0 @@
--- BlackRoad OS — users/humans/accounts/schema.sql
--- TODO: schema

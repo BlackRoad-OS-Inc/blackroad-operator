@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BlackRoad Pricing</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0a;color:#f5f5f5;font-family:'Inter',sans-serif;min-height:100vh}
+h1,h2,h3{font-family:'Space Grotesk',sans-serif}
+.mono{font-family:'JetBrains Mono',monospace}
+nav{height:52px;display:flex;align-items:center;padding:0 24px;border-bottom:1px solid #1a1a1a}
+.logo{display:flex;align-items:center;gap:8px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px}
+.dots{display:flex;gap:3px}
+.dots i{width:6px;height:6px;border-radius:50%;display:block}
+.d1{background:#FF6B2B}.d2{background:#FF2255}.d3{background:#CC00AA}.d4{background:#8844FF}.d5{background:#4488FF}.d6{background:#00D4FF}
+.grad{height:1px;background:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF)}
+main{max-width:900px;margin:0 auto;padding:48px 20px}
+.toggle-wrap{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:36px}
+.toggle-label{font-size:13px;color:#737373}
+.toggle-label.active{color:#f5f5f5}
+.toggle{width:44px;height:24px;background:#1a1a1a;border-radius:12px;cursor:pointer;position:relative;border:1px solid #262626;transition:background .2s}
+.toggle .knob{width:18px;height:18px;background:#f5f5f5;border-radius:50%;position:absolute;top:2px;left:2px;transition:left .2s}
+.toggle.on .knob{left:22px}
+.save-badge{font-size:11px;color:#22c55e;font-weight:600}
+.plans{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:48px}
+@media(max-width:680px){.plans{grid-template-columns:1fr}}
+.plan{background:#131313;border:1px solid #1a1a1a;border-radius:12px;padding:28px 24px;display:flex;flex-direction:column}
+.plan.pop{border-color:#262626}
+.plan-name{font-size:13px;color:#737373;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px}
+.plan-price{font-size:36px;font-weight:700;font-family:'Space Grotesk',sans-serif}
+.plan-price span{font-size:14px;font-weight:400;color:#525252}
+.plan-desc{font-size:13px;color:#525252;margin:8px 0 20px}
+.plan-features{list-style:none;margin-bottom:auto;padding-bottom:20px}
+.plan-features li{font-size:13px;color:#a3a3a3;padding:6px 0;display:flex;align-items:center;gap:8px}
+.plan-features li::before{content:"";width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.p-free li::before{background:#4488FF}
+.p-builder li::before{background:#FF6B2B}
+.p-studio li::before{background:#CC00AA}
+.cta{display:block;text-align:center;padding:12px;border-radius:8px;font-size:14px;font-weight:600;text-decoration:none;cursor:pointer;border:none;width:100%}
+.cta-outline{background:transparent;border:1px solid #262626;color:#f5f5f5}
+.cta-fill{background:#f5f5f5;color:#0a0a0a}
+.cta:hover{opacity:.85}
+h2.section{font-size:20px;margin-bottom:20px}
+.compare{width:100%;border-collapse:collapse;margin-bottom:48px}
+.compare th,.compare td{padding:10px 12px;text-align:left;font-size:13px;border-bottom:1px solid #1a1a1a}
+.compare th{color:#737373;font-weight:500}
+.compare td{color:#a3a3a3}
+.compare td:not(:first-child){text-align:center;width:100px}
+.check{width:8px;height:8px;border-radius:50%;display:inline-block}
+.check.y{background:#22c55e}.check.n{background:#262626}
+.faq-item{background:#131313;border:1px solid #1a1a1a;border-radius:8px;margin-bottom:6px;overflow:hidden}
+.faq-q{padding:16px 20px;font-size:14px;font-weight:500;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.faq-q::after{content:"+";color:#525252;font-size:18px;transition:transform .2s}
+.faq-item.open .faq-q::after{transform:rotate(45deg)}
+.faq-a{padding:0 20px;max-height:0;overflow:hidden;transition:max-height .3s,padding .3s;font-size:13px;color:#737373;line-height:1.6}
+.faq-item.open .faq-a{max-height:200px;padding:0 20px 16px}
+</style>
+</head>
+<body>
+<nav><div class="logo"><span class="dots"><i class="d1"></i><i class="d2"></i><i class="d3"></i><i class="d4"></i><i class="d5"></i><i class="d6"></i></span>BlackRoad</div></nav>
+<div class="grad"></div>
+<main>
+<div style="text-align:center;margin-bottom:12px"><h1 style="font-size:32px">Pricing</h1><p style="color:#737373;font-size:14px;margin-top:6px">Simple plans. Scale when ready.</p></div>
+<div class="toggle-wrap">
+<span class="toggle-label active" id="lbl-mo">Monthly</span>
+<div class="toggle" id="billingToggle" onclick="toggleBilling()"><div class="knob"></div></div>
+<span class="toggle-label" id="lbl-yr">Annual</span>
+<span class="save-badge">Save 20%</span>
+</div>
+<div class="plans">
+<div class="plan"><div class="plan-name">Free</div><div class="plan-price">$0</div><div class="plan-desc">For exploration</div><ul class="plan-features p-free"><li>5 agents</li><li>1 GB storage</li><li>Community support</li></ul><button class="cta cta-outline">Get Started</button></div>
+<div class="plan pop"><div class="plan-name">Builder</div><div class="plan-price" data-mo="10" data-yr="8">$10<span>/mo</span></div><div class="plan-desc">For serious builders</div><ul class="plan-features p-builder"><li>50 agents</li><li>10 GB storage</li><li>Priority support</li><li>Custom domains</li></ul><button class="cta cta-fill">Request Early Access</button></div>
+<div class="plan"><div class="plan-name">Studio</div><div class="plan-price" data-mo="29" data-yr="23">$29<span>/mo</span></div><div class="plan-desc">For teams and studios</div><ul class="plan-features p-studio"><li>500 agents</li><li>100 GB storage</li><li>Dedicated support</li><li>SSO &amp; audit logs</li></ul><button class="cta cta-fill">Request Early Access</button></div>
+</div>
+<h2 class="section">Feature Comparison</h2>
+<table class="compare"><thead><tr><th>Feature</th><th>Free</th><th>Builder</th><th>Studio</th></tr></thead><tbody>
+<tr><td>Agents</td><td>5</td><td>50</td><td>500</td></tr>
+<tr><td>Storage</td><td>1 GB</td><td>10 GB</td><td>100 GB</td></tr>
+<tr><td>Custom Domains</td><td><span class="check n"></span></td><td><span class="check y"></span></td><td><span class="check y"></span></td></tr>
+<tr><td>API Access</td><td><span class="check n"></span></td><td><span class="check y"></span></td><td><span class="check y"></span></td></tr>
+<tr><td>Team Members</td><td>1</td><td>5</td><td>Unlimited</td></tr>
+<tr><td>Webhooks</td><td><span class="check n"></span></td><td><span class="check y"></span></td><td><span class="check y"></span></td></tr>
+<tr><td>SSO</td><td><span class="check n"></span></td><td><span class="check n"></span></td><td><span class="check y"></span></td></tr>
+<tr><td>Audit Logs</td><td><span class="check n"></span></td><td><span class="check n"></span></td><td><span class="check y"></span></td></tr>
+</tbody></table>
+<h2 class="section">FAQ</h2>
+<div id="faq">
+<div class="faq-item"><div class="faq-q">Can I switch plans later?</div><div class="faq-a">Yes. Upgrade or downgrade anytime. Changes take effect on your next billing cycle.</div></div>
+<div class="faq-item"><div class="faq-q">What payment methods do you accept?</div><div class="faq-a">All major credit and debit cards through Stripe. No crypto at this time.</div></div>
+<div class="faq-item"><div class="faq-q">Is there a free trial for paid plans?</div><div class="faq-a">The Free plan has no time limit. Paid plans include a 14-day trial with full features.</div></div>
+<div class="faq-item"><div class="faq-q">Where is data stored?</div><div class="faq-a">Data runs on our sovereign infrastructure. No third-party cloud providers hold your data.</div></div>
+<div class="faq-item"><div class="faq-q">Can I self-host?</div><div class="faq-a">Studio plan includes self-hosting documentation and deployment scripts for your own hardware.</div></div>
+<div class="faq-item"><div class="faq-q">Do you offer refunds?</div><div class="faq-a">Yes. Full refund within 30 days if the product is not right for you. No questions asked.</div></div>
+</div>
+</main>
+<script>
+let annual=false;
+function toggleBilling(){
+annual=!annual;
+document.getElementById("billingToggle").classList.toggle("on",annual);
+document.getElementById("lbl-mo").classList.toggle("active",!annual);
+document.getElementById("lbl-yr").classList.toggle("active",annual);
+document.querySelectorAll(".plan-price[data-mo]").forEach(el=>{
+const p=annual?el.dataset.yr:el.dataset.mo;
+el.innerHTML="$"+p+"<span>/mo</span>";
+});
+}
+document.querySelectorAll(".faq-item").forEach(item=>{
+item.querySelector(".faq-q").addEventListener("click",()=>item.classList.toggle("open"));
+});
+</script>
+</body>
+</html>

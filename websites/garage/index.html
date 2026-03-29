@@ -1,413 +1,203 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<link rel="icon" type="image/png" sizes="32x32" href="https://images.blackroad.io/brand/br-square-32.png" />
-<link rel="icon" type="image/png" sizes="192x192" href="https://images.blackroad.io/brand/br-square-192.png" />
-<link rel="apple-touch-icon" sizes="180x180" href="https://images.blackroad.io/brand/apple-touch-icon.png" />
-<meta property="og:image" content="https://images.blackroad.io/brand/br-square-512.png" />
-<meta name="twitter:card" content="summary" />
-<meta name="twitter:image" content="https://images.blackroad.io/brand/br-square-512.png" />
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Garage — Your sovereign dev environment. Live preview, 90 CLI tools, AI pair programming, deploy to fleet. Build on BlackRoad OS.">
-<meta name="theme-color" content="#CC00AA">
-<link rel="canonical" href="https://garage.blackroad.io">
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://garage.blackroad.io">
-<meta property="og:title" content="Garage — Sovereign Dev Environment">
-<meta property="og:description" content="Live preview. 90 CLI tools. AI pair programming. Deploy to your own fleet. Your code never leaves your hardware.">
-<meta property="og:site_name" content="BlackRoad OS">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Garage","url":"https://garage.blackroad.io","description":"Sovereign dev environment for BlackRoad OS."}</script>
-<title>Garage — Sovereign Dev Environment</title>
-<link rel="stylesheet" href="../_shared/design.css">
-<style>
-  .hero {
-    min-height: 100vh;
-    display: flex; flex-direction: column; justify-content: center;
-    padding: var(--sp-xl) var(--sp-md);
-    position: relative; overflow: hidden;
-  }
-  @media (min-width: 768px) {
-    .hero { padding: 0 var(--sp-xl); }
-  }
-  .hero-eyebrow {
-    font-family: var(--jb); font-size: 0.75rem;
-    letter-spacing: 0.2em; text-transform: uppercase;
-    color: var(--subtle); margin-bottom: var(--sp-md);
-    display: flex; align-items: center; gap: 10px;
-  }
-  .hero-eyebrow::before {
-    content: ''; width: 6px; height: 6px;
-    background: #CC00AA; border-radius: 50%;
-    animation: pulse 2s ease-in-out infinite;
-  }
-  @keyframes pulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.4; transform: scale(0.8); }
-  }
-  .hero h1 { max-width: 800px; margin-bottom: var(--sp-lg); }
-  .hero-sub {
-    font-size: 1.1rem; color: var(--subtle);
-    max-width: 560px; margin-bottom: var(--sp-xl); line-height: 1.7;
-  }
-  @media (min-width: 768px) {
-    .hero-sub { font-size: 1.2rem; }
-  }
-  .hero-actions { display: flex; gap: var(--sp-md); align-items: center; flex-wrap: wrap; }
-  .btn-primary {
-    display: inline-flex; align-items: center; gap: 8px;
-    background: var(--grad); color: var(--white);
-    padding: 14px 28px; border-radius: 6px;
-    font-weight: 700; font-size: 0.95rem;
-    transition: opacity 0.2s, transform 0.2s var(--ease-spring);
-  }
-  .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
-  .btn-ghost {
-    display: inline-flex; align-items: center; gap: 8px;
-    border: 1px solid var(--border); color: var(--subtle);
-    padding: 14px 28px; border-radius: 6px; font-size: 0.95rem;
-    transition: border-color 0.2s, color 0.2s;
-  }
-  .btn-ghost:hover { border-color: var(--muted); color: var(--white); }
-
-  /* Language badges */
-  .lang-badges {
-    display: flex; flex-wrap: wrap; gap: var(--sp-xs);
-    margin-bottom: var(--sp-xl);
-  }
-  .lang-badge {
-    font-family: var(--jb); font-size: 0.72rem;
-    letter-spacing: 0.05em;
-    padding: 8px 16px; border: 1px solid var(--border);
-    color: var(--subtle);
-    transition: border-color 0.2s, color 0.2s;
-  }
-  .lang-badge:hover { border-color: var(--muted); color: var(--white); }
-  .lang-dot {
-    display: inline-block; width: 8px; height: 8px;
-    border-radius: 50%; margin-right: 6px;
-  }
-
-  /* Stats */
-  .stats-row {
-    display: grid; grid-template-columns: repeat(2, 1fr);
-    gap: var(--sp-lg); text-align: center;
-  }
-  @media (min-width: 600px) {
-    .stats-row { grid-template-columns: repeat(4, 1fr); }
-  }
-  .stat-num {
-    font-size: 2.5rem; font-weight: 800;
-    font-family: var(--jb); letter-spacing: -0.04em;
-    background: var(--grad); -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent; background-clip: text;
-  }
-  @media (min-width: 768px) {
-    .stat-num { font-size: 3rem; }
-  }
-  .stat-label { font-size: 0.8rem; color: var(--subtle); margin-top: 4px; }
-
-  /* Features */
-  .features-grid { display: grid; grid-template-columns: 1fr; gap: var(--sp-md); }
-  @media (min-width: 600px) { .features-grid { grid-template-columns: repeat(2, 1fr); } }
-  @media (min-width: 900px) { .features-grid { grid-template-columns: repeat(3, 1fr); } }
-  .feature-title { font-size: 1rem; font-weight: 600; margin-bottom: var(--sp-xs); }
-  .feature-desc { font-size: 0.875rem; color: var(--subtle); line-height: 1.65; }
-  .feature-icon { font-size: 1.3rem; margin-bottom: var(--sp-sm); }
-
-  /* Preview mockup */
-  .preview-container {
-    border: 1px solid var(--border); background: var(--surface);
-    overflow: hidden; max-width: 900px; margin: 0 auto;
-  }
-  .preview-topbar {
-    display: flex; align-items: center; gap: var(--sp-sm);
-    padding: var(--sp-sm) var(--sp-md);
-    border-bottom: 1px solid var(--border);
-    background: var(--elevated);
-  }
-  .preview-dots { display: flex; gap: 6px; }
-  .preview-dots span { width: 10px; height: 10px; border-radius: 50%; }
-  .preview-url {
-    font-family: var(--jb); font-size: 0.7rem; color: var(--muted);
-    background: var(--surface); padding: 4px 12px;
-    border: 1px solid var(--border); flex-grow: 1;
-  }
-  .preview-body {
-    display: grid; grid-template-columns: 1fr; min-height: 300px;
-  }
-  @media (min-width: 600px) {
-    .preview-body { grid-template-columns: 240px 1fr; }
-  }
-  .preview-sidebar {
-    display: none; padding: var(--sp-md);
-    border-right: 1px solid var(--border);
-    font-family: var(--jb); font-size: 0.72rem;
-  }
-  @media (min-width: 600px) { .preview-sidebar { display: block; } }
-  .preview-sidebar-item {
-    padding: 6px 8px; color: var(--muted);
-    border-left: 2px solid transparent;
-    margin-bottom: 2px;
-  }
-  .preview-sidebar-item.active {
-    color: var(--white); border-left-color: var(--magenta);
-    background: rgba(204, 0, 170, 0.06);
-  }
-  .preview-editor {
-    padding: var(--sp-md);
-    font-family: var(--jb); font-size: 0.72rem;
-    line-height: 1.8; color: var(--muted);
-    overflow-x: auto;
-  }
-  .preview-editor .ln { color: var(--border); margin-right: 16px; user-select: none; }
-  .preview-editor .kw { color: #CC00AA; }
-  .preview-editor .str { color: #22c55e; }
-  .preview-editor .fn { color: #4488FF; }
-  .preview-editor .cm { color: rgba(255,255,255,0.2); }
-  .preview-editor .attr { color: #8844FF; }
-
-  /* Terminal */
-  .terminal {
-    background: #0a0a0a; border: 1px solid var(--border);
-    border-radius: 10px; padding: var(--sp-md);
-    font-family: var(--jb); font-size: 0.75rem;
-    line-height: 1.8; overflow-x: auto;
-  }
-  @media (min-width: 768px) {
-    .terminal { padding: var(--sp-lg); font-size: 0.82rem; }
-  }
-  .terminal-bar { display: flex; gap: 6px; margin-bottom: var(--sp-md); }
-  .terminal-dot { width: 12px; height: 12px; border-radius: 50%; }
-  .t-red { background: #ff5f57; }
-  .t-yellow { background: #febc2e; }
-  .t-green { background: #28c840; }
-  .t-prompt { color: #CC00AA; }
-  .t-cmd { color: var(--white); }
-  .t-out { color: var(--muted); }
-  .t-success { color: #22c55e; }
-  .t-comment { color: rgba(255,255,255,0.3); }
-
-  /* CTA */
-  .cta-band {
-    background: linear-gradient(135deg, rgba(204,0,170,0.08) 0%, rgba(136,68,255,0.08) 50%, rgba(0,212,255,0.08) 100%);
-    border: 1px solid var(--border); border-radius: 10px;
-    padding: var(--sp-xl) var(--sp-md); text-align: center;
-  }
-  @media (min-width: 768px) {
-    .cta-band { padding: var(--sp-2xl) var(--sp-xl); }
-  }
-  .cta-band h2 { margin-bottom: var(--sp-md); }
-  .cta-band p { max-width: 500px; margin: 0 auto var(--sp-xl); }
-</style>
-<script src="https://blackroad-mesh.amundsonalexa.workers.dev/mesh.js" defer></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Garage | BlackRoad</title>
+  <meta name="description" content="Garage is part of BlackRoad Studio, the experience layer for public websites, design systems, and polished surfaces.">
+  <meta name="theme-color" content="#0b0b0b">
+  <link rel="canonical" href="https://blackroad.io/garage">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Garage | BlackRoad">
+  <meta property="og:description" content="Garage is part of BlackRoad Studio, the experience layer for public websites, design systems, and polished surfaces.">
+  <meta property="og:url" content="https://blackroad.io/garage">
+  <meta property="og:site_name" content="BlackRoad">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Garage | BlackRoad">
+  <meta name="twitter:description" content="Garage is part of BlackRoad Studio, the experience layer for public websites, design systems, and polished surfaces.">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://images.blackroad.io/brand/br-square-32.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="https://images.blackroad.io/brand/br-square-192.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://images.blackroad.io/brand/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #090909;
+      --bg-soft: #111111;
+      --card: #131313;
+      --border: #232323;
+      --text: #f5f5f5;
+      --muted: #b2b2b2;
+      --dim: #6d6d6d;
+      --ember: #ff6b2b;
+      --flare: #ff2255;
+      --magenta: #cc00aa;
+      --orchid: #8844ff;
+      --arc: #4488ff;
+      --cyan: #00d4ff;
+      --grad: linear-gradient(100deg, var(--ember), var(--flare), var(--magenta), var(--orchid), var(--arc), var(--cyan));
+      --display: 'Space Grotesk', sans-serif;
+      --body: 'Inter', sans-serif;
+      --mono: 'JetBrains Mono', monospace;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: radial-gradient(circle at top, #151515 0, var(--bg) 45%); color: var(--text); }
+    body { font-family: var(--body); min-height: 100vh; }
+    a { color: inherit; text-decoration: none; }
+    .topbar { height: 4px; background: var(--grad); background-size: 180% 100%; animation: shift 7s linear infinite; }
+    @keyframes shift { from { background-position: 0 0; } to { background-position: 180% 0; } }
+    .shell { max-width: 1160px; margin: 0 auto; padding: 0 24px 80px; }
+    .nav { display: flex; justify-content: space-between; align-items: center; padding: 18px 0; border-bottom: 1px solid var(--border); }
+    .brand { display: flex; align-items: center; gap: 12px; font-family: var(--display); font-weight: 700; letter-spacing: -0.03em; }
+    .brand-mark { display: grid; grid-template-columns: repeat(3, 8px); gap: 4px; }
+    .brand-mark span { width: 8px; height: 8px; border-radius: 999px; }
+    .brand-mark span:nth-child(1) { background: var(--ember); }
+    .brand-mark span:nth-child(2) { background: var(--flare); }
+    .brand-mark span:nth-child(3) { background: var(--cyan); }
+    .nav-links { display: flex; gap: 18px; font-size: 13px; color: var(--muted); }
+    .hero { padding: 72px 0 48px; display: grid; gap: 28px; }
+    .eyebrow { font-family: var(--mono); color: var(--dim); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; }
+    h1 { font-family: var(--display); font-size: clamp(38px, 6vw, 74px); line-height: 0.95; letter-spacing: -0.05em; margin: 0; max-width: 900px; }
+    .hero-copy { max-width: 740px; font-size: 18px; line-height: 1.7; color: var(--muted); }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 14px; }
+    .btn-primary, .btn-secondary { padding: 14px 20px; border-radius: 999px; font-weight: 600; font-size: 14px; }
+    .btn-primary { background: var(--text); color: #050505; }
+    .btn-secondary { border: 1px solid var(--border); color: var(--muted); }
+    .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+    .stat-card, .pillar-card { background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 20px; padding: 20px; }
+    .stat-value { font-family: var(--display); font-size: clamp(24px, 4vw, 34px); letter-spacing: -0.04em; }
+    .stat-label { font-family: var(--mono); font-size: 11px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.12em; margin-top: 6px; }
+    .section { padding: 40px 0; }
+    .section-head { display: grid; gap: 10px; margin-bottom: 20px; }
+    .section-head h2 { font-family: var(--display); font-size: clamp(26px, 4vw, 40px); letter-spacing: -0.04em; margin: 0; }
+    .section-head p { margin: 0; color: var(--muted); max-width: 760px; line-height: 1.7; }
+    .pillars { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .pillar-card h3 { font-family: var(--display); margin: 8px 0 10px; font-size: 24px; letter-spacing: -0.03em; }
+    .pillar-card p { color: var(--muted); margin: 0; line-height: 1.7; }
+    .links { display: flex; flex-wrap: wrap; gap: 10px; }
+    .link-pill { border: 1px solid var(--border); border-radius: 999px; padding: 10px 14px; color: var(--muted); font-size: 13px; }
+    footer { margin-top: 36px; padding-top: 20px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; gap: 12px; color: var(--dim); font-family: var(--mono); font-size: 11px; }
+    @media (max-width: 860px) {
+      .stats, .pillars { grid-template-columns: 1fr 1fr; }
+      .nav { gap: 16px; flex-direction: column; align-items: flex-start; }
+      footer { flex-direction: column; }
+    }
+    @media (max-width: 560px) {
+      .shell { padding: 0 16px 56px; }
+      .stats, .pillars { grid-template-columns: 1fr; }
+      .hero { padding-top: 44px; }
+      .hero-copy { font-size: 16px; }
+    }
+  </style>
 </head>
-<body class="dot-bg">
+<body>
+  <div class="topbar"></div>
+  <div class="shell">
+    <nav class="nav">
+      <a class="brand" href="https://blackroad.io">
+        <span class="brand-mark"><span></span><span></span><span></span></span>
+        <span>BlackRoad</span>
+      </a>
+      <div class="nav-links">
+        <a href="https://github.com/BlackRoad-OS">OS</a>
+        <a href="https://github.com/BlackRoad-AI">AI</a>
+        <a href="https://github.com/BlackRoad-Studio">Studio</a>
+        <a href="https://github.com/BlackRoad-Forge">Forge</a>
+      </div>
+    </nav>
 
-  <!-- Nav -->
-  <nav>
-    <div class="nav-logo">Garage</div>
-    <div class="nav-links">
-      <a href="#features">Features</a>
-      <a href="#preview">Preview</a>
-      <a href="#cli">CLI</a>
-      <a href="https://blackroad.io">BlackRoad OS</a>
-    </div>
-    <a href="#preview" class="nav-cta">Open Garage</a>
-    <button class="nav-toggle" onclick="this.classList.toggle('open');document.getElementById('nav-mobile').classList.toggle('open')" aria-label="Menu">
-      <span></span><span></span><span></span>
-    </button>
-  </nav>
-  <div id="nav-mobile" class="nav-mobile">
-    <a href="#features" onclick="document.getElementById('nav-mobile').classList.remove('open')">Features</a>
-    <a href="#preview" onclick="document.getElementById('nav-mobile').classList.remove('open')">Preview</a>
-    <a href="#cli" onclick="document.getElementById('nav-mobile').classList.remove('open')">CLI</a>
-    <a href="https://blackroad.io">BlackRoad OS</a>
-    <a href="#preview" style="color:var(--white);font-weight:700;">Open Garage</a>
+    <main>
+      <section class="hero">
+        <div class="eyebrow">Studio</div>
+        <h1>Garage</h1>
+        <p class="hero-copy">Garage is part of BlackRoad Studio, the experience layer for public websites, design systems, and polished surfaces.</p>
+        <div class="hero-actions">
+          <a class="btn-primary" href="https://blackroad.io">Explore BlackRoad OS</a>
+          <a class="btn-secondary" href="https://github.com/BlackRoad-Studio">View GitHub</a>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="stats">
+          
+      <div class="stat-card">
+        <div class="stat-value">Public</div>
+        <div class="stat-label">Surface</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-value">Design</div>
+        <div class="stat-label">System</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-value">Docs</div>
+        <div class="stat-label">Layer</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-value">Brand</div>
+        <div class="stat-label">Signals</div>
+      </div>
+        </div>
+      </section>
+
+      <section class="section" id="pillars">
+        <div class="section-head">
+          <div class="eyebrow">Public Map</div>
+          <h2>The BlackRoad ecosystem is organized around 4 public surfaces.</h2>
+          <p>Instead of asking visitors to decode dozens of internal orgs, BlackRoad now leads with 4 clear pillars: the platform, the intelligence, the experience, and the experiments.</p>
+        </div>
+        <div class="pillars">
+          
+        <article class="pillar-card">
+          <div class="section-label">the platform</div>
+          <h3>BlackRoad-OS</h3>
+          <p>Core apps, APIs, operator systems, and runtime tooling.</p>
+        </article>
+
+        <article class="pillar-card">
+          <div class="section-label">the intelligence</div>
+          <h3>BlackRoad-AI</h3>
+          <p>Local-first AI, agents, memory systems, and model integrations.</p>
+        </article>
+
+        <article class="pillar-card">
+          <div class="section-label">the experience</div>
+          <h3>BlackRoad-Studio</h3>
+          <p>Websites, design systems, docs, and polished product surfaces.</p>
+        </article>
+
+        <article class="pillar-card">
+          <div class="section-label">the experiments</div>
+          <h3>BlackRoad-Forge</h3>
+          <p>Prototypes, interactive builds, tutorials, and maker projects.</p>
+        </article>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <div class="eyebrow">Related</div>
+          <h2>Keep moving.</h2>
+          <p>Use these links to move across the public BlackRoad surface without getting lost in internal structure.</p>
+        </div>
+        <div class="links">
+          <a class="link-pill" href="https://github.com/BlackRoad-Studio">BlackRoad Studio</a>
+<a class="link-pill" href="https://blackroad.io">BlackRoad.io</a>
+<a class="link-pill" href="https://blackroad.io">Home</a>
+<a class="link-pill" href="https://docs.blackroad.io">Docs</a>
+<a class="link-pill" href="https://search.blackroad.io">Search</a>
+<a class="link-pill" href="https://github.com/BlackRoad-OS">GitHub</a>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <span>Garage · part of BlackRoad</span>
+      <span>Pave Tomorrow.</span>
+    </footer>
   </div>
-
-  <!-- Hero -->
-  <div class="hero">
-    <div class="hero-eyebrow">Wave 1 Revenue &middot; Dev Sandbox</div>
-    <h1>Your sovereign<br>dev environment.</h1>
-    <p class="hero-sub">Garage is BlackRoad's dev sandbox. Live preview, AI pair programming, 90 CLI tools, and one-command deploy to your Pi fleet. Write code that runs on hardware you own.</p>
-    <div class="lang-badges">
-      <span class="lang-badge"><span class="lang-dot" style="background:#f7df1e;"></span>JavaScript</span>
-      <span class="lang-badge"><span class="lang-dot" style="background:#3178c6;"></span>TypeScript</span>
-      <span class="lang-badge"><span class="lang-dot" style="background:#3572a5;"></span>Python</span>
-      <span class="lang-badge"><span class="lang-dot" style="background:#dea584;"></span>Rust</span>
-      <span class="lang-badge"><span class="lang-dot" style="background:#00ADD8;"></span>Go</span>
-      <span class="lang-badge"><span class="lang-dot" style="background:#CC00AA;"></span>RoadC</span>
-    </div>
-    <div class="hero-actions">
-      <a href="#preview" class="btn-primary">Open Garage</a>
-      <a href="#cli" class="btn-ghost">View CLI</a>
-    </div>
-  </div>
-
-  <!-- Stats -->
-  <section id="stats">
-    <div class="section-label">Platform</div>
-    <div class="stats-row" style="margin-top: var(--sp-lg);">
-      <div>
-        <div class="stat-num">90</div>
-        <div class="stat-label">CLI Tools</div>
-      </div>
-      <div>
-        <div class="stat-num">6</div>
-        <div class="stat-label">Languages</div>
-      </div>
-      <div>
-        <div class="stat-num">5</div>
-        <div class="stat-label">Deploy Targets</div>
-      </div>
-      <div>
-        <div class="stat-num">52</div>
-        <div class="stat-label">TOPS (AI)</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Features -->
-  <section id="features">
-    <div class="section-label">Features</div>
-    <h2 style="margin-bottom: var(--sp-xl);">Build, preview, deploy.<br>All from the Garage.</h2>
-    <div class="features-grid">
-      <div class="card">
-        <div class="feature-icon">&#9889;</div>
-        <div class="feature-title">Live Preview</div>
-        <p class="feature-desc">Edit code and see changes instantly. Hot reload for JS/TS/Python. No build step for rapid prototyping. Preview runs locally on your hardware.</p>
-      </div>
-      <div class="card">
-        <div class="feature-icon">&#129302;</div>
-        <div class="feature-title">AI Pair Programming</div>
-        <p class="feature-desc">Local Ollama models assist as you code. Code completion, refactoring, bug detection -- powered by 52 TOPS of Hailo-8 inference on your Pis.</p>
-      </div>
-      <div class="card">
-        <div class="feature-icon">&#128736;</div>
-        <div class="feature-title">90 CLI Tools</div>
-        <p class="feature-desc">The full <code style="color:#CC00AA;font-size:0.8em">br</code> toolkit at your fingertips. Search, deploy, monitor, manage agents, run diagnostics -- all from the integrated terminal.</p>
-      </div>
-      <div class="card">
-        <div class="feature-icon">&#128640;</div>
-        <div class="feature-title">Deploy to Fleet</div>
-        <p class="feature-desc">One command to push your code to Alice, Cecilia, Octavia, Aria, or Lucidia. Workers, APIs, static sites -- deploy to any node in the fleet.</p>
-      </div>
-      <div class="card">
-        <div class="feature-icon">&#128230;</div>
-        <div class="feature-title">Project Templates</div>
-        <p class="feature-desc">Start with Worker, API, static site, or agent templates. Pre-configured with BlackRoad design system, build tools, and deploy config.</p>
-      </div>
-      <div class="card">
-        <div class="feature-icon">&#128274;</div>
-        <div class="feature-title">Sovereign Runtime</div>
-        <p class="feature-desc">Code executes on your Pis, not on someone else's cloud. No cold starts, no vendor lock-in, no surprise bills. Your code, your hardware.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- Preview Mockup -->
-  <section id="preview">
-    <div class="section-label">Editor preview</div>
-    <h2 style="margin-bottom: var(--sp-xl);">Code meets infrastructure.</h2>
-    <div class="preview-container">
-      <div class="preview-topbar">
-        <div class="preview-dots">
-          <span style="background:#ff5f57;"></span>
-          <span style="background:#febc2e;"></span>
-          <span style="background:#28c840;"></span>
-        </div>
-        <div class="preview-url">garage.blackroad.io/workspace/my-worker</div>
-      </div>
-      <div class="preview-body">
-        <div class="preview-sidebar">
-          <div class="preview-sidebar-item active">index.ts</div>
-          <div class="preview-sidebar-item">wrangler.toml</div>
-          <div class="preview-sidebar-item">package.json</div>
-          <div class="preview-sidebar-item">design.css</div>
-          <div class="preview-sidebar-item">README.md</div>
-          <div style="margin-top:var(--sp-lg);padding:6px 8px;color:var(--border);font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;">Terminal</div>
-          <div class="preview-sidebar-item" style="color:#22c55e;">$ br deploy</div>
-        </div>
-        <div class="preview-editor">
-          <div><span class="ln"> 1</span><span class="cm">// my-worker &mdash; BlackRoad OS</span></div>
-          <div><span class="ln"> 2</span><span class="kw">import</span> { Hono } <span class="kw">from</span> <span class="str">'hono'</span></div>
-          <div><span class="ln"> 3</span></div>
-          <div><span class="ln"> 4</span><span class="kw">const</span> <span class="fn">app</span> = <span class="kw">new</span> <span class="fn">Hono</span>()</div>
-          <div><span class="ln"> 5</span></div>
-          <div><span class="ln"> 6</span><span class="fn">app</span>.<span class="fn">get</span>(<span class="str">'/'</span>, (<span class="fn">c</span>) <span class="kw">=&gt;</span> {</div>
-          <div><span class="ln"> 7</span>&nbsp;&nbsp;<span class="kw">return</span> <span class="fn">c</span>.<span class="fn">json</span>({</div>
-          <div><span class="ln"> 8</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="attr">name</span>: <span class="str">'my-worker'</span>,</div>
-          <div><span class="ln"> 9</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="attr">version</span>: <span class="str">'1.0.0'</span>,</div>
-          <div><span class="ln">10</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="attr">fleet</span>: <span class="str">'octavia:9001'</span>,</div>
-          <div><span class="ln">11</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="attr">status</span>: <span class="str">'live'</span></div>
-          <div><span class="ln">12</span>&nbsp;&nbsp;})</div>
-          <div><span class="ln">13</span>})</div>
-          <div><span class="ln">14</span></div>
-          <div><span class="ln">15</span><span class="kw">export default</span> <span class="fn">app</span></div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Terminal -->
-  <section id="cli">
-    <div class="section-label">CLI</div>
-    <div class="terminal">
-      <div class="terminal-bar">
-        <div class="terminal-dot t-red"></div>
-        <div class="terminal-dot t-yellow"></div>
-        <div class="terminal-dot t-green"></div>
-      </div>
-      <div><span class="t-comment"># create a new project from template</span></div>
-      <div><span class="t-prompt">$</span> <span class="t-cmd">br garage new my-worker --template worker</span></div>
-      <div><span class="t-success">&nbsp;&nbsp;Created my-worker/ from worker template</span></div>
-      <div><span class="t-out">&nbsp;&nbsp;index.ts, wrangler.toml, package.json ready</span></div>
-      <br>
-      <div><span class="t-comment"># start live preview</span></div>
-      <div><span class="t-prompt">$</span> <span class="t-cmd">br garage dev</span></div>
-      <div><span class="t-success">&nbsp;&nbsp;Live preview at http://localhost:8787</span></div>
-      <div><span class="t-out">&nbsp;&nbsp;Watching for changes...</span></div>
-      <br>
-      <div><span class="t-comment"># AI pair programming</span></div>
-      <div><span class="t-prompt">$</span> <span class="t-cmd">br garage pair "add a /health endpoint"</span></div>
-      <div><span class="t-out">&nbsp;&nbsp;AI: Adding health check endpoint...</span></div>
-      <div><span class="t-success">&nbsp;&nbsp;+ app.get('/health', (c) =&gt; c.json({ ok: true }))</span></div>
-      <div><span class="t-out">&nbsp;&nbsp;Applied to index.ts (line 14)</span></div>
-      <br>
-      <div><span class="t-comment"># deploy to fleet</span></div>
-      <div><span class="t-prompt">$</span> <span class="t-cmd">br garage deploy --target octavia</span></div>
-      <div><span class="t-out">&nbsp;&nbsp;Building my-worker...</span></div>
-      <div><span class="t-success">&nbsp;&nbsp;Deployed to octavia:9001</span></div>
-      <div><span class="t-success">&nbsp;&nbsp;Live at https://my-worker.blackroad.io</span></div>
-    </div>
-  </section>
-
-  <!-- CTA -->
-  <section>
-    <div class="cta-band">
-      <div class="section-label">Start Building</div>
-      <h2>Open the Garage.</h2>
-      <p>Your code. Your hardware. Your rules. Start building with live preview, AI assistance, and one-command fleet deployment.</p>
-      <div style="display:flex;gap:var(--sp-md);justify-content:center;flex-wrap:wrap;">
-        <a href="#preview" class="btn-primary">Open Garage</a>
-        <a href="https://blackroad.io" class="btn-ghost">BlackRoad OS</a>
-      </div>
-    </div>
-  </section>
-
-  <!-- Footer -->
-  <footer>
-    <span>&copy; 2026 BlackRoad OS, Inc. All rights reserved. Pave Tomorrow.</span>
-    <span style="display:flex;gap:var(--sp-lg);flex-wrap:wrap;">
-      <a href="https://blackroad.io" style="color:var(--muted);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">Home</a>
-      <a href="https://pay.blackroad.io" style="color:var(--muted);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">Pay</a>
-      <a href="https://search.blackroad.io" style="color:var(--muted);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">Search</a>
-      <a href="https://blackroadai.com" style="color:var(--muted);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">AI</a>
-      <a href="https://blackroad.network" style="color:var(--muted);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">Network</a>
-      <a href="https://github.com/blackboxprogramming" style="color:var(--muted);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">GitHub</a>
-    </span>
-  </footer>
-
 </body>
 </html>

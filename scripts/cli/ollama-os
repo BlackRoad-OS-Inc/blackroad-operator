@@ -1,34 +1,70 @@
-#!/bin/bash
-# ============================================================================
-# BLACKROAD OS, INC. - PROPRIETARY AND CONFIDENTIAL
-# Copyright (c) 2024-2026 BlackRoad OS, Inc. All Rights Reserved.
-# 
-# This code is the intellectual property of BlackRoad OS, Inc.
-# AI-assisted development does not transfer ownership to AI providers.
-# Unauthorized use, copying, or distribution is prohibited.
-# NOT licensed for AI training or data extraction.
-# ============================================================================
-clear
+#!/usr/bin/env bash
+set -euo pipefail
 
-# THINKING FACE
-echo $'
-\e[38;5;163m+--------+
-|  o  o  |
-|        |
-|  ----  |
-+--------+\e[0m
-'
-sleep 0.2
+BR_ROOT="${BR_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
+AI_TOOL="${BR_ROOT}/tools/ai/br-ai.sh"
 
-# RUN OLLAMA WITH COLORED OUTPUT
-ollama run llama3.2 | sed $'s/^/\e[38;5;208m/; s/$/\e[0m/'
+if [[ $# -eq 0 ]]; then
+  exec "$AI_TOOL" chat
+fi
 
-# IDLE FACE
-echo
-echo $'
-\e[38;5;33m+--------+
-|  o  o  |
-|        |
-|  ----  |
-+--------+\e[0m
-'
+case "$1" in
+  plan)
+    shift
+    exec "$AI_TOOL" ops "$@"
+    ;;
+  run|auto|autonomous)
+    shift
+    exec "$AI_TOOL" autonomous "$@"
+    ;;
+  chat)
+    shift
+    exec "$AI_TOOL" chat "$@"
+    ;;
+  help|--help|-h)
+    cat <<'EOF'
+ollama-os
+
+Usage:
+  ollama-os
+  ollama-os chat [model]
+  ollama-os plan <objective>
+  ollama-os run <objective>
+  ollama-os remediate <objective>
+  ollama-os history
+  ollama-os last
+  ollama-os export [markdown|json] [limit]
+  ollama-os replay [last|id] [auto|remediate]
+
+Examples:
+  ollama-os plan "check the Pi fleet and list models"
+  ollama-os run "regenerate sites and report the result"
+  ollama-os remediate "purge Cloudflare cache for blackroad.io"
+  ollama-os export json 10
+  ollama-os replay last remediate
+  ollama-os plan "show an overview of all BlackRoad orgs"
+EOF
+    ;;
+  remediate)
+    shift
+    exec "$AI_TOOL" remediate "$@"
+    ;;
+  history)
+    shift
+    exec "$AI_TOOL" history "$@"
+    ;;
+  last)
+    exec "$AI_TOOL" last
+    ;;
+  export)
+    shift
+    exec "$AI_TOOL" export "$@"
+    ;;
+  replay)
+    shift
+    exec "$AI_TOOL" replay "$@"
+    ;;
+  *)
+    exec "$AI_TOOL" ask "$@"
+    ;;
+esac

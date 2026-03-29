@@ -1,1 +1,0 @@
-../../../../../dist/extensions/feishu/skills/feishu-drive/SKILL.md

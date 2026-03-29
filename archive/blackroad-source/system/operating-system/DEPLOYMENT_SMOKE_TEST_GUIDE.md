@@ -1,1 +1,0 @@
-# blackboxprogramming/BlackRoad-Operating-System/DEPLOYMENT_SMOKE_TEST_GUIDE.md

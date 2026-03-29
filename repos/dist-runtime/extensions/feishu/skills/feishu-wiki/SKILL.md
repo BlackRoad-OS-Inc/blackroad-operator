@@ -1,1 +1,0 @@
-../../../../../dist/extensions/feishu/skills/feishu-wiki/SKILL.md

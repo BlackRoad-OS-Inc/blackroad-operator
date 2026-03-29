@@ -1,2 +1,0 @@
--- BlackRoad OS — users/humans/accounts/migration.sql
--- TODO: migration

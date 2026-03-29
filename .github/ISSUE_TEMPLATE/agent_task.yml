@@ -1,5 +1,5 @@
 name: Agent Task
-description: Create a task for BlackRoad agents to pick up
+description: Create an agent-executable task with enough context for autonomous execution
 title: '[Agent]: '
 labels: ['type:agent', 'status:backlog']
 body:
@@ -33,6 +33,18 @@ body:
       required: true
 
   - type: dropdown
+    id: execution_mode
+    attributes:
+      label: Execution mode
+      description: How autonomous should the assigned agent be?
+      options:
+        - Autonomous - agent may act without waiting for approval on normal repo-safe steps
+        - Guided - agent should propose plan before changing anything substantial
+        - Human checkpoint required - agent must stop before execution
+    validations:
+      required: true
+
+  - type: dropdown
     id: priority
     attributes:
       label: Priority
@@ -49,6 +61,19 @@ body:
     attributes:
       label: Task description
       description: What needs to be done? Be specific enough for an agent to execute autonomously.
+    validations:
+      required: true
+
+  - type: textarea
+    id: desired_outcome
+    attributes:
+      label: Desired outcome
+      description: What should exist, be fixed, or be deployed when this is complete?
+      placeholder: |
+        Example:
+        - Pages site updated at blackroad.io
+        - workflow passes on main
+        - README reflects new public 4-org structure
     validations:
       required: true
 
@@ -70,6 +95,20 @@ body:
       description: Comma-separated skills needed.
       placeholder: 'python, api, security'
 
+  - type: textarea
+    id: tool_access
+    attributes:
+      label: Tools and systems the agent may use
+      description: List the concrete tools, services, or commands the agent can touch.
+      placeholder: |
+        Example:
+        - br ai
+        - br pi
+        - br deploy
+        - br cloudflare
+        - GitHub Actions
+        - local Ollama
+
   - type: input
     id: dependencies
     attributes:
@@ -89,3 +128,14 @@ body:
         - Experimental (safe to break)
     validations:
       required: true
+
+  - type: textarea
+    id: rollback
+    attributes:
+      label: Rollback / safety notes
+      description: How should the agent recover if the change misbehaves?
+      placeholder: |
+        Example:
+        - revert generated site changes
+        - disable workflow by file rename
+        - roll back Cloudflare Pages to last successful deploy

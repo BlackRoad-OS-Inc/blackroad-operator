@@ -1,0 +1,246 @@
+# .github/workflows/gitea-github-sync.yml
+# Bidirectional sync between Gitea (Octavia) and GitHub orgs
+# Gitea is PRIMARY — GitHub is the mirror
+#
+# Flow:
+#   Push to GitHub → this workflow → SSH to Octavia → git push to Gitea
+#   Gitea webhooks → repository_dispatch → this workflow → git push to GitHub
+#
+# Supports:
+#   - Auto-mirror new GitHub repos to Gitea
+#   - Sync pushes from GitHub to Gitea
+#   - Periodic full reconciliation
+#   - Org-level mapping (GitHub org → Gitea org)
+
+name: 'Gitea-GitHub Sync'
+
+on:
+  push:
+    branches: [main, master]
+  repository_dispatch:
+    types: [gitea-push, gitea-sync, gitea-mirror]
+  schedule:
+    - cron: '0 0 * * 0'  # Weekly full reconciliation (Sunday midnight)
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Sync action'
+        required: true
+        type: choice
+        options:
+          - github-to-gitea
+          - gitea-to-github
+          - reconcile
+          - mirror-new
+      repo:
+        description: 'Specific repo (leave empty for all)'
+        required: false
+        type: string
+      org:
+        description: 'Specific org (leave empty for all)'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gitea-sync-${{ github.repository }}
+  cancel-in-progress: false
+
+env:
+  GITEA_HOST: '192.168.4.101'
+  GITEA_PORT: '3100'
+  GITEA_SSH_PORT: '2222'
+  GITEA_USER: 'blackroad'
+
+jobs:
+  # ============================================
+  # GitHub → Gitea (push mirror)
+  # ============================================
+  github-to-gitea:
+    name: 'Sync GitHub → Gitea'
+    runs-on: [self-hosted, linux, ARM64]
+    if: >
+      github.event_name == 'push' ||
+      inputs.action == 'github-to-gitea' ||
+      inputs.action == 'reconcile'
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          fetch-depth: 0
+
+      - name: Sync to Gitea
+        run: |
+          echo "::group::GitHub → Gitea Sync"
+
+          REPO_NAME="${GITHUB_REPOSITORY##*/}"
+          ORG_NAME="${GITHUB_REPOSITORY%%/*}"
+
+          # Map GitHub org to Gitea org
+          declare -A ORG_MAP=(
+            ["BlackRoad-OS-Inc"]="blackroad"
+            ["BlackRoad-OS"]="blackroad-os"
+            ["BlackRoad-AI"]="blackroad-ai"
+            ["BlackRoad-Agents"]="blackroad-agents"
+            ["BlackRoad-Labs"]="blackroad-labs"
+            ["BlackRoad-Cloud"]="blackroad-cloud"
+            ["BlackRoad-Education"]="blackroad-education"
+            ["BlackRoad-Media"]="blackroad-media"
+            ["BlackRoad-Studio"]="blackroad-studio"
+            ["BlackRoad-Security"]="blackroad-security"
+            ["BlackRoad-Hardware"]="blackroad-hardware"
+            ["BlackRoad-Interactive"]="blackroad-interactive"
+            ["BlackRoad-Foundation"]="blackroad-foundation"
+            ["BlackRoad-Ventures"]="blackroad-ventures"
+            ["BlackRoad-Gov"]="blackroad-gov"
+            ["BlackRoad-Archive"]="blackroad-archive"
+            ["BlackRoad-Forge"]="blackroad-forge"
+            ["BlackRoad-Network"]="blackroad-network"
+            ["BlackRoad-Sandbox"]="blackroad-sandbox"
+            ["Blackbox-Enterprises"]="blackbox"
+            ["blackboxprogramming"]="blackroad"
+          )
+
+          GITEA_ORG="${ORG_MAP[$ORG_NAME]:-blackroad}"
+
+          echo "GitHub: ${ORG_NAME}/${REPO_NAME}"
+          echo "Gitea:  ${GITEA_ORG}/${REPO_NAME}"
+
+          # Check if Gitea is reachable
+          if ! ssh -o StrictHostKeyChecking=no -o ConnectTimeout=5 pi@${GITEA_HOST} "curl -s http://localhost:${GITEA_PORT}/api/v1/version" 2>/dev/null | grep -q version; then
+            echo "::warning::Gitea not reachable on Octavia"
+            exit 0
+          fi
+
+          # Create org in Gitea if it doesn't exist
+          ssh -o ConnectTimeout=10 pi@${GITEA_HOST} "
+            docker exec blackroad-git gitea admin create-org \
+              --name '${GITEA_ORG}' \
+              --owner 'blackroad' 2>/dev/null || true
+          " 2>&1 || true
+
+          # Add gitea remote and push
+          GITEA_URL="ssh://git@${GITEA_HOST}:${GITEA_SSH_PORT}/${GITEA_ORG}/${REPO_NAME}.git"
+
+          # Create repo in Gitea via API if needed
+          ssh -o ConnectTimeout=10 pi@${GITEA_HOST} "
+            curl -s -X POST http://localhost:${GITEA_PORT}/api/v1/orgs/${GITEA_ORG}/repos \
+              -H 'Content-Type: application/json' \
+              -H 'Authorization: token \$(cat /home/pi/.gitea-token 2>/dev/null || echo none)' \
+              -d '{\"name\": \"${REPO_NAME}\", \"private\": false, \"auto_init\": false}' 2>/dev/null || true
+          " 2>&1 || true
+
+          # Push to Gitea
+          git remote add gitea "${GITEA_URL}" 2>/dev/null || git remote set-url gitea "${GITEA_URL}"
+          git push gitea --all --force 2>&1 || echo "Push failed — check SSH keys"
+          git push gitea --tags --force 2>&1 || true
+
+          echo "Sync complete: ${ORG_NAME}/${REPO_NAME} → ${GITEA_ORG}/${REPO_NAME}"
+          echo "::endgroup::"
+
+  # ============================================
+  # Gitea → GitHub (pull mirror)
+  # ============================================
+  gitea-to-github:
+    name: 'Sync Gitea → GitHub'
+    runs-on: [self-hosted, linux, ARM64]
+    if: >
+      github.event_name == 'repository_dispatch' ||
+      inputs.action == 'gitea-to-github' ||
+      inputs.action == 'reconcile'
+
+    steps:
+      - name: Pull from Gitea and push to GitHub
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "::group::Gitea → GitHub Sync"
+
+          # If triggered by Gitea webhook, get repo info from payload
+          REPO="${{ github.event.client_payload.repo || inputs.repo || '' }}"
+          ORG="${{ github.event.client_payload.org || inputs.org || '' }}"
+
+          if [ -z "$REPO" ]; then
+            echo "No specific repo — running full reconciliation"
+
+            # List all Gitea repos and sync each
+            ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 pi@${GITEA_HOST} "
+              curl -s http://localhost:${GITEA_PORT}/api/v1/repos/search?limit=50 \
+                -H 'Authorization: token \$(cat /home/pi/.gitea-token 2>/dev/null || echo none)' 2>/dev/null \
+                | python3 -c 'import sys,json; [print(r[\"full_name\"]) for r in json.load(sys.stdin).get(\"data\",[])]' 2>/dev/null || echo 'API failed'
+            " 2>&1 | head -50
+
+            echo "Full reconciliation requires manual review — listing repos only"
+          else
+            echo "Syncing specific repo: ${ORG}/${REPO}"
+
+            WORK_DIR=$(mktemp -d)
+            cd "$WORK_DIR"
+
+            # Clone from Gitea
+            GITEA_ORG="${ORG:-blackroad}"
+            git clone "ssh://git@${GITEA_HOST}:${GITEA_SSH_PORT}/${GITEA_ORG}/${REPO}.git" . 2>&1 || {
+              echo "::error::Failed to clone from Gitea"
+              rm -rf "$WORK_DIR"
+              exit 1
+            }
+
+            # Determine GitHub target org
+            declare -A REVERSE_ORG_MAP=(
+              ["blackroad"]="BlackRoad-OS-Inc"
+              ["blackroad-os"]="BlackRoad-OS"
+              ["blackroad-ai"]="BlackRoad-AI"
+              ["blackroad-agents"]="BlackRoad-Agents"
+            )
+            GH_ORG="${REVERSE_ORG_MAP[$GITEA_ORG]:-BlackRoad-OS}"
+
+            # Push to GitHub
+            git remote add github "https://x-access-token:${GH_TOKEN}@github.com/${GH_ORG}/${REPO}.git" 2>/dev/null || true
+            git push github --all 2>&1 || echo "Push to GitHub failed"
+            git push github --tags 2>&1 || true
+
+            rm -rf "$WORK_DIR"
+            echo "Sync complete: ${GITEA_ORG}/${REPO} → ${GH_ORG}/${REPO}"
+          fi
+
+          echo "::endgroup::"
+
+  # ============================================
+  # Full Reconciliation — weekly
+  # ============================================
+  reconcile:
+    name: 'Full Reconciliation'
+    runs-on: [self-hosted, linux, ARM64]
+    if: >
+      github.event_name == 'schedule' ||
+      inputs.action == 'reconcile'
+
+    steps:
+      - name: Reconcile GitHub and Gitea
+        run: |
+          echo "::group::Full Reconciliation"
+
+          # Count repos on each side
+          echo "=== GitHub Repos ==="
+          GITHUB_COUNT=$(gh api /user/repos --paginate -q '.[].full_name' 2>/dev/null | wc -l || echo "0")
+          echo "GitHub repos: $GITHUB_COUNT"
+
+          echo "=== Gitea Repos ==="
+          GITEA_COUNT=$(ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 pi@${GITEA_HOST} "
+            curl -s 'http://localhost:${GITEA_PORT}/api/v1/repos/search?limit=1' \
+              -H 'Authorization: token \$(cat /home/pi/.gitea-token 2>/dev/null || echo none)' 2>/dev/null \
+              | python3 -c 'import sys,json; d=json.load(sys.stdin); print(d.get(\"headers\",{}).get(\"x-total-count\", len(d.get(\"data\",[]))))' 2>/dev/null || echo '0'
+          " 2>&1)
+          echo "Gitea repos: $GITEA_COUNT"
+
+          echo ""
+          echo "Reconciliation summary:"
+          echo "  GitHub: $GITHUB_COUNT repos"
+          echo "  Gitea:  $GITEA_COUNT repos"
+          echo "  Delta:  repos need mirroring"
+          echo ""
+          echo "To mirror missing repos, run:"
+          echo "  gh workflow run gitea-github-sync.yml -f action=mirror-new"
+          echo "::endgroup::"

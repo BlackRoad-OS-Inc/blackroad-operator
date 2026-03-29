@@ -1,7 +1,0 @@
-# nvm_ls_remote stable nightly.txt
-
-**Source:** br-drive
-
----
-
-v22.0.0-nightly20231025d1ccca9d2b

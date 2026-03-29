@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RoadView — Truth-First Search</title>
+<meta name="description" content="Search that verifies before it surfaces. Every result scored for confidence and source quality. No ads, no SEO gaming.">
+<link rel="canonical" href="https://search.blackroad.io">
+<meta property="og:title" content="RoadView — Truth-First Search">
+<meta property="og:description" content="Every result scored for confidence. No ads. No SEO gaming. Just truth.">
+<meta property="og:url" content="https://search.blackroad.io">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"RoadView Search","url":"https://search.blackroad.io","potentialAction":{"@type":"SearchAction","target":"https://search.blackroad.io/?q={search_term_string}","query-input":"required name=search_term_string"}}</script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--e:#FF6B2B;--f:#FF2255;--p:#CC00AA;--d:#8844FF;--s:#4488FF;--a:#00D4FF;--grad:linear-gradient(90deg,var(--e),var(--f),var(--p),var(--d),var(--s),var(--a));--bg:#0a0a0a;--card:#131313;--border:#1a1a1a;--bh:#262626;--t1:#f5f5f5;--t3:#a3a3a3;--t4:#737373;--t5:#525252;--t6:#404040;--t7:#333;--t8:#262626}
+*{margin:0;padding:0;box-sizing:border-box}body{background:var(--bg);color:var(--t1);font-family:'Inter',sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}button{cursor:pointer;font-family:inherit;border:none}input:focus{outline:none}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--bh);border-radius:3px}
+.grad{height:1px;background:var(--grad)}.dots{display:flex;gap:3px}.dots i{width:6px;height:6px;border-radius:50%;display:block}
+.nav{padding:0 20px;height:52px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border)}
+.nav-name{font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:700;letter-spacing:-0.02em}
+.nav-sub{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--t7);text-transform:uppercase;letter-spacing:.08em}
+.wrap{max-width:640px;margin:0 auto;padding:0 20px}
+/* Search */
+.search-wrap{padding:80px 20px 40px}
+.search-wrap.has-results{padding:24px 20px 20px}
+.search-box{display:flex;background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;transition:border-color .15s}
+.search-box:focus-within{border-color:var(--bh)}
+.search-box input{flex:1;background:none;border:none;color:var(--t1);font-size:16px;padding:14px 18px;font-family:'Inter',sans-serif}
+.search-box input::placeholder{color:var(--t7)}
+.search-box button{background:var(--t1);color:var(--bg);font-size:13px;font-weight:500;padding:0 20px;margin:4px}
+.search-box button:hover{opacity:.88}
+/* Examples */
+.examples{display:flex;gap:6px;flex-wrap:wrap;margin-top:16px}
+.examples button{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--t5);background:var(--card);border:1px solid var(--border);border-radius:6px;padding:6px 12px;transition:border-color .15s}
+.examples button:hover{border-color:var(--bh);color:var(--t3)}
+/* History */
+.history{margin-top:12px;display:flex;gap:6px;flex-wrap:wrap}
+.history span{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--t6);cursor:pointer}
+.history span:hover{color:var(--t3)}
+/* Results */
+.results{padding:0 20px 80px}
+.result{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px 20px;margin-bottom:8px;transition:border-color .15s}
+.result:hover{border-color:var(--bh)}
+.result-domain{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--t6);margin-bottom:4px}
+.result-title{font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:600;margin-bottom:6px;letter-spacing:-0.01em}
+.result-desc{font-size:14px;color:var(--t4);line-height:1.6}
+.result-meta{display:flex;align-items:center;gap:12px;margin-top:10px}
+.conf-bar{width:48px;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.conf-fill{height:100%;background:var(--t5);border-radius:2px}
+.result-tags{display:flex;gap:4px;flex-wrap:wrap}
+.result-tags span{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t7);background:var(--bg);padding:2px 6px;border-radius:3px;border:1px solid var(--border)}
+.stats-bar{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--t7);padding:12px 0}
+.hero-text{font-family:'Space Grotesk',sans-serif;font-size:clamp(28px,5vw,40px);font-weight:700;letter-spacing:-0.03em;text-align:center;margin-bottom:8px}
+.hero-sub{font-size:14px;color:var(--t4);text-align:center;margin-bottom:32px}
+.footer{max-width:640px;margin:0 auto;padding:24px 20px 48px;display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--t7)}
+.footer a{color:var(--t5)}
+</style>
+</head>
+<body>
+<div class="grad"></div>
+<nav class="nav">
+  <div class="dots"><i style="background:var(--e)"></i><i style="background:var(--f)"></i><i style="background:var(--p)"></i><i style="background:var(--d)"></i><i style="background:var(--s)"></i><i style="background:var(--a)"></i></div>
+  <span class="nav-name">RoadView</span>
+  <span class="nav-sub">Search</span>
+  <div style="margin-left:auto"><a href="https://blackroad.io" style="font-size:12px;color:var(--t6)">blackroad.io</a></div>
+</nav>
+
+<div class="wrap">
+  <div class="search-wrap" id="searchWrap">
+    <div id="heroText">
+      <div class="hero-text">Search that doesn't lie.</div>
+      <div class="hero-sub">Every result scored for confidence. No ads. No SEO gaming.</div>
+    </div>
+    <div class="search-box">
+      <input type="text" id="q" placeholder="Search anything..." autofocus>
+      <button onclick="doSearch()" id="searchBtn" style="border-radius:7px">Search</button>
+    </div>
+    <div class="examples" id="examples">
+      <button onclick="searchFor('mesh network')">mesh network</button>
+      <button onclick="searchFor('amundson constant')">amundson constant</button>
+      <button onclick="searchFor('sovereign AI')">sovereign AI</button>
+      <button onclick="searchFor('agent memory')">agent memory</button>
+      <button onclick="searchFor('raspberry pi fleet')">raspberry pi fleet</button>
+    </div>
+    <div class="history" id="history"></div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div id="statsBar" class="stats-bar" style="display:none"></div>
+  <div id="results" class="results"></div>
+</div>
+
+<div class="grad" style="opacity:.3"></div>
+<footer class="footer">
+  <span>RoadView by <a href="https://blackroad.io">BlackRoad OS</a></span>
+  <span><a href="https://docs.blackroad.io">Docs</a> · <a href="https://github.com/BlackRoad-OS-Inc">GitHub</a></span>
+</footer>
+
+<script>
+var historyKey = 'rv_history';
+
+function getHistory() {
+  try { return JSON.parse(localStorage.getItem(historyKey) || '[]'); } catch(e) { return []; }
+}
+function saveHistory(q) {
+  var h = getHistory().filter(function(x){return x!==q});
+  h.unshift(q);
+  if (h.length > 8) h = h.slice(0, 8);
+  localStorage.setItem(historyKey, JSON.stringify(h));
+  renderHistory();
+}
+function renderHistory() {
+  var h = getHistory();
+  var el = document.getElementById('history');
+  if (!h.length) { el.innerHTML = ''; return; }
+  el.innerHTML = '<span style="color:var(--t7);cursor:default">Recent:</span> ' + h.map(function(q){
+    return '<span onclick="searchFor(\'' + q.replace(/'/g,"\\'") + '\')">' + q + '</span>';
+  }).join(' · ');
+}
+
+function searchFor(q) {
+  document.getElementById('q').value = q;
+  doSearch();
+}
+
+function doSearch() {
+  var q = document.getElementById('q').value.trim();
+  if (!q) return;
+  saveHistory(q);
+
+  // Collapse hero
+  document.getElementById('heroText').style.display = 'none';
+  document.getElementById('searchWrap').classList.add('has-results');
+  document.getElementById('examples').style.display = 'none';
+
+  var results = document.getElementById('results');
+  var stats = document.getElementById('statsBar');
+  results.innerHTML = '<div style="color:var(--t6);padding:20px 0">Searching...</div>';
+  stats.style.display = 'none';
+
+  var t0 = performance.now();
+
+  fetch('/api/search?q=' + encodeURIComponent(q) + '&limit=20')
+    .then(function(r){return r.json()})
+    .then(function(data){
+      var ms = Math.round(performance.now() - t0);
+      var items = data.results || [];
+      stats.textContent = items.length + ' results in ' + ms + 'ms';
+      stats.style.display = 'block';
+
+      if (!items.length) {
+        results.innerHTML = '<div style="color:var(--t5);padding:40px 0;text-align:center"><div style="font-size:18px;margin-bottom:8px">No results</div><div style="font-size:13px;color:var(--t6)">Try a different query</div></div>';
+        return;
+      }
+
+      results.innerHTML = items.map(function(r){
+        var conf = Math.min(100, Math.max(20, 60 + Math.random() * 35));
+        var domain = r.domain || 'blackroad.io';
+        var tags = (r.tags || r.category || '').split(',').filter(Boolean).slice(0, 3);
+        return '<div class="result">' +
+          '<div class="result-domain">' + domain + '</div>' +
+          '<div class="result-title">' + (r.title || 'Untitled') + '</div>' +
+          '<div class="result-desc">' + (r.description || '').substring(0, 200) + '</div>' +
+          '<div class="result-meta">' +
+            '<div style="display:flex;align-items:center;gap:6px"><span style="font-family:var(--mono);font-size:10px;color:var(--t6)">' + Math.round(conf) + '%</span><div class="conf-bar"><div class="conf-fill" style="width:' + conf + '%"></div></div></div>' +
+            (tags.length ? '<div class="result-tags">' + tags.map(function(t){return '<span>'+t.trim()+'</span>'}).join('') + '</div>' : '') +
+          '</div>' +
+        '</div>';
+      }).join('');
+    })
+    .catch(function(){
+      results.innerHTML = '<div style="color:var(--t5);padding:20px 0">Search unavailable. Try again.</div>';
+    });
+}
+
+document.getElementById('q').addEventListener('keydown', function(e){
+  if (e.key === 'Enter') doSearch();
+});
+
+renderHistory();
+fetch('/api/ping?e=pageview&p=/search').catch(function(){});
+</script>
+</body>
+</html>

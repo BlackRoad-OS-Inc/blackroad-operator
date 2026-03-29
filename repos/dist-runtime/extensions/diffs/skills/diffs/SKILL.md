@@ -1,1 +1,0 @@
-../../../../../dist/extensions/diffs/skills/diffs/SKILL.md

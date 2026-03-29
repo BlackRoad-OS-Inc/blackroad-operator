@@ -1,331 +1,203 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CarKeys — BlackRoad API Key Management</title>
-<link rel="icon" type="image/png" sizes="32x32" href="https://images.blackroad.io/brand/br-square-32.png" />
-<link rel="apple-touch-icon" sizes="180x180" href="https://images.blackroad.io/brand/apple-touch-icon.png" />
-<meta name="description" content="CarKeys — Generate, rotate, and manage API keys for all BlackRoad services. Self-hosted key management.">
-<link rel="stylesheet" href="../_shared/design.css">
-<style>
-  /* Mobile-first */
-  .hero {
-    padding: var(--sp-xl) var(--sp-md);
-    display: flex; flex-direction: column; justify-content: center;
-    min-height: 60vh;
-  }
-  @media (min-width: 768px) { .hero { padding: var(--sp-2xl) var(--sp-xl); } }
-
-  .key-card {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 10px; padding: var(--sp-lg); margin-bottom: var(--sp-md);
-    transition: border-color 0.2s;
-  }
-  .key-card:hover { border-color: var(--muted); }
-  .key-card h3 { font-size: 1rem; margin-bottom: var(--sp-xs); }
-  .key-card .key-desc { font-size: 0.82rem; color: var(--subtle); margin-bottom: var(--sp-sm); }
-  .key-card .key-meta { font-family: var(--jb); font-size: 0.7rem; color: var(--muted); display: flex; gap: var(--sp-md); flex-wrap: wrap; }
-
-  .key-value {
-    font-family: var(--jb); font-size: 0.78rem;
-    background: var(--black); border: 1px solid var(--border);
-    padding: var(--sp-sm) var(--sp-md); border-radius: 6px;
-    display: flex; justify-content: space-between; align-items: center;
-    margin: var(--sp-sm) 0; word-break: break-all;
-  }
-  .key-value .val { color: var(--white); flex: 1; }
-  .key-value .copy-btn {
-    background: none; border: 1px solid var(--border); color: var(--subtle);
-    padding: 4px 10px; border-radius: 4px; cursor: pointer;
-    font-family: var(--jb); font-size: 0.68rem; margin-left: var(--sp-sm);
-    transition: border-color 0.2s, color 0.2s; flex-shrink: 0;
-  }
-  .key-value .copy-btn:hover { border-color: var(--white); color: var(--white); }
-
-  .gen-form {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 10px; padding: var(--sp-lg);
-  }
-  .gen-form label {
-    display: block; font-family: var(--jb); font-size: 0.72rem;
-    color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase;
-    margin-bottom: var(--sp-xs);
-  }
-  .gen-form input, .gen-form select {
-    width: 100%; background: var(--black); border: 1px solid var(--border);
-    color: var(--white); padding: var(--sp-sm) var(--sp-md);
-    font-family: var(--jb); font-size: 0.82rem; border-radius: 6px;
-    margin-bottom: var(--sp-md);
-  }
-  .gen-form input:focus, .gen-form select:focus {
-    outline: none; border-color: var(--muted);
-  }
-  .btn-generate {
-    display: inline-flex; align-items: center; gap: 8px;
-    background: var(--grad); color: var(--white);
-    padding: 12px 24px; border-radius: 6px; border: none;
-    font-weight: 700; font-size: 0.9rem; cursor: pointer;
-    font-family: var(--sg); transition: opacity 0.2s;
-    width: 100%;
-    justify-content: center;
-  }
-  @media (min-width: 600px) { .btn-generate { width: auto; } }
-  .btn-generate:hover { opacity: 0.9; }
-
-  .services-grid { display: grid; grid-template-columns: 1fr; gap: var(--sp-md); }
-  @media (min-width: 600px) { .services-grid { grid-template-columns: repeat(2, 1fr); } }
-  @media (min-width: 900px) { .services-grid { grid-template-columns: repeat(3, 1fr); } }
-
-  .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
-  .status-dot.active { background: #22c55e; }
-  .status-dot.expired { background: #ef4444; }
-  .status-dot.pending { background: #f59e0b; }
-
-  #output { display: none; }
-  #output.visible { display: block; }
-
-  .audit-log { font-family: var(--jb); font-size: 0.72rem; color: var(--subtle); }
-  .audit-log .entry { padding: var(--sp-xs) 0; border-bottom: 1px solid var(--border); }
-  .audit-log .ts { color: var(--muted); }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Carkeys | BlackRoad</title>
+  <meta name="description" content="Carkeys is part of BlackRoad Studio, the experience layer for public websites, design systems, and polished surfaces.">
+  <meta name="theme-color" content="#0b0b0b">
+  <link rel="canonical" href="https://blackroad.io/carkeys">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Carkeys | BlackRoad">
+  <meta property="og:description" content="Carkeys is part of BlackRoad Studio, the experience layer for public websites, design systems, and polished surfaces.">
+  <meta property="og:url" content="https://blackroad.io/carkeys">
+  <meta property="og:site_name" content="BlackRoad">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Carkeys | BlackRoad">
+  <meta name="twitter:description" content="Carkeys is part of BlackRoad Studio, the experience layer for public websites, design systems, and polished surfaces.">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://images.blackroad.io/brand/br-square-32.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="https://images.blackroad.io/brand/br-square-192.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://images.blackroad.io/brand/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #090909;
+      --bg-soft: #111111;
+      --card: #131313;
+      --border: #232323;
+      --text: #f5f5f5;
+      --muted: #b2b2b2;
+      --dim: #6d6d6d;
+      --ember: #ff6b2b;
+      --flare: #ff2255;
+      --magenta: #cc00aa;
+      --orchid: #8844ff;
+      --arc: #4488ff;
+      --cyan: #00d4ff;
+      --grad: linear-gradient(100deg, var(--ember), var(--flare), var(--magenta), var(--orchid), var(--arc), var(--cyan));
+      --display: 'Space Grotesk', sans-serif;
+      --body: 'Inter', sans-serif;
+      --mono: 'JetBrains Mono', monospace;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: radial-gradient(circle at top, #151515 0, var(--bg) 45%); color: var(--text); }
+    body { font-family: var(--body); min-height: 100vh; }
+    a { color: inherit; text-decoration: none; }
+    .topbar { height: 4px; background: var(--grad); background-size: 180% 100%; animation: shift 7s linear infinite; }
+    @keyframes shift { from { background-position: 0 0; } to { background-position: 180% 0; } }
+    .shell { max-width: 1160px; margin: 0 auto; padding: 0 24px 80px; }
+    .nav { display: flex; justify-content: space-between; align-items: center; padding: 18px 0; border-bottom: 1px solid var(--border); }
+    .brand { display: flex; align-items: center; gap: 12px; font-family: var(--display); font-weight: 700; letter-spacing: -0.03em; }
+    .brand-mark { display: grid; grid-template-columns: repeat(3, 8px); gap: 4px; }
+    .brand-mark span { width: 8px; height: 8px; border-radius: 999px; }
+    .brand-mark span:nth-child(1) { background: var(--ember); }
+    .brand-mark span:nth-child(2) { background: var(--flare); }
+    .brand-mark span:nth-child(3) { background: var(--cyan); }
+    .nav-links { display: flex; gap: 18px; font-size: 13px; color: var(--muted); }
+    .hero { padding: 72px 0 48px; display: grid; gap: 28px; }
+    .eyebrow { font-family: var(--mono); color: var(--dim); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; }
+    h1 { font-family: var(--display); font-size: clamp(38px, 6vw, 74px); line-height: 0.95; letter-spacing: -0.05em; margin: 0; max-width: 900px; }
+    .hero-copy { max-width: 740px; font-size: 18px; line-height: 1.7; color: var(--muted); }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 14px; }
+    .btn-primary, .btn-secondary { padding: 14px 20px; border-radius: 999px; font-weight: 600; font-size: 14px; }
+    .btn-primary { background: var(--text); color: #050505; }
+    .btn-secondary { border: 1px solid var(--border); color: var(--muted); }
+    .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+    .stat-card, .pillar-card { background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 20px; padding: 20px; }
+    .stat-value { font-family: var(--display); font-size: clamp(24px, 4vw, 34px); letter-spacing: -0.04em; }
+    .stat-label { font-family: var(--mono); font-size: 11px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.12em; margin-top: 6px; }
+    .section { padding: 40px 0; }
+    .section-head { display: grid; gap: 10px; margin-bottom: 20px; }
+    .section-head h2 { font-family: var(--display); font-size: clamp(26px, 4vw, 40px); letter-spacing: -0.04em; margin: 0; }
+    .section-head p { margin: 0; color: var(--muted); max-width: 760px; line-height: 1.7; }
+    .pillars { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .pillar-card h3 { font-family: var(--display); margin: 8px 0 10px; font-size: 24px; letter-spacing: -0.03em; }
+    .pillar-card p { color: var(--muted); margin: 0; line-height: 1.7; }
+    .links { display: flex; flex-wrap: wrap; gap: 10px; }
+    .link-pill { border: 1px solid var(--border); border-radius: 999px; padding: 10px 14px; color: var(--muted); font-size: 13px; }
+    footer { margin-top: 36px; padding-top: 20px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; gap: 12px; color: var(--dim); font-family: var(--mono); font-size: 11px; }
+    @media (max-width: 860px) {
+      .stats, .pillars { grid-template-columns: 1fr 1fr; }
+      .nav { gap: 16px; flex-direction: column; align-items: flex-start; }
+      footer { flex-direction: column; }
+    }
+    @media (max-width: 560px) {
+      .shell { padding: 0 16px 56px; }
+      .stats, .pillars { grid-template-columns: 1fr; }
+      .hero { padding-top: 44px; }
+      .hero-copy { font-size: 16px; }
+    }
+  </style>
 </head>
-<body class="dot-bg">
-
-  <!-- Nav -->
-  <nav>
-    <div class="nav-logo">CarKeys</div>
-    <div class="nav-links">
-      <a href="#generate">Generate</a>
-      <a href="#services">Services</a>
-      <a href="#audit">Audit Log</a>
-      <a href="https://blackroad.io">BlackRoad OS</a>
-    </div>
-    <button class="nav-toggle" onclick="this.classList.toggle('open');document.getElementById('nav-mobile').classList.toggle('open')" aria-label="Menu">
-      <span></span><span></span><span></span>
-    </button>
-  </nav>
-  <div id="nav-mobile" class="nav-mobile">
-    <a href="#generate" onclick="document.getElementById('nav-mobile').classList.remove('open')">Generate</a>
-    <a href="#services" onclick="document.getElementById('nav-mobile').classList.remove('open')">Services</a>
-    <a href="#audit" onclick="document.getElementById('nav-mobile').classList.remove('open')">Audit Log</a>
-    <a href="https://blackroad.io">BlackRoad OS</a>
-  </div>
-
-  <!-- Hero -->
-  <div class="hero">
-    <div class="section-label">BlackRoad Key Management</div>
-    <h1>CarKeys</h1>
-    <p style="color:var(--subtle);max-width:500px;line-height:1.7;margin-top:var(--sp-md);">
-      Generate, rotate, and manage API keys for every BlackRoad service.
-      Self-hosted. Audit-logged. IP-bound. No external key dashboards.
-    </p>
-  </div>
-
-  <!-- Generate -->
-  <section id="generate">
-    <div class="section-label">Generate Key</div>
-    <div class="gen-form">
-      <label>Service</label>
-      <select id="service">
-        <option value="godaddy">GoDaddy — Domain Registrar API</option>
-        <option value="powerdns">PowerDNS — Authoritative DNS</option>
-        <option value="minio">MinIO — Object Storage (Cecilia)</option>
-        <option value="gitea">RoadCode — Gitea API (Octavia)</option>
-        <option value="ollama">Passenger — Ollama API</option>
-        <option value="nats">CarPool — NATS Auth</option>
-        <option value="redis">Redis — Cache (Alice)</option>
-        <option value="postgres">PostgreSQL — Database</option>
-        <option value="roundtrip">RoundTrip — Chat API</option>
-        <option value="mesh">BlackRoad Mesh — SDK Token</option>
-        <option value="auth">Auth — JWT Signing Key</option>
-        <option value="stripe">Stripe — Payment Gateway</option>
-        <option value="cloudflare">Cloudflare — (being deprecated)</option>
-        <option value="custom">Custom — Any Service</option>
-      </select>
-
-      <label>Key Name</label>
-      <input type="text" id="keyname" placeholder="e.g. production-api, dev-testing, ci-deploy">
-
-      <label>Bind to IP (optional)</label>
-      <input type="text" id="bindip" placeholder="Auto-detected: loading...">
-
-      <label>Bind to Email</label>
-      <input type="text" id="bindemail" placeholder="alexa@blackroad.io" value="alexa@blackroad.io">
-
-      <label>Expiry</label>
-      <select id="expiry">
-        <option value="never">Never</option>
-        <option value="24h">24 Hours</option>
-        <option value="7d">7 Days</option>
-        <option value="30d" selected>30 Days</option>
-        <option value="90d">90 Days</option>
-        <option value="365d">1 Year</option>
-      </select>
-
-      <label>Key Length</label>
-      <select id="keylength">
-        <option value="32">32 bytes (256-bit)</option>
-        <option value="48" selected>48 bytes (384-bit)</option>
-        <option value="64">64 bytes (512-bit)</option>
-      </select>
-
-      <button class="btn-generate" onclick="generateKey()">Generate Key →</button>
-    </div>
-
-    <div id="output" style="margin-top:var(--sp-lg);">
-      <div class="key-card">
-        <h3 id="out-name">—</h3>
-        <div class="key-value">
-          <span class="val" id="out-key">—</span>
-          <button class="copy-btn" onclick="copyKey()">COPY</button>
-        </div>
-        <div class="key-meta">
-          <span>Service: <span id="out-service">—</span></span>
-          <span>IP: <span id="out-ip">—</span></span>
-          <span>Expires: <span id="out-expiry">—</span></span>
-          <span>Created: <span id="out-created">—</span></span>
-        </div>
+<body>
+  <div class="topbar"></div>
+  <div class="shell">
+    <nav class="nav">
+      <a class="brand" href="https://blackroad.io">
+        <span class="brand-mark"><span></span><span></span><span></span></span>
+        <span>BlackRoad</span>
+      </a>
+      <div class="nav-links">
+        <a href="https://github.com/BlackRoad-OS">OS</a>
+        <a href="https://github.com/BlackRoad-AI">AI</a>
+        <a href="https://github.com/BlackRoad-Studio">Studio</a>
+        <a href="https://github.com/BlackRoad-Forge">Forge</a>
       </div>
-    </div>
-  </section>
+    </nav>
 
-  <!-- Services -->
-  <section id="services">
-    <div class="section-label">Active Services</div>
-    <h2 style="margin-bottom:var(--sp-xl);">Key Inventory</h2>
-    <div class="services-grid" id="services-grid">
-      <!-- Populated by JS -->
-    </div>
-  </section>
+    <main>
+      <section class="hero">
+        <div class="eyebrow">Studio</div>
+        <h1>Carkeys</h1>
+        <p class="hero-copy">Carkeys is part of BlackRoad Studio, the experience layer for public websites, design systems, and polished surfaces.</p>
+        <div class="hero-actions">
+          <a class="btn-primary" href="https://blackroad.io">Explore BlackRoad OS</a>
+          <a class="btn-secondary" href="https://github.com/BlackRoad-Studio">View GitHub</a>
+        </div>
+      </section>
 
-  <!-- Audit Log -->
-  <section id="audit">
-    <div class="section-label">Audit Log</div>
-    <div class="audit-log" id="audit-log">
-      <!-- Populated by JS -->
-    </div>
-  </section>
-
-  <!-- Footer -->
-  <footer>
-    <span>© 2026 BlackRoad OS, Inc. All rights reserved.</span>
-    <span style="display:flex;gap:var(--sp-lg);flex-wrap:wrap;">
-      <a href="https://blackroad.io" style="color:var(--muted);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">Home</a>
-      <a href="https://blackroad.systems" style="color:var(--muted);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">Status</a>
-      <a href="https://blackroad.network" style="color:var(--muted);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">Network</a>
-    </span>
-  </footer>
-
-<script>
-// Detect IP
-fetch('https://api.ipify.org?format=json').then(r=>r.json()).then(d=>{
-  document.getElementById('bindip').placeholder = 'Auto-detected: ' + d.ip;
-  document.getElementById('bindip').value = d.ip;
-}).catch(()=>{});
-
-// Service registry
-const SERVICES = [
-  { id: 'powerdns', name: 'PowerDNS', host: 'ns1.blackroad.io', port: 8081, status: 'active', keys: 1, desc: 'Authoritative DNS for 20 domains' },
-  { id: 'minio', name: 'MinIO (Curb)', host: '192.168.4.96', port: 9000, status: 'active', keys: 1, desc: 'S3 object storage on Cecilia' },
-  { id: 'gitea', name: 'RoadCode', host: '192.168.4.101', port: 3100, status: 'active', keys: 0, desc: 'Git hosting — 239 repos, 8 orgs' },
-  { id: 'ollama', name: 'Passenger (Ollama)', host: 'multiple', port: 11434, status: 'active', keys: 0, desc: 'LLM inference on 4 nodes' },
-  { id: 'nats', name: 'CarPool (NATS)', host: '192.168.4.101', port: 4222, status: 'active', keys: 0, desc: 'Pub/sub messaging mesh' },
-  { id: 'redis', name: 'Redis', host: '192.168.4.49', port: 6379, status: 'active', keys: 0, desc: 'Cache on Alice' },
-  { id: 'postgres', name: 'PostgreSQL', host: '192.168.4.49', port: 5432, status: 'active', keys: 0, desc: 'Database on Alice' },
-  { id: 'roundtrip', name: 'RoundTrip', host: 'roundtrip.blackroad.io', port: 443, status: 'active', keys: 0, desc: '62 agent sovereign chat' },
-  { id: 'auth', name: 'Auth', host: 'auth.blackroad.io', port: 443, status: 'active', keys: 1, desc: '42 users, JWT auth' },
-  { id: 'godaddy', name: 'GoDaddy', host: 'api.godaddy.com', port: 443, status: 'pending', keys: 0, desc: 'Domain registrar — 20 domains' },
-  { id: 'stripe', name: 'Stripe', host: 'api.stripe.com', port: 443, status: 'active', keys: 1, desc: 'Payment processing (last external dep)' },
-  { id: 'cloudflare', name: 'Cloudflare', host: 'api.cloudflare.com', port: 443, status: 'expired', keys: 1, desc: 'Being deprecated — sovereignty migration' },
-];
-
-// Render services grid
-const grid = document.getElementById('services-grid');
-SERVICES.forEach(s => {
-  const statusClass = s.status;
-  const statusLabel = s.status.charAt(0).toUpperCase() + s.status.slice(1);
-  grid.innerHTML += `
-    <div class="key-card">
-      <h3><span class="status-dot ${statusClass}"></span>${s.name}</h3>
-      <div class="key-desc">${s.desc}</div>
-      <div class="key-meta">
-        <span>Host: ${s.host}:${s.port}</span>
-        <span>Keys: ${s.keys}</span>
-        <span>Status: ${statusLabel}</span>
+      <section class="section">
+        <div class="stats">
+          
+      <div class="stat-card">
+        <div class="stat-value">Public</div>
+        <div class="stat-label">Surface</div>
       </div>
-    </div>`;
-});
 
-// Key storage
-let keys = JSON.parse(localStorage.getItem('carkeys') || '[]');
-let auditLog = JSON.parse(localStorage.getItem('carkeys-audit') || '[]');
+      <div class="stat-card">
+        <div class="stat-value">Design</div>
+        <div class="stat-label">System</div>
+      </div>
 
-function generateKey() {
-  const service = document.getElementById('service').value;
-  const name = document.getElementById('keyname').value || service + '-key';
-  const ip = document.getElementById('bindip').value;
-  const email = document.getElementById('bindemail').value;
-  const expiry = document.getElementById('expiry').value;
-  const length = parseInt(document.getElementById('keylength').value);
+      <div class="stat-card">
+        <div class="stat-value">Docs</div>
+        <div class="stat-label">Layer</div>
+      </div>
 
-  // Generate cryptographic key
-  const bytes = new Uint8Array(length);
-  crypto.getRandomValues(bytes);
-  const key = Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
+      <div class="stat-card">
+        <div class="stat-value">Brand</div>
+        <div class="stat-label">Signals</div>
+      </div>
+        </div>
+      </section>
 
-  // Prefix with service identifier
-  const prefixed = `br_${service}_${key}`;
+      <section class="section" id="pillars">
+        <div class="section-head">
+          <div class="eyebrow">Public Map</div>
+          <h2>The BlackRoad ecosystem is organized around 4 public surfaces.</h2>
+          <p>Instead of asking visitors to decode dozens of internal orgs, BlackRoad now leads with 4 clear pillars: the platform, the intelligence, the experience, and the experiments.</p>
+        </div>
+        <div class="pillars">
+          
+        <article class="pillar-card">
+          <div class="section-label">the platform</div>
+          <h3>BlackRoad-OS</h3>
+          <p>Core apps, APIs, operator systems, and runtime tooling.</p>
+        </article>
 
-  const entry = {
-    id: crypto.randomUUID(),
-    service, name, key: prefixed,
-    ip, email, expiry,
-    created: new Date().toISOString(),
-    used: 0
-  };
+        <article class="pillar-card">
+          <div class="section-label">the intelligence</div>
+          <h3>BlackRoad-AI</h3>
+          <p>Local-first AI, agents, memory systems, and model integrations.</p>
+        </article>
 
-  keys.push(entry);
-  localStorage.setItem('carkeys', JSON.stringify(keys));
+        <article class="pillar-card">
+          <div class="section-label">the experience</div>
+          <h3>BlackRoad-Studio</h3>
+          <p>Websites, design systems, docs, and polished product surfaces.</p>
+        </article>
 
-  // Audit
-  addAudit('generate', `Generated ${length*8}-bit key for ${service}: ${name}`);
+        <article class="pillar-card">
+          <div class="section-label">the experiments</div>
+          <h3>BlackRoad-Forge</h3>
+          <p>Prototypes, interactive builds, tutorials, and maker projects.</p>
+        </article>
+        </div>
+      </section>
 
-  // Show output
-  document.getElementById('output').classList.add('visible');
-  document.getElementById('out-name').textContent = name;
-  document.getElementById('out-key').textContent = prefixed;
-  document.getElementById('out-service').textContent = service;
-  document.getElementById('out-ip').textContent = ip || 'any';
-  document.getElementById('out-expiry').textContent = expiry;
-  document.getElementById('out-created').textContent = new Date().toLocaleString();
-}
+      <section class="section">
+        <div class="section-head">
+          <div class="eyebrow">Related</div>
+          <h2>Keep moving.</h2>
+          <p>Use these links to move across the public BlackRoad surface without getting lost in internal structure.</p>
+        </div>
+        <div class="links">
+          <a class="link-pill" href="https://github.com/BlackRoad-Studio">BlackRoad Studio</a>
+<a class="link-pill" href="https://blackroad.io">BlackRoad.io</a>
+<a class="link-pill" href="https://blackroad.io">Home</a>
+<a class="link-pill" href="https://docs.blackroad.io">Docs</a>
+<a class="link-pill" href="https://search.blackroad.io">Search</a>
+<a class="link-pill" href="https://github.com/BlackRoad-OS">GitHub</a>
+        </div>
+      </section>
+    </main>
 
-function copyKey() {
-  const key = document.getElementById('out-key').textContent;
-  navigator.clipboard.writeText(key);
-  const btn = document.querySelector('.copy-btn');
-  btn.textContent = 'COPIED';
-  setTimeout(() => btn.textContent = 'COPY', 2000);
-  addAudit('copy', 'Key copied to clipboard');
-}
-
-function addAudit(action, detail) {
-  const entry = { ts: new Date().toISOString(), action, detail, ip: document.getElementById('bindip').value };
-  auditLog.unshift(entry);
-  if (auditLog.length > 100) auditLog = auditLog.slice(0, 100);
-  localStorage.setItem('carkeys-audit', JSON.stringify(auditLog));
-  renderAudit();
-}
-
-function renderAudit() {
-  const el = document.getElementById('audit-log');
-  el.innerHTML = auditLog.slice(0, 20).map(e =>
-    `<div class="entry"><span class="ts">${new Date(e.ts).toLocaleString()}</span> [${e.action}] ${e.detail}</div>`
-  ).join('');
-}
-
-renderAudit();
-</script>
+    <footer>
+      <span>Carkeys · part of BlackRoad</span>
+      <span>Pave Tomorrow.</span>
+    </footer>
+  </div>
 </body>
 </html>

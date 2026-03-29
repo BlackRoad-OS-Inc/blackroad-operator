@@ -1,5 +1,0 @@
-before
-
-> quote
-
-after

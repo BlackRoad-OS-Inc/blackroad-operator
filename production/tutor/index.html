@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RoadWork — AI Tutoring</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0a;color:#f5f5f5;font-family:'Inter',sans-serif;min-height:100vh}
+nav{height:52px;display:flex;align-items:center;padding:0 24px;border-bottom:1px solid #1a1a1a;gap:10px}
+.logo{display:flex;gap:4px;align-items:center}
+.logo span{width:6px;height:6px;border-radius:50%;display:inline-block}
+.d1{background:#FF6B2B}.d2{background:#FF2255}.d3{background:#CC00AA}.d4{background:#8844FF}.d5{background:#4488FF}.d6{background:#00D4FF}
+nav h1{font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:600;color:#a0a0a0}
+main{max-width:960px;margin:0 auto;padding:32px 20px}
+h2{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;margin-bottom:16px}
+.subjects{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-bottom:36px}
+.subject{background:#131313;border:1px solid #1a1a1a;border-radius:10px;padding:16px;text-align:center;cursor:default}
+.subject .name{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:13px;margin-top:10px}
+.subject .desc{font-size:11px;color:#777;margin-top:4px}
+.ring{width:64px;height:64px;margin:0 auto}
+.ring-bg{fill:none;stroke:#1a1a1a;stroke-width:5}
+.ring-fg{fill:none;stroke-width:5;stroke-linecap:round;transition:stroke-dashoffset .6s ease}
+.ring text{fill:#f5f5f5;font-family:'JetBrains Mono',monospace;font-size:13px;dominant-baseline:central;text-anchor:middle}
+.chat-section{background:#131313;border:1px solid #1a1a1a;border-radius:10px;padding:20px;margin-bottom:36px}
+.chat-section h3{font-family:'Space Grotesk',sans-serif;font-size:16px;margin-bottom:12px}
+.pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.pill{background:#1a1a1a;border:1px solid #262626;border-radius:16px;padding:6px 14px;font-size:12px;color:#aaa;cursor:pointer}
+.pill:hover{border-color:#444;color:#f5f5f5}
+.chat-log{min-height:60px;margin-bottom:14px;display:flex;flex-direction:column;gap:8px}
+.msg{padding:8px 12px;border-radius:8px;font-size:13px;max-width:80%;animation:fadeIn .3s}
+.msg.user{background:#1a1a1a;align-self:flex-end;color:#ccc}
+.msg.ai{background:#181818;border:1px solid #1a1a1a;align-self:flex-start;color:#bbb}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.chat-input{display:flex;gap:8px}
+.chat-input input{flex:1;background:#0a0a0a;border:1px solid #1a1a1a;border-radius:8px;padding:10px 14px;color:#f5f5f5;font-family:'Inter',sans-serif;font-size:13px;outline:none}
+.chat-input input:focus{border-color:#333}
+.chat-input button{background:#1a1a1a;border:1px solid #262626;border-radius:8px;padding:10px 18px;color:#f5f5f5;font-size:13px;cursor:pointer;font-family:'Inter',sans-serif}
+.chat-input button:hover{background:#262626}
+.homework h3{font-family:'Space Grotesk',sans-serif;font-size:16px;margin-bottom:12px}
+.hw-item{background:#131313;border:1px solid #1a1a1a;border-radius:8px;padding:12px 16px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+.hw-item .title{font-size:13px}
+.hw-item .course{font-size:11px;color:#666;margin-top:2px}
+.badge{font-family:'JetBrains Mono',monospace;font-size:11px;padding:3px 10px;border-radius:10px}
+.badge.done{background:#0a1a0a;color:#4a4}.badge.progress{background:#1a1a0a;color:#aa4}.badge.todo{background:#1a0a0a;color:#a44}
+</style>
+</head>
+<body>
+<nav>
+  <div class="logo"><span class="d1"></span><span class="d2"></span><span class="d3"></span><span class="d4"></span><span class="d5"></span><span class="d6"></span></div>
+  <h1>RoadWork</h1>
+</nav>
+<main>
+  <h2>Subjects</h2>
+  <div class="subjects" id="subjects"></div>
+  <div class="chat-section">
+    <h3>AI Tutor</h3>
+    <div class="pills">
+      <span class="pill" onclick="sendMsg(this.textContent)">Explain quantum superposition</span>
+      <span class="pill" onclick="sendMsg(this.textContent)">Help me with derivatives</span>
+      <span class="pill" onclick="sendMsg(this.textContent)">Review my essay structure</span>
+    </div>
+    <div class="chat-log" id="log"></div>
+    <div class="chat-input">
+      <input id="inp" placeholder="Ask the tutor anything..." onkeydown="if(event.key==='Enter')send()">
+      <button onclick="send()">Send</button>
+    </div>
+  </div>
+  <div class="homework">
+    <h3>Active Homework</h3>
+    <div class="hw-item"><div><div class="title">Derivative Practice Set #4</div><div class="course">Math</div></div><span class="badge done">completed</span></div>
+    <div class="hw-item"><div><div class="title">Wave-Particle Duality Essay</div><div class="course">Physics</div></div><span class="badge progress">in-progress</span></div>
+    <div class="hw-item"><div><div class="title">Binary Tree Traversal Lab</div><div class="course">CS</div></div><span class="badge todo">not-started</span></div>
+  </div>
+</main>
+<script>
+const subjects=[
+  {name:'Math',pct:72,desc:'Calculus & linear algebra'},
+  {name:'Physics',pct:45,desc:'Classical mechanics & waves'},
+  {name:'CS',pct:83,desc:'Data structures & algorithms'},
+  {name:'Music Theory',pct:38,desc:'Harmony & composition'},
+  {name:'Writing',pct:61,desc:'Academic & creative writing'},
+  {name:'Quantum',pct:22,desc:'Quantum computing basics'}
+];
+const colors=['#FF6B2B','#FF2255','#CC00AA','#8844FF','#4488FF','#00D4FF'];
+const el=document.getElementById('subjects');
+subjects.forEach((s,i)=>{
+  const c=157.08;const off=c-(s.pct/100)*c;
+  el.innerHTML+=`<div class="subject"><svg class="ring" viewBox="0 0 64 64"><circle class="ring-bg" cx="32" cy="32" r="25"/><circle class="ring-fg" cx="32" cy="32" r="25" stroke="${colors[i]}" stroke-dasharray="${c}" stroke-dashoffset="${off}" transform="rotate(-90 32 32)"/><text x="32" y="32">${s.pct}%</text></svg><div class="name">${s.name}</div><div class="desc">${s.desc}</div></div>`;
+});
+const replies=['That\'s a great question. The key insight is to break this into smaller pieces and solve each part step by step. Start with the fundamental definition and work forward.','Let me walk you through this. First, identify the core concept, then apply the rules we covered. Try working through the first step and I\'ll guide you from there.','Good thinking. The approach you want is to connect this back to the foundational principles. Once you see the pattern, the rest follows naturally.'];
+const log=document.getElementById('log'),inp=document.getElementById('inp');
+function addMsg(text,cls){const d=document.createElement('div');d.className='msg '+cls;d.textContent=text;log.appendChild(d);log.scrollTop=log.scrollHeight}
+function sendMsg(t){inp.value=t;send()}
+function send(){const t=inp.value.trim();if(!t)return;addMsg(t,'user');inp.value='';setTimeout(()=>addMsg(replies[Math.floor(Math.random()*replies.length)],'ai'),1000)}
+</script>
+</body>
+</html>

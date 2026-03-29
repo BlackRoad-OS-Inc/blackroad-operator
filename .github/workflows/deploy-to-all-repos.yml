@@ -19,6 +19,8 @@ on:
         type: choice
         options:
           - standard
+          - autonomous
+          - fleet
           - e2e
           - scrapers
           - all
@@ -28,7 +30,7 @@ permissions:
   actions: write
 
 env:
-  GH_TOKEN: ${{ secrets.CROSS_ORG_TOKEN }}
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
   prepare:
@@ -37,14 +39,14 @@ jobs:
     outputs:
       repos: ${{ steps.list.outputs.repos }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
 
       - name: List target repos
         id: list
         run: |
           ORGS="${{ inputs.target_orgs }}"
           if [ "$ORGS" = "all" ]; then
-            ORGS="BlackRoad-OS-Inc,BlackRoad-OS,blackboxprogramming,BlackRoad-AI,BlackRoad-Cloud,BlackRoad-Security,BlackRoad-Media,BlackRoad-Foundation,BlackRoad-Interactive,BlackRoad-Hardware,BlackRoad-Labs,BlackRoad-Studio,BlackRoad-Ventures,BlackRoad-Education,BlackRoad-Gov,Blackbox-Enterprises,BlackRoad-Archive"
+            ORGS="BlackRoad-OS-Inc,BlackRoad-OS,BlackRoad-AI,BlackRoad-Agents,BlackRoad-Alphabet,BlackRoad-Anthropic,BlackRoad-App,BlackRoad-Archive,BlackRoad-Cloud,BlackRoad-Com,BlackRoad-Data,BlackRoad-Dev,BlackRoad-Education,BlackRoad-Forge,BlackRoad-Foundation,BlackRoad-Google,BlackRoad-Gov,BlackRoad-Hardware,BlackRoad-Interactive,BlackRoad-Labs,BlackRoad-Media,BlackRoad-Network,BlackRoad-Nvidia,BlackRoad-OpenAI,BlackRoad-QI,BlackRoad-Quantum,BlackRoad-README,BlackRoad-Sandbox,BlackRoad-Security,BlackRoad-Studio,BlackRoad-Tech,BlackRoad-Ventures,BlackRoad-X,BlackRoad-XYZ,BlackRoad-xAI,Blackbox-Enterprises"
           fi
 
           REPOS="[]"
@@ -76,9 +78,19 @@ jobs:
       matrix:
         repo: ${{ fromJson(needs.prepare.outputs.repos) }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+
+      - name: Generate app token
+        id: app-token
+        uses: actions/create-github-app-token@d72941d797fd3113feb6b93fd0dec494b13a2547
+        with:
+          app-id: ${{ secrets.BLACKROAD_APP_ID }}
+          private-key: ${{ secrets.BLACKROAD_APP_PRIVATE_KEY }}
+        continue-on-error: true
 
       - name: Deploy workflow files
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token || secrets.GITHUB_TOKEN }}
         run: |
           REPO="${{ matrix.repo }}"
           DRY_RUN="${{ inputs.dry_run }}"
@@ -100,11 +112,22 @@ jobs:
 
           cd "${TMPDIR}/repo"
           mkdir -p .github/workflows
+          mkdir -p .github/ISSUE_TEMPLATE
 
           # Copy appropriate workflow files
           case "$WORKFLOW_SET" in
             standard|all)
               cp "${{ github.workspace }}/.github/workflows/ci.yml" .github/workflows/ 2>/dev/null || true
+              ;;
+            autonomous|all)
+              cp "${{ github.workspace }}/.github/workflows/autonomous-orchestrator.yml" .github/workflows/ 2>/dev/null || true
+              cp "${{ github.workspace }}/.github/workflows/autonomous-self-healer.yml" .github/workflows/ 2>/dev/null || true
+              cp "${{ github.workspace }}/.github/workflows/blackroad-ci.yml" .github/workflows/ 2>/dev/null || true
+              cp "${{ github.workspace }}/.github/ISSUE_TEMPLATE/config.yml" .github/ISSUE_TEMPLATE/ 2>/dev/null || true
+              cp "${{ github.workspace }}/.github/ISSUE_TEMPLATE/agent_task.yml" .github/ISSUE_TEMPLATE/ 2>/dev/null || true
+              cp "${{ github.workspace }}/.github/ISSUE_TEMPLATE/bug_report.yml" .github/ISSUE_TEMPLATE/ 2>/dev/null || true
+              cp "${{ github.workspace }}/.github/ISSUE_TEMPLATE/feature_request.yml" .github/ISSUE_TEMPLATE/ 2>/dev/null || true
+              cp "${{ github.workspace }}/.github/ISSUE_TEMPLATE/infra_request.yml" .github/ISSUE_TEMPLATE/ 2>/dev/null || true
               ;;
             e2e|all)
               # Create an E2E check workflow
@@ -118,7 +141,7 @@ jobs:
             check:
               runs-on: ubuntu-latest
               steps:
-                - uses: actions/checkout@v6
+                - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
                 - name: Detect stack
                   run: |
                     [ -f package.json ] && echo "STACK=node" >> $GITHUB_ENV
@@ -141,7 +164,7 @@ jobs:
             report:
               runs-on: ubuntu-latest
               steps:
-                - uses: actions/checkout@v6
+                - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
                 - name: Generate report
                   run: |
                     echo '{"repo":"${{ github.repository }}","time":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"}' > /tmp/report.json
@@ -153,11 +176,11 @@ jobs:
           # Commit and push
           git config user.name "blackroad-bot"
           git config user.email "bot@blackroad.io"
-          git add .github/workflows/
+          git add .github/workflows/ .github/ISSUE_TEMPLATE/
           if git diff --cached --quiet; then
             echo "No changes for ${REPO}"
           else
-            git commit -m "chore: add BlackRoad E2E workflows [operator-deploy]"
+            git commit -m "chore: deploy BlackRoad workflow set [operator-deploy]"
             git push || echo "Push failed for ${REPO}"
           fi
 

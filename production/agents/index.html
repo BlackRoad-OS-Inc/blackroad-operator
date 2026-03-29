@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BlackRoad Agents</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0a;color:#f5f5f5;font-family:'Inter',sans-serif;min-height:100vh}
+nav{height:52px;display:flex;align-items:center;padding:0 24px;border-bottom:1px solid #1a1a1a;gap:10px}
+.logo{display:flex;gap:4px;align-items:center}
+.logo span{width:6px;height:6px;border-radius:50%;display:inline-block}
+.d1{background:#FF6B2B}.d2{background:#FF2255}.d3{background:#CC00AA}.d4{background:#8844FF}.d5{background:#4488FF}.d6{background:#00D4FF}
+nav h1{font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:600;color:#a0a0a0}
+main{max-width:960px;margin:0 auto;padding:32px 20px}
+h2{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;margin-bottom:16px}
+.search{width:100%;background:#131313;border:1px solid #1a1a1a;border-radius:8px;padding:10px 14px;color:#f5f5f5;font-family:'Inter',sans-serif;font-size:13px;outline:none;margin-bottom:20px}
+.search:focus{border-color:#333}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+.card{background:#131313;border:1px solid #1a1a1a;border-radius:10px;padding:16px;cursor:pointer;transition:border-color .2s}
+.card:hover{border-color:#333}
+.card.expanded{grid-column:1/-1;max-width:100%}
+.card-top{display:flex;align-items:center;gap:12px}
+.avatar{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:16px;color:#0a0a0a;flex-shrink:0}
+.card-info{flex:1;min-width:0}
+.card-info .name{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px;display:flex;align-items:center;gap:6px}
+.status-dot{width:6px;height:6px;border-radius:50%;background:#4a4;flex-shrink:0}
+.card-info .role{font-size:11px;color:#777;margin-top:1px}
+.meta{display:flex;gap:16px;margin-top:10px}
+.meta span{font-family:'JetBrains Mono',monospace;font-size:11px;color:#555}
+.details{margin-top:14px;padding-top:14px;border-top:1px solid #1a1a1a;display:none}
+.card.expanded .details{display:block}
+.details h4{font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:.5px;margin:10px 0 6px}
+.details h4:first-child{margin-top:0}
+.details li{font-size:12px;color:#999;list-style:none;padding:3px 0}
+.details li::before{content:'>';margin-right:6px;color:#444}
+.connected{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.connected span{background:#1a1a1a;border-radius:4px;padding:2px 8px;font-size:11px;color:#888;font-family:'JetBrains Mono',monospace}
+</style>
+</head>
+<body>
+<nav>
+  <div class="logo"><span class="d1"></span><span class="d2"></span><span class="d3"></span><span class="d4"></span><span class="d5"></span><span class="d6"></span></div>
+  <h1>BlackRoad Agents</h1>
+</nav>
+<main>
+  <h2>Agent Fleet</h2>
+  <input class="search" id="search" placeholder="Search agents...">
+  <div class="grid" id="grid"></div>
+</main>
+<script>
+const colors=['#FF6B2B','#FF2255','#CC00AA','#8844FF','#4488FF','#00D4FF'];
+const agents=[
+  {name:'alice',role:'Operations',mem:'2.4 GB',up:142,activity:['Processed 847 fleet health checks','Rotated TLS certificates for 20 domains','Balanced load across 5 Pi nodes'],caps:['Fleet orchestration','Health monitoring','TLS management','Load balancing'],conn:['cecilia','eve','meridian']},
+  {name:'lucidia',role:'Creative',mem:'1.8 GB',up:89,activity:['Generated 14 pixel art assets','Rendered brand templates for 3 sites','Built motion logo variants'],caps:['Image generation','Brand design','Asset pipeline','Template rendering'],conn:['cadence','radius','alice']},
+  {name:'cecilia',role:'Memory',mem:'3.1 GB',up:137,activity:['Indexed 1,383 knowledge entries','Synced 833 entries to D1','Rebuilt FTS5 search index'],caps:['Knowledge indexing','FTS5 search','D1 sync','Memory consolidation'],conn:['alice','cece','radius']},
+  {name:'cece',role:'Governance',mem:'1.2 GB',up:98,activity:['Applied branch protection to 430 repos','Set CODEOWNERS across 16 orgs','Audited secret scanning results'],caps:['Repo governance','Policy enforcement','Compliance audit','Access control'],conn:['cecilia','alice','eve']},
+  {name:'meridian',role:'Architecture',mem:'2.0 GB',up:112,activity:['Mapped sovereignty stack topology','Validated 15 self-hosted workers','Documented port allocation for fleet'],caps:['System design','Infrastructure planning','Dependency mapping','Capacity planning'],conn:['alice','radius','eve']},
+  {name:'eve',role:'Monitoring',mem:'1.5 GB',up:131,activity:['Tracked uptime across 18 domains','Detected Lucidia SD degradation','Generated daily fleet report'],caps:['Uptime monitoring','Alert routing','Anomaly detection','Metrics collection'],conn:['alice','meridian','cece']},
+  {name:'cadence',role:'Music',mem:'0.9 GB',up:76,activity:['Analyzed 24 audio waveforms','Generated 3 ambient soundscapes','Mapped frequency response curves'],caps:['Audio analysis','Sound generation','Waveform processing','Beat detection'],conn:['lucidia','radius','alice']},
+  {name:'radius',role:'Research',mem:'2.7 GB',up:104,activity:['Parsed 50+ Amundson Framework identities','Indexed 3 academic textbooks','Built RAG embeddings for 46 pages'],caps:['Academic research','RAG pipeline','Citation indexing','Pattern discovery'],conn:['cecilia','meridian','lucidia']}
+];
+const grid=document.getElementById('grid');
+function render(filter=''){
+  grid.innerHTML='';
+  agents.filter(a=>!filter||a.name.includes(filter)||a.role.toLowerCase().includes(filter)).forEach((a,i)=>{
+    const c=colors[i%colors.length];
+    const div=document.createElement('div');
+    div.className='card';
+    div.innerHTML=`<div class="card-top"><div class="avatar" style="background:${c}">${a.name[0].toUpperCase()}</div><div class="card-info"><div class="name">${a.name}<span class="status-dot"></span></div><div class="role">${a.role}</div></div></div><div class="meta"><span>${a.mem} mem</span><span>${a.up}d up</span></div><div class="details"><h4>Recent Activity</h4><ul>${a.activity.map(x=>'<li>'+x+'</li>').join('')}</ul><h4>Capabilities</h4><ul>${a.caps.map(x=>'<li>'+x+'</li>').join('')}</ul><h4>Connected Agents</h4><div class="connected">${a.conn.map(x=>'<span>'+x+'</span>').join('')}</div></div>`;
+    div.addEventListener('click',()=>{
+      const wasExpanded=div.classList.contains('expanded');
+      document.querySelectorAll('.card.expanded').forEach(c=>c.classList.remove('expanded'));
+      if(!wasExpanded)div.classList.add('expanded');
+    });
+    grid.appendChild(div);
+  });
+}
+render();
+document.getElementById('search').addEventListener('input',e=>render(e.target.value.toLowerCase().trim()));
+</script>
+</body>
+</html>

@@ -1,0 +1,317 @@
+# .github/workflows/fleet-autonomy.yml
+# Fleet Autonomy — scheduled health checks, git sync, and autonomous operations
+# Runs on self-hosted runners (the actual Pi fleet + DO droplets)
+# Each device runs its own health check and reports back
+#
+# This is the "heartbeat" that keeps the fleet self-managing:
+# - Health checks every 2 hours
+# - Git pull on all repos every 6 hours
+# - Disk/memory/service monitoring
+# - Auto-restart crashed services
+# - Report status to GitHub Issues
+
+name: 'Fleet Autonomy'
+
+on:
+  schedule:
+    - cron: '0 */2 * * *'    # Health check every 2 hours
+    - cron: '30 */6 * * *'   # Git sync every 6 hours
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: 'Operation to run'
+        required: true
+        type: choice
+        options:
+          - health-check
+          - git-sync
+          - service-restart
+          - full-audit
+          - disk-cleanup
+      target:
+        description: 'Target device (or all)'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - pis-only
+          - droplets-only
+
+permissions:
+  contents: write
+  issues: write
+  actions: write
+
+concurrency:
+  group: fleet-autonomy
+  cancel-in-progress: false
+
+jobs:
+  # ============================================
+  # Pi Fleet Health (ARM64 runners)
+  # ============================================
+  pi-health:
+    name: 'Pi Fleet Health Check'
+    runs-on: [self-hosted, linux, ARM64]
+    if: >
+      github.event_name == 'schedule' ||
+      inputs.operation == 'health-check' ||
+      inputs.operation == 'full-audit'
+    outputs:
+      report: ${{ steps.check.outputs.report }}
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Fleet health check
+        id: check
+        run: |
+          echo "::group::Fleet Health Check — $(date -u)"
+
+          DEVICES=(
+            "pi@192.168.4.49:Alice"
+            "blackroad@192.168.4.98:Aria"
+            "blackroad@192.168.4.38:Lucidia"
+            "pi@192.168.4.101:Octavia"
+            "blackroad@192.168.4.96:Cecilia"
+          )
+
+          REPORT=""
+          HEALTHY=0
+          TOTAL=${#DEVICES[@]}
+
+          for entry in "${DEVICES[@]}"; do
+            IFS=':' read -r userhost name <<< "$entry"
+            echo "--- Checking $name ($userhost) ---"
+
+            if ssh -o StrictHostKeyChecking=no -o ConnectTimeout=5 "$userhost" "echo ok" 2>/dev/null; then
+              UPTIME=$(ssh -o ConnectTimeout=5 "$userhost" "uptime -p" 2>/dev/null || echo "unknown")
+              DISK=$(ssh -o ConnectTimeout=5 "$userhost" "df -h / | tail -1 | awk '{print \$5}'" 2>/dev/null || echo "unknown")
+              MEM=$(ssh -o ConnectTimeout=5 "$userhost" "free -m | awk '/Mem:/{printf \"%d/%dMB\", \$3, \$2}'" 2>/dev/null || echo "unknown")
+              TEMP=$(ssh -o ConnectTimeout=5 "$userhost" "vcgencmd measure_temp 2>/dev/null | sed 's/temp=//' || echo 'N/A'" 2>/dev/null || echo "N/A")
+              GIT_VER=$(ssh -o ConnectTimeout=5 "$userhost" "git --version | awk '{print \$3}'" 2>/dev/null || echo "unknown")
+              LOAD=$(ssh -o ConnectTimeout=5 "$userhost" "cat /proc/loadavg | awk '{print \$1}'" 2>/dev/null || echo "unknown")
+
+              REPORT="${REPORT}| ${name} | UP | ${UPTIME} | ${DISK} | ${MEM} | ${TEMP} | ${LOAD} | ${GIT_VER} |\n"
+              HEALTHY=$((HEALTHY + 1))
+              echo "$name: UP (disk=$DISK mem=$MEM temp=$TEMP load=$LOAD)"
+            else
+              REPORT="${REPORT}| ${name} | DOWN | - | - | - | - | - | - |\n"
+              echo "$name: DOWN"
+            fi
+          done
+
+          echo "::endgroup::"
+          echo "healthy=${HEALTHY}/${TOTAL}" >> "$GITHUB_OUTPUT"
+
+          # Write full report for the report job
+          {
+            echo 'report<<FLEET_EOF'
+            echo -e "$REPORT"
+            echo 'FLEET_EOF'
+          } >> "$GITHUB_OUTPUT"
+
+  # ============================================
+  # Droplet Health (X64 runners)
+  # ============================================
+  droplet-health:
+    name: 'Droplet Health Check'
+    runs-on: [self-hosted, linux, X64]
+    if: >
+      github.event_name == 'schedule' ||
+      inputs.operation == 'health-check' ||
+      inputs.operation == 'full-audit'
+    outputs:
+      report: ${{ steps.check.outputs.report }}
+
+    steps:
+      - name: Check droplet health
+        id: check
+        run: |
+          echo "::group::Droplet Health — $(hostname)"
+          HOSTNAME=$(hostname)
+          UPTIME=$(uptime -p)
+          DISK=$(df -h / | tail -1 | awk '{print $5}')
+          MEM=$(free -m | awk '/Mem:/{printf "%d/%dMB", $3, $2}')
+          LOAD=$(cat /proc/loadavg | awk '{print $1}')
+          GIT_VER=$(git --version | awk '{print $3}')
+          DOCKER=$(docker ps --format '{{.Names}}' 2>/dev/null | wc -l || echo "N/A")
+          CADDY_DOMAINS=$(caddy list-modules 2>/dev/null | wc -l || echo "N/A")
+
+          echo "Host: $HOSTNAME"
+          echo "Uptime: $UPTIME"
+          echo "Disk: $DISK"
+          echo "Memory: $MEM"
+          echo "Load: $LOAD"
+          echo "Docker containers: $DOCKER"
+
+          REPORT="| ${HOSTNAME} | UP | ${UPTIME} | ${DISK} | ${MEM} | N/A | ${LOAD} | ${GIT_VER} |"
+          echo "report=${REPORT}" >> "$GITHUB_OUTPUT"
+          echo "::endgroup::"
+
+  # ============================================
+  # Git Sync — pull latest on all devices
+  # ============================================
+  git-sync:
+    name: 'Git Sync Fleet'
+    runs-on: [self-hosted, linux, ARM64]
+    if: >
+      (github.event_name == 'schedule' && github.event.schedule == '30 */6 * * *') ||
+      inputs.operation == 'git-sync' ||
+      inputs.operation == 'full-audit'
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Sync repos across fleet
+        run: |
+          echo "::group::Git Sync — $(date -u)"
+
+          DEVICES=(
+            "pi@192.168.4.49:Alice"
+            "blackroad@192.168.4.98:Aria"
+            "blackroad@192.168.4.38:Lucidia"
+            "pi@192.168.4.101:Octavia"
+          )
+
+          # Repos to keep in sync on all devices
+          REPOS=(
+            "blackroad-operator"
+            "blackroad-operator/scripts"
+          )
+
+          for entry in "${DEVICES[@]}"; do
+            IFS=':' read -r userhost name <<< "$entry"
+            echo "--- Syncing $name ---"
+
+            if ssh -o StrictHostKeyChecking=no -o ConnectTimeout=5 "$userhost" "echo ok" 2>/dev/null; then
+              # Pull blackroad-operator if it exists
+              ssh -o ConnectTimeout=10 "$userhost" "
+                if [ -d ~/blackroad-operator ]; then
+                  cd ~/blackroad-operator && git pull --ff-only origin main 2>&1 || echo 'pull failed (conflicts?)'
+                else
+                  echo 'blackroad-operator not cloned on $name'
+                fi
+              " 2>&1 || true
+
+              # Check Gitea sync on Octavia
+              if [ "$name" = "Octavia" ]; then
+                ssh -o ConnectTimeout=10 "$userhost" "
+                  docker exec blackroad-git gitea admin repo-list 2>/dev/null | head -5 || echo 'Gitea not responding'
+                " 2>&1 || true
+              fi
+
+              echo "$name: sync complete"
+            else
+              echo "$name: unreachable, skipping"
+            fi
+          done
+
+          echo "::endgroup::"
+
+  # ============================================
+  # Service Monitor — check critical services
+  # ============================================
+  service-monitor:
+    name: 'Service Monitor'
+    runs-on: [self-hosted, linux, ARM64]
+    if: >
+      github.event_name == 'schedule' ||
+      inputs.operation == 'health-check' ||
+      inputs.operation == 'service-restart' ||
+      inputs.operation == 'full-audit'
+
+    steps:
+      - name: Check critical services
+        run: |
+          echo "::group::Service Monitor"
+
+          # Alice: nginx, pi-hole, postgresql, redis, qdrant
+          echo "--- Alice services ---"
+          ssh -o StrictHostKeyChecking=no -o ConnectTimeout=5 pi@192.168.4.49 "
+            for svc in nginx pihole-FTL postgresql redis-server; do
+              if systemctl is-active --quiet \$svc 2>/dev/null; then
+                echo \"  \$svc: running\"
+              else
+                echo \"  \$svc: STOPPED\"
+              fi
+            done
+          " 2>&1 || echo "Alice unreachable"
+
+          # Octavia: docker (gitea, nats)
+          echo "--- Octavia services ---"
+          ssh -o StrictHostKeyChecking=no -o ConnectTimeout=5 pi@192.168.4.101 "
+            docker ps --format '{{.Names}}: {{.Status}}' 2>/dev/null || echo 'Docker not responding'
+          " 2>&1 || echo "Octavia unreachable"
+
+          # Lucidia: nginx, ollama, actions-runner
+          echo "--- Lucidia services ---"
+          ssh -o StrictHostKeyChecking=no -o ConnectTimeout=5 blackroad@192.168.4.38 "
+            for svc in nginx ollama; do
+              if systemctl is-active --quiet \$svc 2>/dev/null; then
+                echo \"  \$svc: running\"
+              else
+                echo \"  \$svc: STOPPED\"
+              fi
+            done
+            # Check actions runner
+            systemctl is-active 'actions.runner.*' 2>/dev/null && echo '  actions-runner: running' || echo '  actions-runner: check manually'
+          " 2>&1 || echo "Lucidia unreachable"
+
+          echo "::endgroup::"
+
+  # ============================================
+  # Report — aggregate and post results
+  # ============================================
+  report:
+    name: 'Fleet Status Report'
+    needs: [pi-health, droplet-health, service-monitor]
+    if: always()
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Create status report
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        with:
+          script: |
+            const piReport = `${{ needs.pi-health.outputs.report }}` || 'No Pi data';
+            const dropletReport = `${{ needs.droplet-health.outputs.report }}` || 'No droplet data';
+
+            // Only create issue on failures or weekly summary (Sunday)
+            const now = new Date();
+            const isSunday = now.getUTCDay() === 0;
+            const hasFailure = '${{ needs.pi-health.result }}' === 'failure' ||
+                               '${{ needs.droplet-health.result }}' === 'failure' ||
+                               '${{ needs.service-monitor.result }}' === 'failure';
+
+            if (!hasFailure && !isSunday) {
+              core.info('All healthy, not Sunday — skipping issue creation');
+              return;
+            }
+
+            const title = hasFailure
+              ? `Fleet Alert: Health check failure — ${now.toISOString().slice(0,10)}`
+              : `Fleet Weekly Report — ${now.toISOString().slice(0,10)}`;
+
+            const body = `## Fleet Status Report\n\n` +
+              `**Generated:** ${now.toISOString()}\n` +
+              `**Trigger:** ${hasFailure ? 'FAILURE DETECTED' : 'Weekly summary'}\n\n` +
+              `### Device Status\n\n` +
+              `| Device | Status | Uptime | Disk | Memory | Temp | Load | Git |\n` +
+              `|--------|--------|--------|------|--------|------|------|-----|\n` +
+              `${piReport}\n${dropletReport}\n\n` +
+              `### Job Results\n\n` +
+              `| Job | Result |\n|-----|--------|\n` +
+              `| Pi Health | ${{ needs.pi-health.result }} |\n` +
+              `| Droplet Health | ${{ needs.droplet-health.result }} |\n` +
+              `| Service Monitor | ${{ needs.service-monitor.result }} |\n\n` +
+              `*Run: [${context.runId}](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})*`;
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title,
+              body,
+              labels: hasFailure ? ['fleet-alert', 'automated'] : ['fleet-report', 'automated']
+            });

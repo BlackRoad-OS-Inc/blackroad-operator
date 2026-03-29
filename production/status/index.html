@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BlackRoad Status</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0a;color:#f5f5f5;font-family:'Inter',sans-serif;min-height:100vh}
+h1,h2,h3{font-family:'Space Grotesk',sans-serif}
+.mono{font-family:'JetBrains Mono',monospace}
+nav{height:52px;display:flex;align-items:center;padding:0 24px;border-bottom:1px solid #1a1a1a}
+.logo{display:flex;align-items:center;gap:8px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px}
+.dots{display:flex;gap:3px}
+.dots i{width:6px;height:6px;border-radius:50%;display:block}
+.d1{background:#FF6B2B}.d2{background:#FF2255}.d3{background:#CC00AA}.d4{background:#8844FF}.d5{background:#4488FF}.d6{background:#00D4FF}
+.grad{height:1px;background:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF)}
+main{max-width:720px;margin:0 auto;padding:40px 20px}
+.banner{background:#131313;border:1px solid #1a1a1a;border-radius:10px;padding:20px 24px;display:flex;align-items:center;gap:12px;margin-bottom:36px}
+.banner .dot{width:10px;height:10px;border-radius:50%;background:#22c55e;flex-shrink:0}
+.banner h2{font-size:18px;font-weight:500}
+.group{margin-bottom:28px}
+.group-title{font-size:12px;font-weight:500;color:#737373;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px}
+.svc{background:#131313;border:1px solid #1a1a1a;border-radius:8px;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.svc-left{display:flex;align-items:center;gap:10px}
+.svc-left .dot{width:8px;height:8px;border-radius:50%;background:#22c55e}
+.svc-left .dot.down{background:#525252}
+.svc-name{font-size:14px;font-weight:500}
+.svc-status{font-size:12px;color:#737373}
+.uptime-row{display:flex;gap:2px;margin-top:6px}
+.uptime-row .sq{width:4px;height:14px;border-radius:1px;background:#22c55e}
+.uptime-row .sq.down{background:#525252}
+.footer{text-align:center;color:#525252;font-size:12px;margin-top:48px}
+.footer .mono{font-size:11px}
+</style>
+</head>
+<body>
+<nav><div class="logo"><span class="dots"><i class="d1"></i><i class="d2"></i><i class="d3"></i><i class="d4"></i><i class="d5"></i><i class="d6"></i></span>BlackRoad</div></nav>
+<div class="grad"></div>
+<main>
+<h1 style="font-size:28px;margin-bottom:6px">Status</h1>
+<p style="color:#a3a3a3;font-size:14px;margin-bottom:28px">Real-time system health</p>
+<div class="banner"><div class="dot"></div><h2>All Systems Operational</h2></div>
+<div id="services"></div>
+<div class="footer"><p>Auto-refreshes every 30s</p><p class="mono" id="ts"></p></div>
+</main>
+<script>
+const groups=[
+{name:"Experience",svcs:["BackRoad","RoadView","RoadWork","SoundRoad"]},
+{name:"Governance",svcs:["Cece","Auth"]},
+{name:"Infrastructure",svcs:["Mesh","DNS","TLS","Workers"]},
+{name:"Data",svcs:["PostgreSQL","Redis","MinIO"]}
+];
+function uptimeSquares(){let h="";for(let i=0;i<30;i++)h+='<div class="sq"></div>';return h}
+function render(){
+const c=document.getElementById("services");
+c.innerHTML=groups.map(g=>`<div class="group"><div class="group-title">${g.name}</div>${g.svcs.map(s=>`<div class="svc"><div class="svc-left"><div class="dot"></div><span class="svc-name">${s}</span></div><div style="display:flex;align-items:center;gap:14px"><div class="uptime-row">${uptimeSquares()}</div><span class="svc-status mono">operational</span></div></div>`).join("")}</div>`).join("");
+document.getElementById("ts").textContent="Updated "+new Date().toLocaleTimeString();
+}
+render();
+function refresh(){fetch("/api/stats").then(r=>r.json()).then(()=>render()).catch(()=>{document.getElementById("ts").textContent="Updated "+new Date().toLocaleTimeString()})}
+setInterval(refresh,30000);
+</script>
+</body>
+</html>

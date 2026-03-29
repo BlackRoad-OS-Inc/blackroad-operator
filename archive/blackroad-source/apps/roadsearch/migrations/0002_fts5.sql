@@ -1,2 +1,0 @@
--- BlackRoad OS — apps/roadsearch/migrations/0002_fts5.sql
--- TODO: 0002_fts5

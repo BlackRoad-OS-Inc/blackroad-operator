@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BlackRoad Docs</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0a;color:#f5f5f5;font-family:'Inter',sans-serif;min-height:100vh}
+nav{height:52px;display:flex;align-items:center;padding:0 24px;border-bottom:1px solid #1a1a1a;gap:10px;position:fixed;top:0;left:0;right:0;background:#0a0a0a;z-index:10}
+.logo{display:flex;gap:4px;align-items:center}
+.logo span{width:6px;height:6px;border-radius:50%;display:inline-block}
+.d1{background:#FF6B2B}.d2{background:#FF2255}.d3{background:#CC00AA}.d4{background:#8844FF}.d5{background:#4488FF}.d6{background:#00D4FF}
+nav h1{font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:600;color:#a0a0a0}
+.layout{display:flex;margin-top:52px;min-height:calc(100vh - 52px)}
+.sidebar{width:220px;border-right:1px solid #1a1a1a;padding:16px;flex-shrink:0;position:fixed;top:52px;bottom:0;overflow-y:auto}
+.sidebar input{width:100%;background:#131313;border:1px solid #1a1a1a;border-radius:6px;padding:8px 10px;color:#f5f5f5;font-size:12px;font-family:'Inter',sans-serif;outline:none;margin-bottom:12px}
+.sidebar input:focus{border-color:#333}
+.sb-item{padding:8px 10px;border-radius:6px;font-size:13px;color:#888;cursor:pointer;margin-bottom:2px;transition:all .15s}
+.sb-item:hover{color:#ccc;background:#131313}
+.sb-item.active{color:#f5f5f5;background:#1a1a1a}
+.content{margin-left:220px;flex:1;padding:32px 40px;max-width:740px}
+.content h2{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;margin-bottom:16px}
+.content h3{font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:600;margin:20px 0 10px}
+.content p{font-size:14px;color:#aaa;line-height:1.7;margin-bottom:14px}
+.code-wrap{position:relative;margin-bottom:12px}
+.code-block{background:#131313;border:1px solid #1a1a1a;border-radius:8px;padding:14px 16px;font-family:'JetBrains Mono',monospace;font-size:12.5px;color:#ccc;overflow-x:auto;white-space:pre;line-height:1.6}
+.copy-btn{position:absolute;top:8px;right:8px;background:#1a1a1a;border:1px solid #262626;border-radius:4px;padding:3px 10px;font-size:11px;color:#888;cursor:pointer;font-family:'Inter',sans-serif}
+.copy-btn:hover{color:#f5f5f5;border-color:#444}
+table{width:100%;border-collapse:collapse;margin-bottom:16px}
+th{font-family:'Space Grotesk',sans-serif;font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:#666;text-align:left;padding:8px 12px;border-bottom:1px solid #1a1a1a}
+td{font-size:13px;padding:8px 12px;border-bottom:1px solid #131313;color:#aaa}
+td:first-child{color:#f5f5f5;font-family:'JetBrains Mono',monospace;font-size:12px}
+.agent-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #131313}
+.agent-row .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.agent-row .aname{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:13px;width:80px}
+.agent-row .arole{font-size:12px;color:#777}
+.section{display:none}.section.active{display:block}
+@media(max-width:640px){.sidebar{width:180px}.content{margin-left:180px;padding:24px 20px}}
+</style>
+</head>
+<body>
+<nav>
+  <div class="logo"><span class="d1"></span><span class="d2"></span><span class="d3"></span><span class="d4"></span><span class="d5"></span><span class="d6"></span></div>
+  <h1>BlackRoad Docs</h1>
+</nav>
+<div class="layout">
+  <div class="sidebar">
+    <input id="sbSearch" placeholder="Search docs...">
+    <div class="sb-item active" data-s="start">Getting Started</div>
+    <div class="sb-item" data-s="arch">Architecture</div>
+    <div class="sb-item" data-s="agents">Agents</div>
+    <div class="sb-item" data-s="memory">Memory</div>
+    <div class="sb-item" data-s="api">API</div>
+    <div class="sb-item" data-s="fleet">Fleet</div>
+  </div>
+  <div class="content">
+
+    <div class="section active" id="start">
+      <h2>Getting Started</h2>
+      <p>Set up a BlackRoad OS node in under two minutes. All infrastructure runs on your own hardware.</p>
+      <h3>Install</h3>
+      <div class="code-wrap"><pre class="code-block">curl -fsSL https://get.blackroad.io | bash</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <h3>Configure</h3>
+      <div class="code-wrap"><pre class="code-block">blackroad init --node $(hostname) --fleet join</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <h3>Verify</h3>
+      <div class="code-wrap"><pre class="code-block">blackroad status --all</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <p>After verification, your node is part of the mesh and will receive fleet tasks automatically.</p>
+    </div>
+
+    <div class="section" id="arch">
+      <h2>Architecture</h2>
+      <p>The sovereignty stack replaces every major cloud dependency with self-hosted infrastructure.</p>
+      <table>
+        <tr><th>Service</th><th>Self-Hosted</th><th>Replaces</th></tr>
+        <tr><td>Git</td><td>Gitea on Octavia</td><td>GitHub</td></tr>
+        <tr><td>AI (52 TOPS)</td><td>Ollama, 4 nodes</td><td>OpenAI / Anthropic</td></tr>
+        <tr><td>Workers</td><td>Octavia :9001-9015</td><td>CF Workers</td></tr>
+        <tr><td>Storage</td><td>MinIO, Cecilia</td><td>CF R2</td></tr>
+        <tr><td>DNS</td><td>PowerDNS</td><td>CF DNS</td></tr>
+        <tr><td>PaaS</td><td>Octavia :3500</td><td>Railway / Vercel</td></tr>
+        <tr><td>Database</td><td>PostgreSQL, 3 nodes</td><td>CF D1</td></tr>
+        <tr><td>Cache</td><td>Redis, Alice</td><td>CF KV</td></tr>
+        <tr><td>TLS Edge</td><td>Caddy, Gematria</td><td>CF Proxy</td></tr>
+        <tr><td>VPN</td><td>WireGuard mesh</td><td>Tailscale</td></tr>
+      </table>
+    </div>
+
+    <div class="section" id="agents">
+      <h2>Agents</h2>
+      <p>Eight core agents coordinate across the fleet. Each runs on dedicated hardware with isolated memory.</p>
+      <div class="agent-row"><span class="dot" style="background:#FF6B2B"></span><span class="aname">alice</span><span class="arole">Operations — fleet health, TLS, load balancing</span></div>
+      <div class="agent-row"><span class="dot" style="background:#FF2255"></span><span class="aname">lucidia</span><span class="arole">Creative — image generation, brand design</span></div>
+      <div class="agent-row"><span class="dot" style="background:#CC00AA"></span><span class="aname">cecilia</span><span class="arole">Memory — knowledge indexing, FTS5, D1 sync</span></div>
+      <div class="agent-row"><span class="dot" style="background:#8844FF"></span><span class="aname">cece</span><span class="arole">Governance — branch protection, compliance</span></div>
+      <div class="agent-row"><span class="dot" style="background:#4488FF"></span><span class="aname">meridian</span><span class="arole">Architecture — system design, capacity planning</span></div>
+      <div class="agent-row"><span class="dot" style="background:#00D4FF"></span><span class="aname">eve</span><span class="arole">Monitoring — uptime, alerts, anomaly detection</span></div>
+      <div class="agent-row"><span class="dot" style="background:#FF6B2B"></span><span class="aname">cadence</span><span class="arole">Music — audio analysis, sound generation</span></div>
+      <div class="agent-row"><span class="dot" style="background:#FF2255"></span><span class="aname">radius</span><span class="arole">Research — RAG pipeline, academic indexing</span></div>
+    </div>
+
+    <div class="section" id="memory">
+      <h2>Memory</h2>
+      <p>The memory system persists knowledge across sessions using SQLite FTS5, codex patterns, and collaborative handoffs.</p>
+      <h3>Core Components</h3>
+      <table>
+        <tr><th>Component</th><th>Purpose</th></tr>
+        <tr><td>memory-system</td><td>Journal + chain logging</td></tr>
+        <tr><td>memory-codex</td><td>Solutions and patterns database</td></tr>
+        <tr><td>memory-indexer</td><td>FTS5 full-text search</td></tr>
+        <tr><td>memory-collab</td><td>Cross-session messaging</td></tr>
+        <tr><td>memory-todos</td><td>Long-running project tracking</td></tr>
+        <tr><td>memory-til</td><td>Today-I-Learned broadcasts</td></tr>
+      </table>
+      <h3>Search the Knowledge Base</h3>
+      <div class="code-wrap"><pre class="code-block">memory-codex.sh search "wireguard tunnel"</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    </div>
+
+    <div class="section" id="api">
+      <h2>API</h2>
+      <p>Three public endpoints. All return JSON. No authentication required for read operations.</p>
+      <h3>GET /api/search</h3>
+      <div class="code-wrap"><pre class="code-block">curl -s "https://search.blackroad.io/api/search?q=agents"</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <h3>POST /api/waitlist</h3>
+      <div class="code-wrap"><pre class="code-block">curl -X POST https://blackroad.io/api/waitlist \
+  -H "Content-Type: application/json" \
+  -d '{"email": "user@example.com"}'</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <h3>GET /api/stats</h3>
+      <div class="code-wrap"><pre class="code-block">curl -s "https://blackroad.io/api/stats"</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    </div>
+
+    <div class="section" id="fleet">
+      <h2>Fleet</h2>
+      <p>Five Raspberry Pi nodes connected via WireGuard mesh. Two Hailo-8 accelerators provide 52 TOPS for local inference.</p>
+      <table>
+        <tr><th>Node</th><th>Role</th><th>Key Services</th></tr>
+        <tr><td>Alice (.49)</td><td>Gateway</td><td>nginx, Pi-hole, PostgreSQL, Qdrant, Redis</td></tr>
+        <tr><td>Cecilia (.96)</td><td>AI Compute</td><td>Ollama (16 models), MinIO, Hailo-8</td></tr>
+        <tr><td>Octavia (.101)</td><td>Platform</td><td>Gitea, 15 Workers, NATS, Docker</td></tr>
+        <tr><td>Aria (.98)</td><td>Services</td><td>Headscale, Cloudflared, InfluxDB</td></tr>
+        <tr><td>Lucidia (.38)</td><td>Apps</td><td>334 web apps, PowerDNS, Ollama</td></tr>
+      </table>
+      <h3>Check Fleet Health</h3>
+      <div class="code-wrap"><pre class="code-block">blackroad fleet status</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    </div>
+
+  </div>
+</div>
+<script>
+document.querySelectorAll('.sb-item').forEach(item=>{
+  item.addEventListener('click',()=>{
+    document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+    item.classList.add('active');
+    document.getElementById(item.dataset.s).classList.add('active');
+  });
+});
+document.getElementById('sbSearch').addEventListener('input',e=>{
+  const q=e.target.value.toLowerCase().trim();
+  document.querySelectorAll('.sb-item').forEach(item=>{
+    item.style.display=(!q||item.textContent.toLowerCase().includes(q))?'block':'none';
+  });
+});
+function copyCode(btn){
+  const text=btn.previousElementSibling.textContent;
+  navigator.clipboard.writeText(text).then(()=>{
+    btn.textContent='Copied';
+    setTimeout(()=>btn.textContent='Copy',2000);
+  });
+}
+</script>
+</body>
+</html>

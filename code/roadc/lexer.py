@@ -111,6 +111,7 @@ class TokenType(Enum):
 
     AMPERSAND = auto()      # &
     PIPE = auto()           # |
+    PIPE_ARROW = auto()     # |>
     CARET = auto()          # ^
     TILDE = auto()          # ~
 
@@ -573,6 +574,13 @@ class Lexer:
                 '^': TokenType.CARET,
                 '~': TokenType.TILDE,
             }
+
+            # Pipe arrow |>
+            if char == '|' and self.peek_char() == '>':
+                self.advance()
+                self.advance()
+                self.tokens.append(Token(TokenType.PIPE_ARROW, '|>', line, col))
+                continue
 
             if char in single_char_tokens:
                 self.advance()

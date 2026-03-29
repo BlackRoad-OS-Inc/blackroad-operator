@@ -1,0 +1,370 @@
+# .github/workflows/fleet-dispatch.yml
+# Fleet Dispatch — routes @blackroad-* mentions to specific Pi/server runners
+# When someone @mentions a device org in an issue/PR comment, this workflow
+# dispatches the task to the correct self-hosted runner on that physical device.
+#
+# Usage in issues/PRs:
+#   @blackroad-alice run health check
+#   @blackroad-lucidia deploy model
+#   @blackroad-octavia sync repos
+#   @blackroad-agents broadcast status
+#
+# Can also be triggered via repository_dispatch from any repo:
+#   gh api repos/BlackRoad-OS-Inc/blackroad-operator/dispatches \
+#     -f event_type=fleet-dispatch \
+#     -f client_payload='{"device":"alice","command":"uptime","source":"manual"}'
+
+name: 'Fleet Dispatch'
+
+on:
+  issue_comment:
+    types: [created]
+  repository_dispatch:
+    types: [fleet-dispatch, device-command, fleet-broadcast]
+  workflow_dispatch:
+    inputs:
+      device:
+        description: 'Target device (alice/cecilia/octavia/aria/lucidia/gematria/anastasia/all)'
+        required: true
+        type: choice
+        options:
+          - alice
+          - cecilia
+          - octavia
+          - aria
+          - lucidia
+          - gematria
+          - anastasia
+          - all
+      command:
+        description: 'Command to execute'
+        required: true
+        type: string
+      mode:
+        description: 'Execution mode'
+        required: false
+        default: 'safe'
+        type: choice
+        options:
+          - safe
+          - autonomous
+          - audit-only
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+  actions: write
+
+concurrency:
+  group: fleet-dispatch-${{ github.event.client_payload.device || 'comment' }}
+  cancel-in-progress: false
+
+env:
+  FLEET_VERSION: '1.0.0'
+  MEMORY_API: https://blackroad-agents.blackroad.workers.dev/memory
+
+jobs:
+  # ============================================
+  # Stage 1: Parse @mention or dispatch payload
+  # ============================================
+  parse:
+    name: 'Parse Fleet Command'
+    runs-on: ubuntu-latest
+    outputs:
+      device: ${{ steps.parse.outputs.device }}
+      command: ${{ steps.parse.outputs.command }}
+      mode: ${{ steps.parse.outputs.mode }}
+      source: ${{ steps.parse.outputs.source }}
+      valid: ${{ steps.parse.outputs.valid }}
+      broadcast: ${{ steps.parse.outputs.broadcast }}
+
+    steps:
+      - name: Parse trigger source
+        id: parse
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        with:
+          script: |
+            const DEVICE_MAP = {
+              'blackroad-alice':     { runner: 'alice-pi',     host: '192.168.4.49',  user: 'pi' },
+              'blackroad-cecilia':   { runner: 'cecilia-pi',   host: '192.168.4.96',  user: 'blackroad' },
+              'blackroad-octavia':   { runner: 'octavia-pi',   host: '192.168.4.101', user: 'pi' },
+              'blackroad-aria':      { runner: 'aria-pi',      host: '192.168.4.98',  user: 'blackroad' },
+              'blackroad-lucidia':   { runner: 'lucidia-pi',   host: '192.168.4.38',  user: 'blackroad' },
+              'blackroad-gematria':  { runner: 'gematria',     host: 'gematria',      user: 'root' },
+              'blackroad-anastasia': { runner: 'anastasia',    host: 'anastasia',     user: 'root' },
+              'blackroad-agents':    { runner: 'all',          host: 'all',           user: 'all' },
+              'blackroad-gaia':      { runner: 'gaia',         host: 'gaia',          user: 'blackroad' },
+              'blackroad-cadence':   { runner: 'lucidia-pi',   host: '192.168.4.38',  user: 'blackroad' },
+            };
+
+            let device = '', command = '', mode = 'safe', source = '', valid = 'false', broadcast = 'false';
+
+            if (context.eventName === 'issue_comment') {
+              const body = context.payload.comment.body;
+              source = `issue-${context.payload.issue.number}`;
+
+              // Match @blackroad-<device> <command>
+              const match = body.match(/@(blackroad-\w+)\s+(.*)/i);
+              if (match) {
+                const mention = match[1].toLowerCase();
+                command = match[2].trim();
+
+                if (mention === 'blackroad-agents') {
+                  broadcast = 'true';
+                  device = 'all';
+                  valid = 'true';
+                } else if (DEVICE_MAP[mention]) {
+                  device = mention.replace('blackroad-', '');
+                  valid = 'true';
+                }
+              }
+            } else if (context.eventName === 'repository_dispatch') {
+              const payload = context.payload.client_payload || {};
+              device = payload.device || '';
+              command = payload.command || '';
+              mode = payload.mode || 'safe';
+              source = payload.source || 'api';
+              broadcast = context.payload.action === 'fleet-broadcast' ? 'true' : 'false';
+              valid = device && command ? 'true' : 'false';
+            } else if (context.eventName === 'workflow_dispatch') {
+              device = '${{ inputs.device }}';
+              command = '${{ inputs.command }}';
+              mode = '${{ inputs.mode }}';
+              source = 'manual';
+              broadcast = device === 'all' ? 'true' : 'false';
+              valid = 'true';
+            }
+
+            core.setOutput('device', device);
+            core.setOutput('command', command);
+            core.setOutput('mode', mode);
+            core.setOutput('source', source);
+            core.setOutput('valid', valid);
+            core.setOutput('broadcast', broadcast);
+
+            if (valid === 'true') {
+              core.info(`Fleet dispatch: device=${device} command="${command}" mode=${mode} source=${source}`);
+            }
+
+      - name: Acknowledge @mention
+        if: steps.parse.outputs.valid == 'true' && github.event_name == 'issue_comment'
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        with:
+          script: |
+            const device = '${{ steps.parse.outputs.device }}';
+            const command = '${{ steps.parse.outputs.command }}';
+            await github.rest.reactions.createForIssueComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: context.payload.comment.id,
+              content: 'rocket'
+            });
+
+  # ============================================
+  # Stage 2: Execute on target device
+  # ============================================
+  execute-alice:
+    name: 'Execute on Alice'
+    needs: parse
+    if: needs.parse.outputs.valid == 'true' && (needs.parse.outputs.device == 'alice' || needs.parse.outputs.broadcast == 'true')
+    runs-on: [self-hosted, linux, ARM64]
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - name: Execute command on Alice
+        env:
+          DEVICE: alice
+          COMMAND: ${{ needs.parse.outputs.command }}
+          MODE: ${{ needs.parse.outputs.mode }}
+          SOURCE: ${{ needs.parse.outputs.source }}
+        run: |
+          echo "::group::Fleet Dispatch — Alice (192.168.4.49)"
+          echo "Device: $DEVICE"
+          echo "Command: $COMMAND"
+          echo "Mode: $MODE"
+          echo "Source: $SOURCE"
+
+          # Safe mode: only allow read-only commands
+          SAFE_COMMANDS="status|health|uptime|df|free|uname|hostname|whoami|git status|git log|ls|cat|head|tail|wc|ps|top -bn1|sensors|vcgencmd"
+
+          if [ "$MODE" = "safe" ]; then
+            if ! echo "$COMMAND" | grep -qiE "^($SAFE_COMMANDS)"; then
+              echo "::error::Command blocked in safe mode. Use autonomous mode for write operations."
+              exit 1
+            fi
+          fi
+
+          # Execute via SSH to Alice
+          ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 pi@192.168.4.49 "$COMMAND" 2>&1 || true
+          echo "::endgroup::"
+
+      - name: Report result
+        if: always()
+        run: |
+          echo "alice_status=${{ job.status }}" >> "$GITHUB_OUTPUT"
+
+  execute-octavia:
+    name: 'Execute on Octavia'
+    needs: parse
+    if: needs.parse.outputs.valid == 'true' && (needs.parse.outputs.device == 'octavia' || needs.parse.outputs.broadcast == 'true')
+    runs-on: [self-hosted, linux, ARM64]
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - name: Execute command on Octavia
+        env:
+          DEVICE: octavia
+          COMMAND: ${{ needs.parse.outputs.command }}
+          MODE: ${{ needs.parse.outputs.mode }}
+        run: |
+          echo "::group::Fleet Dispatch — Octavia (192.168.4.101)"
+          SAFE_COMMANDS="status|health|uptime|df|free|uname|hostname|whoami|git status|git log|ls|cat|head|tail|wc|ps|top -bn1|sensors|vcgencmd|docker ps|docker stats --no-stream"
+          if [ "$MODE" = "safe" ]; then
+            if ! echo "$COMMAND" | grep -qiE "^($SAFE_COMMANDS)"; then
+              echo "::error::Command blocked in safe mode."
+              exit 1
+            fi
+          fi
+          ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 pi@192.168.4.101 "$COMMAND" 2>&1 || true
+          echo "::endgroup::"
+
+  execute-lucidia:
+    name: 'Execute on Lucidia'
+    needs: parse
+    if: needs.parse.outputs.valid == 'true' && (needs.parse.outputs.device == 'lucidia' || needs.parse.outputs.broadcast == 'true')
+    runs-on: [self-hosted, linux, ARM64]
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - name: Execute command on Lucidia
+        env:
+          DEVICE: lucidia
+          COMMAND: ${{ needs.parse.outputs.command }}
+          MODE: ${{ needs.parse.outputs.mode }}
+        run: |
+          echo "::group::Fleet Dispatch — Lucidia (192.168.4.38)"
+          SAFE_COMMANDS="status|health|uptime|df|free|uname|hostname|whoami|git status|git log|ls|cat|head|tail|wc|ps|top -bn1|sensors|vcgencmd|ollama list|ollama ps"
+          if [ "$MODE" = "safe" ]; then
+            if ! echo "$COMMAND" | grep -qiE "^($SAFE_COMMANDS)"; then
+              echo "::error::Command blocked in safe mode."
+              exit 1
+            fi
+          fi
+          ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 blackroad@192.168.4.38 "$COMMAND" 2>&1 || true
+          echo "::endgroup::"
+
+  execute-aria:
+    name: 'Execute on Aria'
+    needs: parse
+    if: needs.parse.outputs.valid == 'true' && (needs.parse.outputs.device == 'aria' || needs.parse.outputs.broadcast == 'true')
+    runs-on: [self-hosted, linux, ARM64]
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - name: Execute command on Aria
+        env:
+          DEVICE: aria
+          COMMAND: ${{ needs.parse.outputs.command }}
+          MODE: ${{ needs.parse.outputs.mode }}
+        run: |
+          echo "::group::Fleet Dispatch — Aria (192.168.4.98)"
+          SAFE_COMMANDS="status|health|uptime|df|free|uname|hostname|whoami|git status|git log|ls|cat|head|tail|wc|ps|top -bn1|sensors|vcgencmd"
+          if [ "$MODE" = "safe" ]; then
+            if ! echo "$COMMAND" | grep -qiE "^($SAFE_COMMANDS)"; then
+              echo "::error::Command blocked in safe mode."
+              exit 1
+            fi
+          fi
+          ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 blackroad@192.168.4.98 "$COMMAND" 2>&1 || true
+          echo "::endgroup::"
+
+  execute-gematria:
+    name: 'Execute on Gematria'
+    needs: parse
+    if: needs.parse.outputs.valid == 'true' && (needs.parse.outputs.device == 'gematria' || needs.parse.outputs.broadcast == 'true')
+    runs-on: [self-hosted, linux, X64]
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - name: Execute command on Gematria
+        env:
+          DEVICE: gematria
+          COMMAND: ${{ needs.parse.outputs.command }}
+          MODE: ${{ needs.parse.outputs.mode }}
+        run: |
+          echo "::group::Fleet Dispatch — Gematria (DO NYC3)"
+          SAFE_COMMANDS="status|health|uptime|df|free|uname|hostname|whoami|git status|git log|ls|cat|head|tail|wc|ps|top -bn1|caddy list-modules|systemctl status"
+          if [ "$MODE" = "safe" ]; then
+            if ! echo "$COMMAND" | grep -qiE "^($SAFE_COMMANDS)"; then
+              echo "::error::Command blocked in safe mode."
+              exit 1
+            fi
+          fi
+          # Gematria runs the runner itself, so commands execute locally
+          bash -c "$COMMAND" 2>&1 || true
+          echo "::endgroup::"
+
+  execute-anastasia:
+    name: 'Execute on Anastasia'
+    needs: parse
+    if: needs.parse.outputs.valid == 'true' && (needs.parse.outputs.device == 'anastasia' || needs.parse.outputs.broadcast == 'true')
+    runs-on: [self-hosted, linux, X64]
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - name: Execute command on Anastasia
+        env:
+          DEVICE: anastasia
+          COMMAND: ${{ needs.parse.outputs.command }}
+          MODE: ${{ needs.parse.outputs.mode }}
+        run: |
+          echo "::group::Fleet Dispatch — Anastasia (DO NYC1)"
+          SAFE_COMMANDS="status|health|uptime|df|free|uname|hostname|whoami|git status|git log|ls|cat|head|tail|wc|ps|top -bn1|caddy list-modules|systemctl status"
+          if [ "$MODE" = "safe" ]; then
+            if ! echo "$COMMAND" | grep -qiE "^($SAFE_COMMANDS)"; then
+              echo "::error::Command blocked in safe mode."
+              exit 1
+            fi
+          fi
+          bash -c "$COMMAND" 2>&1 || true
+          echo "::endgroup::"
+
+  # ============================================
+  # Stage 3: Report results back
+  # ============================================
+  report:
+    name: 'Report Results'
+    needs: [parse, execute-alice, execute-octavia, execute-lucidia, execute-aria, execute-gematria, execute-anastasia]
+    if: always() && needs.parse.outputs.valid == 'true' && github.event_name == 'issue_comment'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Post results to issue
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        with:
+          script: |
+            const device = '${{ needs.parse.outputs.device }}';
+            const command = '${{ needs.parse.outputs.command }}';
+            const results = {
+              alice: '${{ needs.execute-alice.result }}',
+              octavia: '${{ needs.execute-octavia.result }}',
+              lucidia: '${{ needs.execute-lucidia.result }}',
+              aria: '${{ needs.execute-aria.result }}',
+              gematria: '${{ needs.execute-gematria.result }}',
+              anastasia: '${{ needs.execute-anastasia.result }}'
+            };
+
+            let body = `### Fleet Dispatch Results\n\n`;
+            body += `**Device:** ${device}\n`;
+            body += `**Command:** \`${command}\`\n\n`;
+            body += `| Device | Status |\n|--------|--------|\n`;
+
+            for (const [dev, status] of Object.entries(results)) {
+              if (status && status !== 'skipped') {
+                const icon = status === 'success' ? '✅' : status === 'failure' ? '❌' : '⏭️';
+                body += `| ${dev} | ${icon} ${status} |\n`;
+              }
+            }
+
+            body += `\n*Run: [${context.runId}](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})*`;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.issue.number,
+              body
+            });

@@ -1,1 +1,0 @@
-"""Astrophysics utilities for Lucidia."""

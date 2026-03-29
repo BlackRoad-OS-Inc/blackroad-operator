@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CashRoad — Financial Clarity</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0a;color:#f5f5f5;font-family:'Inter',sans-serif;min-height:100vh}
+h1,h2,h3{font-family:'Space Grotesk',sans-serif}
+.mono{font-family:'JetBrains Mono',monospace}
+nav{height:52px;display:flex;align-items:center;padding:0 24px;border-bottom:1px solid #1a1a1a}
+.logo{display:flex;align-items:center;gap:8px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px}
+.dots{display:flex;gap:3px}
+.dots i{width:6px;height:6px;border-radius:50%;display:block}
+.d1{background:#FF6B2B}.d2{background:#FF2255}.d3{background:#CC00AA}.d4{background:#8844FF}.d5{background:#4488FF}.d6{background:#00D4FF}
+.grad{height:1px;background:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF)}
+main{max-width:720px;margin:0 auto;padding:40px 20px}
+.tabs{display:flex;gap:4px;margin-bottom:28px;background:#131313;border-radius:8px;padding:4px;border:1px solid #1a1a1a}
+.tab{padding:8px 20px;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;color:#737373;transition:all .2s}
+.tab.active{background:#1a1a1a;color:#f5f5f5}
+.card{background:#131313;border:1px solid #1a1a1a;border-radius:10px;padding:20px;margin-bottom:12px}
+.net{font-size:42px;font-weight:700;font-family:'Space Grotesk',sans-serif;margin:4px 0 8px}
+.net-label{font-size:12px;color:#737373;text-transform:uppercase;letter-spacing:1px}
+.accts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:24px}
+.acct-name{font-size:12px;color:#737373;margin-bottom:4px}
+.acct-val{font-size:20px;font-weight:700;font-family:'Space Grotesk',sans-serif}
+.acct-val.neg{color:#a3a3a3}
+.tx{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #1a1a1a}
+.tx:last-child{border-bottom:none}
+.tx-left{display:flex;flex-direction:column;gap:2px}
+.tx-merchant{font-size:14px;font-weight:500}
+.tx-meta{font-size:11px;color:#525252}
+.tx-amount{font-size:14px;font-weight:500;font-family:'JetBrains Mono',monospace}
+.tx-amount.neg{color:#f5f5f5}
+.tx-amount.pos{color:#a3a3a3}
+.budget-item{margin-bottom:16px}
+.budget-header{display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px}
+.budget-cat{font-weight:500}
+.budget-pct{color:#737373;font-family:'JetBrains Mono',monospace;font-size:12px}
+.bar-bg{height:6px;background:#1a1a1a;border-radius:3px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px}
+.b1 .bar-fill{width:68%;background:#FF6B2B}
+.b2 .bar-fill{width:42%;background:#FF2255}
+.b3 .bar-fill{width:25%;background:#4488FF}
+.b4 .bar-fill{width:15%;background:#CC00AA}
+.decide{display:flex;gap:8px;margin-top:20px}
+.decide input{flex:1;background:#0a0a0a;border:1px solid #1a1a1a;border-radius:8px;padding:10px 14px;color:#f5f5f5;font-family:'Inter',sans-serif;font-size:14px;outline:none}
+.decide input:focus{border-color:#262626}
+.decide button{background:#f5f5f5;color:#0a0a0a;border:none;border-radius:8px;padding:10px 20px;font-weight:600;font-size:13px;cursor:pointer}
+.decide-result{margin-top:12px;font-size:13px;color:#a3a3a3;min-height:20px}
+.pane{display:none}.pane.active{display:block}
+</style>
+</head>
+<body>
+<nav><div class="logo"><span class="dots"><i class="d1"></i><i class="d2"></i><i class="d3"></i><i class="d4"></i><i class="d5"></i><i class="d6"></i></span>CashRoad</div></nav>
+<div class="grad"></div>
+<main>
+<h1 style="font-size:28px;margin-bottom:4px">Financial Clarity</h1>
+<p style="color:#a3a3a3;font-size:14px;margin-bottom:24px">See everything. Decide faster.</p>
+<div class="tabs"><div class="tab active" data-t="overview">Overview</div><div class="tab" data-t="transactions">Transactions</div><div class="tab" data-t="budget">Budget</div></div>
+
+<div class="pane active" id="overview">
+<div class="card"><div class="net-label">Net Position</div><div class="net">$12,847</div><p style="font-size:12px;color:#525252">Across 3 accounts</p></div>
+<div class="accts">
+<div class="card"><div class="acct-name">Checking</div><div class="acct-val">$8,420</div></div>
+<div class="card"><div class="acct-name">Savings</div><div class="acct-val">$5,200</div></div>
+<div class="card"><div class="acct-name">Credit</div><div class="acct-val neg">-$773</div></div>
+</div>
+<div class="card">
+<h3 style="font-size:14px;margin-bottom:4px">Quick Decision</h3>
+<p style="font-size:12px;color:#525252;margin-bottom:12px">Can I afford...</p>
+<div class="decide"><input id="decideInput" placeholder="e.g. $200 dinner"><button onclick="decide()">Calculate</button></div>
+<div class="decide-result" id="decideResult"></div>
+</div>
+</div>
+
+<div class="pane" id="transactions">
+<div class="card" style="padding:8px 20px">
+<div class="tx"><div class="tx-left"><span class="tx-merchant">Whole Foods</span><span class="tx-meta">Mar 21 &middot; Food</span></div><span class="tx-amount neg">-$84.30</span></div>
+<div class="tx"><div class="tx-left"><span class="tx-merchant">Spotify</span><span class="tx-meta">Mar 20 &middot; Entertainment</span></div><span class="tx-amount neg">-$10.99</span></div>
+<div class="tx"><div class="tx-left"><span class="tx-merchant">Shell Gas</span><span class="tx-meta">Mar 19 &middot; Transport</span></div><span class="tx-amount neg">-$52.00</span></div>
+<div class="tx"><div class="tx-left"><span class="tx-merchant">Payroll</span><span class="tx-meta">Mar 15 &middot; Income</span></div><span class="tx-amount pos">+$3,200</span></div>
+<div class="tx"><div class="tx-left"><span class="tx-merchant">Amazon</span><span class="tx-meta">Mar 14 &middot; Shopping</span></div><span class="tx-amount neg">-$127.45</span></div>
+<div class="tx"><div class="tx-left"><span class="tx-merchant">Rent</span><span class="tx-meta">Mar 1 &middot; Housing</span></div><span class="tx-amount neg">-$1,650</span></div>
+</div>
+</div>
+
+<div class="pane" id="budget">
+<div class="card">
+<div class="budget-item b1"><div class="budget-header"><span class="budget-cat">Housing</span><span class="budget-pct">68%</span></div><div class="bar-bg"><div class="bar-fill"></div></div></div>
+<div class="budget-item b2"><div class="budget-header"><span class="budget-cat">Food</span><span class="budget-pct">42%</span></div><div class="bar-bg"><div class="bar-fill"></div></div></div>
+<div class="budget-item b3"><div class="budget-header"><span class="budget-cat">Transport</span><span class="budget-pct">25%</span></div><div class="bar-bg"><div class="bar-fill"></div></div></div>
+<div class="budget-item b4"><div class="budget-header"><span class="budget-cat">Entertainment</span><span class="budget-pct">15%</span></div><div class="bar-bg"><div class="bar-fill"></div></div></div>
+</div>
+</div>
+</main>
+<script>
+document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>{
+document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+document.querySelectorAll(".pane").forEach(x=>x.classList.remove("active"));
+t.classList.add("active");
+document.getElementById(t.dataset.t).classList.add("active");
+}));
+function decide(){
+const v=document.getElementById("decideInput").value;
+const n=parseFloat(v.replace(/[^0-9.]/g,""));
+const el=document.getElementById("decideResult");
+if(!n||isNaN(n)){el.textContent="Enter an amount to check.";return}
+const avail=8420;
+if(n<=avail*0.1)el.textContent="Yes. That's "+((n/avail)*100).toFixed(1)+"% of checking. Comfortable.";
+else if(n<=avail*0.5)el.textContent="Possible. That's "+((n/avail)*100).toFixed(1)+"% of checking. Consider timing.";
+else el.textContent="Caution. That's "+((n/avail)*100).toFixed(1)+"% of checking. Review budget first.";
+}
+document.getElementById("decideInput").addEventListener("keydown",e=>{if(e.key==="Enter")decide()});
+</script>
+</body>
+</html>

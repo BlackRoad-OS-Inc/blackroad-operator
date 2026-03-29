@@ -1,2 +1,0 @@
-"""Lucidia API application package."""
-

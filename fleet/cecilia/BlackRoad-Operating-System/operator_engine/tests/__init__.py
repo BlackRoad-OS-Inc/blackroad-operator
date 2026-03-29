@@ -1,1 +1,0 @@
-"""Operator Engine Tests"""

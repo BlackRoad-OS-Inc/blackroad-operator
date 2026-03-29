@@ -1,136 +1,203 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Merge — Better Code. Faster.</title>
-<link rel="icon" type="image/png" sizes="32x32" href="https://images.blackroad.io/brand/br-square-32.png" />
-<link rel="apple-touch-icon" sizes="180x180" href="https://images.blackroad.io/brand/apple-touch-icon.png" />
-<meta property="og:image" content="https://images.blackroad.io/brand/br-square-512.png" />
-<meta name="description" content="Merge — AI-powered code review. Auto-suggestions, conflict resolution, faster PRs.">
-<link rel="stylesheet" href="../_shared/design.css">
-<style>
-  .hero { padding: var(--sp-xl) var(--sp-md); min-height: 100vh; display: flex; flex-direction: column; justify-content: center; }
-  @media (min-width: 768px) { .hero { padding: 0 var(--sp-xl); } }
-  .hero-sub { font-size: 1.1rem; color: var(--subtle); max-width: 480px; line-height: 1.7; margin: var(--sp-md) 0 var(--sp-xl); }
-  .btn-primary { display: inline-flex; align-items: center; gap: 8px; background: var(--grad); color: var(--white); padding: 14px 28px; font-weight: 700; font-size: 0.95rem; transition: opacity 0.2s; border: none; cursor: pointer; }
-  .btn-primary:hover { opacity: 0.9; }
-  .feature-card { background: var(--surface); border: 1px solid var(--border); padding: var(--sp-lg); transition: border-color 0.25s; }
-  .feature-card:hover { border-color: var(--muted); }
-  .feature-card h3 { margin-bottom: var(--sp-xs); }
-  .feature-card p { font-size: 0.85rem; color: var(--subtle); line-height: 1.6; }
-  .feature-icon { font-family: var(--jb); font-size: 1.2rem; color: var(--muted); margin-bottom: var(--sp-sm); }
-  .diff-block { background: var(--surface); border: 1px solid var(--border); padding: 0; margin: var(--sp-xl) 0; overflow: hidden; }
-  .diff-header { padding: var(--sp-sm) var(--sp-md); border-bottom: 1px solid var(--border); font-family: var(--jb); font-size: 0.75rem; color: var(--muted); }
-  .diff-line { padding: 4px var(--sp-md); font-family: var(--jb); font-size: 0.8rem; line-height: 1.6; border-left: 3px solid transparent; }
-  .diff-line.removed { background: rgba(255,34,85,0.08); border-left-color: #FF2255; color: #FF2255; }
-  .diff-line.added { background: rgba(0,212,255,0.08); border-left-color: #00D4FF; color: #00D4FF; }
-  .diff-line.context { color: var(--muted); }
-  .diff-line.suggestion { background: rgba(136,68,255,0.08); border-left-color: #8844FF; color: #8844FF; }
-  .ai-badge { display: inline-block; font-family: var(--jb); font-size: 0.65rem; padding: 2px 8px; background: linear-gradient(90deg, #8844FF, #4488FF); color: var(--white); letter-spacing: 0.05em; margin-left: var(--sp-sm); }
-  .stat-row { display: flex; gap: var(--sp-md); margin-top: var(--sp-xl); flex-wrap: wrap; }
-  .stat { flex: 1; min-width: 120px; text-align: center; padding: var(--sp-lg); background: var(--surface); border: 1px solid var(--border); }
-  .stat .num { font-family: var(--sg); font-size: 1.8rem; font-weight: 700; background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-  .stat .label { font-family: var(--jb); font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 4px; }
-  .cta-section { text-align: center; padding: var(--sp-2xl) var(--sp-md); }
-  .cta-section h2 { margin-bottom: var(--sp-md); }
-  .cta-section p { max-width: 480px; margin: 0 auto var(--sp-xl); }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Merge | BlackRoad</title>
+  <meta name="description" content="Merge is part of BlackRoad Studio, the experience layer for public websites, design systems, and polished surfaces.">
+  <meta name="theme-color" content="#0b0b0b">
+  <link rel="canonical" href="https://blackroad.io/merge">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Merge | BlackRoad">
+  <meta property="og:description" content="Merge is part of BlackRoad Studio, the experience layer for public websites, design systems, and polished surfaces.">
+  <meta property="og:url" content="https://blackroad.io/merge">
+  <meta property="og:site_name" content="BlackRoad">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Merge | BlackRoad">
+  <meta name="twitter:description" content="Merge is part of BlackRoad Studio, the experience layer for public websites, design systems, and polished surfaces.">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://images.blackroad.io/brand/br-square-32.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="https://images.blackroad.io/brand/br-square-192.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://images.blackroad.io/brand/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #090909;
+      --bg-soft: #111111;
+      --card: #131313;
+      --border: #232323;
+      --text: #f5f5f5;
+      --muted: #b2b2b2;
+      --dim: #6d6d6d;
+      --ember: #ff6b2b;
+      --flare: #ff2255;
+      --magenta: #cc00aa;
+      --orchid: #8844ff;
+      --arc: #4488ff;
+      --cyan: #00d4ff;
+      --grad: linear-gradient(100deg, var(--ember), var(--flare), var(--magenta), var(--orchid), var(--arc), var(--cyan));
+      --display: 'Space Grotesk', sans-serif;
+      --body: 'Inter', sans-serif;
+      --mono: 'JetBrains Mono', monospace;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: radial-gradient(circle at top, #151515 0, var(--bg) 45%); color: var(--text); }
+    body { font-family: var(--body); min-height: 100vh; }
+    a { color: inherit; text-decoration: none; }
+    .topbar { height: 4px; background: var(--grad); background-size: 180% 100%; animation: shift 7s linear infinite; }
+    @keyframes shift { from { background-position: 0 0; } to { background-position: 180% 0; } }
+    .shell { max-width: 1160px; margin: 0 auto; padding: 0 24px 80px; }
+    .nav { display: flex; justify-content: space-between; align-items: center; padding: 18px 0; border-bottom: 1px solid var(--border); }
+    .brand { display: flex; align-items: center; gap: 12px; font-family: var(--display); font-weight: 700; letter-spacing: -0.03em; }
+    .brand-mark { display: grid; grid-template-columns: repeat(3, 8px); gap: 4px; }
+    .brand-mark span { width: 8px; height: 8px; border-radius: 999px; }
+    .brand-mark span:nth-child(1) { background: var(--ember); }
+    .brand-mark span:nth-child(2) { background: var(--flare); }
+    .brand-mark span:nth-child(3) { background: var(--cyan); }
+    .nav-links { display: flex; gap: 18px; font-size: 13px; color: var(--muted); }
+    .hero { padding: 72px 0 48px; display: grid; gap: 28px; }
+    .eyebrow { font-family: var(--mono); color: var(--dim); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; }
+    h1 { font-family: var(--display); font-size: clamp(38px, 6vw, 74px); line-height: 0.95; letter-spacing: -0.05em; margin: 0; max-width: 900px; }
+    .hero-copy { max-width: 740px; font-size: 18px; line-height: 1.7; color: var(--muted); }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 14px; }
+    .btn-primary, .btn-secondary { padding: 14px 20px; border-radius: 999px; font-weight: 600; font-size: 14px; }
+    .btn-primary { background: var(--text); color: #050505; }
+    .btn-secondary { border: 1px solid var(--border); color: var(--muted); }
+    .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+    .stat-card, .pillar-card { background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 20px; padding: 20px; }
+    .stat-value { font-family: var(--display); font-size: clamp(24px, 4vw, 34px); letter-spacing: -0.04em; }
+    .stat-label { font-family: var(--mono); font-size: 11px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.12em; margin-top: 6px; }
+    .section { padding: 40px 0; }
+    .section-head { display: grid; gap: 10px; margin-bottom: 20px; }
+    .section-head h2 { font-family: var(--display); font-size: clamp(26px, 4vw, 40px); letter-spacing: -0.04em; margin: 0; }
+    .section-head p { margin: 0; color: var(--muted); max-width: 760px; line-height: 1.7; }
+    .pillars { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .pillar-card h3 { font-family: var(--display); margin: 8px 0 10px; font-size: 24px; letter-spacing: -0.03em; }
+    .pillar-card p { color: var(--muted); margin: 0; line-height: 1.7; }
+    .links { display: flex; flex-wrap: wrap; gap: 10px; }
+    .link-pill { border: 1px solid var(--border); border-radius: 999px; padding: 10px 14px; color: var(--muted); font-size: 13px; }
+    footer { margin-top: 36px; padding-top: 20px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; gap: 12px; color: var(--dim); font-family: var(--mono); font-size: 11px; }
+    @media (max-width: 860px) {
+      .stats, .pillars { grid-template-columns: 1fr 1fr; }
+      .nav { gap: 16px; flex-direction: column; align-items: flex-start; }
+      footer { flex-direction: column; }
+    }
+    @media (max-width: 560px) {
+      .shell { padding: 0 16px 56px; }
+      .stats, .pillars { grid-template-columns: 1fr; }
+      .hero { padding-top: 44px; }
+      .hero-copy { font-size: 16px; }
+    }
+  </style>
 </head>
-<body class="dot-bg">
-  <nav>
-    <div class="nav-logo">Merge</div>
-    <div class="nav-links">
-      <a href="#review">Review</a>
-      <a href="#features">Features</a>
-      <a href="https://blackroad.io">BlackRoad OS</a>
-    </div>
-    <button class="nav-cta" onclick="location.href='#start'">Try Merge</button>
-    <button class="nav-toggle" onclick="this.classList.toggle('open');document.getElementById('nav-mobile').classList.toggle('open')" aria-label="Menu"><span></span><span></span><span></span></button>
-  </nav>
-  <div id="nav-mobile" class="nav-mobile">
-    <a href="#review" onclick="document.getElementById('nav-mobile').classList.remove('open')">Review</a>
-    <a href="#features" onclick="document.getElementById('nav-mobile').classList.remove('open')">Features</a>
-    <a href="https://blackroad.io">BlackRoad OS</a>
+<body>
+  <div class="topbar"></div>
+  <div class="shell">
+    <nav class="nav">
+      <a class="brand" href="https://blackroad.io">
+        <span class="brand-mark"><span></span><span></span><span></span></span>
+        <span>BlackRoad</span>
+      </a>
+      <div class="nav-links">
+        <a href="https://github.com/BlackRoad-OS">OS</a>
+        <a href="https://github.com/BlackRoad-AI">AI</a>
+        <a href="https://github.com/BlackRoad-Studio">Studio</a>
+        <a href="https://github.com/BlackRoad-Forge">Forge</a>
+      </div>
+    </nav>
+
+    <main>
+      <section class="hero">
+        <div class="eyebrow">Studio</div>
+        <h1>Merge</h1>
+        <p class="hero-copy">Merge is part of BlackRoad Studio, the experience layer for public websites, design systems, and polished surfaces.</p>
+        <div class="hero-actions">
+          <a class="btn-primary" href="https://blackroad.io">Explore BlackRoad OS</a>
+          <a class="btn-secondary" href="https://github.com/BlackRoad-Studio">View GitHub</a>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="stats">
+          
+      <div class="stat-card">
+        <div class="stat-value">Public</div>
+        <div class="stat-label">Surface</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-value">Design</div>
+        <div class="stat-label">System</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-value">Docs</div>
+        <div class="stat-label">Layer</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-value">Brand</div>
+        <div class="stat-label">Signals</div>
+      </div>
+        </div>
+      </section>
+
+      <section class="section" id="pillars">
+        <div class="section-head">
+          <div class="eyebrow">Public Map</div>
+          <h2>The BlackRoad ecosystem is organized around 4 public surfaces.</h2>
+          <p>Instead of asking visitors to decode dozens of internal orgs, BlackRoad now leads with 4 clear pillars: the platform, the intelligence, the experience, and the experiments.</p>
+        </div>
+        <div class="pillars">
+          
+        <article class="pillar-card">
+          <div class="section-label">the platform</div>
+          <h3>BlackRoad-OS</h3>
+          <p>Core apps, APIs, operator systems, and runtime tooling.</p>
+        </article>
+
+        <article class="pillar-card">
+          <div class="section-label">the intelligence</div>
+          <h3>BlackRoad-AI</h3>
+          <p>Local-first AI, agents, memory systems, and model integrations.</p>
+        </article>
+
+        <article class="pillar-card">
+          <div class="section-label">the experience</div>
+          <h3>BlackRoad-Studio</h3>
+          <p>Websites, design systems, docs, and polished product surfaces.</p>
+        </article>
+
+        <article class="pillar-card">
+          <div class="section-label">the experiments</div>
+          <h3>BlackRoad-Forge</h3>
+          <p>Prototypes, interactive builds, tutorials, and maker projects.</p>
+        </article>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <div class="eyebrow">Related</div>
+          <h2>Keep moving.</h2>
+          <p>Use these links to move across the public BlackRoad surface without getting lost in internal structure.</p>
+        </div>
+        <div class="links">
+          <a class="link-pill" href="https://github.com/BlackRoad-Studio">BlackRoad Studio</a>
+<a class="link-pill" href="https://blackroad.io">BlackRoad.io</a>
+<a class="link-pill" href="https://blackroad.io">Home</a>
+<a class="link-pill" href="https://docs.blackroad.io">Docs</a>
+<a class="link-pill" href="https://search.blackroad.io">Search</a>
+<a class="link-pill" href="https://github.com/BlackRoad-OS">GitHub</a>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <span>Merge · part of BlackRoad</span>
+      <span>Pave Tomorrow.</span>
+    </footer>
   </div>
-
-  <div class="hero">
-    <div class="section-label">AI Code Review</div>
-    <h1>Better code.<br>Faster.</h1>
-    <p class="hero-sub">AI-powered code review that catches bugs, suggests improvements, and resolves conflicts before they slow you down. Stop waiting on reviewers. Ship with confidence.</p>
-    <a href="#start" class="btn-primary">Connect Your Repo</a>
-  </div>
-
-  <section id="review">
-    <div class="section-label">Live Review</div>
-    <h2 style="margin-bottom:var(--sp-md);">AI catches what humans miss</h2>
-    <div class="diff-block">
-      <div class="diff-header">src/auth/session.ts &mdash; PR #247 <span class="ai-badge">AI REVIEW</span></div>
-      <div class="diff-line context">&nbsp; const session = await getSession(token);</div>
-      <div class="diff-line removed">- if (session) return session.user;</div>
-      <div class="diff-line added">+ if (session &amp;&amp; session.expiresAt > Date.now()) return session.user;</div>
-      <div class="diff-line suggestion">// Merge: Added expiration check &mdash; original code served expired sessions</div>
-      <div class="diff-line context">&nbsp; return null;</div>
-    </div>
-    <div class="stat-row">
-      <div class="stat"><div class="num">4.2s</div><div class="label">Avg Review Time</div></div>
-      <div class="stat"><div class="num">89%</div><div class="label">Bugs Caught</div></div>
-      <div class="stat"><div class="num">3.1x</div><div class="label">Faster Merges</div></div>
-      <div class="stat"><div class="num">0</div><div class="label">False Positives Today</div></div>
-    </div>
-  </section>
-
-  <section id="features">
-    <div class="section-label">Capabilities</div>
-    <h2 style="margin-bottom:var(--sp-xl);">Review, suggest, resolve</h2>
-    <div class="grid-3">
-      <div class="feature-card">
-        <div class="feature-icon">diff</div>
-        <h3>Auto-Review</h3>
-        <p>Every PR reviewed in seconds. Security issues, logic errors, performance problems. All flagged with explanations and fixes.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">fix&gt;</div>
-        <h3>Auto-Suggestions</h3>
-        <p>Not just complaints. Merge suggests exact code changes you can apply with one click. Solutions, not just problems.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">&lt;&gt;&lt;</div>
-        <h3>Conflict Resolution</h3>
-        <p>Git conflicts resolved intelligently. Merge understands intent across branches and picks the right resolution.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">ctx:</div>
-        <h3>Full Context</h3>
-        <p>Reads your entire codebase. Understands patterns, conventions, and architecture. Reviews like a senior engineer who knows the project.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">sec!</div>
-        <h3>Security Scanning</h3>
-        <p>SQL injection. XSS. Auth bypasses. Merge scans for OWASP Top 10 and your custom security rules on every PR.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">git+</div>
-        <h3>Gitea + GitHub</h3>
-        <p>Works with Gitea (primary) and GitHub (mirror). Webhook integration. Review comments posted directly on PRs.</p>
-      </div>
-    </div>
-  </section>
-
-  <section id="start" class="cta-section">
-    <div class="section-label">Get Started</div>
-    <h2>Ship better code today.</h2>
-    <p>Connect your repo and get your first AI review in under 60 seconds. Works with any language, any framework.</p>
-    <a href="https://blackroad.io" class="btn-primary">Deploy Merge</a>
-  </section>
-
-  <footer>
-    <span>&copy; 2026 BlackRoad OS, Inc. &mdash; Pave Tomorrow.</span>
-    <span style="display:flex;gap:var(--sp-lg);flex-wrap:wrap;">
-      <a href="https://blackroad.io" style="color:var(--muted)">Home</a>
-      <a href="https://blackroadai.com" style="color:var(--muted)">AI</a>
-      <a href="https://blackroad.network" style="color:var(--muted)">Network</a>
-    </span>
-  </footer>
 </body>
 </html>

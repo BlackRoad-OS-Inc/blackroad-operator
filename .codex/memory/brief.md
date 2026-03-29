@@ -1,9 +1,9 @@
-# MEMORY BRIEF (2026-03-22T15:24:45.289905Z)
+# MEMORY BRIEF (2026-03-29T04:19:10.551870Z)
 
 - Repo: `/Users/alexa/blackroad-operator`
-- Session: `5d92a315-29ba-4812-8140-6a649800d972`  Command: `start`
+- Session: `56117b81-6186-4212-a0b1-4cf7620066b2`  Command: `start`
 - Branch: `main`  Dirty: `True`
-- Last commit: `c42563145` — Add Gematria + Anastasia droplet code to fleet (2026-03-22 10:23:23 -0500)
+- Last commit: `d7b01fe8f` — fix(workflows): stabilize scheduled automation on hosted runners (2026-03-26 15:51:59 -0500)
 
 ## Allowlisted file highlights
 ### AGENTS.md (TODO/FIXME: 0)
@@ -22,14 +22,14 @@
 
 ### README.md (TODO/FIXME: 0)
 - # BlackRoad Operator
-- The operational brain of BlackRoad OS. Scripts, tools, configs, and automation for managing the entire fleet.
-- ## What's Inside
-- ```
-- blackroad-operator/
-- ├── scripts/memory/     # Memory system (journal, codex, TIL, collaboration, todos)
-- ├── tools/search/       # Unified search index (4,036 entries, FTS5)
-- ├── tools/test/         # E2E test suite (73 checks, 94.5% pass rate)
-- ├── workers/            # Cloudflare Worker sources
-- ├── websites/           # Domain website templates
-- ├── config/             # Fleet configuration
-- └── br                  # CLI entry point
+- The local control plane for BlackRoad OS. This repo runs websites, workflows, Pi fleet operations, health checks, Cloudflare tasks, and Ollama-driven agent automation.
+- ## Start Here
+- ```bash
+- cd /Users/alexa/blackroad-operator
+- # Human-first CLI
+- ./br health
+- ./br pi status
+- ./br ai chat
+- # Ollama-first control plane
+- ./tools/ai/br-ai.sh ops "check the Pi fleet and list available models"
+- ./tools/ai/br-ai.sh autonomous "regenerate public sites and report what changed"

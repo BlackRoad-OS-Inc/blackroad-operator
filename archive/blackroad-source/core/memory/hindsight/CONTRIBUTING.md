@@ -1,1 +1,0 @@
-# blackboxprogramming/hindsight/CONTRIBUTING.md

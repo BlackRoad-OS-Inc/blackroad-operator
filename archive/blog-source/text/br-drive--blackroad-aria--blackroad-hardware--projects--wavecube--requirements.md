@@ -1,9 +1,0 @@
-# requirements.txt
-
-**Source:** br-drive
-
----
-
-pygame>=2.5.0
-numpy>=1.24.0
-pyaudio>=0.2.13

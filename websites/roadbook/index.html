@@ -1,416 +1,203 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<link rel="icon" type="image/png" sizes="32x32" href="https://images.blackroad.io/brand/br-square-32.png" />
-<link rel="icon" type="image/png" sizes="192x192" href="https://images.blackroad.io/brand/br-square-192.png" />
-<link rel="apple-touch-icon" sizes="180x180" href="https://images.blackroad.io/brand/apple-touch-icon.png" />
-<meta property="og:image" content="https://images.blackroad.io/brand/br-square-512.png" />
-<meta name="twitter:card" content="summary" />
-<meta name="twitter:image" content="https://images.blackroad.io/brand/br-square-512.png" />
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="RoadBook — Every fact connected. Every source cited. AI-searchable knowledge graph with citation tracking and collaborative editing.">
-<meta name="theme-color" content="#8844FF">
-<link rel="canonical" href="https://book.blackroad.io">
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://book.blackroad.io">
-<meta property="og:title" content="RoadBook — AI-Searchable Knowledge Graph">
-<meta property="og:description" content="Every fact connected. Every source cited. The knowledge graph that thinks with you.">
-<meta property="og:site_name" content="BlackRoad OS">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"RoadBook","url":"https://book.blackroad.io","description":"AI-searchable knowledge graph with citation tracking, collaborative editing, and AI summaries."}</script>
-<title>RoadBook — Every Fact Connected. Every Source Cited.</title>
-<link rel="stylesheet" href="../_shared/design.css">
-<style>
-  .hero {
-    min-height: 100vh;
-    display: flex; flex-direction: column; justify-content: center;
-    padding: var(--sp-xl) var(--sp-md);
-    position: relative; overflow: hidden;
-  }
-  @media (min-width: 768px) {
-    .hero { padding: 0 var(--sp-xl); }
-  }
-  .hero-eyebrow {
-    font-family: var(--jb); font-size: 0.75rem;
-    letter-spacing: 0.2em; text-transform: uppercase;
-    color: var(--subtle); margin-bottom: var(--sp-md);
-    display: flex; align-items: center; gap: 10px;
-  }
-  .hero-eyebrow::before {
-    content: ''; width: 6px; height: 6px;
-    background: #8844FF; border-radius: 50%;
-    animation: pulse 2s ease-in-out infinite;
-  }
-  @keyframes pulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.4; transform: scale(0.8); }
-  }
-  .hero h1 { max-width: 800px; margin-bottom: var(--sp-lg); }
-  .hero-sub {
-    font-size: 1.1rem; color: var(--subtle);
-    max-width: 560px; margin-bottom: var(--sp-xl); line-height: 1.7;
-  }
-  @media (min-width: 768px) {
-    .hero-sub { font-size: 1.2rem; }
-  }
-  .hero-actions { display: flex; gap: var(--sp-md); align-items: center; flex-wrap: wrap; }
-  .btn-primary {
-    display: inline-flex; align-items: center; gap: 8px;
-    background: var(--grad); color: var(--white);
-    padding: 14px 28px; border-radius: 6px;
-    font-weight: 700; font-size: 0.95rem;
-    transition: opacity 0.2s, transform 0.2s var(--ease-spring);
-  }
-  .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
-  .btn-ghost {
-    display: inline-flex; align-items: center; gap: 8px;
-    border: 1px solid var(--border); color: var(--subtle);
-    padding: 14px 28px; border-radius: 6px; font-size: 0.95rem;
-    transition: border-color 0.2s, color 0.2s;
-  }
-  .btn-ghost:hover { border-color: var(--muted); color: var(--white); }
-
-  /* Knowledge graph viz */
-  .graph-viz {
-    position: relative; height: 300px;
-    background: var(--surface); border: 1px solid var(--border);
-    overflow: hidden; margin-bottom: var(--sp-xl);
-  }
-  @media (min-width: 768px) { .graph-viz { height: 400px; } }
-  .graph-node {
-    position: absolute;
-    width: var(--size); height: var(--size);
-    border: 2px solid var(--color);
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-family: var(--jb); font-size: 0.55rem;
-    color: var(--color); letter-spacing: 0.05em;
-    animation: nodeFloat 6s ease-in-out infinite;
-    animation-delay: var(--delay);
-  }
-  .graph-node::after {
-    content: '';
-    position: absolute;
-    width: calc(var(--size) + 12px);
-    height: calc(var(--size) + 12px);
-    border: 1px solid var(--color);
-    border-radius: 50%;
-    opacity: 0.15;
-  }
-  @keyframes nodeFloat {
-    0%, 100% { transform: translate(0, 0); }
-    33% { transform: translate(var(--fx), var(--fy)); }
-    66% { transform: translate(calc(var(--fx) * -0.5), calc(var(--fy) * 0.5)); }
-  }
-  .graph-edge {
-    position: absolute;
-    height: 1px;
-    background: var(--border);
-    transform-origin: left center;
-    opacity: 0.4;
-  }
-  .graph-label {
-    position: absolute; bottom: var(--sp-md); left: var(--sp-md);
-    font-family: var(--jb); font-size: 0.65rem;
-    color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase;
-  }
-
-  .stats-row {
-    display: grid; grid-template-columns: repeat(2, 1fr);
-    gap: var(--sp-lg); text-align: center;
-  }
-  @media (min-width: 600px) {
-    .stats-row { grid-template-columns: repeat(4, 1fr); }
-  }
-  .stat-num {
-    font-size: 2.5rem; font-weight: 800;
-    font-family: var(--jb); letter-spacing: -0.04em;
-    background: var(--grad); -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent; background-clip: text;
-  }
-  @media (min-width: 768px) {
-    .stat-num { font-size: 3rem; }
-  }
-  .stat-label { font-size: 0.8rem; color: var(--subtle); margin-top: 4px; }
-
-  .features-grid { display: grid; grid-template-columns: 1fr; gap: var(--sp-md); }
-  @media (min-width: 600px) { .features-grid { grid-template-columns: repeat(2, 1fr); } }
-  @media (min-width: 900px) { .features-grid { grid-template-columns: repeat(3, 1fr); } }
-  .feature-title { font-size: 1rem; font-weight: 600; margin-bottom: var(--sp-xs); }
-  .feature-desc { font-size: 0.875rem; color: var(--subtle); line-height: 1.65; }
-  .feature-icon { font-size: 1.3rem; margin-bottom: var(--sp-sm); }
-
-  /* Search demo */
-  .search-demo {
-    background: #0a0a0a; border: 1px solid var(--border);
-    border-radius: 10px; padding: var(--sp-md);
-    font-family: var(--jb); font-size: 0.78rem;
-    line-height: 1.9; overflow-x: auto;
-  }
-  @media (min-width: 768px) {
-    .search-demo { padding: var(--sp-lg); font-size: 0.82rem; }
-  }
-  .sd-query {
-    display: flex; align-items: center; gap: var(--sp-sm);
-    padding: var(--sp-sm) var(--sp-md);
-    border: 1px solid var(--border); margin-bottom: var(--sp-md);
-  }
-  .sd-icon { color: var(--muted); }
-  .sd-input { color: var(--white); }
-  .sd-result {
-    padding: var(--sp-sm) var(--sp-md);
-    border-left: 2px solid var(--border);
-    margin-bottom: var(--sp-sm);
-  }
-  .sd-result:hover { border-left-color: #8844FF; }
-  .sd-title { color: var(--white); font-weight: 600; margin-bottom: 2px; }
-  .sd-snippet { color: var(--subtle); font-size: 0.75rem; }
-  .sd-cite {
-    font-size: 0.65rem; color: var(--muted);
-    margin-top: 2px;
-  }
-  .sd-summary {
-    padding: var(--sp-md);
-    background: rgba(136,68,255,0.05);
-    border: 1px solid rgba(136,68,255,0.15);
-    margin-top: var(--sp-md);
-  }
-  .sd-summary-label {
-    font-size: 0.65rem; letter-spacing: 0.1em;
-    text-transform: uppercase; color: #8844FF;
-    margin-bottom: var(--sp-xs);
-  }
-  .sd-summary-text { color: var(--subtle); font-size: 0.78rem; line-height: 1.7; }
-
-  .replaces-row {
-    display: grid; grid-template-columns: 1fr; gap: var(--sp-md);
-  }
-  @media (min-width: 600px) { .replaces-row { grid-template-columns: repeat(3, 1fr); } }
-  .replaces-card {
-    background: var(--surface); border: 1px solid var(--border);
-    padding: var(--sp-lg);
-  }
-  .replaces-old {
-    font-family: var(--jb); font-size: 0.75rem;
-    color: var(--muted); text-decoration: line-through;
-    letter-spacing: 0.05em; margin-bottom: var(--sp-sm);
-  }
-  .replaces-new {
-    font-family: var(--sg); font-size: 1rem; font-weight: 600;
-    color: var(--white); margin-bottom: var(--sp-xs);
-  }
-  .replaces-desc { font-size: 0.8rem; color: var(--subtle); line-height: 1.6; }
-
-  .cta-band {
-    background: linear-gradient(135deg, rgba(136,68,255,0.08) 0%, rgba(204,0,170,0.08) 50%, rgba(0,212,255,0.08) 100%);
-    border: 1px solid var(--border); border-radius: 10px;
-    padding: var(--sp-xl) var(--sp-md); text-align: center;
-  }
-  @media (min-width: 768px) {
-    .cta-band { padding: var(--sp-2xl) var(--sp-xl); }
-  }
-  .cta-band h2 { margin-bottom: var(--sp-md); }
-  .cta-band p { max-width: 500px; margin: 0 auto var(--sp-xl); }
-</style>
-<script src="https://blackroad-mesh.amundsonalexa.workers.dev/mesh.js" defer></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Roadbook | BlackRoad</title>
+  <meta name="description" content="Roadbook is part of BlackRoad Forge, where experiments, tutorials, prototypes, and interactive builds take shape.">
+  <meta name="theme-color" content="#0b0b0b">
+  <link rel="canonical" href="https://blackroad.io/roadbook">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Roadbook | BlackRoad">
+  <meta property="og:description" content="Roadbook is part of BlackRoad Forge, where experiments, tutorials, prototypes, and interactive builds take shape.">
+  <meta property="og:url" content="https://blackroad.io/roadbook">
+  <meta property="og:site_name" content="BlackRoad">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Roadbook | BlackRoad">
+  <meta name="twitter:description" content="Roadbook is part of BlackRoad Forge, where experiments, tutorials, prototypes, and interactive builds take shape.">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://images.blackroad.io/brand/br-square-32.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="https://images.blackroad.io/brand/br-square-192.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://images.blackroad.io/brand/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #090909;
+      --bg-soft: #111111;
+      --card: #131313;
+      --border: #232323;
+      --text: #f5f5f5;
+      --muted: #b2b2b2;
+      --dim: #6d6d6d;
+      --ember: #ff6b2b;
+      --flare: #ff2255;
+      --magenta: #cc00aa;
+      --orchid: #8844ff;
+      --arc: #4488ff;
+      --cyan: #00d4ff;
+      --grad: linear-gradient(100deg, var(--ember), var(--flare), var(--magenta), var(--orchid), var(--arc), var(--cyan));
+      --display: 'Space Grotesk', sans-serif;
+      --body: 'Inter', sans-serif;
+      --mono: 'JetBrains Mono', monospace;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: radial-gradient(circle at top, #151515 0, var(--bg) 45%); color: var(--text); }
+    body { font-family: var(--body); min-height: 100vh; }
+    a { color: inherit; text-decoration: none; }
+    .topbar { height: 4px; background: var(--grad); background-size: 180% 100%; animation: shift 7s linear infinite; }
+    @keyframes shift { from { background-position: 0 0; } to { background-position: 180% 0; } }
+    .shell { max-width: 1160px; margin: 0 auto; padding: 0 24px 80px; }
+    .nav { display: flex; justify-content: space-between; align-items: center; padding: 18px 0; border-bottom: 1px solid var(--border); }
+    .brand { display: flex; align-items: center; gap: 12px; font-family: var(--display); font-weight: 700; letter-spacing: -0.03em; }
+    .brand-mark { display: grid; grid-template-columns: repeat(3, 8px); gap: 4px; }
+    .brand-mark span { width: 8px; height: 8px; border-radius: 999px; }
+    .brand-mark span:nth-child(1) { background: var(--ember); }
+    .brand-mark span:nth-child(2) { background: var(--flare); }
+    .brand-mark span:nth-child(3) { background: var(--cyan); }
+    .nav-links { display: flex; gap: 18px; font-size: 13px; color: var(--muted); }
+    .hero { padding: 72px 0 48px; display: grid; gap: 28px; }
+    .eyebrow { font-family: var(--mono); color: var(--dim); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; }
+    h1 { font-family: var(--display); font-size: clamp(38px, 6vw, 74px); line-height: 0.95; letter-spacing: -0.05em; margin: 0; max-width: 900px; }
+    .hero-copy { max-width: 740px; font-size: 18px; line-height: 1.7; color: var(--muted); }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 14px; }
+    .btn-primary, .btn-secondary { padding: 14px 20px; border-radius: 999px; font-weight: 600; font-size: 14px; }
+    .btn-primary { background: var(--text); color: #050505; }
+    .btn-secondary { border: 1px solid var(--border); color: var(--muted); }
+    .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+    .stat-card, .pillar-card { background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 20px; padding: 20px; }
+    .stat-value { font-family: var(--display); font-size: clamp(24px, 4vw, 34px); letter-spacing: -0.04em; }
+    .stat-label { font-family: var(--mono); font-size: 11px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.12em; margin-top: 6px; }
+    .section { padding: 40px 0; }
+    .section-head { display: grid; gap: 10px; margin-bottom: 20px; }
+    .section-head h2 { font-family: var(--display); font-size: clamp(26px, 4vw, 40px); letter-spacing: -0.04em; margin: 0; }
+    .section-head p { margin: 0; color: var(--muted); max-width: 760px; line-height: 1.7; }
+    .pillars { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .pillar-card h3 { font-family: var(--display); margin: 8px 0 10px; font-size: 24px; letter-spacing: -0.03em; }
+    .pillar-card p { color: var(--muted); margin: 0; line-height: 1.7; }
+    .links { display: flex; flex-wrap: wrap; gap: 10px; }
+    .link-pill { border: 1px solid var(--border); border-radius: 999px; padding: 10px 14px; color: var(--muted); font-size: 13px; }
+    footer { margin-top: 36px; padding-top: 20px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; gap: 12px; color: var(--dim); font-family: var(--mono); font-size: 11px; }
+    @media (max-width: 860px) {
+      .stats, .pillars { grid-template-columns: 1fr 1fr; }
+      .nav { gap: 16px; flex-direction: column; align-items: flex-start; }
+      footer { flex-direction: column; }
+    }
+    @media (max-width: 560px) {
+      .shell { padding: 0 16px 56px; }
+      .stats, .pillars { grid-template-columns: 1fr; }
+      .hero { padding-top: 44px; }
+      .hero-copy { font-size: 16px; }
+    }
+  </style>
 </head>
-<body class="dot-bg">
+<body>
+  <div class="topbar"></div>
+  <div class="shell">
+    <nav class="nav">
+      <a class="brand" href="https://blackroad.io">
+        <span class="brand-mark"><span></span><span></span><span></span></span>
+        <span>BlackRoad</span>
+      </a>
+      <div class="nav-links">
+        <a href="https://github.com/BlackRoad-OS">OS</a>
+        <a href="https://github.com/BlackRoad-AI">AI</a>
+        <a href="https://github.com/BlackRoad-Studio">Studio</a>
+        <a href="https://github.com/BlackRoad-Forge">Forge</a>
+      </div>
+    </nav>
 
-  <!-- Nav -->
-  <nav>
-    <div class="nav-logo">RoadBook</div>
-    <div class="nav-links">
-      <a href="#features">Features</a>
-      <a href="#search">Search</a>
-      <a href="#replaces">Why Switch</a>
-      <a href="https://blackroad.io">BlackRoad OS</a>
-    </div>
-    <a href="#open" class="nav-cta">Open RoadBook →</a>
-    <button class="nav-toggle" onclick="this.classList.toggle('open');document.getElementById('nav-mobile').classList.toggle('open')" aria-label="Menu">
-      <span></span><span></span><span></span>
-    </button>
-  </nav>
-  <div id="nav-mobile" class="nav-mobile">
-    <a href="#features" onclick="document.getElementById('nav-mobile').classList.remove('open')">Features</a>
-    <a href="#search" onclick="document.getElementById('nav-mobile').classList.remove('open')">Search</a>
-    <a href="#replaces" onclick="document.getElementById('nav-mobile').classList.remove('open')">Why Switch</a>
-    <a href="https://blackroad.io">BlackRoad OS</a>
-    <a href="#open" style="color:var(--white);font-weight:700;" onclick="document.getElementById('nav-mobile').classList.remove('open')">Open RoadBook →</a>
+    <main>
+      <section class="hero">
+        <div class="eyebrow">Forge</div>
+        <h1>Roadbook</h1>
+        <p class="hero-copy">Roadbook is part of BlackRoad Forge, where experiments, tutorials, prototypes, and interactive builds take shape.</p>
+        <div class="hero-actions">
+          <a class="btn-primary" href="https://blackroad.io">Explore BlackRoad OS</a>
+          <a class="btn-secondary" href="https://github.com/BlackRoad-Forge">View GitHub</a>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="stats">
+          
+      <div class="stat-card">
+        <div class="stat-value">Prototype</div>
+        <div class="stat-label">Velocity</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-value">Interactive</div>
+        <div class="stat-label">Builds</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-value">Tutorial</div>
+        <div class="stat-label">Flow</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-value">Maker</div>
+        <div class="stat-label">Mindset</div>
+      </div>
+        </div>
+      </section>
+
+      <section class="section" id="pillars">
+        <div class="section-head">
+          <div class="eyebrow">Public Map</div>
+          <h2>The BlackRoad ecosystem is organized around 4 public surfaces.</h2>
+          <p>Instead of asking visitors to decode dozens of internal orgs, BlackRoad now leads with 4 clear pillars: the platform, the intelligence, the experience, and the experiments.</p>
+        </div>
+        <div class="pillars">
+          
+        <article class="pillar-card">
+          <div class="section-label">the platform</div>
+          <h3>BlackRoad-OS</h3>
+          <p>Core apps, APIs, operator systems, and runtime tooling.</p>
+        </article>
+
+        <article class="pillar-card">
+          <div class="section-label">the intelligence</div>
+          <h3>BlackRoad-AI</h3>
+          <p>Local-first AI, agents, memory systems, and model integrations.</p>
+        </article>
+
+        <article class="pillar-card">
+          <div class="section-label">the experience</div>
+          <h3>BlackRoad-Studio</h3>
+          <p>Websites, design systems, docs, and polished product surfaces.</p>
+        </article>
+
+        <article class="pillar-card">
+          <div class="section-label">the experiments</div>
+          <h3>BlackRoad-Forge</h3>
+          <p>Prototypes, interactive builds, tutorials, and maker projects.</p>
+        </article>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <div class="eyebrow">Related</div>
+          <h2>Keep moving.</h2>
+          <p>Use these links to move across the public BlackRoad surface without getting lost in internal structure.</p>
+        </div>
+        <div class="links">
+          <a class="link-pill" href="https://github.com/BlackRoad-Forge">BlackRoad Forge</a>
+<a class="link-pill" href="https://search.blackroad.io">RoadSearch</a>
+<a class="link-pill" href="https://blackroad.io">Home</a>
+<a class="link-pill" href="https://docs.blackroad.io">Docs</a>
+<a class="link-pill" href="https://search.blackroad.io">Search</a>
+<a class="link-pill" href="https://github.com/BlackRoad-OS">GitHub</a>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <span>Roadbook · part of BlackRoad</span>
+      <span>Pave Tomorrow.</span>
+    </footer>
   </div>
-
-  <!-- Hero -->
-  <div class="hero">
-    <div class="hero-eyebrow">Wave 3 · Education</div>
-    <h1>Every fact connected.<br>Every source cited.</h1>
-    <p class="hero-sub">RoadBook is an AI-searchable knowledge graph. Write notes, link concepts, track citations, and let AI surface connections you didn't know existed. Your second brain, with receipts.</p>
-    <div class="hero-actions">
-      <a href="#open" class="btn-primary">Open RoadBook →</a>
-      <a href="#features" class="btn-ghost">See Features</a>
-    </div>
-  </div>
-
-  <!-- Knowledge Graph Visualization -->
-  <section>
-    <div class="graph-viz">
-      <div class="graph-node" style="--size:60px;--color:#8844FF;--delay:0s;--fx:10px;--fy:-8px;top:30%;left:40%;">PHYSICS</div>
-      <div class="graph-node" style="--size:50px;--color:#4488FF;--delay:0.5s;--fx:-12px;--fy:6px;top:15%;left:20%;">MATH</div>
-      <div class="graph-node" style="--size:45px;--color:#CC00AA;--delay:1s;--fx:8px;--fy:10px;top:55%;left:25%;">CHEM</div>
-      <div class="graph-node" style="--size:55px;--color:#FF2255;--delay:1.5s;--fx:-6px;--fy:-12px;top:20%;left:65%;">BIO</div>
-      <div class="graph-node" style="--size:40px;--color:#00D4FF;--delay:2s;--fx:14px;--fy:4px;top:60%;left:60%;">CS</div>
-      <div class="graph-node" style="--size:35px;--color:#FF6B2B;--delay:0.8s;--fx:-8px;--fy:-6px;top:70%;left:45%;">HIST</div>
-      <div class="graph-node" style="--size:38px;--color:#4488FF;--delay:1.2s;--fx:6px;--fy:8px;top:40%;left:78%;">PHIL</div>
-      <div class="graph-node" style="--size:32px;--color:#CC00AA;--delay:1.8s;--fx:-10px;--fy:5px;top:80%;left:15%;">ECON</div>
-      <div class="graph-node" style="--size:36px;--color:#8844FF;--delay:0.3s;--fx:5px;--fy:-10px;top:10%;left:50%;">LANG</div>
-      <div class="graph-edge" style="top:35%;left:28%;width:120px;transform:rotate(-8deg);"></div>
-      <div class="graph-edge" style="top:42%;left:48%;width:150px;transform:rotate(15deg);"></div>
-      <div class="graph-edge" style="top:25%;left:30%;width:180px;transform:rotate(5deg);"></div>
-      <div class="graph-edge" style="top:58%;left:35%;width:130px;transform:rotate(-20deg);"></div>
-      <div class="graph-edge" style="top:50%;left:55%;width:100px;transform:rotate(30deg);"></div>
-      <div class="graph-edge" style="top:68%;left:30%;width:140px;transform:rotate(-5deg);"></div>
-      <div class="graph-label">Knowledge Graph · 9 Domains · Live Connections</div>
-    </div>
-  </section>
-
-  <!-- Stats -->
-  <section>
-    <div class="section-label">Scale</div>
-    <div class="stats-row" style="margin-top: var(--sp-lg);">
-      <div>
-        <div class="stat-num">&infin;</div>
-        <div class="stat-label">Notes Capacity</div>
-      </div>
-      <div>
-        <div class="stat-num">FTS5</div>
-        <div class="stat-label">Search Engine</div>
-      </div>
-      <div>
-        <div class="stat-num">100%</div>
-        <div class="stat-label">Citations Tracked</div>
-      </div>
-      <div>
-        <div class="stat-num">Local</div>
-        <div class="stat-label">Your Data</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Features -->
-  <section id="features">
-    <div class="section-label">Features</div>
-    <h2 style="margin-bottom: var(--sp-xl);">Knowledge that connects itself.</h2>
-    <div class="features-grid">
-      <div class="card">
-        <div class="feature-icon">🕸</div>
-        <div class="feature-title">Knowledge Graph</div>
-        <p class="feature-desc">Every note is a node. Every link is an edge. RoadBook automatically builds a graph of your knowledge, surfacing connections between ideas across domains.</p>
-      </div>
-      <div class="card">
-        <div class="feature-icon">📎</div>
-        <div class="feature-title">Citation Tracking</div>
-        <p class="feature-desc">Attach sources to every claim. RoadBook tracks where facts came from — papers, books, URLs, conversations. Every fact has a receipt.</p>
-      </div>
-      <div class="card">
-        <div class="feature-icon">✏</div>
-        <div class="feature-title">Collaborative Editing</div>
-        <p class="feature-desc">Real-time multiplayer editing with version history. See who wrote what, when. Merge branches of thought like code branches.</p>
-      </div>
-      <div class="card">
-        <div class="feature-icon">🤖</div>
-        <div class="feature-title">AI Summaries</div>
-        <p class="feature-desc">Ask RoadBook to summarize any topic from your knowledge base. It synthesizes across notes, cites its sources, and flags contradictions.</p>
-      </div>
-      <div class="card">
-        <div class="feature-icon">🔍</div>
-        <div class="feature-title">Semantic Search</div>
-        <p class="feature-desc">Search by meaning, not just keywords. Ask "What causes inflation?" and find relevant notes even if they never use the word "inflation."</p>
-      </div>
-      <div class="card">
-        <div class="feature-icon">🔗</div>
-        <div class="feature-title">Auto-Linking</div>
-        <p class="feature-desc">Write naturally. RoadBook detects entities, concepts, and references, then automatically links them to related notes in your graph.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- Search Demo -->
-  <section id="search">
-    <div class="section-label">AI search</div>
-    <h2 style="margin-bottom: var(--sp-xl);">Ask your knowledge base anything.</h2>
-    <div class="search-demo">
-      <div class="sd-query">
-        <span class="sd-icon">&#x2318;</span>
-        <span class="sd-input">How does photosynthesis relate to semiconductor physics?</span>
-      </div>
-      <div class="sd-result">
-        <div class="sd-title">Photovoltaic Effect in Chloroplasts</div>
-        <div class="sd-snippet">Chlorophyll acts as a natural semiconductor — absorbing photons excites electrons across an energy gap analogous to a p-n junction...</div>
-        <div class="sd-cite">Source: Bio 301 Notes · Linked: Semiconductor Physics, Quantum Biology</div>
-      </div>
-      <div class="sd-result">
-        <div class="sd-title">Band Gap Theory</div>
-        <div class="sd-snippet">The energy gap in silicon (1.1 eV) is tuned to absorb solar radiation, similar to how chlorophyll's absorption peaks match solar output...</div>
-        <div class="sd-cite">Source: Solid State Physics Ch. 7 · Linked: Solar Cells, Photosynthesis</div>
-      </div>
-      <div class="sd-result">
-        <div class="sd-title">Quantum Coherence in Biology</div>
-        <div class="sd-snippet">2007 Fleming group results show quantum coherence in photosynthetic energy transfer at room temperature — efficiency exceeds classical limits...</div>
-        <div class="sd-cite">Source: Nature 446, 782-786 (2007) · Linked: Quantum Mechanics, Biology</div>
-      </div>
-      <div class="sd-summary">
-        <div class="sd-summary-label">AI Summary</div>
-        <div class="sd-summary-text">Photosynthesis and semiconductor physics share a core mechanism: photon absorption excites electrons across an energy gap. In plants, chlorophyll acts as a natural photovoltaic, with recent evidence suggesting quantum coherence enables near-perfect energy transfer efficiency. This cross-domain connection links your notes on band gap theory, quantum biology, and solar cell design. [3 sources cited]</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Replaces -->
-  <section id="replaces">
-    <div class="section-label">Why switch</div>
-    <h2 style="margin-bottom: var(--sp-xl);">Your knowledge deserves better.</h2>
-    <div class="replaces-row">
-      <div class="replaces-card">
-        <div class="replaces-old">Notion</div>
-        <div class="replaces-new">Knowledge Graph</div>
-        <p class="replaces-desc">Notion is a document store. RoadBook is a knowledge graph. Every concept links to every related concept automatically.</p>
-      </div>
-      <div class="replaces-card">
-        <div class="replaces-old">Obsidian</div>
-        <div class="replaces-new">AI-Native + Collaborative</div>
-        <p class="replaces-desc">Obsidian is local-first but solo. RoadBook is local-first AND collaborative, with AI search and citation tracking built in.</p>
-      </div>
-      <div class="replaces-card">
-        <div class="replaces-old">Wikipedia</div>
-        <div class="replaces-new">Your Own Encyclopedia</div>
-        <p class="replaces-desc">Wikipedia is everyone's knowledge. RoadBook is yours — organized your way, with your sources, searchable by your AI.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- CTA -->
-  <section id="open">
-    <div class="cta-band">
-      <div class="section-label">Start building</div>
-      <h2>Your knowledge. Connected.</h2>
-      <p>Every note linked. Every source cited. Every connection surfaced. Start building the knowledge graph that thinks with you.</p>
-      <div style="display:flex;gap:var(--sp-md);justify-content:center;flex-wrap:wrap;">
-        <a href="#" class="btn-primary">Open RoadBook →</a>
-        <a href="https://blackroad.io" class="btn-ghost">BlackRoad OS</a>
-      </div>
-    </div>
-  </section>
-
-  <!-- Footer -->
-  <footer>
-    <span>© 2026 BlackRoad OS, Inc. All rights reserved.</span>
-    <span style="display:flex;gap:var(--sp-lg);flex-wrap:wrap;">
-      <a href="https://blackroad.io" style="color:var(--muted);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">Home</a>
-      <a href="https://blackroadai.com" style="color:var(--muted);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">AI</a>
-      <a href="https://blackroad.network" style="color:var(--muted);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">Network</a>
-      <a href="https://blackroad.systems" style="color:var(--muted);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">Status</a>
-      <a href="https://pricing.blackroad.io" style="color:var(--muted);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">Pricing</a>
-      <a href="https://github.com/blackboxprogramming" style="color:var(--muted);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">GitHub</a>
-    </span>
-  </footer>
-
 </body>
 </html>

@@ -1,1 +1,0 @@
-"""Autotester test suite."""

@@ -1,1 +1,0 @@
-../../../../../../dist/extensions/tlon/bundled-skills/@tloncorp/tlon-skill/SKILL.md

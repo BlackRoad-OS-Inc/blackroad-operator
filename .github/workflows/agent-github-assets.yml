@@ -1,0 +1,67 @@
+name: 'Agent GitHub Assets'
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/ISSUE_TEMPLATE/**'
+      - '.github/workflows/agent-github-assets.yml'
+      - '.github/workflows/deploy-to-all-repos.yml'
+      - 'tools/ai/br-ai.sh'
+  pull_request:
+    paths:
+      - '.github/ISSUE_TEMPLATE/**'
+      - '.github/workflows/agent-github-assets.yml'
+      - '.github/workflows/deploy-to-all-repos.yml'
+      - 'tools/ai/br-ai.sh'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: 'Validate issue templates and Ollama ops surface'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+
+      - name: Check required files
+        run: |
+          test -f .github/ISSUE_TEMPLATE/config.yml
+          test -f .github/ISSUE_TEMPLATE/agent_task.yml
+          test -f .github/ISSUE_TEMPLATE/bug_report.yml
+          test -f .github/ISSUE_TEMPLATE/feature_request.yml
+          test -f .github/ISSUE_TEMPLATE/infra_request.yml
+          test -f tools/ai/br-ai.sh
+
+      - name: Check duplicate legacy templates are gone
+        run: |
+          test ! -f .github/ISSUE_TEMPLATE/bug.yml
+          test ! -f .github/ISSUE_TEMPLATE/feature.yml
+
+      - name: Validate issue template YAML
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import yaml
+
+          required = [
+              Path('.github/ISSUE_TEMPLATE/config.yml'),
+              Path('.github/ISSUE_TEMPLATE/agent_task.yml'),
+              Path('.github/ISSUE_TEMPLATE/bug_report.yml'),
+              Path('.github/ISSUE_TEMPLATE/feature_request.yml'),
+              Path('.github/ISSUE_TEMPLATE/infra_request.yml'),
+          ]
+          for path in required:
+              with path.open() as f:
+                  yaml.safe_load(f)
+              print(f'validated {path}')
+          PY
+
+      - name: Validate Ollama ops commands are exposed
+        run: |
+          grep -q 'cmd_ops()' tools/ai/br-ai.sh
+          grep -q 'cmd_autonomous()' tools/ai/br-ai.sh
+          grep -q 'autonomous|auto' tools/ai/br-ai.sh
+          grep -q 'ops)' tools/ai/br-ai.sh
