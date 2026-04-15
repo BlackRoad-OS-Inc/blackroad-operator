@@ -293,11 +293,7 @@ export class BlackRoadIntegrations {
         results.push({
           id: config.id,
           name: config.name,
-          status: healthy
-            ? 'healthy'
-            : response.ok
-              ? 'degraded'
-              : 'degraded',
+          status: healthy ? 'healthy' : 'degraded',
           latency_ms: latency,
           ...(!healthy && response.ok
             ? {
