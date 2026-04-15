@@ -1,5 +1,10 @@
 # Shellfish — BlackRoad OS Integration
 # iOS SSH/SFTP client
+#
+# VAULT NOTE: All connection hosts are sensitive infrastructure endpoints.
+# Real IPs and credentials are stored in the BlackRoad vault
+# (~/.blackroad/vault/) and injected at runtime via environment variables.
+# Do NOT commit actual IPs or hostnames to version control.
 
 name: shellfish
 category: mobile-tools
@@ -18,25 +23,25 @@ capabilities:
 
 connections:
   - name: blackroad-pi
-    host: 192.168.4.64
+    host: ${SHELLFISH_HOST_BLACKROAD_PI}
     user: pi
     auth: ssh_key
     group: raspberry-pi
 
   - name: aria64
-    host: 192.168.4.38
+    host: ${SHELLFISH_HOST_ARIA64}
     user: pi
     auth: ssh_key
     group: raspberry-pi
 
   - name: alice-pi
-    host: 192.168.4.49
+    host: ${SHELLFISH_HOST_ALICE_PI}
     user: alice
     auth: ssh_key
     group: raspberry-pi
 
   - name: infinity-droplet
-    host: 159.65.43.12
+    host: ${SHELLFISH_HOST_INFINITY_DROPLET}
     user: root
     auth: ssh_key
     group: digitalocean
@@ -59,3 +64,9 @@ notes: |
   SFTP enables direct file management from iPhone/iPad.
   Integrates with iOS Files app for seamless file transfer.
   Shortcuts enable automated SSH operations.
+
+  Environment variables required (set once in vault or shell profile):
+    SHELLFISH_HOST_BLACKROAD_PI   — primary Pi host
+    SHELLFISH_HOST_ARIA64         — aria agent Pi host
+    SHELLFISH_HOST_ALICE_PI       — alice agent Pi host
+    SHELLFISH_HOST_INFINITY_DROPLET — DigitalOcean droplet host
