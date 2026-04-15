@@ -66,6 +66,7 @@ export const DEPLOY_TARGETS: DeployTarget[] = [
  */
 export const BLACKROAD_DOMAINS = [
   'blackroad.io',
+  'os.blackroad.io',
   'blackroad.ai',
   'blackroad.network',
   'blackroad.systems',

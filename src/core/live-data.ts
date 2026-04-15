@@ -275,6 +275,20 @@ export async function probeService(
     clearTimeout(timer)
     const latencyMs = Date.now() - start
     if (res.ok) {
+      // A "200 OK" with an HTML body is not a sign of a healthy JSON API —
+      // it merely satisfies TCP-level expectations (e.g. a redirect or
+      // catch-all page). Require application/json for API endpoints.
+      const contentType = res.headers.get('content-type') ?? ''
+      const isJson = contentType.includes('application/json')
+      if (!isJson) {
+        return {
+          name,
+          url,
+          status: 'degraded',
+          latencyMs,
+          error: `Expected application/json; got ${contentType || 'no content-type'}`,
+        }
+      }
       return { name, url, status: 'up', latencyMs }
     }
     return {

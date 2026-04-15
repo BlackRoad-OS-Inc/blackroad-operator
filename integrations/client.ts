@@ -9,7 +9,11 @@
  */
 
 import { readFileSync } from 'fs'
-import { join } from 'path'
+import { join, dirname } from 'path'
+import { fileURLToPath } from 'url'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
 
 // ─── Gateway Config ─────────────────────────────────────────────────
 const GATEWAY_URL = process.env.BLACKROAD_GATEWAY_URL || 'http://127.0.0.1:8787'
@@ -278,11 +282,24 @@ export class BlackRoadIntegrations {
         })
 
         const latency = Date.now() - start
+
+        // A "200 OK" with an HTML body (e.g. a redirect page) is not a
+        // sign of a healthy JSON API — it merely satisfies TCP expectations.
+        // Require application/json content-type for a truly healthy result.
+        const contentType = response.headers.get('content-type') ?? ''
+        const isJson = contentType.includes('application/json')
+        const healthy = response.ok && isJson
+
         results.push({
           id: config.id,
           name: config.name,
-          status: response.ok ? 'healthy' : 'degraded',
+          status: healthy ? 'healthy' : 'degraded',
           latency_ms: latency,
+          ...(!healthy && response.ok
+            ? {
+                error: `Expected application/json; got ${contentType || 'no content-type'}`,
+              }
+            : {}),
         })
       } catch (err) {
         results.push({
